@@ -78,13 +78,13 @@ if [[ "${lstinfo:0:1}" != / && "${lstinfo:0:2}" != ~/ ]]; then
 	lstinfo=$(pwd)/$lstinfo
 fi
 
-scriptdir=`pwd`
+scriptdir=`pwd`/scripts
 
 source /local/gensoft/adm/etc/profile.d/modules.sh
 module load Python/2.7.11
 
 # rename contigs with gembase name for all genomes and get genome info (nb contigs and size)
-qsub -q gem -N prep-$lstfile -cwd -S $(which python) prepare_sequences.py -d $dbpath -l $lstinfo
+qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequences.py -d $dbpath -l $lstinfo
 
 # For each genome:
 #
@@ -92,10 +92,10 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) prepare_sequences.py -d $db
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$date -wd $dbpath -pe thread 2 prokka_array.sh $lstinfo $scriptdir $respath
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$date -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo $scriptdir $respath
 
 if [ -z $email ]; then
-	qsub -q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$date post_pipeline.sh $dbpath $lstfile
+	qsub -q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$date $scriptdir/post_pipeline.sh $dbpath $lstfile
 else
-	qsub -q gem -N post-$lstfile -M $email -m e -cwd -hold_jid prokka-gembase_$lstfile-$date post_pipeline.sh $dbpath $lstfile
+	qsub -q gem -N post-$lstfile -M $email -m e -cwd -hold_jid prokka-gembase_$lstfile-$date $scriptdir/post_pipeline.sh $dbpath $lstfile
 fi
