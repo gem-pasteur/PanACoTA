@@ -64,7 +64,7 @@ fi
 
 lstfile=$(basename $lstinfo)
 nbtask=`wc -l < $lstinfo`
-date=`date +"%d-%m-%y"`
+dateinit=`date +"%d-%m-%y.%H-%M"`
 
 echo "-> LSTINFO file: " $lstfile
 echo "-> Database in: " $dbpath
@@ -92,10 +92,10 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$date -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo $scriptdir $respath
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo $scriptdir $respath $dateinit
 
 if [ -z $email ]; then
-	qsub -q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$date $scriptdir/post_pipeline.sh $dbpath $lstfile
+	qsub -q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit
 else
-	qsub -q gem -N post-$lstfile -M $email -m e -cwd -hold_jid prokka-gembase_$lstfile-$date $scriptdir/post_pipeline.sh $dbpath $lstfile
+	qsub -q gem -N post-$lstfile -M $email -m e -cwd -hold_jid prokka-gembase_$lstfile-$dateinit $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit
 fi
