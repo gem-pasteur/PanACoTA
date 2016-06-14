@@ -86,9 +86,9 @@ def add_genome_info(orifile, new):
             with open(cleanfile, "w") as ouf:
                 for line in orif:
                     if line.startswith(">"):
+                        nbcont += 1
                         res = ">" + new[0] + "." + str(nbcont).zfill(4) + "\n"
                         ouf.write(res)
-                        nbcont += 1
                     else:
                         gensize += len(line.strip())
                         ouf.write(line)
