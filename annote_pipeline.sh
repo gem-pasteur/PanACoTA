@@ -79,6 +79,7 @@ if [[ "${lstinfo:0:1}" != / && "${lstinfo:0:2}" != ~/ ]]; then
 fi
 
 scriptdir=`pwd`/scripts
+chmod u+x $scriptdir/*
 
 source /local/gensoft/adm/etc/profile.d/modules.sh
 module load Python/2.7.11
