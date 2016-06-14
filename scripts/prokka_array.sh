@@ -13,7 +13,7 @@ vars=($vals)
 gemname=${vars[0]}
 oriname=${vars[1]}
 nbcont=${vars[2]}
-logfile=log-$gemname-$dateinit.out
+logfile=$respath/log-$gemname-$dateinit.out
 
 if [ ! $gemname == "gembase_name" ]; then
 	echo "--------------------------" > $logfile
