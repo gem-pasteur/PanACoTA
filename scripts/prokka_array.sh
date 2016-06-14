@@ -3,6 +3,7 @@
 lstinfo=$1
 scriptdir=$2
 respath=$3
+dateinit=$4
 
 module load hmmer/3.1b1 aragorn/1.2.36 barrnap minced/0.1.6 blast+ prodigal infernal/1.1 ncbi_toolbox/20151127 signalp
 module load prokka/1.11
@@ -12,7 +13,7 @@ vars=($vals)
 gemname=${vars[0]}
 oriname=${vars[1]}
 nbcont=${vars[2]}
-logfile=log-$gemname.out
+logfile=log-$gemname-$dateinit.out
 
 if [ ! $gemname == "gembase_name" ]; then
 	echo "--------------------------" > $logfile
