@@ -1,17 +1,18 @@
 #!/bin/bash
 
-if [ $# != 2 ]
+if [ $# != 3 ]
 then
-	echo "usage: $0 <dbpath> <lstfile>"
+	echo "usage: $0 <dbpath> <lstfile> <date_init>"
 	exit
 fi
 
 dbpath=$1
 lstfile=$2
+dateinit=$3
 
-date=`date +"%d-%m-%y"`
+date=`date +"%d-%m-%y.%H-%M"`
 
-cat $dbpath/log-* > log-$lstfile-$date.out
+cat $dbpath/log-*-$dateinit.out > log-$lstfile-$date.out
 rm prep-$lstfile*
 # rm $dbpath/prokka-gembase_$lstfile*
-rm $dbpath/log-*.out
+rm $dbpath/log-*-$dateinit.out
