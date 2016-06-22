@@ -19,7 +19,7 @@ EOF
 }
 
 # parse arguments
-while getopts ":l:d:r:mh" opt; do
+while getopts "l:d:r:m:h" opt; do
   case $opt in
     l)
 		lstinfo=$OPTARG
@@ -30,7 +30,7 @@ while getopts ":l:d:r:mh" opt; do
     r)
 		respath=$OPTARG
 		;;
-	e)
+	m)
 		email=$OPTARG
 		;;
   	h)
@@ -95,8 +95,9 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check gembase format generated
 qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo $scriptdir $respath $dateinit
 
+post_options="-q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then
-	qsub -q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit $respath
+	qsub $post_options $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit $respath
 else
-	qsub -q gem -N post-$lstfile -M $email -m e -cwd -hold_jid prokka-gembase_$lstfile-$dateinit $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit $respath
+	qsub $post_options -M $email -m e $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit $respath
 fi

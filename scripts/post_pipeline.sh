@@ -1,8 +1,5 @@
 #!/bin/bash
 
-#$ -o $4/post-treatment.out
-#$ -e $4/post-treatment.err
-
 if [ $# != 4 ]
 then
 	echo "usage: $0 <dbpath> <lstfile> <date_init> <respath>"
