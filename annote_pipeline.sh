@@ -2,12 +2,13 @@
 
 show_help() {
 cat << EOF
-Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email]
+Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email -f]
 
 	-l LSTINFO_file: File with 1 genome per line, 2 columns, no header. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
 	-d dbpath: path to the folder containing all genome sequences to annotate.
 	-r respath: path to the folder where all results must be generated (folders LSTINFO, Genes, Replicons, Proteins)
 	[-m email]: give here your email address to be notified when all is finished.
+	[-f]: add this option if you want to run prokka even if the result folder already exists. Otherwise, if the prokka folder exists, the pipeline will run the formatting step with the already generated results. Note that this will be applied to all genomes having a result folder. If you want to rerun prokka only on a specific genome, remove its result folder before running ths script without the '-f' option.
 
 
 Output:
@@ -20,7 +21,7 @@ EOF
 }
 
 # parse arguments
-while getopts "l:d:r:m:h" opt; do
+while getopts "l:d:r:m:fh" opt; do
   case $opt in
     l)
 		lstinfo=$OPTARG
@@ -33,6 +34,9 @@ while getopts "l:d:r:m:h" opt; do
 		;;
 	m)
 		email=$OPTARG
+		;;
+	f)
+		force="--force"
 		;;
   	h)
   		show_help
@@ -99,7 +103,7 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $force
 
 post_options="-q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then
