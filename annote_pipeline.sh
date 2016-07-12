@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: check what happens when the 'oriname' given in lstinfo does not exist.
+
 show_help() {
 cat << EOF
 Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email -f -c cpus]
@@ -113,7 +115,7 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check gembase format generated
 qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread $cpus $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $force $cpus
 
-post_options="-q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
+post_options="-q gem -N post-$lstfile-$dateinit -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then
 	qsub $post_options $scriptdir/post_pipeline.sh $dbpath $lstfile $dateinit $respath
 else
