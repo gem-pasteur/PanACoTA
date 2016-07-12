@@ -4,7 +4,7 @@ show_help() {
 cat << EOF
 Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email]
 
-	-l LSTINFO_file: File with 1 genome per line, 2 columns. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the mounth and year, nnnnn the strain number (with trainling 0s if needed).
+	-l LSTINFO_file: File with 1 genome per line, 2 columns. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
 	-d dbpath: path to the folder containing all genome sequences to annotate.
 	-r respath: path to the folder where all results must be generated (folders LSTINFO, Genes, Replicons, Proteins)
 	[-m email]: give here your email address to be notified when all is finished.
