@@ -29,6 +29,7 @@ import glob
 import os
 import sys
 
+
 def main(db_path, lstfile):
     """
     Main method, renaming fasta contigs of all multifasta files found in db_path,
@@ -39,8 +40,7 @@ def main(db_path, lstfile):
     # get number of contigs, calculate total size, change contig names
     get_all_genomes_info(corres, db_path)
     # Write LSTINFO complete
-    write_lstinfo(lstfile, corres)
-
+    write_lstinfo(lstfile + "-complete.lst", corres)
 
 
 def write_lstinfo(lstfile, corres):
@@ -52,7 +52,7 @@ def write_lstinfo(lstfile, corres):
     with open(lstfile, "w") as lstf:
         lstf.write("gembase_name\tGenome_orig_name\tnb_contigs\tgenome_size\n")
         for gembase in sorted(corres_gembase,
-                              key = lambda x: (x.split(".")[0], int(x.split(".")[-1]))):
+                              key=lambda x: (x.split(".")[0], int(x.split(".")[-1]))):
             to_write = gembase
             for info in corres_gembase[gembase]:
                 to_write += "\t" + str(info)
@@ -80,7 +80,7 @@ def add_genome_info(orifile, new):
         cleanfile = orifile + "-gembase.fna"
         nbcont = 0
         gensize = 0
-        print "   ->", os.path.basename(orifile) #, "\033[K\r",
+        # print "   ->", os.path.basename(orifile)  #, "\033[K\r",
         # sys.stdout.flush()
         with open(orifile, "r") as orif:
             with open(cleanfile, "w") as ouf:
@@ -117,12 +117,12 @@ def parse():
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("-d", "--db", dest="dbpath",
                         help=("Path to the folder containing all multifasta files whose "
-                                  "contigs must be renamed."),
+                              "contigs must be renamed."),
                         required=True)
     parser.add_argument("-l", dest="lstfile",
                         help=("File containing in a first column the new genome name (name which "
-                                  "will be given to the contigs), and in the second column the "
-                                  "original genome name (multifasta filename)."), required=True)
+                              "will be given to the contigs), and in the second column the "
+                              "original genome name (multifasta filename)."), required=True)
     return parser.parse_args()
 
 

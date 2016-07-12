@@ -8,7 +8,7 @@ dateinit=$4
 module load hmmer/3.1b1 aragorn/1.2.36 barrnap minced/0.1.6 blast+ prodigal infernal/1.1 ncbi_toolbox/20151127 signalp
 module load prokka/1.11
 
-vals=$(cat $lstinfo | head -n ${SGE_TASK_ID} | tail -n 1)
+vals=$(cat $lstinfo | head -n $(( ${SGE_TASK_ID} + 1 )) | tail -n 1)
 vars=($vals)
 gemname=${vars[0]}
 oriname=${vars[1]}
@@ -31,4 +31,6 @@ if [ ! $gemname == "gembase_name" ]; then
 		echo "*" `date +"%d/%m/%y - %T"` "Check gembase results" >> $logfile
 		$scriptdir/check_gembase.sh $oriname $gemname $respath $logfile
 	fi
+else
+	echo "prokka: task" ${SGE_TASK_ID}: $gemname $oriname $nbcont
 fi

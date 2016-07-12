@@ -4,7 +4,7 @@ show_help() {
 cat << EOF
 Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email]
 
-	-l LSTINFO_file: File with 1 genome per line, 2 columns. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
+	-l LSTINFO_file: File with 1 genome per line, 2 columns, no header. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
 	-d dbpath: path to the folder containing all genome sequences to annotate.
 	-r respath: path to the folder where all results must be generated (folders LSTINFO, Genes, Replicons, Proteins)
 	[-m email]: give here your email address to be notified when all is finished.
@@ -14,6 +14,7 @@ Output:
 	- In your given respath, you will find 4 folders: LSTINFO (information on each genome, with gene annotations), Genes (nuc. gene sequences), Proteins (aa proteins sequences), Replicons (input sequences but with formatted headers).
 	- In the database, folders with prokka results will be created for each input genome.
 	- In your given respath, a file called log-<LSTINFO_file>-<current_date>.out will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step. All steps start with a '*', and problems start with a ' - '.
+	- In your given respath, a file called err-<LSTINFO_file>-<current_date>.err will be generated, containing the names of all genomes for which a problem occured during the pipeline. See log file to get more details on the problems.
 
 EOF
 }
@@ -62,6 +63,7 @@ if [ -z $respath ]; then
 	exit 1
 fi
 
+# Get given parameters
 lstfile=$(basename $lstinfo)
 nbtask=`wc -l < $lstinfo`
 dateinit=`date +"%d-%m-%y.%H-%M"`
@@ -70,17 +72,21 @@ echo "-> LSTINFO file: " $lstfile
 echo "-> Database in: " $dbpath
 echo "-> number of genomes: " $nbtask
 
+# Put absolute path to database
 if [[ "${dbpath:0:1}" != / && "${dbpath:0:2}" != ~[/a-z] ]]; then
 	dbpath=$(pwd)/$dbpath
 fi
 
+# Put absolute path to LSTINFO file
 if [[ "${lstinfo:0:1}" != / && "${lstinfo:0:2}" != ~/ ]]; then
 	lstinfo=$(pwd)/$lstinfo
 fi
 
+# Add execution rights to all scripts
 scriptdir=`pwd`/scripts
 chmod u+x $scriptdir/*
 
+# Load python
 source /local/gensoft/adm/etc/profile.d/modules.sh
 module load Python/2.7.11
 
@@ -93,7 +99,7 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo $scriptdir $respath $dateinit
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit
 
 post_options="-q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then
