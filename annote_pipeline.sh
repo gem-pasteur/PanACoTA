@@ -14,7 +14,7 @@ Output:
 	- In your given respath, you will find 4 folders: LSTINFO (information on each genome, with gene annotations), Genes (nuc. gene sequences), Proteins (aa proteins sequences), Replicons (input sequences but with formatted headers).
 	- In the database, folders with prokka results will be created for each input genome.
 	- In your given respath, a file called log-<LSTINFO_file>-<current_date>.out will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step. All steps start with a '*', and problems start with a ' - '.
-	- In your given respath, a file called err-<LSTINFO_file>-<current_date>.err will be generated, containing the names of all genomes for which a problem occured during the pipeline. See log file to get more details on the problems.
+	- In your given respath, a file called err-<LSTINFO_file>-<current_date>.err will be generated, containing information on errors occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
 
 EOF
 }

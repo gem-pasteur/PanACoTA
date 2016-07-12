@@ -14,6 +14,7 @@ gemname=${vars[0]}
 oriname=${vars[1]}
 nbcont=${vars[2]}
 logfile=log-$gemname-$dateinit.out
+errfile=err-$gemname-$dateinit.err
 
 if [ ! $gemname == "gembase_name" ]; then
 	echo "--------------------------" > $logfile
@@ -21,7 +22,7 @@ if [ ! $gemname == "gembase_name" ]; then
 	prokka --outdir $oriname-prokka11Res --cpus 2 --prefix $gemname $oriname"-gembase.fna"
 	# --centre to generate clean contig names (length <= 20)
 	echo "*" `date +"%d/%m/%y - %T"` "checking prokka results" >> $logfile
-	$scriptdir/check_prokka_run.sh $oriname $gemname $nbcont $logfile
+	$scriptdir/check_prokka_run.sh $oriname $gemname $nbcont $logfile $errfile
 	logsize=`wc -l < $logfile`
 	# check that prokka11Res folder exists
 
@@ -29,7 +30,7 @@ if [ ! $gemname == "gembase_name" ]; then
 		echo "*" `date +"%d/%m/%y - %T"` "Generate gembase files" >> $logfile
 		$scriptdir/generate_gembase.sh $oriname $gemname $respath $scriptdir
 		echo "*" `date +"%d/%m/%y - %T"` "Check gembase results" >> $logfile
-		$scriptdir/check_gembase.sh $oriname $gemname $respath $logfile
+		$scriptdir/check_gembase.sh $oriname $gemname $respath $logfile $errfile
 	fi
 else
 	echo "prokka: task" ${SGE_TASK_ID}: $gemname $oriname $nbcont
