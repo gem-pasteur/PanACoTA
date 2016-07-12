@@ -2,26 +2,28 @@
 
 show_help() {
 cat << EOF
-Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email -f]
+Usage: $0 -l LSTINFO_file -d dbpath -r respath [-m email -f -c cpus]
 
 	-l LSTINFO_file: File with 1 genome per line, 2 columns, no header. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
 	-d dbpath: path to the folder containing all genome sequences to annotate.
 	-r respath: path to the folder where all results must be generated (folders LSTINFO, Genes, Replicons, Proteins)
 	[-m email]: give here your email address to be notified when all is finished.
 	[-f]: add this option if you want to run prokka even if the result folder already exists. Otherwise, if the prokka folder exists, the pipeline will run the formatting step with the already generated results. Note that this will be applied to all genomes having a result folder. If you want to rerun prokka only on a specific genome, remove its result folder before running ths script without the '-f' option.
+	[-c cpus]: number of cpus to use to run prokka. By default, 2 cpus are used.
 
 
 Output:
 	- In your given respath, you will find 4 folders: LSTINFO (information on each genome, with gene annotations), Genes (nuc. gene sequences), Proteins (aa proteins sequences), Replicons (input sequences but with formatted headers).
-	- In the database, folders with prokka results will be created for each input genome.
+	- In the database, folders with prokka results will be created for each input genome. If errors are generated during prokka step, you can look at the log file to see what was wrong.
 	- In your given respath, a file called log-<LSTINFO_file>-<current_date>.out will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step. All steps start with a '*', and problems start with a ' - '.
 	- In your given respath, a file called err-<LSTINFO_file>-<current_date>.err will be generated, containing information on errors occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
+
 
 EOF
 }
 
 # parse arguments
-while getopts "l:d:r:m:fh" opt; do
+while getopts "l:d:r:m:fc:h" opt; do
   case $opt in
     l)
 		lstinfo=$OPTARG
@@ -37,6 +39,9 @@ while getopts "l:d:r:m:fh" opt; do
 		;;
 	f)
 		force="--force"
+		;;
+	c)
+		cpus=$OPTARG
 		;;
   	h)
   		show_help
@@ -65,6 +70,9 @@ fi
 if [ -z $respath ]; then
 	echo "'-r respath' required. Use -h for more information on usage."
 	exit 1
+fi
+if [ -z $cpus ]; then
+	cpus=2
 fi
 
 # Get given parameters
@@ -103,7 +111,7 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread 2 $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $force
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread $cpus $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $force $cpus
 
 post_options="-q gem -N post-$lstfile -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then

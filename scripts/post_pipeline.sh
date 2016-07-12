@@ -22,7 +22,7 @@ cat $dbpath/err-*-$dateinit.err > $respath/err-$lstfile-$date.err
 
 # Remove temporary files
 rm prep-$lstfile*  # cluster logs of pre-annotation step
-# rm $dbpath/prokka-gembase_$lstfile*  # cluster logs of annotation steps
+rm $dbpath/prokka-gembase_$lstfile*  # cluster logs of annotation steps
 rm $dbpath/log-*-$dateinit.out  # individual output files
 rm $dbpath/err-*-$dateinit.err  # individual error files
 
