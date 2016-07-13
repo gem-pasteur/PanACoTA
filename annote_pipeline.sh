@@ -113,7 +113,7 @@ qsub -q gem -N prep-$lstfile -cwd -S $(which python) $scriptdir/prepare_sequence
 #	- check prokka run
 #	- if prokka run ok, translate output to gembase format
 #	- check gembase format generated
-qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread $cpus $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $force $cpus
+qsub -t 1-$nbtask -q gem -hold_jid prep-$lstfile -N prokka-gembase_$lstfile-$dateinit -wd $dbpath -pe thread $cpus $scriptdir/prokka_array.sh $lstinfo-complete.lst $scriptdir $respath $dateinit $cpus $force
 
 post_options="-q gem -N post-$lstfile-$dateinit -cwd -hold_jid prokka-gembase_$lstfile-$dateinit -o $respath/post-treatment.out -e $respath/post-treatment.err"
 if [ -z $email ]; then
