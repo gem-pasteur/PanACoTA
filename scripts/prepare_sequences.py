@@ -93,6 +93,8 @@ def add_genome_info(orifile, new):
                         gensize += len(line.strip())
                         ouf.write(line)
         new += [nbcont, gensize]
+    else:
+        new += ['NA', 'NA']
 
 
 def read_lstinfo(lstfile):
