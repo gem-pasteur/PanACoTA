@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# TODO: check what happens when the 'oriname' given in lstinfo does not exist.
+
 
 show_help() {
 cat << EOF
