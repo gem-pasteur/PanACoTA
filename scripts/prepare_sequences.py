@@ -35,15 +35,15 @@ def main(db_path, lstfile):
     Main method, renaming fasta contigs of all multifasta files found in db_path,
     according to the genome names defined in lstfile.
     """
-    corres = read_lstinfo(lstfile)
+    corres, gemformat = read_lstinfo(lstfile)
     # For each genome, read its sequence file, and:
     # get number of contigs, calculate total size, change contig names
     get_all_genomes_info(corres, db_path)
     # Write LSTINFO complete
-    write_lstinfo(lstfile + "-complete.lst", corres)
+    write_lstinfo(lstfile + "-complete.lst", corres, gemformat)
 
 
-def write_lstinfo(lstfile, corres):
+def write_lstinfo(lstfile, corres, gemformat):
     """
     From info (saved in 'corres') of all genomes, write it to the output file,
     called 'lstfile'.
@@ -51,12 +51,18 @@ def write_lstinfo(lstfile, corres):
     corres_gembase = {gem: [ori, cont, size] for ori, [gem, cont, size] in corres.items()}
     with open(lstfile, "w") as lstf:
         lstf.write("gembase_name\tGenome_orig_name\tnb_contigs\tgenome_size\n")
-        for gembase in sorted(corres_gembase,
-                              key=lambda x: (x.split(".")[0], int(x.split(".")[-1]))):
-            to_write = gembase
-            for info in corres_gembase[gembase]:
-                to_write += "\t" + str(info)
-            lstf.write(to_write + "\n")
+        if not gemformat:
+            for gembase in sorted(corres_gembase):
+                to_write = gembase
+                for info in corres_gembase[gembase]:
+                    to_write += "\t" + str(info)
+                lstf.write(to_write + "\n")
+        else:
+            for gembase in sorted(corres_gembase, key=lambda x: (x.split(".")[0], int(x.split(".")[-1]))):
+                to_write = gembase
+                for info in corres_gembase[gembase]:
+                    to_write += "\t" + str(info)
+                lstf.write(to_write + "\n")
     print(" * LSTINFO completed")
 
 
@@ -102,13 +108,19 @@ def read_lstinfo(lstfile):
     Read lstinfo file, to have the corresponding original and new names.
     """
     corres = {}
+    # gemformat: check that the sequence name ends with ".xxx" with xxx a strain number (int)
+    # If yes, strains will then be sorted by strain number in the output file. If not, they will
+    # not be sorted.
+    gemformat = True
     with open(lstfile, "r") as lsf:
         for line in lsf:
             if "gembase" not in line and line != "\n":
                 gembase = line.split()[0]
                 ori = line.split()[1]
                 corres[ori] = [gembase]
-    return corres
+                if not gembase.split(".")[-1].isdigit():
+                    gemformat = False
+    return corres, gemformat
 
 
 def parse():
