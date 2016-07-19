@@ -28,9 +28,9 @@ fi
 if [ ! $gemname == "gembase_name" ]; then
 	echo "*" `date +"%d/%m/%y - %T"` "prokka: task" ${SGE_TASK_ID}: $gemname $oriname $nbcont "contigs" >> $logfile
 	# If prokka res folder already exists, write WARNING because it will use already generated results
-	if [[ -d $oriname-prokka11Res ]] && [[ -z $force ]]; then
-		warning="/!\\ `date +"%d/%m/%y - %T"` $gemname $oriname  WARNING: prokka results folder already exists. Prokka did not run again, formatting step used already generated results of Prokka in $oriname-prokka11Res. If you want to re-run prokka, first remove this result folder, or use '-f' option if you want to rerun prokka for all genomes."
-	fi
+#	if [[ -d $oriname-prokka11Res ]] && [[ -z $force ]]; then
+#		warning="/!\\ `date +"%d/%m/%y - %T"` $gemname $oriname  WARNING: prokka results folder already exists. Prokka did not run again, formatting step used already generated results of Prokka in $oriname-prokka11Res. If you want to re-run prokka, first remove this result folder, or use '-f' option if you want to rerun prokka for all genomes."
+#	fi
 	prokka --outdir $oriname-prokka11Res --cpus $cpus $force --prefix $gemname $oriname"-gembase.fna"
 	# --centre to generate clean contig names (length <= 20)
 	echo "*" `date +"%d/%m/%y - %T"` "checking prokka results" >> $logfile
