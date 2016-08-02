@@ -106,6 +106,10 @@ def add_genome_info(orifile, new):
 def read_lstinfo(lstfile):
     """
     Read lstinfo file, to have the corresponding original and new names.
+    return:
+    corres: dict, key is the original name, value is the gembase name
+    gemformat: bool, true if all genomes are in gembase format (ends with .xxx with xxx the
+    strain number (int)) ; false if at least 1 genome does not respect this format.
     """
     corres = {}
     # gemformat: check that the sequence name ends with ".xxx" with xxx a strain number (int)
