@@ -96,6 +96,11 @@ if [[ "${lstinfo:0:1}" != / && "${lstinfo:0:2}" != ~/ ]]; then
 	lstinfo=$(pwd)/$lstinfo
 fi
 
+# Put absolute path to respath
+if [[ "${respath:0:1}" != / && "${respath:0:2}" != ~[/a-z] ]]; then
+        respath=$(pwd)/$respath
+fi
+
 # Add execution rights to all scripts
 scriptdir=`pwd`/scripts
 chmod u+x $scriptdir/*
