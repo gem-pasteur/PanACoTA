@@ -1,5 +1,14 @@
 # pipeline_annotation
-Annotate genomes and format them to gembase format
+Annotate genomes and format them to gembase format.  
+
+**Input:**
+- File with list of genomes to format: 1 genome per line, 2 columns, no header. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
+- all genomes sequences in multifasta (with current name) in a same folder `dbpath`.
+
+**Output:**
+- A folder `respath` with subfolders Genes, Replicons, Proteins, LSTINFO with all genomes in each.
+- The list of genomes updated with 2 new columns: number of contigs and total length of sequence
+- The log files .err and .out
 
 ## Prepare sequences
 Prepares the raw genomic sequence files for the pipeline, with `prepare_sequences.py`:
