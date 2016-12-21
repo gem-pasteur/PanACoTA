@@ -31,6 +31,11 @@ prokka 1.11 (with hmmer/3.1b1 aragorn/1.2.36 barrnap/0.4.2 minced/0.1.6 blast+/2
 - Script `prokka_array.sh`
 - Output: In the `Database` folder, for each genome, a subfolder `<genome_original_name>-prokka11Res` with prokka output files (see https://github.com/tseemann/prokka#output-files).
 
+Prokka annotates each gene with 'PROKKA_xxxxx' with 'xxxxx' a unique ID for the gene in the whole genome (even if several contigs). This is the case for all CDS, tRNA, tmRNA, rRNA...   
+But, for repeat_regions (CRISPR), there is no locus tag. The only information given in `.tbl`file is: rpt_family CRISPR and score (number of repetitions).  
+In the `.ffn` file, gene headers are 'PROKKA_xxxxx + annotation' for CDS, tRNA etc., or only the 'contig header' for CRISPR regions (hence, if several CRISPR regions, several genes with the same header).  
+If `--locustag` is given to prokka command, then PROKKA is replaced by the given locus tag in the gene IDs. But CRISPR regions are still named with the contig ID.
+
 To check that Prokka ran well on all genomes: `check_prokka_run.sh` (called from `prokka_array.sh`). If problems occur, they are added to the error output file, called `err-<LSTINFO_file>-<current_date>.err`.
 
 
