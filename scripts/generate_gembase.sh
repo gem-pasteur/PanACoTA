@@ -18,6 +18,9 @@ gemname=$2
 respath=$3   # will contain folders LSTINFO, Genes, Proteins and Replicons
 scriptdir=$4
 
+source /local/gensoft/adm/etc/profile.d/modules.sh
+module load Python/2.7.11
+
 mkdir -p $respath/LSTINFO
 mkdir -p $respath/Replicons
 mkdir -p $respath/Genes
