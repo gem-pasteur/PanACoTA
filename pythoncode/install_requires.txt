@@ -1,0 +1,17 @@
+# install barrnap
+wget https://github.com/tseemann/barrnap/archive/0.8.tar.gz
+tar -xf 0.8.tar.gz
+rm 0.8.tar.gz
+cd barrnap-0.8
+ln -s absolute_path/barrnap-0.8/bin/barrnap /usr/local/bin
+
+# install prokka:
+
+sudo apt-get install libdatetime-perl libxml-simple-perl libdigest-md5-perl git default-jre bioperl
+
+git clone https://github.com/tseemann/prokka.git
+
+prokka/bin/prokka --setupdb
+
+ln -s absolute_path/prokka/bin/prokka /usr/local/bin
+
