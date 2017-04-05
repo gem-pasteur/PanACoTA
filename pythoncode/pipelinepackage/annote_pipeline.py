@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding: utf-8
 
 """
@@ -39,17 +39,120 @@ genomes: gembase_name, original_name, genome_size, L90, nb_contigs
 April 2017
 """
 
-def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads):
+from pipelinepackage import genome_seq_functions as gfunc
+from pipelinepackage import prokka_functions as pfunc
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+
+
+
+def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date):
     """
+    if threads <= 2: launch prokka on threads cores, one by one
+    otherwise, launch int(threads/2) prokka at the same time, each one on 2 cores
 
     """
-    if cutn > 0:
-        # run cut_n
-        pass
-    # calc L90, nbcontig and genome size for each genome
-    # list of genomes kept, ordered by quality
-    # rename contigs and generate LSTINFO for genomes kept
+    # get only filename of list_file, without extension
+    listfile_base = os.path.basename(os.path.splitext(list_file)[0])
+    # name logfile, add timestamp if already existing
+    logfile = os.path.join(res_path, "annote-genomes-" + listfile_base + ".log")
+    # if os.path.isfile(logfile):
+    #     import time
+    #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
+    # set level of logger (here debug to show everything during development)
+    level = logging.DEBUG
+    init_logger(logfile, level)
+    logger = logging.getLogger()
 
+    genomes = read_genomes(list_file, name, date)
+    gfunc.analyse_all_genomes(genomes, db_path, cutn)
+
+    kept_genomes = {genome: info for genome, info in genomes.items()
+                    if info[-2] <= nbcont and info[-1] <= l90}
+    gfunc.rename_all_genomes(kept_genomes)
+    logger.debug(genomes)
+    logger.debug(kept_genomes)
+    write_lstinfo(list_file, kept_genomes, res_path)
+    pfunc.run_prokka_all(kept_genomes, threads)
+
+
+
+def init_logger(logfile, level):
+    """
+    Create logger and its handlers, and set them to the given level
+    """
+    # create logger
+    logger = logging.getLogger()
+    # set level of logger (here debug to show everything during development)
+    logger.setLevel(level)
+    # create formatter for log messages: "timestamp :: level :: message"
+    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s')
+    formatterStream = logging.Formatter('  * %(message)s')
+
+    # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo. If logfile is 1Mo, it is renamed to logfile.1, and next logs are still written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to logfile.1 etc. We allow maximum 5 log files.
+    logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
+    # set level to the same as the logger level
+    logfile_handler.setLevel(level)
+    logfile_handler.setFormatter(formatterFile)  # add formatter
+    logger.addHandler(logfile_handler)  # add handler to logger
+
+    # Create handler 2: write to stdout
+    stream_handler = logging.StreamHandler()
+    stream_handler.setLevel(level)  # set to the same level
+    stream_handler.setFormatter(formatterStream)
+    logger.addHandler(stream_handler)  # add handler to logger
+
+
+def write_lstinfo(list_file, genomes, outdir):
+    """
+    Write lstinfo file, with following columns:
+    gembase_name, orig_name, size, nbcontigs, l90
+    """
+    _, name_lst = os.path.split(list_file)
+
+    outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) +".lst")
+    with open(outlst, "w") as outf:
+        outf.write("\t".join(["gembase_name", "orig_name", "gsize", "nb_conts", "L90"]) + "\n")
+        for genome, values in sorted(genomes.items(), key=sort_genomes):
+            gembase, _, gsize, nbcont, l90 = [str(x) for x in values]
+            outf.write("\t".join([gembase, genome, gsize, nbcont, l90]) + "\n")
+
+
+def sort_genomes(x):
+    """
+    x = (genome_orig, [gembase, path, gsize, nbcont, L90]}
+    with gembase = species.date.strain
+
+    order by:
+    - species
+    - in each species, by strain number
+    """
+    return (x[1][0], int(x[1][0].split(".")[-1]))
+
+
+
+def read_genomes(list_file, name, date):
+    """
+    Read list of genomes, and return them.
+    If a genome has a name, also return it. Otherwise, return the name given by user.
+
+    genomes = {genome: name or None}
+    """
+    logger = logging.getLogger()
+    logger.info("Reading genomes")
+    genomes = {}
+    with open(list_file, "r") as lff:
+        for line in lff:
+            # empty line: go to the next one
+            if line.strip() == "":
+                continue
+            elems = line.strip().split()
+            if len(elems) == 1:
+                genomes[elems[0]] = [name + "." + date]
+            else:
+                genomes[elems[0]] = [elems[1] + "." + date]
+    return genomes
 
 
 def parse():
@@ -58,12 +161,27 @@ def parse():
     """
     import argparse
     def gen_name(param):
-        if len(gen_name) != 4:
+        if len(param) != 4:
             msg = ("The genome name must contain 4 characters. For example, this name can "
                    " correspond to the 2 first letters of genus, and 2 first letters of "
                    "species, e.g. ESCO for Escherichia Coli.")
             raise argparse.ArgumentTypeError(msg)
         return param
+
+    def get_date():
+        import time
+        return time.strftime("%m%y")
+
+    def cont_num(param):
+        param = int(param)
+        if param < 0 :
+            msg = ("The maximum number of contigs allowed must be a positive number.")
+            raise argparse.ArgumentTypeError(msg)
+        if param >= 10000:
+            msg = ("We do not support genomes with more than 9999 contigs.")
+            raise argparse.ArgumentTypeError(msg)
+        return param
+
 
     parser = argparse.ArgumentParser(description=("Annotate all genomes"))
     # Create command-line parser for all options and arguments to give
@@ -82,7 +200,7 @@ def parse():
                         help=("Choose a name for your annotated genomes. This name should contain 4 letters. Generally, they correspond to the 2 first letters of genus, and 2 first letters of species, e.g. ESCO for Escherichia Coli."))
     parser.add_argument("--l90", dest="l90", type=int, default=100,
                         help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
-    parser.add_argument("--nbcont", dest="nbcont", type=int, default=999,
+    parser.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
                         help=("Maximum number of contigs allowed to keep a genome. "
                               "Default is 999."))
     parser.add_argument("--cutN", dest="cutn", type=int, default=5,
@@ -93,20 +211,18 @@ def parse():
                               "of 'N' stretches, put this value to this option."))
     parser.add_argument("--threads", dest="threads", type=int, default=1,
                         help=("Specify how many threads can be used (default=1)"))
+    parser.add_argument("--date", dest="date", default=get_date(),
+                        help=("Specify the date (MMYY) to give to your annotated genomes. "
+                              "By default, will give today's date."))
     args = parser.parse_args()
     # if args.multi and args.mixed:
     #     parser.error("-M and -X options cannot be activated together. Choose if you want to:\n"
     #                  "- allow several members in any number of genomes of a family (-M)\n"
     #                  "- allow several members in only '1-tol'% of the genomes of a family "
     #                  "(other 'tol'% genomes must have exactely 1 member)")
-    # if args.mixed and args.tol==1:
-    #     parser.error("You are asking for mixed families, while asking for 100% of the genomes of "
-    #                  "a family to have exactly one member, which is not compatible. Do you want "
-    #                  "to \n- lower the percentage of genomes required to have exactly "
-    #                  "1 member (-t tol)\n- not allow mixed families (remove -X option)")
     return args
 
 if __name__ == '__main__':
     OPTIONS = parse()
     main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.l90,
-         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads)
+         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date)
