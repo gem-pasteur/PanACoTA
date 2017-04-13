@@ -14,6 +14,7 @@ import logging
 import subprocess
 import shlex
 import multiprocessing
+import sys
 
 
 logger = logging.getLogger()
@@ -47,11 +48,11 @@ def run_prokka_all(genomes, threads, force):
         # If an error occurs, terminate pool and exit
         except AttributeError as excp:
             pool.terminate()
-            print(excp.message)
+            logger.error(excp.message)
             sys.exit(1)
         except Exception as excp:
             pool.terminate()
-            print(excp.message)
+            logger.error(excp.message)
             sys.exit(1)
 
 
