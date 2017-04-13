@@ -56,8 +56,6 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     otherwise, launch int(threads/2) prokka at the same time, each one on 2 cores
 
     """
-
-
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     # name logfile, add timestamp if already existing
@@ -89,7 +87,6 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     logger.debug(kept_genomes)
     write_lstinfo(list_file, kept_genomes, res_path)
     results = pfunc.run_prokka_all(kept_genomes, threads, force)
-
 
 
 def init_logger(logfile, level):
@@ -145,7 +142,6 @@ def init_logger(logfile, level):
     logger.addHandler(err_handler)  # add handler to logger
 
 
-
 def write_lstinfo(list_file, genomes, outdir):
     """
     Write lstinfo file, with following columns:
@@ -171,7 +167,6 @@ def sort_genomes(x):
     - in each species, by strain number
     """
     return (x[1][0], int(x[1][0].split(".")[-1]))
-
 
 
 def read_genomes(list_file, name, date):
