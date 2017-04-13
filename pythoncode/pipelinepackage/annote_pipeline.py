@@ -81,6 +81,15 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date):
 def init_logger(logfile, level):
     """
     Create logger and its handlers, and set them to the given level
+
+    level hierarchy:
+    CRITICAL > ERROR > WARNING > INFO > DEBUG
+
+    Messages from all levels are written in 'logfile'
+    Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
+    Messages for levels equal or higher than WARNING written to stderr
+
+    level: minimum level that must be considered.
     """
     # create logger
     logger = logging.getLogger()
@@ -91,17 +100,36 @@ def init_logger(logfile, level):
     formatterStream = logging.Formatter('  * %(message)s')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo. If logfile is 1Mo, it is renamed to logfile.1, and next logs are still written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to logfile.1 etc. We allow maximum 5 log files.
+    open(logfile, "w").close()  # empty logfile if already existing
+    errfile = logfile + ".err"
+    open(errfile, "w").close()
     logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
     # set level to the same as the logger level
     logfile_handler.setLevel(level)
     logfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(logfile_handler)  # add handler to logger
 
-    # Create handler 2: write to stdout
-    stream_handler = logging.StreamHandler()
-    stream_handler.setLevel(level)  # set to the same level
+    # Create handler 2: errfile
+    errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
+    # set level to the same as the logger level
+    errfile_handler.setLevel(logging.WARNING)
+    errfile_handler.setFormatter(formatterFile)  # add formatter
+    logger.addHandler(errfile_handler)  # add handler to logger
+
+
+    # Create handler 3: write to stdout
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.DEBUG)  # write any message
+    stream_handler.addFilter(utils.LessThanFilter(logging.WARNING)) # don't write messages >= WARNING
     stream_handler.setFormatter(formatterStream)
     logger.addHandler(stream_handler)  # add handler to logger
+
+    # Create handler 4: write to stderr
+    err_handler = logging.StreamHandler(sys.stderr)
+    err_handler.setLevel(logging.WARNING)  # write any message >= WARNING
+    err_handler.setFormatter(formatterStream)
+    logger.addHandler(err_handler)  # add handler to logger
+
 
 
 def write_lstinfo(list_file, genomes, outdir):
