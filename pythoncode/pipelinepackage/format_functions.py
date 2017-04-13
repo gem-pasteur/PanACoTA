@@ -49,46 +49,25 @@ def tbl2lst(tblfile, lstfile):
                 # if there was something in the previous contig, print last gene of
                 # previous contig (with contigLoc=b), and reinitiate for new contig/genes
                 if start != -1 and end != -1:
-                    # if last gene was a crispr
-                    if gtype == "CRISPR":
-                        locus_num = "CRISPR" + str(crispr_num)
-                        gene_name = "crispr"
-                        product = "crispr-array"
-                        crispr_num += 1
                     cont_loc = "b"
-                    locus_name = "{}.{}{}_{}".format(genome, cont_loc,
-                                                     str(cont_num).zfill(4),
-                                                     str(locus_num).zfill(5))
-                    more_info = "| {} | {} | {}".format(product, ecnum, inf2)
-                    lst_line = "\t".join([str(start), str(end), strain, gtype,
-                                          locus_name, gene_name, more_info])
-                    lstf.write(lst_line + "\n")
-
+                    crispr_num = write_gene(gtype, locus_num, gene_name, product,
+                                            crispr_num, cont_loc, genome, cont_num,
+                                            ecnum, inf2, strain, start, end, lstf)
                     # init for next feature
                     start, end = -1, -1
                     strand, gtype, genome, cont_num, locus_num = [""] * 5
                     gene_name, product, ecnum, inf2 = ["NA"] * 4
-                    cont_loc = "b"
+                # Read new feature
                 contig = line.strip().split()[-1]
                 genome = ".".join(contig.split(".")[:-1])
                 cont_num = contig.split(".")[-1]
             # Line indicating position of gene
             if len(elems) == 3:
-                # if not first gene of the contig, print it
+                # if not first gene of the contig, write previous gene
                 if start != -1 and end != -1:
-                    if gtype == "repeat_region":
-                        gtype = "CRISPR"
-                        locus_num = "CRISPR" + str(crispr_num)
-                        gene_name = "crispr"
-                        product = "crispr-array"
-                        crispr_num += 1
-                    locus_name = "{}.{}{}_{}".format(genome, cont_loc,
-                                                     cont_num.zfill(4),
-                                                     locus_num.zfill(5))
-                    more_info = "| {} | {} | {}".format(product, ecnum, inf2)
-                    lst_line = "\t".join([str(start), str(end), strain, gtype,
-                                          locus_name, gene_name, more_info])
-                    lstf.write(lst_line + "\n")
+                    crispr_num = write_gene(gtype, locus_num, gene_name, product,
+                                            crispr_num, cont_loc, genome, cont_num,
+                                            ecnum, inf2, strain, start, end, lstf)
                     gtype, strand, locus_num = [""] * 3
                     start, end = -1, -1
                     gene_name, product, ecnum, inf2 = ["NA"] * 4
@@ -100,7 +79,6 @@ def tbl2lst(tblfile, lstfile):
                     strain = "C"
                 else:
                     strain = "D"
-            # line indicating locus_tag
             if "locus_tag" in elems[0] and len(elems) == 2:
                 locus_num = elems[-1].split("_")[-1]
             if "gene" in elems[0] and len(elems) == 2:
@@ -114,21 +92,30 @@ def tbl2lst(tblfile, lstfile):
                 inf2 = elems[1]
         # Write last gene:
         if start != -1 and end != -1:
-            # if last gene was a crispr
-            if gtype == "repeat_region":
-                gtype = "CRISPR"
-                locus_num = "CRISPR" + str(crispr_num)
-                gene_name = "crispr"
-                product = "crispr-array"
-                crispr_num += 1
             cont_loc = "b"
-            locus_name = "{}.{}{}_{}".format(genome, cont_loc,
-                                             str(cont_num).zfill(4),
-                                             str(locus_num).zfill(5))
-            more_info = "| {} | {} | {}".format(product, ecnum, inf2)
-            lst_line = "\t".join([str(start), str(end), strain, gtype,
-                                  locus_name, gene_name, more_info])
-            lstf.write(lst_line + "\n")
+            write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
+                       genome, cont_num, ecnum, inf2, strain, start, end, lstf)
+
+def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
+               genome, cont_num, ecnum, inf2, strain, start, end, lstopenfile):
+    """
+    Write given gene to output file
+    """
+    # if last gene was a crispr
+    if gtype == "repeat_region":
+        gtype = "CRISPR"
+        locus_num = "CRISPR" + str(crispr_num)
+        gene_name = "crispr"
+        product = "crispr-array"
+        crispr_num += 1
+    locus_name = "{}.{}{}_{}".format(genome, cont_loc,
+                                     str(cont_num).zfill(4),
+                                     str(locus_num).zfill(5))
+    more_info = "| {} | {} | {}".format(product, ecnum, inf2)
+    lst_line = "\t".join([str(start), str(end), strain, gtype,
+                          locus_name, gene_name, more_info])
+    lstopenfile.write(lst_line + "\n")
+    return crispr_num
 
 if __name__ == '__main__':
     import sys
