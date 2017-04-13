@@ -17,15 +17,18 @@ import numpy as np
 import logging
 
 
-def analyse_all_genomes(genomes, dbpath, nbn):
+logger = logging.getLogger()
+
+
+def analyse_all_genomes(genomes, dbpath, res_path, nbn):
     """
     genomes: {genome: name}
     dbpath: path to folder containing genomes
+    res_path: path to put out files
     nbn: minimum number of 'N' required to cut into a new contig
 
     returns: genomes {genome: [name, size, nbcont, l90]}
     """
-    logger = logging.getLogger()
     cut = nbn > 0
     pat = 'N' * nbn + "+"
     if cut:
@@ -34,10 +37,10 @@ def analyse_all_genomes(genomes, dbpath, nbn):
     else:
         logger.info("Calculating genome size, number of contigs, L90")
     for genome, name in genomes.items():
-        analyse_genome(genome, dbpath, cut, pat, genomes)
+        analyse_genome(genome, dbpath, res_path, cut, pat, genomes)
 
 
-def analyse_genome(genome, dbpath, cut, pat, genomes):
+def analyse_genome(genome, dbpath, res_path, cut, pat, genomes):
     """
     Anayse given genome:
     - if cut is asked:
@@ -45,15 +48,20 @@ def analyse_genome(genome, dbpath, cut, pat, genomes):
         - save cut genome in new file
     - calculate genome size, L90, nb contigs and save it into genomes
 
-    genome: given genome to analyse
-    dbpath: path to the folder containing the given genome sequence
-    cut: True if contigs must be cut, False otherwise
-    pat: pattern on which contigs must be cut
-    genomes: {genome: [name]} -> {genome: [name, path, gsize, nbcont, L90]}
+    * genome: given genome to analyse
+    * dbpath: path to the folder containing the given genome sequence
+    * res_path: path to folder where output files must be saved. cut genome will be saved
+    in res_path/tmp_files
+    * cut: True if contigs must be cut, False otherwise
+    * pat: pattern on which contigs must be cut
+    * genomes: {genome: [name]} -> {genome: [name, path, gsize, nbcont, L90]}
     """
     gpath = os.path.join(dbpath, genome)
     if cut:
-        grespath = os.path.join(dbpath, genome + "-split{}N.fna".format(len(pat) - 1))
+        tmp_res = os.path.join(res_path, "tmp_files")
+        if not os.path.isdir(tmp_res):
+            os.makedirs(tmp_res)
+        grespath = os.path.join(tmp_res, genome + "-split{}N.fna".format(len(pat) - 1))
         gresf = open(grespath, "w")
     else:
         grespath = gpath
@@ -114,7 +122,7 @@ def calc_l90(gsize, contig_sizes):
         if val >= lim:
             return num + 1
 
-def rename_all_genomes(genomes):
+def rename_all_genomes(genomes, res_path):
     """
     Sort kept genomes by L90 and then nb contigs.
     For each genome, assign a strain number, and rename all its contigs.
@@ -133,16 +141,17 @@ def rename_all_genomes(genomes):
             last_strain += 1
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-        rename_genome_contigs(gembase_name, gpath)
+        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, res_path)
 
 
-def rename_genome_contigs(gembase_name, gpath):
+def rename_genome_contigs(gembase_name, gpath, res_path):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name'.
     """
     contig_num = 1
-    with open(gpath, "r") as gpf, open(gpath + "-gembase.fna", "w") as grf:
+    outfile = os.path.join(res_path, "tmp_files", os.path.basename(gpath) + "-gembase.fna")
+    with open(gpath, "r") as gpf, open(outfile, "w") as grf:
         for line in gpf:
             if line.startswith(">"):
                 new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
@@ -150,6 +159,7 @@ def rename_genome_contigs(gembase_name, gpath):
                 grf.write(new_cont + "\n")
             else:
                 grf.write(line)
+    return outfile
 
 
 def sort_genomes(x):

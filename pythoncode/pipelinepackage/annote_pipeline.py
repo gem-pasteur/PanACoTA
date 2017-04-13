@@ -80,11 +80,11 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
         sys.exit(1)
 
     genomes = read_genomes(list_file, name, date)
-    gfunc.analyse_all_genomes(genomes, db_path, cutn)
+    gfunc.analyse_all_genomes(genomes, db_path, res_path, cutn)
 
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
-    gfunc.rename_all_genomes(kept_genomes)
+    gfunc.rename_all_genomes(kept_genomes, res_path)
     logger.debug(genomes)
     logger.debug(kept_genomes)
     write_lstinfo(list_file, kept_genomes, res_path)
