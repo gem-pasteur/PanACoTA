@@ -88,7 +88,7 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     logger.debug(genomes)
     logger.debug(kept_genomes)
     write_lstinfo(list_file, kept_genomes, res_path)
-    pfunc.run_prokka_all(kept_genomes, threads, force)
+    results = pfunc.run_prokka_all(kept_genomes, threads, force)
 
 
 
