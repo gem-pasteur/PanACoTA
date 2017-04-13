@@ -82,7 +82,6 @@ def run_prokka(arguments):
     outdir = gpath + "-prokkaRes"
     FNULL = open(os.devnull, 'w')
     prok_logfile = gpath + "-prokka.log"
-    prokf = open(prok_logfile, "w")
     if os.path.isdir(outdir) and not force:
         logging.warning(("Prokka results folder already exists. Prokka did not run again, "
                          "formatting step used already generated results of Prokka in "
@@ -95,6 +94,7 @@ def run_prokka(arguments):
         cmd = ("prokka --outdir {} --cpus {} {} "
                "--prefix {} {}").format(outdir, threads, force, name, gpath)
     else:
+        prokf = open(prok_logfile, "w")
         cmd = ("prokka --outdir {} --cpus {} "
                "--prefix {} {}").format(outdir, threads, name, gpath)
     logger.debug(cmd)
