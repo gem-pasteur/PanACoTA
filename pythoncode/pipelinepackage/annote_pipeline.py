@@ -41,9 +41,12 @@ April 2017
 
 from pipelinepackage import genome_seq_functions as gfunc
 from pipelinepackage import prokka_functions as pfunc
+from pipelinepackage import utils
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+import subprocess
+import sys
 
 
 
@@ -53,6 +56,8 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     otherwise, launch int(threads/2) prokka at the same time, each one on 2 cores
 
     """
+
+
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     # name logfile, add timestamp if already existing
@@ -64,6 +69,15 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     level = logging.DEBUG
     init_logger(logfile, level)
     logger = logging.getLogger()
+
+    # test if prokka is installed and in the path
+    prokka_cmd = ["prokka", "-h"]
+    FNULL = open(os.devnull, 'w')
+    try:
+        returncode = subprocess.call(prokka_cmd, stdout=FNULL, stderr=subprocess.STDOUT)
+    except Exception as err:
+        logger.error(("{0} failed: {1}").format(prokka_cmd[0], err))
+        sys.exit(1)
 
     genomes = read_genomes(list_file, name, date)
     gfunc.analyse_all_genomes(genomes, db_path, cutn)
