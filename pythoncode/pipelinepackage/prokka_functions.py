@@ -30,9 +30,14 @@ def run_prokka_all(genomes, threads, force):
         _ = [run_prokka(arg) for arg in arguments]
     else:
         # use multiprocessing
-        cores_prokka = 2
-        arguments = [(gpath + "-prokkaRes", cores_prokka, name, gpath)
-                     for genome, (name, gpath, _, _, _) in genomes.items()]
+        # if there are more threads than genomes, use as many threads as possible per genome
+        if len(genomes) <= threads:
+            cores_prokka = int(threads/len(genomes))
+        # otherwise, use 2 threads per genome (and nb_genome/2 genomes at the same time)
+        else:
+            cores_prokka = 2
+        arguments = [(gpath, cores_prokka, name, force, nbcont)
+                     for genome, (name, gpath, _, nbcont, _) in genomes.items()]
         cores_pool = int(threads/cores_prokka)
         pool = multiprocessing.Pool(cores_pool)
         try:
