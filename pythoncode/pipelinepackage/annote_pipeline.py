@@ -47,7 +47,7 @@ from logging.handlers import RotatingFileHandler
 
 
 
-def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date):
+def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, force):
     """
     if threads <= 2: launch prokka on threads cores, one by one
     otherwise, launch int(threads/2) prokka at the same time, each one on 2 cores
@@ -74,7 +74,7 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date):
     logger.debug(genomes)
     logger.debug(kept_genomes)
     write_lstinfo(list_file, kept_genomes, res_path)
-    pfunc.run_prokka_all(kept_genomes, threads)
+    pfunc.run_prokka_all(kept_genomes, threads, force)
 
 
 
@@ -242,6 +242,14 @@ def parse():
     parser.add_argument("--date", dest="date", default=get_date(),
                         help=("Specify the date (MMYY) to give to your annotated genomes. "
                               "By default, will give today's date."))
+    parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
+                        help=("add this option if you want to run prokka even if the result "
+                              "folder already exists (and override the already existing results). "
+                              "Otherwise, if the prokka folder exists, the pipeline will run the "
+                              "formatting step with the already generated results. Note that this "
+                              "will be applied to all genomes having a result folder. If you want "
+                              "to rerun prokka only on a specific genome, remove its result "
+                              "folder before running ths script without the '-F' option."))
     args = parser.parse_args()
     # if args.multi and args.mixed:
     #     parser.error("-M and -X options cannot be activated together. Choose if you want to:\n"
@@ -253,4 +261,4 @@ def parse():
 if __name__ == '__main__':
     OPTIONS = parse()
     main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.l90,
-         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date)
+         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date, OPTIONS.force)

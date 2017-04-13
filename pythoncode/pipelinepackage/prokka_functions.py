@@ -18,19 +18,16 @@ import multiprocessing
 
 logger = logging.getLogger()
 
-def run_prokka_all(genomes, threads):
+def run_prokka_all(genomes, threads, force):
     """
     for each genome in genomes, run prokka to annotate the genome.
 
     """
     if threads <= 3:
         # mettre threads dans argument[1] pour chacun
-        arguments = [(gpath + "-prokkaRes", threads, name, gpath)
-                     for genome, (name, gpath, _, _, _) in genomes.items()]
+        arguments = [(gpath, threads, name, force, nbcont)
+                     for genome, (name, gpath, _, nbcont, _) in genomes.items()]
         _ = [run_prokka(arg) for arg in arguments]
-        # run_prokka((outdir, threads, name, gpath))
-
-        logger.debug("not parallel")
     else:
         # use multiprocessing
         cores_prokka = 2
@@ -57,11 +54,26 @@ def run_prokka(arguments):
     """
 
     """
-    outdir, threads, name, gpath = arguments
-    cmd = ("prokka --outdir {} --cpus {} "
-           "--prefix {} {}").format(outdir, threads, name, gpath)
-    logger.debug(cmd)
+    gpath, threads, name, force, nbcont = arguments
+    outdir = gpath + "-prokkaRes"
     FNULL = open(os.devnull, 'w')
+    prok_logfile = gpath + "-prokka.log"
+    prokf = open(prok_logfile, "w")
+    if os.path.isdir(outdir) and not force:
+        logging.warning(("Prokka results folder already exists. Prokka did not run again, "
+                         "formatting step used already generated results of Prokka in "
+                         "{}. If you want to re-run prokka, first remove this result folder, or "
+                         "use '-F' or '--force' option if you want to rerun prokka for "
+                         "all genomes."))
+        check_prokka(outdir, prok_logfile, name, gpath, nbcont)
+        return
+    elif os.path.isdir(outdir) and force == "--force":
+        cmd = ("prokka --outdir {} --cpus {} {} "
+               "--prefix {} {}").format(outdir, threads, force, name, gpath)
+    else:
+        cmd = ("prokka --outdir {} --cpus {} "
+               "--prefix {} {}").format(outdir, threads, name, gpath)
+    logger.debug(cmd)
     try:
         retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=subprocess.STDOUT)
     except:
