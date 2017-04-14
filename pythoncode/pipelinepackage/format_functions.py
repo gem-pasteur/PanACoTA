@@ -5,6 +5,14 @@
 Functions to:
 - convert prokka tbl file to our tab file
 - convert prokka ffn and faa headers to our format
+- Create the database, with the following folders in the given "res_path":
+    - Proteins: multifasta with all CDS in aa
+    - Replicons: multifasta of genome
+    - Genes: multifasta of all genes in nuc
+    - LSTINFO: information on annotation. Columns are: `start end strand type locus
+    gene_name | product | EC_number | inference2` with the same types as prokka file,
+    and strain is C (complement) or D (direct). Locus is:
+    `<genome_name>.<i or b><contig_num>_<protein_num>`
 
 @author gem
 April 2017
@@ -40,22 +48,48 @@ def format_genomes(genomes, results, res_path):
     os.makedirs(gene_dir, exist_ok=True)
     os.makedirs(rep_dir, exist_ok=True)
 
+    skipped = []  # list of genomes skipped
     for genome, (name, gpath, _, _, _) in genomes.items():
         # if prokka did not run well for a genome, don't format it
         if genome not in results or not results[genome]:
-            print(genome, "skipped")
+            skipped.append(genome)
             continue
-        # convert tbl to lst
-        tblgenome = os.path.join(gpath + "-prokkaRes", name + ".tbl")
-        lstgenome = os.path.join(lst_dir, name + ".lst")
-        tbl2lst(tblgenome, lstgenome)
-        # copy fasta file to Replicons
-        rep_file = os.path.join(rep_dir, name + ".fna")
-        shutil.copyfile(gpath, rep_file)
-        # create Genes file
-        ffngenome = os.path.join(gpath + "-prokkaRes", name + ".ffn")
-        gengenome = os.path.join(gene_dir, name + ".gen")
-        create_gen(ffngenome, lstgenome, gengenome, name)
+        format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir)
+    return skipped
+
+
+def format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir):
+    """
+    Format the given genome, and create its corresponding files in the following folders:
+    - Proteins
+    - Genes
+    - Replicons
+    - LSTINFO
+
+    arguments:
+    * gpath: path to the genome sequence which was given to prokka for annotation
+    * name: gembase name of the genome
+    * lst_dir: path to LSTINFO folder
+    * prot_dir: path to Proteins folder
+    * gene_dir: path to Genes folder
+    * rep_dir: path to Replicons folder
+    """
+    # convert tbl to lst
+    tblgenome = os.path.join(gpath + "-prokkaRes", name + ".tbl")
+    lstgenome = os.path.join(lst_dir, name + ".lst")
+    tbl2lst(tblgenome, lstgenome)
+    # copy fasta file to Replicons
+    rep_file = os.path.join(rep_dir, name + ".fna")
+    shutil.copyfile(gpath, rep_file)
+    # create Genes file
+    ffngenome = os.path.join(gpath + "-prokkaRes", name + ".ffn")
+    gengenome = os.path.join(gene_dir, name + ".gen")
+    create_gen(ffngenome, lstgenome, gengenome, name)
+    # Create Proteins file
+    faagenome = os.path.join(gpath + "-prokkaRes", name + ".faa")
+    prtgenome = os.path.join(prot_dir, name + ".prt")
+    create_prt(faagenome, lstgenome, prtgenome)
+
 
 
 def create_gen(ffnseq, lstfile, genseq, genome_name):
@@ -101,6 +135,43 @@ def create_gen(ffnseq, lstfile, genseq, genome_name):
             # not header: inside sequence, copy it to .gen file
             else:
                 gen.write(line)
+
+
+def create_prt(faaseq, lstfile, prtseq):
+    """
+    Generate .prt file, from sequences in .faa, but changing the headers
+    using information in .lst
+
+    * faaseq: faa file output of prokka
+    * lstfile: lstinfo converted from prokka tab file
+    * prtseq: output file where converted proteins must be saved
+    """
+    with open(faaseq, "r") as faa, open(lstfile, "r") as lst, open(prtseq, "w") as prt:
+        for line in faa:
+            # all header lines must start with PROKKA_<geneID>
+            if line.startswith(">"):
+                try:
+                    # get gene ID
+                    genID = int(line.split()[0].split("_")[1])
+                except Exception as err:
+                    log.error(("Unknown header format {} in {}. "
+                               "Error: {}").format(line, faaseq, err))
+                genIDlst = 0
+                # get line of lst corresponding to the gene ID
+                while (genID > genIDlst):
+                    lstline = lst.readline()
+                    IDlst = lstline.split("\t")[4].split("_")[1]
+                    # don't cast to int if info for a crispr
+                    if(IDlst.isdigit()):
+                        genIDlst = int(IDlst)
+                # check that genID is the same as the lst line
+                if (genID == genIDlst):
+                    write_header(lstline, prt)
+                else:
+                    logger.error("Missing info for protein {} in {}".format(line, lstfile))
+            # not header: inside sequence, copy it to the .prt file
+            else:
+                prt.write(line)
 
 
 def write_header(lstline, outfile):
@@ -201,6 +272,7 @@ def tbl2lst(tblfile, lstfile):
             write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
                        genome, cont_num, ecnum, inf2, strain, start, end, lstf)
 
+
 def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
                genome, cont_num, ecnum, inf2, strain, start, end, lstopenfile):
     """
@@ -221,7 +293,3 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
                           locus_name, gene_name, more_info])
     lstopenfile.write(lst_line + "\n")
     return crispr_num
-
-if __name__ == '__main__':
-    import sys
-    tbl2lst(sys.argv[1], sys.argv[2])
