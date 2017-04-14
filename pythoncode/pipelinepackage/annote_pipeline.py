@@ -41,6 +41,7 @@ April 2017
 
 from pipelinepackage import genome_seq_functions as gfunc
 from pipelinepackage import prokka_functions as pfunc
+from pipelinepackage import format_functions as ffunc
 from pipelinepackage import utils
 import os
 import logging
@@ -77,16 +78,21 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
         logger.error(("{0} failed: {1}").format(prokka_cmd[0], err))
         sys.exit(1)
 
+    # Read genome names
     genomes = read_genomes(list_file, name, date)
+    # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     gfunc.analyse_all_genomes(genomes, db_path, res_path, cutn)
-
+    # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
+    # Rename genomes kept, ordered by quality
     gfunc.rename_all_genomes(kept_genomes, res_path)
-    logger.debug(genomes)
-    logger.debug(kept_genomes)
+    # Write lstinfo file (list of genomes kept with info on L90 etc.)
     write_lstinfo(list_file, kept_genomes, res_path)
+    # Annotate all kept genomes
     results = pfunc.run_prokka_all(kept_genomes, threads, force)
+    # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
+    skipped = ffunc.format_genomes(genomes, results, res_path)
 
 
 def init_logger(logfile, level):
