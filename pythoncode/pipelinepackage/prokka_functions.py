@@ -31,6 +31,7 @@ def run_prokka_all(genomes, threads, force):
     Returns:
         final: {genome: boolean} -> with True if prokka ran well, False otherwise.
     """
+    logger.info("Annotating all genomes with prokka")
     if threads <= 3:
         # mettre threads dans argument[1] pour chacun
         logger.debug("Prokka 1 by 1")
