@@ -85,6 +85,9 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
+    # Write discarded genomes to a file
+    logger.debug(genomes)
+    write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
     # Rename genomes kept, ordered by quality
     gfunc.rename_all_genomes(kept_genomes, res_path)
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
@@ -148,10 +151,35 @@ def init_logger(logfile, level):
     logger.addHandler(err_handler)  # add handler to logger
 
 
+def write_discarded(genomes, kept_genomes, list_file, res_path):
+    """
+    Write the list of genomes discarded to a file, so that users can keep a trace of them,
+    with their information (nb contigs, L90 etc.)
+
+    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+    kept_genomes: list of genomes kept
+    list_file: input file containing the list of genomes
+    res_path: folder where results must be saved
+    """
+    _, name_lst = os.path.split(list_file)
+    outdisc = os.path.join(res_path, "discarded-" + ".".join(name_lst.split(".")[:-1]) +".lst")
+    with open(outdisc, "w") as outdf:
+        outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
+        for genome, values in genomes.items():
+            if genome in kept_genomes:
+                continue
+            _, _, gsize, nbcont, l90 = [str(x) for x in values]
+            outdf.write("\t".join([genome, gsize, nbcont, l90]) + "\n")
+
+
 def write_lstinfo(list_file, genomes, outdir):
     """
     Write lstinfo file, with following columns:
     gembase_name, orig_name, size, nbcontigs, l90
+
+    list_file: input file containing the list of genomes
+    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+    outdir: folder where results must be saved
     """
     _, name_lst = os.path.split(list_file)
 
