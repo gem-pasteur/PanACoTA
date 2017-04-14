@@ -39,6 +39,7 @@ def format_genomes(genomes, results, res_path):
     - results = {genome: bool} True if prokka ran well, False otherwise
     - res_path = path to folder where the 4 directories must be created
     """
+    logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
     prot_dir = os.path.join(res_path, "Proteins")
     gene_dir = os.path.join(res_path, "Genes")
@@ -50,8 +51,11 @@ def format_genomes(genomes, results, res_path):
 
     skipped = []  # list of genomes skipped
     for genome, (name, gpath, _, _, _) in genomes.items():
+        # Ignore genomes with bad quality (not annotated)
+        if genome not in results:
+            continue
         # if prokka did not run well for a genome, don't format it
-        if genome not in results or not results[genome]:
+        if not results[genome]:
             skipped.append(genome)
             continue
         format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir)

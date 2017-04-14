@@ -86,7 +86,6 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file
-    logger.debug(genomes)
     write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
     # Rename genomes kept, ordered by quality
     gfunc.rename_all_genomes(kept_genomes, res_path)
@@ -96,6 +95,8 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     results = pfunc.run_prokka_all(kept_genomes, threads, force)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped = ffunc.format_genomes(genomes, results, res_path)
+    if skipped:
+        write_warning_skipped(skipped)
 
 
 def init_logger(logfile, level):
@@ -149,6 +150,23 @@ def init_logger(logfile, level):
     err_handler.setLevel(logging.WARNING)  # write any message >= WARNING
     err_handler.setFormatter(formatterStream)
     logger.addHandler(err_handler)  # add handler to logger
+
+
+def write_warning_skipped(skipped):
+    """
+    At the end of the script, write a warning to the user with the names of the genomes
+    which had problems with prokka.
+
+    skipped: list of genomes with problems
+    """
+    logger = logging.getLogger()
+    list_to_write = "\n".join(["\t- " + genome for genome in skipped])
+    logger.warning(("Prokka had problems while annotating some genomes. Hence, they are not "
+                    "formatted, and absent from your output database. Please look at their "
+                    "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
+                    "to the current error log (<output_directory>/<input_filename>.log.err) to "
+                    "get more information, and run again to annotate and format them. "
+                    "Here are the genomes: \n{}").format(list_to_write))
 
 
 def write_discarded(genomes, kept_genomes, list_file, res_path):
