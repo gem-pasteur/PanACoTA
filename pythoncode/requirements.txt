@@ -1,0 +1,1 @@
+progressbar2 >= 3.18.0
