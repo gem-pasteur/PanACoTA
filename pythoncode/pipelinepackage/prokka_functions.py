@@ -15,7 +15,7 @@ import subprocess
 import shlex
 import multiprocessing
 import sys
-
+import progressbar
 
 logger = logging.getLogger()
 
@@ -32,16 +32,26 @@ def run_prokka_all(genomes, threads, force):
         final: {genome: boolean} -> with True if prokka ran well, False otherwise.
     """
     logger.info("Annotating all genomes with prokka")
+    nbgen = len(genomes)
+    # Create progressbar
+    widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+               ' ', progressbar.Percentage(), ' - ', progressbar.Timer()
+              ]
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
+                                  redirect_stderr=True, redirect_stdout=True).start()
+
     if threads <= 3:
-        # mettre threads dans argument[1] pour chacun
-        logger.debug("Prokka 1 by 1")
         # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
         arguments = [(genomes[g][1], threads, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
-        final = [run_prokka(arg) for arg in arguments]
+        final = []
+        for num, arg in enumerate(arguments):
+            res = run_prokka(arg)
+            final.append(res)
+            bar.update(num + 1)
+        bar.finish()
     else:
         # use multiprocessing
-        logger.debug("Use multiprocessing")
         # if there are more threads than genomes, use as many threads as possible per genome
         if len(genomes) <= threads:
             cores_prokka = int(threads/len(genomes))
@@ -54,9 +64,16 @@ def run_prokka_all(genomes, threads, force):
         cores_pool = int(threads/cores_prokka)
         pool = multiprocessing.Pool(cores_pool)
         try:
-            final = pool.map(run_prokka, arguments)
+            final = pool.map_async(run_prokka, arguments)
             pool.close()
+            while(True):
+                if final.ready():
+                    break
+                remaining = final._number_left
+                bar.update(nbgen - remaining)
+            bar.finish()
             pool.join()
+            final = final.get()
         # If an error occurs, terminate pool and exit
         except AttributeError as excp:
             pool.terminate()
@@ -92,18 +109,19 @@ def run_prokka(arguments):
         ok = check_prokka(outdir, prok_logfile, name, gpath, nbcont)
         return ok
     elif os.path.isdir(outdir) and force == "--force":
+        prokf = open(prok_logfile, "w")
         cmd = ("prokka --outdir {} --cpus {} {} "
                "--prefix {} {}").format(outdir, threads, force, name, gpath)
     else:
         prokf = open(prok_logfile, "w")
         cmd = ("prokka --outdir {} --cpus {} "
                "--prefix {} {}").format(outdir, threads, name, gpath)
-    logger.debug(cmd)
+    # logger.debug(cmd)
+    # print(cmd)
     try:
         retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=prokf)
         ok = check_prokka(outdir, prok_logfile, name, gpath, nbcont)
         prokf.close()
-        logger.debug("prokka done for " + name)
         return ok
     except Exception as err:
         logging.error("Error while trying to run prokka: {}".format(err))

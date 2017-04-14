@@ -21,7 +21,7 @@ April 2017
 import os
 import shutil
 import logging
-
+import progressbar
 
 logger = logging.getLogger()
 
@@ -49,16 +49,25 @@ def format_genomes(genomes, results, res_path):
     os.makedirs(gene_dir, exist_ok=True)
     os.makedirs(rep_dir, exist_ok=True)
 
+    nbgen = len(genomes)
+    # Create progressbar
+    widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+               ' ', progressbar.Percentage()]
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     skipped = []  # list of genomes skipped
-    for genome, (name, gpath, _, _, _) in genomes.items():
+    for num, (genome, (name, gpath, _, _, _)) in enumerate(genomes.items()):
         # Ignore genomes with bad quality (not annotated)
         if genome not in results:
+            bar.update(num + 1)
             continue
         # if prokka did not run well for a genome, don't format it
         if not results[genome]:
             skipped.append(genome)
+            bar.update(num + 1)
             continue
         format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir)
+        bar.update(num + 1)
+    bar.finish()
     return skipped
 
 
