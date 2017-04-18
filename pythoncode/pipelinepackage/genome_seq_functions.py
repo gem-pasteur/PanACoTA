@@ -186,5 +186,7 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
     nbcont_vals = [val for _, (_, _, _, val, _) in genomes.items()]
     outnbcont = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
-    utils.plot_distr(L90_vals, l90, outl90)
-    utils.plot_distr(nbcont_vals, nbconts, outnbcont)
+    utils.plot_distr(L90_vals, l90, outl90, "L90 distribution for all genomes",
+                     "max L90 =")
+    utils.plot_distr(nbcont_vals, nbconts, outnbcont,
+                     "Distribution of number of contigs among all genomes", "max #contigs =")

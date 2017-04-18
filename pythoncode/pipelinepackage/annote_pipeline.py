@@ -53,7 +53,7 @@ from pipelinepackage import format_functions as ffunc
 from pipelinepackage import utils
 
 
-def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, force):
+def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, force, qc_only):
     """
     Main method, doing all steps:
     - analyse genomes (nb contigs, L90, stretches of N...)
@@ -75,9 +75,10 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     init_logger(logfile, level)
     logger = logging.getLogger()
 
-    # test if prokka is installed and in the path
-    prokka_cmd = ["prokka", "-h"]
-    utils.check_installed(prokka_cmd)
+    if not qc_only:
+        # test if prokka is installed and in the path
+        prokka_cmd = ["prokka", "-h"]
+        utils.check_installed(prokka_cmd)
 
     # Read genome names
     genomes = read_genomes(list_file, name, date)
@@ -90,6 +91,9 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file
     write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
+    # If only QC, stop here.
+    if qc_only:
+        sys.exit(0)
     # Rename genomes kept, ordered by quality
     gfunc.rename_all_genomes(kept_genomes, res_path)
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
@@ -288,7 +292,7 @@ def parse():
                         help=("Path to folder containing all multifasta genome files"))
     parser.add_argument("-r", dest="res_path", required=True,
                         help=("Path to folder where output annotated genomes must be saved"))
-    parser.add_argument("-s", dest="name", required=True, type=gen_name,
+    parser.add_argument("-s", dest="name", type=gen_name, default="NONE",
                         help=("Choose a name for your annotated genomes. This name should contain 4 letters. Generally, they correspond to the 2 first letters of genus, and 2 first letters of species, e.g. ESCO for Escherichia Coli."))
     parser.add_argument("--l90", dest="l90", type=int, default=100,
                         help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
@@ -322,15 +326,23 @@ def parse():
                               "genome, remove its prokka result folder (resp. Genes, Proteins, "
                               "LSTINFO, Replicons result files) before running this script "
                               "without this '-F' option."))
+    parser.add_argument("-Q", dest="qc_only", action="store_true", default=False,
+                        help=("Add this option if you want only to do quality control on your "
+                              "genomes (cut at 5N if asked, calculate L90 and number of contigs "
+                              "and plot their distributions). This allows you to check which "
+                              "genomes would be annotated with the given parameters, and to "
+                              "modify those parameters if you want, before you launch the "
+                              "annotation and formatting steps."))
     args = parser.parse_args()
-    # if args.multi and args.mixed:
-    #     parser.error("-M and -X options cannot be activated together. Choose if you want to:\n"
-    #                  "- allow several members in any number of genomes of a family (-M)\n"
-    #                  "- allow several members in only '1-tol'% of the genomes of a family "
-    #                  "(other 'tol'% genomes must have exactely 1 member)")
+    if not args.qc_only and not args.name:
+        parser.error("You must specify your genomes dataset name in 4 characters with "
+                     "'-s name' option (type -h for more information). Or, if you do not want "
+                     "to annotate and format your genomes but just to run quality control, use "
+                     "option '-Q")
     return args
 
 if __name__ == '__main__':
     OPTIONS = parse()
     main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.l90,
-         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date, OPTIONS.force)
+         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date, OPTIONS.force,
+         OPTIONS.qc_only)
