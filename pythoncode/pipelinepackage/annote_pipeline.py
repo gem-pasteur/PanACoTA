@@ -292,7 +292,7 @@ def parse():
                         help=("Path to folder containing all multifasta genome files"))
     parser.add_argument("-r", dest="res_path", required=True,
                         help=("Path to folder where output annotated genomes must be saved"))
-    parser.add_argument("-s", dest="name", type=gen_name, default="NONE",
+    parser.add_argument("-s", dest="name", type=gen_name,
                         help=("Choose a name for your annotated genomes. This name should contain 4 letters. Generally, they correspond to the 2 first letters of genus, and 2 first letters of species, e.g. ESCO for Escherichia Coli."))
     parser.add_argument("--l90", dest="l90", type=int, default=100,
                         help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
@@ -339,6 +339,8 @@ def parse():
                      "'-s name' option (type -h for more information). Or, if you do not want "
                      "to annotate and format your genomes but just to run quality control, use "
                      "option '-Q")
+    if args.qc_only and not args.name:
+        args.name = "NONE"
     return args
 
 if __name__ == '__main__':
