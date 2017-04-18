@@ -33,6 +33,7 @@ Output:
 - In your given respath, a file called `annote-genomes-<list_file>.log.err` will be generated, containing information on errors and warnings that occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
 - In your given respath, you will find a file called `LSTINFO-<list_file>.lst` with information on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
 - In your given respath, you will find a file called `discarded-<list_file>.lst` with information on genomes that were discarded (and hence not annotated) because of the L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
+- In your given respath, you will find 2 png files: `QC_L90-<list_file>.png` and `QC_nb-contigs-<list_file>.png`, containing the histograms of L90 and nb_contigs values for all genomes, with a vertical red line representing the limit applied here.
 
 
 @author gem
@@ -82,6 +83,8 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     genomes = read_genomes(list_file, name, date)
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     gfunc.analyse_all_genomes(genomes, db_path, res_path, cutn)
+    # Plot L90 and nb_contigs distributions
+    gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbcont)
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}

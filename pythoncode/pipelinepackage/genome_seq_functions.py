@@ -16,6 +16,8 @@ import re
 import numpy as np
 import logging
 
+from pipelinepackage import utils
+
 
 logger = logging.getLogger()
 
@@ -27,7 +29,7 @@ def analyse_all_genomes(genomes, dbpath, res_path, nbn):
     res_path: path to put out files
     nbn: minimum number of 'N' required to cut into a new contig
 
-    returns: genomes {genome: [name, size, nbcont, l90]}
+    returns: genomes {genome: [name, path, size, nbcont, l90]}
     """
     cut = nbn > 0
     pat = 'N' * nbn + "+"
@@ -170,3 +172,19 @@ def sort_genomes(x):
     - for same l90, sort by nb contigs
     """
     return (x[1][0], x[1][-1], x[1][-2])
+
+
+def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
+    """
+    genomes: {genome: [name, path, size, nbcont, l90]}
+    res_patj: path to put all output files
+    listfile_base: name of list file
+    l90: max value of l90
+    nbconts: max value of nb contigs
+    """
+    L90_vals = [val for _, (_, _, _, _, val) in genomes.items()]
+    outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
+    nbcont_vals = [val for _, (_, _, _, val, _) in genomes.items()]
+    outnbcont = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
+    utils.plot_distr(L90_vals, l90, outl90)
+    utils.plot_distr(nbcont_vals, nbconts, outnbcont)

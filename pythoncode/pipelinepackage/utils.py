@@ -41,3 +41,25 @@ def check_installed(cmd):
     except Exception as err:
         logger.error(("{0} failed: {1}").format(cmd[0], err))
         sys.exit(1)
+
+def plot_distr(values, limit, outfile):
+    """ Plot histogram of given values, and add a vertical line corresponding to the choosen
+     'limit' and saves the image into the 'outfile'
+
+    :param values: list of values
+    :type values: list
+    :param limit: limit for which a vertical line must be drawn
+    :type limit: int
+    :param outfile: file in which the output image must be saved
+    :type outfile: str
+    """
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(10,7))
+    max_x = max(values)
+    inter = max_x - min(values)
+    print(min(inter, 200))
+    axes = plt.hist(values, min(inter, 200), edgecolor="black", color="blue")
+    plt.xlim(0,max_x)
+    plt.axvline(x=limit + 5, color="r")
+    plt.text(x=limit + 7, y=45, s=str(limit), color="r")
+    plt.savefig(outfile)
