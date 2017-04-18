@@ -1,0 +1,9 @@
+variables:
+    MYVAR = "plop"
+
+test-ubuntu16.04:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
+  stage: test
+  except: docker
+  script:
+  - prokka -h
