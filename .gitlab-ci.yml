@@ -7,6 +7,5 @@ test-ubuntu16.04:
   except:
     - docker
   script:
-  - prokka -h
   - barrnap -h
   - python
