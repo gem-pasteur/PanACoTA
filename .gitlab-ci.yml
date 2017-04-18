@@ -4,7 +4,8 @@ variables:
 test-ubuntu16.04:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
   stage: test
-  except: docker
+  except:
+    - docker
   script:
   - prokka -h
   - barrnap -h
