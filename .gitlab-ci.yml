@@ -7,5 +7,4 @@ test-ubuntu16.04:
   except:
     - docker
   script:
-  - barrnap -h
   - python
