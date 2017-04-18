@@ -28,33 +28,38 @@ LSTINFO and LSTINFO_dataset.lst file)
 
 Output:
 - In your given respath, you will find 4 folders: LSTINFO (information on each genome, with gene annotations), Genes (nuc. gene sequences), Proteins (aa proteins sequences), Replicons (input sequences but with formatted headers).
-- In the database, folders with prokka results will be created for each input genome. If errors are generated during prokka step, you can look at the log file to see what was wrong.
-- In your given respath, a file called log-<LSTINFO_file>-<current_date>.out will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step. All steps start with a '*', and problems start with a ' - '.
-- In your given respath, a file called err-<LSTINFO_file>-<current_date>.err will be generated, containing information on errors occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
-- In your given respath, you will find a file called <LSTINFO_file>.lst with information on all
-genomes: gembase_name, original_name, genome_size, L90, nb_contigs
+- In your given respath, you will find a "tmp_files" folder, where folders with prokka results will be created for each input genome (<genome_name>-prokkaRes). If errors are generated during prokka step, you can look at the log file to see what was wrong (<genome_name>-prokka.log).
+- In your given respath, a file called `annote-genomes-<list_file>.log` will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step.
+- In your given respath, a file called `annote-genomes-<list_file>.log.err` will be generated, containing information on errors and warnings that occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
+- In your given respath, you will find a file called `LSTINFO-<list_file>.lst` with information on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
+- In your given respath, you will find a file called `discarded-<list_file>.lst` with information on genomes that were discarded (and hence not annotated) because of the L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
 
 
 @author gem
 April 2017
 """
 
+
+import os
+import sys
+import subprocess
+import logging
+from logging.handlers import RotatingFileHandler
+
 from pipelinepackage import genome_seq_functions as gfunc
 from pipelinepackage import prokka_functions as pfunc
 from pipelinepackage import format_functions as ffunc
 from pipelinepackage import utils
-import os
-import logging
-from logging.handlers import RotatingFileHandler
-import subprocess
-import sys
-
 
 
 def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, force):
     """
-    if threads <= 2: launch prokka on threads cores, one by one
-    otherwise, launch int(threads/2) prokka at the same time, each one on 2 cores
+    Main method, doing all steps:
+    - analyse genomes (nb contigs, L90, stretches of N...)
+    - keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
+    - rename genomes with strain number in decreasing quality
+    - annotate genome with prokka
+    - format annotated genomes
 
     """
     # get only filename of list_file, without extension
@@ -304,13 +309,21 @@ def parse():
                         help=("Specify the date (MMYY) to give to your annotated genomes. "
                               "By default, will give today's date."))
     parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
-                        help=("add this option if you want to run prokka even if the result "
-                              "folder already exists (and override the already existing results). "
-                              "Otherwise, if the prokka folder exists, the pipeline will run the "
-                              "formatting step with the already generated results. Note that this "
-                              "will be applied to all genomes having a result folder. If you want "
-                              "to rerun prokka only on a specific genome, remove its result "
-                              "folder before running ths script without the '-F' option."))
+                        help=("Add this option if you want to run prokka and formatting steps "
+                              "even if their result folder (for prokka step) or files (for "
+                              "format step) already exist for the given genome: override "
+                              "existing results.\n"
+                              "Otherwise, without this option, if the prokka folder exists, the "
+                              "pipeline will run the formatting step with the already existing "
+                              "results in prokka folder. If the Genes, Proteins, Replicons and "
+                              "LSTINFO files already exist, the pipeline will skip the "
+                              "formatting step too.\n"
+                              "Note that this will be applied to all genomes: all prokka result "
+                              "folders and format result files will be overridden. If you want "
+                              "to rerun prokka (resp. rerun formatting step) only on a specific "
+                              "genome, remove its prokka result folder (resp. Genes, Proteins, "
+                              "LSTINFO, Replicons result files) before running this script "
+                              "without this '-F' option."))
     args = parser.parse_args()
     # if args.multi and args.mixed:
     #     parser.error("-M and -X options cannot be activated together. Choose if you want to:\n"
