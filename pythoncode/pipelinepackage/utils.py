@@ -9,7 +9,12 @@ Util functions and classes.
 April 2017
 """
 
+import os
+import sys
 import logging
+import subprocess
+
+logger = logging.getLogger()
 
 
 class LessThanFilter(logging.Filter):
@@ -25,3 +30,14 @@ class LessThanFilter(logging.Filter):
 
     def filter(self, rec):
         return rec.levelno < self._level
+
+def check_installed(cmd):
+    """
+    Check that the given command exists
+    """
+    FNULL = open(os.devnull, 'w')
+    try:
+        returncode = subprocess.call(cmd, stdout=FNULL, stderr=subprocess.STDOUT)
+    except Exception as err:
+        logger.error(("{0} failed: {1}").format(cmd[0], err))
+        sys.exit(1)

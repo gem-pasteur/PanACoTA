@@ -6,8 +6,8 @@ Pipeline to annotate genomes. Steps are:
 - optional: find stretches of at least 'n' N (default 5), and cut into a new contig at this stretch
 - for each genome, calc L90 and number of contigs (after cut at N stretches if used)
 - keep only genomes with:
-    - L90 < x (default = 100)
-    - #contig < y (default = 1000)
+    - L90 <= x (default = 100)
+    - #contig <= y (default = 999)
 - rename those genomes and their contigs, with strain name increasing with quality (L90 and
  #contig)
 - annotate kept genomes with prokka
@@ -76,12 +76,7 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
 
     # test if prokka is installed and in the path
     prokka_cmd = ["prokka", "-h"]
-    FNULL = open(os.devnull, 'w')
-    try:
-        returncode = subprocess.call(prokka_cmd, stdout=FNULL, stderr=subprocess.STDOUT)
-    except Exception as err:
-        logger.error(("{0} failed: {1}").format(prokka_cmd[0], err))
-        sys.exit(1)
+    utils.check_installed(prokka_cmd)
 
     # Read genome names
     genomes = read_genomes(list_file, name, date)
