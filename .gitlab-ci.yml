@@ -6,5 +6,7 @@ test-ubuntu16.04:
   stage: test
   except:
     - docker
+  before_script:
+    - python3 setup.py install
   script:
     - python3 --version
