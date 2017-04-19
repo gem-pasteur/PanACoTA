@@ -54,7 +54,9 @@ def plot_distr(values, limit, outfile, title, text):
     :param outfile: file in which the output image must be saved
     :type outfile: str
     """
-    import matplotlib.pyplot as plt
+    import matplotlib
+    matplotlib.use('AGG')
+    from matplotlib import pyplot as plt
     plt.figure(figsize=(10,7))
     max_x = max(values)
     inter = max_x - min(values)
