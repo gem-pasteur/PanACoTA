@@ -8,7 +8,7 @@ test-ubuntu16.04:
     - docker
   before_script:
     - cd pythoncode
-    - python3 setup.py install
+    - pip3 install .
   script:
     - python3 --version
     - pip3 --version
