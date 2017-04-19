@@ -13,10 +13,10 @@ test-ubuntu16.04:
     - pip3 install .
   script:
     - ls -l
-    - py.test
+    - py.test test
   artifacts:
     paths:
-      - htmlcov/
+      - junit_tests.xml
 
 pages:
   stage: deploy
