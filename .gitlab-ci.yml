@@ -13,10 +13,10 @@ test-ubuntu16.04:
     - pip3 install .
   script:
     - ls -l
-    - py.test test
+    - py.test --cov pipelinepackage --junitxml=junit_tests.xml --cov-report=html --cov-report=xml
   artifacts:
     paths:
-      - junit_tests.xml
+      - htmlcov/
 
 pages:
   stage: deploy
