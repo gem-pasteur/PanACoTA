@@ -12,7 +12,6 @@ test-ubuntu16.04:
     - cd pythoncode
     - pip3 install .
   script:
-    - cd pythoncode
     - ls -l
     - py.test
   artifacts:
