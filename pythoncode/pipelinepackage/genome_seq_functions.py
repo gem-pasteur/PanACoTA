@@ -106,11 +106,17 @@ def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
     # split contig each time a stretch of at least nbn 'N' is found
     cont_parts = re.split(pat, cur_contig)
     # save contig parts
-    for num, seq in enumerate(cont_parts):
+    num = 0  # contig number
+    for seq in cont_parts:
+        # Only save non empty contigs (with some patterns, it could arrive that
+        # we get empty contigs, if 2 occurrences of the pattern are side by side).
+        if len(seq) == 0:
+            continue
         cur_name = cur_contig_name + "_" + str(num)
         contig_sizes[cur_name] = len(seq)
         gresf.write(cur_name + "\n")
         gresf.write(seq + "\n")
+        num += 1
 
 
 def calc_l90(gsize, contig_sizes):
