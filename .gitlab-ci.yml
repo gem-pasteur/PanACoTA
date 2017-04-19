@@ -22,8 +22,7 @@ pages:
   dependencies:
     - test-ubuntu16.04
   script:
-    - ls -la
-    - mv htmlcov/ public/
+    - mv pythoncode/htmlcov public/
   artifacts:
     paths:
       - public
