@@ -48,16 +48,17 @@ def test_class_filter():
     record = logging.LogRecord("root", logging.CRITICAL, "path", 10, "message", "args", "exc_info")
     assert not a.filter(record)
 
+
 def test_plot_dist():
     """
     Plot a given distribution, and check that output is as expected
     """
     values = [1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 10]
     limit = 3
-    res_dir = os.path.join("test", "data", "tests_results")
+    res_dir = os.path.join("test", "data")
     os.makedirs(res_dir, exist_ok=True)
     outfile = os.path.join(res_dir, "distrib.png")
-    reffile = os.path.join("test", "data", "res_plot_distr.png")
+    reffile = os.path.join("test", "data", "exp_files", "res_plot_distr.png")
     title = "Distribution test"
     text = "Max L90 ="
     utils.plot_distr(values, limit, outfile, title, text)
