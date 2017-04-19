@@ -7,4 +7,4 @@ test-ubuntu16.04:
   except:
     - docker
   script:
-  - python
+    - python
