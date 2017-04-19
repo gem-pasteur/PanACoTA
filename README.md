@@ -1,4 +1,8 @@
 # pipeline_annotation
+
+[![build status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/build.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/commits/master)
+[![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation)
+
 Annotate genomes and format them to gembase format.  
 
 ## pipeline installation (final mode)
