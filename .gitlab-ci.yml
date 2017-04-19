@@ -1,6 +1,11 @@
 variables:
     MYVAR: "plop"
 
+stages:
+  - build
+  - test
+  - deploy
+
 test-ubuntu16.04:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
   stage: test
@@ -14,3 +19,19 @@ test-ubuntu16.04:
     - pip3 --version
     - pip --version
     - py.test
+  artifacts:
+    paths:
+      - htmlcov/
+
+pages:
+  stage: deploy
+  dependencies:
+    - test-ubuntu16.04
+  script:
+    - mv htmlcov/ public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
