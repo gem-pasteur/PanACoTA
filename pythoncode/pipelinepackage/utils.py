@@ -38,6 +38,7 @@ def check_installed(cmd):
     FNULL = open(os.devnull, 'w')
     try:
         returncode = subprocess.call(cmd, stdout=FNULL, stderr=subprocess.STDOUT)
+        return returncode
     except Exception as err:
         logger.error(("{0} failed: {1}").format(cmd[0], err))
         sys.exit(1)
