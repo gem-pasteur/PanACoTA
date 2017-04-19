@@ -1,6 +1,50 @@
 # pipeline_annotation
 Annotate genomes and format them to gembase format.  
 
+## pipeline installation (final mode)
+
+Dependencies:
+ python3 (and pip)
+ prokka
+
+To install the package *pipelinepackage*, and all its dependances, from the root directory, just do::
+
+    sudo pip3 install .
+
+You will then be able to use the package from any directory in your computer,
+just as any other software.
+
+Warning: This must be done only if you downloaded a stable version of the package, and won't do any more changes on the scripts and modules. Indeed, by installing the package, the changes done after won't be taken into account while running the scripts.  
+If you plan to work on the scripts, or to download a new version after,
+choose the deployment installation (see below).
+
+
+## pipeline installation
+
+If you want to install the package while still working on modifying the scripts, or being able to download and run latest versions, just do::
+
+    sudo pip3 install -e .
+
+Your changes will then be taken into account. As you installed the package, you will be able to run the pipeline from any directory in your computer.
+
+
+## Uninstalling pipeline
+
+Whatever the way you installed the pipeline, you can uninstall it by running::
+
+    sudo pip uninstall pipelinepackage
+
+
+## Running Tests
+
+If you want to work on pipeline scripts, you can use the tests provided with the software, used to check each of its functionalities. To run the tests, run, from the root of the project::
+
+    PYTHONPATH+=. py.test
+
+or, if you installed the package (final or development mode)::
+
+    py.test
+
 **Input:**
 - File with list of genomes to format: 1 genome per line, 2 columns, no header. First column with gembase name of the genome, 2nd column with the current name of the genome (with file extension). The gembase name is: GGSS.mmyy.nnnnn with GGSS the 2 first letters of gender and 2 first letters of species, mmyy the month and year, nnnnn the strain number (with trainling 0s if needed).
 - all genome sequences in multifasta (with current name) in a same folder `dbpath`.
