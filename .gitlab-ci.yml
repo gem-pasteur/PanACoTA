@@ -13,7 +13,7 @@ test-ubuntu16.04:
     - pip3 install .
   script:
     - ls -l
-    - py.test --cov pipelinepackage
+    - py.test test --cov pipelinepackage
   artifacts:
     paths:
       - htmlcov/
