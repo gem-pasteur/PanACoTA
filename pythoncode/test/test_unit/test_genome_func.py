@@ -132,7 +132,7 @@ def test_rename_genomes():
           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
 
     genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
-               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 49, 3, 3],
+               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
                gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
                gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 2],
@@ -142,7 +142,7 @@ def test_rename_genomes():
     out_f = [os.path.join(res_path, gname + "-gembase.fna") for gname in gs]
     gfunc.rename_all_genomes(genomes, res_path)
     exp_genomes =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
-                    gs[1]: ["SAEN.1114.00004", out_f[1], 49, 3, 3],
+                    gs[1]: ["SAEN.1114.00004", out_f[1], 67, 3, 3],
                     gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
                     gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
                     gs[4]: ["SAEN.1115.00001", out_f[4], 106, 3, 2],
@@ -156,3 +156,15 @@ def test_rename_genomes():
             for line_exp, line_out in zip(expf, outf):
                 assert line_exp == line_out
         os.remove(out)
+
+# def test_analyse1genome_nocut():
+#     """
+
+#     """
+#      analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+#     genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
+#                 gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
+#                 gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 4, 1]}
+#     genome = gs[1]
+#     dbpath = os.path.join()
