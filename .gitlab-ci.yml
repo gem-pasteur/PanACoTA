@@ -16,7 +16,7 @@ test-ubuntu16.04:
   artifacts:
     paths:
       - pythoncode/htmlcov/
-    expire_in: 2 min
+    expire_in: 1 hour
 
 pages:
   stage: deploy
@@ -27,6 +27,6 @@ pages:
   artifacts:
     paths:
       - public
-    expire_in: 2 min
+    expire_in: 1 hour
   only:
     - master
