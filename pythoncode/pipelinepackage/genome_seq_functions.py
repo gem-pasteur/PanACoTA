@@ -24,12 +24,12 @@ logger = logging.getLogger()
 
 def analyse_all_genomes(genomes, dbpath, res_path, nbn):
     """
-    genomes: {genome: name}
+    genomes: {genome: spegenus.date}
     dbpath: path to folder containing genomes
     res_path: path to put out files
     nbn: minimum number of 'N' required to cut into a new contig
 
-    returns: genomes {genome: [name, path, size, nbcont, l90]}
+    returns: genomes {genome: [spegenus.date, path, size, nbcont, l90]}
     """
     cut = nbn > 0
     pat = 'N' * nbn + "+"
@@ -42,9 +42,9 @@ def analyse_all_genomes(genomes, dbpath, res_path, nbn):
         analyse_genome(genome, dbpath, res_path, cut, pat, genomes)
 
 
-def analyse_genome(genome, dbpath, res_path, cut, pat, genomes):
+def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
     """
-    Anayse given genome:
+    Analyse given genome:
     - if cut is asked:
         - cut its contigs at each time that 'pat' is seen
         - save cut genome in new file
@@ -52,23 +52,19 @@ def analyse_genome(genome, dbpath, res_path, cut, pat, genomes):
 
     * genome: given genome to analyse
     * dbpath: path to the folder containing the given genome sequence
-    * res_path: path to folder where output files must be saved. cut genome will be saved
-    in res_path/tmp_files
+    * tmp_path: path to folder where output files must be saved.
     * cut: True if contigs must be cut, False otherwise
     * pat: pattern on which contigs must be cut
-    * genomes: {genome: [name]} -> {genome: [name, path, gsize, nbcont, L90]}
+    * genomes: {genome: [spegenus.date]} -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
     """
     gpath = os.path.join(dbpath, genome)
     if cut:
-        tmp_res = os.path.join(res_path, "tmp_files")
-        if not os.path.isdir(tmp_res):
-            os.makedirs(tmp_res)
-        grespath = os.path.join(tmp_res, genome + "-split{}N.fna".format(len(pat) - 1))
+        grespath = os.path.join(tmp_path, genome + "-split{}N.fna".format(len(pat) - 1))
         gresf = open(grespath, "w")
     else:
         grespath = gpath
     with open(gpath, 'r') as genf:
-        contig_sizes = {}  # {name: size}
+        contig_sizes = {}  # {contig_name: size}
         cur_contig_name = ""
         cur_contig = ""
         for line in genf:
@@ -82,7 +78,7 @@ def analyse_genome(genome, dbpath, res_path, cut, pat, genomes):
                 cur_contig_name = line.strip().split()[0]
                 cur_contig = ""
             else:
-                cur_contig += line.strip()
+                cur_contig += line.strip().upper()
         if cut:
             save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
         else:
