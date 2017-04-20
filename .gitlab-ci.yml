@@ -17,7 +17,6 @@ test-ubuntu16.04:
     paths:
       - pythoncode/htmlcov/
     expire_in: 2 min
-    only: master
 
 pages:
   stage: deploy
