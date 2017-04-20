@@ -89,7 +89,7 @@ def analyse_genome(genome, dbpath, res_path, cut, pat, genomes):
             contig_sizes[cur_contig_name] = len(cur_contig)
         nbcont = len(contig_sizes)
         gsize = sum(contig_sizes.values())
-        l90 = calc_l90(gsize, contig_sizes)
+        l90 = calc_l90(contig_sizes)
         genomes[genome] += [grespath, gsize, nbcont, l90]
 
 
@@ -119,16 +119,18 @@ def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
         num += 1
 
 
-def calc_l90(gsize, contig_sizes):
+def calc_l90(contig_sizes):
     """
     Calc L90 of a given genome
     """
+    gsize = sum(contig_sizes.values())
     sizes = [contig_sizes[cont] for cont in contig_sizes]
     cum_sizes = np.cumsum(sorted(sizes, reverse=True))
     lim = 0.9 * gsize
     for num, val in enumerate(cum_sizes):
         if val >= lim:
             return num + 1
+
 
 def rename_all_genomes(genomes, res_path):
     """

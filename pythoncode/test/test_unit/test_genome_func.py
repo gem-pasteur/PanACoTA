@@ -80,3 +80,24 @@ def test_save_contig_ATCG():
         for line_exp, line_seq in zip(expf, seqf):
             assert line_exp == line_seq
     os.remove(seq_file)
+
+
+def test_calc_l90_exact():
+    """
+    Calculate L90 according to the given genome size and contig sizes
+    2 contigs get exactly 90% of the genome
+    """
+    cont_size = {1: 3, 2:800, 3:100, 4:90, 5:7}
+    l90 = gfunc.calc_l90(cont_size)
+    assert l90 == 2
+
+
+def test_calc_l90_more():
+    """
+    Calculate L90 according to the given genome size and contig sizes
+    3 contigs get exactly more than 90%, but 2 contigs get less -> l90 = 3
+    """
+    cont_size = {1: 3, 2: 800, 3: 90, 4: 90, 5: 17}
+    l90 = gfunc.calc_l90(cont_size)
+    assert l90 == 3
+
