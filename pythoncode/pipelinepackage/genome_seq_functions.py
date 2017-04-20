@@ -22,7 +22,7 @@ from pipelinepackage import utils
 logger = logging.getLogger()
 
 
-def analyse_all_genomes(genomes, dbpath, res_path, nbn):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
     """
     genomes: {genome: spegenus.date}
     dbpath: path to folder containing genomes
@@ -39,7 +39,7 @@ def analyse_all_genomes(genomes, dbpath, res_path, nbn):
     else:
         logger.info("Calculating genome size, number of contigs, L90")
     for genome, name in genomes.items():
-        analyse_genome(genome, dbpath, res_path, cut, pat, genomes)
+        analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
 
 
 def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):

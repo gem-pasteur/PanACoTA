@@ -197,7 +197,7 @@ def test_analyse1genome_cut():
     pat = "NNNNN+"
     gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
     out_f = os.path.join(tmp_path, gs[1] + "-split5N.fna")
-    exp_f = os.path.join(tmp_path, "exp_files", "res_genome2.fasta-gembase-split5N.fna")
+    exp_f = os.path.join(tmp_path, "exp_files", "res_genome2.fasta-split5N.fna")
     exp_genomes = {gs[0]: ["SAEN.1113"],
                    gs[1]: ["SAEN.1114", out_f, 55, 5, 4],
                    gs[2]: ["ESCO.0416"]}
@@ -207,3 +207,55 @@ def test_analyse1genome_cut():
             assert line_exp == line_out
     os.remove(out_f)
 
+
+def test_analyseAllGenomes_nocut():
+    """
+    Analyze all given genomes: don't cut at stretches of N, but look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    dbpath = os.path.join("test", "data", "genomes")
+    gpaths = [os.path.join(dbpath, gname) for gname in gs]
+    tmp_path = os.path.join("test", "data")
+    nbn = 0
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
+    # construct expected results
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    assert exp_genomes == genomes
+
+
+def test_analyseAllGenomes_cut():
+    """
+    Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    dbpath = os.path.join("test", "data", "genomes")
+    tmp_path = os.path.join("test", "data")
+    gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
+    nbn = 5
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
+    # construct expected results
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], 55, 5, 4],
+                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    out_f = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
+    exp_f = [os.path.join(tmp_path, "exp_files", "res_" + gname + "-split5N.fna") for gname in gs]
+    assert exp_genomes == genomes
+    for out, exp in zip(out_f, exp_f):
+        with open(out, "r") as outf, open(exp, "r") as expf:
+            for line_exp, line_out in zip(expf, outf):
+                assert line_exp == line_out
+        os.remove(out)
