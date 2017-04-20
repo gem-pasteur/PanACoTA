@@ -202,7 +202,7 @@ def count_tbl(tblfile):
             if "locus_tag" in line:
                 nbGene += 1
             if "repeat_region" in line:
-                nbCRISPR == 1
+                nbCRISPR += 1
     return nbcont, nbCDS, nbGene, nbCRISPR
 
 
