@@ -137,7 +137,7 @@ def test_rename_genomes():
                gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
                gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
                gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
-               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 2],
+               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
     res_path = os.path.join("test", "data")
@@ -145,23 +145,16 @@ def test_rename_genomes():
     gfunc.rename_all_genomes(genomes, res_path)
     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
     # so take into account both choices
-    exp_genomes1 =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
-                     gs[1]: ["SAEN.1114.00004", out_f[1], 67, 3, 3],
-                     gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
-                     gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
-                     gs[4]: ["SAEN.1115.00001", out_f[4], 106, 3, 2],
-                     gs[5]: ["ESCO.0216.00002", out_f[5], 116, 4, 2],
-                     gs[6]: ["SAEN.1115.00002", out_f[6], 137, 3, 2]}
-    exp_genomes2 =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
-                     gs[1]: ["SAEN.1114.00004", out_f[1], 67, 3, 3],
-                     gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
-                     gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
-                     gs[4]: ["SAEN.1115.00002", out_f[4], 106, 3, 2],
-                     gs[5]: ["ESCO.0216.00002", out_f[5], 116, 4, 2],
-                     gs[6]: ["SAEN.1115.00001", out_f[6], 137, 3, 2]}
+    exp_genomes =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
+                    gs[1]: ["SAEN.1114.00004", out_f[1], 67, 3, 3],
+                    gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
+                    gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
+                    gs[4]: ["SAEN.1115.00001", out_f[4], 106, 3, 1],
+                    gs[5]: ["ESCO.0216.00002", out_f[5], 116, 4, 2],
+                    gs[6]: ["SAEN.1115.00002", out_f[6], 137, 3, 2]}
     exp_f = [os.path.join("test", "data", "exp_files", "res_" + gname + "-gembase.fna")
              for gname in gs]
-    assert genomes == exp_genomes1 or genomes == exp_genomes2
+    assert genomes == exp_genomes
     for exp, out in zip(exp_f, out_f):
         with open(exp, "r") as expf, open(out, "r") as outf:
             for line_exp, line_out in zip(expf, outf):
