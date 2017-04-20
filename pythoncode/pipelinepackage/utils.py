@@ -54,15 +54,24 @@ def plot_distr(values, limit, outfile, title, text):
     :param outfile: file in which the output image must be saved
     :type outfile: str
     """
+    import math
+    import numpy as np
     import matplotlib
     matplotlib.use('AGG')
     from matplotlib import pyplot as plt
     plt.figure(figsize=(10,7))
     max_x = max(values)
-    inter = max_x - min(values)
-    axes = plt.hist(values, min(inter, 200), edgecolor="black", color="blue")
-    plt.xlim(0,max_x)
-    plt.axvline(x=limit + 1, color="r")
-    plt.text(x=limit + 2, y=plt.ylim()[1]/2, s=text + " " + str(limit), color="r", rotation=90)
+    # if too many values, group them to have less bins in the histogram.
+    # Put 'group_values' values in each bin ->
+    # if less than 300 values, 1 value per bin, otherwise more values per bin
+    group_values = int(max_x/300) + 1
+    dec_ax = math.exp(0.001 * max_x) - 1
+    dec_text = 3 * dec_ax
+    bins = np.arange(0, max_x + 2*group_values, group_values) - 0.5
+    axes = plt.hist(values, bins = bins, edgecolor="black", color="blue")
+    plt.xlim(0.5, max_x + 0.5*group_values)
+    plt.axvline(x=limit + 0.5*group_values + dec_ax, color="r")
+    plt.text(x=limit + 0.5*group_values + dec_text, y=plt.ylim()[1]/2,
+             s=text + " " + str(limit), color="r", rotation=90)
     plt.title(title)
     plt.savefig(outfile)
