@@ -5,9 +5,11 @@
 Unit tests for utils.py
 """
 
-import pipelinepackage.genome_seq_functions as gfunc
 import pytest
 import os
+import pipelinepackage.genome_seq_functions as gfunc
+import test.test_unit.util_tests as util_tests
+
 
 def test_sort_genomes():
     """
@@ -259,3 +261,35 @@ def test_analyseAllGenomes_cut():
             for line_exp, line_out in zip(expf, outf):
                 assert line_exp == line_out
         os.remove(out)
+
+
+def test_plot_dist():
+    """
+    For all genomes, plot the distribution of their L90 values, and their number of contigs.
+    Add a vertical line at the given threshold.
+    genomes: {genome: [name, path, size, nbcont, l90]}
+    """
+    genomes_dir = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
+          "genome5.fasta", "genome6.fasta", "genome7.fasta"]
+    genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 2, 2],
+               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 15, 13],
+               gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 15, 11],
+               gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 17, 11],
+               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 17, 12],
+               gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 60, 50],
+               gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 20, 12]}
+    res_path = os.path.join("test", "data")
+    exp_path = os.path.join(res_path, "exp_files")
+    listfile_base = "test_plot_dist"
+    l90 = 13
+    nbconts = 19
+    gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbconts)
+    outfiles = [os.path.join(res_path, "QC_L90-" + listfile_base + ".png"),
+                os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")]
+    expfiles = [os.path.join(exp_path, "res_QC_L90-" + listfile_base + ".png"),
+                os.path.join(exp_path, "res_QC_nb-contigs-" + listfile_base + ".png")]
+    for out, exp in zip(outfiles, expfiles):
+        assert util_tests.compare_files(out, exp)
+        os.remove(out)
+

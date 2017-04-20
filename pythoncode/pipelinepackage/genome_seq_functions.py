@@ -181,10 +181,10 @@ def sort_genomes(x):
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     """
     genomes: {genome: [name, path, size, nbcont, l90]}
-    res_patj: path to put all output files
+    res_path: path to put all output files
     listfile_base: name of list file
-    l90: max value of l90
-    nbconts: max value of nb contigs
+    l90: max value of l90 allowed
+    nbconts: max value of nb contigs allowed
     """
     L90_vals = [val for _, (_, _, _, _, val) in genomes.items()]
     outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
