@@ -132,7 +132,7 @@ def calc_l90(contig_sizes):
             return num + 1
 
 
-def rename_all_genomes(genomes, res_path):
+def rename_all_genomes(genomes, tmp_path):
     """
     Sort kept genomes by L90 and then nb contigs.
     For each genome, assign a strain number, and rename all its contigs.
@@ -144,14 +144,14 @@ def rename_all_genomes(genomes, res_path):
     last_strain = 0
     #"SAEN.1015.{}".format(str(last_strain).zfill(5))
     for genome, [name, gpath, size, nbcont, l90] in sorted(genomes.items(), key=sort_genomes):
-        if last_name != name:
+        if last_name != name.split(".")[0]:
             last_strain = 1
-            last_name = name
+            last_name = name.split(".")[0]
         else:
             last_strain += 1
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, res_path)
+        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, tmp_path)
 
 
 def rename_genome_contigs(gembase_name, gpath, tmp_path):
@@ -175,11 +175,11 @@ def rename_genome_contigs(gembase_name, gpath, tmp_path):
 def sort_genomes(x):
     """
     Sort all genomes with the following criteria:
-    - sort by species
+    - sort by species (x[1][0] is species.date)
     - for each species, sort by l90
     - for same l90, sort by nb contigs
     """
-    return (x[1][0], x[1][-1], x[1][-2])
+    return (x[1][0].split(".")[0], x[1][-1], x[1][-2])
 
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):

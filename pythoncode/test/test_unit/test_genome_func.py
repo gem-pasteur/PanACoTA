@@ -14,7 +14,7 @@ def test_sort_genomes():
     Test the function sorting genomes by L90 and nb contigs.
     genome = name, path, gsize, nbcont, L90]
     """
-    genome1 = ["SAEN.1015.", "path/to/genome1", 10000, 11, 2]
+    genome1 = ["SAEN.1116.", "path/to/genome1", 10000, 11, 2]
     genome2 = ["SAEN.1015.", "path/to/genome2", 10000, 12, 2]
     genome3 = ["SAEN.1015.", "path/to/genome3", 10000, 12, 1]
     genome4 = ["ESCO.0216.", "path/to/genome4", 10000, 12, 1]
@@ -121,3 +121,38 @@ def test_rename_contigs():
     os.remove(outf)
 
 
+def test_rename_genomes():
+    """
+    From a list of genomes ({genome: [name.date, path, gsize, nbcont, L90]}),
+    order them by species, and by decreasing quality (L90, nb_cont), and rename them,
+    as well as their contigs.
+    """
+    genomes_dir = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
+          "genome5.fasta", "genome6.fasta", "genome7.fasta"]
+
+    genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
+               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 49, 3, 3],
+               gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
+               gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
+               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 2],
+               gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
+               gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
+    res_path = os.path.join("test", "data")
+    out_f = [os.path.join(res_path, gname + "-gembase.fna") for gname in gs]
+    gfunc.rename_all_genomes(genomes, res_path)
+    exp_genomes =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
+                    gs[1]: ["SAEN.1114.00004", out_f[1], 49, 3, 3],
+                    gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
+                    gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
+                    gs[4]: ["SAEN.1115.00001", out_f[4], 106, 3, 2],
+                    gs[5]: ["ESCO.0216.00002", out_f[5], 116, 4, 2],
+                    gs[6]: ["SAEN.1115.00002", out_f[6], 137, 3, 2]}
+    exp_f = [os.path.join("test", "data", "exp_files", "res_" + gname + "-gembase.fna")
+             for gname in gs]
+    assert exp_genomes == genomes
+    for exp, out in zip(exp_f, out_f):
+        with open(exp, "r") as expf, open(out, "r") as outf:
+            for line_exp, line_out in zip(expf, outf):
+                assert line_exp == line_out
+        os.remove(out)
