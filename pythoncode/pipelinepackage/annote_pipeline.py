@@ -233,7 +233,7 @@ def read_genomes(list_file, name, date):
     Read list of genomes, and return them.
     If a genome has a name, also return it. Otherwise, return the name given by user.
 
-    genomes = {genome: name or None}
+    genomes = {genome: spegenus.date} spegenus.date = name.date
     """
     logger = logging.getLogger()
     logger.info("Reading genomes")
