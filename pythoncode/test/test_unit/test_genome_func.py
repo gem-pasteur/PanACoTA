@@ -101,3 +101,23 @@ def test_calc_l90_more():
     l90 = gfunc.calc_l90(cont_size)
     assert l90 == 3
 
+
+def test_rename_contigs():
+    """
+    From a given sequence, rename all its contigs with the given gembase name + a number,
+    and save the output sequence to the given res_path.
+    Check that the output file is as expected.
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    gembase_name = "ESCO.0216.00005"
+    res_path = os.path.join("test", "data")
+    out_exp = os.path.join(res_path, "H299_H561.fasta-gembase.fna")
+    exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
+    outf = gfunc.rename_genome_contigs(gembase_name, gpath, res_path)
+    assert outf == out_exp
+    with open(exp_file, "r") as expf, open(outf, "r") as of:
+        for line_exp, line_seq in zip(expf, of):
+            assert line_exp == line_seq
+    os.remove(outf)
+
+
