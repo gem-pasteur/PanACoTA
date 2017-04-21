@@ -287,9 +287,28 @@ def tbl2lst(tblfile, lstfile):
 
 
 def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
-               genome, cont_num, ecnum, inf2, strain, start, end, lstopenfile):
+               genome, cont_num, ecnum, inf2, strand, start, end, lstopenfile):
     """
     Write given gene to output file
+
+    * gtype: type of feature (CDS, tRNA, etc.)
+    * locus_num: number of locus given by prokka
+    * gene_name: gene name found by prokka ("NA" if no gene name)
+    * product: found by prokka, "NA" if no product
+    * crispr_num: current crispr number. In prokka tbl, CRISPRs are not numbered, they all
+    have the same name. We name them by adding a unique number to each CRISPR. If the current
+    gene to add is a CRISPR, this number will be incremented and returned. If not, this same
+    name will be returned.
+    * cont_loc: 'i' if the gene is inside a contig, 'b' if its on the border (first or last gene
+    of the contig)
+    * genome: genome name (spegenus.date.strain_num)
+    * cont_num: contig number
+    * ecnum: EC number, found by prokka, or "NA" if no EC number
+    * inf2: more information found by prokka, or "NA" if no more information
+    * strand: C (complement) or D (direct)
+    * start: start of gene in the contig
+    * end: end of gene in the contig
+    * lstopenfile: open file where lstinfo must be written
     """
     # if last gene was a crispr
     if gtype == "repeat_region":
@@ -301,8 +320,11 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     locus_name = "{}.{}{}_{}".format(genome, cont_loc,
                                      str(cont_num).zfill(4),
                                      str(locus_num).zfill(5))
-    more_info = "| {} | {} | {}".format(product, ecnum, inf2)
-    lst_line = "\t".join([str(start), str(end), strain, gtype,
+    # If '|' character found in those fields, replace by '_' to avoid problems while parsing
+    more_info = "| {} | {} | {}".format(product.replace("|", "_"),
+                                        ecnum.replace("|", "_"),
+                                        inf2.replace("|", "_"))
+    lst_line = "\t".join([str(start), str(end), strand, gtype,
                           locus_name, gene_name, more_info])
     lstopenfile.write(lst_line + "\n")
     return crispr_num
