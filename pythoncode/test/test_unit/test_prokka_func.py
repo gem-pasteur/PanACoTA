@@ -342,7 +342,7 @@ def test_run_all_parallel_more_threads():
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
 
 
-def test_run_all_parallel_less_threads(capsys):
+def test_run_all_parallel_less_threads():
     """
     Check that there is no problem when running with less threads than genomes (each genomes
     uses 2 threads)
@@ -371,5 +371,3 @@ def test_run_all_parallel_less_threads(capsys):
     for name in gnames:
         shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))
         os.remove(os.path.join(res_dir, name + "-prokka.log"))
-    _, err = capsys.readouterr()
-    print(err)
