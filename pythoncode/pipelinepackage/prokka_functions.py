@@ -19,7 +19,7 @@ import progressbar
 
 logger = logging.getLogger()
 
-def run_prokka_all(genomes, threads, force):
+def run_prokka_all(genomes, threads, force, prok_folder, res_dir):
     """
     for each genome in genomes, run prokka to annotate the genome.
 
@@ -27,6 +27,10 @@ def run_prokka_all(genomes, threads, force):
     * threads: max number of threads that can be used
     * force: if None, do not override outdir (do not run prokka if outdir already exists). If
     '--force', rerun prokka and override existing outdir, for all genomes.
+    * prok_dir: folder where prokka results must be written: for each genome,
+    a directory <genome_name>-prokkaRes will be created in this folder, and all the results
+    of prokka for the genome will be written inside
+    * res_dir: folder where the user wants its results (formatted database)
 
     Returns:
         final: {genome: boolean} -> with True if prokka ran well, False otherwise.
@@ -41,8 +45,9 @@ def run_prokka_all(genomes, threads, force):
                                   redirect_stderr=True, redirect_stdout=True).start()
 
     if threads <= 3:
-        # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], threads, genomes[g][0], force, genomes[g][3])
+        # arguments : (gpath, prok_dir, res_dir, cores_prokka, name, force, nbcont) for each genome
+        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
+                      res_dir, threads, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         final = []
         for num, arg in enumerate(arguments):
@@ -59,7 +64,8 @@ def run_prokka_all(genomes, threads, force):
         else:
             cores_prokka = 2
         # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], cores_prokka, genomes[g][0], force, genomes[g][3])
+        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
+                      res_dir, cores_prokka, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         cores_pool = int(threads/cores_prokka)
         pool = multiprocessing.Pool(cores_pool)
@@ -75,13 +81,9 @@ def run_prokka_all(genomes, threads, force):
             pool.join()
             final = final.get()
         # If an error occurs, terminate pool and exit
-        except AttributeError as excp:
-            pool.terminate()
-            logger.error(excp.message)
-            sys.exit(1)
         except Exception as excp:
             pool.terminate()
-            logger.error(excp.message)
+            logger.error(excp)
             sys.exit(1)
     final = {genome: res for genome, res in zip(sorted(genomes), final)}
     logger.debug(final)

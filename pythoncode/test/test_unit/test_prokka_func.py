@@ -292,3 +292,84 @@ def test_run_prokka_out_problem_running(capsys):
     os.remove(os.path.join(res_dir, "H299 H561.fasta-prokka.log"))
 
 
+def test_run_all_1by1():
+    """
+    Check that when running with 3 threads (not parallel), prokka runs as expected,
+    and returns True for each genome
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    genome1 = "H299_H561.fasta"
+    gpath1 = os.path.join("test", "data", "genomes", genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join("test", "data", "genomes", genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, 456464645, 1, 465]}
+    threads = 3
+    force = False
+    prok_folder = os.path.join("test", "data")
+    res_dir = os.path.join("test", "data")
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    assert final[genome1]
+    assert final[genome2]
+    shutil.rmtree(os.path.join(prok_folder, genome1 + "-prokkaRes"))
+    shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
+    os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
+    os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+
+
+def test_run_all_parallel_more_threads():
+    """
+    Check that there is no problem when running with more threads than genomes (each genome
+    uses nb_threads/nb_genome threads)
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    genome1 = "H299_H561.fasta"
+    gpath1 = os.path.join("test", "data", "genomes", genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join("test", "data", "genomes", genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, 456464645, 1, 465]}
+    threads = 8
+    force = False
+    prok_folder = os.path.join("test", "data")
+    res_dir = os.path.join("test", "data")
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    assert final[genome1]
+    assert final[genome2]
+    shutil.rmtree(os.path.join(prok_folder, genome1 + "-prokkaRes"))
+    shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
+    os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
+    os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+
+
+def test_run_all_parallel_less_threads(capsys):
+    """
+    Check that there is no problem when running with less threads than genomes (each genomes
+    uses 2 threads)
+    All genomes should run well, except for "genome3", where there are 3 contigs, and
+    we announce 1 contig, so check_prokka should return false.
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: ["test_runall_1by1_1", gpaths[0], 12656, 3, 1],
+               gnames[1]: ["test_runall_1by1_2", gpaths[1], 456464645, 1, 1],
+               gnames[2]: ["test_runall_1by1_2", gpaths[2], 456464645, 4, 1],
+               gnames[3]: ["test_runall_1by1_2", gpaths[3], 456464645, 3, 1],
+               gnames[4]: ["test_runall_1by1_2", gpaths[4], 456464645, 1, 1]
+              }
+    threads = 4
+    force = False
+    prok_folder = os.path.join("test", "data")
+    res_dir = os.path.join("test", "data")
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    assert final[gnames[0]]
+    assert final[gnames[1]]
+    assert final[gnames[2]]
+    assert final[gnames[3]]
+    assert not final[gnames[4]]
+    for name in gnames:
+        shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))
+        os.remove(os.path.join(res_dir, name + "-prokka.log"))
+    _, err = capsys.readouterr()
+    print(err)
