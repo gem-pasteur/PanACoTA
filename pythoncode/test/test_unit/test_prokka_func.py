@@ -20,8 +20,8 @@ def test_count_tbl():
     tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
     ncont, ncds, ngene, ncris = pfunc.count_tbl(tblfile)
     assert ncont == 7
-    assert ncds == 14
-    assert ngene == 16
+    assert ncds == 13
+    assert ngene == 15
     assert ncris == 2
 
 
@@ -142,10 +142,10 @@ def test_check_prokka_wrong_tblCDS(capsys):
     _, err = capsys.readouterr()
     assert err.split("\n")[0] == ("prokka_out_for_test-wrongCDS original_name.fna: "
                                   "no matching number of proteins between tbl and faa; "
-                                  "faa=14; in tbl =13")
+                                  "faa=13; in tbl =12")
     assert err.split("\n")[1] == ("prokka_out_for_test-wrongCDS original_name.fna: "
                                   "no matching number of genes between tbl and ffn; "
-                                  "ffn=18; in tbl =15genes 2CRISPR")
+                                  "ffn=17; in tbl =14genes 2CRISPR")
     os.remove(os.path.join(ori_dir, name + ".ffn"))
     os.remove(os.path.join(ori_dir, name + ".faa"))
 
@@ -168,7 +168,7 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     _, err = capsys.readouterr()
     assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
                    "no matching number of genes between tbl and ffn; "
-                   "ffn=18; in tbl =16genes 1CRISPR\n")
+                   "ffn=17; in tbl =15genes 1CRISPR\n")
     os.remove(os.path.join(ori_dir, name + ".ffn"))
     os.remove(os.path.join(ori_dir, name + ".faa"))
 

@@ -38,10 +38,6 @@
 			locus_tag	JGIKIPIJ_00011
 			product	hypothetical protein
 >Feature test.0417.00002.0003
-3130	3393	CDS
-			inference	ab initio prediction:Prodigal:2.6
-			locus_tag	JGIKIPIJ_00012
-			product	hypothetical protein
 3399	4538	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00013

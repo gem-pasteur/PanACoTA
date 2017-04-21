@@ -37,10 +37,6 @@
 2968265	2969027	repeat_region
 			rpt_family	CRISPR
 			score	13
-3130	3393	CDS
-			inference	ab initio prediction:Prodigal:2.6
-			locus_tag	JGIKIPIJ_00012
-			product	hypothetical protein
 3399	4538	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00013
