@@ -26,9 +26,10 @@ def test_check_install_error(capsys):
     with exit code 1
     """
     with pytest.raises(SystemExit):
-        utils.check_installed(["plop"])
+        utils.check_installed(["plop false command..."])
     out, err = capsys.readouterr()
-    assert err.startswith("plop failed:")
+    print(err)
+    assert "plop false command... failed:" in err
 
 
 def test_class_filter():
