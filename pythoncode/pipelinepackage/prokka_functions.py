@@ -90,44 +90,48 @@ def run_prokka_all(genomes, threads, force):
 
 def run_prokka(arguments):
     """
-    arguments : (gpath, cores_prokka, name, force, nbcont)
+    arguments : (gpath, prok_dir, res_dir, cores_prokka, name, force, nbcont)
+
+    gpath: path and filename of genome to annotate
+    prok_dir: path to folder where prokka results must be written
+    res_dir: path to results directory, where prokka_log is written
+    cores_prokka: how many cores can use prokka
+    name: output name of annotated genome
+    force: "--force" if force run (override existing files), anything else otherwise
+    nbcont: number of contigs in the input genome, to check prokka results
 
     returns:
         boolean. True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, threads, name, force, nbcont = arguments
-    outdir = gpath + "-prokkaRes"
+    gpath, prok_dir, res_dir, threads, name, force, nbcont = arguments
     FNULL = open(os.devnull, 'w')
-    prok_logfile = gpath + "-prokka.log"
-    if os.path.isdir(outdir) and not force:
+    prok_logfile = os.path.join(res_dir, os.path.basename(gpath) + "-prokka.log")
+    if os.path.isdir(prok_dir) and not force:
         logging.warning(("Prokka results folder already exists. Prokka did not run again, "
                          "formatting step used already generated results of Prokka in "
                          "{}. If you want to re-run prokka, first remove this result folder, or "
                          "use '-F' or '--force' option if you want to rerun prokka for "
-                         "all genomes."))
-        ok = check_prokka(outdir, prok_logfile, name, gpath, nbcont)
+                         "all genomes.").format(prok_dir))
+        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
         return ok
-    elif os.path.isdir(outdir) and force == "--force":
-        prokf = open(prok_logfile, "w")
+    elif os.path.isdir(prok_dir) and force == "--force":
         cmd = ("prokka --outdir {} --cpus {} {} "
-               "--prefix {} {}").format(outdir, threads, force, name, gpath)
+               "--prefix {} {}").format(prok_dir, threads, force, name, gpath)
     else:
-        prokf = open(prok_logfile, "w")
         cmd = ("prokka --outdir {} --cpus {} "
-               "--prefix {} {}").format(outdir, threads, name, gpath)
+               "--prefix {} {}").format(prok_dir, threads, name, gpath)
     # logger.debug(cmd)
-    # print(cmd)
+    prokf = open(prok_logfile, "w")
     try:
         retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=prokf)
-        ok = check_prokka(outdir, prok_logfile, name, gpath, nbcont)
+        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
         prokf.close()
         return ok
     except Exception as err:
         logging.error("Error while trying to run prokka: {}".format(err))
         prokf.close()
         return False
-        sys.exit(1)
 
 
 def check_prokka(outdir, logf, name, gpath, nbcont):

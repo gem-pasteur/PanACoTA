@@ -8,6 +8,7 @@ Unit tests for utils.py
 import pytest
 import os
 import shutil
+import glob
 import pipelinepackage.prokka_functions as pfunc
 
 
@@ -165,7 +166,6 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     nbcont = 7
     assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
-    print(err)
     assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
                    "no matching number of genes between tbl and ffn; "
                    "ffn=18; in tbl =16genes 1CRISPR\n")
@@ -184,5 +184,111 @@ def test_check_prokka_ok():
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
     assert pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+
+
+def test_run_prokka_out_exists_ok(capsys):
+    """
+    Test that when the output directory already exists, and files inside are OK,
+    run_prokka returns True, with a warning message indicating that prokka did not rerun.
+    """
+    gpath = "path/to/nogenome/original_name.fna"
+    outdir = os.path.join("test", "data", "test_files")
+    cores_prokka = 1
+    name = "prokka_out_for_test"
+    force = False
+    nbcont = 7
+    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
+    assert pfunc.run_prokka(arguments)
+    _, err = capsys.readouterr()
+    assert err.endswith("Prokka results folder already exists. Prokka did not run again, "
+                        "formatting step used already generated results of Prokka in "
+                        "test/data/test_files. If you want to re-run prokka, first remove this "
+                        "result folder, or use '-F' or '--force' option if you want to rerun "
+                        "prokka for all genomes.\n")
+
+
+def test_run_prokka_out_exists_error(capsys):
+    """
+    Test that when the output directory already exists, and some file is missing,
+    run_prokka returns False, and writes the warning message saying that prokka did not
+    rerun, + the warning message for the missing file(s).
+    """
+    gpath = "path/to/nogenome/original_name.fna"
+    outdir = os.path.join("test", "data", "test_files")
+    cores_prokka = 1
+    name = "prokka_out_for_test-wrongCDS"
+    force = False
+    nbcont = 7
+    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
+    assert not pfunc.run_prokka(arguments)
+    _, err = capsys.readouterr()
+    assert ("Prokka results folder already exists. Prokka did not run again, "
+            "formatting step used already generated results of Prokka in "
+            "test/data/test_files. If you want to re-run prokka, first remove this "
+            "result folder, or use '-F' or '--force' option if you want to rerun "
+            "prokka for all genomes.") in err
+    assert "prokka_out_for_test-wrongCDS original_name.fna: no .ffn file"
+    assert "prokka_out_for_test-wrongCDS original_name.fna: no .faa file"
+
+
+def test_run_prokka_out_exists_force():
+    """
+    Test that when the output directory already exists with wrong files, but force is on,
+    prokka is rerun and outputs the right files
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    outdir = os.path.join("test", "data")
+    res_dir = outdir
+    name = "test_runprokka_H299"
+    # Put empty tbl, faa, ffn files in prokka output dir, to check that they are overridden
+    open(os.path.join(outdir, name + ".tbl"), "w").close()
+    open(os.path.join(outdir, name + ".faa"), "w").close()
+    open(os.path.join(outdir, name + ".ffn"), "w").close()
+    cores_prokka = 5
+    force = "--force"
+    nbcont = 3
+    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    assert pfunc.run_prokka(arguments)
+    for filename in glob.glob(os.path.join(outdir, name + ".*")):
+        os.remove(filename)
+    os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
+
+
+def test_run_prokka_out_doesnt_exist():
+    """
+    Test that when the output directory does not exist, it creates it, and runs prokka
+    with all expected outfiles
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    outdir = os.path.join("test", "data", "prokkaRes")
+    res_dir = os.path.join("test", "data")
+    cores_prokka = 5
+    name = "test_runprokka_H299"
+    force = False
+    nbcont = 3
+    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    assert pfunc.run_prokka(arguments)
+    shutil.rmtree(outdir)
+    os.remove(os.path.join(res_dir, "H299_H561.fasta-prokka.log"))
+
+
+def test_run_prokka_out_problem_running(capsys):
+    """
+    Check that when a problem occurs while trying to run prokka, run_prokka returns False,
+    and the error message indicating to read in the log why it couldn't run
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299 H561.fasta")
+    outdir = os.path.join("test", "data", "prokkaRes")
+    res_dir = os.path.join("test", "data")
+    cores_prokka = 5
+    name = "test_runprokka_H299"
+    force = False
+    nbcont = 3
+    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    assert not pfunc.run_prokka(arguments)
+    _, err = capsys.readouterr()
+    assert ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
+            "for more information.") in err
+    os.remove(os.path.join(res_dir, "H299 H561.fasta-prokka.log"))
 
 
