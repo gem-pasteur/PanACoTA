@@ -1,0 +1,17 @@
+287	787	D	CDS	test.0417.00002.b0001_00001	NA	| hypothetical protein | NA | NA
+4416	6068	D	CDS	test.0417.00002.i0001_00005	yiaD	| putative lipoprotein YiaD | NA | similar to AA sequence:UniProtKB:P37665
+9000	12000	C	CDS	test.0417.00002.b0001_00008	vgrG1	| Actin cross-linking toxin VgrG1 | 6.3.2.- | similar to AA sequence:UniProtKB:Q9KS45
+77	1237	D	CDS	test.0417.00002.b0002_00009	NA	| hypothetical protein | NA | NA
+1279	2346	D	CDS	test.0417.00002.i0002_00010	NA	| hypothetical protein | NA | NA
+2419	3000	D	CDS	test.0417.00002.i0002_00011	NA	| hypothetical protein | NA | NA
+3500	4000	D	CDS	test.0417.00002.i0002_00011	NA	| hypothetical protein | NA | NA
+4632	5000	C	CDS	test.0417.00002.b0002_00011	NA	| hypothetical protein | NA | NA
+296902	2968265	C	CRISPR	test.0417.00002.b0003_CRISPR1	crispr	| crispr-array | NA | NA
+3399	4538	D	CDS	test.0417.00002.b0003_00013	NA	| hypothetical protein | NA | NA
+4535	7888	D	CDS	test.0417.00002.b0004_00014	NA	| hypothetical protein | NA | NA
+3039279	3039355	D	tRNA	test.0417.00002.b0007_02927	NA	| tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2
+3039389	3039465	D	tRNA	test.0417.00002.i0007_02928	NA	| tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2
+7854	9491	D	CDS	test.0417.00002.i0007_00015	NA	| hypothetical protein | NA | NA
+9525	11285	D	CDS	test.0417.00002.i0007_00016	NA	| hypothetical protein | NA | NA
+2994578	2994971	D	CRISPR	test.0417.00002.i0007_CRISPR2	crispr	| crispr-array | NA | NA
+11249	12328	D	CDS	test.0417.00002.b0007_00017	NA	| hypothetical protein | NA | NA

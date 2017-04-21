@@ -72,3 +72,30 @@ def test_write_CRISPR():
         for line_exp, line_out in zip(expf, lstf):
             assert line_exp == line_out
     os.remove(lstfile)
+
+
+def test_tbl_to_lst():
+    """
+    Check that generated lstinfo file is as expected.
+    The test tblfile contains the following aspects:
+    - gene in D strand (start < end)
+    - gene in C strand (start > end)
+    - CDS features (some with all info = ECnumber, gene name, product etc. ;
+    some with missing info)
+    - tRNA type
+    - repeat_region type (*2)
+    - contigs with more than 2 genes
+    - contig with only 2 genes (both 'b' loc)
+    - contig with 1 gene ('b' loc)
+    - contig without gene (should be skipped)
+    """
+    tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
+    lstfile = os.path.join("test", "data", "test_tbl2lst.lst")
+    exp_lst = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    ffunc.tbl2lst(tblfile, lstfile)
+    with open(exp_lst, "r") as expf, open(lstfile, "r") as lstf:
+        for line_exp, line_out in zip(expf, lstf):
+            assert line_exp == line_out
+    os.remove(lstfile)
+
+
