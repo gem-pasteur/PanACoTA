@@ -77,7 +77,8 @@ def test_write_CRISPR():
 
 def test_tbl_to_lst():
     """
-    Check that generated lstinfo file is as expected.
+    Check that generated lstinfo file is as expected, when the genome name is the same as
+    it already was in the genome given to prokka.
     The test tblfile contains the following aspects:
     - gene in D strand (start < end)
     - gene in C strand (start > end)
@@ -93,7 +94,35 @@ def test_tbl_to_lst():
     tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
     lstfile = os.path.join("test", "data", "test_tbl2lst.lst")
     exp_lst = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    ffunc.tbl2lst(tblfile, lstfile)
+    name = "test.0417.00002"
+    assert ffunc.tbl2lst(tblfile, lstfile, name)
+    with open(exp_lst, "r") as expf, open(lstfile, "r") as lstf:
+        for line_exp, line_out in zip(expf, lstf):
+            assert line_exp == line_out
+    os.remove(lstfile)
+
+
+def test_tbl_to_lst_newName():
+    """
+    Check that generated lstinfo file is as expected, when the genome name has changed between
+    the one given to prokka, and the name given now.
+    The test tblfile contains the following aspects:
+    - gene in D strand (start < end)
+    - gene in C strand (start > end)
+    - CDS features (some with all info = ECnumber, gene name, product etc. ;
+    some with missing info)
+    - tRNA type
+    - repeat_region type (*2)
+    - contigs with more than 2 genes
+    - contig with only 2 genes (both 'b' loc)
+    - contig with 1 gene ('b' loc)
+    - contig without gene (should be skipped)
+    """
+    tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
+    lstfile = os.path.join("test", "data", "test_tbl2lstNewName.lst")
+    exp_lst = os.path.join("test", "data", "exp_files", "res_tbl2lst-newName.lst")
+    name = "test.0417.00010"
+    assert not ffunc.tbl2lst(tblfile, lstfile, name)
     with open(exp_lst, "r") as expf, open(lstfile, "r") as lstf:
         for line_exp, line_out in zip(expf, lstf):
             assert line_exp == line_out

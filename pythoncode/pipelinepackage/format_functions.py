@@ -86,23 +86,40 @@ def format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir):
     * prot_dir: path to Proteins folder
     * gene_dir: path to Genes folder
     * rep_dir: path to Replicons folder
+
+    Returns: True if format worked for this genome, False otherwise.
     """
-    # convert tbl to lst
-    tblgenome = os.path.join(gpath + "-prokkaRes", name + ".tbl")
-    lstgenome = os.path.join(lst_dir, name + ".lst")
-    tbl2lst(tblgenome, lstgenome)
-    # create Genes file
+    # try create Genes file
     ffngenome = os.path.join(gpath + "-prokkaRes", name + ".ffn")
     gengenome = os.path.join(gene_dir, name + ".gen")
-    create_gen(ffngenome, lstgenome, gengenome, name)
-    # Create Proteins file
+    ok_gene = create_gen(ffngenome, lstgenome, gengenome, name)
+    # If gene file not created, return False: format did not run for this genome
+    if not ok_gene:
+        return False
+    # If gene file was created, try to create Proteins file
     faagenome = os.path.join(gpath + "-prokkaRes", name + ".faa")
     prtgenome = os.path.join(prot_dir, name + ".prt")
-    create_prt(faagenome, lstgenome, prtgenome)
-    # copy fasta file to Replicons
+    ok_prt = create_prt(faagenome, lstgenome, prtgenome)
+    # If protein file not created, return False: format did not run for this genome
+    if not ok_prt:
+        return False
+    # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
+    # If the user ran prokka, and then changed the genome names (for example, by changing
+    # L90 threshold), and wants to format again its genomes with the new names, but without running prokka again, we must change here the contig names (containing genome name).
+    tblgenome = os.path.join(gpath + "-prokkaRes", name + ".tbl")
+    lstgenome = os.path.join(lst_dir, name + ".lst")
+    same_name = tbl2lst(tblgenome, lstgenome, name)
+    # check that headers of fasta file are with genome name. If yes, copy it to Replicons folder.
+    # If not, change its headers before putting it to Replicons folder.
+
     rep_file = os.path.join(rep_dir, name + ".fna")
     shutil.copyfile(gpath, rep_file)
 
+
+def check_rep_headers():
+    """
+    Check that the multi-fasta file of replicons have the good headers
+    """
 
 
 def create_gen(ffnseq, lstfile, genseq):
@@ -245,9 +262,11 @@ def write_header(lstline, outfile):
     outfile.write(">" + towrite)
 
 
-def tbl2lst(tblfile, lstfile):
+def tbl2lst(tblfile, lstfile, genome):
     """
     Read prokka tbl file, and convert it to the lst file.
+
+    genome = genome name (gembase format)
 
     * prokka tbl file format:
     ```
@@ -271,9 +290,10 @@ def tbl2lst(tblfile, lstfile):
     locus is: `<genome_name>.<i or b><contig_num>_<protein_num>`
 
     """
-    crispr_num = 1
+    same_name = True
+    crispr_num, cont_num = 1, 0
     start, end = -1, -1
-    strand, gtype, genome, cont_num, locus_num = [""] * 5
+    strand, gtype, locus_num = [""] * 3
     gene_name, product, ecnum, inf2 = ["NA"] * 4
     cont_loc = "b"
     with open(tblfile, "r") as tblf, open(lstfile, "w") as lstf:
@@ -290,12 +310,18 @@ def tbl2lst(tblfile, lstfile):
                                             ecnum, inf2, strain, start, end, lstf)
                     # init for next feature
                     start, end = -1, -1
-                    strand, gtype, genome, cont_num, locus_num = [""] * 5
+                    strand, gtype, locus_num = [""] * 3
                     gene_name, product, ecnum, inf2 = ["NA"] * 4
                 # Read new feature
-                contig = line.strip().split()[-1]
-                genome = ".".join(contig.split(".")[:-1])
-                cont_num = contig.split(".")[-1]
+                if same_name:
+                    contig = line.strip().split()[-1]
+                    c_genome = ".".join(contig.split(".")[:-1])
+                    if c_genome != genome:
+                        same_name = False
+                    else:
+                        cont_num = int(contig.split(".")[-1])
+                if not same_name:
+                    cont_num += 1
             # Line indicating position of gene
             if len(elems) == 3:
                 # if not first gene of the contig, write previous gene
@@ -330,6 +356,7 @@ def tbl2lst(tblfile, lstfile):
             cont_loc = "b"
             write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
                        genome, cont_num, ecnum, inf2, strain, start, end, lstf)
+    return same_name
 
 
 def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
