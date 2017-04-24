@@ -35,6 +35,10 @@ Output:
 - In your given respath, you will find a file called `discarded-<list_file>.lst` with information on genomes that were discarded (and hence not annotated) because of the L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
 - In your given respath, you will find 2 png files: `QC_L90-<list_file>.png` and `QC_nb-contigs-<list_file>.png`, containing the histograms of L90 and nb_contigs values for all genomes, with a vertical red line representing the limit applied here.
 
+Requested:
+- in prokka results, all genes are called <whatever>_<number> -> the number will be kept.
+- The number of the genes annotated by prokka are in increasing order in tbl, faa and ffn files
+
 
 @author gem
 April 2017
