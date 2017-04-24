@@ -8,6 +8,7 @@ Unit tests for format_functions.py
 import pytest
 import os
 import pipelinepackage.format_functions as ffunc
+from io import StringIO
 
 
 def test_write_gene():
@@ -97,5 +98,53 @@ def test_tbl_to_lst():
         for line_exp, line_out in zip(expf, lstf):
             assert line_exp == line_out
     os.remove(lstfile)
+
+
+def test_write_header_gene():
+    """
+    From a given line of lstinfo file, giving info for a gene (start, end, gene name,
+    product, EC number, more information), check that the header line of the protein and
+    gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("4416\t6068\tD\tCDS\ttest.0417.00002.i0001_00005\tyiaD\t| "
+               "putative lipoprotein YiaD | 6.3.2.- | similar to AA sequence:UniProtKB:P37665")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    exp = (">test.0417.00002.i0001_00005 1653 yiaD | putative lipoprotein YiaD | 6.3.2.- "
+           "| similar to AA sequence:UniProtKB:P37665")
+    assert res == exp
+    outfile.close()
+
+
+def test_write_header_geneNoName():
+    """
+    From a given line of lstinfo file, giving info for a gene with many unknowk parts (gene
+    name, product, EC number and more information are NAs), check that the header line of the
+    protein and gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("4632\t5000\tC\tCDS\ttest.0417.00002.b0002_00011\tNA\t| hypothetical protein "
+               "| NA | NA")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    exp = (">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA")
+    assert res == exp
+    outfile.close()
+
+
+def test_write_header_geneNoName():
+    """
+    From a given line of lstinfo file, giving info for a CRISPR check that the header
+    line of the protein and gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("296902\t2968265\tC\tCRISPR\ttest.0417.00002.b0003_CRISPR1\tcrispr\t| "
+               "crispr-array | NA | NA")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    exp = (">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA")
+    assert res == exp
+    outfile.close()
 
 
