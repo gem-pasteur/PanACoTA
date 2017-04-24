@@ -364,3 +364,19 @@ def test_create_gen_wrongLstInt(capsys):
                    "res_tbl2lst-wrongGeneName.lst. Error: invalid literal for "
                    "int() with base 10: 'j00009'\n"
                    "Gen file will not be created.\n")
+
+
+def test_create_gen_Ok():
+    """
+    Test that when everything is ok in both ffn and lst files, the gen file is
+    created as expected.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.ffn")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    genseq = os.path.join("test", "data", "test_create_gen.gen")
+    ffunc.create_gen(faaseq, lstfile, genseq)
+    exp_file = os.path.join("test", "data", "exp_files", "res_create_gen.gen")
+    with open(exp_file, "r") as expf, open(genseq, "r") as prtf:
+        for line_exp, line_out in zip(expf, prtf):
+            assert line_exp == line_out
+    os.remove(genseq)
