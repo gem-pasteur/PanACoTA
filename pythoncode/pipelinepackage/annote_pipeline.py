@@ -38,7 +38,9 @@ Output:
 Requested:
 - in prokka results, all genes are called <whatever>_<number> -> the number will be kept.
 - The number of the genes annotated by prokka are in increasing order in tbl, faa and ffn files
-
+- genome names given to prokka should not end with '_<number>'. Ideally, they should always have
+the same format: <spegenus>.<date>.<strain_number> but they can have another format, as long as
+they don't end by '_<number>', which is the format of a gene name.
 
 @author gem
 April 2017
