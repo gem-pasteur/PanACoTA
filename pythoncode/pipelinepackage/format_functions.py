@@ -158,17 +158,27 @@ def create_prt(faaseq, lstfile, prtseq):
     * faaseq: faa file output of prokka
     * lstfile: lstinfo converted from prokka tab file
     * prtseq: output file where converted proteins must be saved
+
+    Note: works if proteins are in increasing order (of number after "_" in their name)
+    in faa and tbl (hence lst) files.
+
+    If a header is not in the right format, or a protein exists in prt file but not in lstfile,
+    conversion is stopped, an error message is output, and prt file is removed.
     """
+    problem = False
     with open(faaseq, "r") as faa, open(lstfile, "r") as lst, open(prtseq, "w") as prt:
         for line in faa:
             # all header lines must start with PROKKA_<geneID>
             if line.startswith(">"):
                 try:
                     # get gene ID
-                    genID = int(line.split()[0].split("_")[1])
+                    genID = int(line.split()[0].split("_")[-1])
                 except Exception as err:
-                    log.error(("Unknown header format {} in {}. "
-                               "Error: {}").format(line, faaseq, err))
+                    logger.error(("Unknown header format {} in {}. "
+                               "Error: {}\n"
+                               "prt file not created from {}").format(line, faaseq, err, faaseq))
+                    problem = True
+                    break
                 genIDlst = 0
                 # get line of lst corresponding to the gene ID
                 while (genID > genIDlst):
@@ -181,10 +191,18 @@ def create_prt(faaseq, lstfile, prtseq):
                 if (genID == genIDlst):
                     write_header(lstline, prt)
                 else:
-                    logger.error("Missing info for protein {} in {}".format(line, lstfile))
+                    logger.error(("Missing info for protein {} in {}. If it is actually present "
+                                  "in the lst file, check that proteins are ordered by increasing "
+                                  "number in both lst and faa files.\n"
+                                  "prt file not created from {}.").format(line, lstfile, faaseq))
+                    problem = True
+                    break
             # not header: inside sequence, copy it to the .prt file
             else:
                 prt.write(line)
+    if problem:
+        os.remove(prtseq)
+    return not problem
 
 
 def write_header(lstline, outfile):

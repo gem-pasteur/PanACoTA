@@ -63,16 +63,16 @@
 			product	tRNA-Met(cat)
 7854	9491	CDS
 			inference	ab initio prediction:Prodigal:2.6
-			locus_tag	JGIKIPIJ_00015
+			locus_tag	JGIKIPIJ_03015
 			product	hypothetical protein
 9525	11285	CDS
 			inference	ab initio prediction:Prodigal:2.6
-			locus_tag	JGIKIPIJ_00016
+			locus_tag	JGIKIPIJ_03016
 			product	hypothetical protein
 2994578	2994971	repeat_region
 			rpt_family	CRISPR
 			score	7
 11249	12328	CDS
 			inference	ab initio prediction:Prodigal:2.6
-			locus_tag	JGIKIPIJ_00017
+			locus_tag	JGIKIPIJ_03017
 			product	hypothetical protein

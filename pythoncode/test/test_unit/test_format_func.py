@@ -148,3 +148,91 @@ def test_write_header_geneNoName():
     outfile.close()
 
 
+def test_create_prt_wrongHeaderSep(capsys):
+    """
+    Test that, when creating prt file from faa and lst, if a header of faa file is
+    not in the right format (protein name and number are not separated by '_'),
+    it writes an error, erases prt file, and returns False.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongHeaderSep.faa")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    assert not ffunc.create_prt(faaseq, lstfile, prtseq)
+    assert not os.path.isfile(prtseq)
+    _, err = capsys.readouterr()
+    assert err == ("Unknown header format >JGIKIPIJ00008\n in test/data/test_files/"
+                   "prokka_out_for_test-wrongHeaderSep.faa. Error: invalid literal for int() "
+                   "with base 10: '>JGIKIPIJ00008'\nprt file not created from "
+                   "test/data/test_files/prokka_out_for_test-wrongHeaderSep.faa\n")
+
+
+def test_create_prt_wrongHeaderInt(capsys):
+    """
+    Test that, when creating prt file from faa and lst, if a header of faa file is
+    not in the right format (protein name and number are separated by '_', but protein num
+    contains a letter), it writes an error, erases prt file, and returns False.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongHeaderInt.faa")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    assert not ffunc.create_prt(faaseq, lstfile, prtseq)
+    assert not os.path.isfile(prtseq)
+    _, err = capsys.readouterr()
+    assert err == ("Unknown header format >JGIKIPIJ_d0008\n in test/data/test_files/"
+                   "prokka_out_for_test-wrongHeaderInt.faa. Error: invalid literal for int() "
+                   "with base 10: 'd0008'\nprt file not created from "
+                   "test/data/test_files/prokka_out_for_test-wrongHeaderInt.faa\n")
+
+
+def test_create_prt_missLst(capsys):
+    """
+    Test that, when creating prt file from faa and lst, if a protein of faa file is not present in
+    the tbl file, it writes an error, removes the prt file, and returns False.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-supHeader.faa")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    assert not ffunc.create_prt(faaseq, lstfile, prtseq)
+    assert not os.path.isfile(prtseq)
+    _, err = capsys.readouterr()
+    assert err == ("Missing info for protein >sup-prot_00012\n in "
+                   "test/data/exp_files/res_tbl2lst.lst. If it is "
+                   "actually present in the lst file, check that proteins are ordered by "
+                   "increasing number in both lst and faa files.\n"
+                   "prt file not created from test/data/test_files/"
+                   "prokka_out_for_test-supHeader.faa.\n")
+
+
+def test_create_prt_wrongOrder(capsys):
+    """
+    Test that, when creating prt file from faa and lst, if a protein of faa file is not present in
+    the tbl file, it writes an error, removes the prt file, and returns False.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongOrder.faa")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    assert not ffunc.create_prt(faaseq, lstfile, prtseq)
+    assert not os.path.isfile(prtseq)
+    _, err = capsys.readouterr()
+    assert err == ("Missing info for protein >appears_after_13_00011\n in "
+                   "test/data/exp_files/res_tbl2lst.lst. If it is "
+                   "actually present in the lst file, check that proteins are ordered by "
+                   "increasing number in both lst and faa files.\n"
+                   "prt file not created from test/data/test_files/"
+                   "prokka_out_for_test-wrongOrder.faa.\n")
+
+def test_create_prt_Ok():
+    """
+    Test that when everything is ok in both faa and lst files, the prt file is
+    created as expected.
+    """
+    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.faa")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    ffunc.create_prt(faaseq, lstfile, prtseq)
+    exp_file = os.path.join("test", "data", "exp_files", "res_create_prt.faa")
+    with open(exp_file, "r") as expf, open(prtseq, "r") as prtf:
+        for line_exp, line_out in zip(expf, prtf):
+            assert line_exp == line_out
+    os.remove(prtseq)
+
