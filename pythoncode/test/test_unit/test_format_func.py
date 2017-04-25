@@ -7,8 +7,9 @@ Unit tests for format_functions.py
 
 import pytest
 import os
-import pipelinepackage.format_functions as ffunc
+import shutil
 from io import StringIO
+import pipelinepackage.format_functions as ffunc
 
 
 def test_write_gene():
@@ -141,7 +142,7 @@ def test_write_header_gene():
     ffunc.write_header(lstline, outfile)
     res = outfile.getvalue()
     exp = (">test.0417.00002.i0001_00005 1653 yiaD | putative lipoprotein YiaD | 6.3.2.- "
-           "| similar to AA sequence:UniProtKB:P37665")
+           "| similar to AA sequence:UniProtKB:P37665\n")
     assert res == exp
     outfile.close()
 
@@ -157,12 +158,12 @@ def test_write_header_geneNoName():
                "| NA | NA")
     ffunc.write_header(lstline, outfile)
     res = outfile.getvalue()
-    exp = (">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA")
+    exp = (">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA\n")
     assert res == exp
     outfile.close()
 
 
-def test_write_header_geneNoName():
+def test_write_header_crispr():
     """
     From a given line of lstinfo file, giving info for a CRISPR check that the header
     line of the protein and gene files are generated as expected.
@@ -172,7 +173,7 @@ def test_write_header_geneNoName():
                "crispr-array | NA | NA")
     ffunc.write_header(lstline, outfile)
     res = outfile.getvalue()
-    exp = (">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA")
+    exp = (">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA\n")
     assert res == exp
     outfile.close()
 
@@ -185,7 +186,7 @@ def test_create_prt_wrongHeaderSep(capsys):
     """
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongHeaderSep.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    prtseq = os.path.join("test", "data", "test_create_prt-wrongHeadSep.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
@@ -203,7 +204,7 @@ def test_create_prt_wrongHeaderInt(capsys):
     """
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongHeaderInt.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    prtseq = os.path.join("test", "data", "test_create_prt-wrongHeadInt.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
@@ -220,7 +221,7 @@ def test_create_prt_missLst(capsys):
     """
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-supHeader.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    prtseq = os.path.join("test", "data", "test_create_prt-missLst.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
@@ -240,7 +241,7 @@ def test_create_prt_wrongOrder(capsys):
     """
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-wrongOrder.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    prtseq = os.path.join("test", "data", "test_create_prt-wrongOrder.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
@@ -260,7 +261,7 @@ def test_create_prt_Ok():
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "test_create_prt.prt")
-    ffunc.create_prt(faaseq, lstfile, prtseq)
+    assert ffunc.create_prt(faaseq, lstfile, prtseq)
     exp_file = os.path.join("test", "data", "exp_files", "res_create_prt.faa")
     with open(exp_file, "r") as expf, open(prtseq, "r") as prtf:
         for line_exp, line_out in zip(expf, prtf):
@@ -294,7 +295,7 @@ def test_create_gen_supGene(capsys):
     """
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-supGene.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
-    prtseq = os.path.join("test", "data", "test_create_prt.prt")
+    prtseq = os.path.join("test", "data", "test_create_gen-supgene.prt")
     assert not ffunc.create_gen(faaseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
@@ -403,9 +404,111 @@ def test_create_gen_Ok():
     faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "test_create_gen.gen")
-    ffunc.create_gen(faaseq, lstfile, genseq)
+    assert ffunc.create_gen(faaseq, lstfile, genseq)
     exp_file = os.path.join("test", "data", "exp_files", "res_create_gen.gen")
     with open(exp_file, "r") as expf, open(genseq, "r") as prtf:
         for line_exp, line_out in zip(expf, prtf):
             assert line_exp == line_out
     os.remove(genseq)
+
+
+def test_format1genome():
+    """
+    Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
+    which did not change name between prokka run and format step.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+    # Check that all files were created
+    assert os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    # Check the contents of the files
+    explst = os.path.join(prok_path, "res_format-B2.lst")
+    expprt = os.path.join(prok_path, "res_format-B2.prt")
+    expgen = os.path.join(prok_path, "res_format-B2.gen")
+    with open(explst, "r") as lstf, open(os.path.join(lst_dir, name + ".lst"), "r") as lsto:
+        for line_exp, line_out in zip(lstf, lsto):
+            assert line_exp == line_out
+    with open(expprt, "r") as expf, open(os.path.join(lst_dir, name + ".prt"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    with open(expgen, "r") as expf, open(os.path.join(lst_dir, name + ".gen"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    with open(gpath, "r") as expf, open(os.path.join(lst_dir, name + ".fna"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    os.remove(os.path.join(lst_dir, name + ".lst"))
+    os.remove(os.path.join(lst_dir, name + ".prt"))
+    os.remove(os.path.join(lst_dir, name + ".fna"))
+    os.remove(os.path.join(lst_dir, name + ".gen"))
+
+
+def test_format1genome_changeHead():
+    """
+    Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
+    which changed its name between prokka and format step.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-changeName.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+    # Check that all files were created
+    assert os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    # Check the contents of the files
+    explst = os.path.join(prok_path, "res_format-B2.lst")
+    expprt = os.path.join(prok_path, "res_format-B2.prt")
+    expgen = os.path.join(prok_path, "res_format-B2.gen")
+    expreplicons = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    with open(explst, "r") as lstf, open(os.path.join(lst_dir, name + ".lst"), "r") as lsto:
+        for line_exp, line_out in zip(lstf, lsto):
+            assert line_exp == line_out
+    with open(expprt, "r") as expf, open(os.path.join(lst_dir, name + ".prt"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    with open(expgen, "r") as expf, open(os.path.join(lst_dir, name + ".gen"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    with open(expreplicons, "r") as expf, open(os.path.join(lst_dir, name + ".fna"), "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    os.remove(os.path.join(lst_dir, name + ".lst"))
+    os.remove(os.path.join(lst_dir, name + ".prt"))
+    os.remove(os.path.join(lst_dir, name + ".fna"))
+    os.remove(os.path.join(lst_dir, name + ".gen"))
+
+
+# def test_format1genome_notbl(capsys):
+#     """
+#     Test that when asking to format a genome, but there is no tbl file in its outdir,
+#     it returns False, with an error message.
+#     """
+#     gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+#     name = "test.0417.00002"
+#     prok_path = os.path.join("test", "data", "toto")
+#     os.makedirs(prok_path)
+#     lst_dir = os.path.join("test", "data")
+#     prot_dir = lst_dir
+#     gene_dir = lst_dir
+#     rep_dir = lst_dir
+#     assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+#                                        prot_dir, gene_dir, rep_dir)
+#     _, err = capsys.readouterr()
+#     assert err == ("No .tbl file in test/data/toto/"
+#                     "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+#     shutil.rmtree(prok_path)

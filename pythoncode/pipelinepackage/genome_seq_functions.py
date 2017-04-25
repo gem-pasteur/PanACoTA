@@ -147,16 +147,16 @@ def rename_all_genomes(genomes, tmp_path):
             last_strain += 1
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, tmp_path)
+        outfile = os.path.join(tmp_path, os.path.basename(gpath) + "-gembase.fna")
+        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, outfile)
 
 
-def rename_genome_contigs(gembase_name, gpath, tmp_path):
+def rename_genome_contigs(gembase_name, gpath, outfile):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name'.
     """
     contig_num = 1
-    outfile = os.path.join(tmp_path, os.path.basename(gpath) + "-gembase.fna")
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
         for line in gpf:
             if line.startswith(">"):

@@ -22,6 +22,8 @@ import os
 import shutil
 import logging
 import progressbar
+import glob
+from pipelinepackage import genome_seq_functions as gfunc
 
 logger = logging.getLogger()
 
@@ -71,7 +73,7 @@ def format_genomes(genomes, results, res_path):
     return skipped
 
 
-def format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir):
+def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir):
     """
     Format the given genome, and create its corresponding files in the following folders:
     - Proteins
@@ -82,6 +84,7 @@ def format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir):
     arguments:
     * gpath: path to the genome sequence which was given to prokka for annotation
     * name: gembase name of the genome
+    * prok_path: directory where prokka folders are saved
     * lst_dir: path to LSTINFO folder
     * prot_dir: path to Proteins folder
     * gene_dir: path to Genes folder
@@ -89,37 +92,66 @@ def format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir):
 
     Returns: True if format worked for this genome, False otherwise.
     """
-    # try create Genes file
-    ffngenome = os.path.join(gpath + "-prokkaRes", name + ".ffn")
-    gengenome = os.path.join(gene_dir, name + ".gen")
-    ok_gene = create_gen(ffngenome, lstgenome, gengenome, name)
-    # If gene file not created, return False: format did not run for this genome
-    if not ok_gene:
+    prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
+    # Get .tbl file
+    tblgenome = glob.glob(os.path.join(prokka_dir, "*.tbl"))
+    if len(tblgenome) == 0:
+        logger.error(("No .tbl file in {}.").format(prokka_dir))
         return False
-    # If gene file was created, try to create Proteins file
-    faagenome = os.path.join(gpath + "-prokkaRes", name + ".faa")
+    elif len(tblgenome) > 1:
+        logger.error("Several .tbl files in {}".format(prokka_dir))
+        return False
+    else:
+        tblgenome = tblgenome[0]
+    lstgenome = os.path.join(lst_dir, name + ".lst")
+    # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
+    # If the user ran prokka, and then changed the genome names (for example, by changing
+    # L90 threshold), and wants to format again its genomes with the new names, but without
+    # running prokka again, we must change here the contig names (containing genome name).
+    same_name = tbl2lst(tblgenome, lstgenome, name)
+    # create Genes file (and check no problem occurred with return code)
+    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))
+    if len(ffngenome) == 0:
+        logger.error(("No .ffn file in {}.").format(prokka_dir))
+        return False
+    elif len(ffngenome) > 1:
+        logger.error("Several .ffn files in {}".format(prokka_dir))
+        return False
+    else:
+        ffngenome = ffngenome[0]
+    gengenome = os.path.join(gene_dir, name + ".gen")
+    ok_gene = create_gen(ffngenome, lstgenome, gengenome)
+    # If gene file not created because a problem occurred, return False:
+    # format did not run for this genome
+    if not ok_gene:
+        os.remove(lstgenome)
+        return False
+    # If gene file was created, create Proteins file
+    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))
+    if len(faagenome) == 0:
+        logger.error(("No .ffn file in {}.").format(prokka_dir))
+        return False
+    elif len(faagenome) > 1:
+        logger.error("Several .ffn files in {}".format(prokka_dir))
+        return False
+    else:
+        faagenome = faagenome[0]
     prtgenome = os.path.join(prot_dir, name + ".prt")
     ok_prt = create_prt(faagenome, lstgenome, prtgenome)
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
+        os.remove(lstgenome)
         return False
-    # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
-    # If the user ran prokka, and then changed the genome names (for example, by changing
-    # L90 threshold), and wants to format again its genomes with the new names, but without running prokka again, we must change here the contig names (containing genome name).
-    tblgenome = os.path.join(gpath + "-prokkaRes", name + ".tbl")
-    lstgenome = os.path.join(lst_dir, name + ".lst")
-    same_name = tbl2lst(tblgenome, lstgenome, name)
-    # check that headers of fasta file are with genome name. If yes, copy it to Replicons folder.
-    # If not, change its headers before putting it to Replicons folder.
-
+    # Create Replicons file
     rep_file = os.path.join(rep_dir, name + ".fna")
-    shutil.copyfile(gpath, rep_file)
-
-
-def check_rep_headers():
-    """
-    Check that the multi-fasta file of replicons have the good headers
-    """
+    # If the genome name did not change after prokka run, copy genome sequence
+    # given to prokka to Replicons folder.
+    if same_name:
+        shutil.copyfile(gpath, rep_file)
+    # otherwise, change headers in the file.
+    else:
+        gfunc.rename_genome_contigs(name, gpath, rep_file)
+    return True
 
 
 def create_gen(ffnseq, lstfile, genseq):
@@ -141,7 +173,7 @@ def create_gen(ffnseq, lstfile, genseq):
                 continue
             # if lstline indicates a CRISPR, header in ffn file is the genome name. Hence,
             # it should not contain a '_' followed by a number.
-            lstline = lst.readline()
+            lstline = lst.readline().strip()
             if "CRISPR" in lstline:
                 if '_' in line_ffn:
                     if line_ffn.strip().split("_")[-1].isdigit():
@@ -227,7 +259,7 @@ def create_prt(faaseq, lstfile, prtseq):
                 genIDlst = 0
                 # get line of lst corresponding to the gene ID
                 while (genID > genIDlst):
-                    lstline = lst.readline()
+                    lstline = lst.readline().strip()
                     IDlst = lstline.split("\t")[4].split("_")[1]
                     # don't cast to int if info for a crispr
                     if(IDlst.isdigit()):
@@ -259,7 +291,7 @@ def write_header(lstline, outfile):
     geneName = lstline.split("\t")[5]
     info = lstline.split("\t")[6]
     towrite = " ".join([name, str(size), geneName, info])
-    outfile.write(">" + towrite)
+    outfile.write(">" + towrite + "\n")
 
 
 def tbl2lst(tblfile, lstfile, genome):
