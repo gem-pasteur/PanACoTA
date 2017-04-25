@@ -99,7 +99,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
         logger.error(("No .tbl file in {}.").format(prokka_dir))
         return False
     elif len(tblgenome) > 1:
-        logger.error("Several .tbl files in {}".format(prokka_dir))
+        logger.error("Several .tbl files in {}.".format(prokka_dir))
         return False
     else:
         tblgenome = tblgenome[0]
@@ -113,9 +113,11 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))
     if len(ffngenome) == 0:
         logger.error(("No .ffn file in {}.").format(prokka_dir))
+        os.remove(lstgenome)
         return False
     elif len(ffngenome) > 1:
-        logger.error("Several .ffn files in {}".format(prokka_dir))
+        logger.error("Several .ffn files in {}.".format(prokka_dir))
+        os.remove(lstgenome)
         return False
     else:
         ffngenome = ffngenome[0]
@@ -130,9 +132,13 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))
     if len(faagenome) == 0:
         logger.error(("No .ffn file in {}.").format(prokka_dir))
+        os.remove(lstgenome)
+        os.remove(gengenome)
         return False
     elif len(faagenome) > 1:
-        logger.error("Several .ffn files in {}".format(prokka_dir))
+        logger.error("Several .ffn files in {}.".format(prokka_dir))
+        os.remove(lstgenome)
+        os.remove(gengenome)
         return False
     else:
         faagenome = faagenome[0]
@@ -141,6 +147,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
         os.remove(lstgenome)
+        os.remove(gengenome)
         return False
     # Create Replicons file
     rep_file = os.path.join(rep_dir, name + ".fna")
@@ -253,7 +260,7 @@ def create_prt(faaseq, lstfile, prtseq):
                 except Exception as err:
                     logger.error(("Unknown header format {} in {}. "
                                "Error: {}\nPrt file not created "
-                               "from {}").format(line.strip(), faaseq, err, faaseq))
+                               "from {}.").format(line.strip(), faaseq, err, faaseq))
                     problem = True
                     break
                 genIDlst = 0

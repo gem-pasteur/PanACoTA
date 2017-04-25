@@ -193,7 +193,7 @@ def test_create_prt_wrongHeaderSep(capsys):
     assert err == ("Unknown header format >JGIKIPIJ00008 in test/data/test_files/"
                    "prokka_out_for_test-wrongHeaderSep.faa. Error: invalid literal for int() "
                    "with base 10: '>JGIKIPIJ00008'\nPrt file not created from "
-                   "test/data/test_files/prokka_out_for_test-wrongHeaderSep.faa\n")
+                   "test/data/test_files/prokka_out_for_test-wrongHeaderSep.faa.\n")
 
 
 def test_create_prt_wrongHeaderInt(capsys):
@@ -211,7 +211,7 @@ def test_create_prt_wrongHeaderInt(capsys):
     assert err == ("Unknown header format >JGIKIPIJ_d0008 in test/data/test_files/"
                    "prokka_out_for_test-wrongHeaderInt.faa. Error: invalid literal for int() "
                    "with base 10: 'd0008'\nPrt file not created from "
-                   "test/data/test_files/prokka_out_for_test-wrongHeaderInt.faa\n")
+                   "test/data/test_files/prokka_out_for_test-wrongHeaderInt.faa.\n")
 
 
 def test_create_prt_missLst(capsys):
@@ -493,22 +493,272 @@ def test_format1genome_changeHead():
     os.remove(os.path.join(lst_dir, name + ".gen"))
 
 
-# def test_format1genome_notbl(capsys):
-#     """
-#     Test that when asking to format a genome, but there is no tbl file in its outdir,
-#     it returns False, with an error message.
-#     """
-#     gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
-#     name = "test.0417.00002"
-#     prok_path = os.path.join("test", "data", "toto")
-#     os.makedirs(prok_path)
-#     lst_dir = os.path.join("test", "data")
-#     prot_dir = lst_dir
-#     gene_dir = lst_dir
-#     rep_dir = lst_dir
-#     assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
-#                                        prot_dir, gene_dir, rep_dir)
-#     _, err = capsys.readouterr()
-#     assert err == ("No .tbl file in test/data/toto/"
-#                     "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
-#     shutil.rmtree(prok_path)
+def test_format1genome_notbl(capsys):
+    """
+    Test that when asking to format a genome, but there is no tbl file in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    os.makedirs(prok_path)
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("No .tbl file in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_sevtbl(capsys):
+    """
+    Test that when asking to format a genome, but there are several tbl files in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    prok_dir = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes")
+    # Create output dir, with 2 (empty) tbl files
+    os.makedirs(prok_dir)
+    tbl1 = os.path.join(prok_dir, "toto.tbl")
+    tbl2 = os.path.join(prok_dir, "toto2.tbl")
+    open(tbl1, "w").close()
+    open(tbl2, "w").close()
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("Several .tbl files in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_noffn(capsys):
+    """
+    Test that when asking to format a genome, but there is no tbl file in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    prok_dir = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes")
+    # Create output dir, with an (empty) tbl file
+    os.makedirs(prok_dir)
+    tbl1 = os.path.join(prok_dir, "toto.tbl")
+    open(tbl1, "w").close()
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("No .ffn file in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_sevffn(capsys):
+    """
+    Test that when asking to format a genome, but there are several tbl files in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    prok_dir = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes")
+    # Create output dir, with (empty) file: 1 tbl, 2 ffn files
+    os.makedirs(prok_dir)
+    tbl1 = os.path.join(prok_dir, "toto.tbl")
+    ffn1 = os.path.join(prok_dir, "toto2.ffn")
+    ffn2 = os.path.join(prok_dir, "toto-ffn.ffn")
+    open(tbl1, "w").close()
+    open(ffn1, "w").close()
+    open(ffn2, "w").close()
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("Several .ffn files in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_nofaa(capsys):
+    """
+    Test that when asking to format a genome, but there is no tbl file in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    prok_dir = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes")
+    # Create output dir, with (empty) files: 1 tbl, 1 ffn file
+    os.makedirs(prok_dir)
+    tbl1 = os.path.join(prok_dir, "toto.tbl")
+    ffn1 = os.path.join(prok_dir, "toto.ffn")
+    open(tbl1, "w").close()
+    open(ffn1, "w").close()
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("No .ffn file in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_sevfaa(capsys):
+    """
+    Test that when asking to format a genome, but there are several tbl files in its outdir,
+    it returns False, with an error message.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "toto")
+    prok_dir = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes")
+    # Create output dir, with (empty) file: 1 tbl, 1 ffn, 2 faa files
+    os.makedirs(prok_dir)
+    tbl1 = os.path.join(prok_dir, "toto.tbl")
+    ffn1 = os.path.join(prok_dir, "toto2.ffn")
+    faa1 = os.path.join(prok_dir, "toto-faa.faa")
+    faa2 = os.path.join(prok_dir, "toto-2emefaa.faa")
+    open(tbl1, "w").close()
+    open(ffn1, "w").close()
+    open(faa1, "w").close()
+    open(faa2, "w").close()
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
+                                       prot_dir, gene_dir, rep_dir)
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("Several .ffn files in test/data/toto/"
+                    "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
+    shutil.rmtree(prok_path)
+
+
+def test_format1genome_problemgen(capsys):
+    """
+    Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
+    which did not change name between prokka run and format step.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+                           name + ".tbl")
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems-prokkaRes",
+                           name + ".tbl")
+    shutil.copyfile(tblInit, tblout)
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir,
+                                       gene_dir, rep_dir)
+    # Check that all files were created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
+                   "test/data/exp_files/B2_A3_5.fasta-problems-prokkaRes/test.0417.00002.ffn. "
+                   "Error: invalid literal for int() with base 10: 'i00002'\n"
+                   "Gen file will not be created.\n")
+    # remove tblout which was copied for this test
+    os.remove(tblout)
+
+
+def test_format1genome_problemprt(capsys):
+    """
+    Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
+    which did not change name between prokka run and format step.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    # copy tbl without errors to error prokka dir
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+                           name + ".tbl")
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems-prokkaRes",
+                           name + ".tbl")
+    shutil.copyfile(tblInit, tblout)
+    # copy ffn without error to error prokka dir
+    ffnInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+                           name + ".ffn")
+    ffnOk = os.path.join(prok_path, "B2_A3_5.fasta-problems-prokkaRes",
+                           name + ".ffn")
+    ffnError = ffnOk + "-error"
+    # change name of ffn file with error to keep it for later (used for tests)
+    shutil.copyfile(ffnOk, ffnError)
+    # copy ffn without error to prokka res (erasing ffn with error)
+    shutil.copyfile(ffnInit, ffnOk)
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir,
+                                       gene_dir, rep_dir)
+    # Check that all files were created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    _, err = capsys.readouterr()
+    assert err == ("Unknown header format >EPKOMDHM00003 hypothetical protein in "
+                   "test/data/exp_files/B2_A3_5.fasta-problems-prokkaRes/test.0417.00002.faa. "
+                   "Error: invalid literal for int() with base 10: '>EPKOMDHM00003'\n"
+                   "Prt file not created from test/data/exp_files/"
+                   "B2_A3_5.fasta-problems-prokkaRes/test.0417.00002.faa.\n")
+    # remove files which were copied for this test (tblout). And rename ffn with errors
+    # to its original name.
+    os.rename(ffnError, ffnOk)
+    os.remove(tblout)
+
