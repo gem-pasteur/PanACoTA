@@ -28,7 +28,6 @@ def test_check_install_error(capsys):
     with pytest.raises(SystemExit):
         utils.check_installed(["plop false command..."])
     out, err = capsys.readouterr()
-    print(err)
     assert "plop false command... failed:" in err
 
 
