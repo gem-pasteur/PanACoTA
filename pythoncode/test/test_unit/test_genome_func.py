@@ -115,7 +115,7 @@ def test_rename_contigs():
     res_path = os.path.join("test", "data")
     out_exp = os.path.join(res_path, "H299_H561.fasta-gembase.fna")
     exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
-    outf = gfunc.rename_genome_contigs(gembase_name, gpath, res_path)
+    outf = gfunc.rename_genome_contigs(gembase_name, gpath, out_exp)
     assert outf == out_exp
     with open(exp_file, "r") as expf, open(outf, "r") as of:
         for line_exp, line_seq in zip(expf, of):
