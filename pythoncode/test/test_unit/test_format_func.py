@@ -762,3 +762,36 @@ def test_format1genome_problemprt(capsys):
     os.rename(ffnError, ffnOk)
     os.remove(tblout)
 
+
+def test_format_all():
+    """
+
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
+    onames = ["test_runprokka_H299", "test.0417.00002"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
+               gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
+              }
+    prok_path = os.path.join("test", "data", "exp_files")
+    res_path = os.path.join("test", "data")
+    results = {gname: True for gname in gnames}
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    assert skipped == []
+    assert skipped_format == []
+    lstfiles = [os.path.join(res_path, "LSTINFO", name + ".lst") for name in onames]
+    prtfiles = [os.path.join(res_path, "Proteins", name + ".prt") for name in onames]
+    genfiles = [os.path.join(res_path, "Genes", name + ".gen") for name in onames]
+    repfiles = [os.path.join(res_path, "Replicons", name + ".fna") for name in onames]
+    for f in lstfiles + prtfiles + genfiles + repfiles:
+        assert os.path.isfile(f)
+    shutil.rmtree(os.path.join(res_path, "LSTINFO"))
+    shutil.rmtree(os.path.join(res_path, "Proteins"))
+    shutil.rmtree(os.path.join(res_path, "Genes"))
+    shutil.rmtree(os.path.join(res_path, "Replicons"))
+
+    # faire un test avec un genome où result = False
+
+
+

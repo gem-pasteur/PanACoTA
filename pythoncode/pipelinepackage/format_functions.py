@@ -28,7 +28,7 @@ from pipelinepackage import genome_seq_functions as gfunc
 logger = logging.getLogger()
 
 
-def format_genomes(genomes, results, res_path):
+def format_genomes(genomes, results, res_path, prok_path):
     """
     For all genomes which were annotated by prokka, reformat them
     in order to have, in 'res_path', the following folders:
@@ -40,6 +40,8 @@ def format_genomes(genomes, results, res_path):
     - genomes = {genome: [name, gpath, size, nbcont, l90]}
     - results = {genome: bool} True if prokka ran well, False otherwise
     - res_path = path to folder where the 4 directories must be created
+    - prok_path = path to folder named "<genome_name>-prokkaRes" where all prokka
+    results are saved.
     """
     logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
@@ -56,7 +58,8 @@ def format_genomes(genomes, results, res_path):
     widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                ' ', progressbar.Percentage()]
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
-    skipped = []  # list of genomes skipped
+    skipped = []  # list of genomes skipped: no format step run
+    skipped_format = []  # List of genomes for which forat step had problems
     for num, (genome, (name, gpath, _, _, _)) in enumerate(genomes.items()):
         # Ignore genomes with bad quality (not annotated)
         if genome not in results:
@@ -67,10 +70,12 @@ def format_genomes(genomes, results, res_path):
             skipped.append(genome)
             bar.update(num + 1)
             continue
-        format_one_genome(gpath, name, lst_dir, prot_dir, gene_dir, rep_dir)
+        ok_format = format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+        if not ok_format:
+            skipped_format.append(genome)
         bar.update(num + 1)
     bar.finish()
-    return skipped
+    return skipped, skipped_format
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir):
@@ -267,7 +272,7 @@ def create_prt(faaseq, lstfile, prtseq):
                 # get line of lst corresponding to the gene ID
                 while (genID > genIDlst):
                     lstline = lst.readline().strip()
-                    IDlst = lstline.split("\t")[4].split("_")[1]
+                    IDlst = lstline.split("\t")[4].split("_")[-1]
                     # don't cast to int if info for a crispr
                     if(IDlst.isdigit()):
                         genIDlst = int(IDlst)
