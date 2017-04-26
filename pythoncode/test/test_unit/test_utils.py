@@ -74,12 +74,14 @@ def test_skipped_prokka(capsys):
     skipped = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped)
     out, err = capsys.readouterr()
-    assert err == ("Prokka had problems while annotating some genomes. Hence, they are not "
-                   "formatted, and absent from your output database. Please look at their "
-                   "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
-                   "to the current error log (<output_directory>/<input_filename>.log.err)"
-                   " to get more information, and run again to annotate and format them. "
-                   "Here are the genomes: \n\t- toto\n\t- genome\n\t- genome2\n")
+    assert ("Prokka had problems while annotating some genomes. Hence, they are not "
+            "formatted, and absent from your output database. Please look at their "
+            "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
+            "to the current error log (<output_directory>/<input_filename>.log.err)"
+            " to get more information, and run again to annotate and format them. "
+            "Here are the genomes:") in err
+    assert ("\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err or
+            "\n\t- toto\n\t- genome\n\t- genome2" in err)
 
 
 def test_skipped_format(capsys):
@@ -90,10 +92,11 @@ def test_skipped_format(capsys):
     skipped_format = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped_format, format=True)
     out, err = capsys.readouterr()
-    assert err == ("Some genomes were annotated by prokka, but could not be formatted, "
-                   "and are hence absent from your output database. Please look at log "
-                   "filesto get more information about wh they could not be "
-                   "formatted.\n\t- toto\n\t- genome\n\t- genome2\n")
+    assert ("Some genomes were annotated by prokka, but could not be formatted, "
+            "and are hence absent from your output database. Please look at log "
+            "filesto get more information about wh they could not be ") in err
+    assert ("formatted.\n\t- toto\n\t- genome\n\t- genome2\n" in err or
+            "formatted.\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err)
 
 
 def test_write_discarded():
