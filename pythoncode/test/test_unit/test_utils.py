@@ -117,9 +117,12 @@ def test_write_discarded():
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
     outfile = os.path.join("test", "data", "discarded-list_genomes.lst")
     exp_file = os.path.join("test", "data", "exp_files", "res_test_write_discard.lst")
+    # There is no order in the discarded file. So, just check that the lines
+    # written are as expected.
     with open (outfile, "r") as outf, open(exp_file, "r") as expf:
-        for line_out, line_exp in zip(outf, expf):
-            assert line_out == line_exp
+        exp_lines = expf.readlines()
+        out_lines = outf.readlines()
+    assert set(out_lines) == set(exp_lines)
     os.remove(outfile)
 
 
