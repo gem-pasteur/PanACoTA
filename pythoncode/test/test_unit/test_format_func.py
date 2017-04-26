@@ -765,7 +765,8 @@ def test_format1genome_problemprt(capsys):
 
 def test_format_all():
     """
-
+    Test that when giving a list of genomes, for which prokka ran without problem,
+    they are formatted, with all expected files created.
     """
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
@@ -791,7 +792,116 @@ def test_format_all():
     shutil.rmtree(os.path.join(res_path, "Genes"))
     shutil.rmtree(os.path.join(res_path, "Replicons"))
 
-    # faire un test avec un genome où result = False
+
+def test_format_all_resultFalse():
+    """
+    Test that when giving a list of 2 genomes, 1 for which prokka ran without problem,
+    1 for which prokka had problems, the correct genome is formatted, with all
+    expected files created, and the genome with problems is not formatted.
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
+    onames = ["test_runprokka_H299", "test.0417.00002"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
+               gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
+              }
+    prok_path = os.path.join("test", "data", "exp_files")
+    res_path = os.path.join("test", "data")
+    results = {gnames[0]: True, gnames[1]: False}
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    assert skipped == ["B2_A3_5.fasta-changeName.fna"]
+    assert skipped_format == []
+    lstfiles = os.path.join(res_path, "LSTINFO")
+    prtfiles = os.path.join(res_path, "Proteins")
+    genfiles = os.path.join(res_path, "Genes")
+    repfiles = os.path.join(res_path, "Replicons")
+    assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
+    assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
+    assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
+    assert not os.path.isfile(os.path.join(prtfiles, onames[1] + ".prt"))
+    assert os.path.isfile(os.path.join(genfiles, onames[0] + ".gen"))
+    assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
+    assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
+    assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
+    shutil.rmtree(os.path.join(res_path, "LSTINFO"))
+    shutil.rmtree(os.path.join(res_path, "Proteins"))
+    shutil.rmtree(os.path.join(res_path, "Genes"))
+    shutil.rmtree(os.path.join(res_path, "Replicons"))
 
 
+def test_format_all_notResult():
+    """
+    Test that when giving a list of 2 genomes, but only 1 is in the results list (and prokka ran
+    without problems for it), the correct genome is formatted, with all
+    expected files created, and the other genome is not formatted, and does not appear in
+    skipped list (as it was removed from the study before annotation step, probably by QC).
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
+    onames = ["test_runprokka_H299", "test.0417.00002"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
+               gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
+              }
+    prok_path = os.path.join("test", "data", "exp_files")
+    res_path = os.path.join("test", "data")
+    results = {gnames[0]: True}
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    assert skipped == []
+    assert skipped_format == []
+    lstfiles = os.path.join(res_path, "LSTINFO")
+    prtfiles = os.path.join(res_path, "Proteins")
+    genfiles = os.path.join(res_path, "Genes")
+    repfiles = os.path.join(res_path, "Replicons")
+    assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
+    assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
+    assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
+    assert not os.path.isfile(os.path.join(prtfiles, onames[1] + ".prt"))
+    assert os.path.isfile(os.path.join(genfiles, onames[0] + ".gen"))
+    assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
+    assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
+    assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
+    shutil.rmtree(os.path.join(res_path, "LSTINFO"))
+    shutil.rmtree(os.path.join(res_path, "Proteins"))
+    shutil.rmtree(os.path.join(res_path, "Genes"))
+    shutil.rmtree(os.path.join(res_path, "Replicons"))
 
+
+def test_format_all_error(capsys):
+    """
+    Test that when giving a list of 2 genomes, prokka ran without problem for both.
+    But a problem appears while formatting the 2nd one. So, the 2nd one is not formatted,
+    and appears in skipped_format. The first one is formmated, and check that all output files are created.
+    """
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems"]
+    onames = ["test_runprokka_H299", "test.0417.00002"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
+               gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
+              }
+    prok_path = os.path.join("test", "data", "exp_files")
+    res_path = os.path.join("test", "data")
+    results = {gnames[0]: True, gnames[1]: True}
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    assert skipped == []
+    assert skipped_format == ["B2_A3_5.fasta-problems"]
+    lstfiles = os.path.join(res_path, "LSTINFO")
+    prtfiles = os.path.join(res_path, "Proteins")
+    genfiles = os.path.join(res_path, "Genes")
+    repfiles = os.path.join(res_path, "Replicons")
+    assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
+    assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
+    assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
+    assert not os.path.isfile(os.path.join(prtfiles, onames[1] + ".prt"))
+    assert os.path.isfile(os.path.join(genfiles, onames[0] + ".gen"))
+    assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
+    assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
+    assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
+    _, err = capsys.readouterr()
+    assert err == "No .tbl file in test/data/exp_files/B2_A3_5.fasta-problems-prokkaRes.\n"
+    shutil.rmtree(os.path.join(res_path, "LSTINFO"))
+    shutil.rmtree(os.path.join(res_path, "Proteins"))
+    shutil.rmtree(os.path.join(res_path, "Genes"))
+    shutil.rmtree(os.path.join(res_path, "Replicons"))

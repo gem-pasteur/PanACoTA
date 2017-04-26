@@ -107,7 +107,7 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     # Annotate all kept genomes
     results = pfunc.run_prokka_all(kept_genomes, threads, force)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped = ffunc.format_genomes(genomes, results, res_path)
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path)
     if skipped:
         write_warning_skipped(skipped)
 
