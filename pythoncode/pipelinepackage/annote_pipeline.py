@@ -87,7 +87,7 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
         utils.check_installed(prokka_cmd)
 
     # Read genome names
-    genomes = read_genomes(list_file, name, date)
+    genomes = utils.read_genomes(list_file, name, date)
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     gfunc.analyse_all_genomes(genomes, db_path, res_path, cutn)
     # Plot L90 and nb_contigs distributions
@@ -96,20 +96,22 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file
-    write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
+    utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
     # If only QC, stop here.
     if qc_only:
         sys.exit(0)
     # Rename genomes kept, ordered by quality
     gfunc.rename_all_genomes(kept_genomes, res_path)
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
-    write_lstinfo(list_file, kept_genomes, res_path)
+    utils.write_lstinfo(list_file, kept_genomes, res_path)
     # Annotate all kept genomes
     results = pfunc.run_prokka_all(kept_genomes, threads, force)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path)
     if skipped:
-        write_warning_skipped(skipped)
+        utils.write_warning_skipped(skipped)
+    if skipped_format:
+        utils.write_warning_skipped(skipped_format, format=True)
 
 
 def init_logger(logfile, level):
@@ -163,98 +165,6 @@ def init_logger(logfile, level):
     err_handler.setLevel(logging.WARNING)  # write any message >= WARNING
     err_handler.setFormatter(formatterStream)
     logger.addHandler(err_handler)  # add handler to logger
-
-
-def write_warning_skipped(skipped):
-    """
-    At the end of the script, write a warning to the user with the names of the genomes
-    which had problems with prokka.
-
-    skipped: list of genomes with problems
-    """
-    logger = logging.getLogger()
-    list_to_write = "\n".join(["\t- " + genome for genome in skipped])
-    logger.warning(("Prokka had problems while annotating some genomes. Hence, they are not "
-                    "formatted, and absent from your output database. Please look at their "
-                    "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
-                    "to the current error log (<output_directory>/<input_filename>.log.err) to "
-                    "get more information, and run again to annotate and format them. "
-                    "Here are the genomes: \n{}").format(list_to_write))
-
-
-def write_discarded(genomes, kept_genomes, list_file, res_path):
-    """
-    Write the list of genomes discarded to a file, so that users can keep a trace of them,
-    with their information (nb contigs, L90 etc.)
-
-    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
-    kept_genomes: list of genomes kept
-    list_file: input file containing the list of genomes
-    res_path: folder where results must be saved
-    """
-    _, name_lst = os.path.split(list_file)
-    outdisc = os.path.join(res_path, "discarded-" + ".".join(name_lst.split(".")[:-1]) +".lst")
-    with open(outdisc, "w") as outdf:
-        outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
-        for genome, values in genomes.items():
-            if genome in kept_genomes:
-                continue
-            _, _, gsize, nbcont, l90 = [str(x) for x in values]
-            outdf.write("\t".join([genome, gsize, nbcont, l90]) + "\n")
-
-
-def write_lstinfo(list_file, genomes, outdir):
-    """
-    Write lstinfo file, with following columns:
-    gembase_name, orig_name, size, nbcontigs, l90
-
-    list_file: input file containing the list of genomes
-    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
-    outdir: folder where results must be saved
-    """
-    _, name_lst = os.path.split(list_file)
-
-    outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) +".lst")
-    with open(outlst, "w") as outf:
-        outf.write("\t".join(["gembase_name", "orig_name", "gsize", "nb_conts", "L90"]) + "\n")
-        for genome, values in sorted(genomes.items(), key=sort_genomes):
-            gembase, _, gsize, nbcont, l90 = [str(x) for x in values]
-            outf.write("\t".join([gembase, genome, gsize, nbcont, l90]) + "\n")
-
-
-def sort_genomes(x):
-    """
-    x = (genome_orig, [gembase, path, gsize, nbcont, L90]}
-    with gembase = species.date.strain
-
-    order by:
-    - species
-    - in each species, by strain number
-    """
-    return (x[1][0], int(x[1][0].split(".")[-1]))
-
-
-def read_genomes(list_file, name, date):
-    """
-    Read list of genomes, and return them.
-    If a genome has a name, also return it. Otherwise, return the name given by user.
-
-    genomes = {genome: spegenus.date} spegenus.date = name.date
-    """
-    logger = logging.getLogger()
-    logger.info("Reading genomes")
-    genomes = {}
-    with open(list_file, "r") as lff:
-        for line in lff:
-            # empty line: go to the next one
-            if line.strip() == "":
-                continue
-            elems = line.strip().split()
-            if len(elems) == 1:
-                genomes[elems[0]] = [name + "." + date]
-            else:
-                genomes[elems[0]] = [elems[1] + "." + date]
-    return genomes
 
 
 def parse():
@@ -348,6 +258,7 @@ def parse():
     if args.qc_only and not args.name:
         args.name = "NONE"
     return args
+
 
 if __name__ == '__main__':
     OPTIONS = parse()
