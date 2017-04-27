@@ -238,7 +238,6 @@ def test_run_prokka_out_exists_force():
     """
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data")
-    res_dir = outdir
     name = "test_runprokka_H299"
     # Put empty tbl, faa, ffn files in prokka output dir, to check that they are overridden
     open(os.path.join(outdir, name + ".tbl"), "w").close()
@@ -247,7 +246,7 @@ def test_run_prokka_out_exists_force():
     cores_prokka = 5
     force = "--force"
     nbcont = 3
-    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
     for filename in glob.glob(os.path.join(outdir, name + ".*")):
         os.remove(filename)
@@ -261,15 +260,15 @@ def test_run_prokka_out_doesnt_exist():
     """
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data", "prokkaRes")
-    res_dir = os.path.join("test", "data")
+    prok_dir = os.path.join("test", "data")
     cores_prokka = 5
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, prok_dir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
     shutil.rmtree(outdir)
-    os.remove(os.path.join(res_dir, "H299_H561.fasta-prokka.log"))
+    os.remove(os.path.join(prok_dir, "H299_H561.fasta-prokka.log"))
 
 
 def test_run_prokka_out_problem_running(capsys):
@@ -308,7 +307,7 @@ def test_run_all_1by1():
     force = False
     prok_folder = os.path.join("test", "data")
     res_dir = os.path.join("test", "data")
-    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[genome1]
     assert final[genome2]
     shutil.rmtree(os.path.join(prok_folder, genome1 + "-prokkaRes"))
@@ -333,7 +332,7 @@ def test_run_all_parallel_more_threads():
     force = False
     prok_folder = os.path.join("test", "data")
     res_dir = os.path.join("test", "data")
-    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[genome1]
     assert final[genome2]
     shutil.rmtree(os.path.join(prok_folder, genome1 + "-prokkaRes"))
@@ -362,7 +361,7 @@ def test_run_all_parallel_less_threads():
     force = False
     prok_folder = os.path.join("test", "data")
     res_dir = os.path.join("test", "data")
-    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder, res_dir)
+    final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[gnames[0]]
     assert final[gnames[1]]
     assert final[gnames[2]]

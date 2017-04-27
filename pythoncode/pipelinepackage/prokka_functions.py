@@ -45,7 +45,7 @@ def run_prokka_all(genomes, threads, force, prok_folder):
 
     if threads <= 3:
         # arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
+        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"), prok_folder,
                       threads, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         final = []
@@ -63,7 +63,7 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         else:
             cores_prokka = 2
         # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
+        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"), prok_folder,
                       cores_prokka, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         cores_pool = int(threads/cores_prokka)
@@ -91,10 +91,11 @@ def run_prokka_all(genomes, threads, force, prok_folder):
 
 def run_prokka(arguments):
     """
-    arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont)
+    arguments : (gpath, prok_dir, prok_folder, cores_prokka, name, force, nbcont)
 
     gpath: path and filename of genome to annotate
     prok_dir: path to folder where prokka results must be written
+    prok_folder: path to folder where all prokka folders for all genomes are saved
     cores_prokka: how many cores can use prokka
     name: output name of annotated genome
     force: "--force" if force run (override existing files), anything else otherwise
@@ -104,9 +105,9 @@ def run_prokka(arguments):
         boolean. True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prok_dir, threads, name, force, nbcont = arguments
+    gpath, prok_dir, prok_folder, threads, name, force, nbcont = arguments
     FNULL = open(os.devnull, 'w')
-    prok_logfile = os.path.join(prok_dir, os.path.basename(gpath) + "-prokka.log")
+    prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
         logging.warning(("Prokka results folder already exists. Prokka did not run again, "
                          "formatting step used already generated results of Prokka in "
