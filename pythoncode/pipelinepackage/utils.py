@@ -172,16 +172,65 @@ def read_genomes(list_file, name, date, dbpath):
     genomes = {}
     with open(list_file, "r") as lff:
         for line in lff:
+            line = line.strip()
             # empty line: go to the next one
-            if line.strip() == "":
+            if line == "":
                 continue
-            elems = line.strip().split()
-            if not os.path.isfile(os.path.join(dbpath, elems[0])):
-                logger.warning(("{} genome file does not exist. "
-                                    "It will be ignored.").format(elems[0]))
-                continue
-            if len(elems) == 1:
-                genomes[elems[0]] = [name + "." + date]
+            # If separator ::, look for species and/or date
+            if "::" in line:
+                genomes_inf, name_inf = line.split("::")
+                genomes_inf = genomes_inf.strip()
+                name_inf = name_inf.strip().split(".")
+                # if only species provided
+                if len(name_inf) == 1:
+                    if name_inf[0] != "":
+                        cur_name = name_inf[0]
+                    else:
+                        cur_name = name
+                    cur_date = date
+                elif len(name_inf) > 2:
+                    logger.warning(("Invalid name/date given for genome {}. Only put "
+                                    "4 alphanumeric characters in your date and name. For "
+                                    "this genome, the default name ({}) and date ({}) will "
+                                    "be used.").format(genomes_inf, name, date))
+                    cur_name = name
+                    cur_date = date
+                else:
+                    cur_name, cur_date = name_inf
+                    if cur_name == "":
+                        cur_name = name
+                    if cur_date == "":
+                        cur_date = date
+                    if not check_format(cur_name):
+                        logger.warning(("Invalid name {} given for genome {}. Only put "
+                                        "4 alphanumeric characters in your date and name. "
+                                        "For this genome, the default name ({}) and date ({}) "
+                                        "will be used.").format(cur_name, genomes_inf, name, date))
+                        cur_name = name
+                    if not check_format(cur_date):
+                        logger.warning(("Invalid date {} given for genome {}. Only put "
+                                        "4 alphanumeric characters in your date and name. "
+                                        "For this genome, the default name ({}) and date ({}) "
+                                        "will be used.").format(cur_date, genomes_inf, name, date))
+                        cur_date = date
             else:
-                genomes[elems[0]] = [elems[1] + "." + date]
+                genomes_inf = line.strip()
+                cur_name = name
+                cur_date = date
+            if not os.path.isfile(os.path.join(dbpath, genomes_inf)):
+                logger.warning(("{} genome file does not exist. "
+                                    "It will be ignored.").format(genomes_inf))
+                continue
+            genomes[genomes_inf] = [cur_name + "." + cur_date]
     return genomes
+
+
+def check_format(info):
+    """
+    Check that the given information (can be the genomes name or the date) is in the right
+    format: it should have 4 characters, all alphanumeric.
+    """
+    if len(info) != 4:
+        return False
+    return info.isalnum()
+

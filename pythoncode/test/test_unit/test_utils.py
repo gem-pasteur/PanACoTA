@@ -255,7 +255,9 @@ def test_read_genomes_ok(capsys):
     list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
     genomes = utils.read_genomes(list_file, name, date, dbpath)
     exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
-           "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"]}
+           "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
+           "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
+           "genome5.fasta": ["TOTO.0114"]}
     assert exp == genomes
     _, err = capsys.readouterr()
     assert "genome.fst genome file does not exist. It will be ignored." in err

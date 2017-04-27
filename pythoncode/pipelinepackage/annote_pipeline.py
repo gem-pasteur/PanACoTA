@@ -191,7 +191,7 @@ def parse(argu=sys.argv[1:]):
     """
     import argparse
     def gen_name(param):
-        if len(param) != 4:
+        if not utils.check_format(param):
             msg = ("The genome name must contain 4 characters. For example, this name can "
                    " correspond to the 2 first letters of genus, and 2 first letters of "
                    "species, e.g. ESCO for Escherichia Coli.")
@@ -199,7 +199,7 @@ def parse(argu=sys.argv[1:]):
         return param
 
     def date_name(param):
-        if len(param) != 4:
+        if not utils.check_format(param):
             msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
                    "corresponding to the month (2 digits) and year (2 digits).")
             raise argparse.ArgumentTypeError(msg)
