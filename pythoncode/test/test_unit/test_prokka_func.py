@@ -17,7 +17,8 @@ def test_count_tbl():
     Count the different features found in the tbl file, and return
     nbcont, nbCDS, nbGene, nbCRISPR
     """
-    tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
+    tblfile = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                           "prokka_out_for_test.tbl")
     ncont, ncds, ngene, ncris = pfunc.count_tbl(tblfile)
     assert ncont == 7
     assert ncds == 13
@@ -52,60 +53,66 @@ def test_check_prokka_notbl(capsys):
     """
     Check that check_prokka returns false when a tbl file is missing, and an error message
     """
-    outdir = os.path.join("test", "data", "test_files")
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_notbl")
     name = "prokka_out_for_test-misstbl"
-    ori_dir = os.path.join("test", "data", "test_files")
-    ori_file = "prokka_out_for_test"
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".faa"), os.path.join(ori_dir, name + ".faa"))
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".ffn"), os.path.join(ori_dir, name + ".ffn"))
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
     logf = "prokka.log"
-    gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-misstbl original_name.fna: no .tbl file\n"
-    os.remove(os.path.join(ori_dir, name + ".faa"))
-    os.remove(os.path.join(ori_dir, name + ".ffn"))
+    assert err == "prokka_out_for_test-misstbl original_name-error.fna: no .tbl file\n"
+    shutil.rmtree(out_dir)
 
 
 def test_check_prokka_nofaa(capsys):
     """
     Check that check_prokka returns false when a faa file is missing, and an error message
     """
-    outdir = os.path.join("test", "data", "test_files")
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
-    ori_dir = os.path.join("test", "data", "test_files")
-    ori_file = "prokka_out_for_test"
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".tbl"), os.path.join(ori_dir, name + ".tbl"))
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".ffn"), os.path.join(ori_dir, name + ".ffn"))
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
     assert err == "prokka_out_for_test-missfaa original_name.fna: no .faa file\n"
-    os.remove(os.path.join(ori_dir, name + ".tbl"))
-    os.remove(os.path.join(ori_dir, name + ".ffn"))
+    shutil.rmtree(out_dir)
 
 
 def test_check_prokka_noffn(capsys):
     """
     Check that check_prokka returns false when a ffn file is missing, and an error message
     """
-    outdir = os.path.join("test", "data", "test_files")
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_noffn")
     name = "prokka_out_for_test-missffn"
-    ori_dir = os.path.join("test", "data", "test_files")
-    ori_file = "prokka_out_for_test"
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".tbl"), os.path.join(ori_dir, name + ".tbl"))
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".faa"), os.path.join(ori_dir, name + ".faa"))
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
     assert err == "prokka_out_for_test-missffn original_name.fna: no .ffn file\n"
-    os.remove(os.path.join(ori_dir, name + ".tbl"))
-    os.remove(os.path.join(ori_dir, name + ".faa"))
+    shutil.rmtree(out_dir)
 
 
 def test_check_prokka_wrong_cont(capsys):
@@ -113,7 +120,7 @@ def test_check_prokka_wrong_cont(capsys):
     Check that check_prokka returns an error message when the number of contigs in tbl
     file is not as expected
     """
-    outdir = os.path.join("test", "data", "test_files")
+    outdir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     name = "prokka_out_for_test"
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -129,16 +136,18 @@ def test_check_prokka_wrong_tblCDS(capsys):
     Check that check_prokka returns an error message when the number of CDS in tbl
     file is different from the number of headers in faa file
     """
-    outdir = os.path.join("test", "data", "test_files")
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "test_files")
     name = "prokka_out_for_test-wrongCDS"
-    ori_dir = os.path.join("test", "data", "test_files")
-    ori_file = "prokka_out_for_test"
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".ffn"), os.path.join(ori_dir, name + ".ffn"))
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".faa"), os.path.join(ori_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
     assert err.split("\n")[0] == ("prokka_out_for_test-wrongCDS original_name.fna: "
                                   "no matching number of proteins between tbl and faa; "
@@ -146,8 +155,8 @@ def test_check_prokka_wrong_tblCDS(capsys):
     assert err.split("\n")[1] == ("prokka_out_for_test-wrongCDS original_name.fna: "
                                   "no matching number of genes between tbl and ffn; "
                                   "ffn=17; in tbl =14genes 2CRISPR")
-    os.remove(os.path.join(ori_dir, name + ".ffn"))
-    os.remove(os.path.join(ori_dir, name + ".faa"))
+    os.remove(os.path.join(out_dir, name + ".ffn"))
+    os.remove(os.path.join(out_dir, name + ".faa"))
 
 
 def test_check_prokka_wrong_tblCRISPR(capsys):
@@ -155,22 +164,24 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     Check that check_prokka returns an error message when the number of headers in ffn
     file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
     """
-    outdir = os.path.join("test", "data", "test_files")
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "test_files")
     name = "prokka_out_for_test-wrongtblCRISP"
-    ori_dir = os.path.join("test", "data", "test_files")
-    ori_file = "prokka_out_for_test"
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".ffn"), os.path.join(ori_dir, name + ".ffn"))
-    shutil.copyfile(os.path.join(ori_dir, ori_file + ".faa"), os.path.join(ori_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
     assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
                    "no matching number of genes between tbl and ffn; "
                    "ffn=17; in tbl =15genes 1CRISPR\n")
-    os.remove(os.path.join(ori_dir, name + ".ffn"))
-    os.remove(os.path.join(ori_dir, name + ".faa"))
+    os.remove(os.path.join(out_dir, name + ".ffn"))
+    os.remove(os.path.join(out_dir, name + ".faa"))
 
 
 def test_check_prokka_ok():
@@ -178,7 +189,7 @@ def test_check_prokka_ok():
     Check that everything is ok with prokka results (tbl, faa and ffn files exist,
     and number of CDS, CRISPR and genes correspond between them)
     """
-    outdir = os.path.join("test", "data", "test_files")
+    outdir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     name = "prokka_out_for_test"
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -197,12 +208,13 @@ def test_run_prokka_out_exists_ok(capsys):
     name = "prokka_out_for_test"
     force = False
     nbcont = 7
-    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
     _, err = capsys.readouterr()
     assert err.endswith("Prokka results folder already exists. Prokka did not run again, "
                         "formatting step used already generated results of Prokka in "
-                        "test/data/test_files. If you want to re-run prokka, first remove this "
+                        "test/data/test_files/original_name.fna-prokkaRes. If you want "
+                        "to re-run prokka, first remove this "
                         "result folder, or use '-F' or '--force' option if you want to rerun "
                         "prokka for all genomes.\n")
 
@@ -213,22 +225,31 @@ def test_run_prokka_out_exists_error(capsys):
     run_prokka returns False, and writes the warning message saying that prokka did not
     rerun, + the warning message for the missing file(s).
     """
-    gpath = "path/to/nogenome/original_name.fna"
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    new_prok_dir = os.path.join("test", "data", "test_files", "original_name-error-prokkaRes")
+    name = "prokka_out_for_test-wrongCDS"
+    os.makedirs(new_prok_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(new_prok_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(new_prok_dir, name + ".faa"))
+    gpath = "path/to/nogenome/original_name-error"
     outdir = os.path.join("test", "data", "test_files")
     cores_prokka = 1
-    name = "prokka_out_for_test-wrongCDS"
     force = False
     nbcont = 7
-    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert not pfunc.run_prokka(arguments)
     _, err = capsys.readouterr()
     assert ("Prokka results folder already exists. Prokka did not run again, "
             "formatting step used already generated results of Prokka in "
-            "test/data/test_files. If you want to re-run prokka, first remove this "
+            "test/data/test_files/original_name-error-prokkaRes. If you want to re-run prokka, first remove this "
             "result folder, or use '-F' or '--force' option if you want to rerun "
             "prokka for all genomes.") in err
     assert "prokka_out_for_test-wrongCDS original_name.fna: no .ffn file"
     assert "prokka_out_for_test-wrongCDS original_name.fna: no .faa file"
+    shutil.rmtree(new_prok_dir)
 
 
 def test_run_prokka_out_exists_force():
@@ -238,18 +259,37 @@ def test_run_prokka_out_exists_force():
     """
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data")
+    out_prokdir = os.path.join(outdir, "H299_H561.fasta-prokkaRes")
     name = "test_runprokka_H299"
     # Put empty tbl, faa, ffn files in prokka output dir, to check that they are overridden
-    open(os.path.join(outdir, name + ".tbl"), "w").close()
-    open(os.path.join(outdir, name + ".faa"), "w").close()
-    open(os.path.join(outdir, name + ".ffn"), "w").close()
+    os.makedirs(out_prokdir)
+    open(os.path.join(out_prokdir, name + ".tbl"), "w").close()
+    open(os.path.join(out_prokdir, name + ".faa"), "w").close()
+    open(os.path.join(out_prokdir, name + ".ffn"), "w").close()
     cores_prokka = 5
     force = "--force"
     nbcont = 3
-    arguments = (gpath, outdir, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
-    for filename in glob.glob(os.path.join(outdir, name + ".*")):
-        os.remove(filename)
+    # Check content of tbl, ffn and faa files
+    exp_dir = os.path.join("test", "data", "exp_files", "H299_H561.fasta-prokkaRes",
+                           "test_runprokka_H299")
+    out_tbl = os.path.join(out_prokdir, name + ".tbl")
+    out_faa = os.path.join(out_prokdir, name + ".faa")
+    out_ffn = os.path.join(out_prokdir, name + ".ffn")
+    assert os.path.isfile(out_tbl)
+    with open(exp_dir + ".tbl", "r") as expf, open(out_tbl, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    assert os.path.isfile(out_faa)
+    with open(exp_dir + ".faa", "r") as expf, open(out_faa, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    assert os.path.isfile(out_ffn)
+    with open(exp_dir + ".ffn", "r") as expf, open(out_ffn, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    shutil.rmtree(out_prokdir)
     os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
 
 
@@ -259,15 +299,15 @@ def test_run_prokka_out_doesnt_exist():
     with all expected outfiles
     """
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
-    outdir = os.path.join("test", "data", "prokkaRes")
     prok_dir = os.path.join("test", "data")
+    out_dir = os.path.join(prok_dir, "H299_H561.fasta-prokkaRes")
     cores_prokka = 5
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, outdir, prok_dir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, prok_dir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
-    shutil.rmtree(outdir)
+    shutil.rmtree(out_dir)
     os.remove(os.path.join(prok_dir, "H299_H561.fasta-prokka.log"))
 
 
@@ -277,18 +317,17 @@ def test_run_prokka_out_problem_running(capsys):
     and the error message indicating to read in the log why it couldn't run
     """
     gpath = os.path.join("test", "data", "genomes", "H299 H561.fasta")
-    outdir = os.path.join("test", "data", "prokkaRes")
-    res_dir = os.path.join("test", "data")
+    outdir = os.path.join("test", "data")
     cores_prokka = 5
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, outdir, res_dir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert not pfunc.run_prokka(arguments)
     _, err = capsys.readouterr()
     assert ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
             "for more information.") in err
-    os.remove(os.path.join(res_dir, "H299 H561.fasta-prokka.log"))
+    os.remove(os.path.join(outdir, "H299 H561.fasta-prokka.log"))
 
 
 def test_run_all_1by1():

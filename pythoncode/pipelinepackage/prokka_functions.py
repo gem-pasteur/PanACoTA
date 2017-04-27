@@ -42,11 +42,9 @@ def run_prokka_all(genomes, threads, force, prok_folder):
               ]
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
                                   redirect_stderr=True, redirect_stdout=True).start()
-
     if threads <= 3:
         # arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"), prok_folder,
-                      threads, genomes[g][0], force, genomes[g][3])
+        arguments = [(genomes[g][1], prok_folder, threads, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         final = []
         for num, arg in enumerate(arguments):
@@ -63,8 +61,8 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         else:
             cores_prokka = 2
         # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"), prok_folder,
-                      cores_prokka, genomes[g][0], force, genomes[g][3])
+        arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
+                      force, genomes[g][3])
                      for g in sorted(genomes)]
         cores_pool = int(threads/cores_prokka)
         pool = multiprocessing.Pool(cores_pool)
@@ -91,7 +89,7 @@ def run_prokka_all(genomes, threads, force, prok_folder):
 
 def run_prokka(arguments):
     """
-    arguments : (gpath, prok_dir, prok_folder, cores_prokka, name, force, nbcont)
+    arguments : (gpath, prok_folder, cores_prokka, name, force, nbcont)
 
     gpath: path and filename of genome to annotate
     prok_dir: path to folder where prokka results must be written
@@ -105,7 +103,8 @@ def run_prokka(arguments):
         boolean. True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prok_dir, prok_folder, threads, name, force, nbcont = arguments
+    gpath, prok_folder, threads, name, force, nbcont = arguments
+    prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
     FNULL = open(os.devnull, 'w')
     prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
