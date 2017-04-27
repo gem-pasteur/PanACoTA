@@ -136,12 +136,12 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # If gene file was created, create Proteins file
     faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))
     if len(faagenome) == 0:
-        logger.error(("No .ffn file in {}.").format(prokka_dir))
+        logger.error(("No .faa file in {}.").format(prokka_dir))
         os.remove(lstgenome)
         os.remove(gengenome)
         return False
     elif len(faagenome) > 1:
-        logger.error("Several .ffn files in {}.".format(prokka_dir))
+        logger.error("Several .faa files in {}.".format(prokka_dir))
         os.remove(lstgenome)
         os.remove(gengenome)
         return False

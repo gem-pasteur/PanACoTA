@@ -92,7 +92,8 @@ def test_tbl_to_lst():
     - contig with 1 gene ('b' loc)
     - contig without gene (should be skipped)
     """
-    tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
+    tblfile = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                           "prokka_out_for_test.tbl")
     lstfile = os.path.join("test", "data", "test_tbl2lst.lst")
     exp_lst = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     name = "test.0417.00002"
@@ -119,7 +120,8 @@ def test_tbl_to_lst_newName():
     - contig with 1 gene ('b' loc)
     - contig without gene (should be skipped)
     """
-    tblfile = os.path.join("test", "data", "test_files", "prokka_out_for_test.tbl")
+    tblfile = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                           "prokka_out_for_test.tbl")
     lstfile = os.path.join("test", "data", "test_tbl2lstNewName.lst")
     exp_lst = os.path.join("test", "data", "exp_files", "res_tbl2lst-newName.lst")
     name = "test.0417.00010"
@@ -258,7 +260,8 @@ def test_create_prt_Ok():
     Test that when everything is ok in both faa and lst files, the prt file is
     created as expected.
     """
-    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.faa")
+    faaseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                          "prokka_out_for_test.faa")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "test_create_prt.prt")
     assert ffunc.create_prt(faaseq, lstfile, prtseq)
@@ -329,7 +332,8 @@ def test_create_gen_wrongCRISPR(capsys):
     Test that when the CRISPR number of lstinfo file does not correspond to the CRISPR number
     in ffn, it writes an error, returns false and removes gen file.
     """
-    ffnseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.ffn")
+    ffnseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                          "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst-wrongCRISPRnum.lst")
     genseq = os.path.join("test", "data", "test_create_gen_wrongCRISPR.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq)
@@ -383,7 +387,8 @@ def test_create_gen_wrongLstInt(capsys):
     not in the right format (gene name and number are separated by '_', but gene num
     contains a letter), it writes an error, erases gen file, and returns False.
     """
-    ffnseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.ffn")
+    ffnseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                          "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst-wrongGeneName.lst")
     genseq = os.path.join("test", "data", "test_create_gen_wrongLstHeadInt.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq)
@@ -401,7 +406,8 @@ def test_create_gen_Ok():
     Test that when everything is ok in both ffn and lst files, the gen file is
     created as expected.
     """
-    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test.ffn")
+    faaseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+                          "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "test_create_gen.gen")
     assert ffunc.create_gen(faaseq, lstfile, genseq)
@@ -642,7 +648,7 @@ def test_format1genome_nofaa(capsys):
     assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
     _, err = capsys.readouterr()
-    assert err == ("No .ffn file in test/data/toto/"
+    assert err == ("No .faa file in test/data/toto/"
                     "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
     shutil.rmtree(prok_path)
 
@@ -678,7 +684,7 @@ def test_format1genome_sevfaa(capsys):
     assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
     _, err = capsys.readouterr()
-    assert err == ("Several .ffn files in test/data/toto/"
+    assert err == ("Several .faa files in test/data/toto/"
                     "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes.\n")
     shutil.rmtree(prok_path)
 
