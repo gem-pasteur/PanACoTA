@@ -26,7 +26,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
     """
     genomes: {genome: spegenus.date}
     dbpath: path to folder containing genomes
-    res_path: path to put out files
+    tmp_path: path to put out files
     nbn: minimum number of 'N' required to cut into a new contig
 
     returns: genomes {genome: [spegenus.date, path, size, nbcont, l90]}
@@ -147,15 +147,15 @@ def rename_all_genomes(genomes, tmp_path):
             last_strain += 1
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-        outfile = os.path.join(tmp_path, os.path.basename(gpath) + "-gembase.fna")
-        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, outfile)
+        genomes[genome][1] = rename_genome_contigs(gembase_name, gpath, tmp_path)
 
 
-def rename_genome_contigs(gembase_name, gpath, outfile):
+def rename_genome_contigs(gembase_name, gpath, tmp_path):
     """
     For the given genome (sequence in gpath), rename all its contigs
-    with the new name: 'gembase_name'.
+    with the new name: 'gembase_name', and save the output sequence in tmp_path folder
     """
+    outfile = os.path.join(tmp_path, os.path.basename(gpath) + "-gembase.fna")
     contig_num = 1
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
         for line in gpf:
