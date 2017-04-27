@@ -134,7 +134,7 @@ def rename_all_genomes(genomes, tmp_path):
     For each genome, assign a strain number, and rename all its contigs.
 
     genomes: {genome: [name, path, gsize, nbcont, L90]} ->
-    {genome: [gembase_name, path, gsize, nbcont, L90]}
+    {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
     """
     last_name = ""
     last_strain = 0

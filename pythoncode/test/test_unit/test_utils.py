@@ -94,7 +94,7 @@ def test_skipped_format(capsys):
     out, err = capsys.readouterr()
     assert ("Some genomes were annotated by prokka, but could not be formatted, "
             "and are hence absent from your output database. Please look at log "
-            "filesto get more information about wh they could not be ") in err
+            "files to get more information about wh they could not be ") in err
     assert ("formatted.\n\t- toto\n\t- genome\n\t- genome2\n" in err or
             "formatted.\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err)
 
