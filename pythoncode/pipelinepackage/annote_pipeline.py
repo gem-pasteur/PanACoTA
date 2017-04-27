@@ -99,7 +99,7 @@ def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, fo
 
     # Read genome names.
     # genomes = {genome: [spegenus.date]}
-    genomes = utils.read_genomes(list_file, name, date)
+    genomes = utils.read_genomes(list_file, name, date, db_path)
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn)
@@ -112,7 +112,7 @@ def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, fo
     utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # If only QC, stop here.
     if qc_only:
-        sys.exit(0)
+        return genomes, kept_genomes
     # Rename genomes kept, ordered by quality
     # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
     gfunc.rename_all_genomes(kept_genomes, tmp_dir)
@@ -126,9 +126,10 @@ def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, fo
         utils.write_warning_skipped(skipped)
     if skipped_format:
         utils.write_warning_skipped(skipped_format, format=True)
+    return genomes, kept_genomes, skipped, skipped_format
 
 
-def init_logger(logfile, level):
+def init_logger(logfile, level, name= None):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -142,7 +143,10 @@ def init_logger(logfile, level):
     level: minimum level that must be considered.
     """
     # create logger
-    logger = logging.getLogger()
+    if name:
+        logger = logging.getLogger(name)
+    else:
+        logger = logging.getLogger()
     # set level of logger (here debug to show everything during development)
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
@@ -181,7 +185,7 @@ def init_logger(logfile, level):
     logger.addHandler(err_handler)  # add handler to logger
 
 
-def parse():
+def parse(argu=sys.argv[1:]):
     """
     Method to create a parser for command-line options
     """
@@ -194,12 +198,23 @@ def parse():
             raise argparse.ArgumentTypeError(msg)
         return param
 
+    def date_name(param):
+        if len(param) != 4:
+            msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
+                   "corresponding to the month (2 digits) and year (2 digits).")
+            raise argparse.ArgumentTypeError(msg)
+        return param
+
     def get_date():
         import time
         return time.strftime("%m%y")
 
     def cont_num(param):
-        param = int(param)
+        try:
+            param = int(param)
+        except Exception:
+            msg = "argument --nbcont: invalid int value: {}".format(param)
+            raise argparse.ArgumentTypeError(msg)
         if param < 0 :
             msg = ("The maximum number of contigs allowed must be a positive number.")
             raise argparse.ArgumentTypeError(msg)
@@ -237,9 +252,12 @@ def parse():
                               "of 'N' stretches, put this value to this option."))
     parser.add_argument("--threads", dest="threads", type=int, default=1,
                         help=("Specify how many threads can be used (default=1)"))
-    parser.add_argument("--date", dest="date", default=get_date(),
+    parser.add_argument("--date", dest="date", default=get_date(), type=date_name,
                         help=("Specify the date (MMYY) to give to your annotated genomes. "
-                              "By default, will give today's date."))
+                              "By default, will give today's date. The only requirement on the"
+                              " given date is that it is 4 characters long. You can use letters"
+                              " if you want. But the common way is to use 4 digits, "
+                              "corresponding to MMYY."))
     parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
                         help=("Add this option if you want to run prokka and formatting steps "
                               "even if their result folder (for prokka step) or files (for "
@@ -263,10 +281,10 @@ def parse():
                               "genomes would be annotated with the given parameters, and to "
                               "modify those parameters if you want, before you launch the "
                               "annotation and formatting steps."))
-    args = parser.parse_args()
+    args = parser.parse_args(argu)
     if not args.qc_only and not args.name:
         parser.error("You must specify your genomes dataset name in 4 characters with "
-                     "'-s name' option (type -h for more information). Or, if you do not want "
+                     "'-n name' option (type -h for more information). Or, if you do not want "
                      "to annotate and format your genomes but just to run quality control, use "
                      "option '-Q")
     if args.qc_only and not args.name:
@@ -275,7 +293,7 @@ def parse():
 
 
 if __name__ == '__main__':
-    OPTIONS = parse()
+    OPTIONS = parse(sys.argv[1:])
     main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.l90,
          OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date, OPTIONS.force,
          OPTIONS.qc_only)

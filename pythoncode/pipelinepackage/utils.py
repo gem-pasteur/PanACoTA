@@ -157,10 +157,13 @@ def sort_genomes(x):
     return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
 
 
-def read_genomes(list_file, name, date):
+def read_genomes(list_file, name, date, dbpath):
     """
     Read list of genomes, and return them.
     If a genome has a name, also return it. Otherwise, return the name given by user.
+
+    Check that the given genome file exists in dbpath. Otherwise, put an error message,
+    and ignore this file.
 
     genomes = {genome: spegenus.date} spegenus.date = name.date
     """
@@ -173,6 +176,10 @@ def read_genomes(list_file, name, date):
             if line.strip() == "":
                 continue
             elems = line.strip().split()
+            if not os.path.isfile(os.path.join(dbpath, elems[0])):
+                logger.warning(("{} genome file does not exist. "
+                                    "It will be ignored.").format(elems[0]))
+                continue
             if len(elems) == 1:
                 genomes[elems[0]] = [name + "." + date]
             else:

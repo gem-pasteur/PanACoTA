@@ -231,18 +231,34 @@ def test_sort_gene():
     assert sorted_genomes == exp
 
 
-def test_read_genomes():
+def test_read_genomes_wrongName():
     """
-
+    Test that when the list file contains only genome names which do not exist,
+    it returns an empty list of genomes to annotate/format.
     """
     name = "ESCO"
     date = "0417"
+    dbpath = os.path.join("test", "data", "genomes")
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
+    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    assert genomes == {}
+
+
+def test_read_genomes_ok(capsys):
+    """
+    Test that when the list file contains only genome names which do not exist,
+    it returns an empty list of genomes to annotate/format.
+    """
+    name = "ESCO"
+    date = "0417"
+    dbpath = os.path.join("test", "data", "genomes")
     list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
-    genomes = utils.read_genomes(list_file, name, date)
-    exp = {"mygenome_in-fasta.fasta": ["ESCO.0417"], "othergenome.fa": ["ESCO.0417"],
-           "yet-another-genome": ["ABCD.0417"], "andAnother1.fna": ["TOTO.0417"],
-           "species-not-given": ["ESCO.0417"], "another-genome-from-TOTO_species": ["TOTO.0417"]}
+    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+           "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"]}
     assert exp == genomes
+    _, err = capsys.readouterr()
+    assert "genome.fst genome file does not exist. It will be ignored." in err
 
 
 
