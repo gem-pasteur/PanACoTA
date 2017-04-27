@@ -3,6 +3,7 @@ image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
 stages:
   - build
   - test
+  - coverage
   - deploy
 
 unit-test-ubuntu16.04:
@@ -36,7 +37,7 @@ func-test-ubuntu16.04:
     expire_in: 1 hour
 
 coverage:
-  stage: test
+  stage: coverage
   except:
     - docker
   dependencies:
