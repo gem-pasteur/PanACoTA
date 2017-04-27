@@ -1,10 +1,11 @@
+image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
+
 stages:
   - build
   - test
   - deploy
 
-test-ubuntu16.04:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
+unit-test-ubuntu16.04:
   stage: test
   except:
     - docker
@@ -12,16 +13,49 @@ test-ubuntu16.04:
     - cd pythoncode
     - pip3 install .
   script:
-    - py.test test
+    - py.test test/test_unit
+    - mv .coverage .coverage-unit
   artifacts:
     paths:
-      - pythoncode/htmlcov/
+      - pythoncode/.coverage-unit
+    expire_in: 1 hour
+
+func-test-ubuntu16.04:
+  stage: test
+  except:
+    - docker
+  before_script:
+    - cd pythoncode
+    - pip3 install .
+  script:
+    - py.test test/test_functional
+    - mv .coverage .coverage-functional
+  artifacts:
+    paths:
+      - pythoncode/.coverage-functional
+    expire_in: 1 hour
+
+coverage:
+  stage: test
+  except:
+    - docker
+  dependencies:
+    - unit-test-ubuntu16.04
+    - func-test-ubuntu16.04
+  script:
+    - cd pythoncode
+    - coverage combine .coverage-unit .coverage-functional
+    - coverage report
+    - coverage html
+  artifacts:
+    paths:
+      - pythoncode/htmlcov
     expire_in: 1 hour
 
 pages:
   stage: deploy
   dependencies:
-    - test-ubuntu16.04
+    - coverage
   script:
     - mv pythoncode/htmlcov public/
   artifacts:
