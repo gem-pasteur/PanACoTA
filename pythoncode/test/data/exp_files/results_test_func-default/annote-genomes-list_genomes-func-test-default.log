@@ -1,0 +1,5 @@
+[2017-04-27 13:59:05,009] :: INFO :: Reading genomes
+[2017-04-27 13:59:05,018] :: INFO :: Cutting genomes at each stretch of at least 5 'N', and then, calculating genome size, number of contigs and L90.
+[2017-04-27 13:59:05,836] :: INFO :: Annotating all genomes with prokka
+[2017-04-27 13:59:27,168] :: DEBUG :: {'A_H738.fasta': True, 'B2_A3_5.fasta-changeName.fna': True, 'H299_H561.fasta': True}
+[2017-04-27 13:59:27,171] :: INFO :: Formatting all genomes
