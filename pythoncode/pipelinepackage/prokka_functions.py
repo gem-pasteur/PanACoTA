@@ -19,6 +19,7 @@ import progressbar
 
 logger = logging.getLogger()
 
+
 def run_prokka_all(genomes, threads, force, prok_folder):
     """
     for each genome in genomes, run prokka to annotate the genome.
@@ -43,15 +44,8 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
                                   redirect_stderr=True, redirect_stdout=True).start()
     if threads <= 3:
-        # arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], prok_folder, threads, genomes[g][0], force, genomes[g][3])
-                     for g in sorted(genomes)]
-        final = []
-        for num, arg in enumerate(arguments):
-            res = run_prokka(arg)
-            final.append(res)
-            bar.update(num + 1)
-        bar.finish()
+        cores_prokka = threads
+        pool_size = 1
     else:
         # use multiprocessing
         # if there are more threads than genomes, use as many threads as possible per genome
@@ -60,28 +54,28 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         # otherwise, use 2 threads per genome (and nb_genome/2 genomes at the same time)
         else:
             cores_prokka = 2
-        # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-        arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
-                      force, genomes[g][3])
-                     for g in sorted(genomes)]
-        cores_pool = int(threads/cores_prokka)
-        pool = multiprocessing.Pool(cores_pool)
-        try:
-            final = pool.map_async(run_prokka, arguments)
-            pool.close()
-            while(True):
-                if final.ready():
-                    break
-                remaining = final._number_left
-                bar.update(nbgen - remaining)
-            bar.finish()
-            pool.join()
-            final = final.get()
-        # If an error occurs, terminate pool and exit
-        except Exception as excp:
-            pool.terminate()
-            logger.error(excp)
-            sys.exit(1)
+        pool_size = int(threads/cores_prokka)
+    # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
+    arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
+                  force, genomes[g][3])
+                 for g in sorted(genomes)]
+    pool = multiprocessing.Pool(pool_size)
+    try:
+        final = pool.map_async(run_prokka, arguments)
+        pool.close()
+        while(True):
+            if final.ready():
+                break
+            remaining = final._number_left
+            bar.update(nbgen - remaining)
+        bar.finish()
+        pool.join()
+        final = final.get()
+    # If an error occurs, terminate pool and exit
+    except Exception as excp:
+        pool.terminate()
+        logger.error(excp)
+        sys.exit(1)
     final = {genome: res for genome, res in zip(sorted(genomes), final)}
     logger.debug(final)
     return final
