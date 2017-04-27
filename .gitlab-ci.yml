@@ -43,8 +43,10 @@ coverage:
   dependencies:
     - unit-test-ubuntu16.04
     - func-test-ubuntu16.04
-  script:
+  before_script:
     - cd pythoncode
+    - pip3 install -r requirements.txt
+  script:
     - coverage combine .coverage-unit .coverage-functional
     - coverage report
     - coverage html
