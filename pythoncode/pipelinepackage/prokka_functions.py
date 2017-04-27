@@ -19,18 +19,17 @@ import progressbar
 
 logger = logging.getLogger()
 
-def run_prokka_all(genomes, threads, force, prok_folder, res_dir):
+def run_prokka_all(genomes, threads, force, prok_folder):
     """
     for each genome in genomes, run prokka to annotate the genome.
 
-    * genomes = {genome: [name, gpath, size, nbcont, l90]}
+    * genomes = {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
     * threads: max number of threads that can be used
     * force: if None, do not override outdir (do not run prokka if outdir already exists). If
     '--force', rerun prokka and override existing outdir, for all genomes.
     * prok_dir: folder where prokka results must be written: for each genome,
     a directory <genome_name>-prokkaRes will be created in this folder, and all the results
     of prokka for the genome will be written inside
-    * res_dir: folder where the user wants its results (formatted database)
 
     Returns:
         final: {genome: boolean} -> with True if prokka ran well, False otherwise.
@@ -45,9 +44,9 @@ def run_prokka_all(genomes, threads, force, prok_folder, res_dir):
                                   redirect_stderr=True, redirect_stdout=True).start()
 
     if threads <= 3:
-        # arguments : (gpath, prok_dir, res_dir, cores_prokka, name, force, nbcont) for each genome
+        # arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont) for each genome
         arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
-                      res_dir, threads, genomes[g][0], force, genomes[g][3])
+                      threads, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         final = []
         for num, arg in enumerate(arguments):
@@ -65,7 +64,7 @@ def run_prokka_all(genomes, threads, force, prok_folder, res_dir):
             cores_prokka = 2
         # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
         arguments = [(genomes[g][1], os.path.join(prok_folder, g + "-prokkaRes"),
-                      res_dir, cores_prokka, genomes[g][0], force, genomes[g][3])
+                      cores_prokka, genomes[g][0], force, genomes[g][3])
                      for g in sorted(genomes)]
         cores_pool = int(threads/cores_prokka)
         pool = multiprocessing.Pool(cores_pool)
@@ -92,11 +91,10 @@ def run_prokka_all(genomes, threads, force, prok_folder, res_dir):
 
 def run_prokka(arguments):
     """
-    arguments : (gpath, prok_dir, res_dir, cores_prokka, name, force, nbcont)
+    arguments : (gpath, prok_dir, cores_prokka, name, force, nbcont)
 
     gpath: path and filename of genome to annotate
     prok_dir: path to folder where prokka results must be written
-    res_dir: path to results directory, where prokka_log is written
     cores_prokka: how many cores can use prokka
     name: output name of annotated genome
     force: "--force" if force run (override existing files), anything else otherwise
@@ -106,9 +104,9 @@ def run_prokka(arguments):
         boolean. True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prok_dir, res_dir, threads, name, force, nbcont = arguments
+    gpath, prok_dir, threads, name, force, nbcont = arguments
     FNULL = open(os.devnull, 'w')
-    prok_logfile = os.path.join(res_dir, os.path.basename(gpath) + "-prokka.log")
+    prok_logfile = os.path.join(prok_dir, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
         logging.warning(("Prokka results folder already exists. Prokka did not run again, "
                          "formatting step used already generated results of Prokka in "

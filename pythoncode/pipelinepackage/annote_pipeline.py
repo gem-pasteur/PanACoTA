@@ -59,7 +59,7 @@ from pipelinepackage import format_functions as ffunc
 from pipelinepackage import utils
 
 
-def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, force, qc_only):
+def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, force, qc_only):
     """
     Main method, doing all steps:
     - analyse genomes (nb contigs, L90, stretches of N...)
@@ -69,10 +69,20 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
     - format annotated genomes
 
     """
+    # By default, all tmp files (split sequences, renamed sequences, prokka results) will
+    # be saved in the given <res_dir>/tmp_files.
+    # Create output (results, tmp...) directories if not already existing
+    tmp_dir = os.path.join(res_dir, "tmp_files")
+    prok_dir = tmp_dir
+    os.makedirs(res_dir, exist_ok=True)
+    os.makedirs(tmp_dir, exist_ok=True)
+    os.makedirs(prok_dir, exist_ok=True)
+
+
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     # name logfile, add timestamp if already existing
-    logfile = os.path.join(res_path, "annote-genomes-" + listfile_base + ".log")
+    logfile = os.path.join(res_dir, "annote-genomes-" + listfile_base + ".log")
     # if os.path.isfile(logfile):
     #     import time
     #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
@@ -86,28 +96,32 @@ def main(list_file, db_path, res_path, name, l90, nbcont, cutn, threads, date, f
         prokka_cmd = ["prokka", "-h"]
         utils.check_installed(prokka_cmd)
 
-    # Read genome names
+
+    # Read genome names.
+    # genomes = {genome: [spegenus.date]}
     genomes = utils.read_genomes(list_file, name, date)
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-    gfunc.analyse_all_genomes(genomes, db_path, res_path, cutn)
+    # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn)
     # Plot L90 and nb_contigs distributions
-    gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbcont)
+    gfunc.plot_distributions(genomes, res_dir, listfile_base, l90, nbcont)
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file
-    utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_path)
+    utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # If only QC, stop here.
     if qc_only:
         sys.exit(0)
     # Rename genomes kept, ordered by quality
-    gfunc.rename_all_genomes(kept_genomes, res_path)
+    # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
+    gfunc.rename_all_genomes(kept_genomes, tmp_dir)
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
-    utils.write_lstinfo(list_file, kept_genomes, res_path)
+    utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # Annotate all kept genomes
-    results = pfunc.run_prokka_all(kept_genomes, threads, force)
+    results = pfunc.run_prokka_all(kept_genomes, threads, force, prok_dir)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path)
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, prok_dir)
     if skipped:
         utils.write_warning_skipped(skipped)
     if skipped_format:
