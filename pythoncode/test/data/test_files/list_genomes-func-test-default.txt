@@ -1,3 +1,3 @@
-B2_A3_5.fasta-changeName.fna
-H299_H561.fasta
-A_H738.fasta
+B2_A3_5.fasta-changeName.fna::ESCO.
+H299_H561.fasta genome6.fasta
+A_H738.fasta toto.fst genome1.fasta genome.fst::.1015
