@@ -183,9 +183,15 @@ def read_genomes(list_file, name, date, dbpath):
                 name_inf = name_inf.strip().split(".")
                 # if only species provided
                 if len(name_inf) == 1:
-                    if name_inf[0] != "":
+                    if name_inf[0] == "":
+                        cur_name = name
+                    elif check_format(name_inf[0]):
                         cur_name = name_inf[0]
                     else:
+                        logger.warning(("Invalid name {} given for genome {}. Only put "
+                                        "4 alphanumeric characters in your date and name. "
+                                        "For this genome, the default name ({}) will be "
+                                        "used.").format(name_inf[0], genomes_inf, name))
                         cur_name = name
                     cur_date = date
                 elif len(name_inf) > 2:
@@ -197,6 +203,7 @@ def read_genomes(list_file, name, date, dbpath):
                     cur_date = date
                 else:
                     cur_name, cur_date = name_inf
+                    print(line, "-{}-{}-".format(cur_name, cur_date))
                     if cur_name == "":
                         cur_name = name
                     if cur_date == "":
@@ -204,14 +211,14 @@ def read_genomes(list_file, name, date, dbpath):
                     if not check_format(cur_name):
                         logger.warning(("Invalid name {} given for genome {}. Only put "
                                         "4 alphanumeric characters in your date and name. "
-                                        "For this genome, the default name ({}) and date ({}) "
-                                        "will be used.").format(cur_name, genomes_inf, name, date))
+                                        "For this genome, the default name ({}) "
+                                        "will be used.").format(cur_name, genomes_inf, name))
                         cur_name = name
                     if not check_format(cur_date):
                         logger.warning(("Invalid date {} given for genome {}. Only put "
                                         "4 alphanumeric characters in your date and name. "
-                                        "For this genome, the default name ({}) and date ({}) "
-                                        "will be used.").format(cur_date, genomes_inf, name, date))
+                                        "For this genome, the default date ({}) "
+                                        "will be used.").format(cur_date, genomes_inf, date))
                         cur_date = date
             else:
                 genomes_inf = line.strip()

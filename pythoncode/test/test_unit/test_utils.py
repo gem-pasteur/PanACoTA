@@ -263,4 +263,49 @@ def test_read_genomes_ok(capsys):
     assert "genome.fst genome file does not exist. It will be ignored." in err
 
 
-
+def test_read_genomes_errors(capsys):
+    """
+    Test that when the list file contains only genome names which do not exist,
+    it returns an empty list of genomes to annotate/format.
+    """
+    name = "ESCO"
+    date = "0417"
+    dbpath = os.path.join("test", "data", "genomes")
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-errors.txt")
+    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+           "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
+           "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["ESCO.0417"],
+           "genome5.fasta": ["ESCO.0417"]}
+    assert genomes == exp
+    _, err = capsys.readouterr()
+    assert ("Invalid name/date given for genome A_H738.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default name (ESCO) and date (0417) will "
+            "be used.") in err
+    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-gembase.fna. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default name (ESCO) will "
+            "be used.") in err
+    assert ("Invalid date 152 given for genome H299_H561.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default date (0417) will "
+            "be used.") in err
+    assert ("Invalid date 1-03 given for genome genome2.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default date (0417) will "
+            "be used.") in err
+    assert ("genome.fst genome file does not exist. "
+            "It will be ignored.") in err
+    assert ("Invalid name a/b2 given for genome genome3.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default name (ESCO) will "
+            "be used.") in err
+    assert ("Invalid name #esc given for genome genome5.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default name (ESCO) will "
+            "be used.") in err
+    assert ("Invalid date 1_14 given for genome genome5.fasta. Only put "
+            "4 alphanumeric characters in your date and name. For "
+            "this genome, the default date (0417) will "
+            "be used.") in err

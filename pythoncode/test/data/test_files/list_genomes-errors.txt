@@ -1,0 +1,11 @@
+A_H738.fasta::n.ol.0156
+B2_A3_5.fasta-split5N.fna-gembase.fna::abc
+
+H299_H561.fasta   ::ABCD.152
+genome2.fasta::TOTO.1-03
+genome.fst::
+
+genome3.fasta::    a/b2.0512
+genome4.fasta  ::   
+
+genome5.fasta   :: #esc.1_14
