@@ -1,0 +1,12 @@
+A_H738.fasta B2_A3_5.fasta-split5N.fna-gembase.fna
+
+H299_H561.fasta  genome6.fasta genome.fna ::ABCD
+genome2.fasta::TOTO
+genome.fst::
+
+genome3.fasta::    .0512
+genome4.fasta  :: TOTO.
+
+genome5.fasta   :: TOTO.0114
+
+toto.fst toto.fasta genome.fst

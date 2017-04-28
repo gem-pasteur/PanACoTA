@@ -231,23 +231,23 @@ def test_sort_gene():
     assert sorted_genomes == exp
 
 
-def test_read_genomes_wrongName():
-    """
-    Test that when the list file contains only genome names which do not exist,
-    it returns an empty list of genomes to annotate/format.
-    """
-    name = "ESCO"
-    date = "0417"
-    dbpath = os.path.join("test", "data", "genomes")
-    list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath)
-    assert genomes == {}
+# def test_read_genomes_wrongName():
+#     """
+#     Test that when the list file contains only genome names which do not exist,
+#     it returns an empty list of genomes to annotate/format.
+#     """
+#     name = "ESCO"
+#     date = "0417"
+#     dbpath = os.path.join("test", "data", "genomes")
+#     list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
+#     genomes = utils.read_genomes(list_file, name, date, dbpath)
+#     assert genomes == {}
 
 
 def test_read_genomes_ok(capsys):
     """
-    Test that when the list file contains only genome names which do not exist,
-    it returns an empty list of genomes to annotate/format.
+    Test that when the list file contains genomes existing, it returns the expected list
+    of genomes
     """
     name = "ESCO"
     date = "0417"
@@ -265,8 +265,8 @@ def test_read_genomes_ok(capsys):
 
 def test_read_genomes_errors(capsys):
     """
-    Test that when the list file contains only genome names which do not exist,
-    it returns an empty list of genomes to annotate/format.
+    Test that when the list file contains errors in name and date provided,
+    it returns the expected errors, and the expected genome list.
     """
     name = "ESCO"
     date = "0417"
@@ -309,3 +309,50 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default date (0417) will "
             "be used.") in err
+
+
+def test_read_genomes_multi_files(capsys):
+    """
+    Test that when the list file contains several filenames for 1 same genome,
+    it returns the expected genome list, the expected errors (when some genome
+    files do not exist) and the expected concatenated files.
+    """
+    name = "ESCO"
+    date = "0417"
+    dbpath = os.path.join("test", "data", "genomes")
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-multi-files.txt")
+    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    exp = {"A_H738.fasta-all.fna": ["ESCO.0417"],
+           "H299_H561.fasta-all.fna": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
+           "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
+           "genome5.fasta": ["TOTO.0114"]}
+    assert exp == genomes
+    # Check error messages
+    _, err = capsys.readouterr()
+    assert ("genome.fna genome file does not exist. Its file will be ignored "
+            "when concatenating ['H299_H561.fasta', 'genome6.fasta', 'genome.fna']") in err
+    assert ("genome.fst genome file does not exist. It will be ignored.") in err
+    assert ("toto.fst genome file does not exist. Its file will be ignored "
+            "when concatenating ['toto.fst', 'toto.fasta', 'genome.fst']") in err
+    assert ("toto.fasta genome file does not exist. Its file will be ignored "
+            "when concatenating ['toto.fst', 'toto.fasta', 'genome.fst']") in err
+    assert ("genome.fst genome file does not exist. Its file will be ignored "
+            "when concatenating ['toto.fst', 'toto.fasta', 'genome.fst']") in err
+    assert ("None of the genome files in ['toto.fst', 'toto.fasta', 'genome.fst'] exist. "
+            "This genome will be ignored.") in err
+    # Check that files were concatenated as expected
+    concat1 = os.path.join(dbpath, "A_H738.fasta-all.fna")
+    exp_concat1 = os.path.join(dbpath, "A_H738-and-B2_A3_5.fna")
+    concat2 = os.path.join(dbpath, "H299_H561.fasta-all.fna")
+    exp_concat2 = os.path.join(dbpath, "H299_H561-and-genome6.fna")
+    with open(concat1, "r") as outf, open(exp_concat1, "r") as expf:
+        for line_out, line_exp in zip(outf, expf):
+            assert line_out == line_exp
+    with open(concat2, "r") as outf, open(exp_concat2, "r") as expf:
+        for line_out, line_exp in zip(outf, expf):
+            assert line_out == line_exp
+    os.remove(concat1)
+    os.remove(concat2)
+
+
+

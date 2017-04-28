@@ -13,6 +13,7 @@ import os
 import sys
 import logging
 import subprocess
+import shutil
 
 logger = logging.getLogger()
 
@@ -180,56 +181,104 @@ def read_genomes(list_file, name, date, dbpath):
             if "::" in line:
                 genomes_inf, name_inf = line.split("::")
                 genomes_inf = genomes_inf.strip()
-                name_inf = name_inf.strip().split(".")
-                # if only species provided
-                if len(name_inf) == 1:
-                    if name_inf[0] == "":
-                        cur_name = name
-                    elif check_format(name_inf[0]):
-                        cur_name = name_inf[0]
-                    else:
-                        logger.warning(("Invalid name {} given for genome {}. Only put "
-                                        "4 alphanumeric characters in your date and name. "
-                                        "For this genome, the default name ({}) will be "
-                                        "used.").format(name_inf[0], genomes_inf, name))
-                        cur_name = name
-                    cur_date = date
-                elif len(name_inf) > 2:
-                    logger.warning(("Invalid name/date given for genome {}. Only put "
-                                    "4 alphanumeric characters in your date and name. For "
-                                    "this genome, the default name ({}) and date ({}) will "
-                                    "be used.").format(genomes_inf, name, date))
-                    cur_name = name
-                    cur_date = date
-                else:
-                    cur_name, cur_date = name_inf
-                    print(line, "-{}-{}-".format(cur_name, cur_date))
-                    if cur_name == "":
-                        cur_name = name
-                    if cur_date == "":
-                        cur_date = date
-                    if not check_format(cur_name):
-                        logger.warning(("Invalid name {} given for genome {}. Only put "
-                                        "4 alphanumeric characters in your date and name. "
-                                        "For this genome, the default name ({}) "
-                                        "will be used.").format(cur_name, genomes_inf, name))
-                        cur_name = name
-                    if not check_format(cur_date):
-                        logger.warning(("Invalid date {} given for genome {}. Only put "
-                                        "4 alphanumeric characters in your date and name. "
-                                        "For this genome, the default date ({}) "
-                                        "will be used.").format(cur_date, genomes_inf, date))
-                        cur_date = date
+                cur_name, cur_date = read_info(name_inf, name, date, genomes_inf)
             else:
                 genomes_inf = line.strip()
                 cur_name = name
                 cur_date = date
-            if not os.path.isfile(os.path.join(dbpath, genomes_inf)):
-                logger.warning(("{} genome file does not exist. "
-                                    "It will be ignored.").format(genomes_inf))
-                continue
-            genomes[genomes_inf] = [cur_name + "." + cur_date]
+            # If several file names, check that each one exists, and concatenate the existing files
+            genomes_inf = genomes_inf.split()
+            if len(genomes_inf) > 1:
+                to_concat = []
+                for file in genomes_inf:
+                    if os.path.isfile(os.path.join(dbpath, file)):
+                        to_concat.append(file)
+                    else:
+                        logger.warning(("{} genome file does not exist. Its file will be "
+                                        "ignored when concatenating {}").format(file, genomes_inf))
+                # If there are files to concatenate, concatenate them
+                if to_concat != []:
+                    genome_name = to_concat[0] + "-all.fna"
+                    concat_file = os.path.join(dbpath, genome_name)
+                    to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
+                    cat(to_concat, concat_file)
+                else:
+                    logger.warning(("None of the genome files in {} exist. "
+                                    "This genome will be ignored.").format(genomes_inf))
+                    genome_name = ""
+            # If only 1 sequence file, check that it exists, and take its name
+            else:
+                if not os.path.isfile(os.path.join(dbpath, genomes_inf[0])):
+                    logger.warning(("{} genome file does not exist. "
+                                    "It will be ignored.").format(genomes_inf[0]))
+                    genome_name = ""
+                else:
+                    genome_name = genomes_inf[0]
+            if genome_name != "":
+                genomes[genome_name] = [cur_name + "." + cur_date]
     return genomes
+
+
+def read_info(name_inf, name, date, genomes_inf):
+    """
+    From the given information in 'name_inf', check if there is a name (and if its
+    format is ok) and if there is a date (and if its format is ok).
+    If no name (resp. no date), return default name (resp. default date).
+
+    Return name and date.
+    """
+    name_inf = name_inf.strip().split(".")
+    # if only species provided
+    if len(name_inf) == 1:
+        if name_inf[0] == "":
+            cur_name = name
+        elif check_format(name_inf[0]):
+            cur_name = name_inf[0]
+        else:
+            logger.warning(("Invalid name {} given for genome {}. Only put "
+                            "4 alphanumeric characters in your date and name. "
+                            "For this genome, the default name ({}) will be "
+                            "used.").format(name_inf[0], genomes_inf, name))
+            cur_name = name
+        cur_date = date
+    elif len(name_inf) > 2:
+        logger.warning(("Invalid name/date given for genome {}. Only put "
+                        "4 alphanumeric characters in your date and name. For "
+                        "this genome, the default name ({}) and date ({}) will "
+                        "be used.").format(genomes_inf, name, date))
+        cur_name = name
+        cur_date = date
+    else:
+        cur_name, cur_date = name_inf
+        if cur_name == "":
+            cur_name = name
+        if cur_date == "":
+            cur_date = date
+        if not check_format(cur_name):
+            logger.warning(("Invalid name {} given for genome {}. Only put "
+                            "4 alphanumeric characters in your date and name. "
+                            "For this genome, the default name ({}) "
+                            "will be used.").format(cur_name, genomes_inf, name))
+            cur_name = name
+        if not check_format(cur_date):
+            logger.warning(("Invalid date {} given for genome {}. Only put "
+                            "4 alphanumeric characters in your date and name. "
+                            "For this genome, the default date ({}) "
+                            "will be used.").format(cur_date, genomes_inf, date))
+            cur_date = date
+    return cur_name, cur_date
+
+
+def cat(list_files, output):
+    """
+    Concatenate all files in 'list_files' and save result in 'output'
+    Concat using shutil.copyfileobj, in order to copy by chunks, to
+    avoid memory problems if files are big.
+    """
+    with open(output, "w") as outf:
+        for file in list_files:
+            with open(file, "r") as inf:
+                shutil.copyfileobj(inf, outf)
 
 
 def check_format(info):
