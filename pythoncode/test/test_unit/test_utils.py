@@ -231,17 +231,17 @@ def test_sort_gene():
     assert sorted_genomes == exp
 
 
-# def test_read_genomes_wrongName():
-#     """
-#     Test that when the list file contains only genome names which do not exist,
-#     it returns an empty list of genomes to annotate/format.
-#     """
-#     name = "ESCO"
-#     date = "0417"
-#     dbpath = os.path.join("test", "data", "genomes")
-#     list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
-#     genomes = utils.read_genomes(list_file, name, date, dbpath)
-#     assert genomes == {}
+def test_read_genomes_wrongName():
+    """
+    Test that when the list file contains only genome names which do not exist,
+    it returns an empty list of genomes to annotate/format.
+    """
+    name = "ESCO"
+    date = "0417"
+    dbpath = os.path.join("test", "data", "genomes")
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
+    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    assert genomes == {}
 
 
 def test_read_genomes_ok(capsys):
