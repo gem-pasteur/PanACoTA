@@ -26,7 +26,8 @@ def test_parser_noarg(capsys):
     _, err = capsys.readouterr()
     assert ("[-h] -d DB_PATH -r RES_PATH [-n NAME] [--l90 L90]") in err
     assert "[--nbcont NBCONT] [--cutN CUTN] [--threads THREADS]" in err
-    assert "[--date DATE] [-F] [-Q]" in err
+    assert "[--date DATE] [--tmp TMPDIR] [--prok PROKKADIR] [-F]" in err
+    assert "[-Q]" in err
     assert "list_file" in err
     assert "the following arguments are required: list_file, -d, -r" in err
 
@@ -341,8 +342,8 @@ def test_main_allDiscardNbcont():
     date = "0417"
     force = False
     qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, l90, nbcont,
-                                         cutn, threads, date, force, qc_only)
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
+                                         cutn, threads, force, qc_only)
     assert skip == []
     assert skipf == []
     assert kept == {}
@@ -371,8 +372,8 @@ def test_main_allDiscardL90():
     date = "0417"
     force = False
     qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, l90, nbcont,
-                                         cutn, threads, date, force, qc_only)
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
+                                         cutn, threads, force, qc_only)
     assert skip == []
     assert skipf == []
     assert kept == {}
@@ -402,8 +403,8 @@ def test_main_QC():
     date = "0417"
     force = False
     qc_only = True
-    allg, kept = annot.main(list_file, dbpath, resdir, name, l90, nbcont,
-                                         cutn, threads, date, force, qc_only)
+    allg, kept = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
+                                         cutn, threads, force, qc_only)
     assert kept == {}
     expg = {'B2_A3_5.fasta-changeName.fna': ['ESCO.0417', ('test/data/genomes/'
                                              'B2_A3_5.fasta-changeName.fna'), 120529, 5, 4],
@@ -431,8 +432,8 @@ def test_main_wrongSeqNames():
     date = "0417"
     force = False
     qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, l90, nbcont,
-                                         cutn, threads, date, force, qc_only)
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
+                                         cutn, threads, force, qc_only)
     assert skip == []
     assert skipf == []
     assert kept == {}

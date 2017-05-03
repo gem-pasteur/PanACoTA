@@ -59,7 +59,8 @@ from pipelinepackage import format_functions as ffunc
 from pipelinepackage import utils
 
 
-def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, force, qc_only):
+def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+         threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None):
     """
     Main method, doing all steps:
     - analyse genomes (nb contigs, L90, stretches of N...)
@@ -72,8 +73,10 @@ def main(list_file, db_path, res_dir, name, l90, nbcont, cutn, threads, date, fo
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
-    tmp_dir = os.path.join(res_dir, "tmp_files")
-    prok_dir = tmp_dir
+    if not tmp_dir:
+        tmp_dir = os.path.join(res_dir, "tmp_files")
+    if not prok_dir:
+        prok_dir = tmp_dir
     os.makedirs(res_dir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(prok_dir, exist_ok=True)
@@ -258,6 +261,15 @@ def parse(argu=sys.argv[1:]):
                               " given date is that it is 4 characters long. You can use letters"
                               " if you want. But the common way is to use 4 digits, "
                               "corresponding to MMYY."))
+    parser.add_argument("--tmp", dest="tmpdir",
+                        help=("Specify where the temporary files (sequence split by stretches "
+                              "of 'N', sequence with new contig names etc.) must be saved. "
+                              "By default, it will be saved in your result_directory/tmp_files."))
+    parser.add_argument("--prok", dest="prokkadir",
+                        help=("Specify in which directory the prokka output files "
+                              "(1 folder per genome, called <genome_name>-prokkaRes) must be "
+                              "saved. By default, they are saved in the same directory as "
+                              "your temporary files (see --tmp option to change it)."))
     parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
                         help=("Add this option if you want to run prokka and formatting steps "
                               "even if their result folder (for prokka step) or files (for "
@@ -294,6 +306,6 @@ def parse(argu=sys.argv[1:]):
 
 if __name__ == '__main__':
     OPTIONS = parse(sys.argv[1:])
-    main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.l90,
-         OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads, OPTIONS.date, OPTIONS.force,
-         OPTIONS.qc_only)
+    main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.date,
+         OPTIONS.l90, OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads,
+         OPTIONS.force, OPTIONS.qc_only, OPTIONS.tmpdir, OPTIONS.prokkadir)
