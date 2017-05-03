@@ -326,6 +326,147 @@ def test_logger_critical(capsys):
     os.remove(logfile + ".err")
 
 
+def test_main_given_tmp():
+    """
+    Test that when a tmp folder is given by user, tmp files are saved in it,
+    and prokka files too.
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-default.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcGivenTmp")
+    tmpdir = os.path.join("test", "data", "tmp_funcGivenTmp")
+    name = "ESCO"
+    l90 = 1
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
+                                         tmp_dir=tmpdir)
+    assert skip == []
+    assert skipf == []
+    expk = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/tmp_funcGivenTmp/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1]
+           }
+    assert kept == expk
+    expg = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/tmp_funcGivenTmp/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1],
+            'H299_H561.fasta-all.fna':
+                ['ESCO.1015',
+                 'test/data/genomes/H299_H561.fasta-all.fna',
+                 13259, 7, 3],
+            'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.1116',
+                 'test/data/genomes/B2_A3_5.fasta-changeName.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    # Check that tmp files exist in the right folder
+    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna"))
+    # Test that prokka folder is in the right directory
+    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna-prokkaRes"))
+    shutil.rmtree(resdir, ignore_errors=True)
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
+    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
+
+
+def test_main_given_prokka():
+    """
+    Test that when a prokka folder is given by user, tmp files are saved in result/tmp_files,
+    and prokka files are saved in the given prokka folder.
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-default.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcGivenTmp")
+    prokdir = os.path.join("test", "data", "prokka_funcGivenTmp")
+    name = "ESCO"
+    l90 = 1
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
+                                         prok_dir=prokdir)
+    assert skip == []
+    assert skipf == []
+    expk = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1]
+           }
+    assert kept == expk
+    expg = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1],
+            'H299_H561.fasta-all.fna':
+                ['ESCO.1015',
+                 'test/data/genomes/H299_H561.fasta-all.fna',
+                 13259, 7, 3],
+            'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.1116',
+                 'test/data/genomes/B2_A3_5.fasta-changeName.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(resdir, "tmp_files", "A_H738.fasta-all.fna-gembase.fna"))
+    # Test that prokka folder is in the right directory (given)
+    assert os.path.isdir(os.path.join(prokdir, "A_H738.fasta-all.fna-gembase.fna-prokkaRes"))
+    shutil.rmtree(resdir, ignore_errors=True)
+    shutil.rmtree(prokdir, ignore_errors=True)
+    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
+    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
+
+
+def test_main_given_tmpAndprokka():
+    """
+    Test that when a tmp folder and a prokka folder are given by user, tmp files are saved in
+    tmp folder, and prokka files in prokka folder.
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-default.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcGivenTmp")
+    prokdir = os.path.join("test", "data", "prokka_funcGivenTmp")
+    tmpdir = os.path.join("test", "data", "tmp_funcGivenTmp")
+    name = "ESCO"
+    l90 = 1
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
+                                         prok_dir=prokdir, tmp_dir=tmpdir)
+    assert skip == []
+    assert skipf == []
+    expk = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/tmp_funcGivenTmp/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1]
+           }
+    assert kept == expk
+    expg = {"A_H738.fasta-all.fna":
+                ["ESCO.1015.00001",
+                 'test/data/tmp_funcGivenTmp/A_H738.fasta-all.fna-gembase.fna',
+                 20031, 5, 1],
+            'H299_H561.fasta-all.fna':
+                ['ESCO.1015',
+                 'test/data/genomes/H299_H561.fasta-all.fna',
+                 13259, 7, 3],
+            'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.1116',
+                 'test/data/genomes/B2_A3_5.fasta-changeName.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna"))
+    # Test that prokka folder is in the right directory (given)
+    assert os.path.isdir(os.path.join(prokdir, "A_H738.fasta-all.fna-gembase.fna-prokkaRes"))
+    assert os.path.isfile(os.path.join(prokdir, "A_H738.fasta-all.fna-gembase.fna-prokka.log"))
+    shutil.rmtree(resdir, ignore_errors=True)
+    shutil.rmtree(prokdir, ignore_errors=True)
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
+    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
+
+
 def test_main_allDiscardNbcont():
     """
     Test that when the genomes given in list file have high nbcontigs compared
@@ -449,6 +590,8 @@ def test_annote_all():
     Test that when we call the pipeline with all default parameters, all expected output files
     are created. Check the content of result files (LSTINFO, Genes, Proteins, Replicons),
     lstinfo, discarded and log files.
+    Test that prokka files are in the right folder (result/tmp_files), and that tmp files
+    are also in results/tmp_files (no tmp or prokka dir given, so default is used)
     """
     date = time.strftime("%m%y")
     fulldate = time.strftime("%Y-%m-%d")
@@ -466,9 +609,9 @@ def test_annote_all():
     discfile = [os.path.join(respath, "discarded-list_genomes-func-test-default.lst")]
     QCfiles = [os.path.join(respath, qc + "list_genomes-func-test-default.png")
                for qc in ["QC_L90-", "QC_nb-contigs-"]]
-    genomes = {"B2_A3_5.fasta-changeName.fna": "ESCO.1116.00002".format(date),
-               "H299_H561.fasta-all.fna": "ESCO.1015.00001".format(date),
-               "A_H738.fasta-all.fna": "GENO.1015.00001".format(date)}
+    genomes = {"B2_A3_5.fasta-changeName.fna": "ESCO.1116.00002",
+               "H299_H561.fasta-all.fna": "ESCO.1015.00001",
+               "A_H738.fasta-all.fna": "GENO.1015.00001"}
     split5Nfiles = [os.path.join(respath, "tmp_files", g + "-split5N.fna") for g in genomes]
     gembasefiles = [os.path.join(respath, "tmp_files", g + "-split5N.fna-gembase.fna")
                     for g in genomes]
