@@ -7,6 +7,7 @@ Functional tests for annote_pipeline.py
 
 import pytest
 import os
+import glob
 import subprocess
 import shutil
 import time
@@ -457,8 +458,8 @@ def test_annote_all():
     discfile = [os.path.join(respath, "discarded-list_genomes-func-test-default.lst")]
     QCfiles = [os.path.join(respath, qc + "list_genomes-func-test-default.png")
                for qc in ["QC_L90-", "QC_nb-contigs-"]]
-    genomes = {"B2_A3_5.fasta-changeName.fna": "ESCO.{}.00001".format(date),
-               "H299_H561.fasta-all.fna": "GENO.{}.00002".format(date),
+    genomes = {"B2_A3_5.fasta-changeName.fna": "ESCO.1116.00002".format(date),
+               "H299_H561.fasta-all.fna": "ESCO.1015.00001".format(date),
                "A_H738.fasta-all.fna": "GENO.1015.00001".format(date)}
     split5Nfiles = [os.path.join(respath, "tmp_files", g + "-split5N.fna") for g in genomes]
     gembasefiles = [os.path.join(respath, "tmp_files", g + "-split5N.fna-gembase.fna")
@@ -486,34 +487,59 @@ def test_annote_all():
         assert os.path.isfile(f + ".faa")
         assert os.path.isfile(f + ".ffn")
 
-    TODO: check next steps, update with changed lstfile.
-    # # Check content of result database files
-    # exp_dir = os.path.join("test", "data", "exp_files", "results_test_func-default")
-    # for f in (lstinffiles + prtfiles + genfiles + repfiles):
-    #     exp_file = os.sep.join(f.split(os.sep)[-2:])
-    #     exp_path = os.path.join(exp_dir, exp_file)
-    #     with open(exp_path, "r") as expf, open(f, "r") as outf:
-    #         for line_exp, line_out in zip(expf, outf):
-    #             assert line_exp == line_out
-    # # Check that err file is empty
-    # with open(log_files[1], "r") as errf:
-    #     lines = errf.readlines()
-    #     assert lines == []
-    # # Check that log file contains expected information (info level)
-    # with open(log_files[0], "r") as logf:
-    #     infos = []
-    #     for line in logf:
-    #         assert line.startswith("[" + fulldate)
-    #         assert line.count("::") == 2
-    #         infos.append(line.strip().split("::")[-1].strip())
-    #     assert "Reading genomes" in infos
-    #     assert ("Cutting genomes at each stretch of at least 5 'N', and then, calculating "
-    #             "genome size, number of contigs and L90.") in infos
-    #     assert ("Annotating all genomes with prokka") in infos
-    #     assert ("Formatting all genomes") in infos
-    # # Check lstinfo file content
-    # explst = os.path.join(exp_dir, "LSTINFO-list_genomes-func-test-default.lst")
-    # with open(lstfile[0], "r") as expf, open(explst, "r") as outf:
-    #     for line_exp, line_out in zip(expf, outf):
-    #         assert line_exp == line_out
-    # shutil.rmtree(respath)
+    # TODO: check next steps, update with changed lstfile.
+    # Check content of result database files
+    exp_dir = os.path.join("test", "data", "exp_files", "results_test_func-default")
+    for f in (lstinffiles + prtfiles + genfiles + repfiles):
+        exp_file = os.sep.join(f.split(os.sep)[-2:])
+        exp_file_path = os.path.join(exp_dir, exp_file)
+        with open(exp_file_path, "r") as expf, open(f, "r") as outf:
+            for line_exp, line_out in zip(expf, outf):
+                assert line_exp == line_out
+
+    # Check that log files (error and log) contain expected information
+    with open(log_files[0], "r") as logf:
+        infos = []
+        for line in logf:
+            assert line.startswith("[" + fulldate)
+            assert line.count("::") == 2
+            infos.append(line.strip().split("::")[-1].strip())
+        assert "Reading genomes" in infos
+        assert ("Cutting genomes at each stretch of at least 5 'N', and then, calculating "
+                "genome size, number of contigs and L90.") in infos
+        assert ("Annotating all genomes with prokka") in infos
+        assert ("Formatting all genomes") in infos
+    with open(log_files[1], "r") as logf:
+        infos = []
+        for line in logf:
+            assert line.startswith("[" + fulldate)
+            assert line.count("::") == 2
+            infos.append(line.strip().split("::")[-1].strip())
+        assert ("toto.fst genome file does not exist. Its file will be ignored when "
+                "concatenating ['A_H738.fasta', 'toto.fst', 'genome1.fasta', "
+                "'genome.fst']") in infos
+        assert ("genome.fst genome file does not exist. Its file will be ignored when "
+                "concatenating ['A_H738.fasta', 'toto.fst', 'genome1.fasta', "
+                "'genome.fst']") in infos
+    # Check file content of genomes "-all" files
+    # H299_H561.fasta and genome6.fasta
+    exp_Hand6 = os.path.join(dbpath, "H299_H561-and-genome6.fna")
+    Handg6 = os.path.join(dbpath, "H299_H561.fasta-all.fna")
+    with open(exp_Hand6, "r") as expf, open(Handg6, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    os.remove(Handg6)
+    # A_H738.fasta and genome1.fasta
+    exp_Aand1 = os.path.join(dbpath, "A_H738-and-genome1.fna")
+    Aand1 = os.path.join(dbpath, "A_H738.fasta-all.fna")
+    with open(exp_Aand1, "r") as expf, open(Aand1, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    os.remove(Aand1)
+    # Check lstinfo file content
+    explst = os.path.join(exp_dir, "LSTINFO-list_genomes-func-test-default.lst")
+    with open(lstfile[0], "r") as expf, open(explst, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    shutil.rmtree(respath)
+
