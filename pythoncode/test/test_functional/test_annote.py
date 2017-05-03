@@ -57,6 +57,7 @@ def test_parser_wrongname(capsys):
             " correspond to the 2 first letters of genus, and 2 first letters of "
             "species, e.g. ESCO for Escherichia Coli.") in err
 
+
 def test_parser_negativeCont(capsys):
     """
     Test that when the script is called with a limit of contig number higher than 9999,
@@ -326,7 +327,8 @@ def test_logger_critical(capsys):
 
 def test_main_allDiscardNbcont():
     """
-
+    Test that when the genomes given in list file have high nbcontigs compared
+    to given threshold, they appear in the list of genomes, but are not kept for analysis.
     """
     list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-allDiscard.txt")
     dbpath = os.path.join("test", "data", "genomes")
@@ -355,7 +357,8 @@ def test_main_allDiscardNbcont():
 
 def test_main_allDiscardL90():
     """
-
+    Test that when the genomes given in list file have high L90 compared
+    to given threshold, they appear in the list of genomes, but are not kept for analysis.
     """
     list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-allDiscard.txt")
     dbpath = os.path.join("test", "data", "genomes")
@@ -384,7 +387,9 @@ def test_main_allDiscardL90():
 
 def test_main_QC():
     """
-
+    Test that when only QC is run, it returns only the list of all genomes + list of genomes
+    that would be kept for an analysis. It does not return the list of genomes for
+    which annotation or format had problems, as this step did not run.
     """
     list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-allDiscard.txt")
     dbpath = os.path.join("test", "data", "genomes")
@@ -411,7 +416,9 @@ def test_main_QC():
 
 def test_main_wrongSeqNames():
     """
-
+    Test that when some genome names given in the list file do not exist in the
+    db path, they are not considered in the list of genomes to annotate/format. The others
+    appear in the list of genomes.
     """
     list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-wrongNames.txt")
     dbpath = os.path.join("test", "data", "genomes")
