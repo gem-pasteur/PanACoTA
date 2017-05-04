@@ -585,6 +585,163 @@ def test_main_wrongSeqNames():
     shutil.rmtree(resdir, ignore_errors=True)
 
 
+def test_main_onExistingProkkaDir():
+    """
+    Test that, when the pipeline is run with a given prokka dir, where prokka results already
+    exist, and are ok, all runs well
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-exist_dir.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcExistingProkka")
+    prokdir = os.path.join("test", "data", "exp_files")
+    name = "ESCO"
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
+                                         prok_dir=prokdir)
+    assert skip == []
+    assert skipf == []
+    expg = {'H299_H561.fasta':
+                ['ESCO.1015.00001',
+                 'test/data/res_test_funcExistingProkka/tmp_files/H299_H561.fasta-gembase.fna',
+                 13143, 3, 3],
+            'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.1116.00002',
+                 'test/data/res_test_funcExistingProkka/tmp_files/B2_A3_5.fasta-changeName.fna-gembase.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    assert kept == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "B2_A3_5.fasta-changeName.fna-gembase.fna"))
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "H299_H561.fasta-gembase.fna"))
+    # Test that prokka folder was not recreated
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "B2_A3_5.fasta-changeName.fna-gembase.fna-prokkaRes"))
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "H299_H561.fasta-gembase.fna-prokkaRes"))
+    # Test that result files are in result dir
+    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist_dir.lst"))
+    shutil.rmtree(resdir, ignore_errors=True)
+
+
+def test_main_onExistingProkkaDirErrorProkk(capsys):
+    """
+    Test that, when the pipeline is run with a given prokka dir, where prokka results have
+    problems (no tbl file), it returns an error message and the genome with problems
+    is in skipped.
+    """
+    list_file = os.path.join("test", "data", "test_files",
+                             "list_genomes-func-test-exist-dir-err.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    genome_ori = os.path.join(dbpath, "B2_A3_5.fasta-changeName.fna")
+    genome_here = os.path.join(dbpath, "B2_A3_5.fasta-problems.fna")
+    shutil.copyfile(genome_ori, genome_here)
+    resdir = os.path.join("test", "data", "res_test_ProkErr")
+    prokdir = os.path.join("test", "data", "exp_files")
+    name = "ESCO"
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
+                                         prok_dir=prokdir)
+    assert skip == ['B2_A3_5.fasta-problems.fna']
+    assert skipf == []
+    expg = {'H299_H561.fasta':
+                ['ESCO.1015.00001',
+                 'test/data/res_test_ProkErr/tmp_files/H299_H561.fasta-gembase.fna',
+                 13143, 3, 3],
+            'B2_A3_5.fasta-problems.fna':
+                ['ESCO.1116.00002',
+                 'test/data/res_test_ProkErr/tmp_files/B2_A3_5.fasta-problems.fna-gembase.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    assert kept == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "B2_A3_5.fasta-problems.fna-gembase.fna"))
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "H299_H561.fasta-gembase.fna"))
+    # Test that prokka folder was not recreated
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes"))
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "H299_H561.fasta-gembase.fna-prokkaRes"))
+    # Test that result files are in result dir
+    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist-dir-err.lst"))
+    # Check error messages
+    _, err = capsys.readouterr()
+    assert ("Prokka had problems while annotating some genomes, or did not find any gene. "
+            "Hence, they are not formatted, and absent from your output database. Please look "
+            "at their Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
+            "to the current error log (<output_directory>/<input_filename>.log.err) to get "
+            "more information, and run again to annotate and format them. Here are the "
+            "genomes (problem with prokka or no gene found):") in err
+    assert "- B2_A3_5.fasta-problems.fna" in err
+    shutil.rmtree(resdir, ignore_errors=True)
+    os.remove(genome_here)
+
+
+def test_main_onExistingProkkaDirErrorForm(capsys):
+    """
+    Test that, when the pipeline is run with a given prokka dir, where prokka results are ok
+    (good files), but have problems inside (wrong header format), it returns an error
+    message and the genome with problems is in skipped_format.
+    """
+    list_file = os.path.join("test", "data", "test_files",
+                             "list_genomes-func-test-exist-dir-err.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    genome_ori = os.path.join(dbpath, "B2_A3_5.fasta-changeName.fna")
+    genome_here = os.path.join(dbpath, "B2_A3_5.fasta-problems.fna")
+    shutil.copyfile(genome_ori, genome_here)
+    resdir = os.path.join("test", "data", "res_test_ProkErr")
+    prokdir = os.path.join("test", "data", "exp_files")
+    tblInit = os.path.join(prokdir, "B2_A3_5.fasta-changeName.fna-gembase.fna-prokkaRes",
+                           "test.0417.00002.tbl")
+    tblHere = os.path.join(prokdir, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+                           "test.0417.00002.tbl")
+    shutil.copyfile(tblInit, tblHere)
+    name = "ESCO"
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
+                                         prok_dir=prokdir)
+    assert skip == []
+    assert skipf == ['B2_A3_5.fasta-problems.fna']
+    expg = {'H299_H561.fasta':
+                ['ESCO.1015.00001',
+                 'test/data/res_test_ProkErr/tmp_files/H299_H561.fasta-gembase.fna',
+                 13143, 3, 3],
+            'B2_A3_5.fasta-problems.fna':
+                ['ESCO.1116.00002',
+                 'test/data/res_test_ProkErr/tmp_files/B2_A3_5.fasta-problems.fna-gembase.fna',
+                 120529, 5, 4]
+           }
+    assert allg == expg
+    assert kept == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "B2_A3_5.fasta-problems.fna-gembase.fna"))
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "H299_H561.fasta-gembase.fna"))
+    # Test that prokka folder was not recreated
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes"))
+    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
+                                          "H299_H561.fasta-gembase.fna-prokkaRes"))
+    # Test that result files are in result dir
+    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist-dir-err.lst"))
+    # Check error messages
+    _, err = capsys.readouterr()
+    assert ("Some genomes were annotated by prokka, but could not be formatted, "
+            "and are hence absent from your output database. Please look at log "
+            "files to get more information about why they could not be "
+            "formatted.") in err
+    assert "- B2_A3_5.fasta-problems.fna" in err
+    shutil.rmtree(resdir, ignore_errors=True)
+    os.remove(genome_here)
+    os.remove(tblHere)
+
+
 def test_annote_all():
     """
     Test that when we call the pipeline with all default parameters, all expected output files

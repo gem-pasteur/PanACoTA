@@ -104,7 +104,7 @@ def write_warning_skipped(skipped, format=False):
     else:
         logger.warning(("Some genomes were annotated by prokka, but could not be formatted, "
                         "and are hence absent from your output database. Please look at log "
-                        "files to get more information about wh they could not be "
+                        "files to get more information about why they could not be "
                         "formatted.\n{}").format(list_to_write))
 
 
