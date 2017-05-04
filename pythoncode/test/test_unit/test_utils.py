@@ -74,12 +74,14 @@ def test_skipped_prokka(capsys):
     skipped = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped)
     out, err = capsys.readouterr()
-    assert ("Prokka had problems while annotating some genomes. Hence, they are not "
+    assert ("Prokka had problems while annotating some genomes, or did not "
+            "find any gene. Hence, they are not "
             "formatted, and absent from your output database. Please look at their "
             "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
             "to the current error log (<output_directory>/<input_filename>.log.err)"
             " to get more information, and run again to annotate and format them. "
-            "Here are the genomes:") in err
+            "Here are the genomes (problem with prokka or no "
+            "gene found):") in err
     assert ("\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err or
             "\n\t- toto\n\t- genome\n\t- genome2" in err)
 

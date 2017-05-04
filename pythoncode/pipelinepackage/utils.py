@@ -93,12 +93,14 @@ def write_warning_skipped(skipped, format=False):
     logger = logging.getLogger()
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not format:
-        logger.warning(("Prokka had problems while annotating some genomes. Hence, they are not "
+        logger.warning(("Prokka had problems while annotating some genomes, or did not "
+                        "find any gene. Hence, they are not "
                         "formatted, and absent from your output database. Please look at their "
                         "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
                         "to the current error log (<output_directory>/<input_filename>.log.err)"
                         " to get more information, and run again to annotate and format them. "
-                        "Here are the genomes: \n{}").format(list_to_write))
+                        "Here are the genomes (problem with prokka or no "
+                        "gene found): \n{}").format(list_to_write))
     else:
         logger.warning(("Some genomes were annotated by prokka, but could not be formatted, "
                         "and are hence absent from your output database. Please look at log "
