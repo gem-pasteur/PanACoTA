@@ -71,6 +71,33 @@ def test_check_prokka_notbl(capsys):
     shutil.rmtree(out_dir)
 
 
+def test_check_prokka_sevtbl(capsys):
+    """
+    Check that check_prokka returns false when there is more than 1 tbl file,
+    and an error message
+    """
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_notbl")
+    name = "prokka_out_for_test-misstbl"
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + "2.tbl"))
+    logf = "prokka.log"
+    nbcont = 7
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
+    _, err = capsys.readouterr()
+    assert err == "prokka_out_for_test-misstbl original_name-error.fna: several .tbl files\n"
+    shutil.rmtree(out_dir)
+
+
 def test_check_prokka_nofaa(capsys):
     """
     Check that check_prokka returns false when a faa file is missing, and an error message
@@ -93,6 +120,33 @@ def test_check_prokka_nofaa(capsys):
     shutil.rmtree(out_dir)
 
 
+def test_check_prokka_sevfaa(capsys):
+    """
+    Check that check_prokka returns false when there is more than 1 faa file,
+    and an error message
+    """
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_nofaa")
+    name = "prokka_out_for_test-missfaa"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + "2.faa"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
+    _, err = capsys.readouterr()
+    assert err == "prokka_out_for_test-missfaa original_name.fna: several .faa files\n"
+    shutil.rmtree(out_dir)
+
+
 def test_check_prokka_noffn(capsys):
     """
     Check that check_prokka returns false when a ffn file is missing, and an error message
@@ -112,6 +166,33 @@ def test_check_prokka_noffn(capsys):
     assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     _, err = capsys.readouterr()
     assert err == "prokka_out_for_test-missffn original_name.fna: no .ffn file\n"
+    shutil.rmtree(out_dir)
+
+
+def test_check_prokka_sevffn(capsys):
+    """
+    Check that check_prokka returns false when there is more than 1 ffn file,
+    and an error message
+    """
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "out_test_noffn")
+    name = "prokka_out_for_test-missffn"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + "2.ffn"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
+    _, err = capsys.readouterr()
+    assert err == "prokka_out_for_test-missffn original_name.fna: several .ffn files\n"
     shutil.rmtree(out_dir)
 
 
