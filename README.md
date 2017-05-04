@@ -8,6 +8,7 @@ Annotate genomes and format them to gembase format.
 ## pipeline installation (final mode)
 
 Dependencies:
+ git
  python3 (and pip)
  prokka
 
