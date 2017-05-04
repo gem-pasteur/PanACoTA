@@ -60,10 +60,8 @@ pages:
   dependencies:
     - coverage
   script:
-    - mkdir public/htmlcov
-    - mkdir public/other
-    - mkdir public/doc
-    - mv pythoncode/htmlcov public/htmlcov
+    - mv pythoncode/htmlcov public
+    - ls -la public
   artifacts:
     paths:
       - public
