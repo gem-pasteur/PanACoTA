@@ -357,7 +357,7 @@ def test_run_prokka_out_exists_force():
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
     # Check content of tbl, ffn and faa files
-    exp_dir = os.path.join("test", "data", "exp_files", "H299_H561.fasta-prokkaRes",
+    exp_dir = os.path.join("test", "data", "exp_files", "H299_H561.fasta-gembase.fna-prokkaRes",
                            "test_runprokka_H299")
     out_tbl = os.path.join(out_prokdir, name + ".tbl")
     out_faa = os.path.join(out_prokdir, name + ".faa")
