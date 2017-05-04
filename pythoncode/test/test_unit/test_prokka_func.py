@@ -138,12 +138,15 @@ def test_check_prokka_wrong_tblCDS(capsys):
     """
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "test_files")
+    out_dir = os.path.join("test", "data", "res_checkProkkaWrongTbl")
+    os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongCDS"
+    tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
@@ -155,8 +158,7 @@ def test_check_prokka_wrong_tblCDS(capsys):
     assert err.split("\n")[1] == ("prokka_out_for_test-wrongCDS original_name.fna: "
                                   "no matching number of genes between tbl and ffn; "
                                   "ffn=17; in tbl =14genes 2CRISPR")
-    os.remove(os.path.join(out_dir, name + ".ffn"))
-    os.remove(os.path.join(out_dir, name + ".faa"))
+    shutil.rmtree(out_dir)
 
 
 def test_check_prokka_wrong_tblCRISPR(capsys):
@@ -166,12 +168,15 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     """
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "test_files")
+    out_dir = os.path.join("test", "data", "res_checlProkkaWrongCRISPR")
+    os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongtblCRISP"
+    tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
@@ -180,8 +185,7 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
                    "no matching number of genes between tbl and ffn; "
                    "ffn=17; in tbl =15genes 1CRISPR\n")
-    os.remove(os.path.join(out_dir, name + ".ffn"))
-    os.remove(os.path.join(out_dir, name + ".faa"))
+    shutil.rmtree(out_dir)
 
 
 def test_check_prokka_ok():
@@ -384,8 +388,8 @@ def test_run_all_parallel_less_threads():
     """
     Check that there is no problem when running with less threads than genomes (each genomes
     uses 2 threads)
-    All genomes should run well, except for "genome3", where there are 3 contigs, and
-    we announce 1 contig, so check_prokka should return false.
+    Genomes H299 and A_H738 should run well, but genomes genome* have problems (no CDS found),
+    so check_prokka should return false.
     """
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
@@ -403,8 +407,8 @@ def test_run_all_parallel_less_threads():
     final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[gnames[0]]
     assert final[gnames[1]]
-    assert final[gnames[2]]
-    assert final[gnames[3]]
+    assert not final[gnames[2]]
+    assert not final[gnames[3]]
     assert not final[gnames[4]]
     for name in gnames:
         shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))

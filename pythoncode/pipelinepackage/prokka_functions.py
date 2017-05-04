@@ -10,6 +10,7 @@ April 2017
 """
 
 import os
+import glob
 import logging
 import subprocess
 import shlex
@@ -147,19 +148,31 @@ def check_prokka(outdir, logf, name, gpath, nbcont):
         missing_file = True
     else:
         oriname = os.path.basename(gpath)
-        tblfile = os.path.join(outdir, name + ".tbl")
-        faafile = os.path.join(outdir, name + ".faa")
-        ffnfile = os.path.join(outdir, name + ".ffn")
-        if not os.path.isfile(tblfile):
+        tblfile = glob.glob(os.path.join(outdir, "*.tbl"))
+        faafile = glob.glob(os.path.join(outdir, "*.faa"))
+        ffnfile = glob.glob(os.path.join(outdir, "*.ffn"))
+        if len(tblfile) == 0:
             logger.error(("{} {}: no .tbl file").format(name, oriname))
             missing_file = True
-        if not os.path.isfile(faafile):
+        elif len(tblfile) > 1:
+            logger.error(("{} {}: several .tbl files").format(name, oriname))
+            missing_file = True
+        if len(faafile) == 0:
             logger.error(("{} {}: no .faa file").format(name, oriname))
             missing_file = True
-        if not os.path.isfile(ffnfile):
+        elif len(faafile) > 1:
+            logger.error(("{} {}: several .faa files").format(name, oriname))
+            missing_file = True
+        if len(ffnfile) == 0:
             logger.error(("{} {}: no .ffn file").format(name, oriname))
             missing_file = True
+        elif len(ffnfile) > 1:
+            logger.error(("{} {}: several .ffn files").format(name, oriname))
+            missing_file = True
         if not missing_file:
+            tblfile = tblfile[0]
+            faafile = faafile[0]
+            ffnfile = ffnfile[0]
             fnbcont, tnbCDS, tnbGene, tnbCRISPR = count_tbl(tblfile)
             faaprot = count_headers(faafile)
             ffngene = count_headers(ffnfile)
