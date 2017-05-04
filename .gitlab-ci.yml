@@ -63,6 +63,7 @@ pages:
     - mkdir public
     - mkdir public/htmlcov
     - mkdir public/others
+    - cp pythoncode/index.html public/others
     - mv pythoncode/htmlcov public
     - ls -la public
   artifacts:
