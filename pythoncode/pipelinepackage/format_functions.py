@@ -99,15 +99,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     """
     prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
     # Get .tbl file
-    tblgenome = glob.glob(os.path.join(prokka_dir, "*.tbl"))
-    if len(tblgenome) == 0:
-        logger.error(("No .tbl file in {}.").format(prokka_dir))
-        return False
-    elif len(tblgenome) > 1:
-        logger.error("Several .tbl files in {}.".format(prokka_dir))
-        return False
-    else:
-        tblgenome = tblgenome[0]
+    tblgenome = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
     lstgenome = os.path.join(lst_dir, name + ".lst")
     # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
     # If the user ran prokka, and then changed the genome names (for example, by changing
@@ -115,17 +107,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # running prokka again, we must change here the contig names (containing genome name).
     same_name = tbl2lst(tblgenome, lstgenome, name)
     # create Genes file (and check no problem occurred with return code)
-    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))
-    if len(ffngenome) == 0:
-        logger.error(("No .ffn file in {}.").format(prokka_dir))
-        os.remove(lstgenome)
-        return False
-    elif len(ffngenome) > 1:
-        logger.error("Several .ffn files in {}.".format(prokka_dir))
-        os.remove(lstgenome)
-        return False
-    else:
-        ffngenome = ffngenome[0]
+    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
     gengenome = os.path.join(gene_dir, name + ".gen")
     ok_gene = create_gen(ffngenome, lstgenome, gengenome)
     # If gene file not created because a problem occurred, return False:
@@ -134,19 +116,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
         os.remove(lstgenome)
         return False
     # If gene file was created, create Proteins file
-    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))
-    if len(faagenome) == 0:
-        logger.error(("No .faa file in {}.").format(prokka_dir))
-        os.remove(lstgenome)
-        os.remove(gengenome)
-        return False
-    elif len(faagenome) > 1:
-        logger.error("Several .faa files in {}.".format(prokka_dir))
-        os.remove(lstgenome)
-        os.remove(gengenome)
-        return False
-    else:
-        faagenome = faagenome[0]
+    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
     prtgenome = os.path.join(prot_dir, name + ".prt")
     ok_prt = create_prt(faagenome, lstgenome, prtgenome)
     # If protein file not created, return False: format did not run for this genome
