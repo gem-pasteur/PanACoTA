@@ -58,25 +58,37 @@ def format_genomes(genomes, results, res_path, prok_path):
     widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                progressbar.Percentage(), ")"]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+    # bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
-    for num, (genome, (name, gpath, _, _, _)) in enumerate(genomes.items()):
-        # Ignore genomes with bad quality (not annotated)
-        if genome not in results:
-            bar.update(num + 1)
-            continue
-        # if prokka did not run well for a genome, don't format it
-        if not results[genome]:
-            skipped.append(genome)
-            bar.update(num + 1)
-            continue
-        ok_format = format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
-        if not ok_format:
-            skipped_format.append(genome)
-        bar.update(num + 1)
-    bar.finish()
+    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
+              for genome, (name, gpath, _, _, _) in genomes.items()]
+    res = [handle_genome(args) for args in params]
+    for output in res:
+        if output[0] == "bad_prokka":
+            skipped.append(output[1])
+        elif not output[0]:
+            skipped_format.append(output[1])
+    logger.debug(res)
+    logger.debug(skipped)
+    logger.debug(skipped_format)
     return skipped, skipped_format
+
+
+def handle_genome(args):
+    """
+    For a given genome, check if it has been annotated (in results), if prokka ran without
+    problems (result = True). In that case, format the genome and get the output to
+    see if everything went ok.
+    """
+    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results = args
+    if genome not in results:
+        return ("no_res", genome)
+    # if prokka did not run well for a genome, don't format it
+    if not results[genome]:
+        return ("bad_prokka", genome)
+    ok_format = format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+    return (ok_format, genome)
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir):

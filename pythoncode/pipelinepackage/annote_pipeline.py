@@ -71,7 +71,6 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     - format annotated genomes
 
     """
-    print(force)
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
