@@ -10,6 +10,7 @@ April 2017
 """
 
 import os
+import shutil
 import glob
 import logging
 import subprocess
@@ -27,8 +28,8 @@ def run_prokka_all(genomes, threads, force, prok_folder):
 
     * genomes = {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
     * threads: max number of threads that can be used
-    * force: if None, do not override outdir (do not run prokka if outdir already exists). If
-    '--force', rerun prokka and override existing outdir, for all genomes.
+    * force: if False, do not override prokka outdir and result dir if they exist. If
+    True, rerun prokka and override existing results, for all genomes.
     * prok_dir: folder where prokka results must be written: for each genome,
     a directory <genome_name>-prokkaRes will be created in this folder, and all the results
     of prokka for the genome will be written inside
@@ -91,7 +92,7 @@ def run_prokka(arguments):
     prok_folder: path to folder where all prokka folders for all genomes are saved
     cores_prokka: how many cores can use prokka
     name: output name of annotated genome
-    force: "--force" if force run (override existing files), anything else otherwise
+    force: True if force run (override existing files), False otherwise
     nbcont: number of contigs in the input genome, to check prokka results
 
     returns:
@@ -110,12 +111,10 @@ def run_prokka(arguments):
                          "all genomes.").format(prok_dir))
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
         return ok
-    elif os.path.isdir(prok_dir) and force == "--force":
-        cmd = ("prokka --outdir {} --cpus {} {} "
-               "--prefix {} {}").format(prok_dir, threads, force, name, gpath)
-    else:
-        cmd = ("prokka --outdir {} --cpus {} "
-               "--prefix {} {}").format(prok_dir, threads, name, gpath)
+    elif os.path.isdir(prok_dir) and force:
+        shutil.rmtree(prok_dir)
+    cmd = ("prokka --outdir {} --cpus {} "
+           "--prefix {} {}").format(prok_dir, threads, name, gpath)
     # logger.debug(cmd)
     prokf = open(prok_logfile, "w")
     try:

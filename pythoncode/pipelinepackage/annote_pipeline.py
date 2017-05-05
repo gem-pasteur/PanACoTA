@@ -71,6 +71,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     - format annotated genomes
 
     """
+    print(force)
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
@@ -279,7 +280,7 @@ def parse(argu=sys.argv[1:]):
                               "(1 folder per genome, called <genome_name>-prokkaRes) must be "
                               "saved. By default, they are saved in the same directory as "
                               "your temporary files (see --tmp option to change it)."))
-    parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
+    parser.add_argument("-F", "--force", dest="force", action="store_true",
                         help=("Force run: Add this option if you want to run prokka and "
                               "formatting steps for all genomes "
                               "even if their result folder (for prokka step) or files (for "
