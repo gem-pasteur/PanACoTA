@@ -742,6 +742,24 @@ def test_main_onExistingProkkaDirErrorForm(capsys):
     os.remove(tblHere)
 
 
+def test_run_exist_resdir(capsys):
+    """
+    Test that when the pipeline is called, with a given resdir which already contains
+    results, the program ends, with an error message.
+    """
+    resdir = os.path.join("test", "data", "test_func_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Proteins"))
+    open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
+    with pytest.raises(SystemExit):
+        annot.main("list_file.lst", "path/db", resdir, "toto", "0123")
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .prt files in the "
+            "Proteins folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
 def test_annote_all():
     """
     Test that when we call the pipeline with all default parameters, all expected output files

@@ -11,6 +11,7 @@ April 2017
 
 import os
 import sys
+import glob
 import logging
 import subprocess
 import shutil
@@ -295,4 +296,34 @@ def check_format(info):
     if len(info) != 4:
         return False
     return info.isalnum()
+
+
+def check_out_dirs(resdir):
+    """
+    Check that there is no file in:
+    - resdir/LSTINFO
+    - resdir/Genes
+    - resdir/Proteins
+    - resdir/Replicons
+    """
+    if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")) != []:
+        logger.error("ERROR: Your output directory already has .lst files in the "
+                     "LSTINFO folder. Provide another result directory, or remove the "
+                     "files in this one.\nEnding program.")
+        sys.exit(1)
+    if glob.glob(os.path.join(resdir, "Proteins", "*.prt")) != []:
+        logger.error("ERROR: Your output directory already has .prt files in the "
+                     "Proteins folder. Provide another result directory, or remove the "
+                     "files in this one.\nEnding program.")
+        sys.exit(1)
+    if glob.glob(os.path.join(resdir, "Genes", "*.gen")) != []:
+        logger.error("ERROR: Your output directory already has .gen files in the "
+                     "Genes folder. Provide another result directory, or remove the "
+                     "files in this one.\nEnding program.")
+        sys.exit(1)
+    if glob.glob(os.path.join(resdir, "Replicons", "*.fna")) != []:
+        logger.error("ERROR: Your output directory already has .fna files in the "
+                     "Replicons folder. Provide another result directory, or remove the "
+                     "files in this one.\nEnding program.")
+        sys.exit(1)
 

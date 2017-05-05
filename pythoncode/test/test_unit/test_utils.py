@@ -8,6 +8,7 @@ Unit tests for utils.py
 import pipelinepackage.utils as utils
 import pytest
 import os
+import shutil
 import logging
 import test.test_unit.util_tests as util_tests
 
@@ -370,5 +371,96 @@ def test_read_genomes_multi_files(capsys):
     os.remove(concat1)
     os.remove(concat2)
 
+
+def test_check_resdirLst(capsys):
+    """
+    Test that when the result directory already contains .lst files in LSTINFO,
+    program ends with an error message.
+    """
+    resdir = os.path.join("test", "data", "test_check_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "LSTINFO"))
+    open(os.path.join(resdir, "LSTINFO", "toto.lst"), "w").close()
+    with pytest.raises(SystemExit):
+        utils.check_out_dirs(resdir)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .lst files in the "
+            "LSTINFO folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirPrt(capsys):
+    """
+    Test that when the result directory already contains .prt files in Proteins,
+    program ends with an error message.
+    """
+    resdir = os.path.join("test", "data", "test_check_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Proteins"))
+    open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
+    with pytest.raises(SystemExit):
+        utils.check_out_dirs(resdir)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .prt files in the "
+            "Proteins folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirGen(capsys):
+    """
+    Test that when the result directory already contains .gen files in Genes,
+    program ends with an error message.
+    """
+    resdir = os.path.join("test", "data", "test_check_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Genes"))
+    open(os.path.join(resdir, "Genes", "toto.gen"), "w").close()
+    with pytest.raises(SystemExit):
+        utils.check_out_dirs(resdir)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .gen files in the "
+            "Genes folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirRep(capsys):
+    """
+    Test that when the result directory already contains .fna files in Replicons,
+    program ends with an error message.
+    """
+    resdir = os.path.join("test", "data", "test_check_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Replicons"))
+    open(os.path.join(resdir, "Replicons", "toto.fna"), "w").close()
+    with pytest.raises(SystemExit):
+        utils.check_out_dirs(resdir)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .fna files in the "
+            "Replicons folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirOtherExt():
+    """
+    Test that when the result directory contains txt files in Replicons dir,
+    there is no problem.
+    """
+    resdir = os.path.join("test", "data", "test_check_resdir")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Replicons"))
+    open(os.path.join(resdir, "Replicons", "toto.txt"), "w").close()
+    utils.check_out_dirs(resdir)
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirNoDir():
+    """
+    Test that when the result directory does not already exist, there is no problem.
+    """
+    utils.check_out_dirs("totoresdir")
 
 

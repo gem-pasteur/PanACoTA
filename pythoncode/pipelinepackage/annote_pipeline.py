@@ -80,7 +80,8 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     os.makedirs(res_dir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(prok_dir, exist_ok=True)
-
+    # Check that resultdir is not already used
+    utils.check_out_dirs(res_dir)
 
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
