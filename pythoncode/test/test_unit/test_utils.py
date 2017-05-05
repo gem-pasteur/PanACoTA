@@ -241,8 +241,10 @@ def test_read_genomes_nofile(capsys):
     with pytest.raises(SystemExit):
         utils.read_genomes("toto.txt", "TOTO", "0417", "db/path")
     out, err = capsys.readouterr()
-    assert ("ERROR: Your list file 'toto.txt' does not exist. "
-            "Please provide a list file.\n Ending program.") in err
+    assert ("ERROR: Your list file ") in err
+    assert ("toto.txt") in err
+    assert ("does not exist. Please provide a list file.") in err
+    assert ("Ending program.") in err
 
 
 def test_read_genomes_wrongName():
