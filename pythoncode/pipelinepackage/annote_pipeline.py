@@ -103,12 +103,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     level = logging.DEBUG
     init_logger(logfile, level)
     logger = logging.getLogger()
-
     if not qc_only:
         # test if prokka is installed and in the path
         prokka_cmd = ["prokka", "-h"]
         utils.check_installed(prokka_cmd)
-
 
     # Read genome names.
     # genomes = {genome: [spegenus.date]}
@@ -183,7 +181,6 @@ def init_logger(logfile, level, name= None):
     errfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
-
     # Create handler 3: write to stdout
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.DEBUG)  # write any message
@@ -235,7 +232,6 @@ def parse(argu=sys.argv[1:]):
             msg = ("We do not support genomes with more than 9999 contigs.")
             raise argparse.ArgumentTypeError(msg)
         return param
-
 
     parser = argparse.ArgumentParser(description=("Annotate all genomes"))
     # Create command-line parser for all options and arguments to give
