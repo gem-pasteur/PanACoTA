@@ -778,25 +778,44 @@ def test_main_onExistResDirForce():
                                          force=True, threads=8)
     assert set(skip) == set(["genome1.fasta", "genome2.fasta"])
     assert skipf == []
-    expg = {'H299_H561.fasta':
+    # 2 solutions as genome2 and H299 have the same L90 and nbcontig: randomly choose the
+    # order between the 2.
+    expg1 = {'H299_H561.fasta':
                 ['ESCO.0417.00002',
                  'test/data/res_test_funcExistResdirForce/tmp_files/H299_H561.fasta-gembase.fna',
                  13143, 3, 3],
-            'B2_A3_5.fasta-changeName.fna':
+             'B2_A3_5.fasta-changeName.fna':
                 ['ESCO.0417.00004',
                  'test/data/res_test_funcExistResdirForce/tmp_files/B2_A3_5.fasta-changeName.fna-gembase.fna',
                  120529, 5, 4],
-            'genome1.fasta':
+             'genome1.fasta':
                 ['ESCO.0417.00001',
                  'test/data/res_test_funcExistResdirForce/tmp_files/genome1.fasta-gembase.fna',
                  51, 4, 2],
-            'genome2.fasta':
+             'genome2.fasta':
                 ['ESCO.0417.00003',
                  'test/data/res_test_funcExistResdirForce/tmp_files/genome2.fasta-gembase.fna',
                  67, 3, 3],
            }
-    assert allg == expg
-    assert kept == expg
+    expg2 = {'H299_H561.fasta':
+                ['ESCO.0417.00003   ',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/H299_H561.fasta-gembase.fna',
+                 13143, 3, 3],
+             'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.0417.00004',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/B2_A3_5.fasta-changeName.fna-gembase.fna',
+                 120529, 5, 4],
+             'genome1.fasta':
+                ['ESCO.0417.00001',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/genome1.fasta-gembase.fna',
+                 51, 4, 2],
+             'genome2.fasta':
+                ['ESCO.0417.00002',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/genome2.fasta-gembase.fna',
+                 67, 3, 3],
+            }
+    assert allg == expg1 or allg == expg2
+    assert kept == expg1 or kept == expg2
     # Check that tmp files exist in the right folder (result/tmp_files)
     assert os.path.isfile(os.path.join(resdir, "tmp_files",
                                        "B2_A3_5.fasta-changeName.fna-gembase.fna"))
