@@ -760,6 +760,58 @@ def test_run_exist_resdir(capsys):
     shutil.rmtree(resdir)
 
 
+def test_main_onExistResDirForce():
+    """
+    Test that, when the pipeline is run on an existing result directory, but force option is on,
+    it removes the result folders and runs again.
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-allDiscard.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcExistResdirForce")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "Proteins"))
+    open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
+    assert os.path.isfile(os.path.join(resdir, "Proteins", "toto.prt"))
+    name = "ESCO"
+    date = "0417"
+    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
+                                         force=True, threads=8)
+    assert skip == ["genome1.fasta", "genome2.fasta"]
+    assert skipf == []
+    expg = {'H299_H561.fasta':
+                ['ESCO.0417.00002',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/H299_H561.fasta-gembase.fna',
+                 13143, 3, 3],
+            'B2_A3_5.fasta-changeName.fna':
+                ['ESCO.0417.00004',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/B2_A3_5.fasta-changeName.fna-gembase.fna',
+                 120529, 5, 4],
+            'genome1.fasta':
+                ['ESCO.0417.00001',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/genome1.fasta-gembase.fna',
+                 51, 4, 2],
+            'genome2.fasta':
+                ['ESCO.0417.00003',
+                 'test/data/res_test_funcExistResdirForce/tmp_files/genome2.fasta-gembase.fna',
+                 67, 3, 3],
+           }
+    assert allg == expg
+    assert kept == expg
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "B2_A3_5.fasta-changeName.fna-gembase.fna"))
+    assert os.path.isfile(os.path.join(resdir, "tmp_files",
+                                       "H299_H561.fasta-gembase.fna"))
+    # Test that prokka files exist in the right folder (resdir/tmp_files)
+    assert os.path.isdir(os.path.join(resdir, "tmp_files",
+                                      "B2_A3_5.fasta-changeName.fna-gembase.fna-prokkaRes"))
+    assert os.path.isdir(os.path.join(resdir, "tmp_files",
+                                      "H299_H561.fasta-gembase.fna-prokkaRes"))
+    # Test that result folders were removed before run: toto.prt should not be in Proteins anymore
+    assert not os.path.isfile(os.path.join(resdir, "Proteins", "toto.prt"))
+    shutil.rmtree(resdir, ignore_errors=True)
+
+
 def test_annote_all():
     """
     Test that when we call the pipeline with all default parameters, all expected output files

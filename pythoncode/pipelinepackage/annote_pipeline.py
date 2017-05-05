@@ -50,6 +50,7 @@ April 2017
 import os
 import sys
 import subprocess
+import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 
@@ -80,8 +81,15 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     os.makedirs(res_dir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(prok_dir, exist_ok=True)
-    # Check that resultdir is not already used
-    utils.check_out_dirs(res_dir)
+    # If force was set, remove result folders (Proteins, Replicons, Genes, LSTINFO)
+    if force:
+        shutil.rmtree(os.path.join(res_dir, "LSTINFO"), ignore_errors=True)
+        shutil.rmtree(os.path.join(res_dir, "Proteins"), ignore_errors=True)
+        shutil.rmtree(os.path.join(res_dir, "Genes"), ignore_errors=True)
+        shutil.rmtree(os.path.join(res_dir, "Replicons"), ignore_errors=True)
+    else:
+        # Check that resultdir is not already used
+        utils.check_out_dirs(res_dir)
 
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
@@ -272,21 +280,16 @@ def parse(argu=sys.argv[1:]):
                               "saved. By default, they are saved in the same directory as "
                               "your temporary files (see --tmp option to change it)."))
     parser.add_argument("-F", "--force", dest="force", const="--force", action="store_const",
-                        help=("Add this option if you want to run prokka and formatting steps "
+                        help=("Force run: Add this option if you want to run prokka and "
+                              "formatting steps for all genomes "
                               "even if their result folder (for prokka step) or files (for "
-                              "format step) already exist for the given genome: override "
+                              "format step) already exist: override "
                               "existing results.\n"
-                              "Otherwise, without this option, if the prokka folder exists, the "
-                              "pipeline will run the formatting step with the already existing "
-                              "results in prokka folder. If the Genes, Proteins, Replicons and "
-                              "LSTINFO files already exist, the pipeline will skip the "
-                              "formatting step too.\n"
-                              "Note that this will be applied to all genomes: all prokka result "
-                              "folders and format result files will be overridden. If you want "
-                              "to rerun prokka (resp. rerun formatting step) only on a specific "
-                              "genome, remove its prokka result folder (resp. Genes, Proteins, "
-                              "LSTINFO, Replicons result files) before running this script "
-                              "without this '-F' option."))
+                              "Without this option, if there already are results in the given "
+                              "result folder, the program stops. If there are no results, but "
+                              "prokka folder already exists, prokka won't run again, and the "
+                              "formating step will use the already existing folder if correct, "
+                              "or skip the genome if there are problems in prokka folder."))
     parser.add_argument("-Q", dest="qc_only", action="store_true", default=False,
                         help=("Add this option if you want only to do quality control on your "
                               "genomes (cut at 5N if asked, calculate L90 and number of contigs "
