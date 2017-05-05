@@ -683,7 +683,8 @@ def test_format_all():
     prok_path = os.path.join("test", "data", "exp_files")
     res_path = os.path.join("test", "data")
     results = {gname: True for gname in gnames}
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path,
+                                                   prok_path, threads=4)
     assert skipped == []
     assert skipped_format == []
     lstfiles = [os.path.join(res_path, "LSTINFO", name + ".lst") for name in onames]
@@ -788,7 +789,7 @@ def test_format_all_notResult():
         os.remove(f)
 
 
-def test_format_all_error(capsys):
+def test_format_all_error():
     """
     Test that when giving a list of 2 genomes, prokka ran without problem for both.
     But a problem appears while formatting the 2nd one. So, the 2nd one is not formatted,
@@ -829,12 +830,6 @@ def test_format_all_error(capsys):
     assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
     assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
     assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
-    _, err = capsys.readouterr()
-    assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
-                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
-                   "test.0417.00002.ffn. "
-                   "Error: invalid literal for int() with base 10: 'i00002'\n"
-                   "Gen file will not be created.\n")
     shutil.rmtree(os.path.join(res_path, "LSTINFO"))
     shutil.rmtree(os.path.join(res_path, "Proteins"))
     shutil.rmtree(os.path.join(res_path, "Genes"))

@@ -23,12 +23,13 @@ import shutil
 import logging
 import progressbar
 import glob
+import multiprocessing
 from pipelinepackage import genome_seq_functions as gfunc
 
 logger = logging.getLogger()
 
 
-def format_genomes(genomes, results, res_path, prok_path):
+def format_genomes(genomes, results, res_path, prok_path, threads=1):
     """
     For all genomes which were annotated by prokka, reformat them
     in order to have, in 'res_path', the following folders:
@@ -58,20 +59,27 @@ def format_genomes(genomes, results, res_path, prok_path):
     widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                progressbar.Percentage(), ")"]
-    # bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
     params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
               for genome, (name, gpath, _, _, _) in genomes.items()]
-    res = [handle_genome(args) for args in params]
+    pool = multiprocessing.Pool(threads)
+    final = pool.map_async(handle_genome, params)
+    pool.close()
+    while(True):
+        if final.ready():
+            break
+        remaining = final._number_left
+        bar.update(nbgen - remaining)
+    bar.finish()
+    pool.join()
+    res = final.get()
     for output in res:
         if output[0] == "bad_prokka":
             skipped.append(output[1])
         elif not output[0]:
             skipped_format.append(output[1])
-    logger.debug(res)
-    logger.debug(skipped)
-    logger.debug(skipped_format)
     return skipped, skipped_format
 
 
