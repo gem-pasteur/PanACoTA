@@ -233,6 +233,18 @@ def test_sort_gene():
     assert sorted_genomes == exp
 
 
+def test_read_genomes_nofile(capsys):
+    """
+    Test that when the genome list file provided does not exist, it
+    ends the program with an error message
+    """
+    with pytest.raises(SystemExit):
+        utils.read_genomes("toto.txt", "TOTO", "0417", "db/path")
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your list file 'toto.txt' does not exist. "
+            "Please provide a list file.\n Ending program.") in err
+
+
 def test_read_genomes_wrongName():
     """
     Test that when the list file contains only genome names which do not exist,

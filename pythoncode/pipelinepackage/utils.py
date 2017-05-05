@@ -173,6 +173,10 @@ def read_genomes(list_file, name, date, dbpath):
     logger = logging.getLogger()
     logger.info("Reading genomes")
     genomes = {}
+    if not os.path.isfile(list_file):
+        logger.error(("ERROR: Your list file '{}' does not exist. "
+                      "Please provide a list file.\n Ending program.").format(list_file))
+        sys.exit(1)
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
