@@ -41,7 +41,9 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     nbgen = len(genomes)
     # Create progressbar
     widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Percentage(), ' - ', progressbar.Timer()
+               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
+               progressbar.ETA()
               ]
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
                                   redirect_stderr=True, redirect_stdout=True).start()
