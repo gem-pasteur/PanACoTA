@@ -152,7 +152,7 @@ def test_parser_default():
     assert OPTIONS.cutn == 5
     assert OPTIONS.threads == 1
     assert OPTIONS.date == time.strftime("%m%y")
-    assert OPTIONS.force == None
+    assert OPTIONS.force == False
     assert OPTIONS.qc_only == False
 
 
@@ -171,7 +171,7 @@ def test_parser_values():
     assert OPTIONS.cutn == 0
     assert OPTIONS.threads == 8
     assert OPTIONS.date == "toto"
-    assert OPTIONS.force == None
+    assert OPTIONS.force == False
     assert OPTIONS.qc_only == False
 
 
@@ -189,7 +189,7 @@ def test_parser_force():
     assert OPTIONS.cutn == 5
     assert OPTIONS.threads == 1
     assert OPTIONS.date == time.strftime("%m%y")
-    assert OPTIONS.force == "--force"
+    assert OPTIONS.force == True
     assert OPTIONS.qc_only == False
 
 
@@ -218,7 +218,7 @@ def test_parser_qc():
     assert OPTIONS.cutn == 5
     assert OPTIONS.threads == 1
     assert OPTIONS.date == time.strftime("%m%y")
-    assert OPTIONS.force == None
+    assert OPTIONS.force == False
     assert OPTIONS.qc_only == True
 
 
