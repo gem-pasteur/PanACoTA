@@ -776,7 +776,7 @@ def test_main_onExistResDirForce():
     date = "0417"
     allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
                                          force=True, threads=8)
-    assert skip == ["genome1.fasta", "genome2.fasta"]
+    assert set(skip) == set(["genome1.fasta", "genome2.fasta"])
     assert skipf == []
     expg = {'H299_H561.fasta':
                 ['ESCO.0417.00002',
