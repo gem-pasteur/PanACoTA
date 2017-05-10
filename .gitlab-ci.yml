@@ -6,13 +6,20 @@ stages:
   - coverage
   - deploy
 
+build-from-base:
+  stage: build
+  only: install
+  script:
+    - command -v prokka
+
+
 unit-test-ubuntu16.04:
   stage: test
   except:
     - docker
   before_script:
     - cd pythoncode
-    - pip3 install .
+    - ./make.py
   script:
     - py.test test/test_unit
     - mv .coverage .coverage-unit
