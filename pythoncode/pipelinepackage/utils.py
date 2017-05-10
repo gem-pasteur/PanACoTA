@@ -37,7 +37,9 @@ class LessThanFilter(logging.Filter):
 
 def check_installed(cmd):
     """
-    Check if the command is in $PATH and can then be executed
+    Check if the command 'cmd' is in $PATH and can then be executed
+
+    return True or False
     """
     torun = "which " + cmd
     trying = subprocess.Popen(shlex.split(torun), stdout=subprocess.PIPE)
@@ -49,7 +51,7 @@ def check_installed(cmd):
 
 
 def plot_distr(values, limit, outfile, title, text):
-    """ Plot histogram of given values, and add a vertical line corresponding to the choosen
+    """ Plot histogram of given 'values', and add a vertical line corresponding to the chosen
      'limit' and saves the image into the 'outfile'
 
     :param values: list of values

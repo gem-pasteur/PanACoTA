@@ -352,7 +352,7 @@ def test_run_prokka_out_exists_force():
     open(os.path.join(out_prokdir, name + ".faa"), "w").close()
     open(os.path.join(out_prokdir, name + ".ffn"), "w").close()
     cores_prokka = 5
-    force = "--force"
+    force = True
     nbcont = 3
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
