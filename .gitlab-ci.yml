@@ -15,7 +15,7 @@ build-from-base:
     - cd pythoncode
     - python3 make.py
     - barrnap -h
-    - prokka -h
+    - echo $(prokka -h)
     - annote_pipeline.py -h
 
 build-from-barrnap:
@@ -27,7 +27,7 @@ build-from-barrnap:
     - cd pythoncode
     - python3 make.py
     - barrnap -h
-    - prokka -h
+    - echo $(prokka -h)
     - annote_pipeline.py -h
 
 build-from-prokka:
@@ -39,7 +39,7 @@ build-from-prokka:
     - cd pythoncode
     - python3 make.py
     - echo $(barrnap -h)
-    - prokka -h
+    - echo $(prokka -h)
     - annote_pipeline.py -h
 
 unit-test-ubuntu16.04:
