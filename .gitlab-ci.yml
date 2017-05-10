@@ -16,6 +16,7 @@ build-from-base:
     - python3 make.py
     - barrnap -h
     - prokka -h
+    - annote_pipeline.py -h
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
@@ -27,6 +28,7 @@ build-from-barrnap:
     - python3 make.py
     - barrnap -h
     - prokka -h
+    - annote_pipeline.py -h
 
 build-from-prokka:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
@@ -38,6 +40,7 @@ build-from-prokka:
     - python3 make.py
     - echo $(barrnap -h)
     - prokka -h
+    - annote_pipeline.py -h
 
 unit-test-ubuntu16.04:
   stage: test
