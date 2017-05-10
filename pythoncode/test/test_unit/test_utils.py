@@ -17,19 +17,16 @@ def test_check_install():
     """
     Try to run prokka, which is installed, and check that there is no problem
     """
-    ret = utils.check_installed(["prokka"])
-    assert ret == 1
+    assert utils.check_installed("prokka")
 
 
-def test_check_install_error(capsys):
+
+def test_check_install_error():
     """
     Try to run a command which does not exist, and check that it closes the program
     with exit code 1
     """
-    with pytest.raises(SystemExit):
-        utils.check_installed(["plop false command..."])
-    out, err = capsys.readouterr()
-    assert "plop false command... failed:" in err
+    assert not utils.check_installed("plop false command...")
 
 
 def test_class_filter():
