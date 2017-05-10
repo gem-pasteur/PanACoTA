@@ -20,7 +20,7 @@ unit-test-ubuntu16.04:
     - docker
   before_script:
     - cd pythoncode
-    - ./make.py
+    - python3 make.py
   script:
     - py.test test/test_unit
     - mv .coverage .coverage-unit
