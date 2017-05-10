@@ -24,18 +24,52 @@ import logging
 from logging.handlers import RotatingFileHandler
 import sys
 import shlex
+import shutil
 
-def install_all():
+
+def clean_dependencies():
+    """
+    Remove 'binaries' folder from PATH, and remove 'binaries' and 'dependencies' folders with
+    all their content.
+    """
+    logger.info("Cleaning dependencies")
+    binpath = os.path.join(os.getcwd(), "binaries")
+    srcpath = os.path.join(os.getcwd(), "dependencies")
+    elems = os.environ["PATH"].split(os.pathsep)
+    if binpath in elems:
+        elems.remove(binpath)
+    os.environ["PATH"] = os.pathsep.join(elems)
+    if os.path.isfile("0.8.tar.gz"):
+        os.remove("0.8.tar.gz")
+    shutil.rmtree(binpath, ignore_errors=True)
+    shutil.rmtree(srcpath, ignore_errors=True)
+    shutil.rmtree("prokka", ignore_errors=True)
+    shutil.rmtree("barrnap-0.8", ignore_errors=True)
+
+
+def uninstall():
+    """
+    Uninstall python package
+    """
+    cmd = "pip3 uninstall -y pipelinepackage"
+    error = "A problem occurred while trying to uninstall totomain."
+    run_cmd(cmd, error)
+
+
+def install_all(dev=False):
     """
     Install all needed software(s).
     First, check if dependencies are installed.
     If at least one dependency is not installed, install it.
     Then, install totomain.
+
+    dev: install totomain in development mode if true. Otherwise, install in final mode
     """
     to_install = check_dependencies()
     if to_install != []:
-        os.makedirs("dependences", exist_ok=True)
-        os.makedirs("binaries", exist_ok=True)
+        binpath = os.path.join(os.getcwd(), "binaries")
+        os.makedirs("dependencies", exist_ok=True)
+        os.makedirs(binpath, exist_ok=True)
         if "barrnap" in to_install:
             ret = install_barrnap()
             if ret != 0:
@@ -43,10 +77,13 @@ def install_all():
                                "not predict RNA.")
         if "prokka" in to_install:
             install_prokka()
-        logger.info("Finalizing dependences installation")
-        os.environ["PATH"] += os.pathsep + os.path.join(os.getcwd(), "binaries")
-    logger.info("Installing totomain")
-    cmd = "pip3 install ."
+        logger.info("Appending to PATH: {}".format(binpath))
+        os.environ["PATH"] += os.pathsep + binpath
+    logger.info("Installing totomain...")
+    if dev:
+        cmd = "pip3 install -e ."
+    else:
+        cmd = "pip3 install ."
     error = "A problem occurred while trying to install totomain."
     run_cmd(cmd, error)
 
@@ -72,7 +109,7 @@ def check_dependencies():
                     logger.error(("You need tar to install barrnap, the RNA predictor"
                                   " used by prokka."))
                     sys.exit(1)
-            to_install.append("barrnap")
+                to_install.append("barrnap")
             if not cmd_exists("git"):
                 logger.error("You need git to install prokka.")
                 sys.exit(1)
@@ -101,11 +138,11 @@ def install_barrnap():
     cmd = "rm 0.8.tar.gz"
     error = "A problem occurred while removing barrnap archive. See log above."
     ret = run_cmd(cmd, error)
-    cmd = "mv barrnap-0.8 dependences"
+    cmd = "mv barrnap-0.8 dependencies"
     error = ("A problem occurred while moving barrnap package to "
              "dependencies folder. See log above.")
     ret = run_cmd(cmd, error)
-    os.symlink(os.path.join("dependences", "barrnap-0.8", "bin", "barrnap"),
+    os.symlink(os.path.join("dependencies", "barrnap-0.8", "bin", "barrnap"),
                os.path.join("binaries", "barrnap"))
     return 0
 
@@ -118,13 +155,13 @@ def install_prokka():
     cmd = "git clone https://github.com/tseemann/prokka.git"
     error = "A problem occurred while trying to download prokka. See log above."
     ret = run_cmd(cmd, error, eof=True)
-    cmd = "mv prokka dependences"
-    error = "A problem occurred while moving prokka to 'dependences'. See log above."
+    cmd = "mv prokka dependencies"
+    error = "A problem occurred while moving prokka to 'dependencies'. See log above."
     ret = run_cmd(cmd, error, eof=True)
     cmd = os.path.join("dependencies", "prokka", "bin", "prokka") +  " --setupdb"
     error = "A problem occurred while initializing prokka db. See log above."
     ret = run_cmd(cmd, error, eof=True)
-    os.symlink(os.path.join("dependences", "prokka", "bin", "prokka"),
+    os.symlink(os.path.join("dependencies", "prokka", "bin", "prokka"),
                os.path.join("binaries", "prokka"))
 
 
@@ -133,6 +170,7 @@ def run_cmd(cmd, error, eof=False):
     Run the given command line. If the return code is not 0, print error message
     if eof (exit on fail) is True, exit program if error code is not 0.
     """
+    logger.info("--> CMD: '{}'".format(cmd))
     retcode = subprocess.call(shlex.split(cmd))
     if retcode != 0:
         logger.error(error)
@@ -162,20 +200,22 @@ def parse():
     parser = argparse.ArgumentParser(description=("Script to install, clean or uninstall "
                                                   "pipelineannotation"))
     # Create command-line parser for all options and arguments to give
-    targets = ['install', 'clean', 'uninstall']
+    targets = ['install', 'develop', 'clean', 'uninstall']
     parser.add_argument("target", default='install', choices=targets,
                         help=("Choose what you want to do:\n"
-                              " - install: install the pipeline and its dependences. If not "
-                              "already installed by user, dependences packages will be downloaded "
-                              "and built in 'dependences' folder, and their binary files will be "
+                              " - install: install the pipeline and its dependencies. If not "
+                              "already installed by user, dependencies packages "
+                              "will be downloaded "
+                              "and built in 'dependencies' folder, and their binary files will be "
                               "put to 'binaries'.\n"
-                              " - clean: clean dependences: for dependences which were installed "
+                              " - clean: clean dependencies: for dependencies "
+                              "which were installed "
                               "via this script, uninstall them, and remove their downloaded "
                               "sources from 'dependencies' folder. Can be used if the user wants "
                               "to install another version of the dependencies.\n"
-                              " - uninstall: uninstall the pipeline, as well as the dependences "
-                              "which were installed for it (in 'dependences' folder).\n"
-                              "Default is %(default)s"))
+                              " - uninstall: uninstall the pipeline, as well as the dependencies "
+                              "which were installed for it (in 'dependencies' folder).\n"
+                              "Default is %(default)s."))
     args = parser.parse_args()
     return args
 
@@ -186,9 +226,10 @@ if __name__ == '__main__':
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
     formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s')
-    formatterStream = logging.Formatter('  * %(message)s')
+    formatterStream = logging.Formatter(' * [%(asctime)s] :: %(message)s')
     # Create handler 1: writing to 'logfile'
     logfile = "install.log"
+    open(logfile, "w").close()  # empty logfile if existing
     logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
     # set level to the same as the logger level
     logfile_handler.setLevel(level)
@@ -205,7 +246,11 @@ if __name__ == '__main__':
     target = OPTIONS.target
     if target == "install":
         install_all()
-    # elif OPTIONS.target == "clean":
-    #     clean_all()
-    # else:
-    #     uninstall_all()
+    elif target == "develop":
+        install_all(dev=True)
+    elif target == "clean":
+        clean_dependencies()
+    elif target == "uninstall":
+        clean_dependencies()
+        uninstall()
+
