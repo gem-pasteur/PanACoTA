@@ -36,7 +36,7 @@ build-from-prokka:
   script:
     - cd pythoncode
     - python3 make.py
-    - barrnap -h
+    - echo $(barrnap -h)
     - prokka -h
 
 unit-test-ubuntu16.04:
