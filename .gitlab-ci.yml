@@ -12,6 +12,7 @@ build-from-base:
   only:
     - install
   script:
+    - cd pythoncode
     - python3 make.py
     - barrnap -h
     - prokka -h
@@ -22,6 +23,7 @@ build-from-barrnap:
   only:
     - install
   script:
+    - cd pythoncode
     - python3 make.py
     - barrnap -h
     - prokka -h
@@ -32,6 +34,7 @@ build-from-prokka:
   only:
     - install
   script:
+    - cd pythoncode
     - python3 make.py
     - barrnap -h
     - prokka -h
