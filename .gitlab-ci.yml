@@ -50,6 +50,7 @@ unit-test-ubuntu16.04:
     - cd pythoncode
     - python3 make.py
   script:
+    - ls test/data
     - py.test test/test_unit
     - mv .coverage .coverage-unit
   artifacts:
@@ -65,6 +66,7 @@ func-test-ubuntu16.04:
     - cd pythoncode
     - python3 make.py
   script:
+    - ls test/data
     - py.test test/test_functional
     - mv .coverage .coverage-functional
   artifacts:
