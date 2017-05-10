@@ -15,6 +15,7 @@ import glob
 import logging
 import subprocess
 import shutil
+import shlex
 
 logger = logging.getLogger()
 
@@ -39,7 +40,7 @@ def check_installed(cmd):
     Check if the command is in $PATH and can then be executed
     """
     torun = "command -v " + cmd
-    trying = subprocess.Popen(torun.split(), stdout=subprocess.PIPE)
+    trying = subprocess.Popen(shlex.split(torun), stdout=subprocess.PIPE)
     out, _ = trying.communicate()
     if trying.returncode == 0:
         if os.path.isfile(out.strip()):
