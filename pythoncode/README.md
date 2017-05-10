@@ -8,6 +8,6 @@ TODO:
 
 - test if prokka is in the path
 - put "-gembase" et "-splitxN" et "prokkaRes" files/folders into res_path/tmp_files
-- convert prokka to gembase format
+- convert prokka to gembase format: done
 - log errors when launching prokka
 - unit tests: done
