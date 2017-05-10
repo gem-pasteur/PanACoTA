@@ -8,7 +8,8 @@ stages:
 
 build-from-base:
   stage: build
-  only: install
+  only:
+    - install
   script:
     - command -v prokka
 
