@@ -16,7 +16,7 @@ build-from-base:
     - barrnap -h
     - prokka -h
 
-build-from-base:
+build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
   stage: build
   only:
@@ -26,8 +26,8 @@ build-from-base:
     - barrnap -h
     - prokka -h
 
-build-from-base:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-ubuntu-prokkaOnly
+build-from-prokka:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
   stage: build
   only:
     - install
