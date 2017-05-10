@@ -35,7 +35,7 @@ func-test-ubuntu16.04:
     - docker
   before_script:
     - cd pythoncode
-    - pip3 install .
+    - python3 make.py
   script:
     - py.test test/test_functional
     - mv .coverage .coverage-functional
