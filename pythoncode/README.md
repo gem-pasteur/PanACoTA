@@ -4,6 +4,9 @@ From `pythoncode` directory, run:
 `PYTHONPATH+=. ./pipelinepackage/annote_pipeline.py`
 
 
+To install before:
+wget, git, python3, pip3, tar
+
 TODO:
 
 - test if prokka is in the path
