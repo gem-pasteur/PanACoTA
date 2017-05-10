@@ -2,20 +2,21 @@
 # coding: utf-8
 
 """
-Functions to:
-- convert prokka tbl file to our tab file
-- convert prokka ffn and faa headers to our format
-- Create the database, with the following folders in the given "res_path":
-    - Proteins: multifasta with all CDS in aa
-    - Replicons: multifasta of genome
-    - Genes: multifasta of all genes in nuc
-    - LSTINFO: information on annotation. Columns are: `start end strand type locus
-    gene_name | product | EC_number | inference2` with the same types as prokka file,
-    and strain is C (complement) or D (direct). Locus is:
-    `<genome_name>.<i or b><contig_num>_<protein_num>`
+Installation script.
+Targets available are:
+
+- `./make.py install` : install all dependencies if not already present, and install totomain
+- `./make.py develop` : same as install, but install totomain in development mode, to be
+able to change the script and run it.
+- `./make.py clean` : clean all dependencies (uninstall them, remove source and bin folders)
+- `./make.py uninstall` : clean dependencies + uninstall totomain
+
+By default, the dependencies are installed in /usr/local/bin. If the user wants
+to install them in another directory (which is in the path), he can specify it with
+`--prefix <directory>`.
 
 @author gem
-April 2017
+May 2017
 """
 
 import subprocess
@@ -25,38 +26,61 @@ from logging.handlers import RotatingFileHandler
 import sys
 import shlex
 import shutil
+import glob
 
 
-def clean_dependencies():
+def check_path(install_dir):
     """
-    Remove 'binaries' folder from PATH, and remove 'binaries' and 'dependencies' folders with
+    Check that given install dir is in $PATH. If not, close and ask user to provide
+    an installation directory which is in the path, or to add /usr/local/bin to
+    its path.
+    """
+    elems = os.environ["PATH"].split(os.pathsep)
+    if install_dir not in elems:
+        logger.error("Your installation directory ({}) is not in your $PATH. Please, provide "
+                     "an installation directory which is in your PATH with '--prefix "
+                     "<install_dir>', or add the default installation directory "
+                     "(/usr/local/bin) to your PATH.".format(install_dir))
+        sys.exit(1)
+
+
+def clean_dependencies(install_dir):
+    """
+    Remove links to files in 'binaries', and remove 'binaries' and 'dependencies' folders with
     all their content.
     """
-    logger.info("Cleaning dependencies")
+    logger.info("Cleaning dependencies...")
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
-    elems = os.environ["PATH"].split(os.pathsep)
-    if binpath in elems:
-        elems.remove(binpath)
-    os.environ["PATH"] = os.pathsep.join(elems)
+    # Remove barrnap downloaded archive if not already done
     if os.path.isfile("0.8.tar.gz"):
         os.remove("0.8.tar.gz")
+    # Remove prokka downloaded folder if it was not moved to 'dependencies'
+    shutil.rmtree("prokka", ignore_errors=True)
+    # Remove barrnap initial folder if it was not moved to 'dependencies'
+    shutil.rmtree("barrnap-0.8", ignore_errors=True)
+    # If there are binaries in 'binaries' folder, remove their link to install_dir
+    if os.path.isdir(binpath):
+        for binf in glob.glob(os.path.join(binpath, "*")):
+            linked = os.path.join(install_dir, os.path.basename(binf))
+            if os.path.isfile(linked):
+                os.remove(linked)
+    # Remove 'dependencies' and 'binaries' folders
     shutil.rmtree(binpath, ignore_errors=True)
     shutil.rmtree(srcpath, ignore_errors=True)
-    shutil.rmtree("prokka", ignore_errors=True)
-    shutil.rmtree("barrnap-0.8", ignore_errors=True)
 
 
 def uninstall():
     """
-    Uninstall python package
+    Uninstall totomain python package
     """
+    logger.info("Uninstalling totomain...")
     cmd = "pip3 uninstall -y pipelinepackage"
     error = "A problem occurred while trying to uninstall totomain."
     run_cmd(cmd, error)
 
 
-def install_all(dev=False):
+def install_all(install_dir, dev=False):
     """
     Install all needed software(s).
     First, check if dependencies are installed.
@@ -77,8 +101,9 @@ def install_all(dev=False):
                                "not predict RNA.")
         if "prokka" in to_install:
             install_prokka()
-        logger.info("Appending to PATH: {}".format(binpath))
-        os.environ["PATH"] += os.pathsep + binpath
+        logger.info("Finalizing dependencies installation...")
+        for binf in glob.glob(os.path.join(binpath, "*")):
+            os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
     logger.info("Installing totomain...")
     if dev:
         cmd = "pip3 install -e ."
@@ -115,7 +140,7 @@ def check_dependencies():
                 sys.exit(1)
             to_install.append("prokka")
         if not cmd_exists("pip3"):
-            logger.error("You need pip3 to install the pipeline.")
+            logger.error("You need pip3 to install totomain.")
             sys.exit(1)
     return to_install
 
@@ -138,12 +163,14 @@ def install_barrnap():
     cmd = "rm 0.8.tar.gz"
     error = "A problem occurred while removing barrnap archive. See log above."
     ret = run_cmd(cmd, error)
-    cmd = "mv barrnap-0.8 dependencies"
+    binpath = os.path.join(os.getcwd(), "binaries")
+    srcpath = os.path.join(os.getcwd(), "dependencies")
+    cmd = "mv barrnap-0.8 " + srcpath
     error = ("A problem occurred while moving barrnap package to "
              "dependencies folder. See log above.")
     ret = run_cmd(cmd, error)
-    os.symlink(os.path.join("dependencies", "barrnap-0.8", "bin", "barrnap"),
-               os.path.join("binaries", "barrnap"))
+    os.symlink(os.path.join(srcpath, "barrnap-0.8", "bin", "barrnap"),
+               os.path.join(binpath, "barrnap"))
     return 0
 
 
@@ -158,11 +185,13 @@ def install_prokka():
     cmd = "mv prokka dependencies"
     error = "A problem occurred while moving prokka to 'dependencies'. See log above."
     ret = run_cmd(cmd, error, eof=True)
-    cmd = os.path.join("dependencies", "prokka", "bin", "prokka") +  " --setupdb"
+    binpath = os.path.join(os.getcwd(), "binaries")
+    srcpath = os.path.join(os.getcwd(), "dependencies")
+    cmd = os.path.join(srcpath, "prokka", "bin", "prokka") +  " --setupdb"
     error = "A problem occurred while initializing prokka db. See log above."
     ret = run_cmd(cmd, error, eof=True)
-    os.symlink(os.path.join("dependencies", "prokka", "bin", "prokka"),
-               os.path.join("binaries", "prokka"))
+    os.symlink(os.path.join(srcpath, "prokka", "bin", "prokka"),
+               os.path.join(binpath, "prokka"))
 
 
 def run_cmd(cmd, error, eof=False):
@@ -170,7 +199,6 @@ def run_cmd(cmd, error, eof=False):
     Run the given command line. If the return code is not 0, print error message
     if eof (exit on fail) is True, exit program if error code is not 0.
     """
-    logger.info("--> CMD: '{}'".format(cmd))
     retcode = subprocess.call(shlex.split(cmd))
     if retcode != 0:
         logger.error(error)
@@ -198,16 +226,19 @@ def parse():
     """
     import argparse
     parser = argparse.ArgumentParser(description=("Script to install, clean or uninstall "
-                                                  "pipelineannotation"))
+                                                  "totomain"))
     # Create command-line parser for all options and arguments to give
     targets = ['install', 'develop', 'clean', 'uninstall']
-    parser.add_argument("target", default='install', choices=targets,
+    parser.add_argument("target", default='install', choices=targets, nargs='?',
                         help=("Choose what you want to do:\n"
                               " - install: install the pipeline and its dependencies. If not "
                               "already installed by user, dependencies packages "
                               "will be downloaded "
                               "and built in 'dependencies' folder, and their binary files will be "
                               "put to 'binaries'.\n"
+                              " - develop: same as install, but totomain will be installed "
+                              "in development mode, so that you can modify the script and "
+                              "take the changes into account while running.\n"
                               " - clean: clean dependencies: for dependencies "
                               "which were installed "
                               "via this script, uninstall them, and remove their downloaded "
@@ -216,11 +247,16 @@ def parse():
                               " - uninstall: uninstall the pipeline, as well as the dependencies "
                               "which were installed for it (in 'dependencies' folder).\n"
                               "Default is %(default)s."))
+    parser.add_argument("--prefix", dest="install_dir",
+                        help=("By default, all scripts will be installed in /usr/local/bin. "
+                              "If you want to install them in another directory, give it "
+                              "with this --prefix option."))
     args = parser.parse_args()
     return args
 
 
 if __name__ == '__main__':
+    # Init logger
     logger = logging.getLogger()
     level = logging.INFO
     logger.setLevel(level)
@@ -235,22 +271,31 @@ if __name__ == '__main__':
     logfile_handler.setLevel(level)
     logfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(logfile_handler)  # add handler to logger
-    # Create handler 3: write to stdout
+    # Create handler 2: write to stderr
     stream_handler = logging.StreamHandler()
     stream_handler.setLevel(level)  # write any message
     stream_handler.setFormatter(formatterStream)
     logger.addHandler(stream_handler)  # add handler to logger
 
+    # Get user arguments
     OPTIONS = parse()
-
+    if not OPTIONS.install_dir:
+        install_dir = os.path.join("/usr", "local", "bin")
+    else:
+        install_dir = OPTIONS.install_dir
     target = OPTIONS.target
+    # Execute target
     if target == "install":
-        install_all()
+        # Check that installation directory is in $PATH
+        check_path(install_dir)
+        install_all(install_dir)
     elif target == "develop":
-        install_all(dev=True)
+        # Check that installation directory is in $PATH
+        check_path(install_dir)
+        install_all(install_dir, dev=True)
     elif target == "clean":
-        clean_dependencies()
+        clean_dependencies(install_dir)
     elif target == "uninstall":
-        clean_dependencies()
+        clean_dependencies(install_dir)
         uninstall()
 
