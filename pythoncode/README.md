@@ -10,4 +10,4 @@ TODO:
 - put "-gembase" et "-splitxN" et "prokkaRes" files/folders into res_path/tmp_files
 - convert prokka to gembase format
 - log errors when launching prokka
-- unit tests
+- unit tests: done
