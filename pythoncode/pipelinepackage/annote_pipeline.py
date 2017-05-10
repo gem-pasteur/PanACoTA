@@ -104,8 +104,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     logger = logging.getLogger()
     if not qc_only:
         # test if prokka is installed and in the path
-        prokka_cmd = ["prokka", "-h"]
-        utils.check_installed(prokka_cmd)
+        if not utils.check_installed("prokka"):
+            logger.error("Prokka is not installed. totomain annotate cannot run.")
+            sys.exit(1)
 
     # Read genome names.
     # genomes = {genome: [spegenus.date]}

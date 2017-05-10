@@ -36,15 +36,15 @@ class LessThanFilter(logging.Filter):
 
 def check_installed(cmd):
     """
-    Check that the given command exists
+    Check if the command is in $PATH and can then be executed
     """
-    FNULL = open(os.devnull, 'w')
-    try:
-        returncode = subprocess.call(cmd, stdout=FNULL, stderr=subprocess.STDOUT)
-        return returncode
-    except Exception as err:
-        logger.error(("{0} failed: {1}").format(cmd[0], err))
-        sys.exit(1)
+    torun = "command -v " + cmd
+    trying = subprocess.Popen(torun.split(), stdout=subprocess.PIPE)
+    out, _ = trying.communicate()
+    if trying.returncode == 0:
+        if os.path.isfile(out.strip()):
+            return True
+    return False
 
 
 def plot_distr(values, limit, outfile, title, text):
