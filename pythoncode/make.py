@@ -2,16 +2,16 @@
 # coding: utf-8
 
 """
-Installation script.
+Installation script for genomeAPCAT
 Targets available are:
 
 - `./make.py` = `./make.py install` : install all dependencies if not already present,
-and install totomain
-- `./make.py develop` : same as install, but install totomain in development mode, to be
+and install genomeAPCAT
+- `./make.py develop` : same as install, but install genomeAPCAT in development mode, to be
 able to change the script and run it.
 - `./make.py clean` : clean all dependencies that were installed by this script
 (uninstall them, remove source and bin folders)
-- `./make.py uninstall` : clean dependencies + uninstall totomain
+- `./make.py uninstall` : clean dependencies + uninstall genomeAPCAT
 
 By default, the dependencies are installed in /usr/local/bin. If the user wants
 to install them in another directory (which is in the path), he can specify it with
@@ -74,11 +74,11 @@ def clean_dependencies(install_dir):
 
 def uninstall():
     """
-    Uninstall totomain python package
+    Uninstall genomeAPCAT python package
     """
-    logger.info("Uninstalling totomain...")
+    logger.info("Uninstalling genomeAPCAT...")
     cmd = "pip3 uninstall -y pipelinepackage"
-    error = "A problem occurred while trying to uninstall totomain."
+    error = "A problem occurred while trying to uninstall genomeAPCAT."
     run_cmd(cmd, error)
 
 
@@ -87,9 +87,9 @@ def install_all(install_dir, dev=False):
     Install all needed software(s).
     First, check if dependencies are installed.
     If at least one dependency is not installed, install it.
-    Then, install totomain.
+    Then, install genomeAPCAT.
 
-    dev: install totomain in development mode if true. Otherwise, install in final mode
+    dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
     """
     to_install = check_dependencies()
     if to_install != []:
@@ -106,12 +106,12 @@ def install_all(install_dir, dev=False):
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
-    logger.info("Installing totomain...")
+    logger.info("Installing genomeAPCAT...")
     if dev:
         cmd = "pip3 install -e ."
     else:
         cmd = "pip3 install ."
-    error = "A problem occurred while trying to install totomain."
+    error = "A problem occurred while trying to install genomeAPCAT."
     run_cmd(cmd, error)
 
 
@@ -142,7 +142,7 @@ def check_dependencies():
                 sys.exit(1)
             to_install.append("prokka")
         if not cmd_exists("pip3"):
-            logger.error("You need pip3 to install totomain.")
+            logger.error("You need pip3 to install genomeAPCAT.")
             sys.exit(1)
     return to_install
 
@@ -230,17 +230,17 @@ def parse():
     """
     import argparse
     parser = argparse.ArgumentParser(description=("Script to install, clean or uninstall "
-                                                  "totomain"))
+                                                  "genomeAPCAT"))
     # Create command-line parser for all options and arguments to give
     targets = ['install', 'develop', 'clean', 'uninstall']
     parser.add_argument("target", default='install', choices=targets, nargs='?',
                         help=("Choose what you want to do:\n"
-                              " - install: install totomain and its dependencies. If not "
+                              " - install: install genomeAPCAT and its dependencies. If not "
                               "already installed by user, dependencies packages "
                               "will be downloaded "
                               "and built in 'dependencies' folder, and their binary files will be "
                               "put to 'binaries' folder.\n"
-                              " - develop: same as install, but totomain will be installed "
+                              " - develop: same as install, but genomeAPCAT will be installed "
                               "in development mode, so that you can modify the script and "
                               "take the changes into account while running.\n"
                               " - clean: clean dependencies: for dependencies "
@@ -248,7 +248,7 @@ def parse():
                               "via this script, uninstall them, and remove their downloaded "
                               "sources from 'dependencies' folder. Can be used if the user wants "
                               "to install another version of the dependencies.\n"
-                              " - uninstall: uninstall totomain, as well as the dependencies "
+                              " - uninstall: uninstall genomeAPCAT, as well as the dependencies "
                               "which were installed for it (in 'dependencies' folder).\n"
                               "Default is %(default)s."))
     parser.add_argument("--prefix", dest="install_dir",
@@ -263,10 +263,13 @@ if __name__ == '__main__':
     # Init logger
     logger = logging.getLogger()
     level = logging.INFO
+    # logging.basicConfig(level=level,
+                        # datefmt='%a, %d %b %Y %H:%M:%S')
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
-    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s')
-    formatterStream = logging.Formatter(' * [%(asctime)s] :: %(message)s')
+    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
+                                      '"%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter(' * [%(asctime)s] :: %(message)s', '"%Y-%m-%d %H:%M:%S')
     # Create handler 1: writing to 'logfile'
     logfile = "install.log"
     open(logfile, "w").close()  # empty logfile if existing
