@@ -5,7 +5,7 @@ From `pythoncode` directory, run:
 
 
 To install before:
-wget, git, python3, pip3, tar
+wget, git, python3, pip3, tar, default-jre, bioperl
 
 TODO:
 
