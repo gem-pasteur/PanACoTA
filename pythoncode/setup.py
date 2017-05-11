@@ -5,7 +5,7 @@
 Setup script
 """
 
-import pipelinepackage
+import genomeAPCAT
 try:
     from setuptools import setup
     from setuptools.command.test import test as TestCommand
@@ -37,9 +37,9 @@ def parse_requirements(requirements):
         return [l.strip('\n') for l in req_file if l.strip('\n')
                 and not l.startswith('#')]
 
-packages = ['pipelinepackage']
+packages = ['genomeAPCAT']
 requires = parse_requirements("requirements.txt")
-scripts = ['pipelinepackage/annote_pipeline.py']
+scripts = ['genomeAPCAT/annote_pipeline.py']
 
 classifiers = [
     "Environment :: Console",
@@ -54,10 +54,11 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(
-    name='pipelinepackage',
+    name='genomeAPCAT',
     packages=packages,
-    version=pipelinepackage.__version__,
-    description='Pipeline to annotate and format genomes',
+    version=genomeAPCAT.__version__,
+    description="Large scale comparative genomics tools: annotate genomes, do pangenome, "
+                "core/persistent genome, align core/persistent families, infer phylogenetic tree.",
     long_description=long_description,
     author='Amandine Perrin',
     author_email='amandine.perrin@pasteur.fr',

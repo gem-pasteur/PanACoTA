@@ -77,7 +77,7 @@ def uninstall():
     Uninstall genomeAPCAT python package
     """
     logger.info("Uninstalling genomeAPCAT...")
-    cmd = "pip3 uninstall -y pipelinepackage"
+    cmd = "pip3 uninstall -y genomeAPCAT"
     error = "A problem occurred while trying to uninstall genomeAPCAT."
     run_cmd(cmd, error)
 
@@ -268,8 +268,8 @@ if __name__ == '__main__':
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
     formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
-                                      '"%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter(' * [%(asctime)s] :: %(message)s', '"%Y-%m-%d %H:%M:%S')
+                                      '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter(' * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
     # Create handler 1: writing to 'logfile'
     logfile = "install.log"
     open(logfile, "w").close()  # empty logfile if existing
