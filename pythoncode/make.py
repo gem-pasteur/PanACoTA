@@ -5,10 +5,12 @@
 Installation script.
 Targets available are:
 
-- `./make.py install` : install all dependencies if not already present, and install totomain
+- `./make.py` = `./make.py install` : install all dependencies if not already present,
+and install totomain
 - `./make.py develop` : same as install, but install totomain in development mode, to be
 able to change the script and run it.
-- `./make.py clean` : clean all dependencies (uninstall them, remove source and bin folders)
+- `./make.py clean` : clean all dependencies that were installed by this script
+(uninstall them, remove source and bin folders)
 - `./make.py uninstall` : clean dependencies + uninstall totomain
 
 By default, the dependencies are installed in /usr/local/bin. If the user wants
@@ -169,6 +171,8 @@ def install_barrnap():
     error = ("A problem occurred while moving barrnap package to "
              "dependencies folder. See log above.")
     ret = run_cmd(cmd, error)
+    if ret != 0:
+        return ret
     os.symlink(os.path.join(srcpath, "barrnap-0.8", "bin", "barrnap"),
                os.path.join(binpath, "barrnap"))
     return 0
@@ -231,11 +235,11 @@ def parse():
     targets = ['install', 'develop', 'clean', 'uninstall']
     parser.add_argument("target", default='install', choices=targets, nargs='?',
                         help=("Choose what you want to do:\n"
-                              " - install: install the pipeline and its dependencies. If not "
+                              " - install: install totomain and its dependencies. If not "
                               "already installed by user, dependencies packages "
                               "will be downloaded "
                               "and built in 'dependencies' folder, and their binary files will be "
-                              "put to 'binaries'.\n"
+                              "put to 'binaries' folder.\n"
                               " - develop: same as install, but totomain will be installed "
                               "in development mode, so that you can modify the script and "
                               "take the changes into account while running.\n"
@@ -244,7 +248,7 @@ def parse():
                               "via this script, uninstall them, and remove their downloaded "
                               "sources from 'dependencies' folder. Can be used if the user wants "
                               "to install another version of the dependencies.\n"
-                              " - uninstall: uninstall the pipeline, as well as the dependencies "
+                              " - uninstall: uninstall totomain, as well as the dependencies "
                               "which were installed for it (in 'dependencies' folder).\n"
                               "Default is %(default)s."))
     parser.add_argument("--prefix", dest="install_dir",
@@ -280,7 +284,7 @@ if __name__ == '__main__':
     # Get user arguments
     OPTIONS = parse()
     if not OPTIONS.install_dir:
-        install_dir = os.path.join("/usr", "local", "bin")
+        install_dir = os.path.join(os.sep + "usr", "local", "bin")
     else:
         install_dir = OPTIONS.install_dir
     target = OPTIONS.target
