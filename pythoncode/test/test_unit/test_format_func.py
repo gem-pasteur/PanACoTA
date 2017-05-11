@@ -418,6 +418,85 @@ def test_create_gen_Ok():
     os.remove(genseq)
 
 
+def test_handle_genome_nores():
+    """
+    Test that when we try to format a genome which is not in results,
+    it returns a tuple with "no_res" and the genome name.
+    """
+    results = {"abcd.fasta": True}
+    args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
+            "gene/dir", "rep/dir", results)
+    res = ffunc.handle_genome(args)
+    assert res == ("no_res", "toto.fasta")
+
+
+def test_handle_genome_badprok():
+    """
+    Test that when we try to format a genome which is in results, but with False,
+    it returns a tuple with "bad_prokka" and the genome name.
+    """
+    results = {"abcd.fasta": True, "toto.fasta": False}
+    args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
+            "gene/dir", "rep/dir", results)
+    res = ffunc.handle_genome(args)
+    assert res == ("bad_prokka", "toto.fasta")
+
+
+def test_handle_genome_formatok():
+    """
+    Test that when we try to format a genome which is in results, but with False,
+    it returns a tuple with "bad_prokka" and the genome name.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    results = {"B2_A3_5.fasta-split5N.fna-gembase.fna": True, "toto.fasta": False}
+    args = ("B2_A3_5.fasta-split5N.fna-gembase.fna", name, gpath, prok_path, lst_dir, prot_dir,
+            gene_dir, rep_dir, results)
+    res = ffunc.handle_genome(args)
+    assert res == (True, "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    os.remove(os.path.join(lst_dir, name + ".prt"))
+    os.remove(os.path.join(lst_dir, name + ".fna"))
+    os.remove(os.path.join(lst_dir, name + ".gen"))
+    os.remove(os.path.join(lst_dir, name + ".lst"))
+
+
+def test_handle_genome_formaterror(capsys):
+    """
+    Test that when we try to format a genome which is in results, but with False,
+    it returns a tuple with "bad_prokka" and the genome name.
+    """
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-gembase.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "exp_files")
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+                           name + ".tbl")
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+                           name + ".tbl")
+    shutil.copyfile(tblInit, tblout)
+    lst_dir = os.path.join("test", "data")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    results = {"B2_A3_5.fasta-problems.fna-gembase.fna": True, "toto.fasta": False}
+    args = ("B2_A3_5.fasta-problems.fna-gembase.fna", name, gpath, prok_path, lst_dir, prot_dir,
+            gene_dir, rep_dir, results)
+    res = ffunc.handle_genome(args)
+    assert res == (False, "B2_A3_5.fasta-problems.fna-gembase.fna")
+    _, err = capsys.readouterr()
+    assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
+                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
+                   "test.0417.00002.ffn. "
+                   "Error: invalid literal for int() with base 10: 'i00002'\n"
+                   "Gen file will not be created.\n")
+    # remove tblout which was copied for this test
+    os.remove(tblout)
+
+
 def test_format1genome():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
@@ -604,7 +683,8 @@ def test_format_all():
     prok_path = os.path.join("test", "data", "exp_files")
     res_path = os.path.join("test", "data")
     results = {gname: True for gname in gnames}
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path,
+                                                   prok_path, threads=4)
     assert skipped == []
     assert skipped_format == []
     lstfiles = [os.path.join(res_path, "LSTINFO", name + ".lst") for name in onames]
@@ -709,7 +789,7 @@ def test_format_all_notResult():
         os.remove(f)
 
 
-def test_format_all_error(capsys):
+def test_format_all_error():
     """
     Test that when giving a list of 2 genomes, prokka ran without problem for both.
     But a problem appears while formatting the 2nd one. So, the 2nd one is not formatted,
@@ -750,12 +830,6 @@ def test_format_all_error(capsys):
     assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
     assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
     assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
-    _, err = capsys.readouterr()
-    assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
-                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
-                   "test.0417.00002.ffn. "
-                   "Error: invalid literal for int() with base 10: 'i00002'\n"
-                   "Gen file will not be created.\n")
     shutil.rmtree(os.path.join(res_path, "LSTINFO"))
     shutil.rmtree(os.path.join(res_path, "Proteins"))
     shutil.rmtree(os.path.join(res_path, "Genes"))
