@@ -13,7 +13,7 @@ import shutil
 import time
 import logging
 
-from pipelinepackage import annote_pipeline as annot
+from genomeAPCAT import annote_pipeline as annot
 
 
 def test_parser_noarg(capsys):

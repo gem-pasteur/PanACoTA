@@ -54,10 +54,10 @@ import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 
-from pipelinepackage import genome_seq_functions as gfunc
-from pipelinepackage import prokka_functions as pfunc
-from pipelinepackage import format_functions as ffunc
-from pipelinepackage import utils
+from genomeAPCAT import genome_seq_functions as gfunc
+from genomeAPCAT import prokka_functions as pfunc
+from genomeAPCAT import format_functions as ffunc
+from genomeAPCAT import utils
 
 
 def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,

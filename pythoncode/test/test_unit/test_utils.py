@@ -5,7 +5,7 @@
 Unit tests for utils.py
 """
 
-import pipelinepackage.utils as utils
+import genomeAPCAT.utils as utils
 import pytest
 import os
 import shutil

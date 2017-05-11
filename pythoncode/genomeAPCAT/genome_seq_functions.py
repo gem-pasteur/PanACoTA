@@ -16,7 +16,7 @@ import re
 import numpy as np
 import logging
 
-from pipelinepackage import utils
+from genomeAPCAT import utils
 
 
 logger = logging.getLogger()

@@ -9,7 +9,7 @@ import pytest
 import os
 import shutil
 from io import StringIO
-import pipelinepackage.format_functions as ffunc
+import genomeAPCAT.format_functions as ffunc
 
 
 def test_write_gene():

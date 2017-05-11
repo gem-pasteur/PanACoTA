@@ -24,7 +24,7 @@ import logging
 import progressbar
 import glob
 import multiprocessing
-from pipelinepackage import genome_seq_functions as gfunc
+from genomeAPCAT import genome_seq_functions as gfunc
 
 logger = logging.getLogger()
 

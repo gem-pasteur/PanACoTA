@@ -9,7 +9,7 @@ import pytest
 import os
 import shutil
 import glob
-import pipelinepackage.prokka_functions as pfunc
+import genomeAPCAT.prokka_functions as pfunc
 
 
 def test_count_tbl():
