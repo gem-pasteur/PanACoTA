@@ -12,6 +12,7 @@ import subprocess
 import shutil
 import time
 import logging
+import argparse
 
 from genomeAPCAT import annote_pipeline as annot
 
@@ -21,8 +22,10 @@ def test_parser_noarg(capsys):
     Test that when the script is called without any argument, an error message appears,
     indicating the required arguments.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("".split())
+        annot.parse(parser, "".split())
     _, err = capsys.readouterr()
     assert ("[-h] -d DB_PATH -r RES_PATH [-n NAME] [--l90 L90]") in err
     assert "[--nbcont NBCONT] [--cutN CUTN] [--threads THREADS]" in err
@@ -37,8 +40,10 @@ def test_parser_noname(capsys):
     Test that when the script is called without any name for the genomes not -Q option,
     it returns an error message
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath".split())
+        annot.parse(parser, "list_file -d dbpath -r respath".split())
     _, err = capsys.readouterr()
     assert ("You must specify your genomes dataset name in 4 characters with "
             "'-n name' option (type -h for more information). Or, if you do not want "
@@ -51,11 +56,13 @@ def test_parser_wrongname(capsys):
     Test that when the script is called with a genome name with more than 4 characters,
     it returns an error message
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n genome".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n genome".split())
     _, err = capsys.readouterr()
     assert ("The genome name must contain 4 characters. For example, this name can "
-            " correspond to the 2 first letters of genus, and 2 first letters of "
+            "correspond to the 2 first letters of genus, and 2 first letters of "
             "species, e.g. ESCO for Escherichia Coli.") in err
 
 
@@ -64,8 +71,10 @@ def test_parser_negativeCont(capsys):
     Test that when the script is called with a limit of contig number higher than 9999,
     it returns an error message
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --nbcont -5".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont -5".split())
     _, err = capsys.readouterr()
     assert ("The maximum number of contigs allowed must be a positive number.") in err
 
@@ -75,8 +84,10 @@ def test_parser_highCont(capsys):
     Test that when the script is called with a negative limit of contig number,
     it returns an error message
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --nbcont 10005".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont 10005".split())
     _, err = capsys.readouterr()
     assert ("We do not support genomes with more than 9999 contigs.") in err
 
@@ -86,8 +97,10 @@ def test_parser_wrongCont(capsys):
     Test that when the script is called with a non integer limit of contig number,
     it returns an error message
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --nbcont 10.5".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont 10.5".split())
     _, err = capsys.readouterr()
     assert ("argument --nbcont: invalid int value: 10.5") in err
 
@@ -97,8 +110,10 @@ def test_parser_wrongl90(capsys):
     Test that when the user does not give an int for the l90 limit, it returns an
     error message.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --l90 l90".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --l90 l90".split())
     _, err = capsys.readouterr()
     assert ("argument --l90: invalid int value: 'l90'") in err
 
@@ -108,8 +123,10 @@ def test_parser_wrongCut(capsys):
     Test that when the user does not give an int for the cutN value, it returns an
     error message.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --cutN 10.5".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --cutN 10.5".split())
     _, err = capsys.readouterr()
     assert ("argument --cutN: invalid int value: '10.5'") in err
 
@@ -119,8 +136,10 @@ def test_parser_wrongThread(capsys):
     Test that when the user does not give an int for the threads value, it returns an
     error message.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --threads 10.5".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --threads 10.5".split())
     _, err = capsys.readouterr()
     assert ("argument --threads: invalid int value: '10.5'") in err
 
@@ -130,8 +149,10 @@ def test_parser_wrongDate(capsys):
     Test that when the user does not give an int for the threads value, it returns an
     error message.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 --date 417".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 --date 417".split())
     _, err = capsys.readouterr()
     assert (("The date must contain 4 characters. Usually, it contains 4 digits, "
              "corresponding to the month (2 digits) and year (2 digits).")) in err
@@ -142,7 +163,9 @@ def test_parser_default():
     Test that when run with the minimum required arguments, all default values are
     as expected.
     """
-    OPTIONS = annot.parse("list_file -d dbpath -r respath -n g123".split())
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
+    OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -n g123".split())
     assert OPTIONS.list_file == "list_file"
     assert OPTIONS.db_path == "dbpath"
     assert OPTIONS.res_path == "respath"
@@ -160,8 +183,10 @@ def test_parser_values():
     """
     Test that values for L90, nbcontig, cutn, threads, date are taken into account
     """
-    OPTIONS = annot.parse(("list_file -d dbpath -r respath -n g123 --l90 2 "
-                           "--nbcont 10 --cutN 0 --threads 8 --date toto").split())
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
+    OPTIONS = annot.parse(parser, ("list_file -d dbpath -r respath -n g123 --l90 2 "
+                                   "--nbcont 10 --cutN 0 --threads 8 --date toto").split())
     assert OPTIONS.list_file == "list_file"
     assert OPTIONS.db_path == "dbpath"
     assert OPTIONS.res_path == "respath"
@@ -179,7 +204,9 @@ def test_parser_force():
     """
     Test that when run with '-F' option, force is initialized to "--force".
     """
-    OPTIONS = annot.parse("list_file -d dbpath -r respath -n g123 -F".split())
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
+    OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -n g123 -F".split())
     assert OPTIONS.list_file == "list_file"
     assert OPTIONS.db_path == "dbpath"
     assert OPTIONS.res_path == "respath"
@@ -197,8 +224,10 @@ def test_parser_wrongforce(capsys):
     """
     Test that when run with '-F' option + a value, it returns an error message.
     """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse("list_file -d dbpath -r respath -n g123 -F 10".split())
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 -F 10".split())
     _, err = capsys.readouterr()
     assert "unrecognized arguments: 10" in err
 
@@ -208,7 +237,9 @@ def test_parser_qc():
     Test that when run with '-Q' option (for QC only) and no name given for the genome, it
     is set to "NONE"
     """
-    OPTIONS = annot.parse("list_file -d dbpath -r respath -Q".split())
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    annot.build_parser(parser)
+    OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -Q".split())
     assert OPTIONS.list_file == "list_file"
     assert OPTIONS.db_path == "dbpath"
     assert OPTIONS.res_path == "respath"
@@ -235,8 +266,12 @@ def test_logger_default(capsys):
     logger.warning("info warning")
     logger.critical("info critical")
     out, err = capsys.readouterr()
-    assert out == "  * info debug\n  * info info\n"
-    assert err == "  * info warning\n  * info critical\n"
+    assert out.startswith("  * ")
+    assert "info debug\n" in out
+    assert "info info\n" in out
+    assert err.startswith("  * ")
+    assert "info warning\n" in err
+    assert "info critical\n" in err
     with open(logfile, "r") as logf:
         assert logf.readline().endswith("] :: DEBUG :: info debug\n")
         assert logf.readline().endswith("] :: INFO :: info info\n")
@@ -262,8 +297,11 @@ def test_logger_info(capsys):
     logger.warning("info warning")
     logger.critical("info critical")
     out, err = capsys.readouterr()
-    assert out == "  * info info\n"
-    assert err == "  * info warning\n  * info critical\n"
+    assert out.startswith("  * ")
+    assert "info info\n" in out
+    assert err.startswith("  * ")
+    assert "info warning\n" in err
+    assert "info critical\n" in err
     with open(logfile, "r") as logf:
         assert logf.readline().endswith("] :: INFO :: info info\n")
         assert logf.readline().endswith("] :: WARNING :: info warning\n")
@@ -290,7 +328,9 @@ def test_logger_warning(capsys):
     logger.critical("info critical")
     out, err = capsys.readouterr()
     assert out == ""
-    assert err == "  * info warning\n  * info critical\n"
+    assert err.startswith("  * ")
+    assert "info warning\n" in err
+    assert "info critical\n" in err
     with open(logfile, "r") as logf:
         assert logf.readline().endswith("] :: WARNING :: info warning\n")
         assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
@@ -317,7 +357,8 @@ def test_logger_critical(capsys):
     logger.critical("info critical")
     out, err = capsys.readouterr()
     assert out == ""
-    assert err == "  * info critical\n"
+    assert err.startswith("  * ")
+    assert "info critical\n" in err
     with open(logfile, "r") as logf:
         assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
     with open(logfile + ".err", "r") as logf:

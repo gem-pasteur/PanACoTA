@@ -142,7 +142,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     logger = logging.getLogger()
     if not qc_only:
         # test if prokka is installed and in the path
-        if not utils.check_installed("prokka"):
+        if not utils.check_installed("prokka"):  # pragma: no cover
             logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
             sys.exit(1)
 
@@ -239,7 +239,7 @@ def init_logger(logfile, level, name= None):
     logger.addHandler(err_handler)  # add handler to logger
 
 
-def parse(argu=sys.argv[1:]):
+def build_parser(parser):
     """
     Method to create a parser for command-line options
     """
@@ -277,7 +277,6 @@ def parse(argu=sys.argv[1:]):
             raise argparse.ArgumentTypeError(msg)
         return param
 
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
     # Create command-line parser for all options and arguments to give
     parser.add_argument(dest="list_file",
                         help=("File containing the list of genome filenames to annotate (1 genome"
@@ -343,6 +342,11 @@ def parse(argu=sys.argv[1:]):
                               "genomes would be annotated with the given parameters, and to "
                               "modify those parameters if you want, before you launch the "
                               "annotation and formatting steps."))
+
+def parse(parser, argu):
+    """
+    Parse arguments given to parser
+    """
     args = parser.parse_args(argu)
     if not args.qc_only and not args.name:
         parser.error("You must specify your genomes dataset name in 4 characters with "
@@ -355,7 +359,10 @@ def parse(argu=sys.argv[1:]):
 
 
 if __name__ == '__main__':
-    OPTIONS = parse(sys.argv[1:])
+    import argparse
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    build_parser(parser)
+    OPTIONS = parse(parser, sys.argv[1:])
     main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.date,
          OPTIONS.l90, OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads,
          OPTIONS.force, OPTIONS.qc_only, OPTIONS.tmpdir, OPTIONS.prokkadir)
