@@ -2,7 +2,9 @@
 # coding: utf-8
 
 """
-Pipeline to annotate genomes. Steps are:
+annotate is a subcommand of genomeAPCAT
+
+It is a pipeline to do quality control and annotate genomes. Steps are:
 - optional: find stretches of at least 'n' N (default 5), and cut into a new contig at this stretch
 - for each genome, calc L90 and number of contigs (after cut at N stretches if used)
 - keep only genomes with:
@@ -12,28 +14,64 @@ Pipeline to annotate genomes. Steps are:
  #contig)
 - annotate kept genomes with prokka
 - gembase format
-- find essential genes and give a distribution graph/table so that the user can choose which
-genomes he wants to remove on the 'essential genes' criteria
 
 Input:
-- list_file: list of genome filenames to annotate. Each genome is in a multi-fasta file. This file
-contains 1 genome filename per line. It can contain a second column, with the species in 4 letters.
-Genomes without this 2nd column will be renamed with the name given in species
-- species: with 4 letters to rename genomes (except those whose species name is precised
-in 2nd column of list file)
-- dbpath: path to folder containing all multi-fasta sequences of genomes
-- respath: path to folder where outputs must be saved (folders Genes, Replicons, Proteins,
+- **list_file:** list of genome filenames to annotate. This file contains 1 line per genome. It
+contains the name(s) of the (multi-)fasta file(s) corresponding to the genome (separated
+by space if several fasta files for the genome). After quality control, selected genomes
+will be named as following: `<gen-spe>.<date>.<strain>`, with:
+    * `<gen_spe>` 4 alphanumeric characters. Usually it corresponds to the 2 first letters
+    of genus, and 2 first letters of species, like ESCO for Escherichia coli.
+    * `<date>` date at which the genome was downloaded, formatted as MMYY (M=Month, Y=Year)
+    * `<strain>` is the strain number of the genome in the species, ordered by quality.
+Default values for `<gen_spe>` and `date` are given as input (see after). However, if some
+genomes do not have the same date and/or genus/species as the others, you can add
+this information for those genomes in the list file. fasta filenames and information are
+separated by `::`. `<gen_spe>` is given after the `::`, and `<date>` is preceded by a `.`. Here
+is an example:
+```
+genome1.fasta
+genome2_ch1.fna genome2_pl.fst
+genome3.fst genome3_plasmid.fst :: name
+genome4.fna genome4.p1.fna genome4.p2.fna :: name.
+genome5.fasta :: name.date
+genome6.chromo.fst genome6.pl.fst  :: .date
+```
+- **species:** with 4 alphanumeric characters, used to rename genomes (except those whose
+species name is specified in the list file)
+- **date:** optional. By default, takes the current date. Used to rename genomes (except those
+whose date is specified in the list file)
+- **dbpath:** path to folder containing all multi-fasta sequences of genomes
+- **respath:** path to folder where outputs must be saved (folders Genes, Replicons, Proteins,
 LSTINFO and LSTINFO_dataset.lst file)
-- threads: number of threads that can be used (default 1)
+- **tmppath** optional. Path where tmp files must be saved. Default is respath/tmp_files
+- **prokpath** optional. Path where prokka output folders for all genomes must be saved.
+Default is respath/tmp_files
+- **threads:** number of threads that can be used (default 1)
 
 Output:
-- In your given respath, you will find 4 folders: LSTINFO (information on each genome, with gene annotations), Genes (nuc. gene sequences), Proteins (aa proteins sequences), Replicons (input sequences but with formatted headers).
-- In your given respath, you will find a "tmp_files" folder, where folders with prokka results will be created for each input genome (<genome_name>-prokkaRes). If errors are generated during prokka step, you can look at the log file to see what was wrong (<genome_name>-prokka.log).
-- In your given respath, a file called `annote-genomes-<list_file>.log` will be generated. You can find there all logs: problems during annotation (hence no formatting step ran), and problems during formatting step.
-- In your given respath, a file called `annote-genomes-<list_file>.log.err` will be generated, containing information on errors and warnings that occured. If this file is empty, then annotation and formatting steps finished without any problem for all genomes.
-- In your given respath, you will find a file called `LSTINFO-<list_file>.lst` with information on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
-- In your given respath, you will find a file called `discarded-<list_file>.lst` with information on genomes that were discarded (and hence not annotated) because of the L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
-- In your given respath, you will find 2 png files: `QC_L90-<list_file>.png` and `QC_nb-contigs-<list_file>.png`, containing the histograms of L90 and nb_contigs values for all genomes, with a vertical red line representing the limit applied here.
+- In your given respath, you will find 4 folders:
+    * LSTINFO (information on each genome, with gene annotations),
+    * Genes (nuc. gene sequences),
+    * Proteins (aa proteins sequences),
+    * Replicons (input sequences but with formatted headers).
+- In your given tmppath folder, folders with prokka results will be created for each input
+genome (1 folder per genome, called <genome_name>-prokkaRes). If errors are generated during
+prokka step, you can look at the log file to see what was wrong (<genome_name>-prokka.log).
+- In your given respath, a file called `annote-genomes-<list_file>.log` will be generated.
+You can find there all logs.
+- In your given respath, a file called `annote-genomes-<list_file>.log.err` will be generated,
+containing information on errors and warnings that occurred: problems during annotation (hence
+no formatting step ran), and problems during formatting step. If this file is empty, then
+annotation and formatting steps finished without any problem for all genomes.
+- In your given respath, you will find a file called `LSTINFO-<list_file>.lst` with information
+on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
+- In your given respath, you will find a file called `discarded-<list_file>.lst` with
+information on genomes that were discarded (and hence not annotated) because of the
+ L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
+- In your given respath, you will find 2 png files: `QC_L90-<list_file>.png` and
+`QC_nb-contigs-<list_file>.png`, containing the histograms of L90 and nb_contigs values for
+all genomes, with a vertical red line representing the limit applied here.
 
 Requested:
 - in prokka results, all genes are called <whatever>_<number> -> the number will be kept.
@@ -64,7 +102,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None):
     """
     Main method, doing all steps:
-    - analyse genomes (nb contigs, L90, stretches of N...)
+    - analyze genomes (nb contigs, L90, stretches of N...)
     - keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     - rename genomes with strain number in decreasing quality
     - annotate genome with prokka
@@ -105,15 +143,15 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):
-            logger.error("Prokka is not installed. totomain annotate cannot run.")
+            logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
             sys.exit(1)
 
     # Read genome names.
-    # genomes = {genome: [spegenus.date]}
     genomes = utils.read_genomes(list_file, name, date, db_path)
+    # genomes = {genome: [spegenus.date]}
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-    # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn)
+    # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     # Plot L90 and nb_contigs distributions
     gfunc.plot_distributions(genomes, res_dir, listfile_base, l90, nbcont)
     # Get list of genomes kept (according to L90 and nbcont thresholds)
@@ -124,9 +162,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # If only QC, stop here.
     if qc_only:
         return genomes, kept_genomes
-    # Rename genomes kept, ordered by quality
-    # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
+    # Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes, tmp_dir)
+    # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # Annotate all kept genomes
@@ -147,24 +185,30 @@ def init_logger(logfile, level, name= None):
     level hierarchy:
     CRITICAL > ERROR > WARNING > INFO > DEBUG
 
-    Messages from all levels are written in 'logfile'
+    Messages from all levels are written in 'logfile'.log
     Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
     Messages for levels equal or higher than WARNING written to stderr
+    Messages for levels equal or higher than WARNING written in `logfile`.log.err
 
     level: minimum level that must be considered.
+    name: if we need to name the logger (used for tests)
     """
     # create logger
     if name:
         logger = logging.getLogger(name)
     else:
         logger = logging.getLogger()
-    # set level of logger (here debug to show everything during development)
+    # set level of logger
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
-    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s')
-    formatterStream = logging.Formatter('  * %(message)s')
+    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
+                                      '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
 
-    # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo. If logfile is 1Mo, it is renamed to logfile.1, and next logs are still written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to logfile.1 etc. We allow maximum 5 log files.
+    # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
+    # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
+    # written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to
+    # logfile.1 etc. We allow maximum 5 log files.
     open(logfile, "w").close()  # empty logfile if already existing
     errfile = logfile + ".err"
     open(errfile, "w").close()
@@ -176,7 +220,6 @@ def init_logger(logfile, level, name= None):
 
     # Create handler 2: errfile
     errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
-    # set level to the same as the logger level
     errfile_handler.setLevel(logging.WARNING)
     errfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
@@ -184,13 +227,14 @@ def init_logger(logfile, level, name= None):
     # Create handler 3: write to stdout
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.DEBUG)  # write any message
-    stream_handler.addFilter(utils.LessThanFilter(logging.WARNING)) # don't write messages >= WARNING
+    # don't write messages >= WARNING
+    stream_handler.addFilter(utils.LessThanFilter(logging.WARNING))
     stream_handler.setFormatter(formatterStream)
     logger.addHandler(stream_handler)  # add handler to logger
 
     # Create handler 4: write to stderr
     err_handler = logging.StreamHandler(sys.stderr)
-    err_handler.setLevel(logging.WARNING)  # write any message >= WARNING
+    err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
     err_handler.setFormatter(formatterStream)
     logger.addHandler(err_handler)  # add handler to logger
 
@@ -203,7 +247,7 @@ def parse(argu=sys.argv[1:]):
     def gen_name(param):
         if not utils.check_format(param):
             msg = ("The genome name must contain 4 characters. For example, this name can "
-                   " correspond to the 2 first letters of genus, and 2 first letters of "
+                   "correspond to the 2 first letters of genus, and 2 first letters of "
                    "species, e.g. ESCO for Escherichia Coli.")
             raise argparse.ArgumentTypeError(msg)
         return param
@@ -238,16 +282,21 @@ def parse(argu=sys.argv[1:]):
     parser.add_argument(dest="list_file",
                         help=("File containing the list of genome filenames to annotate (1 genome"
                               " per line). Each genome is in multi-fasta format. You can "
-                              "specify the species name (4 letters) you want to give to each "
-                              "genome by adding it after the genome filename, separated by a "
-                              "space. If not given, the species name will be the one given in "
-                              "'species' argument. "))
+                              "specify the species name (4 characters) you want to give to each "
+                              "genome by adding it after the genome filename(s), separated "
+                              "by '::'. If not given, the species name will be the one given in "
+                              "'species' argument. You can also specify the date (4 digits) "
+                              "by adding '.' + your date choice after the genome "
+                              "filename(s), '::' and, if given, the species name."))
     parser.add_argument("-d", dest="db_path", required=True,
                         help=("Path to folder containing all multifasta genome files"))
     parser.add_argument("-r", dest="res_path", required=True,
                         help=("Path to folder where output annotated genomes must be saved"))
     parser.add_argument("-n", dest="name", type=gen_name,
-                        help=("Choose a name for your annotated genomes. This name should contain 4 letters. Generally, they correspond to the 2 first letters of genus, and 2 first letters of species, e.g. ESCO for Escherichia Coli."))
+                        help=("Choose a name for your annotated genomes. This name should contain "
+                              "4 alphanumeric characters. Generally, they correspond to the 2 "
+                              "first letters of genus, and 2 first letters of species, e.g. "
+                              "ESCO for Escherichia Coli."))
     parser.add_argument("--l90", dest="l90", type=int, default=100,
                         help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
     parser.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
