@@ -12,7 +12,6 @@ build-from-base:
   only:
     - install
   script:
-    - cd pythoncode
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
@@ -24,7 +23,6 @@ build-from-barrnap:
   only:
     - install
   script:
-    - cd pythoncode
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
@@ -36,7 +34,6 @@ build-from-prokka:
   only:
     - install
   script:
-    - cd pythoncode
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
@@ -47,7 +44,6 @@ unit-test-ubuntu16.04:
   except:
     - docker
   before_script:
-    - cd pythoncode
     - python3 make.py
   script:
     - ls test/data
@@ -55,7 +51,7 @@ unit-test-ubuntu16.04:
     - mv .coverage .coverage-unit
   artifacts:
     paths:
-      - pythoncode/.coverage-unit
+      - .coverage-unit
     expire_in: 1 hour
 
 func-test-ubuntu16.04:
@@ -63,7 +59,6 @@ func-test-ubuntu16.04:
   except:
     - docker
   before_script:
-    - cd pythoncode
     - python3 make.py
   script:
     - ls test/data
@@ -71,7 +66,7 @@ func-test-ubuntu16.04:
     - mv .coverage .coverage-functional
   artifacts:
     paths:
-      - pythoncode/.coverage-functional
+      - .coverage-functional
     expire_in: 1 hour
 
 coverage:
@@ -82,7 +77,6 @@ coverage:
     - unit-test-ubuntu16.04
     - func-test-ubuntu16.04
   before_script:
-    - cd pythoncode
     - pip3 install -r requirements.txt
   script:
     - coverage combine .coverage-unit .coverage-functional
@@ -90,7 +84,7 @@ coverage:
     - coverage html
   artifacts:
     paths:
-      - pythoncode/htmlcov
+      - htmlcov
     expire_in: 1 hour
 
 pages:
@@ -99,7 +93,7 @@ pages:
     - coverage
   script:
     - mkdir -p public/htmlcov
-    - mv pythoncode/htmlcov public
+    - mv htmlcov public
   artifacts:
     paths:
       - public
