@@ -13,6 +13,114 @@ import logging
 import test.test_unit.util_tests as util_tests
 
 
+def test_logger_default(capsys):
+    """
+    Test that logger is initialized as expected.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.DEBUG
+    utils.init_logger(logfile, level, "default")
+    logger = logging.getLogger("default")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert "info debug\n" in out
+    assert "info info\n" in out
+    assert "info warning\n" in err
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
+        assert logf.readline().endswith("] :: INFO :: info info\n")
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_info(capsys):
+    """
+    Test that when logger is initialized with "INFO" level, it does not return DEBUG info.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.INFO
+    utils.init_logger(logfile, level, "info")
+    logger = logging.getLogger("info")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert "info info\n" in out
+    assert "info warning\n" in err
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: INFO :: info info\n")
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_warning(capsys):
+    """
+    Test that when logger is initialized with "WARNING" level, it does not return
+    anything in stdout, as DEBUG and INFO are not returned.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.WARNING
+    utils.init_logger(logfile, level, "warn")
+    logger = logging.getLogger("warn")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert "info warning\n" in err
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_critical(capsys):
+    """
+    Test that when logger is initialized with "CRITICAL" level, it only returns
+    CRITICAL information.
+
+    """
+    logfile = "logfile_test.txt"
+    level = logging.CRITICAL
+    utils.init_logger(logfile, level, "crit")
+    logger = logging.getLogger("crit")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
 def test_check_install():
     """
     Try to run prokka, which is installed, and check that there is no problem

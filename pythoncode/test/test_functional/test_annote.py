@@ -253,118 +253,41 @@ def test_parser_qc():
     assert OPTIONS.qc_only == True
 
 
-def test_logger_default(capsys):
+def test_main_from_parse():
     """
-    Test that logger is initialized as expected.
+    Test that when a tmp folder is given by user, tmp files are saved in it,
+    and prokka files too.
     """
-    logfile = "logfile_test.txt"
-    level = logging.DEBUG
-    annot.init_logger(logfile, level, "default")
-    logger = logging.getLogger("default")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out.startswith("  * ")
-    assert "info debug\n" in out
-    assert "info info\n" in out
-    assert err.startswith("  * ")
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_info(capsys):
-    """
-    Test that when logger is initialized with "INFO" level, it does not return DEBUG info.
-    """
-    logfile = "logfile_test.txt"
-    level = logging.INFO
-    annot.init_logger(logfile, level, "info")
-    logger = logging.getLogger("info")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out.startswith("  * ")
-    assert "info info\n" in out
-    assert err.startswith("  * ")
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_warning(capsys):
-    """
-    Test that when logger is initialized with "WARNING" level, it does not return
-    anything in stdout, as DEBUG and INFO are not returned.
-    """
-    logfile = "logfile_test.txt"
-    level = logging.WARNING
-    annot.init_logger(logfile, level, "warn")
-    logger = logging.getLogger("warn")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out == ""
-    assert err.startswith("  * ")
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_critical(capsys):
-    """
-    Test that when logger is initialized with "CRITICAL" level, it only returns
-    CRITICAL information.
-
-    """
-    logfile = "logfile_test.txt"
-    level = logging.CRITICAL
-    annot.init_logger(logfile, level, "crit")
-    logger = logging.getLogger("crit")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out == ""
-    assert err.startswith("  * ")
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
+    list_file = os.path.join("test", "data", "test_files", "list_genomes-func-test-default.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_funcfromparse")
+    tmpdir = os.path.join("test", "data", "tmp_funcGivenTmp")
+    name = "ESCO"
+    l90 = 1
+    date = "0417"
+    args = argparse.Namespace()
+    args.list_file = list_file
+    args.db_path = dbpath
+    args.res_path = resdir
+    args.name = name
+    args.date = date
+    args.l90 = l90
+    args.nbcont = 999
+    args.cutn = 0
+    args.threads = 1
+    args.force = False
+    args.qc_only = False
+    args.tmpdir = tmpdir
+    args.prokkadir = None
+    annot.main_from_parse(args)
+    # Check that tmp files exist in the right folder
+    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna"))
+    # Test that prokka folder is in the right directory
+    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna-prokkaRes"))
+    shutil.rmtree(tmpdir, ignore_errors=True)
+    shutil.rmtree(resdir, ignore_errors=True)
+    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
+    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
 def test_main_given_tmp():
@@ -867,7 +790,7 @@ def test_annote_all():
     ret = subprocess.call(cmd.split())
     assert ret == 0
     # Get output files
-    log_files = [os.path.join(respath, "annote-genomes-list_genomes-func-test-default" + ext)
+    log_files = [os.path.join(respath, "genomeAPCAT-annotate_list_genomes-func-test-default" + ext)
                  for ext in [".log", ".log.err"]]
     lstfile = [os.path.join(respath, "LSTINFO-list_genomes-func-test-default.lst")]
     discfile = [os.path.join(respath, "discarded-list_genomes-func-test-default.lst")]
