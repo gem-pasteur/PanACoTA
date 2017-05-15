@@ -84,18 +84,17 @@ they don't end by '_<number>', which is the format of a gene name.
 April 2017
 """
 
-
 import os
 import sys
-import subprocess
-import shutil
-import logging
-from logging.handlers import RotatingFileHandler
 
-from genomeAPCAT import genome_seq_functions as gfunc
-from genomeAPCAT import prokka_functions as pfunc
-from genomeAPCAT import format_functions as ffunc
-from genomeAPCAT import utils
+
+def main_from_parse(arguments):
+    """
+    Call main function from the arguments given by parser
+    """
+    main(arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
+         arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
+         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.prokkadir)
 
 
 def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
@@ -109,6 +108,13 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     - format annotated genomes
 
     """
+    # import needed packages
+    import shutil
+    import logging
+    from genomeAPCAT import genome_seq_functions as gfunc
+    from genomeAPCAT import prokka_functions as pfunc
+    from genomeAPCAT import format_functions as ffunc
+    from genomeAPCAT import utils
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
@@ -132,14 +138,15 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     # name logfile, add timestamp if already existing
-    logfile = os.path.join(res_dir, "annote-genomes-" + listfile_base + ".log")
+    logfile = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base + ".log")
     # if os.path.isfile(logfile):
     #     import time
     #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
     # set level of logger (here debug to show everything during development)
     level = logging.DEBUG
-    init_logger(logfile, level)
+    utils.init_logger(logfile, level)
     logger = logging.getLogger()
+
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
@@ -178,72 +185,12 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     return genomes, kept_genomes, skipped, skipped_format
 
 
-def init_logger(logfile, level, name= None):
-    """
-    Create logger and its handlers, and set them to the given level
-
-    level hierarchy:
-    CRITICAL > ERROR > WARNING > INFO > DEBUG
-
-    Messages from all levels are written in 'logfile'.log
-    Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
-    Messages for levels equal or higher than WARNING written to stderr
-    Messages for levels equal or higher than WARNING written in `logfile`.log.err
-
-    level: minimum level that must be considered.
-    name: if we need to name the logger (used for tests)
-    """
-    # create logger
-    if name:
-        logger = logging.getLogger(name)
-    else:
-        logger = logging.getLogger()
-    # set level of logger
-    logger.setLevel(level)
-    # create formatter for log messages: "timestamp :: level :: message"
-    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
-                                      '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
-
-    # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
-    # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
-    # written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to
-    # logfile.1 etc. We allow maximum 5 log files.
-    open(logfile, "w").close()  # empty logfile if already existing
-    errfile = logfile + ".err"
-    open(errfile, "w").close()
-    logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
-    # set level to the same as the logger level
-    logfile_handler.setLevel(level)
-    logfile_handler.setFormatter(formatterFile)  # add formatter
-    logger.addHandler(logfile_handler)  # add handler to logger
-
-    # Create handler 2: errfile
-    errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
-    errfile_handler.setLevel(logging.WARNING)
-    errfile_handler.setFormatter(formatterFile)  # add formatter
-    logger.addHandler(errfile_handler)  # add handler to logger
-
-    # Create handler 3: write to stdout
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG)  # write any message
-    # don't write messages >= WARNING
-    stream_handler.addFilter(utils.LessThanFilter(logging.WARNING))
-    stream_handler.setFormatter(formatterStream)
-    logger.addHandler(stream_handler)  # add handler to logger
-
-    # Create handler 4: write to stderr
-    err_handler = logging.StreamHandler(sys.stderr)
-    err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
-    err_handler.setFormatter(formatterStream)
-    logger.addHandler(err_handler)  # add handler to logger
-
-
 def build_parser(parser):
     """
     Method to create a parser for command-line options
     """
     import argparse
+    from genomeAPCAT import utils
     def gen_name(param):
         if not utils.check_format(param):
             msg = ("The genome name must contain 4 characters. For example, this name can "
@@ -363,6 +310,4 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=("Annotate all genomes"))
     build_parser(parser)
     OPTIONS = parse(parser, sys.argv[1:])
-    main(OPTIONS.list_file, OPTIONS.db_path, OPTIONS.res_path, OPTIONS.name, OPTIONS.date,
-         OPTIONS.l90, OPTIONS.nbcont, OPTIONS.cutn, OPTIONS.threads,
-         OPTIONS.force, OPTIONS.qc_only, OPTIONS.tmpdir, OPTIONS.prokkadir)
+    main_from_parse(OPTIONS)
