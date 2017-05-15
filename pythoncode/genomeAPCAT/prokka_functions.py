@@ -76,7 +76,7 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         pool.join()
         final = final.get()
     # If an error occurs, terminate pool and exit
-    except Exception as excp:
+    except Exception as excp:  # pragma: no cover
         pool.terminate()
         logger.error(excp)
         sys.exit(1)
@@ -124,7 +124,7 @@ def run_prokka(arguments):
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
         prokf.close()
         return ok
-    except Exception as err:
+    except Exception as err:  # pragma: no cover
         logging.error("Error while trying to run prokka: {}".format(err))
         prokf.close()
         return False
