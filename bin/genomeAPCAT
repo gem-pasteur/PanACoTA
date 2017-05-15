@@ -12,6 +12,11 @@ def main():
     Start program according to arguments given by user.
     """
     action, args = parse_arguments(sys.argv[1:])
+    # loglevel = {0: logging.ERROR,
+    #             1: logging.WARNING,
+    #             2: logging.INFO,
+    #             3: logging.DEBUG,
+    #            }.get(verbosity, logging.DEBUG)
     action(args)
 
 
