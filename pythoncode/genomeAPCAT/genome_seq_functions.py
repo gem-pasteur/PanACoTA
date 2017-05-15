@@ -15,6 +15,7 @@ import os
 import re
 import numpy as np
 import logging
+import progressbar
 
 from genomeAPCAT import utils
 
@@ -33,13 +34,27 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
     """
     cut = nbn > 0
     pat = 'N' * nbn + "+"
+    nbgen = len(genomes)
     if cut:
         logger.info(("Cutting genomes at each stretch of at least {} 'N', "
                      "and then, calculating genome size, number of contigs and L90.").format(nbn))
     else:
         logger.info("Calculating genome size, number of contigs, L90")
+
+    # Create progressbar
+    widgets = ['Analysis: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
+               progressbar.ETA()
+              ]
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
+                                  redirect_stderr=True, redirect_stdout=True).start()
+    curnum = 1
     for genome, name in genomes.items():
+        bar.update(curnum)
+        curnum += 1
         analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    bar.finish()
 
 
 def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
