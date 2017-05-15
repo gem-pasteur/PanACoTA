@@ -13,11 +13,73 @@ import os
 import sys
 import glob
 import logging
+from logging.handlers import RotatingFileHandler
 import subprocess
 import shutil
 import shlex
 
 logger = logging.getLogger()
+
+
+def init_logger(logfile, level, name= None):
+    """
+    Create logger and its handlers, and set them to the given level
+
+    level hierarchy:
+    CRITICAL > ERROR > WARNING > INFO > DEBUG
+
+    Messages from all levels are written in 'logfile'.log
+    Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
+    Messages for levels equal or higher than WARNING written to stderr
+    Messages for levels equal or higher than WARNING written in `logfile`.log.err
+
+    level: minimum level that must be considered.
+    name: if we need to name the logger (used for tests)
+    """
+    # create logger
+    if name:
+        logger = logging.getLogger(name)
+    else:  # pragma: no cover
+        logger = logging.getLogger()
+    # set level of logger
+    logger.setLevel(level)
+    # create formatter for log messages: "timestamp :: level :: message"
+    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
+                                      '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
+
+    # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
+    # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
+    # written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to
+    # logfile.1 etc. We allow maximum 5 log files.
+    open(logfile, "w").close()  # empty logfile if already existing
+    errfile = logfile + ".err"
+    open(errfile, "w").close()
+    logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
+    # set level to the same as the logger level
+    logfile_handler.setLevel(level)
+    logfile_handler.setFormatter(formatterFile)  # add formatter
+    logger.addHandler(logfile_handler)  # add handler to logger
+
+    # Create handler 2: errfile
+    errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
+    errfile_handler.setLevel(logging.WARNING)
+    errfile_handler.setFormatter(formatterFile)  # add formatter
+    logger.addHandler(errfile_handler)  # add handler to logger
+
+    # Create handler 3: write to stdout
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.DEBUG)  # write any message
+    # don't write messages >= WARNING
+    stream_handler.addFilter(LessThanFilter(logging.WARNING))
+    stream_handler.setFormatter(formatterStream)
+    logger.addHandler(stream_handler)  # add handler to logger
+
+    # Create handler 4: write to stderr
+    err_handler = logging.StreamHandler(sys.stderr)
+    err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
+    err_handler.setFormatter(formatterStream)
+    logger.addHandler(err_handler)  # add handler to logger
 
 
 class LessThanFilter(logging.Filter):
@@ -329,4 +391,3 @@ def check_out_dirs(resdir):
                      "Replicons folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
-
