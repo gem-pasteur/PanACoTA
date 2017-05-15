@@ -290,19 +290,27 @@ def build_parser(parser):
                               "modify those parameters if you want, before you launch the "
                               "annotation and formatting steps."))
 
+
 def parse(parser, argu):
     """
     Parse arguments given to parser
     """
     args = parser.parse_args(argu)
-    if not args.qc_only and not args.name:
-        parser.error("You must specify your genomes dataset name in 4 characters with "
-                     "'-n name' option (type -h for more information). Or, if you do not want "
-                     "to annotate and format your genomes but just to run quality control, use "
-                     "option '-Q")
-    if args.qc_only and not args.name:
-        args.name = "NONE"
-    return args
+    return check_args(parser, argu)
+
+
+def check_args(parser, args):
+  """
+  Check that arguments given to parser are as expected.
+  """
+  if not args.qc_only and not args.name:
+      parser.error("You must specify your genomes dataset name in 4 characters with "
+                   "'-n name' option (type -h for more information). Or, if you do not want "
+                   "to annotate and format your genomes but just to run quality control, use "
+                   "option '-Q")
+  if args.qc_only and not args.name:
+      args.name = "NONE"
+  return args
 
 
 if __name__ == '__main__':
