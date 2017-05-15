@@ -79,11 +79,23 @@ If you installed the dependencies (such as prokka) via our installation script, 
 
 ## Quick run
 
-`genomeAPCAT` contains 4 different modules: `annotate`, `pan-genome`, `pers-genome` and `tree`. You can run then by typing:
+`genomeAPCAT` contains 4 different modules: 
+- `annotate` (annotate all genomes of the dataset, after a quality control)
+- `pan-genome` (generate pan-genome)
+- `pers-genome` (generate persistent-genome)
+- `tree` (infer phylogenetic tree from persistent genome)
+
+You can run then by typing:
 
     genomeAPCAT <module_name> <arguments_for_module>
 
-Each module has its own options and inputs. Type: `genomeAPCAT help <module_name>` or `genomeAPCAT <module_name> -h` to get the list of required arguments and other available options for the module you want to run.
+Each module has its own options and inputs. Type: 
+
+    genomeAPCAT help <module_name>
+    # or 
+    genomeAPCAT <module_name> -h
+
+to get the list of required arguments and other available options for the module you want to run.
 
 ## Examples
 
