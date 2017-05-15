@@ -89,13 +89,11 @@ You can run then by typing:
 
     genomeAPCAT <module_name> <arguments_for_module>
 
-Each module has its own options and inputs. Type: 
+Each module has its own options and inputs. To get the list of required arguments and other available options for the module you want to run, type: 
 
     genomeAPCAT help <module_name>
     # or 
     genomeAPCAT <module_name> -h
-
-to get the list of required arguments and other available options for the module you want to run.
 
 ## Examples
 
