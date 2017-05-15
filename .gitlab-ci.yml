@@ -16,7 +16,7 @@ build-from-base:
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
-    - qc_and_annote.py -h
+    - genomeAPCAT -h
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
@@ -28,7 +28,7 @@ build-from-barrnap:
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
-    - qc_and_annote.py -h
+    - genomeAPCAT -h
 
 build-from-prokka:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
@@ -40,7 +40,7 @@ build-from-prokka:
     - python3 make.py
     - echo $(barrnap -h)
     - echo $(prokka -h)
-    - qc_and_annote.py -h
+    - genomeAPCAT -h
 
 unit-test-ubuntu16.04:
   stage: test

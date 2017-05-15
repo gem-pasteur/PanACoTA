@@ -39,7 +39,7 @@ def parse_requirements(requirements):
 
 packages = ['genomeAPCAT', 'genomeAPCAT.qc_annote_module', 'genomeAPCAT.subcommands']
 requires = parse_requirements("requirements.txt")
-scripts = ['genomeAPCAT/subcommands/qc_and_annote.py']
+scripts = ['genomeAPCAT/subcommands/qc_and_annote.py', 'bin/genomeAPCAT']
 
 classifiers = [
     "Environment :: Console",
