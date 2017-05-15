@@ -37,7 +37,7 @@ def parse_requirements(requirements):
         return [l.strip('\n') for l in req_file if l.strip('\n')
                 and not l.startswith('#')]
 
-packages = ['genomeAPCAT', 'genomeAPCAT.qcAnnote', 'genomeAPCAT.subcommands']
+packages = ['genomeAPCAT', 'genomeAPCAT.qc_annote_module', 'genomeAPCAT.subcommands']
 requires = parse_requirements("requirements.txt")
 scripts = ['genomeAPCAT/subcommands/qc_and_annote.py']
 
