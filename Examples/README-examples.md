@@ -18,6 +18,9 @@ We provide 4 different fictive genomes:
     * 1 file, with 4 contigs (multifasta)
     * same as KLPN
 
+**Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations. Hence, the examples results should not be interpreted biologically!
+
+
 ## Annotate step
 
 To annotate genomes, you need to provide a list of genomes to annotate, in a text file. An example, corresponding to the genomes in `Examples/genomes` is provided in `Examples/input_files/list_genomes.lst`. You can see that each line contains the filename(s) corresponding to one genome. 
