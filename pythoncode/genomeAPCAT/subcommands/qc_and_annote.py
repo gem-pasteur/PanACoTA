@@ -296,7 +296,7 @@ def parse(parser, argu):
     Parse arguments given to parser
     """
     args = parser.parse_args(argu)
-    return check_args(parser, argu)
+    return check_args(parser, args)
 
 
 def check_args(parser, args):
