@@ -1,0 +1,4 @@
+ACBA.fst :: ACBA
+ESCO.chromo.fna ESCO.plasmid1.fst ESCO.plasmid2.fst :: ESCO.1116
+KLPN.fst
+SAEN.fna::.1116
