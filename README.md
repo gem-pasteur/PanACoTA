@@ -102,6 +102,10 @@ In this folder, you will also find a README file, explaining you how to run the 
 
 **Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations. Hence, the examples results should not be interpreted biologically!
 
+## Documentation
+
+Not done yet, there will be a documentation describing each module and its arguments/options...
+
 # Development
 
 This part is for people who want to work on developing `genomeAPCAT` package.
