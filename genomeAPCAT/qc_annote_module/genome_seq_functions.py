@@ -47,8 +47,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
                progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
                progressbar.ETA()
               ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
-                                  redirect_stderr=True, redirect_stdout=True).start()
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     curnum = 1
     for genome, name in genomes.items():
         bar.update(curnum)
@@ -90,7 +89,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
                         save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
                     else:
                         contig_sizes[cur_contig_name] = len(cur_contig)
-                cur_contig_name = line.strip().split()[0]
+                cur_contig_name = "_".join(line.strip().split())
                 cur_contig = ""
             else:
                 cur_contig += line.strip().upper()
