@@ -9,7 +9,7 @@ import pytest
 import os
 import shutil
 from io import StringIO
-import genomeAPCAT.format_functions as ffunc
+import genomeAPCAT.qc_annote_module.format_functions as ffunc
 
 
 def test_write_gene():

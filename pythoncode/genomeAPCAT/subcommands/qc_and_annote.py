@@ -111,9 +111,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # import needed packages
     import shutil
     import logging
-    from genomeAPCAT import genome_seq_functions as gfunc
-    from genomeAPCAT import prokka_functions as pfunc
-    from genomeAPCAT import format_functions as ffunc
+    from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
+    from genomeAPCAT.qc_annote_module import prokka_functions as pfunc
+    from genomeAPCAT.qc_annote_module import format_functions as ffunc
     from genomeAPCAT import utils
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.

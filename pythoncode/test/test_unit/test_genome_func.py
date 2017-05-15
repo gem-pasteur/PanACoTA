@@ -7,7 +7,7 @@ Unit tests for utils.py
 
 import pytest
 import os
-import genomeAPCAT.genome_seq_functions as gfunc
+import genomeAPCAT.qc_annote_module.genome_seq_functions as gfunc
 import test.test_unit.util_tests as util_tests
 
 

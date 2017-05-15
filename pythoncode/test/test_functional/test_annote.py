@@ -14,7 +14,7 @@ import time
 import logging
 import argparse
 
-from genomeAPCAT import annote_pipeline as annot
+from genomeAPCAT.subcommands import qc_and_annote as annot
 
 
 def test_parser_noarg(capsys):
@@ -786,7 +786,7 @@ def test_annote_all():
     dbpath = os.path.join("test", "data", "genomes")
     respath = os.path.join("test", "data", "res_test_funcDefault")
     name = "GENO"
-    cmd = "annote_pipeline.py {} -d {} -r {} -n {}".format(list_file, dbpath, respath, name)
+    cmd = "qc_and_annote.py {} -d {} -r {} -n {}".format(list_file, dbpath, respath, name)
     ret = subprocess.call(cmd.split())
     assert ret == 0
     # Get output files

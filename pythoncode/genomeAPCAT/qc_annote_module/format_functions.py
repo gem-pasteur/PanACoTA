@@ -24,7 +24,7 @@ import logging
 import progressbar
 import glob
 import multiprocessing
-from genomeAPCAT import genome_seq_functions as gfunc
+from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
 
 logger = logging.getLogger()
 
