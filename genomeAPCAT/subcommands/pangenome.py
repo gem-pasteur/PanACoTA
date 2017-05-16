@@ -4,27 +4,56 @@
 """
 pan-genome is a subcommand of genomeAPCAT
 
+
 @author gem
 May 2017
 """
 
 import sys
+import os
 
 
-def main_from_parse(arguments):
+def main_from_parse(args):
     """
     Call main function from the arguments given by parser
     """
-    main()
+    main(args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
+         args.clust_mode, args.spedir, args.threads)
 
 
-def main():
+def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads=None):
     """
     Main method, doing all steps:
-    -
-
+    - concatenate all protein files
+    - create database as ffindex
+    - cluster all proteins
+    - convert to pangenome file
+    - summary/matrix?
     """
     # import needed packages
+    import logging
+    from genomeAPCAT import utils
+    from genomeAPCAT.pangenome_module import protein_seq_functions as protf
+
+    os.makedirs(outdir, exist_ok=True)
+    # get only filename of list_file, without extension
+    # name logfile, add timestamp if already existing
+    logfile = os.path.join(outdir, "genomeAPCAT-pangenome_" + name + ".log")
+    # if os.path.isfile(logfile):
+    #     import time
+    #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
+    # set level of logger (here debug to show everything during development)
+    level = logging.DEBUG
+    utils.init_logger(logfile, level)
+    logger = logging.getLogger()
+
+    # test if prokka is installed and in the path
+    if not utils.check_installed("mmseqs"):  # pragma: no cover
+        logger.error("mmseqs is not installed. 'genomeAPCAT pan-genome' cannot run.")
+        sys.exit(1)
+
+    prt_bank = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
+    logger.debug(prt_bank)
 
 
 def build_parser(parser):
@@ -32,7 +61,7 @@ def build_parser(parser):
     Method to create a parser for command-line options
     """
     import argparse
-    def perc_id():
+    def perc_id(param):
         try:
             param = float(param)
         except Exception:
