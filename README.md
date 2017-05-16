@@ -19,7 +19,7 @@ genomeAPCAT is written in **python3**. So, you need python3 (and pip3 for instal
 Its external dependencies are:
 - prokka (to annotate the genomes). 
 
-You can either install the external dependencies yourself, with the version you want, or use the installation script `make.py`, which will install the dependencies.
+You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
 To be able to install the dependencies (by yourself, or with the installation script), make sure you have: `tar`, `git` and `wget`.
 
@@ -45,11 +45,11 @@ Then, you will be able to install the new version (see bellow).
 
 To install `genomeAPCAT`, and all its dependencies, from the root directory, type:
 
-    ./make.py 
+    ./make
 
 or 
 
-    ./make.py install
+    ./make install
 
 You will then be able to use the package from any directory in your computer,
 just as any other software.
@@ -61,7 +61,7 @@ just as any other software.
 
 If you want to install `genomeAPCAT` while still working on modifying the scripts, type:
 
-    ./make.py develop
+    ./make develop
 
 Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
 
@@ -69,20 +69,20 @@ Your changes will then be taken into account. As you installed the package, you 
 
 If you don't want `genomeAPCAT` anymore, or if you want to install a newer version, uninstall it by typing:
 
-    ./make.py uninstall
+    ./make uninstall
 
 ## Update to new version
 
 If you want to install a new version of `genomeAPCAT`:
-- uninstall the previous version (`./make.py uninstall`)
+- uninstall the previous version (`./make uninstall`)
 - update to the new version (`git pull`)
-- install the new version (`./make.py`)
+- install the new version (`./make`)
 
 ## Cleaning dependencies
 
-If you installed the dependencies (such as prokka) via our installation script, but now want to install your own version, you can remove all dependencies downloaded and installed by `make.py` by doing:
+If you installed the dependencies (such as prokka) via our installation script, but now want to install your own version, you can remove all dependencies downloaded and installed by `make` by doing:
 
-    ./make.py clean
+    ./make clean
 
 # Running `genomeAPCAT`
 

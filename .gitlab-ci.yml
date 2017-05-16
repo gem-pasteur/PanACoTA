@@ -12,7 +12,7 @@ build-from-base:
   only:
     - install
   script:
-    - python3 make.py
+    - python3 make
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - genomeAPCAT -h
@@ -23,7 +23,7 @@ build-from-barrnap:
   only:
     - install
   script:
-    - python3 make.py
+    - python3 make
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - genomeAPCAT -h
@@ -34,7 +34,7 @@ build-from-prokka:
   only:
     - install
   script:
-    - python3 make.py
+    - python3 make
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - genomeAPCAT -h
@@ -44,7 +44,7 @@ unit-test-ubuntu16.04:
   except:
     - docker
   before_script:
-    - python3 make.py
+    - ./make
   script:
     - ls test/data
     - py.test test/test_unit
@@ -59,7 +59,7 @@ func-test-ubuntu16.04:
   except:
     - docker
   before_script:
-    - python3 make.py
+    - python3 make
   script:
     - ls test/data
     - py.test test/test_functional
