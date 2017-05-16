@@ -21,7 +21,7 @@ def main_from_parse(args):
          args.clust_mode, args.spedir, args.threads)
 
 
-def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads=None):
+def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     """
     Main method, doing all steps:
     - concatenate all protein files
@@ -32,6 +32,7 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads=Non
     """
     # import needed packages
     import logging
+    import time
     from genomeAPCAT import utils
     from genomeAPCAT.pangenome_module import protein_seq_functions as protf
 
@@ -52,8 +53,56 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads=Non
         logger.error("mmseqs is not installed. 'genomeAPCAT pan-genome' cannot run.")
         sys.exit(1)
 
-    prt_bank = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
+    prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
+    prt_bank = os.path.basename(prt_path)
     logger.debug(prt_bank)
+
+    if threads != 1:
+        threadinfo = "-th" + str(threads)
+    else:
+        threadinfo = ""
+    start = time.strftime('%Y-%m-%d_%H-%M-%S')
+    infoname = tr(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + $start
+    mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
+    mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
+    tmpdi = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
+    logmmseq = os.path.join(outdir, "mmeq_" + prt_bank + "_" + infoname + ".log")
+    logger.info("Running mmseqs with:")
+    logger.info(" - minimum sequence identity = {}".format(min_id))
+    logger.info(" - cluster mode {}".format(clust_mode))
+    if threads > 1:
+        logger.info(" - {} threads".format(threads))
+
+#     # Create ffindex of DB if not already done
+# if [ ! -e $mmseqdb ]; then
+#     echo " * creating database"
+#     mmseqs createdb $protsdb $mmseqdb
+# else
+#     echo " * database "$mmseqdb" already exists"
+# fi
+
+# # create temporary folder
+# mkdir -p $tmpdir
+
+# # Cluster all proteins
+# echo " * clustering proteins with cluster mode "$clustmode
+# if [ -z $mpi ]; then
+#     mmseqs cluster $mmseqdb $mmseqclust $tmpdir --min-seq-id $minid $paramthreads --cluster-mode $clustmode > $logfile
+# else
+#     RUNNER="mpirun -np $mpi" mmseqs cluster $mmseqdb $mmseqclust $tmpdir --min-seq-id $minid $paramthreads --cluster-mode $clustmode > $logfile
+# fi
+
+# # Convert output to tsv file (one line per comparison done)
+# echo " * Converting to tsv file"
+# mmseqs createtsv $mmseqdb $mmseqdb $mmseqclust $mmseqclust.tsv
+# # Convert the tsv file to a 'pangenome' file: one line per family
+# echo " * Converting to pangenome file"
+# python mmseq_to_pangenome.py $mmseqclust.tsv
+
+# end=`date +"%d-%m-%y_%T"`
+
+# echo $start >> $logfile
+# echo $end >> $logfile
 
 
 def build_parser(parser):
@@ -71,6 +120,17 @@ def build_parser(parser):
             msg = ("The minimum %% of identity must be in [0, 1]. Invalid value: {}".format(param))
             raise argparse.ArgumentTypeError(msg)
         return param
+    def thread_num(param):
+        try:
+            param = int(param)
+        except Exception:
+            msg = "argument --threads threads: invalid int value: {}".format(param)
+            raise argparse.ArgumentTypeError(msg)
+        if param < 1:
+            msg = ("You must provide at least 1 thread. Invalid value: {}".format(param))
+            raise argparse.ArgumentTypeError(msg)
+        return param
+
     # Create command-line parser for all options and arguments to give
     parser.add_argument("-l", dest="lstinfo_file", required=True,
                         help=("File containing the list of all genomes to include in "
@@ -102,7 +162,7 @@ def build_parser(parser):
                         help=("use this option if you want to save the concatenated protein "
                               "databank in another directory than the one containing all "
                               "individual protein files ('Proteins' folder)."))
-    parser.add_argument("--threads", dest="threads",
+    parser.add_argument("--threads", dest="threads", default=1, type=thread_num,
                         help=("add this option if you want to parallelize on several threads. "
                               "Indicate on how many threads you want to parallelize. "
                               "By default, it uses all threads in the computer."))
