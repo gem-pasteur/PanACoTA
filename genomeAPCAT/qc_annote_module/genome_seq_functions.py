@@ -78,11 +78,13 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
     * genomes: {genome: [spegenus.date]} -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
     """
     gpath = os.path.join(dbpath, genome)
+    print(gpath)
     if cut:
         grespath = os.path.join(tmp_path, genome + "-split{}N.fna".format(len(pat) - 1))
         gresf = open(grespath, "w")
     else:
         grespath = gpath
+    print(grespath)
     with open(gpath, 'r') as genf:
         contig_sizes = {}  # {contig_name: size}
         cur_contig_name = ""
@@ -99,10 +101,11 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
                 cur_contig = ""
             else:
                 cur_contig += line.strip().upper()
-        if cut:
-            save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
-        else:
-            contig_sizes[cur_contig_name] = len(cur_contig)
+        if cur_contig != "":
+            if cut:
+                save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
+            else:
+                contig_sizes[cur_contig_name] = len(cur_contig)
         nbcont = len(contig_sizes)
         gsize = sum(contig_sizes.values())
         l90 = calc_l90(contig_sizes)

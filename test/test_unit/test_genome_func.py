@@ -176,33 +176,36 @@ def test_analyse1genome_nocut():
     tmp_path = os.path.join("plop")
     cut = False
     pat = "NNNNN+"
-    gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
     exp_genomes = {gs[0]: ["SAEN.1113"],
                    gs[1]: ["SAEN.1114", os.path.join(dbpath, gs[1]), 67, 3, 3],
                    gs[2]: ["ESCO.0416"]}
     assert genomes == exp_genomes
 
 
-# def test_analyse1genome_nocut_empty():
-#     """
-#     Analyse the given genome: without cutting at stretches of N. The genome is an empty
-#     file, so it is not possible to calculate L90
-#     """
-#     dbpath = os.path.join("test", "data", "genomes")
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
-#     open(os.path.join(dbpath, gs[3]), "w").close()
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"]}
-#     genome = gs[1]
-#     tmp_path = os.path.join("plop")
-#     cut = False
-#     pat = "NNNNN+"
-#     gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
-#     exp_genomes = {gs[0]: ["SAEN.1113"],
-#                    gs[1]: ["SAEN.1114", os.path.join(dbpath, gs[1]), 67, 3, 3],
-#                    gs[2]: ["ESCO.0416"]}
-#     assert genomes == exp_genomes
+def test_analyse1genome_nocut_empty():
+    """
+    Analyse the given genome: without cutting at stretches of N. The genome is an empty
+    file, so it is not possible to calculate L90
+    """
+    dbpath = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
+    open(os.path.join(dbpath, gs[3]), "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0415"]}
+    genome = gs[3]
+    tmp_path = os.path.join("plop")
+    cut = False
+    pat = "NNNNN+"
+    assert not gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    exp_genomes = {gs[0]: ["SAEN.1113"],
+                   gs[1]: ["SAEN.1114"],
+                   gs[2]: ["ESCO.0416"],
+                   gs[3]: ["ESCO.0415"]}
+    assert genomes == exp_genomes
+    os.remove(os.path.join(dbpath, gs[3]))
 
 
 def test_analyse1genome_cut():
@@ -220,7 +223,7 @@ def test_analyse1genome_cut():
     tmp_path = os.path.join("test", "data")
     cut = True
     pat = "NNNNN+"
-    gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
     out_f = os.path.join(tmp_path, gs[1] + "-split5N.fna")
     exp_f = os.path.join(tmp_path, "exp_files", "res_genome2.fasta-split5N.fna")
     exp_genomes = {gs[0]: ["SAEN.1113"],
@@ -230,6 +233,35 @@ def test_analyse1genome_cut():
     with open(out_f, "r") as outf, open(exp_f, "r") as expf:
         for line_exp, line_out in zip(expf, outf):
             assert line_exp == line_out
+    os.remove(out_f)
+
+
+def test_analyse1genome_cut_empty():
+    """
+    Analyse the given genome: cut at each stretch of 5 N, but the file is empty.
+    Check that it returns False
+    """
+    dbpath = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
+    open(os.path.join(dbpath, gs[3]), "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0415"]}
+    genome = gs[3]
+    tmp_path = os.path.join("test", "data")
+    cut = True
+    pat = "NNNNN+"
+    assert not gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    exp_genomes = {gs[0]: ["SAEN.1113"],
+                   gs[1]: ["SAEN.1114"],
+                   gs[2]: ["ESCO.0416"],
+                   gs[3]: ["ESCO.0415"]}
+    assert genomes == exp_genomes
+    out_f = os.path.join(tmp_path, gs[3] + "-split5N.fna")
+    with open(out_f, "r") as outf:
+        assert outf.readlines() == []
+    os.remove(os.path.join(dbpath, gs[3]))
     os.remove(out_f)
 
 
@@ -254,6 +286,32 @@ def test_analyseAllGenomes_nocut():
                    gs[1]: ["SAEN.1114", gpaths[1], 67, 3, 3],
                    gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
+
+
+def test_analyseAllGenomes_nocut_empty():
+    """
+    Analyze all given genomes: don't cut at stretches of N, but look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    dbpath = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
+    open(os.path.join(dbpath, gs[3]), "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0123"]}
+    gpaths = [os.path.join(dbpath, gname) for gname in gs]
+    tmp_path = os.path.join("test", "data")
+    nbn = 0
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
+    # construct expected results
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    assert exp_genomes == genomes
+    os.remove(os.path.join(dbpath, gs[3]))
 
 
 def test_analyseAllGenomes_cut():
@@ -284,6 +342,42 @@ def test_analyseAllGenomes_cut():
             for line_exp, line_out in zip(expf, outf):
                 assert line_exp == line_out
         os.remove(out)
+
+
+def test_analyseAllGenomes_cut_empty():
+    """
+    Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    dbpath = os.path.join("test", "data", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
+    open(os.path.join(dbpath, gs[3]), "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0123"]}
+    tmp_path = os.path.join("test", "data")
+    gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
+    nbn = 5
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
+    # construct expected results
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], 55, 5, 4],
+                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    out_f = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
+    exp_f = [os.path.join(tmp_path, "exp_files", "res_" + gname + "-split5N.fna") for gname in gs]
+    assert exp_genomes == genomes
+    for out, exp in zip(out_f[:-1], exp_f[:-1]):
+        with open(out, "r") as outf, open(exp, "r") as expf:
+            for line_exp, line_out in zip(expf, outf):
+                assert line_exp == line_out
+        os.remove(out)
+    with open(out_f[-1], "r") as outf:
+        assert outf.readlines() == []
+    os.remove(out_f[-1])
+    os.remove(os.path.join(dbpath, gs[3]))
 
 
 def test_plot_dist():
