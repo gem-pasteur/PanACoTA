@@ -25,14 +25,21 @@ To be able to install the dependencies (by yourself, or with the installation sc
 
 Then, for prokka installation, you need to install some system packages, as well as bioperl and java, if not already done (see [Prokka README](https://github.com/tseemann/prokka) for more information).
 
-## Downloading `genomeAPCAT`
+## Downloading and updating `genomeAPCAT`
 
-You can download `genomeAPCAT` source code by cloning its gitlab repository. Then, go to the directory created to install `genomeAPCAT` as described bellow. Here is an example to download the code and move to the created repository (called 'root directory' in the next sections):
+You can download `genomeAPCAT` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
     git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
-    cd pipeline_annotation
 
-After the first command, it will ask you for your gitlab login and password.
+Give your gitlab login, and password.
+
+This will create a repository called `pipeline_annotation`. Go inside this repository to install `genomeAPCAT`, as described hereafter.
+
+If a new version of `genomeAPCAT` is released, and you want to use it, type the following command to update the source code:
+
+    git pull
+
+Then, you will be able to install the new version (see bellow).
 
 ## Installing `genomeAPCAT` (final mode)
 
@@ -68,7 +75,7 @@ If you don't want `genomeAPCAT` anymore, or if you want to install a newer versi
 
 If you want to install a new version of `genomeAPCAT`:
 - uninstall the previous version (`./make.py uninstall`)
-- download the new version
+- update to the new version (`git pull`)
 - install the new version (`./make.py`)
 
 ## Cleaning dependencies
