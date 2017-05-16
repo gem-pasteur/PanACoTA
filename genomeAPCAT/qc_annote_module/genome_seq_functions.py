@@ -49,10 +49,16 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
               ]
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     curnum = 1
+    toremove = []
     for genome, name in genomes.items():
         bar.update(curnum)
         curnum += 1
-        analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+        if not res:
+            toremove.append(genome)
+    if toremove:
+        for gen in toremove:
+            del genomes[gen]
     bar.finish()
 
 
@@ -100,7 +106,12 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
         nbcont = len(contig_sizes)
         gsize = sum(contig_sizes.values())
         l90 = calc_l90(contig_sizes)
-        genomes[genome] += [grespath, gsize, nbcont, l90]
+        if not l90:
+            logger.error("Problem with genome {}. Not possible to get L90".format(genome))
+            return False
+        else:
+            genomes[genome] += [grespath, gsize, nbcont, l90]
+        return True
 
 
 def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):

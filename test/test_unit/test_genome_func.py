@@ -183,6 +183,28 @@ def test_analyse1genome_nocut():
     assert genomes == exp_genomes
 
 
+# def test_analyse1genome_nocut_empty():
+#     """
+#     Analyse the given genome: without cutting at stretches of N. The genome is an empty
+#     file, so it is not possible to calculate L90
+#     """
+#     dbpath = os.path.join("test", "data", "genomes")
+#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
+#     open(os.path.join(dbpath, gs[3]), "w").close()
+#     genomes = {gs[0]: ["SAEN.1113"],
+#                gs[1]: ["SAEN.1114"],
+#                gs[2]: ["ESCO.0416"]}
+#     genome = gs[1]
+#     tmp_path = os.path.join("plop")
+#     cut = False
+#     pat = "NNNNN+"
+#     gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+#     exp_genomes = {gs[0]: ["SAEN.1113"],
+#                    gs[1]: ["SAEN.1114", os.path.join(dbpath, gs[1]), 67, 3, 3],
+#                    gs[2]: ["ESCO.0416"]}
+#     assert genomes == exp_genomes
+
+
 def test_analyse1genome_cut():
     """
     Analyse the given genome: cut at each stretch of 5 N, put it to a new file,
