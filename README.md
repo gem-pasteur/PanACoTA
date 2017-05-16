@@ -29,8 +29,10 @@ Then, for prokka installation, you need to install some system packages, as well
 
 You can download `genomeAPCAT` source code by cloning its gitlab repository. Then, go to the directory created to install `genomeAPCAT` as described bellow. Here is an example to download the code and move to the created repository (called 'root directory' in the next sections):
 
-    git clone https://aperrin@gitlab.pasteur.fr/aperrin/pipeline_annotation.git
+    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
     cd pipeline_annotation
+
+After the first command, it will ask you for your gitlab login and password.
 
 ## Installing `genomeAPCAT` (final mode)
 
