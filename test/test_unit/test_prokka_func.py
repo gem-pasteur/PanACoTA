@@ -249,7 +249,7 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     """
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "res_checlProkkaWrongCRISPR")
+    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPR")
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongtblCRISP"
     tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
@@ -266,6 +266,31 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
                    "no matching number of genes between tbl and ffn; "
                    "ffn=17; in tbl =15genes 1CRISPR\n")
+    shutil.rmtree(out_dir)
+
+
+def test_check_prokka_tblCRISPR_newversion(capsys):
+    """
+    Check that check_prokka does not return an error message when the number of headers in ffn
+    file is equal to the number of CDS in tbl file (1CRISPR in tbl, 0 in ffn), but
+    does not contain the CRISPRs found in tbl
+    As the new version of prokka (1.12) does not put crisprs in .ffn
+    """
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPRnewversion")
+    os.makedirs(out_dir)
+    name = "prokka_out_for_test-wrongtblCRISPnewversion"
+    ffnfile = os.path.join("test", "data", "test_files", name + ".ffn")
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
     shutil.rmtree(out_dir)
 
 
