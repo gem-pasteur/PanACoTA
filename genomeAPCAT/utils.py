@@ -174,7 +174,7 @@ def write_warning_skipped(skipped, format=False):
                         "formatted.\n{}").format(list_to_write))
 
 
-def write_discarded(genomes, kept_genomes, list_file, res_path):
+def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     """
     Write the list of genomes discarded to a file, so that users can keep a trace of them,
     with their information (nb contigs, L90 etc.)
@@ -183,9 +183,16 @@ def write_discarded(genomes, kept_genomes, list_file, res_path):
     kept_genomes: list of genomes kept
     list_file: input file containing the list of genomes
     res_path: folder where results must be saved
+    qc: if it is the file written after qc only, call it info-genomes-<list_file>.txt
+    otherwise, call it discarded-<list_file>.txt
     """
     _, name_lst = os.path.split(list_file)
-    outdisc = os.path.join(res_path, "discarded-" + ".".join(name_lst.split(".")[:-1]) +".lst")
+    if not qc:
+        outdisc = os.path.join(res_path,
+                               "discarded-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+    else:
+        outdisc = os.path.join(res_path,
+                               "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in genomes.items():

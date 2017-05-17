@@ -168,6 +168,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # If only QC, stop here.
     if qc_only:
+        utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
         return genomes, kept_genomes
     # Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes, tmp_dir)

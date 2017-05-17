@@ -234,6 +234,34 @@ def test_write_discarded():
     os.remove(outfile)
 
 
+def test_write_discarded_qc():
+    """
+    Test that the list with information on all genomes when we run with QC only is
+    written as expected
+    """
+    gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome1", "genome2", "genome3"]
+    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    genomes = {gnames[0]: ["toto.0417", gpaths[0], 12656, 3, 1],
+               gnames[1]: ["toto.0417", gpaths[1], 456464645, 5, 1],
+               gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
+               gnames[3]: ["toto.0417", gpaths[3], 6549, 16, 8],
+               gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
+              }
+    kept_genomes = []
+    list_file = os.path.join("test", "data", "list_genomes.txt")
+    res_path = os.path.join("test", "data")
+    utils.write_discarded(genomes, kept_genomes, list_file, res_path, qc=True)
+    outfile = os.path.join("test", "data", "info-genomes-list_genomes.lst")
+    exp_file = os.path.join("test", "data", "exp_files", "res_test_write_info_qc.lst")
+    # There is no order in the discarded file. So, just check that the lines
+    # written are as expected.
+    with open (outfile, "r") as outf, open(exp_file, "r") as expf:
+        exp_lines = expf.readlines()
+        out_lines = outf.readlines()
+    assert set(out_lines) == set(exp_lines)
+    os.remove(outfile)
+
+
 def test_write_discarded_empty():
     """
     Test that when the list of genomes is empty, but the list of kept-genomes is not
