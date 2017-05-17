@@ -140,6 +140,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
     prtgenome = os.path.join(prot_dir, name + ".prt")
     ok_prt = create_prt(faagenome, lstgenome, prtgenome)
+
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
         os.remove(lstgenome)
@@ -177,9 +178,11 @@ def create_gen(ffnseq, lstfile, genseq):
             # if lstline indicates a CRISPR, header in ffn file is the genome name. Hence,
             # it should not contain a '_' followed by a number.
             lstline = lst.readline().strip()
-            if "CRISPR" in lstline:
-                if '_' in line_ffn:
-                    if line_ffn.strip().split("_")[-1].isdigit():
+            if lstline.strip().split()[3] == "CRISPR":
+                if '_' in line_ffn.split()[0]:
+                    # modify here. If it has the format of a gene in ffn_file, then go to next line of lstinfo, and check if it is a gene and go on.
+                    # if it does not have the format of a gene, then it is a crispr, so the 'old' version of prokka (before 1.12), write it as it is done now.
+                    if line_ffn.strip().split()[0].split("_")[-1].isdigit():
                         logger.error("According to lstinfo file, gene {} should be a CRISPR. "
                                      "However, its name has the same format as a gene name (not "
                                      "CRISPR). Format function will stop here, and gen file will "
