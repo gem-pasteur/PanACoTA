@@ -59,7 +59,7 @@ func-test-ubuntu16.04:
   except:
     - docker
   before_script:
-    - python3 make
+    - ./make
   script:
     - ls test/data
     - py.test test/test_functional
