@@ -11,7 +11,7 @@ and install genomeAPCAT
 able to change the script and run it.
 - `./make.py clean` : clean all dependencies that were installed by this script
 (uninstall them, remove source and bin folders)
-- `./make.py uninstall` : clean dependencies + uninstall genomeAPCAT
+- `./make.py uninstall` : uninstall genomeAPCAT
 
 By default, the dependencies are installed in /usr/local/bin. If the user wants
 to install them in another directory (which is in the path), he can specify it with
@@ -248,8 +248,7 @@ def parse():
                               "via this script, uninstall them, and remove their downloaded "
                               "sources from 'dependencies' folder. Can be used if the user wants "
                               "to install another version of the dependencies.\n"
-                              " - uninstall: uninstall genomeAPCAT, as well as the dependencies "
-                              "which were installed for it (in 'dependencies' folder).\n"
+                              " - uninstall: uninstall genomeAPCAT.\n"
                               "Default is %(default)s."))
     parser.add_argument("--prefix", dest="install_dir",
                         help=("By default, all scripts will be installed in /usr/local/bin. "
@@ -303,6 +302,5 @@ if __name__ == '__main__':
     elif target == "clean":
         clean_dependencies(install_dir)
     elif target == "uninstall":
-        clean_dependencies(install_dir)
         uninstall()
 
