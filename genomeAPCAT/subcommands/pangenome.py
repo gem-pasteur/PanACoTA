@@ -62,7 +62,7 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     else:
         threadinfo = ""
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    infoname = tr(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + $start
+    infoname = tr(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
     tmpdi = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
