@@ -185,7 +185,7 @@ def check_prokka(outdir, logf, name, gpath, nbcont):
                 logger.error(("{} {}: no matching number of proteins between tbl and faa; "
                               "faa={}; in tbl ={}").format(name, oriname, faaprot, tnbCDS))
                 problem = True
-            if tnbGene + tnbCRISPR != ffngene:
+            if tnbGene + tnbCRISPR != ffngene and tnbGene != ffngene:
                 logger.error(("{} {}: no matching number of genes between tbl and ffn; "
                         "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
                                                                    ffngene, tnbGene, tnbCRISPR))
