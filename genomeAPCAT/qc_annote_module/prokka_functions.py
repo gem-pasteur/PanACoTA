@@ -65,7 +65,7 @@ def run_prokka_all(genomes, threads, force, prok_folder):
                  for g in sorted(genomes)]
     pool = multiprocessing.Pool(pool_size)
     try:
-        final = pool.map_async(run_prokka, arguments)
+        final = pool.map_async(run_prokka, arguments, chunksize=1)
         pool.close()
         while(True):
             if final.ready():

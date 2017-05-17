@@ -65,7 +65,7 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
               for genome, (name, gpath, _, _, _) in genomes.items()]
     pool = multiprocessing.Pool(threads)
-    final = pool.map_async(handle_genome, params)
+    final = pool.map_async(handle_genome, params, chunksize=1)
     pool.close()
     while(True):
         if final.ready():

@@ -212,6 +212,7 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     l90: max value of l90 allowed
     nbconts: max value of nb contigs allowed
     """
+    logger.info("Generating distribution of L90 and #contigs graphs.")
     L90_vals = [val for _, (_, _, _, _, val) in genomes.items()]
     outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
     nbcont_vals = [val for _, (_, _, _, val, _) in genomes.items()]
