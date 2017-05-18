@@ -58,7 +58,7 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     # Create progressbar
     widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ")"]
+               progressbar.Percentage(), ") - ", progressbar.Timer()]
     bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
