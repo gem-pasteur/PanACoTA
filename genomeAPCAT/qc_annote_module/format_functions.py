@@ -202,24 +202,30 @@ def create_gen(ffnseq, lstfile, genseq):
                                   "created.").format(line_ffn.strip(), ffnseq))
                     problem = True
                     break
+            # If ffn contains a gene header, find its information in lst file
             else:
                 genID = int(test_genID)
                 # genID exists, ffn header is for a gene. Check that it corresponds to
                 # information in lst file.
                 IDlst = lstline.split("\t")[4].split("_")[-1]
+                # if line in lst corresponds to a gene -> get gene ID.
+                # Otherwise, genID = 0 (CRISPR line in lst)
                 if(IDlst.isdigit()):
                     genIDlst = int(IDlst)
                 else:
                     genIDlst = 0
-
+                # in lst, find the same gene ID as in ffn
+                # as they are ordered by increasing number, stop if ffn ID is higher than lst ID
                 while (genID > genIDlst):
                     lstline = lst.readline().strip()
                     IDlst = lstline.split("\t")[4].split("_")[-1]
                     # don't cast to int if info for a crispr
                     if(IDlst.isdigit()):
                         genIDlst = int(IDlst)
+                # If it found the same gene ID, write info in gene file
                 if (genID == genIDlst):
                     write_header(lstline.strip(), gen)
+                # If gene ID of ffn not found, write error message and stop
                 else:
                     logger.error("Missing info for gene {} in {}. If it is actually present "
                                  "in the lst file, check that genes are ordered by increasing "
@@ -227,68 +233,6 @@ def create_gen(ffnseq, lstfile, genseq):
                                  "from {}.".format(line_ffn.strip(), lstfile, ffnseq))
                     problem = True
                     break
-
-            # try:
-            #     genIDlst = int(lstline.split("\t")[4].split("_")[-1])
-            # except Exception as err:
-            #     logger.error(("Unknown gene format {} in {}. "
-            #                "Error: {}\nGen file will not be "
-            #                "created.").format(lstline.strip(), lstfile, err))
-            #     problem = True
-            #     break
-            # # if lstline indicates a CRISPR, header in ffn file is the genome name. Hence,
-            # # it should not contain a '_' followed by a number.
-            # lstline = lst.readline().strip()
-            # if lstline.strip().split()[3] == "CRISPR":
-            #     if '_' in line_ffn.split()[0]:
-            #         # modify here. If it has the format of a gene in ffn_file, then go to next line of lstinfo, and check if it is a gene and go on.
-            #         # if it does not have the format of a gene, then it is a crispr, so the 'old' version of prokka (before 1.12), write it as it is done now.
-            #         if line_ffn.strip().split()[0].split("_")[-1].isdigit():
-            #             logger.error("According to lstinfo file, gene {} should be a CRISPR. "
-            #                          "However, its name has the same format as a gene name (not "
-            #                          "CRISPR). Format function will stop here, and gen file will "
-            #                          "not be created for {}.".format(line_ffn.strip(), ffnseq))
-            #             problem = True
-            #             break
-            #     # check crispr ID is the same as in the current lst line
-            #     crisprIDlst = int(lstline.split("\t")[4].split("_CRISPR")[1])
-            #     if (crisprID == crisprIDlst):
-            #         write_header(lstline, gen)
-            #         crisprID += 1
-            #     else:
-            #         logger.error(("Problem with CRISPR numbers in {}. CRISPR {} in ffn is "
-            #                       "CRISPR num {}, which is not found at this place in "
-            #                       "lstinfo file.").format(lstfile, line_ffn.strip(), crisprID))
-            #         problem = True
-            #         break
-            # else:
-            #     # get geneID of this header, and the next line of the lst file
-            #     try:
-            #         genID = int(line_ffn.split()[0].split("_")[-1])
-            #     except Exception as err:
-            #         logger.error(("Unknown header format {} in {}. "
-            #                    "Error: {}\nGen file will not be "
-            #                    "created.").format(line_ffn.strip(), ffnseq, err))
-            #         problem = True
-            #         break
-            #     try:
-            #         genIDlst = int(lstline.split("\t")[4].split("_")[-1])
-            #     except Exception as err:
-            #         logger.error(("Unknown gene format {} in {}. "
-            #                    "Error: {}\nGen file will not be "
-            #                    "created.").format(lstline.strip(), lstfile, err))
-            #         problem = True
-            #         break
-            #     # check that genID is the same as the lst line
-            #     if (genID == genIDlst):
-            #         write_header(lstline.strip(), gen)
-            #     else:
-            #         logger.error("Missing info for gene {} in {}. If it is actually present "
-            #                      "in the lst file, check that genes are ordered by increasing "
-            #                      "number in both lst and ffn files.\nGen file not created "
-            #                      "from {}.".format(line_ffn.strip(), lstfile, ffnseq))
-            #         problem = True
-            #         break
     if problem:
         os.remove(genseq)
     return not problem
