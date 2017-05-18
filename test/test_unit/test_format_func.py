@@ -287,8 +287,7 @@ def test_create_gen_supCRISPR(capsys):
     assert not os.path.isfile(genseq)
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >prokka_out_for_test in test/data/test_files/"
-                   "prokka_out_for_test-supCRISPR.ffn. Error: invalid literal for "
-                   "int() with base 10: 'test'\nGen file will not be created.\n")
+                   "prokka_out_for_test-supCRISPR.ffn.\nGen file will not be created.\n")
 
 
 def test_create_gen_supGene(capsys):
@@ -296,10 +295,10 @@ def test_create_gen_supGene(capsys):
     Test that, when creating gen file from ffn and lst, if a gene of ffn file is not present in
     the lst file, it writes an error, removes the gen file, and returns False.
     """
-    faaseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-supGene.ffn")
+    ffnseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-supGene.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "test_create_gen-supgene.prt")
-    assert not ffunc.create_gen(faaseq, lstfile, prtseq)
+    assert not ffunc.create_gen(ffnseq, lstfile, prtseq)
     assert not os.path.isfile(prtseq)
     _, err = capsys.readouterr()
     assert err == ("Missing info for gene >sup_gene_00012 in test/data/exp_files/"
@@ -311,9 +310,11 @@ def test_create_gen_supGene(capsys):
 
 def test_create_gen_missCRISPR(capsys):
     """
-    Test that when there is a CRISPR in the lstinfo file, but not in ffn (in ffn, classical gene),
-    it returns an error, because the ID in ffn file corresponds to a gene ID, and not a CRISPR.
-    Should return False, write error message, and remove gen file.
+    Test for situation where there are 2 CRISPRs in the lstinfo file, the first one
+    is not in the ffn file, while the second one is in the ffn file.
+    It should return an error message about CRISPR number not corresponding, as
+    the first CRISPR found in ffn (CRISPR 1) corresponds to CRISPR2 in lstinfo file.
+    Gene file should be removed, and the function should return False
     """
     ffnseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-missCRISPR.ffn")
     lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
@@ -321,28 +322,27 @@ def test_create_gen_missCRISPR(capsys):
     assert not ffunc.create_gen(ffnseq, lstfile, genseq)
     assert not os.path.isfile(genseq)
     _, err = capsys.readouterr()
-    assert err == ("According to lstinfo file, gene >JGIKIPIJ_00013 should be a CRISPR. "
-                   "However, its name has the same format as a gene name (not "
-                   "CRISPR). Format function will stop here, and gen file will "
-                   "not be created for test/data/test_files/prokka_out_for_test-missCRISPR.ffn.\n")
+    assert err == ("Problem with CRISPR numbers in test/data/exp_files/res_tbl2lst.lst. "
+                   "CRISPR >prokka_out_for_test in ffn is CRISPR num 1, whereas it is annotated "
+                   "as CRISPR num 2 in lst file.\n")
 
 
-def test_create_gen_wrongCRISPR(capsys):
+def test_create_gen_noCRISPRffn():
     """
-    Test that when the CRISPR number of lstinfo file does not correspond to the CRISPR number
-    in ffn, it writes an error, returns false and removes gen file.
+    Test that when the there is a CRISPR in the lst file, but not in the ffn file,
+    everything goes well, as in some versions of prokka (1.12)n CRISPRs are not in ffn while
+    they are specified in lst. Function should return True, and gene file created.
     """
-    ffnseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
-                          "prokka_out_for_test.ffn")
-    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst-wrongCRISPRnum.lst")
-    genseq = os.path.join("test", "data", "test_create_gen_wrongCRISPR.gen")
-    assert not ffunc.create_gen(ffnseq, lstfile, genseq)
-    assert not os.path.isfile(genseq)
-    _, err = capsys.readouterr()
-    assert err == ("Problem with CRISPR numbers in test/data/"
-                   "exp_files/res_tbl2lst-wrongCRISPRnum.lst. CRISPR >prokka_out_for_test"
-                   " in ffn is CRISPR num 1, which is not found at this place in "
-                   "lstinfo file.\n")
+    ffnseq = os.path.join("test", "data", "test_files", "prokka_out_for_test-noCRISPRffn.ffn")
+    lstfile = os.path.join("test", "data", "exp_files", "res_tbl2lst.lst")
+    genseq = os.path.join("test", "data", "test_create_gen_noCRISPRffn.gen")
+    assert ffunc.create_gen(ffnseq, lstfile, genseq)
+    assert os.path.isfile(genseq)
+    exp_file = os.path.join("test", "data", "exp_files", "res_create_gen_noCRISPRffn.gen")
+    with open(exp_file, "r") as expf, open(genseq, "r") as prtf:
+        for line_exp, line_out in zip(expf, prtf):
+            assert line_exp == line_out
+    os.remove(genseq)
 
 
 def test_create_gen_wrongHeaderSep(capsys):
@@ -358,8 +358,7 @@ def test_create_gen_wrongHeaderSep(capsys):
     assert not os.path.isfile(genseq)
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >JGIKIPIJ-00005 in test/data/test_files/"
-                   "prokka_out_for_test-wrongFormat.ffn. Error: invalid literal for "
-                   "int() with base 10: '>JGIKIPIJ-00005'\n"
+                   "prokka_out_for_test-wrongFormat.ffn.\n"
                    "Gen file will not be created.\n")
 
 
@@ -376,8 +375,7 @@ def test_create_gen_wrongHeaderInt(capsys):
     assert not os.path.isfile(genseq)
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >JGIKIPIJ_a00005 in test/data/test_files/"
-                   "prokka_out_for_test-wrongInt.ffn. Error: invalid literal for "
-                   "int() with base 10: 'a00005'\n"
+                   "prokka_out_for_test-wrongInt.ffn.\n"
                    "Gen file will not be created.\n")
 
 
@@ -386,6 +384,7 @@ def test_create_gen_wrongLstInt(capsys):
     Test that, when creating gen file from ffn and lst, if a gene name in lst file is
     not in the right format (gene name and number are separated by '_', but gene num
     contains a letter), it writes an error, erases gen file, and returns False.
+    Because the gene name in ffn won't be found in lst (a it contains an error in lst).
     """
     ffnseq = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
                           "prokka_out_for_test.ffn")
@@ -394,11 +393,12 @@ def test_create_gen_wrongLstInt(capsys):
     assert not ffunc.create_gen(ffnseq, lstfile, genseq)
     assert not os.path.isfile(genseq)
     _, err = capsys.readouterr()
-    assert err == ("Unknown gene format 77\t1237\tD\tCDS\ttest.0417.00002.b0002_j00009\tNA\t"
-                   "| hypothetical protein | NA | NA in test/data/exp_files/"
-                   "res_tbl2lst-wrongGeneName.lst. Error: invalid literal for "
-                   "int() with base 10: 'j00009'\n"
-                   "Gen file will not be created.\n")
+    assert err == ("Missing info for gene >JGIKIPIJ_00009 in test/data/exp_files/"
+                   "res_tbl2lst-wrongGeneName.lst. If it is actually present "
+                   "in the lst file, check that genes are ordered by increasing "
+                   "number in both lst and ffn files.\nGen file not created "
+                   "from test/data/test_files/original_name.fna-prokkaRes/"
+                   "prokka_out_for_test.ffn.\n")
 
 
 def test_create_gen_Ok():
@@ -490,8 +490,7 @@ def test_handle_genome_formaterror(capsys):
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
                    "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
-                   "test.0417.00002.ffn. "
-                   "Error: invalid literal for int() with base 10: 'i00002'\n"
+                   "test.0417.00002.ffn.\n"
                    "Gen file will not be created.\n")
     # remove tblout which was copied for this test
     os.remove(tblout)
@@ -609,8 +608,7 @@ def test_format1genome_problemgen(capsys):
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
                    "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
-                   "test.0417.00002.ffn. "
-                   "Error: invalid literal for int() with base 10: 'i00002'\n"
+                   "test.0417.00002.ffn.\n"
                    "Gen file will not be created.\n")
     # remove tblout which was copied for this test
     os.remove(tblout)
