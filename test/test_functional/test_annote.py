@@ -786,7 +786,7 @@ def test_annote_all():
     dbpath = os.path.join("test", "data", "genomes")
     respath = os.path.join("test", "data", "res_test_funcDefault")
     name = "GENO"
-    cmd = "qc_and_annote.py {} -d {} -r {} -n {}".format(list_file, dbpath, respath, name)
+    cmd = "genomeAPCAT annotate {} -d {} -r {} -n {}".format(list_file, dbpath, respath, name)
     ret = subprocess.call(cmd.split())
     assert ret == 0
     # Get output files
