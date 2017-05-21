@@ -81,7 +81,6 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         logger.error(excp)
         sys.exit(1)
     final = {genome: res for genome, res in zip(sorted(genomes), final)}
-    logger.debug(final)
     return final
 
 
