@@ -125,7 +125,7 @@ def check_dependencies():
     - check that pip3 is available
     """
     to_install = []
-    if target == "install":
+    if target == "install" or target == "develop":
         if not cmd_exists("prokka"):
             if not cmd_exists("barrnap"):
                 if not cmd_exists("wget"):
