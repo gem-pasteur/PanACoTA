@@ -46,7 +46,7 @@ def init_logger(logfile, level, name= None):
     # create formatter for log messages: "timestamp :: level :: message"
     formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
                                       '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
@@ -110,6 +110,24 @@ def check_installed(cmd):
         if os.path.isfile(out.strip()):
             return True
     return False
+
+
+def run_cmd(cmd, error, eof=False, **kwargs):
+    """
+    Run the given command line. If the return code is not 0, print error message.
+    if eof (exit on fail) is True, exit program if error code is not 0.
+    """
+    if not "stdout" in kwargs:
+        kwargs["stdout"] = None
+    if not "stderr" in kwargs:
+        kwargs["stderr"] = None
+    retcode = subprocess.call(shlex.split(cmd), stdout=kwargs["stdout"], stderr=kwargs["stderr"])
+    if retcode != 0:
+        logger.error(error)
+        sys.stderr.write(error)
+        if eof:
+            sys.exit(retcode)
+    return retcode
 
 
 def plot_distr(values, limit, outfile, title, text):
