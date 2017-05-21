@@ -35,6 +35,7 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     import time
     from genomeAPCAT import utils
     from genomeAPCAT.pangenome_module import protein_seq_functions as protf
+    from genomeAPCAT.pangenome_module import mmseq_to_pangenome as m2p
 
     os.makedirs(outdir, exist_ok=True)
     # get only filename of list_file, without extension
@@ -62,47 +63,45 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     else:
         threadinfo = ""
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    infoname = tr(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
+    infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
-    tmpdi = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
-    logmmseq = os.path.join(outdir, "mmeq_" + prt_bank + "_" + infoname + ".log")
+    tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
+    logmmseq = os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
     logger.info("Running mmseqs with:")
     logger.info(" - minimum sequence identity = {}".format(min_id))
     logger.info(" - cluster mode {}".format(clust_mode))
     if threads > 1:
         logger.info(" - {} threads".format(threads))
-
-#     # Create ffindex of DB if not already done
-# if [ ! -e $mmseqdb ]; then
-#     echo " * creating database"
-#     mmseqs createdb $protsdb $mmseqdb
-# else
-#     echo " * database "$mmseqdb" already exists"
-# fi
-
-# # create temporary folder
-# mkdir -p $tmpdir
-
-# # Cluster all proteins
-# echo " * clustering proteins with cluster mode "$clustmode
-# if [ -z $mpi ]; then
-#     mmseqs cluster $mmseqdb $mmseqclust $tmpdir --min-seq-id $minid $paramthreads --cluster-mode $clustmode > $logfile
-# else
-#     RUNNER="mpirun -np $mpi" mmseqs cluster $mmseqdb $mmseqclust $tmpdir --min-seq-id $minid $paramthreads --cluster-mode $clustmode > $logfile
-# fi
-
-# # Convert output to tsv file (one line per comparison done)
-# echo " * Converting to tsv file"
-# mmseqs createtsv $mmseqdb $mmseqdb $mmseqclust $mmseqclust.tsv
-# # Convert the tsv file to a 'pangenome' file: one line per family
-# echo " * Converting to pangenome file"
-# python mmseq_to_pangenome.py $mmseqclust.tsv
-
-# end=`date +"%d-%m-%y_%T"`
-
-# echo $start >> $logfile
-# echo $end >> $logfile
+    # Create ffindex of DB if not already done
+    if not os.path.isfile(mmseqdb):
+        logger.info("Creating database")
+        cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
+        msg = ("Problem while trying to convert database {} to mmseqs "
+               "database format.").format(prt_path)
+        utils.run_cmd(cmd, msg, eof=True)
+    else:
+        logger.warning(("mmseq database {} already exists. The program will "
+                        "use it.").format(mmseqdb))
+    os.makedirs(tmpdir, exist_ok = True)
+    # Cluster with mmseqs
+    logger.info("Clustering proteins...")
+    cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
+           "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
+    msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
+    with open(logmmseq, "w") as logm:
+        utils.run_cmd(cmd, msg, eof=True, stdout=logm, stderr=logm)
+    # Convert output to tsv file (one line per comparison done)
+    cmd = "mmseqs createtsv {} {} {} {}.tsv".format(mmseqdb, mmseqdb, mmseqclust, mmseqclust)
+    msg = "Problem while trying to convert mmseq result file to tsv file"
+    utils.run_cmd(cmd, msg, eof=True)
+    # Convert the tsv file to a 'pangenome' file: one line per famil
+    logger.info("Converting mmseqs results to pangenome file")
+    m2p.main(mmseqclust + ".tsv") # python mmseq_to_pangenome.py $mmseqclust.tsv
+    end = time.strftime('%Y-%m-%d_%H-%M-%S')
+    with open(logmmseq, "a") as logm:
+        logm.write("Start: {}".format(start) + "\n")
+        logm.write("End: {}".format(end) + "\n")
 
 
 def build_parser(parser):
