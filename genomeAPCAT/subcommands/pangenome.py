@@ -55,14 +55,13 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
 
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
     prt_bank = os.path.basename(prt_path)
-    logger.debug(prt_bank)
 
     if threads != 1:
         threadinfo = "-th" + str(threads)
     else:
         threadinfo = ""
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    infoname = tr(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
+    infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
     tmpdi = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
@@ -154,7 +153,7 @@ def build_parser(parser):
     parser.add_argument("-o", dest="outdir", required=True,
                         help=("Output directory, where all results must be saved "
                               "(including tmp folder)"))
-    parser.add_argument("-c", dest="clust_mode", choices=[0, 1, 2], default=1,
+    parser.add_argument("-c", dest="clust_mode", type=int, choices=[0, 1, 2], default=1,
                         help=("Choose the clustering mode: 0 for 'set cover', 1 for "
                               "'single-linkage', 2 for 'CD-Hit'. Default "
                               "is 'single-linkage' (1)"))
