@@ -26,13 +26,17 @@ def build_prt_bank(lstinfo, dbpath, name, spedir):
     spedir: By default, output file is saved in dbpath directory. If it must be saved somewhere
     else, it is specified here.
     """
-    logger.info("Building bank with all proteins to {}".format(name + ".All.prt"))
     if not spedir:
         outdir = dbpath
     else:
         os.makedirs(spedir, exist_ok=True)
         outdir = spedir
     outfile = os.path.join(outdir, name + ".All.prt")
+    if os.path.isfile(outfile):
+        logger.warning(("Protein bank {} already exists. "
+                        "It will be used by mmseqs.").format(outfile))
+        return outfile
+    logger.info("Building bank with all proteins to {}".format(name + ".All.prt"))
     genomes = []
     with open(lstinfo, 'r') as lstf:
         for line in lstf:
@@ -42,5 +46,5 @@ def build_prt_bank(lstinfo, dbpath, name, spedir):
             genome = line.strip().split()[0]
             genomes.append(genome)
     all_names = [os.path.join(dbpath, gen + ".prt") for gen in genomes]
-    utils.cat(all_names, outfile)
+    utils.cat(all_names, outfile, title="Building bank")
     return outfile
