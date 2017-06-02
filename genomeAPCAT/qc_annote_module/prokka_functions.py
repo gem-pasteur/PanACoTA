@@ -42,11 +42,10 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     # Create progressbar
     widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
-               progressbar.ETA()
+               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
               ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
-                                  redirect_stderr=True, redirect_stdout=True).start()
+    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
+                                  term_width=100).start()
     if threads <= 3:
         cores_prokka = threads
         pool_size = 1
