@@ -18,10 +18,10 @@ def main_from_parse(args):
     Call main function from the arguments given by parser
     """
     main(args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
-         args.clust_mode, args.spedir, args.threads)
+         args.clust_mode, args.spedir, args.threads, args.outfile)
 
 
-def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
+def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None):
     """
     Main method, doing all steps:
     - concatenate all protein files
@@ -32,13 +32,12 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     """
     # import needed packages
     import logging
-    import time
     from genomeAPCAT import utils
     from genomeAPCAT.pangenome_module import protein_seq_functions as protf
     from genomeAPCAT.pangenome_module import mmseq_to_pangenome as m2p
+    from genomeAPCAT.pangenome_module import mmseqs_functions as mmf
 
     os.makedirs(outdir, exist_ok=True)
-    # get only filename of list_file, without extension
     # name logfile, add timestamp if already existing
     logfile = os.path.join(outdir, "genomeAPCAT-pangenome_" + name + ".log")
     # if os.path.isfile(logfile):
@@ -49,59 +48,15 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     utils.init_logger(logfile, level)
     logger = logging.getLogger()
 
-    # test if prokka is installed and in the path
+    # test if mmseqs is installed and in the path
     if not utils.check_installed("mmseqs"):  # pragma: no cover
-        logger.error("mmseqs is not installed. 'genomeAPCAT pan-genome' cannot run.")
+        logger.error("mmseqs is not installed. 'genomeAPCAT pangenome' cannot run.")
         sys.exit(1)
 
+    # Build bank with all proteins to include in the pangenome
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
-    prt_bank = os.path.basename(prt_path)
-
-    if threads != 1:
-        threadinfo = "-th" + str(threads)
-    else:
-        threadinfo = ""
-    start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
-    mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
-    mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
-    tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
-    logmmseq = os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
-    information = ("Running mmseqs with:\n"
-                   " - minimum sequence identity = {}\n"
-                   " - cluster mode {}").format(min_id, clust_mode)
-    if threads > 1:
-        information += "\n - {} threads".format(threads)
-    logger.info(information)
-    # Create ffindex of DB if not already done
-    if not os.path.isfile(mmseqdb):
-        logger.info("Creating database")
-        cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
-        msg = ("Problem while trying to convert database {} to mmseqs "
-               "database format.").format(prt_path)
-        utils.run_cmd(cmd, msg, eof=True)
-    else:
-        logger.warning(("mmseq database {} already exists. The program will "
-                        "use it.").format(mmseqdb))
-    os.makedirs(tmpdir, exist_ok = True)
-    # Cluster with mmseqs
-    logger.info("Clustering proteins...")
-    cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
-           "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
-    msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
-    with open(logmmseq, "w") as logm:
-        utils.run_cmd(cmd, msg, eof=True, stdout=logm, stderr=logm)
-    # Convert output to tsv file (one line per comparison done)
-    cmd = "mmseqs createtsv {} {} {} {}.tsv".format(mmseqdb, mmseqdb, mmseqclust, mmseqclust)
-    msg = "Problem while trying to convert mmseq result file to tsv file"
-    utils.run_cmd(cmd, msg, eof=True)
-    # Convert the tsv file to a 'pangenome' file: one line per famil
-    logger.info("Converting mmseqs results to pangenome file")
-    m2p.main(mmseqclust + ".tsv") # python mmseq_to_pangenome.py $mmseqclust.tsv
-    end = time.strftime('%Y-%m-%d_%H-%M-%S')
-    with open(logmmseq, "a") as logm:
-        logm.write("Start: {}".format(start) + "\n")
-        logm.write("End: {}".format(end) + "\n")
+    # Do pangenome
+    mmf.run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, outfile)
 
 
 def build_parser(parser):
@@ -153,6 +108,11 @@ def build_parser(parser):
     parser.add_argument("-o", dest="outdir", required=True,
                         help=("Output directory, where all results must be saved "
                               "(including tmp folder)"))
+    parser.add_argument("-f", dest="outfile",
+                        help=("Use this option if you want to give the name of the pangenome "
+                              "output file (without path). Otherwise, by default, it is called "
+                              "PanGenome-mmseq_<given_dataset_name>.All.prt_<"
+                              "information_on_parameters>.lst"))
     parser.add_argument("-c", dest="clust_mode", type=int, choices=[0, 1, 2], default=1,
                         help=("Choose the clustering mode: 0 for 'set cover', 1 for "
                               "'single-linkage', 2 for 'CD-Hit'. Default "
