@@ -67,11 +67,12 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads):
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
     tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
     logmmseq = os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
-    logger.info("Running mmseqs with:")
-    logger.info(" - minimum sequence identity = {}".format(min_id))
-    logger.info(" - cluster mode {}".format(clust_mode))
+    information = ("Running mmseqs with:\n"
+                   " - minimum sequence identity = {}\n"
+                   " - cluster mode {}").format(min_id, clust_mode)
     if threads > 1:
-        logger.info(" - {} threads".format(threads))
+        information += "\n - {} threads".format(threads)
+    logger.info(information)
     # Create ffindex of DB if not already done
     if not os.path.isfile(mmseqdb):
         logger.info("Creating database")
