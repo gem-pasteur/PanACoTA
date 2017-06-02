@@ -5,6 +5,7 @@ import sys
 from genomeAPCAT import __version__ as version
 
 from genomeAPCAT.subcommands import qc_and_annote
+from genomeAPCAT.subcommands import pangenome
 
 
 def main():
@@ -32,7 +33,7 @@ def parse_arguments(argv):
                                      prog='genomeAPCAT')
 
     parser.add_argument('-V', '--version', action='version',
-            version='genomeAPCAT - v ' + str(version),
+            version='genomeAPCAT - v. ' + str(version),
             help="Print the version number and exit")
     # parser.add_argument('-v', '--verbose', dest='verbosity',
     #         action='count', default=1,
@@ -46,17 +47,18 @@ def parse_arguments(argv):
     actions = {}  # to add the action to do according to the subparser called
     checks = {}   # to add the function to call to check the subparser arguments
 
-    # Help part
-    parser_help = subparsers.add_parser('help',
-                                        help='Detailed help for actions using help <action>')
-    parser_help.add_argument('action')
     # QC and annotation part
     parser_annote = subparsers.add_parser('annotate',
                                        help="Quality control and annotation of genomes")
     qc_and_annote.build_parser(parser_annote)
     actions["annotate"] = qc_and_annote.main_from_parse
     checks["annotate"] = qc_and_annote.check_args
+
     # Pan genome part
+    parser_pan = subparsers.add_parser('pangenome', help="Generate a pan-genome of your dataset")
+    pangenome.build_parser(parser_pan)
+    actions["pangenome"] = pangenome.main_from_parse
+
     # Persistent genome part
     # Alignment and tree part
 
@@ -68,11 +70,9 @@ def parse_arguments(argv):
     if action_called in checks:
         checks[action_called](parser, arguments)
 
-    # If subparser help is called, return help
-    if action_called == 'help':
-        return parse_arguments([str(arguments.action), '-h'])
-    elif action_called not in actions:
-        parser.error("too few arguments")
+    # If subparser called does not exist, error
+    if action_called not in actions:
+        parser.error("too few arguments. Use '-h' to get help.")
     return actions[action_called], arguments
 
 
