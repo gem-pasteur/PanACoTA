@@ -34,7 +34,6 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     import logging
     from genomeAPCAT import utils
     from genomeAPCAT.pangenome_module import protein_seq_functions as protf
-    from genomeAPCAT.pangenome_module import mmseq_to_pangenome as m2p
     from genomeAPCAT.pangenome_module import mmseqs_functions as mmf
 
     os.makedirs(outdir, exist_ok=True)
@@ -64,6 +63,7 @@ def build_parser(parser):
     Method to create a parser for command-line options
     """
     import argparse
+    import multiprocessing
     def perc_id(param):
         try:
             param = float(param)
@@ -80,9 +80,17 @@ def build_parser(parser):
         except Exception:
             msg = "argument --threads threads: invalid int value: {}".format(param)
             raise argparse.ArgumentTypeError(msg)
-        if param < 1:
-            msg = ("You must provide at least 1 thread. Invalid value: {}".format(param))
+        nb_cpu = multiprocessing.cpu_count()
+        if param > nb_cpu:
+            msg = ("You have {} threads on your computer, you cannot ask for more: "
+                   "invalid value: {}").format(nb_cpu, param)
             raise argparse.ArgumentTypeError(msg)
+        elif param < 0:
+            msg = ("Please provide a positive number of threads (or 0 for all threads): "
+                   "Invalid value: {}").format(param)
+            raise argparse.ArgumentTypeError(msg)
+        elif param == 0:
+            return multiprocessing.cpu_count()
         return param
 
     # Create command-line parser for all options and arguments to give
@@ -124,7 +132,8 @@ def build_parser(parser):
     parser.add_argument("--threads", dest="threads", default=1, type=thread_num,
                         help=("add this option if you want to parallelize on several threads. "
                               "Indicate on how many threads you want to parallelize. "
-                              "By default, it uses all threads in the computer."))
+                              "By default, it uses 1 thread. Put 0 if you want to use "
+                              "all threads of your computer."))
 
 
 def parse(parser, argu):
