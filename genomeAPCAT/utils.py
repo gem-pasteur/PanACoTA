@@ -387,6 +387,8 @@ def cat(list_files, output, title = None):
                 curnum += 1
             with open(file, "r") as inf:
                 shutil.copyfileobj(inf, outf)
+    if title:
+        bar.finish()
 
 
 def check_format(info):
