@@ -17,6 +17,7 @@ from logging.handlers import RotatingFileHandler
 import subprocess
 import shutil
 import shlex
+import progressbar
 
 logger = logging.getLogger()
 
@@ -366,14 +367,24 @@ def read_info(name_inf, name, date, genomes_inf):
     return cur_name, cur_date
 
 
-def cat(list_files, output):
+def cat(list_files, output, title = None):
     """
     Concatenate all files in 'list_files' and save result in 'output'
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
     """
+    if title:
+        nbfiles = len(list_files)
+        widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+               ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
+               progressbar.Percentage(), ") - ", progressbar.Timer()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
+        curnum = 1
     with open(output, "w") as outf:
         for file in list_files:
+            if title:
+                bar.update(curnum)
+                curnum += 1
             with open(file, "r") as inf:
                 shutil.copyfileobj(inf, outf)
 
