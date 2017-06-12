@@ -49,7 +49,8 @@ def parse_arguments(argv):
 
     # QC and annotation part
     parser_annote = subparsers.add_parser('annotate',
-                                       help="Quality control and annotation of genomes")
+                                       help="Quality control and annotation of genomes",
+                                       add_help=False)
     qc_and_annote.build_parser(parser_annote)
     actions["annotate"] = qc_and_annote.main_from_parse
     checks["annotate"] = qc_and_annote.check_args

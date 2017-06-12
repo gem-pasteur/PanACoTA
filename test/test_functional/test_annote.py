@@ -22,15 +22,14 @@ def test_parser_noarg(capsys):
     Test that when the script is called without any argument, an error message appears,
     indicating the required arguments.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "".split())
     _, err = capsys.readouterr()
-    assert ("[-h] -d DB_PATH -r RES_PATH [-n NAME] [--l90 L90]") in err
-    assert "[--nbcont NBCONT] [--cutN CUTN] [--threads THREADS]" in err
-    assert "[--date DATE] [--tmp TMPDIR] [--prok PROKKADIR] [-F]" in err
-    assert "[-Q]" in err
+    assert ("-d DB_PATH -r RES_PATH [-n NAME] [-Q] [--l90 L90]") in err
+    assert "[--nbcont NBCONT] [--cutN CUTN] [--date DATE] [--tmp TMPDIR]" in err
+    assert "[--prok PROKKADIR] [-F] [--threads THREADS] [-v] [-q] [-h]" in err
     assert "list_file" in err
     assert "the following arguments are required: list_file, -d, -r" in err
 
@@ -40,7 +39,7 @@ def test_parser_noname(capsys):
     Test that when the script is called without any name for the genomes not -Q option,
     it returns an error message
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath".split())
@@ -56,7 +55,7 @@ def test_parser_wrongname(capsys):
     Test that when the script is called with a genome name with more than 4 characters,
     it returns an error message
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n genome".split())
@@ -71,7 +70,7 @@ def test_parser_negativeCont(capsys):
     Test that when the script is called with a limit of contig number higher than 9999,
     it returns an error message
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont -5".split())
@@ -84,7 +83,7 @@ def test_parser_highCont(capsys):
     Test that when the script is called with a negative limit of contig number,
     it returns an error message
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont 10005".split())
@@ -97,7 +96,7 @@ def test_parser_wrongCont(capsys):
     Test that when the script is called with a non integer limit of contig number,
     it returns an error message
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --nbcont 10.5".split())
@@ -110,7 +109,7 @@ def test_parser_wrongl90(capsys):
     Test that when the user does not give an int for the l90 limit, it returns an
     error message.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --l90 l90".split())
@@ -123,7 +122,7 @@ def test_parser_wrongCut(capsys):
     Test that when the user does not give an int for the cutN value, it returns an
     error message.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --cutN 10.5".split())
@@ -136,7 +135,7 @@ def test_parser_wrongThread(capsys):
     Test that when the user does not give an int for the threads value, it returns an
     error message.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --threads 10.5".split())
@@ -149,7 +148,7 @@ def test_parser_wrongDate(capsys):
     Test that when the user does not give an int for the threads value, it returns an
     error message.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 --date 417".split())
@@ -163,7 +162,7 @@ def test_parser_default():
     Test that when run with the minimum required arguments, all default values are
     as expected.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -n g123".split())
     assert OPTIONS.list_file == "list_file"
@@ -183,7 +182,7 @@ def test_parser_values():
     """
     Test that values for L90, nbcontig, cutn, threads, date are taken into account
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     OPTIONS = annot.parse(parser, ("list_file -d dbpath -r respath -n g123 --l90 2 "
                                    "--nbcont 10 --cutN 0 --threads 8 --date toto").split())
@@ -204,7 +203,7 @@ def test_parser_force():
     """
     Test that when run with '-F' option, force is initialized to "--force".
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -n g123 -F".split())
     assert OPTIONS.list_file == "list_file"
@@ -224,7 +223,7 @@ def test_parser_wrongforce(capsys):
     """
     Test that when run with '-F' option + a value, it returns an error message.
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
         annot.parse(parser, "list_file -d dbpath -r respath -n g123 -F 10".split())
@@ -237,7 +236,7 @@ def test_parser_qc():
     Test that when run with '-Q' option (for QC only) and no name given for the genome, it
     is set to "NONE"
     """
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     annot.build_parser(parser)
     OPTIONS = annot.parse(parser, "list_file -d dbpath -r respath -Q".split())
     assert OPTIONS.list_file == "list_file"
@@ -279,6 +278,8 @@ def test_main_from_parse():
     args.qc_only = False
     args.tmpdir = tmpdir
     args.prokkadir = None
+    args.verbose=False
+    args.quiet=False
     annot.main_from_parse(args)
     # Check that tmp files exist in the right folder
     assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-gembase.fna"))

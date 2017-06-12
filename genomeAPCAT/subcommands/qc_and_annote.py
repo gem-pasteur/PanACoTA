@@ -94,11 +94,13 @@ def main_from_parse(arguments):
     """
     main(arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
-         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.prokkadir)
+         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.prokkadir,
+         arguments.verbose, arguments.quiet)
 
 
 def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
-         threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None):
+         threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None,
+         verbose=False, quiet=False):
     """
     Main method, doing all steps:
     - analyze genomes (nb contigs, L90, stretches of N...)
@@ -226,7 +228,8 @@ def build_parser(parser):
         return param
 
     # Create command-line parser for all options and arguments to give
-    parser.add_argument(dest="list_file",
+    required = parser.add_argument_group('Required arguments')
+    required.add_argument(dest="list_file",
                         help=("File containing the list of genome filenames to annotate (1 genome"
                               " per line). Each genome is in multi-fasta format. You can "
                               "specify the species name (4 characters) you want to give to each "
@@ -235,44 +238,50 @@ def build_parser(parser):
                               "'species' argument. You can also specify the date (4 digits) "
                               "by adding '.' + your date choice after the genome "
                               "filename(s), '::' and, if given, the species name."))
-    parser.add_argument("-d", dest="db_path", required=True,
+    required.add_argument("-d", dest="db_path", required=True,
                         help=("Path to folder containing all multifasta genome files"))
-    parser.add_argument("-r", dest="res_path", required=True,
+    required.add_argument("-r", dest="res_path", required=True,
                         help=("Path to folder where output annotated genomes must be saved"))
-    parser.add_argument("-n", dest="name", type=gen_name,
+    optional = parser.add_argument_group('Optional arguments')
+    optional.add_argument("-n", dest="name", type=gen_name,
                         help=("Choose a name for your annotated genomes. This name should contain "
                               "4 alphanumeric characters. Generally, they correspond to the 2 "
                               "first letters of genus, and 2 first letters of species, e.g. "
                               "ESCO for Escherichia Coli."))
-    parser.add_argument("--l90", dest="l90", type=int, default=100,
+    optional.add_argument("-Q", dest="qc_only", action="store_true", default=False,
+                        help=("Add this option if you want only to do quality control on your "
+                              "genomes (cut at 5N if asked, calculate L90 and number of contigs "
+                              "and plot their distributions). This allows you to check which "
+                              "genomes would be annotated with the given parameters, and to "
+                              "modify those parameters if you want, before you launch the "
+                              "annotation and formatting steps."))
+    optional.add_argument("--l90", dest="l90", type=int, default=100,
                         help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
-    parser.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
+    optional.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
                         help=("Maximum number of contigs allowed to keep a genome. "
                               "Default is 999."))
-    parser.add_argument("--cutN", dest="cutn", type=int, default=5,
+    optional.add_argument("--cutN", dest="cutn", type=int, default=5,
                         help=("By default, each genome will be cut into new contigs at each "
                               "stretch of at least 5 'N' in its sequence. If you don't want to "
                               "cut genomes into new contigs when there are stretches of 'N', "
                               "put 0 to this option. If you want to cut from a different number "
                               "of 'N' stretches, put this value to this option."))
-    parser.add_argument("--threads", dest="threads", type=int, default=1,
-                        help=("Specify how many threads can be used (default=1)"))
-    parser.add_argument("--date", dest="date", default=get_date(), type=date_name,
+    optional.add_argument("--date", dest="date", default=get_date(), type=date_name,
                         help=("Specify the date (MMYY) to give to your annotated genomes. "
                               "By default, will give today's date. The only requirement on the"
                               " given date is that it is 4 characters long. You can use letters"
                               " if you want. But the common way is to use 4 digits, "
                               "corresponding to MMYY."))
-    parser.add_argument("--tmp", dest="tmpdir",
+    optional.add_argument("--tmp", dest="tmpdir",
                         help=("Specify where the temporary files (sequence split by stretches "
                               "of 'N', sequence with new contig names etc.) must be saved. "
                               "By default, it will be saved in your result_directory/tmp_files."))
-    parser.add_argument("--prok", dest="prokkadir",
+    optional.add_argument("--prok", dest="prokkadir",
                         help=("Specify in which directory the prokka output files "
                               "(1 folder per genome, called <genome_name>-prokkaRes) must be "
                               "saved. By default, they are saved in the same directory as "
                               "your temporary files (see --tmp option to change it)."))
-    parser.add_argument("-F", "--force", dest="force", action="store_true",
+    optional.add_argument("-F", "--force", dest="force", action="store_true",
                         help=("Force run: Add this option if you want to run prokka and "
                               "formatting steps for all genomes "
                               "even if their result folder (for prokka step) or files (for "
@@ -283,13 +292,16 @@ def build_parser(parser):
                               "prokka folder already exists, prokka won't run again, and the "
                               "formating step will use the already existing folder if correct, "
                               "or skip the genome if there are problems in prokka folder."))
-    parser.add_argument("-Q", dest="qc_only", action="store_true", default=False,
-                        help=("Add this option if you want only to do quality control on your "
-                              "genomes (cut at 5N if asked, calculate L90 and number of contigs "
-                              "and plot their distributions). This allows you to check which "
-                              "genomes would be annotated with the given parameters, and to "
-                              "modify those parameters if you want, before you launch the "
-                              "annotation and formatting steps."))
+    optional.add_argument("--threads", dest="threads", type=int, default=1,
+                        help=("Specify how many threads can be used (default=1)"))
+    helper = parser.add_argument_group('Others')
+    helper.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False,
+                        help=("Increase verbosity in stdout/stderr."))
+    helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
+                        help=("Do not display anything to stdout/stderr. log files will "
+                              "still be created."))
+    helper.add_argument("-h", "--help", dest="help", action="help",
+                        help="show this help message and exit")
 
 
 def parse(parser, argu):
@@ -301,22 +313,25 @@ def parse(parser, argu):
 
 
 def check_args(parser, args):
-  """
-  Check that arguments given to parser are as expected.
-  """
-  if not args.qc_only and not args.name:
+    """
+    Check that arguments given to parser are as expected.
+    """
+    if not args.qc_only and not args.name:
       parser.error("You must specify your genomes dataset name in 4 characters with "
                    "'-n name' option (type -h for more information). Or, if you do not want "
                    "to annotate and format your genomes but just to run quality control, use "
                    "option '-Q")
-  if args.qc_only and not args.name:
+    if args.qc_only and not args.name:
       args.name = "NONE"
-  return args
+    if args.verbose and args.quiet:
+        parser.error("Choose between a verbose output (-v) or quiet output (-q)."
+                     " You cannot have both...")
+    return args
 
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"))
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
     build_parser(parser)
     OPTIONS = parse(parser, sys.argv[1:])
     main_from_parse(OPTIONS)
