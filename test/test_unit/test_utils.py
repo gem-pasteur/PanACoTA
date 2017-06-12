@@ -28,8 +28,65 @@ def test_logger_default(capsys):
     out, err = capsys.readouterr()
     assert "info debug\n" in out
     assert "info info\n" in out
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
+        assert logf.readline().endswith("] :: INFO :: info info\n")
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_verbose(capsys):
+    """
+    Test that logger is initialized as expected.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.DEBUG
+    utils.init_logger(logfile, level, "default", verbose=True)
+    logger = logging.getLogger("default")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert "info debug\n" in out
+    assert "info info\n" in out
     assert "info warning\n" in err
     assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
+        assert logf.readline().endswith("] :: INFO :: info info\n")
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_quiet(capsys):
+    """
+    Test that logger is initialized as expected.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.DEBUG
+    utils.init_logger(logfile, level, "default", quiet=True)
+    logger = logging.getLogger("default")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert "info debug\n" not in out
+    assert "info info\n" not in out
+    assert "info warning\n" not in err
+    assert "info critical\n" not in err
     with open(logfile, "r") as logf:
         assert logf.readline().endswith("] :: DEBUG :: info debug\n")
         assert logf.readline().endswith("] :: INFO :: info info\n")
@@ -49,6 +106,32 @@ def test_logger_info(capsys):
     logfile = "logfile_test.txt"
     level = logging.INFO
     utils.init_logger(logfile, level, "info")
+    logger = logging.getLogger("info")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert "info info\n" in out
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: INFO :: info info\n")
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_info_verbose(capsys):
+    """
+    Test that when logger is initialized with "INFO" level, it does not return DEBUG info.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.INFO
+    utils.init_logger(logfile, level, "info", verbose=True)
     logger = logging.getLogger("info")
     logger.debug("info debug")
     logger.info("info info")
@@ -77,6 +160,33 @@ def test_logger_warning(capsys):
     logfile = "logfile_test.txt"
     level = logging.WARNING
     utils.init_logger(logfile, level, "warn")
+    logger = logging.getLogger("warn")
+    logger.debug("info debug")
+    logger.info("info info")
+    logger.warning("info warning")
+    logger.critical("info critical")
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert "info warning\n" not in err
+    assert "info critical\n" in err
+    with open(logfile, "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    with open(logfile + ".err", "r") as logf:
+        assert logf.readline().endswith("] :: WARNING :: info warning\n")
+        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+    os.remove(logfile)
+    os.remove(logfile + ".err")
+
+
+def test_logger_warning_verbose(capsys):
+    """
+    Test that when logger is initialized with "WARNING" level, it does not return
+    anything in stdout, as DEBUG and INFO are not returned.
+    """
+    logfile = "logfile_test.txt"
+    level = logging.WARNING
+    utils.init_logger(logfile, level, "warn", verbose=True)
     logger = logging.getLogger("warn")
     logger.debug("info debug")
     logger.info("info info")

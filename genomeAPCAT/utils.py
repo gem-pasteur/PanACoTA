@@ -21,7 +21,7 @@ import shlex
 logger = logging.getLogger()
 
 
-def init_logger(logfile, level, name= None):
+def init_logger(logfile, level, name= None, verbose=False, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -35,6 +35,8 @@ def init_logger(logfile, level, name= None):
 
     level: minimum level that must be considered.
     name: if we need to name the logger (used for tests)
+    verbose: be more verbose: add warnings in stderr (by default, only error)
+    quiet: do not print anything to stderr/stdout
     """
     # create logger
     if name:
@@ -68,18 +70,22 @@ def init_logger(logfile, level, name= None):
     logger.addHandler(errfile_handler)  # add handler to logger
 
     # Create handler 3: write to stdout
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG)  # write any message
-    # don't write messages >= WARNING
-    stream_handler.addFilter(LessThanFilter(logging.WARNING))
-    stream_handler.setFormatter(formatterStream)
-    logger.addHandler(stream_handler)  # add handler to logger
+    if not quiet:
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)  # write any message
+        # don't write messages >= WARNING
+        stream_handler.addFilter(LessThanFilter(logging.WARNING))
+        stream_handler.setFormatter(formatterStream)
+        logger.addHandler(stream_handler)  # add handler to logger
 
-    # Create handler 4: write to stderr
-    err_handler = logging.StreamHandler(sys.stderr)
-    err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
-    err_handler.setFormatter(formatterStream)
-    logger.addHandler(err_handler)  # add handler to logger
+        # Create handler 4: write to stderr
+        err_handler = logging.StreamHandler(sys.stderr)
+        if verbose:
+            err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
+        else:
+            err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
+        err_handler.setFormatter(formatterStream)
+        logger.addHandler(err_handler)  # add handler to logger
 
 
 class LessThanFilter(logging.Filter):

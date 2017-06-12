@@ -29,7 +29,7 @@ from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
 logger = logging.getLogger()
 
 
-def format_genomes(genomes, results, res_path, prok_path, threads=1):
+def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False):
     """
     For all genomes which were annotated by prokka, reformat them
     in order to have, in 'res_path', the following folders:
@@ -55,11 +55,13 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     os.makedirs(rep_dir, exist_ok=True)
 
     nbgen = len(genomes)
+    if not quiet:
     # Create progressbar
-    widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ") - ", progressbar.Timer()]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        widgets = ['Formatting genomes: ',
+                   progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ") - ", progressbar.Timer()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
     params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
@@ -67,12 +69,13 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     pool = multiprocessing.Pool(threads)
     final = pool.map_async(handle_genome, params, chunksize=1)
     pool.close()
-    while(True):
-        if final.ready():
-            break
-        remaining = final._number_left
-        bar.update(nbgen - remaining)
-    bar.finish()
+    if not quiet:
+        while(True):
+            if final.ready():
+                break
+            remaining = final._number_left
+            bar.update(nbgen - remaining)
+        bar.finish()
     pool.join()
     res = final.get()
     for output in res:

@@ -22,7 +22,7 @@ import progressbar
 logger = logging.getLogger()
 
 
-def run_prokka_all(genomes, threads, force, prok_folder):
+def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     """
     for each genome in genomes, run prokka to annotate the genome.
 
@@ -39,13 +39,14 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     """
     logger.info("Annotating all genomes with prokka")
     nbgen = len(genomes)
-    # Create progressbar
-    widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
-                                  term_width=100).start()
+    if not quiet:
+        # Create progressbar
+        widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
+                                      term_width=100).start()
     if threads <= 3:
         cores_prokka = threads
         pool_size = 1
@@ -66,12 +67,13 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     try:
         final = pool.map_async(run_prokka, arguments, chunksize=1)
         pool.close()
-        while(True):
-            if final.ready():
-                break
-            remaining = final._number_left
-            bar.update(nbgen - remaining)
-        bar.finish()
+        if not quiet:
+            while(True):
+                if final.ready():
+                    break
+                remaining = final._number_left
+                bar.update(nbgen - remaining)
+            bar.finish()
         pool.join()
         final = final.get()
     # If an error occurs, terminate pool and exit

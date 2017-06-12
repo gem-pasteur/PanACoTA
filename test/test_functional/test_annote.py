@@ -157,6 +157,19 @@ def test_parser_wrongDate(capsys):
              "corresponding to the month (2 digits) and year (2 digits).")) in err
 
 
+def test_parser_qAndv(capsys):
+    """
+    Test that when the user wants both quiet and verbose option, it gives an error message
+    """
+    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
+    annot.build_parser(parser)
+    with pytest.raises(SystemExit):
+        annot.parse(parser, "list_file -d dbpath -r respath -n g123 -q -v".split())
+    _, err = capsys.readouterr()
+    assert (("Choose between a verbose output (-v) or quiet output (-q)."
+             " You cannot have both...")) in err
+
+
 def test_parser_default():
     """
     Test that when run with the minimum required arguments, all default values are
@@ -605,7 +618,7 @@ def test_main_onExistingProkkaDirErrorProkk(capsys):
     name = "ESCO"
     date = "0417"
     allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         prok_dir=prokdir)
+                                         prok_dir=prokdir, verbose=True)
     assert skip == ['B2_A3_5.fasta-problems.fna']
     assert skipf == []
     expg = {'H299_H561.fasta':
@@ -666,7 +679,7 @@ def test_main_onExistingProkkaDirErrorForm(capsys):
     name = "ESCO"
     date = "0417"
     allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         prok_dir=prokdir)
+                                         prok_dir=prokdir, verbose=True)
     assert skip == []
     assert skipf == ['B2_A3_5.fasta-problems.fna']
     expg = {'H299_H561.fasta':

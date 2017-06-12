@@ -146,7 +146,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
     # set level of logger (here debug to show everything during development)
     level = logging.DEBUG
-    utils.init_logger(logfile, level)
+    utils.init_logger(logfile, level, verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
     if not qc_only:
@@ -159,7 +159,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     genomes = utils.read_genomes(list_file, name, date, db_path)
     # genomes = {genome: [spegenus.date]}
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn)
+    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
     # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     # Plot L90 and nb_contigs distributions
     gfunc.plot_distributions(genomes, res_dir, listfile_base, l90, nbcont)
@@ -178,9 +178,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # Annotate all kept genomes
-    results = pfunc.run_prokka_all(kept_genomes, threads, force, prok_dir)
+    results = pfunc.run_prokka_all(kept_genomes, threads, force, prok_dir, quiet=quiet)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, prok_dir, threads)
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, prok_dir,
+                                                   threads, quiet=quiet)
     if skipped:
         utils.write_warning_skipped(skipped)
     if skipped_format:

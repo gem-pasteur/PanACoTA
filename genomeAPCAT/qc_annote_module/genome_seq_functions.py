@@ -23,7 +23,7 @@ from genomeAPCAT import utils
 logger = logging.getLogger()
 
 
-def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, quiet=False):
     """
     genomes: {genome: spegenus.date}
     dbpath: path to folder containing genomes
@@ -40,26 +40,28 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
                      "and then, calculating genome size, number of contigs and L90.").format(nbn))
     else:
         logger.info("Calculating genome size, number of contigs, L90")
-
-    # Create progressbar
-    widgets = ['Analysis: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
-               progressbar.ETA()
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
-    curnum = 1
+    if not quiet:
+        # Create progressbar
+        widgets = ['Analysis: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
+                   progressbar.ETA()
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        curnum = 1
     toremove = []
     for genome, name in genomes.items():
-        bar.update(curnum)
-        curnum += 1
+        if not quiet:
+            bar.update(curnum)
+            curnum += 1
         res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
         if not res:
             toremove.append(genome)
     if toremove:
         for gen in toremove:
             del genomes[gen]
-    bar.finish()
+    if not quiet:
+        bar.finish()
 
 
 def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
