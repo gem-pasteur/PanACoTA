@@ -162,6 +162,7 @@ def plot_distr(values, limit, outfile, title, text):
              s=text + " " + str(limit), color="r", rotation=90)
     plt.title(title)
     plt.savefig(outfile)
+    plt.close("all")
 
 
 def write_warning_skipped(skipped, format=False):
