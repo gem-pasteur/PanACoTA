@@ -17,7 +17,6 @@ from logging.handlers import RotatingFileHandler
 import subprocess
 import shutil
 import shlex
-import progressbar
 
 logger = logging.getLogger()
 
@@ -373,6 +372,7 @@ def cat(list_files, output, title = None):
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
     """
+    import progressbar
     if title:
         nbfiles = len(list_files)
         widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
