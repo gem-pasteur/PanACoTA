@@ -44,8 +44,8 @@ def test_save_contig_5N():
     resf = open(seq_file, "w")
     gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf)
     resf.close()
-    exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.00001_cont2_0": 39,
-           ">ESCO.0216.00001_cont2_1": 33, ">ESCO.0216.00001_cont2_2": 20}
+    exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.0000_0": 39,
+           ">ESCO.0216.0000_1": 33, ">ESCO.0216.0000_2": 20}
     assert contig_sizes == exp
 
     exp_file = os.path.join("test", "data", "exp_files", "res_save_contig5N.faa")
@@ -71,10 +71,10 @@ def test_save_contig_ATCG():
     resf = open(seq_file, "w")
     gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf)
     resf.close()
-    exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.00001_cont2_0": 14,
-           ">ESCO.0216.00001_cont2_1": 11, ">ESCO.0216.00001_cont2_2": 13,
-           ">ESCO.0216.00001_cont2_3": 34, ">ESCO.0216.00001_cont2_4": 1,
-           ">ESCO.0216.00001_cont2_5": 6, ">ESCO.0216.00001_cont2_6": 5}
+    exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.0000_0": 14,
+           ">ESCO.0216.0000_1": 11, ">ESCO.0216.0000_2": 13,
+           ">ESCO.0216.0000_3": 34, ">ESCO.0216.0000_4": 1,
+           ">ESCO.0216.0000_5": 6, ">ESCO.0216.0000_6": 5}
     assert contig_sizes == exp
 
     exp_file = os.path.join("test", "data", "exp_files", "res_save_contigATCG.faa")
@@ -104,24 +104,6 @@ def test_calc_l90_more():
     assert l90 == 3
 
 
-def test_rename_contigs():
-    """
-    From a given sequence, rename all its contigs with the given gembase name + a number,
-    and save the output sequence to the given res_path.
-    Check that the output file is as expected.
-    """
-    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
-    gembase_name = "ESCO.0216.00005"
-    res_path = os.path.join("test", "data")
-    outfile = os.path.join(res_path, "H299_H561.fasta-gembase.fna")
-    exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
-    gfunc.rename_genome_contigs(gembase_name, gpath, outfile)
-    with open(exp_file, "r") as expf, open(outfile, "r") as of:
-        for line_exp, line_seq in zip(expf, of):
-            assert line_exp == line_seq
-    os.remove(outfile)
-
-
 def test_rename_genomes():
     """
     From a list of genomes ({genome: [name.date, path, gsize, nbcont, L90]}),
@@ -140,25 +122,17 @@ def test_rename_genomes():
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
     res_path = os.path.join("test", "data")
-    out_f = [os.path.join(res_path, gname + "-gembase.fna") for gname in gs]
     gfunc.rename_all_genomes(genomes, res_path)
     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
     # so take into account both choices
-    exp_genomes =  {gs[0]: ["SAEN.1113.00003", out_f[0], 51, 4, 2],
-                    gs[1]: ["SAEN.1114.00004", out_f[1], 67, 3, 3],
-                    gs[2]: ["ESCO.0416.00001", out_f[2], 70, 4, 1],
-                    gs[3]: ["ESCO.0216.00003", out_f[3], 114, 5, 2],
-                    gs[4]: ["SAEN.1115.00001", out_f[4], 106, 3, 1],
-                    gs[5]: ["ESCO.0216.00002", out_f[5], 116, 4, 2],
-                    gs[6]: ["SAEN.1115.00002", out_f[6], 137, 3, 2]}
-    exp_f = [os.path.join("test", "data", "exp_files", "res_" + gname + "-gembase.fna")
-             for gname in gs]
+    exp_genomes =  {gs[0]: ["SAEN.1113.00003", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
+                    gs[1]: ["SAEN.1114.00004", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
+                    gs[2]: ["ESCO.0416.00001", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
+                    gs[3]: ["ESCO.0216.00003", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
+                    gs[4]: ["SAEN.1115.00001", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
+                    gs[5]: ["ESCO.0216.00002", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
+                    gs[6]: ["SAEN.1115.00002", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
     assert genomes == exp_genomes
-    for exp, out in zip(exp_f, out_f):
-        with open(exp, "r") as expf, open(out, "r") as outf:
-            for line_exp, line_out in zip(expf, outf):
-                assert line_exp == line_out
-        os.remove(out)
 
 
 def test_analyse1genome_nocut():
@@ -173,14 +147,20 @@ def test_analyse1genome_nocut():
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
     genome = gs[1]
-    tmp_path = os.path.join("plop")
+    tmp_path = os.path.join("test", "data")
     cut = False
     pat = "NNNNN+"
     assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    outf = os.path.join(tmp_path, gs[1] + "-short-contig.fna")
     exp_genomes = {gs[0]: ["SAEN.1113"],
-                   gs[1]: ["SAEN.1114", os.path.join(dbpath, gs[1]), 67, 3, 3],
+                   gs[1]: ["SAEN.1114", outf, 67, 3, 3],
                    gs[2]: ["ESCO.0416"]}
     assert genomes == exp_genomes
+    exp_file = os.path.join(tmp_path, "exp_files", "res_test_analyse-genome2.fna")
+    with open(exp_file, "r") as expf, open(outf, "r") as of:
+        for linee, lineo in zip(expf, of):
+            assert linee == lineo
+    os.remove(outf)
 
 
 def test_analyse1genome_nocut_empty():
@@ -196,7 +176,7 @@ def test_analyse1genome_nocut_empty():
                gs[2]: ["ESCO.0416"],
                gs[3]: ["ESCO.0415"]}
     genome = gs[3]
-    tmp_path = os.path.join("plop")
+    tmp_path = os.path.join("test", "data")
     cut = False
     pat = "NNNNN+"
     assert not gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
@@ -206,6 +186,7 @@ def test_analyse1genome_nocut_empty():
                    gs[3]: ["ESCO.0415"]}
     assert genomes == exp_genomes
     os.remove(os.path.join(dbpath, gs[3]))
+    os.remove(os.path.join(tmp_path, gs[3] + "-short-contig.fna"))
 
 
 def test_analyse1genome_cut():
@@ -278,14 +259,17 @@ def test_analyseAllGenomes_nocut():
     dbpath = os.path.join("test", "data", "genomes")
     gpaths = [os.path.join(dbpath, gname) for gname in gs]
     tmp_path = os.path.join("test", "data")
+    opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
     nbn = 0
     # Run analysis
     gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
     # construct expected results
-    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
-                   gs[1]: ["SAEN.1114", gpaths[1], 67, 3, 3],
-                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    exp_genomes = {gs[0]: ["SAEN.1113", opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", opaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", opaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
+    for f in opaths:
+        os.remove(f)
 
 
 def test_analyseAllGenomes_nocut_empty():
@@ -303,15 +287,18 @@ def test_analyseAllGenomes_nocut_empty():
                gs[3]: ["ESCO.0123"]}
     gpaths = [os.path.join(dbpath, gname) for gname in gs]
     tmp_path = os.path.join("test", "data")
+    opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
     nbn = 0
     # Run analysis
     gfunc.analyse_all_genomes(genomes, dbpath, tmp_path, nbn)
     # construct expected results
-    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
-                   gs[1]: ["SAEN.1114", gpaths[1], 67, 3, 3],
-                   gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
+    exp_genomes = {gs[0]: ["SAEN.1113", opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", opaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", opaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
     os.remove(os.path.join(dbpath, gs[3]))
+    for f in opaths:
+        os.remove(f)
 
 
 def test_analyseAllGenomes_cut():
