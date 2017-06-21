@@ -157,6 +157,11 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 
     # Read genome names.
     genomes = utils.read_genomes(list_file, name, date, db_path)
+    if not genomes:
+        logger.error(("We did not find any genome listed in {} in the folder {}. "
+                      "Please check your list to give valid genome "
+                      "names.").format(list_file, db_path))
+        sys.exit(-1)
     # genomes = {genome: [spegenus.date]}
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
