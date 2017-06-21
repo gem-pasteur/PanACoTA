@@ -94,10 +94,13 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     logger.addHandler(errfile_handler)  # add handler to logger
 
     # Create handler 3: detailsfile. Write everything to this file.
-    detfile_handler = RotatingFileHandler(detailfile, 'w', 1000000, 5)
-    detfile_handler.setLevel(level)
-    detfile_handler.setFormatter(formatterFile)  # add formatter
-    logger.addHandler(detfile_handler)  # add handler to logger
+    # Create it only if level is less than INFO. otherwise, it is the
+    # same file as .log
+    if level < logging.INFO:
+        detfile_handler = RotatingFileHandler(detailfile, 'w', 1000000, 5)
+        detfile_handler.setLevel(level)
+        detfile_handler.setFormatter(formatterFile)  # add formatter
+        logger.addHandler(detfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
     if not quiet:
