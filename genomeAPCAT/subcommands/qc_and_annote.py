@@ -100,7 +100,7 @@ def main_from_parse(arguments):
 
 def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None,
-         verbose=False, quiet=False):
+         verbose=0, quiet=False):
     """
     Main method, doing all steps:
     - analyze genomes (nb contigs, L90, stretches of N...)
@@ -109,6 +109,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     - annotate genome with prokka
     - format annotated genomes
 
+    verbosity:
+    - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
+    - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+    - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
     """
     # import needed packages
     import shutil
@@ -139,16 +143,12 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
-    # name logfile, add timestamp if already existing
-    logfile = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base + ".log")
-    # if os.path.isfile(logfile):
-    #     import time
-    #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
+
     # set level of logger (here debug to show everything during development)
     level = logging.DEBUG
-    utils.init_logger(logfile, level, verbose=verbose, quiet=quiet)
+    logfile_base = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base)
+    utils.init_logger(logfile_base, level, verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
-
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
@@ -296,7 +296,7 @@ def build_parser(parser):
     optional.add_argument("--threads", dest="threads", type=int, default=1,
                         help=("Specify how many threads can be used (default=1)"))
     helper = parser.add_argument_group('Others')
-    helper.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False,
+    helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
                         help=("Increase verbosity in stdout/stderr."))
     helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
                         help=("Do not display anything to stdout/stderr. log files will "
