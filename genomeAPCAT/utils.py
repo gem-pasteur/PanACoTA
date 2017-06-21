@@ -175,10 +175,17 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         kwargs["stdout"] = None
     if not "stderr" in kwargs:
         kwargs["stderr"] = None
-    retcode = subprocess.call(shlex.split(cmd), stdout=kwargs["stdout"], stderr=kwargs["stderr"])
+    try:
+        retcode = subprocess.call(shlex.split(cmd), stdout=kwargs["stdout"],
+                                  stderr=kwargs["stderr"])
+    except OSError:
+        logger.error(error + ": " + "{} does not exist".format(cmd))
+        if eof:
+            sys.exit(-1)
+        else:
+            return -1
     if retcode != 0:
         logger.error(error)
-        sys.stderr.write(error)
         if eof:
             sys.exit(retcode)
     return retcode
