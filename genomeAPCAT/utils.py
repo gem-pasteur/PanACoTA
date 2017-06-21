@@ -484,3 +484,20 @@ def check_out_dirs(resdir):
                      "Replicons folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
+
+
+def rename_genome_contigs(gembase_name, gpath, outfile):
+    """
+    For the given genome (sequence in gpath), rename all its contigs
+    with the new name: 'gembase_name', and save the output sequence in outfile
+    """
+    contig_num = 1
+    with open(gpath, "r") as gpf, open(outfile, "w") as grf:
+        for line in gpf:
+            if line.startswith(">"):
+                new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
+                contig_num += 1
+                grf.write(new_cont + "\n")
+            else:
+                grf.write(line)
+

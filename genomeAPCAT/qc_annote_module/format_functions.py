@@ -24,7 +24,7 @@ import logging
 import progressbar
 import glob
 import multiprocessing
-from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
+import genomeAPCAT.utils as utils
 
 logger = logging.getLogger()
 
@@ -157,7 +157,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
         shutil.copyfile(gpath, rep_file)
     # otherwise, change headers in the file.
     else:
-        gfunc.rename_genome_contigs(name, gpath, rep_file)
+        utils.rename_genome_contigs(name, gpath, rep_file)
     return True
 
 
