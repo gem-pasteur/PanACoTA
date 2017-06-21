@@ -707,3 +707,83 @@ def test_check_resdirNoDir():
     utils.check_out_dirs("totoresdir")
 
 
+def test_run_cmd_error_noQuit(capsys):
+    """
+    Test that when we try to run a command which does not exist, it returns an error message,
+    but does not exit the program (eof=False).
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    assert utils.run_cmd(cmd, error) == -1
+    out, err = capsys.readouterr()
+    assert ("error trying to run toto: toto does not exist") in err
+
+
+def test_run_cmd_error_Quit(capsys):
+    """
+    Test that when we try to run a command which does not exist, it returns an error message,
+    and exits the program (eof=True)
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    with pytest.raises(SystemExit):
+        utils.run_cmd(cmd, error, eof=True)
+    out, err = capsys.readouterr()
+    assert ("error trying to run toto: toto does not exist") in err
+
+
+def test_run_cmd_retcode_non0(capsys):
+    """
+    Test that when the command fails, it returns a non-zero int, writes an error message,
+    but does not quit the program (eof=False by default).
+    """
+    cmd = "prodigal -u"
+    error = "error trying to run prodigal"
+    assert utils.run_cmd(cmd, error) != 0
+    _, err = capsys.readouterr()
+    assert error in err
+
+
+def test_run_cmd_retcode_non0_quit(capsys):
+    """
+    Test that when the command fails, it returns a non-zero int, writes an error message,
+    and exits the program (eof=True).
+    """
+    cmd = "prodigal -u"
+    error = "error trying to run prodigal"
+    with pytest.raises(SystemExit):
+        utils.run_cmd(cmd, error, eof=True)
+    _, err = capsys.readouterr()
+    assert error in err
+
+
+def test_run_cmd_error_stderrFile():
+    """
+    Test that when we try to run a command which does not exist, and direct its output to
+    a file instead of stderr, we have the expected error written in the given error file.
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    outfile = open(os.path.join("test", "data", "stderr_run_cmd.txt"), "w")
+    assert utils.run_cmd(cmd, error, stderr=outfile) == -1
+    outfile.close()
+    os.remove(os.path.join("test", "data", "stderr_run_cmd.txt"))
+
+
+def test_rename_contigs():
+    """
+    From a given sequence, rename all its contigs with the given gembase name + a number,
+    and save the output sequence to the given res_path.
+    Check that the output file is as expected.
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    gembase_name = "ESCO.0216.00005"
+    res_path = os.path.join("test", "data")
+    outfile = os.path.join(res_path, "H299_H561.fasta-gembase.fna")
+    exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
+    utils.rename_genome_contigs(gembase_name, gpath, outfile)
+    with open(exp_file, "r") as expf, open(outfile, "r") as of:
+        for line_exp, line_seq in zip(expf, of):
+            assert line_exp == line_seq
+    os.remove(outfile)
+
