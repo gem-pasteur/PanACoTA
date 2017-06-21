@@ -12,6 +12,8 @@ import shutil
 import logging
 import test.test_unit.util_tests as util_tests
 
+import progressbar
+
 
 def test_logger_default(capsys):
     """
@@ -470,7 +472,6 @@ def test_check_install():
     assert utils.check_installed("prokka")
 
 
-
 def test_check_install_error():
     """
     Try to run a command which does not exist, and check that it closes the program
@@ -497,6 +498,24 @@ def test_class_filter():
     assert not a.filter(record)
 
 
+def test_class_nolevel_filter():
+    """
+    Check that for a class LessThanFilter(warning), info and debug are allowed,
+    but warning, error and critical are not.
+    """
+    a = utils.NoLevelFilter(logging.WARNING)
+    record = logging.LogRecord("root", logging.DEBUG, "path", 10, "message", "args", "exc_info")
+    assert a.filter(record)
+    record = logging.LogRecord("root", logging.INFO, "path", 10, "message", "args", "exc_info")
+    assert a.filter(record)
+    record = logging.LogRecord("root", logging.WARNING, "path", 10, "message", "args", "exc_info")
+    assert not a.filter(record)
+    record = logging.LogRecord("root", logging.ERROR, "path", 10, "message", "args", "exc_info")
+    assert a.filter(record)
+    record = logging.LogRecord("root", logging.CRITICAL, "path", 10, "message", "args", "exc_info")
+    assert a.filter(record)
+
+
 def test_plot_dist():
     """
     Plot a given distribution, and check that output is as expected
@@ -519,6 +538,8 @@ def test_skipped_prokka(capsys):
     Test that when the list of skipped genomes (because of prokka run) is not empty,
     it writes the right message.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, verbose=1)
     skipped = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped)
     out, err = capsys.readouterr()
@@ -532,6 +553,9 @@ def test_skipped_prokka(capsys):
             "gene found):") in err
     assert ("\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err or
             "\n\t- toto\n\t- genome\n\t- genome2" in err)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_skipped_format(capsys):
@@ -539,6 +563,8 @@ def test_skipped_format(capsys):
     Test that when the list of skipped genomes (format step could not run) is not empty,
     it writes the right message.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, verbose=1)
     skipped_format = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped_format, format=True)
     out, err = capsys.readouterr()
@@ -547,6 +573,9 @@ def test_skipped_format(capsys):
             "files to get more information about why they could not be ") in err
     assert ("formatted.\n\t- toto\n\t- genome\n\t- genome2\n" in err or
             "formatted.\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_write_discarded():
@@ -741,6 +770,8 @@ def test_read_genomes_ok(capsys):
     Test that when the list file contains genomes existing, it returns the expected list
     of genomes
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -753,6 +784,9 @@ def test_read_genomes_ok(capsys):
     assert exp == genomes
     _, err = capsys.readouterr()
     assert "genome.fst genome file does not exist. It will be ignored." in err
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_read_genomes_errors(capsys):
@@ -760,6 +794,8 @@ def test_read_genomes_errors(capsys):
     Test that when the list file contains errors in name and date provided,
     it returns the expected errors, and the expected genome list.
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -801,6 +837,9 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default date (0417) will "
             "be used.") in err
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_read_genomes_multi_files(capsys):
@@ -809,6 +848,8 @@ def test_read_genomes_multi_files(capsys):
     it returns the expected genome list, the expected errors (when some genome
     files do not exist) and the expected concatenated files.
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -845,6 +886,9 @@ def test_read_genomes_multi_files(capsys):
             assert line_out == line_exp
     os.remove(concat1)
     os.remove(concat2)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_check_resdirLst(capsys):
@@ -1017,5 +1061,42 @@ def test_rename_contigs():
     with open(exp_file, "r") as expf, open(outfile, "r") as of:
         for line_exp, line_seq in zip(expf, of):
             assert line_exp == line_seq
+    os.remove(outfile)
+
+
+def test_cat_nobar(capsys):
+    """
+    Check that when cat is called on a list of several files, the output file
+    contains what is expected (concatenation of content of all input files)
+    """
+    import glob
+    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    outfile = "test_catfile.txt"
+    utils.cat(list_files, outfile)
+    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
+        lines_exp = expf.readlines()
+        lines_out = outf.readlines()
+    assert set(lines_exp) == set(lines_out)
+    _, err = capsys.readouterr()
+    assert "/{} (".format(len(list_files)) not in err
+    os.remove(outfile)
+
+
+def test_cat_bar():
+    """
+    Check that when cat is called on a list of several files, the output file
+    contains what is expected (concatenation of content of all input files)
+    """
+    import glob
+    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    outfile = "test_catfile.txt"
+    title = "test cat progressbar"
+    utils.cat(list_files, outfile, title=title)
+    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
+        lines_exp = expf.readlines()
+        lines_out = outf.readlines()
+    assert set(lines_exp) == set(lines_out)
     os.remove(outfile)
 

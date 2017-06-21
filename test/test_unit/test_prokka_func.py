@@ -10,7 +10,7 @@ import os
 import shutil
 import glob
 import genomeAPCAT.qc_annote_module.prokka_functions as pfunc
-
+import genomeAPCAT.utils as utils
 
 def test_count_tbl():
     """
@@ -307,11 +307,13 @@ def test_check_prokka_ok():
     assert pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
 
 
-def test_run_prokka_out_exists_ok(capsys):
+def test_run_prokka_out_exists_ok():
     """
     Test that when the output directory already exists, and files inside are OK,
     run_prokka returns True, with a warning message indicating that prokka did not rerun.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     gpath = "path/to/nogenome/original_name.fna"
     outdir = os.path.join("test", "data", "test_files")
     cores_prokka = 1
@@ -320,13 +322,9 @@ def test_run_prokka_out_exists_ok(capsys):
     nbcont = 7
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert pfunc.run_prokka(arguments)
-    _, err = capsys.readouterr()
-    assert err.endswith("Prokka results folder already exists. Prokka did not run again, "
-                        "formatting step used already generated results of Prokka in "
-                        "test/data/test_files/original_name.fna-prokkaRes. If you want "
-                        "to re-run prokka, first remove this "
-                        "result folder, or use '-F' or '--force' option if you want to rerun "
-                        "prokka for all genomes.\n")
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_exists_error(capsys):
@@ -335,6 +333,8 @@ def test_run_prokka_out_exists_error(capsys):
     run_prokka returns False, and writes the warning message saying that prokka did not
     rerun, + the warning message for the missing file(s).
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
     new_prok_dir = os.path.join("test", "data", "test_files", "original_name-error-prokkaRes")
@@ -352,14 +352,11 @@ def test_run_prokka_out_exists_error(capsys):
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
     assert not pfunc.run_prokka(arguments)
     _, err = capsys.readouterr()
-    assert ("Prokka results folder already exists. Prokka did not run again, "
-            "formatting step used already generated results of Prokka in "
-            "test/data/test_files/original_name-error-prokkaRes. If you want to re-run prokka, first remove this "
-            "result folder, or use '-F' or '--force' option if you want to rerun "
-            "prokka for all genomes.") in err
-    assert "prokka_out_for_test-wrongCDS original_name.fna: no .ffn file"
-    assert "prokka_out_for_test-wrongCDS original_name.fna: no .faa file"
+    assert "prokka_out_for_test-wrongCDS original_name-error: no .tbl file" in err
     shutil.rmtree(new_prok_dir)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_exists_force():
@@ -367,6 +364,8 @@ def test_run_prokka_out_exists_force():
     Test that when the output directory already exists with wrong files, but force is on,
     prokka is rerun and outputs the right files
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data")
     out_prokdir = os.path.join(outdir, "H299_H561.fasta-prokkaRes")
@@ -401,6 +400,9 @@ def test_run_prokka_out_exists_force():
             assert line_exp == line_out
     shutil.rmtree(out_prokdir)
     os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_doesnt_exist():
@@ -408,6 +410,8 @@ def test_run_prokka_out_doesnt_exist():
     Test that when the output directory does not exist, it creates it, and runs prokka
     with all expected outfiles
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     prok_dir = os.path.join("test", "data")
     out_dir = os.path.join(prok_dir, "H299_H561.fasta-prokkaRes")
@@ -419,6 +423,9 @@ def test_run_prokka_out_doesnt_exist():
     assert pfunc.run_prokka(arguments)
     shutil.rmtree(out_dir)
     os.remove(os.path.join(prok_dir, "H299_H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_problem_running(capsys):
@@ -426,6 +433,8 @@ def test_run_prokka_out_problem_running(capsys):
     Check that when a problem occurs while trying to run prokka, run_prokka returns False,
     and the error message indicating to read in the log why it couldn't run
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     gpath = os.path.join("test", "data", "genomes", "H299 H561.fasta")
     outdir = os.path.join("test", "data")
     cores_prokka = 5
@@ -438,6 +447,9 @@ def test_run_prokka_out_problem_running(capsys):
     assert ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
             "for more information.") in err
     os.remove(os.path.join(outdir, "H299 H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_1by1():
@@ -445,6 +457,8 @@ def test_run_all_1by1():
     Check that when running with 3 threads (not parallel), prokka runs as expected,
     and returns True for each genome
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
     gpath1 = os.path.join("test", "data", "genomes", genome1)
@@ -463,6 +477,9 @@ def test_run_all_1by1():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_more_threads():
@@ -470,6 +487,8 @@ def test_run_all_parallel_more_threads():
     Check that there is no problem when running with more threads than genomes (each genome
     uses nb_threads/nb_genome threads)
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
     gpath1 = os.path.join("test", "data", "genomes", genome1)
@@ -488,6 +507,9 @@ def test_run_all_parallel_more_threads():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_less_threads():
@@ -497,6 +519,8 @@ def test_run_all_parallel_less_threads():
     Genomes H299 and A_H738 should run well, but genomes genome* have problems (no CDS found),
     so check_prokka should return false.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0)
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
@@ -519,3 +543,7 @@ def test_run_all_parallel_less_threads():
     for name in gnames:
         shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))
         os.remove(os.path.join(res_dir, name + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
+
