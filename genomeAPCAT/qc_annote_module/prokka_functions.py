@@ -102,6 +102,7 @@ def run_prokka(arguments):
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
     gpath, prok_folder, threads, name, force, nbcont = arguments
+    logger.details("Start annotating {}".format(gpath))
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
     FNULL = open(os.devnull, 'w')
     prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
@@ -112,6 +113,8 @@ def run_prokka(arguments):
                          "use '-F' or '--force' option if you want to rerun prokka for "
                          "all genomes.").format(prok_dir))
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
+        if ok:
+            logger.details("End annotating {}".format(gpath))
         return ok
     elif os.path.isdir(prok_dir) and force:
         shutil.rmtree(prok_dir)
@@ -123,10 +126,14 @@ def run_prokka(arguments):
         retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=prokf)
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
         prokf.close()
+        if ok:
+            logger.details("End annotating {}".format(gpath))
         return ok
     except Exception as err:  # pragma: no cover
         logging.error("Error while trying to run prokka: {}".format(err))
         prokf.close()
+        if ok:
+            logger.details("End annotating {}".format(gpath))
         return False
 
 
