@@ -270,9 +270,11 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     if not qc:
         outdisc = os.path.join(res_path,
                                "discarded-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+        logger.info("Writing discarded genomes to {}".format(outdisc))
     else:
         outdisc = os.path.join(res_path,
                                "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+        logger.info("Writting information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in genomes.items():
