@@ -41,7 +41,7 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     quiet: do not print anything to stderr/stdout
     """
     import time
-    time_start = time.strftime("_%y-%m-%d_%H-%m-%S.log")
+    time_start = time.strftime("_%y-%m-%d_%H-%m-%S")
     # create logger
     if name:
         logger = logging.getLogger(name)
@@ -82,14 +82,14 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     # written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to
     # logfile.1 etc. We allow maximum 5 log files.
     # logfile contains everything from INFO level (INFO, WARNING, ERROR)
-    logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
+    logfile_handler = RotatingFileHandler(logfile, 'w', 10000000, 5)
     # set level to the same as the logger level
     logfile_handler.setLevel(logging.INFO)
     logfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(logfile_handler)  # add handler to logger
 
     # Create handler 2: errfile. Write only warnings and errors
-    errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
+    errfile_handler = RotatingFileHandler(errfile, 'w', 10000000, 5)
     errfile_handler.setLevel(logging.WARNING)
     errfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
@@ -98,7 +98,7 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     # Create it only if level is less than INFO. otherwise, it is the
     # same file as .log
     if level < logging.INFO:
-        detfile_handler = RotatingFileHandler(detailfile, 'w', 1000000, 5)
+        detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(level)
         detfile_handler.setFormatter(formatterFile)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
