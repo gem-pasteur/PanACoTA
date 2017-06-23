@@ -777,7 +777,8 @@ def test_read_genomes_ok(capsys):
     dbpath = os.path.join("test", "data", "genomes")
     list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
     genomes = utils.read_genomes(list_file, name, date, dbpath)
-    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+    exp = {"A_H738.fasta": ["ESCO.0417"],
+           "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
            "genome5.fasta": ["TOTO.0114"]}
@@ -801,7 +802,7 @@ def test_read_genomes_errors(capsys):
     dbpath = os.path.join("test", "data", "genomes")
     list_file = os.path.join("test", "data", "test_files", "list_genomes-errors.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath)
-    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["ESCO.0417"],
            "genome5.fasta": ["ESCO.0417"]}
@@ -811,7 +812,7 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default name (ESCO) and date (0417) will "
             "be used.") in err
-    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-gembase.fna. Only put "
+    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-short-contig.fna. Only put "
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default name (ESCO) will "
             "be used.") in err
@@ -1055,7 +1056,7 @@ def test_rename_contigs():
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     gembase_name = "ESCO.0216.00005"
     res_path = os.path.join("test", "data")
-    outfile = os.path.join(res_path, "H299_H561.fasta-gembase.fna")
+    outfile = os.path.join(res_path, "H299_H561.fasta-short-contig.fna")
     exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
     utils.rename_genome_contigs(gembase_name, gpath, outfile)
     with open(exp_file, "r") as expf, open(outfile, "r") as of:

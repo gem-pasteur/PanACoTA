@@ -444,21 +444,22 @@ def test_handle_genome_badprok():
 
 def test_handle_genome_formatok():
     """
-    Test that when we try to format a genome which is in results, but with False,
-    it returns a tuple with "bad_prokka" and the genome name.
+    Test that when we try to format a genome which is in results, with True,
+    it returns a tuple with "True" and the genome name.
     """
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
     lst_dir = os.path.join("test", "data")
     prot_dir = lst_dir
     gene_dir = lst_dir
     rep_dir = lst_dir
-    results = {"B2_A3_5.fasta-split5N.fna-gembase.fna": True, "toto.fasta": False}
-    args = ("B2_A3_5.fasta-split5N.fna-gembase.fna", name, gpath, prok_path, lst_dir, prot_dir,
+    results = {"B2_A3_5.fasta-split5N.fna-short-contig.fna": True, "toto.fasta": False}
+    args = ("B2_A3_5.fasta-split5N.fna-short-contig.fna", name, gpath, prok_path,
+            lst_dir, prot_dir,
             gene_dir, rep_dir, results)
     res = ffunc.handle_genome(args)
-    assert res == (True, "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    assert res == (True, "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     os.remove(os.path.join(lst_dir, name + ".prt"))
     os.remove(os.path.join(lst_dir, name + ".fna"))
     os.remove(os.path.join(lst_dir, name + ".gen"))
@@ -470,26 +471,26 @@ def test_handle_genome_formaterror(capsys):
     Test that when we try to format a genome which is in results, but with False,
     it returns a tuple with "bad_prokka" and the genome name.
     """
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
-    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
     shutil.copyfile(tblInit, tblout)
     lst_dir = os.path.join("test", "data")
     prot_dir = lst_dir
     gene_dir = lst_dir
     rep_dir = lst_dir
-    results = {"B2_A3_5.fasta-problems.fna-gembase.fna": True, "toto.fasta": False}
-    args = ("B2_A3_5.fasta-problems.fna-gembase.fna", name, gpath, prok_path, lst_dir, prot_dir,
-            gene_dir, rep_dir, results)
+    results = {"B2_A3_5.fasta-problems.fna-short-contig.fna": True, "toto.fasta": False}
+    args = ("B2_A3_5.fasta-problems.fna-short-contig.fna", name, gpath,
+            prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
     res = ffunc.handle_genome(args)
-    assert res == (False, "B2_A3_5.fasta-problems.fna-gembase.fna")
+    assert res == (False, "B2_A3_5.fasta-problems.fna-short-contig.fna")
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
-                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
+                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/"
                    "test.0417.00002.ffn.\n"
                    "Gen file will not be created.\n")
     # remove tblout which was copied for this test
@@ -501,7 +502,7 @@ def test_format1genome():
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
     which did not change name between prokka run and format step.
     """
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
     lst_dir = os.path.join("test", "data")
@@ -542,7 +543,8 @@ def test_format1genome_changeHead():
     which changed its name between prokka and format step.
     """
     ginit = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-changeName.fna")
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-changeName.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes",
+                         "B2_A3_5.fasta-changeName.fna-short-contig.fna")
     shutil.copyfile(ginit, gpath)
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
@@ -560,7 +562,8 @@ def test_format1genome_changeHead():
     explst = os.path.join(prok_path, "res_format-B2.lst")
     expprt = os.path.join(prok_path, "res_format-B2.prt")
     expgen = os.path.join(prok_path, "res_format-B2.gen")
-    expreplicons = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-split5N.fna-gembase.fna")
+    expreplicons = os.path.join("test", "data", "genomes",
+                                "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     with open(explst, "r") as lstf, open(os.path.join(lst_dir, name + ".lst"), "r") as lsto:
         for line_exp, line_out in zip(lstf, lsto):
             assert line_exp == line_out
@@ -586,12 +589,12 @@ def test_format1genome_problemgen(capsys):
     and does not create any output file if there is a problem while converting the
     .ffn to .gen
     """
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
-    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
     shutil.copyfile(tblInit, tblout)
     lst_dir = os.path.join("test", "data")
@@ -607,7 +610,7 @@ def test_format1genome_problemgen(capsys):
     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
-                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
+                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/"
                    "test.0417.00002.ffn.\n"
                    "Gen file will not be created.\n")
     # remove tblout which was copied for this test
@@ -619,19 +622,19 @@ def test_format1genome_problemprt(capsys):
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
     which did not change name between prokka run and format step.
     """
-    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-gembase.fna")
+    gpath = os.path.join("test", "data", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "exp_files")
     # copy tbl without errors to error prokka dir
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
-    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
     shutil.copyfile(tblInit, tblout)
     # copy ffn without error to error prokka dir
-    ffnInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+    ffnInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
                            name + ".ffn")
-    ffnOk = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+    ffnOk = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".ffn")
     ffnError = ffnOk + "-error"
     # change name of ffn file with error to keep it for later (used for tests)
@@ -651,11 +654,11 @@ def test_format1genome_problemprt(capsys):
     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
     _, err = capsys.readouterr()
     assert err == ("Unknown header format >EPKOMDHM00003 hypothetical protein in "
-                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/"
+                   "test/data/exp_files/B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/"
                    "test.0417.00002.faa. "
                    "Error: invalid literal for int() with base 10: '>EPKOMDHM00003'\n"
                    "Prt file not created from test/data/exp_files/"
-                   "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes/test.0417.00002.faa.\n")
+                   "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/test.0417.00002.faa.\n")
     # remove files which were copied for this test (tblout). And rename ffn with errors
     # to its original name.
     os.rename(ffnError, ffnOk)
@@ -670,7 +673,7 @@ def test_format_all():
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     initnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
     initpaths = [os.path.join("test", "data", "genomes", name) for name in initnames]
-    gnames = ["H299_H561.fasta-gembase.fna", "B2_A3_5.fasta-changeName.fna-gembase.fna"]
+    gnames = ["H299_H561.fasta-short-contig.fna", "B2_A3_5.fasta-changeName.fna-short-contig.fna"]
     onames = ["test_runprokka_H299", "test.0417.00002"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
     for f1, f2 in zip(initpaths, gpaths):
@@ -709,7 +712,7 @@ def test_format_all_resultFalse():
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     initnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
     initpaths = [os.path.join("test", "data", "genomes", name) for name in initnames]
-    gnames = ["H299_H561.fasta-gembase.fna", "B2_A3_5.fasta-changeName.fna-gembase.fna"]
+    gnames = ["H299_H561.fasta-short-contig.fna", "B2_A3_5.fasta-changeName.fna-short-contig.fna"]
     onames = ["test_runprokka_H299", "test.0417.00002"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
     for f1, f2 in zip(initpaths, gpaths):
@@ -721,7 +724,7 @@ def test_format_all_resultFalse():
     res_path = os.path.join("test", "data")
     results = {gnames[0]: True, gnames[1]: False}
     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
-    assert skipped == ["B2_A3_5.fasta-changeName.fna-gembase.fna"]
+    assert skipped == ["B2_A3_5.fasta-changeName.fna-short-contig.fna"]
     assert skipped_format == []
     lstfiles = os.path.join(res_path, "LSTINFO")
     prtfiles = os.path.join(res_path, "Proteins")
@@ -753,7 +756,7 @@ def test_format_all_notResult():
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     initnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
     initpaths = [os.path.join("test", "data", "genomes", name) for name in initnames]
-    gnames = ["H299_H561.fasta-gembase.fna", "B2_A3_5.fasta-changeName.fna-gembase.fna"]
+    gnames = ["H299_H561.fasta-short-contig.fna", "B2_A3_5.fasta-changeName.fna-short-contig.fna"]
     onames = ["test_runprokka_H299", "test.0417.00002"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
     for f1, f2 in zip(initpaths, gpaths):
@@ -797,7 +800,7 @@ def test_format_all_error():
     name = "test.0417.00002"
     initnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
     initpaths = [os.path.join("test", "data", "genomes", name) for name in initnames]
-    gnames = ["H299_H561.fasta-gembase.fna", "B2_A3_5.fasta-problems.fna-gembase.fna"]
+    gnames = ["H299_H561.fasta-short-contig.fna", "B2_A3_5.fasta-problems.fna-short-contig.fna"]
     onames = ["test_runprokka_H299", "test.0417.00002"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
     for f1, f2 in zip(initpaths, gpaths):
@@ -807,15 +810,15 @@ def test_format_all_error():
               }
     prok_path = os.path.join("test", "data", "exp_files")
     res_path = os.path.join("test", "data")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-gembase.fna-prokkaRes",
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
-    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-gembase.fna-prokkaRes",
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
     shutil.copyfile(tblInit, tblout)
     results = {gnames[0]: True, gnames[1]: True}
     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
     assert skipped == []
-    assert skipped_format == ["B2_A3_5.fasta-problems.fna-gembase.fna"]
+    assert skipped_format == ["B2_A3_5.fasta-problems.fna-short-contig.fna"]
     lstfiles = os.path.join(res_path, "LSTINFO")
     prtfiles = os.path.join(res_path, "Proteins")
     genfiles = os.path.join(res_path, "Genes")

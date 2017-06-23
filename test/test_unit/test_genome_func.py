@@ -47,7 +47,7 @@ def test_save_contig_5N():
     contig_sizes = {">ESCO.0216.00001_cont1": 1623}
     seq_file = os.path.join("test", "data", "test_save_contig5N.faa")
     resf = open(seq_file, "w")
-    gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf)
+    gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf, -1)
     resf.close()
     exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.0000_0": 39,
            ">ESCO.0216.0000_1": 33, ">ESCO.0216.0000_2": 20}
@@ -74,7 +74,7 @@ def test_save_contig_ATCG():
     contig_sizes = {">ESCO.0216.00001_cont1": 1623}
     seq_file = os.path.join("test", "data", "test_save_contigATCG.faa")
     resf = open(seq_file, "w")
-    gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf)
+    gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf, -1)
     resf.close()
     exp = {">ESCO.0216.00001_cont1": 1623, ">ESCO.0216.0000_0": 14,
            ">ESCO.0216.0000_1": 11, ">ESCO.0216.0000_2": 13,

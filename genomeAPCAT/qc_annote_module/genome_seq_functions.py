@@ -140,9 +140,9 @@ def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf, num):
     for seq in cont_parts:
         # Only save non empty contigs (with some patterns, it could arrive that
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
-        num += 1
         if len(seq) == 0:
             continue
+        num += 1
         cur_name = cur_contig_name[:15] + "_" + str(num)
         contig_sizes[cur_name] = len(seq)
         gresf.write(cur_name + "\n")
