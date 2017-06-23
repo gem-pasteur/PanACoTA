@@ -94,7 +94,8 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
                 # If it is not the first contig, find stretch(es) of N in previous contig
                 if cur_contig != "":
                     if cut:
-                        save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
+                        num = save_contig(pat, cur_contig, cur_contig_name,
+                                          contig_sizes, gresf, num)
                     else:
                         gresf.write(">" + cur_contig_name[:15] + "_" + str(num) + "\n")
                         gresf.write(cur_contig + "\n")
@@ -106,7 +107,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
                 cur_contig += line.strip().upper()
         if cur_contig != "":
             if cut:
-                save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
+                num = save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf, num)
             else:
                 gresf.write(">" + cur_contig_name[:15] + "_" + str(num) + "\n")
                 gresf.write(cur_contig + "\n")
@@ -122,7 +123,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
     return True
 
 
-def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
+def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf, num):
     """
     Save the contig read just before into dicts and write it to sequence file.
     Contig name must be at most 20 characters (required by prokka)
@@ -136,17 +137,17 @@ def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
     # split contig each time a stretch of at least nbn 'N' is found
     cont_parts = re.split(pat, cur_contig)
     # save contig parts
-    num = 0  # contig number
     for seq in cont_parts:
         # Only save non empty contigs (with some patterns, it could arrive that
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
+        num += 1
         if len(seq) == 0:
             continue
         cur_name = cur_contig_name[:15] + "_" + str(num)
         contig_sizes[cur_name] = len(seq)
         gresf.write(cur_name + "\n")
         gresf.write(seq + "\n")
-        num += 1
+    return num
 
 
 def calc_l90(contig_sizes):

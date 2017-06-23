@@ -11,6 +11,11 @@ import genomeAPCAT.qc_annote_module.genome_seq_functions as gfunc
 import test.test_unit.util_tests as util_tests
 
 
+@pytest.fixture(scope="module")
+def dbpath():
+    return os.path.join("test", "data", "genomes")
+
+
 def test_sort_genomes():
     """
     Test the function sorting genomes by L90 and nb contigs.
@@ -135,13 +140,12 @@ def test_rename_genomes():
     assert genomes == exp_genomes
 
 
-def test_analyse1genome_nocut():
+def test_analyse1genome_nocut(dbpath):
     """
     Analyse the given genome: without cutting at stretches of N, calculate
     its genome size, nb contigs and L90, and add it to the genomes dict, as well as
     the path to the genome file.
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
     genomes = {gs[0]: ["SAEN.1113"],
                gs[1]: ["SAEN.1114"],
@@ -163,12 +167,11 @@ def test_analyse1genome_nocut():
     os.remove(outf)
 
 
-def test_analyse1genome_nocut_empty():
+def test_analyse1genome_nocut_empty(dbpath):
     """
     Analyse the given genome: without cutting at stretches of N. The genome is an empty
     file, so it is not possible to calculate L90
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
     open(os.path.join(dbpath, gs[3]), "w").close()
     genomes = {gs[0]: ["SAEN.1113"],
@@ -189,13 +192,12 @@ def test_analyse1genome_nocut_empty():
     os.remove(os.path.join(tmp_path, gs[3] + "-short-contig.fna"))
 
 
-def test_analyse1genome_cut():
+def test_analyse1genome_cut(dbpath):
     """
     Analyse the given genome: cut at each stretch of 5 N, put it to a new file,
     and then calculate its genome size, nb contigs and L90. Add this information
     to the genomes dict, as well as the path to the genome file (cut).
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
     genomes = {gs[0]: ["SAEN.1113"],
                gs[1]: ["SAEN.1114"],
@@ -217,12 +219,33 @@ def test_analyse1genome_cut():
     os.remove(out_f)
 
 
-def test_analyse1genome_cut_empty():
+def test_analyse1genome_cut_same_names(dbpath):
+    """
+    Analyse a genome. Its contig names all have the same first 20 characters. There is no
+    stretch of at least 5N, so contigs are not split.
+    New contig names should be uniq, and not all ending with _0!
+    """
+    genome = "genome_long_header.fst"
+    genomes = {genome: ["SAEN.1015.0117"]}
+    tmp_path = os.path.join("test", "data")
+    cut = True
+    pat = "NNNNN+"
+    assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
+    out_f = os.path.join(tmp_path, genome + "-split5N.fna")
+    exp_f = os.path.join("test", "data", "exp_files", "res_genome_short-long_header.fst")
+    exp_genomes = {genome: ["SAEN.1015.0117", out_f, 151, 3, 3]}
+    assert genomes == exp_genomes
+    with open(out_f, "r") as outf, open(exp_f, "r") as expf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    os.remove(out_f)
+
+
+def test_analyse1genome_cut_empty(dbpath):
     """
     Analyse the given genome: cut at each stretch of 5 N, but the file is empty.
     Check that it returns False
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
     open(os.path.join(dbpath, gs[3]), "w").close()
     genomes = {gs[0]: ["SAEN.1113"],
@@ -246,7 +269,7 @@ def test_analyse1genome_cut_empty():
     os.remove(out_f)
 
 
-def test_analyseAllGenomes_nocut():
+def test_analyseAllGenomes_nocut(dbpath):
     """
     Analyze all given genomes: don't cut at stretches of N, but look at their sequence
     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
@@ -256,7 +279,6 @@ def test_analyseAllGenomes_nocut():
     genomes = {gs[0]: ["SAEN.1113"],
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
-    dbpath = os.path.join("test", "data", "genomes")
     gpaths = [os.path.join(dbpath, gname) for gname in gs]
     tmp_path = os.path.join("test", "data")
     opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
@@ -272,13 +294,12 @@ def test_analyseAllGenomes_nocut():
         os.remove(f)
 
 
-def test_analyseAllGenomes_nocut_empty():
+def test_analyseAllGenomes_nocut_empty(dbpath):
     """
     Analyze all given genomes: don't cut at stretches of N, but look at their sequence
     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
     path to the genomic sequence, to the genomes dict.
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
     open(os.path.join(dbpath, gs[3]), "w").close()
     genomes = {gs[0]: ["SAEN.1113"],
@@ -301,7 +322,7 @@ def test_analyseAllGenomes_nocut_empty():
         os.remove(f)
 
 
-def test_analyseAllGenomes_cut():
+def test_analyseAllGenomes_cut(dbpath):
     """
     Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
@@ -311,7 +332,6 @@ def test_analyseAllGenomes_cut():
     genomes = {gs[0]: ["SAEN.1113"],
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
-    dbpath = os.path.join("test", "data", "genomes")
     tmp_path = os.path.join("test", "data")
     gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
     nbn = 5
@@ -331,13 +351,12 @@ def test_analyseAllGenomes_cut():
         os.remove(out)
 
 
-def test_analyseAllGenomes_cut_empty():
+def test_analyseAllGenomes_cut_empty(dbpath):
     """
     Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
     path to the genomic sequence, to the genomes dict.
     """
-    dbpath = os.path.join("test", "data", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
     open(os.path.join(dbpath, gs[3]), "w").close()
     genomes = {gs[0]: ["SAEN.1113"],
