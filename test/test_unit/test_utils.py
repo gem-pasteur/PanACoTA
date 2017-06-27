@@ -9,7 +9,7 @@ import genomeAPCAT.utils as utils
 import pytest
 import os
 import shutil
-import test.test_unit.util_tests as util_tests
+import test.test_unit.utilities_for_tests as util_tests
 
 
 def test_check_install():
