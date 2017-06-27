@@ -147,14 +147,14 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # set level of logger (here debug to show everything during development)
     level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base)
-    utils.init_logger(logfile_base, level, verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
+    utils.init_logger(logfile_base, level, name='', verbose=verbose, quiet=quiet)
+    logger = logging.getLogger('')
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
             logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
             sys.exit(1)
-
+    logger.info("Let's start!")
     # Read genome names.
     genomes = utils.read_genomes(list_file, name, date, db_path)
     if not genomes:

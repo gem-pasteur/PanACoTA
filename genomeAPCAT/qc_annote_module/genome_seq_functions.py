@@ -20,7 +20,7 @@ import progressbar
 from genomeAPCAT import utils
 
 
-logger = logging.getLogger()
+logger = logging.getLogger("qc_annote.gseq")
 
 
 def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, quiet=False):
