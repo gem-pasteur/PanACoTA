@@ -69,6 +69,25 @@ def test_main_from_parse(logger):
     os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
+def test_main_noValidGenome(capsys):
+    """
+    Test that when, in the list file, all genomes are wrong (do not correspond to
+    filenames in the given dbpath), it closes the program with an error message.
+    """
+    list_file = os.path.join("test", "data", "test_files", "list_no_genome.txt")
+    dbpath = os.path.join("test", "data", "genomes")
+    resdir = os.path.join("test", "data", "res_test_NoGenome")
+    name = "ESCO"
+    date = "0417"
+    with pytest.raises(SystemExit):
+        annot.main(list_file, dbpath, resdir, name, date)
+    _, err = capsys.readouterr()
+    assert ("We did not find any genome listed in test/data/test_files/list_no_genome.txt "
+            "in the folder test/data/genomes. Please check your list to give valid "
+            "genome names.") in err
+    shutil.rmtree(resdir, ignore_errors=True)
+
+
 def test_main_given_tmp(logger):
     """
     Test that when a tmp folder is given by user, tmp files are saved in it,
