@@ -19,10 +19,9 @@ import shutil
 import shlex
 import progressbar
 
-logger = logging.getLogger()
 
 
-def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
+def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -43,10 +42,8 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     import time
     time_start = time.strftime("_%y-%m-%d_%H-%m-%S")
     # create logger
-    if name:
-        logger = logging.getLogger(name)
-    else:  # pragma: no cover
-        logger = logging.getLogger()
+    logger = logging.getLogger(name)
+
 
     # Determine logfile names
     logfile = logfile_base + ".log"
@@ -62,8 +59,8 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     # Create a new logging level: details (between info and debug)
     # Used to add details to the log file, but not to stdout, while still having
     # the possibility to put debug messages, used only for development.
-    logging.addLevelName(15, "DETAIL")
-    logging.DETAIL = 15
+    logging.addLevelName(detail_lvl(), "DETAIL")
+    logging.DETAIL = detail_lvl()
     def details(self, message, *args, **kws):
         if self.isEnabledFor(logging.DETAIL):
             self._log(logging.DETAIL, message, args, **kws)
@@ -73,9 +70,12 @@ def init_logger(logfile_base, level, name= None, verbose=0, quiet=False):
     logger.setLevel(level)
 
     # create formatter for log messages: "timestamp :: level :: message"
-    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
+    # :: %(name)s  to add the logger name
+    # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
+    my_format = '[%(asctime)s] %(name)s :: %(levelname)s :: %(message)s'
+    formatterFile = logging.Formatter(my_format,
                                       '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] %(levelname)s %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
@@ -175,6 +175,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     Run the given command line. If the return code is not 0, print error message.
     if eof (exit on fail) is True, exit program if error code is not 0.
     """
+    logger = logging.getLogger("qc_annote.utils")
     if not "stdout" in kwargs:
         kwargs["stdout"] = None
     if not "stderr" in kwargs:
@@ -240,7 +241,7 @@ def write_warning_skipped(skipped, format=False):
     format: if False, genomes were not skipped because of format step, but before that.
     if True, they were skipped because of format
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger("qc_annote.utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not format:
         logger.warning(("Prokka had problems while annotating some genomes, or did not "
@@ -270,6 +271,7 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     qc: if it is the file written after qc only, call it info-genomes-<list_file>.txt
     otherwise, call it discarded-<list_file>.txt
     """
+    logger = logging.getLogger("qc_annote.utils")
     _, name_lst = os.path.split(list_file)
     if not qc:
         outdisc = os.path.join(res_path,
@@ -329,7 +331,7 @@ def read_genomes(list_file, name, date, dbpath):
 
     genomes = {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger("qc_annote.utils")
     logger.info("Reading genomes")
     genomes = {}
     if not os.path.isfile(list_file):
@@ -392,6 +394,7 @@ def read_info(name_inf, name, date, genomes_inf):
 
     Return name and date.
     """
+    logger = logging.getLogger("qc_annote.utils")
     name_inf = name_inf.strip().split(".")
     # if only species provided
     if len(name_inf) == 1:
@@ -476,6 +479,7 @@ def check_out_dirs(resdir):
     - resdir/Proteins
     - resdir/Replicons
     """
+    logger = logging.getLogger("qc_annote.utils")
     if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")) != []:
         logger.error("ERROR: Your output directory already has .lst files in the "
                      "LSTINFO folder. Provide another result directory, or remove the "
@@ -513,3 +517,22 @@ def rename_genome_contigs(gembase_name, gpath, outfile):
             else:
                 grf.write(line)
 
+
+def logger_thread(q):
+    """
+    Queue listener used in a thread to handle the logs put to a QueueHandler
+    by several processes (multiprocessing.pool.map_async for example)
+    """
+    logger = logging.getLogger("qc_annote.utils")
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
+def detail_lvl():
+    """
+    Returns the int level corresponding to "DETAIL"
+    """
+    return 15

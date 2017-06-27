@@ -22,7 +22,7 @@ import genomeAPCAT.utils as utils
 def logger():
     print("--- Init logger ---")
     logfile_base = "test_main_from_parse"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     yield logging.getLogger()
     print("--- Clean logs ---")
     os.remove(logfile_base + ".log")

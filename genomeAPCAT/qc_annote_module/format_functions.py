@@ -21,12 +21,12 @@ April 2017
 import os
 import shutil
 import logging
+import logging.handlers
 import progressbar
 import glob
 import multiprocessing
+import threading
 import genomeAPCAT.utils as utils
-
-logger = logging.getLogger()
 
 
 def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False):
@@ -44,7 +44,8 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
     - prok_path = path to folder named "<genome_name>-prokkaRes" where all prokka
     results are saved.
     """
-    logger.info("Formatting all genomes")
+    main_logger = logging.getLogger("qc_annote.ffunc")
+    main_logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
     prot_dir = os.path.join(res_path, "Proteins")
     gene_dir = os.path.join(res_path, "Genes")
@@ -62,13 +63,18 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+    # Create a Queue to put logs from processes, and handle them after from a single thread
+    m = multiprocessing.Manager()
+    q = m.Queue()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
-    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
+    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
     pool = multiprocessing.Pool(threads)
     final = pool.map_async(handle_genome, params, chunksize=1)
     pool.close()
+    lp = threading.Thread(target=utils.logger_thread, args=(q,))
+    lp.start()
     if not quiet:
         while(True):
             if final.ready():
@@ -77,6 +83,8 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
             bar.update(nbgen - remaining)
         bar.finish()
     pool.join()
+    q.put(None)
+    lp.join()
     res = final.get()
     for output in res:
         if output[0] == "bad_prokka":
@@ -92,17 +100,27 @@ def handle_genome(args):
     problems (result = True). In that case, format the genome and get the output to
     see if everything went ok.
     """
-    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results = args
+    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q = args
+    # Set logger for this process
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('format.handle_genome')
+    # Handle genome
     if genome not in results:
         return ("no_res", genome)
     # if prokka did not run well for a genome, don't format it
     if not results[genome]:
         return ("bad_prokka", genome)
-    ok_format = format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+    ok_format = format_one_genome(gpath, name, prok_path, lst_dir,
+                                  prot_dir, gene_dir, rep_dir, logger)
     return (ok_format, genome)
 
 
-def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir):
+def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, logger):
     """
     Format the given genome, and create its corresponding files in the following folders:
     - Proteins
@@ -133,7 +151,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # create Genes file (and check no problem occurred with return code)
     ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
     gengenome = os.path.join(gene_dir, name + ".gen")
-    ok_gene = create_gen(ffngenome, lstgenome, gengenome)
+    ok_gene = create_gen(ffngenome, lstgenome, gengenome, logger)
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
     if not ok_gene:
@@ -142,7 +160,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # If gene file was created, create Proteins file
     faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
     prtgenome = os.path.join(prot_dir, name + ".prt")
-    ok_prt = create_prt(faagenome, lstgenome, prtgenome)
+    ok_prt = create_prt(faagenome, lstgenome, prtgenome, logger)
 
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
@@ -161,7 +179,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     return True
 
 
-def create_gen(ffnseq, lstfile, genseq):
+def create_gen(ffnseq, lstfile, genseq, logger):
     """
     Generate .gen file, from sequences contained in .ffn, but changing the
     headers using the information in .lst
@@ -241,7 +259,7 @@ def create_gen(ffnseq, lstfile, genseq):
     return not problem
 
 
-def create_prt(faaseq, lstfile, prtseq):
+def create_prt(faaseq, lstfile, prtseq, logger):
     """
     Generate .prt file, from sequences in .faa, but changing the headers
     using information in .lst

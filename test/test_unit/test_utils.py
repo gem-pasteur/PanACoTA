@@ -37,21 +37,21 @@ def test_logger_default(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.details") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: DETAIL :: info details\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: DEBUG :: info debug\n")
+        assert logf.readline().endswith(" :: DETAIL :: info details\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
     os.remove(logfile + ".log.details")
@@ -79,21 +79,21 @@ def test_logger_verbose1(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.details") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: DETAIL :: info details\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: DEBUG :: info debug\n")
+        assert logf.readline().endswith(" :: DETAIL :: info details\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
     os.remove(logfile + ".log.details")
@@ -121,21 +121,21 @@ def test_logger_verbose2(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.details") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: DETAIL :: info details\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: DEBUG :: info debug\n")
+        assert logf.readline().endswith(" :: DETAIL :: info details\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
     os.remove(logfile + ".log.details")
@@ -163,21 +163,21 @@ def test_logger_quiet(capsys):
     assert "info error\n" not in err
     assert "info critical\n" not in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.details") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: DETAIL :: info details\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: DEBUG :: info debug\n")
+        assert logf.readline().endswith(" :: DETAIL :: info details\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
     os.remove(logfile + ".log.details")
@@ -205,15 +205,15 @@ def test_logger_info(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -240,15 +240,15 @@ def test_logger_info_verbose1(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -275,15 +275,15 @@ def test_logger_info_verbose2(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -311,14 +311,14 @@ def test_logger_warning(capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -361,14 +361,14 @@ def check_warning_verbose(logfile, capsys):
     assert "info error\n" in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -397,10 +397,10 @@ def test_logger_critical(capsys):
     assert "info error\n" not in err
     assert "info critical\n" in err
     with open(logfile + ".log", "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     assert not os.path.isfile(logfile + ".log.details")
     with open(logfile + ".log.err", "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     os.remove(logfile + ".log")
     os.remove(logfile + ".log.err")
 
@@ -440,27 +440,27 @@ def test_logger_exists(capsys):
     assert len(logs) == 2
     logs.remove(logfile + ".log")
     with open(logs[0], "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     logs = glob.glob(logfile + "*" + ".log.err")
     assert len(logs) == 2
     logs.remove(logfile + ".log.err")
     with open(logs[0], "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     logs = glob.glob(logfile + "*" + ".log.details")
     assert len(logs) == 2
     logs.remove(logfile + ".log.details")
     with open(logs[0], "r") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: DETAIL :: info details\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: ERROR :: info error\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
+        assert logf.readline().endswith(" :: DEBUG :: info debug\n")
+        assert logf.readline().endswith(" :: DETAIL :: info details\n")
+        assert logf.readline().endswith(" :: INFO :: info info\n")
+        assert logf.readline().endswith(" :: WARNING :: info warning\n")
+        assert logf.readline().endswith(" :: ERROR :: info error\n")
+        assert logf.readline().endswith(" :: CRITICAL :: info critical\n")
     for f in glob.glob(logfile + "*"):
         os.remove(f)
 
@@ -539,7 +539,7 @@ def test_skipped_prokka(capsys):
     it writes the right message.
     """
     logfile_base = "test_prokka"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     skipped = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped)
     out, err = capsys.readouterr()
@@ -564,7 +564,7 @@ def test_skipped_format(capsys):
     it writes the right message.
     """
     logfile_base = "test_prokka"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     skipped_format = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped_format, format=True)
     out, err = capsys.readouterr()
@@ -771,7 +771,7 @@ def test_read_genomes_ok(capsys):
     of genomes
     """
     logfile_base = "test_utils"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -796,7 +796,7 @@ def test_read_genomes_errors(capsys):
     it returns the expected errors, and the expected genome list.
     """
     logfile_base = "test_utils"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -850,7 +850,7 @@ def test_read_genomes_multi_files(capsys):
     files do not exist) and the expected concatenated files.
     """
     logfile_base = "test_utils"
-    utils.init_logger(logfile_base, 0, verbose=1)
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -1101,3 +1101,116 @@ def test_cat_bar():
     assert set(lines_exp) == set(lines_out)
     os.remove(outfile)
 
+
+def test_detail():
+    """
+    Check value returned for detail level
+    """
+    assert utils.detail_lvl() == 15
+
+
+def test_log_listen(capsys):
+    """
+    Check that when we log to a queue listener, and then handle the logs
+    via logger_thread, the logs appear.
+    """
+    import multiprocessing
+    import threading
+
+    # Create Queue, QueueHandler, and log messages to it
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('process')
+    logger.debug("debug message")
+    logger.log(utils.detail_lvl(), "detail message")
+    logger.info("info message")
+    logger.warning("warning message")
+    logger.error("error message")
+    logger.critical("critical message")
+    q.put(None)
+
+    # Initialize real logger
+    logfile = "test_log_listen"
+    utils.init_logger(logfile, 0, '')
+
+    # Listen to QueueHandler and handle messages to stdout/stderr/files
+    lp = threading.Thread(target=utils.logger_thread, args=(q,))
+    lp.start()
+    lp.join()
+
+    out, err = capsys.readouterr()
+    assert "debug message\n" in out
+    assert "detail message\n" not in out
+    assert "info message\n" in out
+    assert "warning message\n" not in err
+    assert "error message\n" in err
+    assert "critical message\n" in err
+    with open(logfile + ".log", "r") as logf:
+        assert logf.readline().endswith(" :: INFO :: info message\n")
+        assert logf.readline().endswith(" :: WARNING :: warning message\n")
+        assert logf.readline().endswith(" :: ERROR :: error message\n")
+        assert logf.readline().endswith(" :: CRITICAL :: critical message\n")
+    with open(logfile + ".log.details") as logf:
+        assert logf.readline().endswith(" :: DEBUG :: debug message\n")
+        assert logf.readline().endswith(" :: DETAIL :: detail message\n")
+        assert logf.readline().endswith(" :: INFO :: info message\n")
+        assert logf.readline().endswith(" :: WARNING :: warning message\n")
+        assert logf.readline().endswith(" :: ERROR :: error message\n")
+        assert logf.readline().endswith(" :: CRITICAL :: critical message\n")
+    with open(logfile + ".log.err", "r") as logf:
+        assert logf.readline().endswith(" :: WARNING :: warning message\n")
+        assert logf.readline().endswith(" :: ERROR :: error message\n")
+        assert logf.readline().endswith(" :: CRITICAL :: critical message\n")
+    os.remove(logfile + ".log")
+    os.remove(logfile + ".log.err")
+    os.remove(logfile + ".log.details")
+
+
+def test_log_no_listen(capsys):
+    """
+    Check that when we log to a queue listener, but never listen to the queue,
+    there is nothing in stderr/stdout/files
+    """
+    import multiprocessing
+
+    # Create Queue, QueueHandler, and log messages to it
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('process')
+    logger.debug("debug message")
+    logger.log(utils.detail_lvl(), "detail message")
+    logger.info("info message")
+    logger.warning("warning message")
+    logger.error("error message")
+    logger.critical("critical message")
+    q.put(None)
+
+    # Initialize real logger
+    logfile = "test_log_listen"
+    utils.init_logger(logfile, 0, '')
+
+    assert q.qsize() == 7
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert err == ""
+    with open(logfile + ".log", "r") as logf:
+        assert logf.readlines() == []
+    with open(logfile + ".log.details") as logf:
+        assert logf.readlines() == []
+    with open(logfile + ".log.err", "r") as logf:
+        assert logf.readlines() == []
+    os.remove(logfile + ".log")
+    os.remove(logfile + ".log.err")
+    os.remove(logfile + ".log.details")
