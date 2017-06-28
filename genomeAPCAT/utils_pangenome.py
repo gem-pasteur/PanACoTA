@@ -51,7 +51,7 @@ def get_fams_info(families):
         fams_by_strain[num] = {}
         for gene in fam:
             read_gene(gene, num, fams_by_strain, all_strains)
-    sort_all_strains = sorted(all_strains, key=lambda x: (x.split(".")[0], int(x.split(".")[-1])))
+    sort_all_strains = sorted(all_strains, key=utils.sort_genomes)
     return fams_by_strain, sort_all_strains
 
 
@@ -83,7 +83,7 @@ def read_pan_file(filein):
                 read_gene(gene, fam_num, fams_by_strain, all_strains)
             families[fam_num] = genes_ok
             nfam += 1
-    sort_all_strains = sorted(all_strains, key=lambda x: int(x.split(".")[-1]))
+    sort_all_strains = sorted(all_strains, key=utils.sort_genomes)
     return fams_by_strain, families, sort_all_strains
 
 
