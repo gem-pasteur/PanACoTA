@@ -68,15 +68,15 @@ In your `my_results` directory, you should now have:
 - in `tmp_files`, you still have the 'split5N' genomic sequence files, as well as prokka result folders.
 - You have 4 new folders: `Replicons`, `LSTINFO`, `Genes`, `Proteins` each one containing 3 files (1 per genome) with your results.
 
-## Pangenome step
+## PanGenome step
 
 To do a pangenome, you need to provide the list of genomes to consider, with 1 genome per line. Only the first column (genome name) will be considered, but you can use a file containing other columns...such as the one you already have in the result folder of annotation step: `LSTINFO-list_genomes.lst`! However, of course, if you want to do a pangenome of less genomes than the ones you annotated, you are free to create a new file with the genomes you want!  
 Here, we are doing a pangenome of the 3 genomes annotated before. Here is the command line:
 
-    genomeAPCAT pangenome -l my_results/LSTINFO-list_genomes.lst -n GENO3 -d my_results/Proteins -i 0.8 -o my_results/pangenome 
+    genomeAPCAT pangenome -l Examples/input_files/input_for_pangenome.txt -n GENO3 -d my_results/Proteins -i 0.8 -o my_results/pangenome 
 
 With:
-- `-l`: We are using the list of genomes provided from the previous step (annotation)
+- `-l`: the provided file (`input_for_pangenome.txt`) is the same as what you should have in `my_results/LSTINFO-list_genomes.lst`.
 - `-n`: we name this dataset 'GENO3' (for 3 genomes of species 'GENO')
 - `-d`: path to the folder containing all protein files
 - `-i`: we want a pangenome with 80% identity
@@ -93,3 +93,17 @@ You should also have other files that could help you if you need to investigate 
 - `PanGenome-GENO3.All.prt-clust-0.8-mode1-th10_2017-06-28_15-19-12.tsv.lst.bin`: binary file containing Python objects corresponding to the pangenome. Used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
 
 In your `my_results/Proteins` folder, you should have a new file, `GENO3.All.prt`, containing all proteins of the 3 genomes.
+
+## Core/Persistent Genome step
+
+The core genome is inferred from the PanGenome. So, the only required file is your pangenome, obtained at last step. By default, it will generate a CoreGenome. Here is the command line to obtain the CoreGenome of our dataset:
+
+    genomeAPCAT corepers -p Examples/input_files/input_for_corepers.txt
+
+The provided file (`input_for_corepers.txt`) is the same as the PanGenome you should get from the previous step (`my_results/pangenome/PanGenome-GENO3.All.prt-clust-0.8-model1_<date>.tsv.lst`).
+
+If you want a Persistent Genome, specify the required options (minimum percentage of genomes in a family to be considered as persistent, allowing or not multi/mixed families...). You can see all options available by typing:
+    
+    genomeAPCAT corepers -h
+
+
