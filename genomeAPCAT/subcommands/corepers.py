@@ -12,6 +12,28 @@ June 2017
 import sys
 
 
+def main_from_parse(args):
+    """
+    Call main function from the arguments given by parser
+    """
+    main(args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile)
+
+
+def main(pangenome, tol, multi, mixed, pyobjects=None, outputfile=None):
+    """ Read pangenome and deduce Persistent genome according to the user criteria
+
+    :param pangenome: file containing pangenome
+    :type pangenome: str
+    :param tol: min number of genomes present in a family to consider it as persistent
+    :type tol: float between 0 and 1
+    :param multi: True f multigenic families are allowed, False otherwise
+    :type multi: boolean
+    :param pyobjects: python objects containing pangenome information
+    :type pyobjects: tuple(dict, dict, list)
+    """
+    print("hello!")
+
+
 def build_parser(parser):
     """
     Method to create a parser for command-line options

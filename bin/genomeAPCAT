@@ -6,6 +6,7 @@ from genomeAPCAT import __version__ as version
 
 from genomeAPCAT.subcommands import qc_and_annote
 from genomeAPCAT.subcommands import pangenome
+from genomeAPCAT.subcommands import corepers
 
 
 def main():
@@ -62,6 +63,13 @@ def parse_arguments(argv):
     actions["pangenome"] = pangenome.main_from_parse
 
     # Persistent genome part
+    parser_corepers = subparsers.add_parser('corepers',
+                                     help="Compute a Core or Persistent genome of your dataset",
+                                     add_help=False)
+    corepers.build_parser(parser_corepers)
+    actions["corepers"] = corepers.main_from_parse
+    checks["corepers"] = corepers.check_args
+
     # Alignment and tree part
 
     # Parse arguments and execute corresponding action
