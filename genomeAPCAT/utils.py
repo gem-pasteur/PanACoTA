@@ -75,7 +75,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     my_format = '[%(asctime)s] %(name)s :: %(levelname)s :: %(message)s'
     formatterFile = logging.Formatter(my_format,
                                       '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] %(levelname)s %(message)s', '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
