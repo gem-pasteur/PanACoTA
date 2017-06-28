@@ -11,7 +11,6 @@ from genomeAPCAT import utils
 import logging
 import os
 
-logger = logging.getLogger()
 
 
 def build_prt_bank(lstinfo, dbpath, name, spedir):
@@ -26,6 +25,7 @@ def build_prt_bank(lstinfo, dbpath, name, spedir):
     spedir: By default, output file is saved in dbpath directory. If it must be saved somewhere
     else, it is specified here.
     """
+    logger = logging.getLogger('pangenome.bank')
     if not spedir:
         outdir = dbpath
     else:
