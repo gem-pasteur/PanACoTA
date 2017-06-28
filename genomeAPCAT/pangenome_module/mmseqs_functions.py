@@ -40,7 +40,8 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     create_mmseqs_db(mmseqdb, prt_path)
 
     # Cluster with mmseqs
-    panfile = os.path.join(outdir, panfile)
+    if panfile:
+        panfile = os.path.join(outdir, panfile)
     do_pangenome(outdir, prt_path, mmseqdb, min_id, clust_mode, threads, start, panfile)
 
 
