@@ -32,6 +32,7 @@ def main(pangenome, tol, multi, mixed, outputfile=None):
     import logging
     from genomeAPCAT import utils
     from genomeAPCAT import utils_pangenome as utilsp
+    import genomeAPCAT.corepers_module.persistent_functions as pers
 
     # name logfile, add timestamp if already existing
     path_pan, base_pan = os.path.split(pangenome)
@@ -55,10 +56,9 @@ def main(pangenome, tol, multi, mixed, outputfile=None):
 
     # Read pangenome
     fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome)
-
-    # pers, fams = get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed)
-    # print "Persistent genome of ", len(pers), " families."
-    # write_persistent(fams, outputfile)
+    # Generate persistent genome
+    fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed)
+    pers.write_persistent(fams, outputfile)
 
 
 def get_info(tol, multi, mixed):
