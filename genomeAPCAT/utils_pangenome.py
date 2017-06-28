@@ -68,7 +68,7 @@ def read_pan_file(filein):
     all_strains = list of all strains found in the pangenome
     :rtype: tuple(dict, dict, list)
     """
-    logger.info("Calculating pan_summary, pan_quali and pan_quanti from pangenome file")
+    logger.info("Reading and getting information from pangenome file")
     fams_by_strain = {}
     families = {}
     all_strains = []

@@ -18,7 +18,13 @@ import subprocess
 import shutil
 import shlex
 import progressbar
-
+try:
+    import cPickle as pickle
+except:
+    try:
+        import _pickle as pickle
+    except:
+        import pickle
 
 
 def init_logger(logfile_base, level, name, verbose=0, quiet=False):
@@ -554,13 +560,6 @@ def save_bin(objects, fileout):
     """
     Save python 'objects' in a binary file called 'fileout'
     """
-    try:
-        import cPickle as pickle
-    except:
-        try:
-            import _pickle as pickle
-        except:
-            import pickle
     with open(fileout, "wb") as binf:
         pickle.dump(objects, binf)
 
