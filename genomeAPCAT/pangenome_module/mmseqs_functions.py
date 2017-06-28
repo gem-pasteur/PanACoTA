@@ -14,8 +14,7 @@ import multiprocessing
 import progressbar
 from genomeAPCAT import utils
 
-
-logger = logging.getLogger()
+logger = logging.getLogger("pangnome.mmseqs")
 
 
 def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None):
@@ -44,7 +43,9 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     # Cluster with mmseqs
     if panfile:
         panfile = os.path.join(outdir, panfile)
-    do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile)
+    families, outfile = do_pangenome(outdir, prt_bank, mmseqdb, min_id,
+                            clust_mode, threads, start, panfile)
+    return families, outfile
 
 
 def get_info(prt_bank, threads, min_id, clust_mode, start):
@@ -95,7 +96,8 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
         bar.finish()
         pool.join()
     # Convert output to tsv file (one line per comparison done)
-    mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)
+    families, outfile = mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)
+    return families, outfile
 
 
 def run_mmseqs_clust(args):
@@ -121,7 +123,8 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
     # Convert the tsv file to a 'pangenome' file: one line per family
-    mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
+    families, outfile = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
+    return families, outfile
 
 
 def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
@@ -135,11 +138,12 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
         base = os.path.basename(tsvfile)
         outfile = os.path.join(outpath, "PanGenome-" + base + ".lst")
     clusters = mmseq_tsv_to_clusters(tsvfile)
-    clusters_to_file(clusters, outfile)
+    families = clusters_to_file(clusters, outfile)
     end = time.strftime('%Y-%m-%d_%H-%M-%S')
     with open(logmmseq, "a") as logm:
-        logm.write("Start: {}".format(start) + "\n")
+        logm.write("\n------------\n\nStart: {}".format(start) + "\n")
         logm.write("End: {}".format(end) + "\n")
+    return families, outfile
 
 
 def mmseq_tsv_to_clusters(mmseq):
@@ -161,14 +165,17 @@ def clusters_to_file(clust, fileout):
     """
     Write all clusters to a file
     """
+    families = {}  # {famnum: [members]}
     with open(fileout, "w") as fout:
         num = 1
         for _, fam in clust.items():
+            families[num] = fam
             fout.write(str(num))
             for mem in sorted(fam, key=utils.sort_proteins):
                 fout.write(" " + mem)
             fout.write("\n")
             num += 1
+    return families
 
 
 def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
