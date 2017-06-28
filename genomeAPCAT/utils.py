@@ -23,7 +23,7 @@ try:
 except:
     try:
         import _pickle as pickle
-    except:
+    except: # pragma: no cover
         import pickle
 
 
@@ -324,7 +324,10 @@ def sort_genomes(x):
     - species
     - in each species, by strain number
     """
-    return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
+    if isinstance(x, tuple):
+        return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
+    else:
+        return (x.split(".")[0], int(x.split(".")[-1]))
 
 
 def sort_proteins(x):
