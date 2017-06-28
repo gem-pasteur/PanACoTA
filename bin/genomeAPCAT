@@ -56,7 +56,8 @@ def parse_arguments(argv):
     checks["annotate"] = qc_and_annote.check_args
 
     # Pan genome part
-    parser_pan = subparsers.add_parser('pangenome', help="Generate a pan-genome of your dataset")
+    parser_pan = subparsers.add_parser('pangenome', help="Generate a pan-genome of your dataset",
+                                       add_help=False)
     pangenome.build_parser(parser_pan)
     actions["pangenome"] = pangenome.main_from_parse
 

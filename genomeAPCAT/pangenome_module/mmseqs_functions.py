@@ -17,7 +17,7 @@ from genomeAPCAT import utils
 logger = logging.getLogger("pangnome.mmseqs")
 
 
-def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None):
+def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None, quiet=False):
     """
     Run all steps to build a pangenome:
     - create mmseqs database from protein bank
@@ -44,7 +44,7 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     if panfile:
         panfile = os.path.join(outdir, panfile)
     families, outfile = do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                            clust_mode, threads, start, panfile)
+                            clust_mode, threads, start, panfile, quiet)
     return families, outfile
 
 
@@ -67,7 +67,8 @@ def get_logmmseq(outdir, prt_bank, infoname):
     return os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
 
 
-def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile=None):
+def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile=None,
+                 quiet=False):
     """
     Use mmseqs to cluster proteins
     """
@@ -81,19 +82,21 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
                         "it to a pangenome file.").format(mmseqclust))
     else:
         logger.info("Clustering proteins...")
-        widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
-                   "  -  ", progressbar.Timer()]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
+        if not quiet:
+            widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+                       "  -  ", progressbar.Timer()]
+            bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
         pool = multiprocessing.Pool(1)
         args = [mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode]
         final = pool.map_async(run_mmseqs_clust, [args], chunksize=1)
         pool.close()
-        while(True):
-            if final.ready():
-                break
-            remaining = final._number_left
-            bar.update()
-        bar.finish()
+        if not quiet:
+            while(True):
+                if final.ready():
+                    break
+                remaining = final._number_left
+                bar.update()
+            bar.finish()
         pool.join()
     # Convert output to tsv file (one line per comparison done)
     families, outfile = mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)

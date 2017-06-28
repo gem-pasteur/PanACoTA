@@ -13,7 +13,7 @@ import os
 
 
 
-def build_prt_bank(lstinfo, dbpath, name, spedir):
+def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
     """
     Build a file containing all proteins of all genomes contained in lstinfo.
 
@@ -46,5 +46,8 @@ def build_prt_bank(lstinfo, dbpath, name, spedir):
             genome = line.strip().split()[0]
             genomes.append(genome)
     all_names = [os.path.join(dbpath, gen + ".prt") for gen in genomes]
-    utils.cat(all_names, outfile, title="Building bank")
+    if quiet:
+        utils.cat(all_names, outfile)
+    else:
+        utils.cat(all_names, outfile, title="Building bank")
     return outfile
