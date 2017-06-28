@@ -29,35 +29,51 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     prt_bank = os.path.basename(prt_path)
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
-    information = ("Running mmseqs with:\n"
+    information = ("Will run MMseqs2 with:\n"
                    "\t- minimum sequence identity = {}\n"
                    "\t- cluster mode {}").format(min_id, clust_mode)
     if threads > 1:
         information += "\n\t- {} threads".format(threads)
     logger.info(information)
 
+    infoname = get_info(prt_bank, threads, min_id, clust_mode, start)
+    logmmseq = get_logmmseq(outdir, prt_bank, infoname)
     # Create ffindex of DB if not already done
-    create_mmseqs_db(mmseqdb, prt_path)
+    create_mmseqs_db(mmseqdb, prt_path, logmmseq)
 
     # Cluster with mmseqs
     if panfile:
         panfile = os.path.join(outdir, panfile)
-    do_pangenome(outdir, prt_path, mmseqdb, min_id, clust_mode, threads, start, panfile)
+    do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile)
 
 
-def do_pangenome(outdir, prt_path, mmseqdb, min_id, clust_mode, threads, start, panfile=None):
+def get_info(prt_bank, threads, min_id, clust_mode, start):
     """
-    Use mmseqs to cluster proteins
+    Get string containing all information on future run
     """
-    prt_bank = os.path.basename(prt_path)
     if threads != 1:
         threadinfo = "-th" + str(threads)
     else:
         threadinfo = ""
     infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
+    return infoname
+
+
+def get_logmmseq(outdir, prt_bank, infoname):
+    """
+    Get filename of logfile, given information
+    """
+    return os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
+
+
+def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile=None):
+    """
+    Use mmseqs to cluster proteins
+    """
+    infoname = get_info(prt_bank, threads, min_id, clust_mode, start)
+    logmmseq = get_logmmseq(outdir, prt_bank, infoname)
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
     tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
-    logmmseq = os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
     os.makedirs(tmpdir, exist_ok = True)
     if os.path.isfile(mmseqclust):
         logger.warning(("mmseqs clustering {} already exists. The program will now convert "
@@ -90,7 +106,7 @@ def run_mmseqs_clust(args):
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
            "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
     msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
-    with open(logmmseq, "w") as logm:
+    with open(logmmseq, "a") as logm:
         utils.run_cmd(cmd, msg, eof=True, stdout=logm, stderr=logm)
 
 
@@ -102,7 +118,8 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     """
     cmd = "mmseqs createtsv {0} {0} {1} {1}.tsv".format(mmseqdb, mmseqclust)
     msg = "Problem while trying to convert mmseq result file to tsv file"
-    utils.run_cmd(cmd, msg, eof=True)
+    with open(logmmseq, "a") as logf:
+        utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
     # Convert the tsv file to a 'pangenome' file: one line per family
     mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
 
@@ -154,7 +171,7 @@ def clusters_to_file(clust, fileout):
             num += 1
 
 
-def create_mmseqs_db(mmseqdb, prt_path):
+def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     """
     Create ffindex of protein bank if not already done. If done, just write a message
     to tell the user that the current existing file will be used.
@@ -164,7 +181,8 @@ def create_mmseqs_db(mmseqdb, prt_path):
         cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
         msg = ("Problem while trying to convert database {} to mmseqs "
                "database format.").format(prt_path)
-        utils.run_cmd(cmd, msg, eof=True)
+        with open(logmmseq, "w") as logf:
+            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
     else:
         logger.warning(("mmseq database {} already exists. The program will "
                         "use it.").format(mmseqdb))
