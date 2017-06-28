@@ -160,7 +160,7 @@ def parse(parser, argu):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description=("Compute pan-genome"))
+    parser = argparse.ArgumentParser(description=("Compute pan-genome"), add_help=False)
     build_parser(parser)
     OPTIONS = parse(parser, sys.argv[1:])
     main_from_parse(OPTIONS)
