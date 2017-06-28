@@ -18,17 +18,19 @@ def main_from_parse(args):
     Call main function from the arguments given by parser
     """
     main(args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
-         args.clust_mode, args.spedir, args.threads, args.outfile)
+         args.clust_mode, args.spedir, args.threads, args.outfile, 0,
+         False)
 
 
-def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None):
+def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
+         verbose=0, quiet=False):
     """
     Main method, doing all steps:
     - concatenate all protein files
     - create database as ffindex
     - cluster all proteins
     - convert to pangenome file
-    - summary/matrix?
+    - creating summary and matrix of pangenome
     """
     # import needed packages
     import logging
@@ -38,13 +40,9 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
 
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
-    logfile = os.path.join(outdir, "genomeAPCAT-pangenome_" + name + ".log")
-    # if os.path.isfile(logfile):
-    #     import time
-    #     logfile = os.path.splitext(logfile)[0] + time.strftime("_%y-%m-%d_%H-%m-%S.log")
-    # set level of logger (here debug to show everything during development)
+    logfile_base = os.path.join(outdir, "genomeAPCAT-pangenome_" + name)
     level = logging.DEBUG
-    utils.init_logger(logfile, level)
+    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
     # test if mmseqs is installed and in the path
