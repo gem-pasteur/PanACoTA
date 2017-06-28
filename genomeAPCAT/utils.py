@@ -175,7 +175,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     Run the given command line. If the return code is not 0, print error message.
     if eof (exit on fail) is True, exit program if error code is not 0.
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils.run_cmd")
     if not "stdout" in kwargs:
         kwargs["stdout"] = None
     if not "stderr" in kwargs:
@@ -241,7 +241,7 @@ def write_warning_skipped(skipped, format=False):
     format: if False, genomes were not skipped because of format step, but before that.
     if True, they were skipped because of format
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not format:
         logger.warning(("Prokka had problems while annotating some genomes, or did not "
@@ -271,7 +271,7 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     qc: if it is the file written after qc only, call it info-genomes-<list_file>.txt
     otherwise, call it discarded-<list_file>.txt
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     _, name_lst = os.path.split(list_file)
     if not qc:
         outdisc = os.path.join(res_path,
@@ -331,7 +331,7 @@ def read_genomes(list_file, name, date, dbpath):
 
     genomes = {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     logger.info("Reading genomes")
     genomes = {}
     if not os.path.isfile(list_file):
@@ -394,7 +394,7 @@ def read_info(name_inf, name, date, genomes_inf):
 
     Return name and date.
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     name_inf = name_inf.strip().split(".")
     # if only species provided
     if len(name_inf) == 1:
@@ -479,7 +479,7 @@ def check_out_dirs(resdir):
     - resdir/Proteins
     - resdir/Replicons
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")) != []:
         logger.error("ERROR: Your output directory already has .lst files in the "
                      "LSTINFO folder. Provide another result directory, or remove the "
@@ -523,7 +523,7 @@ def logger_thread(q):
     Queue listener used in a thread to handle the logs put to a QueueHandler
     by several processes (multiprocessing.pool.map_async for example)
     """
-    logger = logging.getLogger("qc_annote.utils")
+    logger = logging.getLogger("utils")
     while True:
         record = q.get()
         if record is None:
