@@ -37,6 +37,7 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     from genomeAPCAT import utils
     from genomeAPCAT.pangenome_module import protein_seq_functions as protf
     from genomeAPCAT.pangenome_module import mmseqs_functions as mmf
+    from genomeAPCAT.pangenome_module import post_treatment as pt
 
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
@@ -53,7 +54,10 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     # Build bank with all proteins to include in the pangenome
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir)
     # Do pangenome
-    mmf.run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, outfile)
+    families, panfile = mmf.run_all_pangenome(min_id, clust_mode, outdir,
+                                              prt_path, threads, outfile)
+    # Create matrix pan_quali, pan_quanti and summary file
+    pt.post_treat(families, panfile)
 
 
 def build_parser(parser):
