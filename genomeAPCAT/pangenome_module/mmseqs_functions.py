@@ -148,7 +148,7 @@ def clusters_to_file(clust, fileout):
         num = 1
         for _, fam in clust.items():
             fout.write(str(num))
-            for mem in sorted(fam, key=lambda x: (int(x.split(".")[2]), int(x.split("_")[-1]))):
+            for mem in sorted(fam, key=utils.sort_proteins):
                 fout.write(" " + mem)
             fout.write("\n")
             num += 1

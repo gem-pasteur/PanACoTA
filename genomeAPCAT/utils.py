@@ -321,6 +321,18 @@ def sort_genomes(x):
     return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
 
 
+def sort_proteins(x):
+    """
+    x = species.date.strain.contig_protnum
+
+    order by:
+    - species
+    - in each species, strain number
+    - in each species and strain number, by protein number
+    """
+    return (x.split(".")[0], int(x.split(".")[2]), int(x.split("_")[-1]))
+
+
 def read_genomes(list_file, name, date, dbpath):
     """
     Read list of genomes, and return them.
