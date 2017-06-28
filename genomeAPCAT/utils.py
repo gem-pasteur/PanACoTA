@@ -548,3 +548,36 @@ def detail_lvl():
     Returns the int level corresponding to "DETAIL"
     """
     return 15
+
+
+def save_bin(objects, fileout):
+    """
+    Save python 'objects' in a binary file called 'fileout'
+    """
+    try:
+        import cPickle as pickle
+    except:
+        try:
+            import _pickle as pickle
+        except:
+            import pickle
+    with open(fileout, "wb") as binf:
+        pickle.dump(objects, binf)
+
+def load_bin(binfile):
+    """
+    Unpickle python objects from the binary file 'binfile'
+    """
+    with open(binfile, "rb") as binf:
+        objects = pickle.load(binf)
+    return objects
+
+
+def write_list(liste):
+    """
+    Return a string corresponding to the given liste, with all elements separated
+    by a space. Used to write a list into a file
+    Ex: [1, 2, "toto"] -> "1 2 toto"
+    """
+    list_write = [str(l) for l in liste]
+    return " ".join(list_write) + "\n"
