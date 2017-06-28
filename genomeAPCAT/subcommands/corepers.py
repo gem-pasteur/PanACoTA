@@ -9,7 +9,7 @@ corepers is a subcommand of genomeAPCAT
 June 2017
 """
 
-import sys
+import os
 
 
 def main_from_parse(args):
@@ -19,19 +19,69 @@ def main_from_parse(args):
     main(args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile)
 
 
-def main(pangenome, tol, multi, mixed, pyobjects=None, outputfile=None):
+def main(pangenome, tol, multi, mixed, outputfile=None):
     """ Read pangenome and deduce Persistent genome according to the user criteria
 
-    :param pangenome: file containing pangenome
-    :type pangenome: str
-    :param tol: min number of genomes present in a family to consider it as persistent
-    :type tol: float between 0 and 1
-    :param multi: True f multigenic families are allowed, False otherwise
-    :type multi: boolean
-    :param pyobjects: python objects containing pangenome information
-    :type pyobjects: tuple(dict, dict, list)
+    pangenome: file containing pangenome
+    tol: min number of genomes present in a family to consider it as persistent
+    multi: True if multigenic families are allowed, False otherwise
+    multi: True if mixed families are allowed, False otherwise
+    outputfile: name of persistent genome file
     """
-    print("hello!")
+    # import needed packages
+    import logging
+    from genomeAPCAT import utils
+    from genomeAPCAT import utils_pangenome as utilsp
+
+    # name logfile, add timestamp if already existing
+    path_pan, base_pan = os.path.split(pangenome)
+    logfile_base = os.path.join(path_pan, "genomeAPCAT-corepers")
+    level = logging.DEBUG
+    utils.init_logger(logfile_base, level, '') #, verbose=verbose, quiet=quiet)
+    logger = logging.getLogger()
+
+    # Define output filename
+    if not outputfile:
+        outputfile = os.path.join(path_pan, "PersGenome_" + base_pan + "_" + str(tol))
+        if multi:
+            outputfile += "-multi.lst"
+        elif mixed:
+            outputfile += "-mixed.lst"
+        else:
+            outputfile += ".lst"
+    else:
+        outputfile = os.path.join(path_pan, outputfile)
+    logger.info(get_info(tol, multi, mixed))
+
+    # Read pangenome
+    fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome)
+
+    # pers, fams = get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed)
+    # print "Persistent genome of ", len(pers), " families."
+    # write_persistent(fams, outputfile)
+
+
+def get_info(tol, multi, mixed):
+    """
+    Get a string corresponding to the information that will be given to logger.
+    """
+    if tol == 1:
+        return "Will generate a CoreGenome."
+    else:
+        toprint = ("Will generate a Persistent genome with member(s) in at least {}"
+                   "% of all genomes in each family.\n").format(100*tol)
+        if multi:
+            toprint += ("Multigenic families are allowed (several members in "
+                        "any genome of a family).")
+        elif mixed:
+            toprint += ("Mixed families are allowed. To be considered as persistent, "
+                        "a family must have exactly 1 member in {}% of the genomes, "
+                        "but in the remaining {}% genomes, there can be 0, 1 or "
+                        "several members.".format(tol*100, round((1-tol)*100), 3))
+        else:
+            toprint += ("To be considered as persistent, a family must contain exactly 1 member "
+                        "in at least {}% of all genomes.").format(tol*100)
+        return toprint
 
 
 def build_parser(parser):
@@ -76,7 +126,8 @@ def build_parser(parser):
                                 "with -M (which is allowing multigenic families: having several "
                                 "members in any number of genomes)."))
     optional.add_argument("-o", dest="outfile",
-                          help=("You can specify an output file for the Persistent genome "
+                          help=("You can specify an output filename (without path)"
+                                " for the Persistent genome "
                                 "deduced from Pan. If not given, it will be saved as "
                                 "PersGenome_<pangenome>_tol[-multi][-mixed].lst"))
 
