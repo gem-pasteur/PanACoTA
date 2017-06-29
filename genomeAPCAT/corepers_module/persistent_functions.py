@@ -43,7 +43,7 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
             if len(family) >= min_members and (multi or uniq_members(family)):
                 pers[fam_num] = family
                 fams[fam_num] = fam_all_members[fam_num]
-    logger.info("Persistent genome of {} families.".format(len(pers)))
+    logger.info("The persistent genome contains {} families.".format(len(pers)))
     return fams
 
 

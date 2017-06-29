@@ -566,6 +566,7 @@ def save_bin(objects, fileout):
     with open(fileout, "wb") as binf:
         pickle.dump(objects, binf)
 
+
 def load_bin(binfile):
     """
     Unpickle python objects from the binary file 'binfile'
