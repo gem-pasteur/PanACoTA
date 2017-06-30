@@ -46,8 +46,6 @@ unit-test-ubuntu16.04:
   before_script:
     - ./make
   script:
-    - ls test/data
-    - ls -la bin
     - py.test test/test_unit
     - mv .coverage .coverage-unit
   artifacts:
@@ -62,7 +60,6 @@ func-test-ubuntu16.04:
   before_script:
     - ./make
   script:
-    - ls test/data
     - py.test test/test_functional
     - mv .coverage .coverage-functional
   artifacts:
