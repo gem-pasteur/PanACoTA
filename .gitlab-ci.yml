@@ -47,7 +47,7 @@ unit-test-ubuntu16.04:
     - ./make
   script:
     - ls test/data
-    - ls -la bin
+    - ls -la
     - py.test test/test_unit
     - mv .coverage .coverage-unit
   artifacts:
