@@ -152,6 +152,12 @@ def test_analyse1genome_nocut(dbpath):
                gs[2]: ["ESCO.0416"]}
     genome = gs[1]
     tmp_path = os.path.join("test", "data")
+    # Put genome file in tmppath instead of dbpath, as if it was
+    # the result of concatenation of several files for the same genome,
+    # done in the first step.
+    orig_file = os.path.join(dbpath, genome)
+    out_file = os.path.join(tmp_path, genome)
+    os.rename(orig_file, out_file)
     cut = False
     pat = "NNNNN+"
     assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
@@ -165,6 +171,7 @@ def test_analyse1genome_nocut(dbpath):
         for linee, lineo in zip(expf, of):
             assert linee == lineo
     os.remove(outf)
+    os.rename(out_file, orig_file)
 
 
 def test_analyse1genome_nocut_empty(dbpath):

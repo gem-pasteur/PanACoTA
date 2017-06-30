@@ -255,7 +255,7 @@ def test_read_genomes_nofile(capsys):
     ends the program with an error message
     """
     with pytest.raises(SystemExit):
-        utils.read_genomes("toto.txt", "TOTO", "0417", "db/path")
+        utils.read_genomes("toto.txt", "TOTO", "0417", "db/path", "tmppath")
     out, err = capsys.readouterr()
     assert ("ERROR: Your list file ") in err
     assert ("toto.txt") in err
@@ -271,8 +271,9 @@ def test_read_genomes_wrongName():
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
+    tmppath = "tmppath"
     list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     assert genomes == {}
 
 
@@ -286,8 +287,9 @@ def test_read_genomes_ok(capsys):
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
+    tmppath = "tmppath"
     list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
-    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta": ["ESCO.0417"],
            "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -311,8 +313,9 @@ def test_read_genomes_errors(capsys):
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
+    tmppath = "tmppath"
     list_file = os.path.join("test", "data", "test_files", "list_genomes-errors.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["ESCO.0417"],
@@ -365,8 +368,9 @@ def test_read_genomes_multi_files(capsys):
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
+    tmppath = os.path.join("test", "data")
     list_file = os.path.join("test", "data", "test_files", "list_genomes-multi-files.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta-all.fna": ["ESCO.0417"],
            "H299_H561.fasta-all.fna": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
@@ -386,9 +390,9 @@ def test_read_genomes_multi_files(capsys):
     assert ("None of the genome files in ['toto.fst', 'toto.fasta', 'genome.fst'] exist. "
             "This genome will be ignored.") in err
     # Check that files were concatenated as expected
-    concat1 = os.path.join(dbpath, "A_H738.fasta-all.fna")
+    concat1 = os.path.join(tmppath, "A_H738.fasta-all.fna")
     exp_concat1 = os.path.join(dbpath, "A_H738-and-B2_A3_5.fna")
-    concat2 = os.path.join(dbpath, "H299_H561.fasta-all.fna")
+    concat2 = os.path.join(tmppath, "H299_H561.fasta-all.fna")
     exp_concat2 = os.path.join(dbpath, "H299_H561-and-genome6.fna")
     with open(concat1, "r") as outf, open(exp_concat1, "r") as expf:
         for line_out, line_exp in zip(outf, expf):

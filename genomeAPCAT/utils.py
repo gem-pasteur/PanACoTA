@@ -342,7 +342,7 @@ def sort_proteins(x):
     return (x.split(".")[0], int(x.split(".")[2]), int(x.split("_")[-1]))
 
 
-def read_genomes(list_file, name, date, dbpath):
+def read_genomes(list_file, name, date, dbpath, tmp_path):
     """
     Read list of genomes, and return them.
     If a genome has a name, also return it. Otherwise, return the name given by user.
@@ -387,7 +387,7 @@ def read_genomes(list_file, name, date, dbpath):
                 # If there are files to concatenate, concatenate them
                 if to_concat != []:
                     genome_name = to_concat[0] + "-all.fna"
-                    concat_file = os.path.join(dbpath, genome_name)
+                    concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
                     cat(to_concat, concat_file)
                 else:

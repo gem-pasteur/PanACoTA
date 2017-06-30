@@ -79,7 +79,11 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
     * pat: pattern on which contigs must be cut
     * genomes: {genome: [spegenus.date]} -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
     """
-    gpath = os.path.join(dbpath, genome)
+    gpath = os.path.join(dbpath, genome)  # genome file is in dbpath
+    # except if it was in several files in dbpath, in which case it has been concatenated to
+    # a file in tmp_path
+    if not os.path.isfile(gpath):
+        gpath = os.path.join(tmp_path, genome)
     if cut:
         grespath = os.path.join(tmp_path, genome + "-split{}N.fna".format(len(pat) - 1))
     else:

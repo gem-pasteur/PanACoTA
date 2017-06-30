@@ -156,7 +156,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
             sys.exit(1)
     logger.info("Let's start!")
     # Read genome names.
-    genomes = utils.read_genomes(list_file, name, date, db_path)
+    genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
     if not genomes:
         logger.error(("We did not find any genome listed in {} in the folder {}. "
                       "Please check your list to give valid genome "

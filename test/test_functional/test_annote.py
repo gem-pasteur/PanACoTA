@@ -65,8 +65,6 @@ def test_main_from_parse(logger):
     assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
     shutil.rmtree(tmpdir, ignore_errors=True)
     shutil.rmtree(resdir, ignore_errors=True)
-    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
-    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
 def test_main_noValidGenome(capsys):
@@ -130,8 +128,6 @@ def test_main_given_tmp(logger):
     assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
     shutil.rmtree(resdir, ignore_errors=True)
     shutil.rmtree(tmpdir, ignore_errors=True)
-    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
-    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
 def test_main_given_prokka(logger):
@@ -179,8 +175,6 @@ def test_main_given_prokka(logger):
     assert os.path.isdir(os.path.join(prokdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
     shutil.rmtree(resdir, ignore_errors=True)
     shutil.rmtree(prokdir, ignore_errors=True)
-    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
-    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
 def test_main_given_tmpAndprokka(logger):
@@ -228,8 +222,6 @@ def test_main_given_tmpAndprokka(logger):
     shutil.rmtree(resdir, ignore_errors=True)
     shutil.rmtree(prokdir, ignore_errors=True)
     shutil.rmtree(tmpdir, ignore_errors=True)
-    os.remove(os.path.join(dbpath, "A_H738.fasta-all.fna"))
-    os.remove(os.path.join(dbpath, "H299_H561.fasta-all.fna"))
 
 
 def test_main_allDiscardNbcont(logger):
@@ -726,15 +718,16 @@ def test_annote_all():
                 "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
     # Check file content of genomes "-all" files
     # H299_H561.fasta and genome6.fasta
+    tmp_path = os.path.join(respath, "tmp_files")
     exp_Hand6 = os.path.join(dbpath, "H299_H561-and-genome6.fna")
-    Handg6 = os.path.join(dbpath, "H299_H561.fasta-all.fna")
+    Handg6 = os.path.join(tmp_path, "H299_H561.fasta-all.fna")
     with open(exp_Hand6, "r") as expf, open(Handg6, "r") as outf:
         for line_exp, line_out in zip(expf, outf):
             assert line_exp == line_out
     os.remove(Handg6)
     # A_H738.fasta and genome1.fasta
     exp_Aand1 = os.path.join(dbpath, "A_H738-and-genome1.fna")
-    Aand1 = os.path.join(dbpath, "A_H738.fasta-all.fna")
+    Aand1 = os.path.join(tmp_path, "A_H738.fasta-all.fna")
     with open(exp_Aand1, "r") as expf, open(Aand1, "r") as outf:
         for line_exp, line_out in zip(expf, outf):
             assert line_exp == line_out
