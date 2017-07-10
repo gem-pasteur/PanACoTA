@@ -18,7 +18,8 @@ build-from-base:
     - genomeAPCAT -h
     - ./make upgrade
     - genomeAPCAT -h
-
+    - ./make uninstall
+    - echo $(genomeAPCAT -h)
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
@@ -54,6 +55,8 @@ build-from-prokka-user:
     - echo $(prokka -h)
     - genomeAPCAT -h
     - ./make upgrade
+    - echo $(genomeAPCAT -h)
+    - ./make uninstall
     - echo $(genomeAPCAT -h)
 
 unit-test-ubuntu16.04:
