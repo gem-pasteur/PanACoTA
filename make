@@ -82,6 +82,9 @@ def uninstall():
     error = ("A problem occurred while trying to uninstall genomeAPCAT. If you have "
              "permission errors, try to add 'sudo' before your command line.")
     run_cmd(cmd, error)
+    link_dest = os.path.join(os.sep + "usr", "local", "bin", "genomeAPCAT")
+    if os.path.exists(link_dest):
+    	os.remove(link_dest)
 
 
 def upgrade(user=False):
