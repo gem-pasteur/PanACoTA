@@ -314,7 +314,7 @@ def parse():
                         help="Install package in user mode.")
     args = parser.parse_args()
     if args.user and args.target not in  ["install", "upgrade"]:
-    	parser.error("--user option can only be used when installing the package.")
+    	parser.error("--user option can only be used when installing (or upgrading) the package.")
     return args
 
 
