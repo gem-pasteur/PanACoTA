@@ -119,6 +119,8 @@ def install_all(install_dir, dev=False, user=False):
                                "not predict RNA.")
         if "prokka" in to_install:
             install_prokka()
+        if "mmseqs" in to_install:
+        	install_mmseqs()
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
@@ -136,6 +138,9 @@ def install_all(install_dir, dev=False, user=False):
              "permission errors, try to add 'sudo' before your command line. If "
              "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
+    # if user:
+    #     gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
+    #     os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
 
 
 def check_dependencies():
@@ -167,13 +172,16 @@ def check_dependencies():
         if not cmd_exists("pip3"):
             logger.error("You need pip3 to install genomeAPCAT.")
             sys.exit(1)
+        if not cmd_exists("mmseqs"):
+        	to_install.append("mmseqs")
     return to_install
+
 
 def install_mmseqs():
 	"""
-
+	Install MMseqs2
 	"""
-	pass
+	logger.error("Please install MMseqs2 to be able to get pan and core genomes")
 	# avoir installé : git, g++ (4.6 or higher) and cmake (3.0 or higher) g++ pas de clang, mais de homebrew.
 
 	# if mac, check if homebrew is installed. otherwise install homebrew.
@@ -186,6 +194,7 @@ def install_mmseqs():
     # make
     # make install
     # export PATH=$(pwd)/bin/:$PATH
+
 
 def install_barrnap():
     """
