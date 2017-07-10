@@ -48,6 +48,7 @@ build-from-prokka-user:
   only:
     - install
   script:
+    - echo $(genomeAPCAT -h)
     - python3 make --user
     - echo $(barrnap -h)
     - echo $(prokka -h)
