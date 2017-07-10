@@ -138,9 +138,9 @@ def install_all(install_dir, dev=False, user=False):
              "permission errors, try to add 'sudo' before your command line. If "
              "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
-    # if user:
-    #     gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
-    #     os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
+    if user:
+        gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
+        os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
 
 
 def check_dependencies():

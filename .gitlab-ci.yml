@@ -55,7 +55,7 @@ build-from-prokka-user:
     - ln -s $(pwd)/bin/genomeAPCAT /usr/local/bin
     - genomeAPCAT -h
     - ./make upgrade
-    - genomeAPCAT -h
+    - echo $(genomeAPCAT -h)
 
 unit-test-ubuntu16.04:
   stage: test
