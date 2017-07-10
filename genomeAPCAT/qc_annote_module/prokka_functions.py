@@ -18,11 +18,12 @@ import shlex
 import multiprocessing
 import sys
 import progressbar
+import threading
 
-logger = logging.getLogger()
+import genomeAPCAT.utils as utils
 
 
-def run_prokka_all(genomes, threads, force, prok_folder):
+def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     """
     for each genome in genomes, run prokka to annotate the genome.
 
@@ -37,16 +38,17 @@ def run_prokka_all(genomes, threads, force, prok_folder):
     Returns:
         final: {genome: boolean} -> with True if prokka ran well, False otherwise.
     """
-    logger.info("Annotating all genomes with prokka")
+    main_logger = logging.getLogger("qc_annote.prokka")
+    main_logger.info("Annotating all genomes with prokka")
     nbgen = len(genomes)
-    # Create progressbar
-    widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
-               progressbar.ETA()
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100,
-                                  redirect_stderr=True, redirect_stdout=True).start()
+    if not quiet:
+        # Create progressbar
+        widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
+                                      term_width=100).start()
     if threads <= 3:
         cores_prokka = threads
         pool_size = 1
@@ -59,21 +61,30 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         else:
             cores_prokka = 2
         pool_size = int(threads/cores_prokka)
-    # arguments : (gpath, cores_prokka, name, force, nbcont) for each genome
-    arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
-                  force, genomes[g][3])
-                 for g in sorted(genomes)]
     pool = multiprocessing.Pool(pool_size)
+    # Create a Queue to put logs from processes, and handle them after from a single thread
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    # arguments : (gpath, cores_prokka, name, force, nbcont, q) for each genome
+    arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
+                  force, genomes[g][3], q)
+                 for g in sorted(genomes)]
     try:
-        final = pool.map_async(run_prokka, arguments)
+        final = pool.map_async(run_prokka, arguments, chunksize=1)
         pool.close()
-        while(True):
-            if final.ready():
-                break
-            remaining = final._number_left
-            bar.update(nbgen - remaining)
-        bar.finish()
+        # Listen for logs in processes
+        lp = threading.Thread(target=utils.logger_thread, args=(q,))
+        lp.start()
+        if not quiet:
+            while(True):
+                if final.ready():
+                    break
+                remaining = final._number_left
+                bar.update(nbgen - remaining)
+            bar.finish()
         pool.join()
+        q.put(None)
+        lp.join()
         final = final.get()
     # If an error occurs, terminate pool and exit
     except Exception as excp:  # pragma: no cover
@@ -81,7 +92,6 @@ def run_prokka_all(genomes, threads, force, prok_folder):
         logger.error(excp)
         sys.exit(1)
     final = {genome: res for genome, res in zip(sorted(genomes), final)}
-    logger.debug(final)
     return final
 
 
@@ -101,17 +111,29 @@ def run_prokka(arguments):
         boolean. True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prok_folder, threads, name, force, nbcont = arguments
+    gpath, prok_folder, threads, name, force, nbcont, q = arguments
+    # Set logger for this process
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('run_prokka')
+    logger.log(utils.detail_lvl(), "Start annotating {} {}".format(name, gpath))
+    # Define prokka directory and logfile, and check their existence
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
     FNULL = open(os.devnull, 'w')
     prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
-        logging.warning(("Prokka results folder already exists. Prokka did not run again, "
-                         "formatting step used already generated results of Prokka in "
-                         "{}. If you want to re-run prokka, first remove this result folder, or "
-                         "use '-F' or '--force' option if you want to rerun prokka for "
-                         "all genomes.").format(prok_dir))
-        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
+        logger.warning(("Prokka results folder already exists. Prokka did not run again, "
+                        "formatting step used already generated results of Prokka in "
+                        "{}. If you want to re-run prokka, first remove this result folder, or "
+                        "use '-F' or '--force' option if you want to rerun prokka for "
+                        "all genomes.").format(prok_dir))
+        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+        if ok:
+            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
         return ok
     elif os.path.isdir(prok_dir) and force:
         shutil.rmtree(prok_dir)
@@ -121,16 +143,20 @@ def run_prokka(arguments):
     prokf = open(prok_logfile, "w")
     try:
         retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=prokf)
-        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont)
+        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
         prokf.close()
+        if ok:
+            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
         return ok
     except Exception as err:  # pragma: no cover
-        logging.error("Error while trying to run prokka: {}".format(err))
+        logger.error("Error while trying to run prokka: {}".format(err))
         prokf.close()
+        if ok:
+            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
         return False
 
 
-def check_prokka(outdir, logf, name, gpath, nbcont):
+def check_prokka(outdir, logf, name, gpath, nbcont, logger):
     """
     Prokka writes everything to stderr, and always returns a non-zero return code. So, we
     check if it ran well by checking the content of output directory.
@@ -185,7 +211,7 @@ def check_prokka(outdir, logf, name, gpath, nbcont):
                 logger.error(("{} {}: no matching number of proteins between tbl and faa; "
                               "faa={}; in tbl ={}").format(name, oriname, faaprot, tnbCDS))
                 problem = True
-            if tnbGene + tnbCRISPR != ffngene:
+            if tnbGene + tnbCRISPR != ffngene and tnbGene != ffngene:
                 logger.error(("{} {}: no matching number of genes between tbl and ffn; "
                         "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
                                                                    ffngene, tnbGene, tnbCRISPR))

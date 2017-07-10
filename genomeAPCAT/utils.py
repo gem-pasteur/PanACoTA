@@ -17,11 +17,17 @@ from logging.handlers import RotatingFileHandler
 import subprocess
 import shutil
 import shlex
+import progressbar
+try:
+    import cPickle as pickle
+except:
+    try:
+        import _pickle as pickle
+    except: # pragma: no cover
+        import pickle
 
-logger = logging.getLogger()
 
-
-def init_logger(logfile, level, name= None):
+def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -35,51 +41,94 @@ def init_logger(logfile, level, name= None):
 
     level: minimum level that must be considered.
     name: if we need to name the logger (used for tests)
+    verbose: be more verbose: 1 = add warnings in stderr (by default, only error),
+    2 = like 1 + add DETAIL to stdout (by default only INFO)
+    quiet: do not print anything to stderr/stdout
     """
+    import time
+    time_start = time.strftime("_%y-%m-%d_%H-%m-%S")
     # create logger
-    if name:
-        logger = logging.getLogger(name)
-    else:  # pragma: no cover
-        logger = logging.getLogger()
+    logger = logging.getLogger(name)
+
+
+    # Determine logfile names
+    logfile = logfile_base + ".log"
+    if os.path.isfile(logfile):
+        logfile = logfile_base + "-" + time_start + ".log"
+    errfile = logfile_base + ".log.err"
+    if os.path.isfile(errfile):
+        errfile = logfile_base + "-" + time_start + ".log.err"
+    detailfile = logfile_base + ".log.details"
+    if os.path.isfile(detailfile):
+        detailfile = logfile_base + "-" + time_start + ".log.details"
+
+    # Create a new logging level: details (between info and debug)
+    # Used to add details to the log file, but not to stdout, while still having
+    # the possibility to put debug messages, used only for development.
+    logging.addLevelName(detail_lvl(), "DETAIL")
+    logging.DETAIL = detail_lvl()
+    def details(self, message, *args, **kws):
+        if self.isEnabledFor(logging.DETAIL):
+            self._log(logging.DETAIL, message, args, **kws)
+    logging.Logger.details = details
+
     # set level of logger
     logger.setLevel(level)
+
     # create formatter for log messages: "timestamp :: level :: message"
-    formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
+    # :: %(name)s  to add the logger name
+    # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
+    my_format = '[%(asctime)s] %(name)s :: %(levelname)s :: %(message)s'
+    formatterFile = logging.Formatter(my_format,
                                       '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] :: %(message)s', '%Y-%m-%d %H:%M:%S')
+    formatterStream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
     # written to logfile. Then, logfile.1 is renamed to logfile.2, logfile to
     # logfile.1 etc. We allow maximum 5 log files.
-    open(logfile, "w").close()  # empty logfile if already existing
-    errfile = logfile + ".err"
-    open(errfile, "w").close()
-    logfile_handler = RotatingFileHandler(logfile, 'w', 1000000, 5)
+    # logfile contains everything from INFO level (INFO, WARNING, ERROR)
+    logfile_handler = RotatingFileHandler(logfile, 'w', 10000000, 5)
     # set level to the same as the logger level
-    logfile_handler.setLevel(level)
+    logfile_handler.setLevel(logging.INFO)
     logfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(logfile_handler)  # add handler to logger
 
-    # Create handler 2: errfile
-    errfile_handler = RotatingFileHandler(errfile, 'w', 1000000, 5)
+    # Create handler 2: errfile. Write only warnings and errors
+    errfile_handler = RotatingFileHandler(errfile, 'w', 10000000, 5)
     errfile_handler.setLevel(logging.WARNING)
     errfile_handler.setFormatter(formatterFile)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
-    # Create handler 3: write to stdout
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG)  # write any message
-    # don't write messages >= WARNING
-    stream_handler.addFilter(LessThanFilter(logging.WARNING))
-    stream_handler.setFormatter(formatterStream)
-    logger.addHandler(stream_handler)  # add handler to logger
+    # Create handler 3: detailsfile. Write everything to this file.
+    # Create it only if level is less than INFO. otherwise, it is the
+    # same file as .log
+    if level < logging.INFO:
+        detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
+        detfile_handler.setLevel(level)
+        detfile_handler.setFormatter(formatterFile)  # add formatter
+        logger.addHandler(detfile_handler)  # add handler to logger
 
-    # Create handler 4: write to stderr
-    err_handler = logging.StreamHandler(sys.stderr)
-    err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
-    err_handler.setFormatter(formatterStream)
-    logger.addHandler(err_handler)  # add handler to logger
+    # If not quiet, add handlers for stdout and stderr
+    if not quiet:
+        # Create handler 4: write to stdout
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)  # write any message
+        # don't write messages >= WARNING
+        stream_handler.addFilter(LessThanFilter(logging.WARNING))
+        if verbose < 2:
+            stream_handler.addFilter(NoLevelFilter(logging.DETAIL))
+        stream_handler.setFormatter(formatterStream)
+        logger.addHandler(stream_handler)  # add handler to logger
+
+        # Create handler 5: write to stderr
+        err_handler = logging.StreamHandler(sys.stderr)
+        if verbose > 0:
+            err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
+        else:
+            err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
+        err_handler.setFormatter(formatterStream)
+        logger.addHandler(err_handler)  # add handler to logger
 
 
 class LessThanFilter(logging.Filter):
@@ -97,6 +146,21 @@ class LessThanFilter(logging.Filter):
         return rec.levelno < self._level
 
 
+class NoLevelFilter(logging.Filter):
+    """
+    When using log, specify a given level that must not be taken into account by the handler.
+    This is used for the stdout handler. We want to print, by default,
+    DEBUG (for development use) and INFO levels, but not DETAILS level (which is between
+    DEBUG and INFO). We want to print DETAIL only if verbose option was set
+    """
+    def __init__(self, level):
+        self._level = level
+        logging.Filter.__init__(self)
+
+    def filter(self, rec):
+        return rec.levelno != self._level
+
+
 def check_installed(cmd):
     """
     Check if the command 'cmd' is in $PATH and can then be executed
@@ -110,6 +174,32 @@ def check_installed(cmd):
         if os.path.isfile(out.strip()):
             return True
     return False
+
+
+def run_cmd(cmd, error, eof=False, **kwargs):
+    """
+    Run the given command line. If the return code is not 0, print error message.
+    if eof (exit on fail) is True, exit program if error code is not 0.
+    """
+    logger = logging.getLogger("utils.run_cmd")
+    if not "stdout" in kwargs:
+        kwargs["stdout"] = None
+    if not "stderr" in kwargs:
+        kwargs["stderr"] = None
+    try:
+        retcode = subprocess.call(shlex.split(cmd), stdout=kwargs["stdout"],
+                                  stderr=kwargs["stderr"])
+    except OSError:
+        logger.error(error + ": " + "{} does not exist".format(cmd))
+        if eof:
+            sys.exit(-1)
+        else:
+            return -1
+    if retcode != 0:
+        logger.error(error)
+        if eof:
+            sys.exit(retcode)
+    return retcode
 
 
 def plot_distr(values, limit, outfile, title, text):
@@ -144,6 +234,7 @@ def plot_distr(values, limit, outfile, title, text):
              s=text + " " + str(limit), color="r", rotation=90)
     plt.title(title)
     plt.savefig(outfile)
+    plt.close("all")
 
 
 def write_warning_skipped(skipped, format=False):
@@ -156,7 +247,7 @@ def write_warning_skipped(skipped, format=False):
     format: if False, genomes were not skipped because of format step, but before that.
     if True, they were skipped because of format
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not format:
         logger.warning(("Prokka had problems while annotating some genomes, or did not "
@@ -186,13 +277,16 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     qc: if it is the file written after qc only, call it info-genomes-<list_file>.txt
     otherwise, call it discarded-<list_file>.txt
     """
+    logger = logging.getLogger("utils")
     _, name_lst = os.path.split(list_file)
     if not qc:
         outdisc = os.path.join(res_path,
                                "discarded-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+        logger.info("Writing discarded genomes to {}".format(outdisc))
     else:
         outdisc = os.path.join(res_path,
                                "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+        logger.info("Writting information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in genomes.items():
@@ -230,7 +324,22 @@ def sort_genomes(x):
     - species
     - in each species, by strain number
     """
-    return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
+    if isinstance(x, tuple):
+        return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
+    else:
+        return (x.split(".")[0], int(x.split(".")[-1]))
+
+
+def sort_proteins(x):
+    """
+    x = species.date.strain.contig_protnum
+
+    order by:
+    - species
+    - in each species, strain number
+    - in each species and strain number, by protein number
+    """
+    return (x.split(".")[0], int(x.split(".")[2]), int(x.split("_")[-1]))
 
 
 def read_genomes(list_file, name, date, dbpath):
@@ -243,7 +352,7 @@ def read_genomes(list_file, name, date, dbpath):
 
     genomes = {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger()
+    logger = logging.getLogger("utils")
     logger.info("Reading genomes")
     genomes = {}
     if not os.path.isfile(list_file):
@@ -306,6 +415,7 @@ def read_info(name_inf, name, date, genomes_inf):
 
     Return name and date.
     """
+    logger = logging.getLogger("utils")
     name_inf = name_inf.strip().split(".")
     # if only species provided
     if len(name_inf) == 1:
@@ -348,16 +458,28 @@ def read_info(name_inf, name, date, genomes_inf):
     return cur_name, cur_date
 
 
-def cat(list_files, output):
+def cat(list_files, output, title = None):
     """
     Concatenate all files in 'list_files' and save result in 'output'
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
     """
+    if title:
+        nbfiles = len(list_files)
+        widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+               ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
+               progressbar.Percentage(), ") - ", progressbar.Timer()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
+        curnum = 1
     with open(output, "w") as outf:
         for file in list_files:
+            if title:
+                bar.update(curnum)
+                curnum += 1
             with open(file, "r") as inf:
                 shutil.copyfileobj(inf, outf)
+    if title:
+        bar.finish()
 
 
 def check_format(info):
@@ -378,6 +500,7 @@ def check_out_dirs(resdir):
     - resdir/Proteins
     - resdir/Replicons
     """
+    logger = logging.getLogger("utils")
     if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")) != []:
         logger.error("ERROR: Your output directory already has .lst files in the "
                      "LSTINFO folder. Provide another result directory, or remove the "
@@ -398,3 +521,66 @@ def check_out_dirs(resdir):
                      "Replicons folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
+
+
+def rename_genome_contigs(gembase_name, gpath, outfile):
+    """
+    For the given genome (sequence in gpath), rename all its contigs
+    with the new name: 'gembase_name', and save the output sequence in outfile
+    """
+    contig_num = 1
+    with open(gpath, "r") as gpf, open(outfile, "w") as grf:
+        for line in gpf:
+            if line.startswith(">"):
+                new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
+                contig_num += 1
+                grf.write(new_cont + "\n")
+            else:
+                grf.write(line)
+
+
+def logger_thread(q):
+    """
+    Queue listener used in a thread to handle the logs put to a QueueHandler
+    by several processes (multiprocessing.pool.map_async for example)
+    """
+    logger = logging.getLogger("utils")
+    while True:
+        record = q.get()
+        if record is None:
+            break
+        logger = logging.getLogger(record.name)
+        logger.handle(record)
+
+def detail_lvl():
+    """
+    Returns the int level corresponding to "DETAIL"
+    """
+    return 15
+
+
+def save_bin(objects, fileout):
+    """
+    Save python 'objects' in a binary file called 'fileout'
+    """
+    with open(fileout, "wb") as binf:
+        pickle.dump(objects, binf)
+
+
+def load_bin(binfile):
+    """
+    Unpickle python objects from the binary file 'binfile'
+    """
+    with open(binfile, "rb") as binf:
+        objects = pickle.load(binf)
+    return objects
+
+
+def write_list(liste):
+    """
+    Return a string corresponding to the given liste, with all elements separated
+    by a space. Used to write a list into a file
+    Ex: [1, 2, "toto"] -> "1 2 toto"
+    """
+    list_write = [str(l) for l in liste]
+    return " ".join(list_write) + "\n"

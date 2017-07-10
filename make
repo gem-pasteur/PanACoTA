@@ -134,7 +134,7 @@ def check_dependencies():
     - check that pip3 is available
     """
     to_install = []
-    if target == "install":
+    if target == "install" or target == "develop":
         if not cmd_exists("prokka"):
             if not cmd_exists("barrnap"):
                 if not cmd_exists("wget"):
@@ -155,7 +155,24 @@ def check_dependencies():
             sys.exit(1)
     return to_install
 
+def install_mmseqs():
+	"""
 
+	"""
+	pass 
+	# avoir installé : git, g++ (4.6 or higher) and cmake (3.0 or higher) g++ pas de clang, mais de homebrew.
+
+	# if mac, check if homebrew is installed. otherwise install homebrew. 
+	# check if g++ is installed with homebrew. otherwise install it.
+	# git clone https://github.com/soedinglab/MMseqs2.git
+    # cd MMseqs2
+    # mkdir build
+    # cd build
+    # cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. ..
+    # make
+    # make install 
+    # export PATH=$(pwd)/bin/:$PATH
+ 
 def install_barrnap():
     """
     Install barrnap, the RNA predictor used by prokka

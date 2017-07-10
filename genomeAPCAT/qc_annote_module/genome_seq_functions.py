@@ -20,10 +20,10 @@ import progressbar
 from genomeAPCAT import utils
 
 
-logger = logging.getLogger()
+logger = logging.getLogger("qc_annote.gseq")
 
 
-def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, quiet=False):
     """
     genomes: {genome: spegenus.date}
     dbpath: path to folder containing genomes
@@ -40,26 +40,28 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn):
                      "and then, calculating genome size, number of contigs and L90.").format(nbn))
     else:
         logger.info("Calculating genome size, number of contigs, L90")
-
-    # Create progressbar
-    widgets = ['Analysis: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
-               progressbar.ETA()
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
-    curnum = 1
+    if not quiet:
+        # Create progressbar
+        widgets = ['Analysis: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
+                   progressbar.ETA()
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        curnum = 1
     toremove = []
     for genome, name in genomes.items():
-        bar.update(curnum)
-        curnum += 1
+        if not quiet:
+            bar.update(curnum)
+            curnum += 1
         res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
         if not res:
             toremove.append(genome)
     if toremove:
         for gen in toremove:
             del genomes[gen]
-    bar.finish()
+    if not quiet:
+        bar.finish()
 
 
 def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
@@ -80,20 +82,24 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
     gpath = os.path.join(dbpath, genome)
     if cut:
         grespath = os.path.join(tmp_path, genome + "-split{}N.fna".format(len(pat) - 1))
-        gresf = open(grespath, "w")
     else:
-        grespath = gpath
-    with open(gpath, 'r') as genf:
+        grespath = os.path.join(tmp_path, genome + "-short-contig.fna")
+    with open(gpath, 'r') as genf, open(grespath, "w") as gresf:
         contig_sizes = {}  # {contig_name: size}
         cur_contig_name = ""
         cur_contig = ""
+        num = 0
         for line in genf:
             if line.startswith(">"):
                 # If it is not the first contig, find stretch(es) of N in previous contig
                 if cur_contig != "":
                     if cut:
-                        save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
+                        num = save_contig(pat, cur_contig, cur_contig_name,
+                                          contig_sizes, gresf, num)
                     else:
+                        gresf.write(">" + cur_contig_name[:15] + "_" + str(num) + "\n")
+                        gresf.write(cur_contig + "\n")
+                        num += 1
                         contig_sizes[cur_contig_name] = len(cur_contig)
                 cur_contig_name = "_".join(line.strip().split())
                 cur_contig = ""
@@ -101,23 +107,26 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes):
                 cur_contig += line.strip().upper()
         if cur_contig != "":
             if cut:
-                save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf)
+                num = save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf, num)
             else:
+                gresf.write(">" + cur_contig_name[:15] + "_" + str(num) + "\n")
+                gresf.write(cur_contig + "\n")
                 contig_sizes[cur_contig_name] = len(cur_contig)
-        nbcont = len(contig_sizes)
-        gsize = sum(contig_sizes.values())
-        l90 = calc_l90(contig_sizes)
-        if not l90:
-            logger.error("Problem with genome {}. Not possible to get L90".format(genome))
-            return False
-        else:
-            genomes[genome] += [grespath, gsize, nbcont, l90]
-        return True
+    nbcont = len(contig_sizes)
+    gsize = sum(contig_sizes.values())
+    l90 = calc_l90(contig_sizes)
+    if not l90:
+        logger.error("Problem with genome {}. Not possible to get L90".format(genome))
+        return False
+    else:
+        genomes[genome] += [grespath, gsize, nbcont, l90]
+    return True
 
 
-def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
+def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf, num):
     """
     Save the contig read just before into dicts and write it to sequence file.
+    Contig name must be at most 20 characters (required by prokka)
 
     pat: pattern to split a contig
     cur_contig: sequence of current contig, to save once split according to pat
@@ -128,17 +137,17 @@ def save_contig(pat, cur_contig, cur_contig_name, contig_sizes, gresf):
     # split contig each time a stretch of at least nbn 'N' is found
     cont_parts = re.split(pat, cur_contig)
     # save contig parts
-    num = 0  # contig number
     for seq in cont_parts:
         # Only save non empty contigs (with some patterns, it could arrive that
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        cur_name = cur_contig_name + "_" + str(num)
+        num += 1
+        cur_name = cur_contig_name[:15] + "_" + str(num)
         contig_sizes[cur_name] = len(seq)
         gresf.write(cur_name + "\n")
         gresf.write(seq + "\n")
-        num += 1
+    return num
 
 
 def calc_l90(contig_sizes):
@@ -160,8 +169,9 @@ def rename_all_genomes(genomes, tmp_path):
     For each genome, assign a strain number, and rename all its contigs.
 
     genomes: {genome: [name, path, gsize, nbcont, L90]} ->
-    {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
+    genomes: {genome: [gembase_name, path, gsize, nbcont, L90]}
     """
+    logger.info("Renaming kept genomes according to their quality.")
     last_name = ""
     last_strain = 0
     #"SAEN.1015.{}".format(str(last_strain).zfill(5))
@@ -174,24 +184,6 @@ def rename_all_genomes(genomes, tmp_path):
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
         outfile = os.path.join(tmp_path, os.path.basename(gpath) + "-gembase.fna")
-        rename_genome_contigs(gembase_name, gpath, outfile)
-        genomes[genome][1] = outfile
-
-
-def rename_genome_contigs(gembase_name, gpath, outfile):
-    """
-    For the given genome (sequence in gpath), rename all its contigs
-    with the new name: 'gembase_name', and save the output sequence in outfile
-    """
-    contig_num = 1
-    with open(gpath, "r") as gpf, open(outfile, "w") as grf:
-        for line in gpf:
-            if line.startswith(">"):
-                new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                contig_num += 1
-                grf.write(new_cont + "\n")
-            else:
-                grf.write(line)
 
 
 def sort_genomes(x):
@@ -212,6 +204,7 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     l90: max value of l90 allowed
     nbconts: max value of nb contigs allowed
     """
+    logger.info("Generating distribution of L90 and #contigs graphs.")
     L90_vals = [val for _, (_, _, _, _, val) in genomes.items()]
     outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
     nbcont_vals = [val for _, (_, _, _, val, _) in genomes.items()]

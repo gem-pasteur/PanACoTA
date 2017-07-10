@@ -9,116 +9,7 @@ import genomeAPCAT.utils as utils
 import pytest
 import os
 import shutil
-import logging
-import test.test_unit.util_tests as util_tests
-
-
-def test_logger_default(capsys):
-    """
-    Test that logger is initialized as expected.
-    """
-    logfile = "logfile_test.txt"
-    level = logging.DEBUG
-    utils.init_logger(logfile, level, "default")
-    logger = logging.getLogger("default")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert "info debug\n" in out
-    assert "info info\n" in out
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: DEBUG :: info debug\n")
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_info(capsys):
-    """
-    Test that when logger is initialized with "INFO" level, it does not return DEBUG info.
-    """
-    logfile = "logfile_test.txt"
-    level = logging.INFO
-    utils.init_logger(logfile, level, "info")
-    logger = logging.getLogger("info")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert "info info\n" in out
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: INFO :: info info\n")
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_warning(capsys):
-    """
-    Test that when logger is initialized with "WARNING" level, it does not return
-    anything in stdout, as DEBUG and INFO are not returned.
-    """
-    logfile = "logfile_test.txt"
-    level = logging.WARNING
-    utils.init_logger(logfile, level, "warn")
-    logger = logging.getLogger("warn")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out == ""
-    assert "info warning\n" in err
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: WARNING :: info warning\n")
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
-
-
-def test_logger_critical(capsys):
-    """
-    Test that when logger is initialized with "CRITICAL" level, it only returns
-    CRITICAL information.
-
-    """
-    logfile = "logfile_test.txt"
-    level = logging.CRITICAL
-    utils.init_logger(logfile, level, "crit")
-    logger = logging.getLogger("crit")
-    logger.debug("info debug")
-    logger.info("info info")
-    logger.warning("info warning")
-    logger.critical("info critical")
-    out, err = capsys.readouterr()
-    assert out == ""
-    assert "info critical\n" in err
-    with open(logfile, "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    with open(logfile + ".err", "r") as logf:
-        assert logf.readline().endswith("] :: CRITICAL :: info critical\n")
-    os.remove(logfile)
-    os.remove(logfile + ".err")
+import test.test_unit.utilities_for_tests as util_tests
 
 
 def test_check_install():
@@ -128,31 +19,12 @@ def test_check_install():
     assert utils.check_installed("prokka")
 
 
-
 def test_check_install_error():
     """
     Try to run a command which does not exist, and check that it closes the program
     with exit code 1
     """
     assert not utils.check_installed("plop false command...")
-
-
-def test_class_filter():
-    """
-    Check that for a class LessThanFilter(warning), info and debug are allowed,
-    but warning, error and critical are not.
-    """
-    a = utils.LessThanFilter(logging.WARNING)
-    record = logging.LogRecord("root", logging.DEBUG, "path", 10, "message", "args", "exc_info")
-    assert a.filter(record)
-    record = logging.LogRecord("root", logging.INFO, "path", 10, "message", "args", "exc_info")
-    assert a.filter(record)
-    record = logging.LogRecord("root", logging.WARNING, "path", 10, "message", "args", "exc_info")
-    assert not a.filter(record)
-    record = logging.LogRecord("root", logging.ERROR, "path", 10, "message", "args", "exc_info")
-    assert not a.filter(record)
-    record = logging.LogRecord("root", logging.CRITICAL, "path", 10, "message", "args", "exc_info")
-    assert not a.filter(record)
 
 
 def test_plot_dist():
@@ -177,6 +49,8 @@ def test_skipped_prokka(capsys):
     Test that when the list of skipped genomes (because of prokka run) is not empty,
     it writes the right message.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     skipped = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped)
     out, err = capsys.readouterr()
@@ -190,6 +64,9 @@ def test_skipped_prokka(capsys):
             "gene found):") in err
     assert ("\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err or
             "\n\t- toto\n\t- genome\n\t- genome2" in err)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_skipped_format(capsys):
@@ -197,6 +74,8 @@ def test_skipped_format(capsys):
     Test that when the list of skipped genomes (format step could not run) is not empty,
     it writes the right message.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     skipped_format = ["toto", "genome", "genome2"]
     utils.write_warning_skipped(skipped_format, format=True)
     out, err = capsys.readouterr()
@@ -205,6 +84,9 @@ def test_skipped_format(capsys):
             "files to get more information about why they could not be ") in err
     assert ("formatted.\n\t- toto\n\t- genome\n\t- genome2\n" in err or
             "formatted.\\n\\t- toto\\n\\t- genome\\n\\t- genome2" in err)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_write_discarded():
@@ -399,18 +281,24 @@ def test_read_genomes_ok(capsys):
     Test that when the list file contains genomes existing, it returns the expected list
     of genomes
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
     list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
     genomes = utils.read_genomes(list_file, name, date, dbpath)
-    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+    exp = {"A_H738.fasta": ["ESCO.0417"],
+           "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
            "genome5.fasta": ["TOTO.0114"]}
     assert exp == genomes
     _, err = capsys.readouterr()
     assert "genome.fst genome file does not exist. It will be ignored." in err
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_read_genomes_errors(capsys):
@@ -418,12 +306,14 @@ def test_read_genomes_errors(capsys):
     Test that when the list file contains errors in name and date provided,
     it returns the expected errors, and the expected genome list.
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
     list_file = os.path.join("test", "data", "test_files", "list_genomes-errors.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath)
-    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-gembase.fna": ["ESCO.0417"],
+    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["ESCO.0417"],
            "genome5.fasta": ["ESCO.0417"]}
@@ -433,7 +323,7 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default name (ESCO) and date (0417) will "
             "be used.") in err
-    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-gembase.fna. Only put "
+    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-short-contig.fna. Only put "
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default name (ESCO) will "
             "be used.") in err
@@ -459,6 +349,9 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default date (0417) will "
             "be used.") in err
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_read_genomes_multi_files(capsys):
@@ -467,6 +360,8 @@ def test_read_genomes_multi_files(capsys):
     it returns the expected genome list, the expected errors (when some genome
     files do not exist) and the expected concatenated files.
     """
+    logfile_base = "test_utils"
+    utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join("test", "data", "genomes")
@@ -503,6 +398,9 @@ def test_read_genomes_multi_files(capsys):
             assert line_out == line_exp
     os.remove(concat1)
     os.remove(concat2)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_check_resdirLst(capsys):
@@ -597,3 +495,126 @@ def test_check_resdirNoDir():
     utils.check_out_dirs("totoresdir")
 
 
+def test_run_cmd_error_noQuit(capsys):
+    """
+    Test that when we try to run a command which does not exist, it returns an error message,
+    but does not exit the program (eof=False).
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    assert utils.run_cmd(cmd, error) == -1
+    out, err = capsys.readouterr()
+    assert ("error trying to run toto: toto does not exist") in err
+
+
+def test_run_cmd_error_Quit(capsys):
+    """
+    Test that when we try to run a command which does not exist, it returns an error message,
+    and exits the program (eof=True)
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    with pytest.raises(SystemExit):
+        utils.run_cmd(cmd, error, eof=True)
+    out, err = capsys.readouterr()
+    assert ("error trying to run toto: toto does not exist") in err
+
+
+def test_run_cmd_retcode_non0(capsys):
+    """
+    Test that when the command fails, it returns a non-zero int, writes an error message,
+    but does not quit the program (eof=False by default).
+    """
+    cmd = "prodigal -u"
+    error = "error trying to run prodigal"
+    assert utils.run_cmd(cmd, error) != 0
+    _, err = capsys.readouterr()
+    assert error in err
+
+
+def test_run_cmd_retcode_non0_quit(capsys):
+    """
+    Test that when the command fails, it returns a non-zero int, writes an error message,
+    and exits the program (eof=True).
+    """
+    cmd = "prodigal -u"
+    error = "error trying to run prodigal"
+    with pytest.raises(SystemExit):
+        utils.run_cmd(cmd, error, eof=True)
+    _, err = capsys.readouterr()
+    assert error in err
+
+
+def test_run_cmd_error_stderrFile():
+    """
+    Test that when we try to run a command which does not exist, and direct its output to
+    a file instead of stderr, we have the expected error written in the given error file.
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    outfile = open(os.path.join("test", "data", "stderr_run_cmd.txt"), "w")
+    assert utils.run_cmd(cmd, error, stderr=outfile) == -1
+    outfile.close()
+    os.remove(os.path.join("test", "data", "stderr_run_cmd.txt"))
+
+
+def test_rename_contigs():
+    """
+    From a given sequence, rename all its contigs with the given gembase name + a number,
+    and save the output sequence to the given res_path.
+    Check that the output file is as expected.
+    """
+    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    gembase_name = "ESCO.0216.00005"
+    res_path = os.path.join("test", "data")
+    outfile = os.path.join(res_path, "H299_H561.fasta-short-contig.fna")
+    exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
+    utils.rename_genome_contigs(gembase_name, gpath, outfile)
+    with open(exp_file, "r") as expf, open(outfile, "r") as of:
+        for line_exp, line_seq in zip(expf, of):
+            assert line_exp == line_seq
+    os.remove(outfile)
+
+
+def test_cat_nobar(capsys):
+    """
+    Check that when cat is called on a list of several files, the output file
+    contains what is expected (concatenation of content of all input files)
+    """
+    import glob
+    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    outfile = "test_catfile.txt"
+    utils.cat(list_files, outfile)
+    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
+        lines_exp = expf.readlines()
+        lines_out = outf.readlines()
+    assert set(lines_exp) == set(lines_out)
+    _, err = capsys.readouterr()
+    assert "/{} (".format(len(list_files)) not in err
+    os.remove(outfile)
+
+
+def test_cat_bar():
+    """
+    Check that when cat is called on a list of several files, the output file
+    contains what is expected (concatenation of content of all input files)
+    """
+    import glob
+    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    outfile = "test_catfile.txt"
+    title = "test cat progressbar"
+    utils.cat(list_files, outfile, title=title)
+    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
+        lines_exp = expf.readlines()
+        lines_out = outf.readlines()
+    assert set(lines_exp) == set(lines_out)
+    os.remove(outfile)
+
+
+def test_detail():
+    """
+    Check value returned for detail level
+    """
+    assert utils.detail_lvl() == 15

@@ -21,15 +21,15 @@ April 2017
 import os
 import shutil
 import logging
+import logging.handlers
 import progressbar
 import glob
 import multiprocessing
-from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
+import threading
+import genomeAPCAT.utils as utils
 
-logger = logging.getLogger()
 
-
-def format_genomes(genomes, results, res_path, prok_path, threads=1):
+def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False):
     """
     For all genomes which were annotated by prokka, reformat them
     in order to have, in 'res_path', the following folders:
@@ -44,7 +44,8 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     - prok_path = path to folder named "<genome_name>-prokkaRes" where all prokka
     results are saved.
     """
-    logger.info("Formatting all genomes")
+    main_logger = logging.getLogger("qc_annote.ffunc")
+    main_logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
     prot_dir = os.path.join(res_path, "Proteins")
     gene_dir = os.path.join(res_path, "Genes")
@@ -55,25 +56,35 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1):
     os.makedirs(rep_dir, exist_ok=True)
 
     nbgen = len(genomes)
+    if not quiet:
     # Create progressbar
-    widgets = ['Formatting genomes: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ")"]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        widgets = ['Formatting genomes: ',
+                   progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ") - ", progressbar.Timer()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+    # Create a Queue to put logs from processes, and handle them after from a single thread
+    m = multiprocessing.Manager()
+    q = m.Queue()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
-    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results)
+    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
     pool = multiprocessing.Pool(threads)
-    final = pool.map_async(handle_genome, params)
+    final = pool.map_async(handle_genome, params, chunksize=1)
     pool.close()
-    while(True):
-        if final.ready():
-            break
-        remaining = final._number_left
-        bar.update(nbgen - remaining)
-    bar.finish()
+    lp = threading.Thread(target=utils.logger_thread, args=(q,))
+    lp.start()
+    if not quiet:
+        while(True):
+            if final.ready():
+                break
+            remaining = final._number_left
+            bar.update(nbgen - remaining)
+        bar.finish()
     pool.join()
+    q.put(None)
+    lp.join()
     res = final.get()
     for output in res:
         if output[0] == "bad_prokka":
@@ -89,17 +100,27 @@ def handle_genome(args):
     problems (result = True). In that case, format the genome and get the output to
     see if everything went ok.
     """
-    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results = args
+    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q = args
+    # Set logger for this process
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('format.handle_genome')
+    # Handle genome
     if genome not in results:
         return ("no_res", genome)
     # if prokka did not run well for a genome, don't format it
     if not results[genome]:
         return ("bad_prokka", genome)
-    ok_format = format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir)
+    ok_format = format_one_genome(gpath, name, prok_path, lst_dir,
+                                  prot_dir, gene_dir, rep_dir, logger)
     return (ok_format, genome)
 
 
-def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir):
+def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, logger):
     """
     Format the given genome, and create its corresponding files in the following folders:
     - Proteins
@@ -130,7 +151,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # create Genes file (and check no problem occurred with return code)
     ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
     gengenome = os.path.join(gene_dir, name + ".gen")
-    ok_gene = create_gen(ffngenome, lstgenome, gengenome)
+    ok_gene = create_gen(ffngenome, lstgenome, gengenome, logger)
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
     if not ok_gene:
@@ -139,7 +160,8 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # If gene file was created, create Proteins file
     faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
     prtgenome = os.path.join(prot_dir, name + ".prt")
-    ok_prt = create_prt(faagenome, lstgenome, prtgenome)
+    ok_prt = create_prt(faagenome, lstgenome, prtgenome, logger)
+
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
         os.remove(lstgenome)
@@ -153,11 +175,11 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
         shutil.copyfile(gpath, rep_file)
     # otherwise, change headers in the file.
     else:
-        gfunc.rename_genome_contigs(name, gpath, rep_file)
+        utils.rename_genome_contigs(name, gpath, rep_file)
     return True
 
 
-def create_gen(ffnseq, lstfile, genseq):
+def create_gen(ffnseq, lstfile, genseq, logger):
     """
     Generate .gen file, from sequences contained in .ffn, but changing the
     headers using the information in .lst
@@ -174,50 +196,57 @@ def create_gen(ffnseq, lstfile, genseq):
             if not line_ffn.startswith(">"):
                 gen.write(line_ffn)
                 continue
-            # if lstline indicates a CRISPR, header in ffn file is the genome name. Hence,
-            # it should not contain a '_' followed by a number.
             lstline = lst.readline().strip()
-            if "CRISPR" in lstline:
-                if '_' in line_ffn:
-                    if line_ffn.strip().split("_")[-1].isdigit():
-                        logger.error("According to lstinfo file, gene {} should be a CRISPR. "
-                                     "However, its name has the same format as a gene name (not "
-                                     "CRISPR). Format function will stop here, and gen file will "
-                                     "not be created for {}.".format(line_ffn.strip(), ffnseq))
+            # Try to get gene ID. If does not work, look if it is a CRISPR in lstinfo
+            test_genID = line_ffn.split()[0].split("_")[-1]
+            if not test_genID.isdigit():
+                # If it is a CRISPR in lstline, and header of ffn does not have a gene format,
+                # then ffn contains the CRISPR sequence
+                if lstline.strip().split()[3] == "CRISPR":
+                    crisprIDlst = int(lstline.split("\t")[4].split("_CRISPR")[-1])
+                    print(lstline, crisprIDlst)
+                    if (crisprID == crisprIDlst):
+                        write_header(lstline, gen)
+                        crisprID += 1
+                    else:
+                        logger.error(("Problem with CRISPR numbers in {}. CRISPR {} in ffn is "
+                                      "CRISPR num {}, whereas it is annotated as CRISPR num {} "
+                                      "in lst file.").format(lstfile, line_ffn.strip(), crisprID,
+                                                             crisprIDlst))
                         problem = True
                         break
-                # check crispr ID is the same as in the current lst line
-                crisprIDlst = int(lstline.split("\t")[4].split("_CRISPR")[1])
-                if (crisprID == crisprIDlst):
-                    write_header(lstline, gen)
-                    crisprID += 1
+                # It is not a CRISPR in lstline, and header of ffn does not have a gene format:
+                # problem
                 else:
-                    logger.error(("Problem with CRISPR numbers in {}. CRISPR {} in ffn is "
-                                  "CRISPR num {}, which is not found at this place in "
-                                  "lstinfo file.").format(lstfile, line_ffn.strip(), crisprID))
+                    logger.error(("Unknown header format {} in {}."
+                                  "\nGen file will not be "
+                                  "created.").format(line_ffn.strip(), ffnseq))
                     problem = True
                     break
+            # If ffn contains a gene header, find its information in lst file
             else:
-                # get geneID of this header, and the next line of the lst file
-                try:
-                    genID = int(line_ffn.split()[0].split("_")[-1])
-                except Exception as err:
-                    logger.error(("Unknown header format {} in {}. "
-                               "Error: {}\nGen file will not be "
-                               "created.").format(line_ffn.strip(), ffnseq, err))
-                    problem = True
-                    break
-                try:
-                    genIDlst = int(lstline.split("\t")[4].split("_")[-1])
-                except Exception as err:
-                    logger.error(("Unknown gene format {} in {}. "
-                               "Error: {}\nGen file will not be "
-                               "created.").format(lstline.strip(), lstfile, err))
-                    problem = True
-                    break
-                # check that genID is the same as the lst line
+                genID = int(test_genID)
+                # genID exists, ffn header is for a gene. Check that it corresponds to
+                # information in lst file.
+                IDlst = lstline.split("\t")[4].split("_")[-1]
+                # if line in lst corresponds to a gene -> get gene ID.
+                # Otherwise, genID = 0 (CRISPR line in lst)
+                if(IDlst.isdigit()):
+                    genIDlst = int(IDlst)
+                else:
+                    genIDlst = 0
+                # in lst, find the same gene ID as in ffn
+                # as they are ordered by increasing number, stop if ffn ID is higher than lst ID
+                while (genID > genIDlst):
+                    lstline = lst.readline().strip()
+                    IDlst = lstline.split("\t")[4].split("_")[-1]
+                    # don't cast to int if info for a crispr
+                    if(IDlst.isdigit()):
+                        genIDlst = int(IDlst)
+                # If it found the same gene ID, write info in gene file
                 if (genID == genIDlst):
                     write_header(lstline.strip(), gen)
+                # If gene ID of ffn not found, write error message and stop
                 else:
                     logger.error("Missing info for gene {} in {}. If it is actually present "
                                  "in the lst file, check that genes are ordered by increasing "
@@ -230,7 +259,7 @@ def create_gen(ffnseq, lstfile, genseq):
     return not problem
 
 
-def create_prt(faaseq, lstfile, prtseq):
+def create_prt(faaseq, lstfile, prtseq, logger):
     """
     Generate .prt file, from sequences in .faa, but changing the headers
     using information in .lst

@@ -8,8 +8,27 @@ Unit tests for utils.py
 import pytest
 import os
 import shutil
+import logging
 import glob
 import genomeAPCAT.qc_annote_module.prokka_functions as pfunc
+import genomeAPCAT.utils as utils
+
+
+@pytest.fixture(scope="function")
+def logger():
+    """
+    logger given to function called by a subprocess
+    """
+    import multiprocessing
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    return q, logging.getLogger('process')
 
 
 def test_count_tbl():
@@ -35,7 +54,7 @@ def test_count_headers():
     assert nb == 5
 
 
-def test_check_prokka_no_outdir(capsys):
+def test_check_prokka_no_outdir(logger):
     """
     Test that prokka returns the right error message when output directory does not exist
     """
@@ -44,12 +63,14 @@ def test_check_prokka_no_outdir(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "Prokka could not run properly. Look at prokka.log for more information.\n"
+    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
+    q = logger[0]
+    assert q.qsize() == 1
+    msg = "Prokka could not run properly. Look at prokka.log for more information."
+    assert q.get().message == msg
 
 
-def test_check_prokka_notbl(capsys):
+def test_check_prokka_notbl(logger):
     """
     Check that check_prokka returns false when a tbl file is missing, and an error message
     """
@@ -65,13 +86,15 @@ def test_check_prokka_notbl(capsys):
                     os.path.join(out_dir, name + ".ffn"))
     logf = "prokka.log"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-misstbl original_name-error.fna: no .tbl file\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-misstbl original_name-error.fna: no .tbl file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_sevtbl(capsys):
+def test_check_prokka_sevtbl(logger):
     """
     Check that check_prokka returns false when there is more than 1 tbl file,
     and an error message
@@ -92,13 +115,15 @@ def test_check_prokka_sevtbl(capsys):
                     os.path.join(out_dir, name + "2.tbl"))
     logf = "prokka.log"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-misstbl original_name-error.fna: several .tbl files\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-misstbl original_name-error.fna: several .tbl files"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_nofaa(capsys):
+def test_check_prokka_nofaa(logger):
     """
     Check that check_prokka returns false when a faa file is missing, and an error message
     """
@@ -114,13 +139,15 @@ def test_check_prokka_nofaa(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-missfaa original_name.fna: no .faa file\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missfaa original_name.fna: no .faa file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_sevfaa(capsys):
+def test_check_prokka_sevfaa(logger):
     """
     Check that check_prokka returns false when there is more than 1 faa file,
     and an error message
@@ -141,13 +168,15 @@ def test_check_prokka_sevfaa(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-missfaa original_name.fna: several .faa files\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missfaa original_name.fna: several .faa files"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_noffn(capsys):
+def test_check_prokka_noffn(logger):
     """
     Check that check_prokka returns false when a ffn file is missing, and an error message
     """
@@ -163,13 +192,15 @@ def test_check_prokka_noffn(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-missffn original_name.fna: no .ffn file\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missffn original_name.fna: no .ffn file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_sevffn(capsys):
+def test_check_prokka_sevffn(logger):
     """
     Check that check_prokka returns false when there is more than 1 ffn file,
     and an error message
@@ -190,13 +221,15 @@ def test_check_prokka_sevffn(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == "prokka_out_for_test-missffn original_name.fna: several .ffn files\n"
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missffn original_name.fna: several .ffn files"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_wrong_cont(capsys):
+def test_check_prokka_wrong_cont(logger):
     """
     Check that check_prokka returns an error message when the number of contigs in tbl
     file is not as expected
@@ -206,13 +239,15 @@ def test_check_prokka_wrong_cont(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 10
-    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == ("prokka_out_for_test original_name.fna: no matching number of contigs; "
-                   "nbcontig=10; in tbl =7\n")
+    assert not pfunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
+    msg = ("prokka_out_for_test original_name.fna: no matching number of contigs; "
+           "nbcontig=10; in tbl =7")
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
 
 
-def test_check_prokka_wrong_tblCDS(capsys):
+def test_check_prokka_wrong_tblCDS(logger):
     """
     Check that check_prokka returns an error message when the number of CDS in tbl
     file is different from the number of headers in faa file
@@ -231,25 +266,28 @@ def test_check_prokka_wrong_tblCDS(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err.split("\n")[0] == ("prokka_out_for_test-wrongCDS original_name.fna: "
-                                  "no matching number of proteins between tbl and faa; "
-                                  "faa=13; in tbl =12")
-    assert err.split("\n")[1] == ("prokka_out_for_test-wrongCDS original_name.fna: "
-                                  "no matching number of genes between tbl and ffn; "
-                                  "ffn=17; in tbl =14genes 2CRISPR")
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg1 = ("prokka_out_for_test-wrongCDS original_name.fna: "
+            "no matching number of proteins between tbl and faa; "
+            "faa=13; in tbl =12")
+    msg2 = ("prokka_out_for_test-wrongCDS original_name.fna: "
+            "no matching number of genes between tbl and ffn; "
+            "ffn=17; in tbl =14genes 2CRISPR")
+    q = logger[0]
+    assert q.qsize() == 2
+    assert q.get().message == msg1
+    assert q.get().message == msg2
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_wrong_tblCRISPR(capsys):
+def test_check_prokka_wrong_tblCRISPR(logger):
     """
     Check that check_prokka returns an error message when the number of headers in ffn
     file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
     """
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "res_checlProkkaWrongCRISPR")
+    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPR")
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongtblCRISP"
     tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
@@ -261,15 +299,42 @@ def test_check_prokka_wrong_tblCRISPR(capsys):
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont)
-    _, err = capsys.readouterr()
-    assert err == ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
-                   "no matching number of genes between tbl and ffn; "
-                   "ffn=17; in tbl =15genes 1CRISPR\n")
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
+           "no matching number of genes between tbl and ffn; "
+           "ffn=17; in tbl =15genes 1CRISPR")
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_ok():
+def test_check_prokka_tblCRISPR_newversion(logger):
+    """
+    Check that check_prokka does not return an error message when the number of headers in ffn
+    file is equal to the number of CDS in tbl file (1CRISPR in tbl, 0 in ffn), but
+    does not contain the CRISPRs found in tbl
+    As the new version of prokka (1.12) does not put crisprs in .ffn
+    """
+    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPRnewversion")
+    os.makedirs(out_dir)
+    name = "prokka_out_for_test-wrongtblCRISPnewversion"
+    ffnfile = os.path.join("test", "data", "test_files", name + ".ffn")
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    shutil.rmtree(out_dir)
+
+
+def test_check_prokka_ok(logger):
     """
     Check that everything is ok with prokka results (tbl, faa and ffn files exist,
     and number of CDS, CRISPR and genes correspond between them)
@@ -279,37 +344,37 @@ def test_check_prokka_ok():
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
-    assert pfunc.check_prokka(outdir, logf, name, gpath, nbcont)
+    assert pfunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
 
 
-def test_run_prokka_out_exists_ok(capsys):
+def test_run_prokka_out_exists_ok(logger):
     """
     Test that when the output directory already exists, and files inside are OK,
     run_prokka returns True, with a warning message indicating that prokka did not rerun.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     gpath = "path/to/nogenome/original_name.fna"
     outdir = os.path.join("test", "data", "test_files")
     cores_prokka = 1
     name = "prokka_out_for_test"
     force = False
     nbcont = 7
-    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
-    _, err = capsys.readouterr()
-    assert err.endswith("Prokka results folder already exists. Prokka did not run again, "
-                        "formatting step used already generated results of Prokka in "
-                        "test/data/test_files/original_name.fna-prokkaRes. If you want "
-                        "to re-run prokka, first remove this "
-                        "result folder, or use '-F' or '--force' option if you want to rerun "
-                        "prokka for all genomes.\n")
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
-def test_run_prokka_out_exists_error(capsys):
+def test_run_prokka_out_exists_error(logger):
     """
     Test that when the output directory already exists, and some file is missing,
     run_prokka returns False, and writes the warning message saying that prokka did not
     rerun, + the warning message for the missing file(s).
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
     new_prok_dir = os.path.join("test", "data", "test_files", "original_name-error-prokkaRes")
@@ -324,24 +389,27 @@ def test_run_prokka_out_exists_error(capsys):
     cores_prokka = 1
     force = False
     nbcont = 7
-    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert not pfunc.run_prokka(arguments)
-    _, err = capsys.readouterr()
-    assert ("Prokka results folder already exists. Prokka did not run again, "
-            "formatting step used already generated results of Prokka in "
-            "test/data/test_files/original_name-error-prokkaRes. If you want to re-run prokka, first remove this "
-            "result folder, or use '-F' or '--force' option if you want to rerun "
-            "prokka for all genomes.") in err
-    assert "prokka_out_for_test-wrongCDS original_name.fna: no .ffn file"
-    assert "prokka_out_for_test-wrongCDS original_name.fna: no .faa file"
+    msg = "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
+    q = logger[0]
+    assert q.qsize() == 3
+    q.get()  # start annotating...
+    q.get()  # warning prokka results folder exists
+    assert q.get().message == msg
     shutil.rmtree(new_prok_dir)
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
-def test_run_prokka_out_exists_force():
+def test_run_prokka_out_exists_force(logger):
     """
     Test that when the output directory already exists with wrong files, but force is on,
     prokka is rerun and outputs the right files
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data")
     out_prokdir = os.path.join(outdir, "H299_H561.fasta-prokkaRes")
@@ -354,10 +422,11 @@ def test_run_prokka_out_exists_force():
     cores_prokka = 5
     force = True
     nbcont = 3
-    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
     # Check content of tbl, ffn and faa files
-    exp_dir = os.path.join("test", "data", "exp_files", "H299_H561.fasta-gembase.fna-prokkaRes",
+    exp_dir = os.path.join("test", "data", "exp_files",
+                           "H299_H561.fasta-short-contig.fna-prokkaRes",
                            "test_runprokka_H299")
     out_tbl = os.path.join(out_prokdir, name + ".tbl")
     out_faa = os.path.join(out_prokdir, name + ".faa")
@@ -376,13 +445,18 @@ def test_run_prokka_out_exists_force():
             assert line_exp == line_out
     shutil.rmtree(out_prokdir)
     os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
-def test_run_prokka_out_doesnt_exist():
+def test_run_prokka_out_doesnt_exist(logger):
     """
     Test that when the output directory does not exist, it creates it, and runs prokka
     with all expected outfiles
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
     prok_dir = os.path.join("test", "data")
     out_dir = os.path.join(prok_dir, "H299_H561.fasta-prokkaRes")
@@ -390,29 +464,40 @@ def test_run_prokka_out_doesnt_exist():
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, prok_dir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, prok_dir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
     shutil.rmtree(out_dir)
     os.remove(os.path.join(prok_dir, "H299_H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
-def test_run_prokka_out_problem_running(capsys):
+def test_run_prokka_out_problem_running(logger):
     """
     Check that when a problem occurs while trying to run prokka, run_prokka returns False,
     and the error message indicating to read in the log why it couldn't run
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "genomes", "H299 H561.fasta")
     outdir = os.path.join("test", "data")
     cores_prokka = 5
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, outdir, cores_prokka, name, force, nbcont)
+    arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert not pfunc.run_prokka(arguments)
-    _, err = capsys.readouterr()
-    assert ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
-            "for more information.") in err
+    q = logger[0]
+    assert q.qsize() == 2
+    msg = ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
+           "for more information.")
+    q.get()
+    assert q.get().message == msg
     os.remove(os.path.join(outdir, "H299 H561.fasta-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_1by1():
@@ -420,6 +505,8 @@ def test_run_all_1by1():
     Check that when running with 3 threads (not parallel), prokka runs as expected,
     and returns True for each genome
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
     gpath1 = os.path.join("test", "data", "genomes", genome1)
@@ -438,6 +525,9 @@ def test_run_all_1by1():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_more_threads():
@@ -445,6 +535,8 @@ def test_run_all_parallel_more_threads():
     Check that there is no problem when running with more threads than genomes (each genome
     uses nb_threads/nb_genome threads)
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
     gpath1 = os.path.join("test", "data", "genomes", genome1)
@@ -463,6 +555,9 @@ def test_run_all_parallel_more_threads():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_less_threads():
@@ -472,6 +567,8 @@ def test_run_all_parallel_less_threads():
     Genomes H299 and A_H738 should run well, but genomes genome* have problems (no CDS found),
     so check_prokka should return false.
     """
+    logfile_base = "test_prokka"
+    utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
     gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
@@ -494,3 +591,7 @@ def test_run_all_parallel_less_threads():
     for name in gnames:
         shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))
         os.remove(os.path.join(res_dir, name + "-prokka.log"))
+    os.remove(logfile_base + ".log")
+    os.remove(logfile_base + ".log.details")
+    os.remove(logfile_base + ".log.err")
+
