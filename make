@@ -79,8 +79,21 @@ def uninstall():
     """
     logger.info("Uninstalling genomeAPCAT...")
     cmd = "pip3 uninstall -y genomeAPCAT"
-    error = "A problem occurred while trying to uninstall genomeAPCAT."
+    error = ("A problem occurred while trying to uninstall genomeAPCAT. If you have "
+             "permission errors, try to add 'sudo' before your command line.")
     run_cmd(cmd, error)
+
+
+def upgrade():
+	"""
+	Upgrade genomeAPCAT module to the latest version. User must update the sources
+	before running upgrade!
+	"""
+	logger.info("Upgrading genomeAPCAT...")
+	cmd = "pip3 install --upgrade --no-deps ."
+	error = ("An error occurred whyle trying to update genomeAPCAT. If you have "
+             "permission errors, try to add 'sudo' before your command line.")
+	run_cmd(cmd, error, eof=True)
 
 
 def install_all(install_dir, dev=False, user=False):
@@ -120,7 +133,8 @@ def install_all(install_dir, dev=False, user=False):
     else:
         cmd = "pip3 install " + opt + " ."
     error = ("A problem occurred while trying to install genomeAPCAT. If you have "
-             "permission errors, try to install with the '--user' option")
+             "permission errors, try to add 'sudo' before your command line. If "
+             "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
 
 
@@ -159,10 +173,10 @@ def install_mmseqs():
 	"""
 
 	"""
-	pass 
+	pass
 	# avoir installé : git, g++ (4.6 or higher) and cmake (3.0 or higher) g++ pas de clang, mais de homebrew.
 
-	# if mac, check if homebrew is installed. otherwise install homebrew. 
+	# if mac, check if homebrew is installed. otherwise install homebrew.
 	# check if g++ is installed with homebrew. otherwise install it.
 	# git clone https://github.com/soedinglab/MMseqs2.git
     # cd MMseqs2
@@ -170,9 +184,9 @@ def install_mmseqs():
     # cd build
     # cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. ..
     # make
-    # make install 
+    # make install
     # export PATH=$(pwd)/bin/:$PATH
- 
+
 def install_barrnap():
     """
     Install barrnap, the RNA predictor used by prokka
@@ -258,7 +272,7 @@ def parse():
     parser = argparse.ArgumentParser(description=("Script to install, clean or uninstall "
                                                   "genomeAPCAT"))
     # Create command-line parser for all options and arguments to give
-    targets = ['install', 'develop', 'clean', 'uninstall']
+    targets = ['install', 'develop', 'upgrade', 'clean', 'uninstall']
     parser.add_argument("target", default='install', choices=targets, nargs='?',
                         help=("Choose what you want to do:\n"
                               " - install: install genomeAPCAT and its dependencies. If not "
@@ -266,6 +280,7 @@ def parse():
                               "will be downloaded "
                               "and built in 'dependencies' folder, and their binary files will be "
                               "put to 'binaries' folder.\n"
+                              " - upgrade: upgrade genomeAPCAT module. \n"
                               " - develop: same as install, but genomeAPCAT will be installed "
                               "in development mode, so that you can modify the script and "
                               "take the changes into account while running.\n"
@@ -330,6 +345,8 @@ if __name__ == '__main__':
         # Check that installation directory is in $PATH
         check_path(install_dir)
         install_all(install_dir, dev=True)
+    elif target == "upgrade":
+    	upgrade()
     elif target == "clean":
         clean_dependencies(install_dir)
     elif target == "uninstall":

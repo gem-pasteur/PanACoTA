@@ -16,6 +16,8 @@ build-from-base:
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - genomeAPCAT -h
+    - ./make upgrade
+    - genomeAPCAT -h
 
 
 build-from-barrnap:
@@ -50,6 +52,8 @@ build-from-prokka-user:
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - ln -s $(pwd)/bin/genomeAPCAT /usr/local/bin
+    - genomeAPCAT -h
+    - ./make upgrade
     - genomeAPCAT -h
 
 unit-test-ubuntu16.04:
