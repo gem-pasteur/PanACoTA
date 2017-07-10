@@ -17,6 +17,18 @@ build-from-base:
     - echo $(prokka -h)
     - genomeAPCAT -h
 
+build-from-base-user:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-base
+  stage: build
+  only:
+    - install
+  script:
+    - python3 make --user
+    - echo $(barrnap -h)
+    - echo $(prokka -h)
+    - ln -s $(pwd)/bin/genomeAPCAT /usr/local/bin
+    - genomeAPCAT -h
+
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
   stage: build
