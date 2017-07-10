@@ -16,6 +16,10 @@ build-from-base:
     - echo $(barrnap -h)
     - echo $(prokka -h)
     - genomeAPCAT -h
+    - ./make upgrade
+    - genomeAPCAT -h
+    - ./make uninstall
+    - echo $(genomeAPCAT -h)
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
@@ -39,6 +43,22 @@ build-from-prokka:
     - echo $(prokka -h)
     - genomeAPCAT -h
 
+build-from-prokka-user:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
+  stage: build
+  only:
+    - install
+  script:
+    - echo $(genomeAPCAT -h)
+    - python3 make --user
+    - echo $(barrnap -h)
+    - echo $(prokka -h)
+    - genomeAPCAT -h
+    - ./make upgrade
+    - echo $(genomeAPCAT -h)
+    - ./make uninstall
+    - echo $(genomeAPCAT -h)
+
 unit-test-ubuntu16.04:
   stage: test
   except:
@@ -46,7 +66,6 @@ unit-test-ubuntu16.04:
   before_script:
     - ./make
   script:
-    - ls test/data
     - py.test test/test_unit
     - mv .coverage .coverage-unit
   artifacts:
@@ -61,7 +80,6 @@ func-test-ubuntu16.04:
   before_script:
     - ./make
   script:
-    - ls test/data
     - py.test test/test_functional
     - mv .coverage .coverage-functional
   artifacts:

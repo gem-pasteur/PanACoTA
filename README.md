@@ -17,13 +17,18 @@ genome APCAT is a software providing tools for large scale comparative genomics:
 genomeAPCAT is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- prokka (to annotate the genomes). 
+- prokka (to annotate the genomes)  
+- mmseqs (to generate pangenomes) NOT INSTALLED BY 'make' FOR NOW
 
 You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
-To be able to install the dependencies (by yourself, or with the installation script), make sure you have: `tar`, `git` and `wget`.
+To be able to install the dependencies (by yourself, or with the installation script), make sure you already have: 
 
-Then, for prokka installation, you need to install some system packages, as well as bioperl and java, if not already done (see [Prokka README](https://github.com/tseemann/prokka) for more information).
+- `tar`
+- `git`
+- `wget`
+- bioperl, java and some other base packages required for prokka: see [Prokka README](https://github.com/tseemann/prokka) for more information.
+
 
 ## Downloading and updating `genomeAPCAT`
 
@@ -39,7 +44,7 @@ If a new version of `genomeAPCAT` is released, and you want to use it, type the 
 
     git pull
 
-Then, you will be able to install the new version (see bellow).
+Then, you will be able to upgrade to the new version (see bellow).
 
 ## Installing `genomeAPCAT` (final mode)
 
@@ -52,7 +57,9 @@ or
     ./make install
 
 You will then be able to use the package from any directory in your computer,
-just as any other software.
+just as any other software. 
+
+If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
 
 **Warning:** If you plan to work on the scripts, or to download a new version after, choose the development installation (see below).
 
@@ -71,12 +78,11 @@ If you don't want `genomeAPCAT` anymore, or if you want to install a newer versi
 
     ./make uninstall
 
-## Update to new version
+## Upgrade to new version
 
 If you want to install a new version of `genomeAPCAT`:
-- uninstall the previous version (`./make uninstall`)
 - update to the new version (`git pull`)
-- install the new version (`./make`)
+- upgrade to the new version (`./make upgrade`)
 
 ## Cleaning dependencies
 
@@ -88,21 +94,20 @@ If you installed the dependencies (such as prokka) via our installation script, 
 
 ## Quick run
 
-`genomeAPCAT` contains 4 different modules: 
+`genomeAPCAT` contains 5 different subcommands: 
 - `annotate` (annotate all genomes of the dataset, after a quality control)
-- `pan-genome` (generate pan-genome)
-- `pers-genome` (generate persistent-genome)
-- `tree` (infer phylogenetic tree from persistent genome)
+- `pangenome` (generate pan-genome)
+- `corepers` (generate core-genome or persistent-genome)
+- `align` (align core/persistent families) NOT IMPLEMENTED YET
+- `tree` (infer phylogenetic tree from persistent genome) NOT IMPLEMENTED YET
 
-You can run then by typing:
+You can run them by typing:
 
-    genomeAPCAT <module_name> <arguments_for_module>
+    genomeAPCAT <subcommand_name> <arguments_for_subcommand>
 
-Each module has its own options and inputs. To get the list of required arguments and other available options for the module you want to run, type: 
+Each subcommand has its own options and inputs. To get the list of required arguments and other available options for the subcommand you want to run, type: 
 
-    genomeAPCAT help <module_name>
-    # or 
-    genomeAPCAT <module_name> -h
+    genomeAPCAT <subcommand> -h
 
 ## Examples
 
