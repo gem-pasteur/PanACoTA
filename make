@@ -5,13 +5,14 @@
 Installation script for genomeAPCAT
 Targets available are:
 
-- `./make.py` = `./make.py install` : install all dependencies if not already present,
+- `./make.py` = `./make.py install`: install all dependencies if not already present,
 and install genomeAPCAT
-- `./make.py develop` : same as install, but install genomeAPCAT in development mode, to be
+- `./make.py upgrade`: upgrade genomeAPCAT package.
+- `./make.py develop`: same as install, but install genomeAPCAT in development mode, to be
 able to change the script and run it.
-- `./make.py clean` : clean all dependencies that were installed by this script
+- `./make.py clean`: clean all dependencies that were installed by this script
 (uninstall them, remove source and bin folders)
-- `./make.py uninstall` : uninstall genomeAPCAT
+- `./make.py uninstall`: uninstall genomeAPCAT
 
 By default, the dependencies are installed in /usr/local/bin. If the user wants
 to install them in another directory (which is in the path), he can specify it with
@@ -82,7 +83,7 @@ def uninstall():
     run_cmd(cmd, error)
 
 
-def install_all(install_dir, dev=False):
+def install_all(install_dir, dev=False, user=False):
     """
     Install all needed software(s).
     First, check if dependencies are installed.
@@ -90,11 +91,13 @@ def install_all(install_dir, dev=False):
     Then, install genomeAPCAT.
 
     dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
+    user: install in user mode if True
     """
     to_install = check_dependencies()
     if to_install != []:
         binpath = os.path.join(os.getcwd(), "binaries")
-        os.makedirs("dependencies", exist_ok=True)
+        deppath = os.path.join(os.getcwd(), "dependencies")
+        os.makedirs(deppath, exist_ok=True)
         os.makedirs(binpath, exist_ok=True)
         if "barrnap" in to_install:
             ret = install_barrnap()
@@ -106,13 +109,19 @@ def install_all(install_dir, dev=False):
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
-    logger.info("Installing genomeAPCAT...")
-    if dev:
-        cmd = "pip3 install -e ."
+    if user:
+    	logger.info("Installing genomeAPCAT in user mode...")
+    	opt = "--user"
     else:
-        cmd = "pip3 install ."
-    error = "A problem occurred while trying to install genomeAPCAT."
-    run_cmd(cmd, error)
+        logger.info("Installing genomeAPCAT...")
+        opt = ""
+    if dev:
+        cmd = "pip3 install " + opt + " -e ."
+    else:
+        cmd = "pip3 install " + opt + " ."
+    error = ("A problem occurred while trying to install genomeAPCAT. If you have "
+             "permission errors, try to install with the '--user' option")
+    run_cmd(cmd, error, eof=True)
 
 
 def check_dependencies():
@@ -254,7 +263,11 @@ def parse():
                         help=("By default, all scripts will be installed in /usr/local/bin. "
                               "If you want to install them in another directory, give it "
                               "with this --prefix option."))
+    parser.add_argument("--user", dest="user", action="store_true",
+                        help="Install package in user mode.")
     args = parser.parse_args()
+    if args.user and args.target != "install":
+    	parser.error("--user option can only be used when installing the package.")
     return args
 
 
@@ -285,6 +298,7 @@ if __name__ == '__main__':
 
     # Get user arguments
     OPTIONS = parse()
+    user = OPTIONS.user
     if not OPTIONS.install_dir:
         install_dir = os.path.join(os.sep + "usr", "local", "bin")
     else:
@@ -294,7 +308,7 @@ if __name__ == '__main__':
     if target == "install":
         # Check that installation directory is in $PATH
         check_path(install_dir)
-        install_all(install_dir)
+        install_all(install_dir, user=user)
     elif target == "develop":
         # Check that installation directory is in $PATH
         check_path(install_dir)
