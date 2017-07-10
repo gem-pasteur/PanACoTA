@@ -7,6 +7,7 @@ from genomeAPCAT import __version__ as version
 from genomeAPCAT.subcommands import qc_and_annote
 from genomeAPCAT.subcommands import pangenome
 from genomeAPCAT.subcommands import corepers
+from genomeAPCAT.subcommands import align
 
 
 def main():
@@ -70,7 +71,15 @@ def parse_arguments(argv):
     actions["corepers"] = corepers.main_from_parse
     checks["corepers"] = corepers.check_args
 
-    # Alignment and tree part
+    # Alignment part
+    parser_align = subparsers.add_parser('align',
+                                         help="Align Core/Persistent familiest",
+                                         add_help=False)
+    align.build_parser(parser_align)
+    actions["align"] = align.main_from_parse
+    checks["align"] = align.check_args
+
+    # and tree part
 
     # Parse arguments and execute corresponding action
     arguments = parser.parse_args(argv)
