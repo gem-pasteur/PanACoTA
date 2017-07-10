@@ -84,13 +84,16 @@ def uninstall():
     run_cmd(cmd, error)
 
 
-def upgrade():
+def upgrade(user=False):
 	"""
 	Upgrade genomeAPCAT module to the latest version. User must update the sources
 	before running upgrade!
 	"""
 	logger.info("Upgrading genomeAPCAT...")
-	cmd = "pip3 install --upgrade --no-deps ."
+	if user:
+		cmd = "pip3 install --upgrade --no-deps --user ."
+	else:
+		cmd = "pip3 install --upgrade --no-deps ."
 	error = ("An error occurred whyle trying to update genomeAPCAT. If you have "
              "permission errors, try to add 'sudo' before your command line.")
 	run_cmd(cmd, error, eof=True)
@@ -307,7 +310,7 @@ def parse():
     parser.add_argument("--user", dest="user", action="store_true",
                         help="Install package in user mode.")
     args = parser.parse_args()
-    if args.user and args.target != "install":
+    if args.user and args.target not in  ["install", "upgrade"]:
     	parser.error("--user option can only be used when installing the package.")
     return args
 
@@ -355,7 +358,7 @@ if __name__ == '__main__':
         check_path(install_dir)
         install_all(install_dir, dev=True)
     elif target == "upgrade":
-    	upgrade()
+    	upgrade(user=user)
     elif target == "clean":
         clean_dependencies(install_dir)
     elif target == "uninstall":

@@ -52,7 +52,6 @@ build-from-prokka-user:
     - python3 make --user
     - echo $(barrnap -h)
     - echo $(prokka -h)
-    - ln -s $(pwd)/bin/genomeAPCAT /usr/local/bin
     - genomeAPCAT -h
     - ./make upgrade
     - echo $(genomeAPCAT -h)
