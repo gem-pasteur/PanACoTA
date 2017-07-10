@@ -278,6 +278,11 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     otherwise, call it discarded-<list_file>.txt
     """
     logger = logging.getLogger("utils")
+    nb_disc = len(genomes) - len(kept_genomes)
+    if not qc and nb_disc < 2:
+        logger.info("{} genome was discarded.".format(nb_disc))
+    elif not qc:
+        logger.info("{} genomes were discarded.".format(nb_disc))
     _, name_lst = os.path.split(list_file)
     if not qc:
         outdisc = os.path.join(res_path,
