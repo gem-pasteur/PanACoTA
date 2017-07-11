@@ -11,7 +11,7 @@ June 2017
 
 import os
 import sys
-from genomeAPCAT.align_module import pan_to_pergenome as p2g
+
 
 
 def main_from_parse(args):
@@ -26,8 +26,18 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     """
     Align given core genome families
     """
-    print("alignment module")
-    p2g.get_per_genome(corepers, list_genomes, dname, outdir)
+    # import needed packages
+    import logging
+    from genomeAPCAT import utils
+    from genomeAPCAT.align_module import pan_to_pergenome as p2g
+    from genomeAPCAT.align_module import get_seqs as gseqs
+
+    os.makedirs(outdir, exist_ok=True)
+    # name logfile, add timestamp if already existing
+    logfile_base = os.path.join(outdir, "genomeAPCAT-align_" + dname)
+    level = logging.DEBUG
+    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    logger = logging.getLogger()
 
 
 def build_parser(parser):
