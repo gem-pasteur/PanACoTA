@@ -40,6 +40,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     logger = logging.getLogger()
 
     all_genomes, aldir, listdir = p2g.get_per_genome(corepers, list_genomes, dname, outdir)
+    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir)
 
 
 def build_parser(parser):

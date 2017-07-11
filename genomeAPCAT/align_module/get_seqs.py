@@ -2,16 +2,26 @@
 # coding: utf-8
 
 import sys
+import os
 import logging
 
 logger = logging.getLogger("pangnome.mmseqs")
 
 
-def get_all_seqs():
+def get_all_seqs(all_genomes, dname, dbpath, listdir):
     """
     For all genomes, extract its proteins present in a persistent family to the file
     corresponding to this family.
     """
+    logger.info("Extracting proteins and genes from all genomes")
+    for genome in all_genomes:
+        ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
+        ge_prt = os.path.join(listdir, dname + "-getEntry_prt_" + genome + ".txt")
+        logger.details("Extracting proteins and genes from {}".format(genome))
+        prtdb = os.path.join(dbpath, "Proteins", genome + ".prt")
+        gendb = os.path.join(dbpath, "Genes", genome + ".gen")
+        get_genome_seqs(prtdb, ge_prt)
+        get_genome_seqs(gendb, ge_gen)
 
 
 def get_genome_seqs(fasta, tabfile, outfile=None):
@@ -29,7 +39,7 @@ def get_genome_seqs(fasta, tabfile, outfile=None):
         to_extract = get_names_to_extract(tabf, outfile)
 
     if outfile:
-        with open(fasta, "r") as fasf, open(outfile, "w") as outf:
+        with open(fasta, "r") as fasf, open(outfile, "a") as outf:
             extract_sequences(to_extract, fasf, outf)
     else:
         with open(fasta, "r") as fasf:
@@ -71,7 +81,7 @@ def extract_sequences(to_extract, fasf, outf=None):
             if seq in to_extract:
                 if not out_given:
                     out = to_extract[seq]
-                    outf = open(out, "w")
+                    outf = open(out, "a")
                 outf.write(line)
                 extract = True
             else:
