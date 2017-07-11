@@ -17,14 +17,16 @@ def main_from_parse(args):
     """
     Call main function from the arguments given by parser
     """
-    main()
+    main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
+         args.verbose, args.quiet)
 
 
-def main():
+def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     """
     Align given core genome families
     """
     print("alignment module")
+    print(corepers, list_genomes, dname, dbpath, outdir, verbose, quiet)
 
 
 def build_parser(parser):
@@ -35,14 +37,29 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
-    required.add_argument("-p", dest="pangenome", required=True,
-                        help=("PanGenome file (1 line per family, first column is fam number)"))
+    required.add_argument("-c", dest="corepers", required=True,
+                        help=("Core or persistent genome whose families must be aligned."))
+    required.add_argument("-l", dest="list_genomes", required=True,
+                        help=("File containing the list of all the genomes you want "
+                              "to align from their core/persistent families. "
+                              "1 genome per line: it can be the "
+                              "LSTINFO-<list_file>.lst file of 'genomeAPCAT annotate' module. "
+                              "Here, only the first column (genome name without extension) "
+                              "will be used. The final alignment file will contain "
+                              "1 alignment per genome in this file."))
+    required.add_argument("-n", dest="dataset_name", required=True,
+                        help=("Name of the dataset which will be aligned (for example, "
+                              "SAEN1234 for 1234 Salmonella enterica genomes). This name will "
+                              "be used to name the alignment file."))
+    required.add_argument("-d", dest="dbpath", required=True,
+                        help=("Path to the folder containing the directories 'Proteins' "
+                              "and 'Genes', created by 'genomeAPCAT annotate'."))
+    required.add_argument("-o", dest="outdir", required=True,
+                          help=("Output directory, where all results must be saved "))
 
-    optional = parser.add_argument_group('Optional arguments')
-    # optional.add_argument("-t", dest="tol", default=1, type=percentage,
-    #                       help=("min %% of genomes having at least 1 member in a family to "
-    #                             "consider the family as persistent (between 0 and 1, "
-    #                             "default is 1 = 100%% of genomes = Core genome)"))
+    # optional = parser.add_argument_group('Optional arguments')
+    # optional.add_argument("-m", dest="mafft_options",
+    #                       help=("If you want to add options to mafft, such as --quiet..."))
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
