@@ -50,10 +50,8 @@ def get_per_genome(persgen, list_gen, dname, outdir):
     # Define output directories
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
-    if not os.path.isdir(aldir):
-        os.makedirs(aldir, exist_ok=True)
-    if not os.path.isdir(listdir):
-        os.makedirs(listdir, exist_ok=True)
+    os.makedirs(aldir, exist_ok=True)
+    os.makedirs(listdir, exist_ok=True)
 
     # Get list of all genomes
     all_genomes = get_all_genomes(list_gen)
