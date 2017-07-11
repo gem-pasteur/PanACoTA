@@ -46,6 +46,7 @@ def get_per_genome(persgen, list_gen, dname, outdir):
     outdir: Directory where files must be saved. Will create 2 subfolders: Align-<dname>
     and List-<dname>
     """
+    logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     # Define output directories
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
@@ -61,6 +62,7 @@ def get_per_genome(persgen, list_gen, dname, outdir):
     # Write output files
     write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
     write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname)
+    return all_genomes, aldir, listdir
 
 
 def get_all_genomes(list_gen):

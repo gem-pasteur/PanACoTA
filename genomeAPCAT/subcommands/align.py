@@ -39,6 +39,8 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
+    all_genomes, aldir, listdir = p2g.get_per_genome(corepers, list_genomes, dname, outdir)
+
 
 def build_parser(parser):
     """
