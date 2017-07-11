@@ -7,7 +7,14 @@ import logging
 logger = logging.getLogger("pangnome.mmseqs")
 
 
-def get_seqs(fasta, tabfile, outfile=None):
+def get_all_seqs():
+    """
+    For all genomes, extract its proteins present in a persistent family to the file
+    corresponding to this family.
+    """
+
+
+def get_genome_seqs(fasta, tabfile, outfile=None):
     """
     From a fasta file, extract all sequences given in the tab file.
     The tab file can contain:
@@ -65,7 +72,7 @@ def extract_sequences(to_extract, fasf, outf=None):
                 if not out_given:
                     out = to_extract[seq]
                     outf = open(out, "w")
-                outf.write(line.strip() + '\n')
+                outf.write(line)
                 extract = True
             else:
                 if not out_given and outf:
@@ -78,7 +85,8 @@ def extract_sequences(to_extract, fasf, outf=None):
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
-        get_seqs(sys.argv[1], sys.argv[2])
+        for _ in range(200):
+            get_genome_seqs(sys.argv[1], sys.argv[2])
     elif len(sys.argv) == 4:
         get_seqs(sys.argv[1], sys.argv[2], sys.argv[3])
     else:
