@@ -11,6 +11,7 @@ June 2017
 
 import os
 import sys
+from genomeAPCAT.align_module import pan_to_pergenome as p2g
 
 
 def main_from_parse(args):
@@ -26,7 +27,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     Align given core genome families
     """
     print("alignment module")
-    print(corepers, list_genomes, dname, dbpath, outdir, verbose, quiet)
+    p2g.get_per_genome(corepers, list_genomes, dname, outdir)
 
 
 def build_parser(parser):
