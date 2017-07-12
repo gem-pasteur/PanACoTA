@@ -51,7 +51,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     logger = logging.getLogger()
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
-    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, force, quiet)
+    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
     prefix = os.path.join(aldir, dname)
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), quiet, threads)
     if not status:
