@@ -17,8 +17,9 @@ genome APCAT is a software providing tools for large scale comparative genomics:
 genomeAPCAT is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- prokka (to annotate the genomes)  
+- prokka (to annotate the genomes)
 - mmseqs (to generate pangenomes) NOT INSTALLED BY 'make' FOR NOW
+- fftns (from mafft, to align persistent genome) NOT INSTALLED BY 'make' FOR NOW
 
 You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
@@ -48,6 +49,7 @@ Then, you will be able to upgrade to the new version (see bellow).
 
 ## Installing `genomeAPCAT` (final mode)
 
+
 To install `genomeAPCAT`, and all its dependencies, from the root directory, type:
 
     ./make
@@ -62,6 +64,9 @@ just as any other software.
 If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
 
 **Warning:** If you plan to work on the scripts, or to download a new version after, choose the development installation (see below).
+
+**Note**: Dependencies installed by make:
+- prokka
 
 
 ## Installing `genomeAPCAT` (development mode)
