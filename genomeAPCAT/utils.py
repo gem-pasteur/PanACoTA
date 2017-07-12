@@ -182,7 +182,8 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     Run the given command line. If the return code is not 0, print error message.
     if eof (exit on fail) is True, exit program if error code is not 0.
     """
-    logger = logging.getLogger("utils.run_cmd")
+    if not "logger" in kwargs:
+        logger = logging.getLogger("utils.run_cmd")
     if not "stdout" in kwargs:
         kwargs["stdout"] = None
     if not "stderr" in kwargs:
