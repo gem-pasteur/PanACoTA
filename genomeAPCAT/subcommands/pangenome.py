@@ -39,17 +39,17 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     from genomeAPCAT.pangenome_module import mmseqs_functions as mmf
     from genomeAPCAT.pangenome_module import post_treatment as pt
 
+    # test if mmseqs is installed and in the path
+    if not utils.check_installed("mmseqs"):  # pragma: no cover
+        logger.error("mmseqs is not installed. 'genomeAPCAT pangenome' cannot run.")
+        sys.exit(1)
+
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "genomeAPCAT-pangenome_" + name)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
-
-    # test if mmseqs is installed and in the path
-    if not utils.check_installed("mmseqs"):  # pragma: no cover
-        logger.error("mmseqs is not installed. 'genomeAPCAT pangenome' cannot run.")
-        sys.exit(1)
 
     # Build bank with all proteins to include in the pangenome
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
