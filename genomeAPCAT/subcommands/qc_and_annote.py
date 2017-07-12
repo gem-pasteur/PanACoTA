@@ -121,6 +121,13 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     from genomeAPCAT.qc_annote_module import prokka_functions as pfunc
     from genomeAPCAT.qc_annote_module import format_functions as ffunc
     from genomeAPCAT import utils
+
+    if not qc_only:
+        # test if prokka is installed and in the path
+        if not utils.check_installed("prokka"):  # pragma: no cover
+            logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
+            sys.exit(1)
+
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
@@ -149,11 +156,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     logfile_base = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base)
     utils.init_logger(logfile_base, level, name='', verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
-    if not qc_only:
-        # test if prokka is installed and in the path
-        if not utils.check_installed("prokka"):  # pragma: no cover
-            logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
-            sys.exit(1)
+
     logger.info("Let's start!")
     # Read genome names.
     genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
