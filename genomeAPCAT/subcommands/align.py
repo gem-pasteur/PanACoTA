@@ -34,6 +34,11 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, verbose=0, quie
     from genomeAPCAT.align_module import alignment as ali
     from genomeAPCAT.align_module import post_align as post
 
+    # test if prokka is installed and in the path
+    if not utils.check_installed("fftns"):  # pragma: no cover
+        logger.error("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
+        sys.exit(1)
+
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "genomeAPCAT-align_" + dname)
