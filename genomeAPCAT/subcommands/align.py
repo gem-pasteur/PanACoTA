@@ -52,6 +52,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, verbose=0, quie
                       "grouped by genome."))
         sys.exit(1)
     post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
+    logger.info("END")
 
 
 def build_parser(parser):
