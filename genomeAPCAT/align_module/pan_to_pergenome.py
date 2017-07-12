@@ -33,7 +33,7 @@ import logging
 logger = logging.getLogger("align.pan_to_pergenome")
 
 
-def get_per_genome(persgen, list_gen, dname, outdir, force):
+def get_per_genome(persgen, list_gen, dname, outdir):
     """ From persistent genome and list of all genomes, sort persistent proteins by genome
 
     For each genome, write all persistent proteins to a file, with the family from which they
@@ -58,7 +58,7 @@ def get_per_genome(persgen, list_gen, dname, outdir, force):
     # Sort proteins by strain
     all_prots, fam_genomes, several = proteins_per_strain(persgen)
     # Write output files
-    write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes, force)
+    write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
     write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname)
     return all_genomes, aldir, listdir, fam_genomes.keys()
 
@@ -109,7 +109,7 @@ def proteins_per_strain(persgen):
     return all_prots, fam_genomes, several
 
 
-def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes, force):
+def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes):
     """ For each species, write all its persistent proteins into a file, with the
     persistent family in which they are. Those files will be used to extract all
     proteins.
@@ -122,7 +122,7 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes,
     all_genomes: list of all genomes
     """
     for strain, member in all_prots.items():
-        write_genome_file(listdir, aldir, dname, strain, member, several, force)
+        write_genome_file(listdir, aldir, dname, strain, member, several)
     error = []
     for strain in all_genomes:
         gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
@@ -137,17 +137,17 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes,
         sys.exit(1)
 
 
-def write_genome_file(listdir, aldir, dname, strain, member, several, force):
+def write_genome_file(listdir, aldir, dname, strain, member, several):
     """
     For a given genome, write all the proteins and genes to extract to its file.
     If one of the 2 files (proteins and genes) already exists, overwrite it.
     If no file exists -> write them
     If the 2 files exist -> warning saying that we use already existing files
     """
-    # If the 2 files exist, use them as they are if not force (if force, they will be overwritten)
+    # If the 2 files exist, use them as they are
     gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
     geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
-    if os.path.isfile(gegenfile) and os.path.isfile(geprtfile) and not force:
+    if os.path.isfile(gegenfile) and os.path.isfile(geprtfile):
         logger.warning("For genome {}, {} and {} already exist. The program will use them "
                        "to extract proteins and genes. If you prefer to rewrite them, use "
                        "option -F (or --force).".format(strain, geprtfile, gegenfile))

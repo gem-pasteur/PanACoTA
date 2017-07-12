@@ -28,6 +28,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     """
     # import needed packages
     import logging
+    import shutil
     from genomeAPCAT import utils
     from genomeAPCAT.align_module import pan_to_pergenome as p2g
     from genomeAPCAT.align_module import get_seqs as gseqs
@@ -39,15 +40,17 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
         logger.error("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
         sys.exit(1)
 
+    if force:
+        shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
+
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "genomeAPCAT-align_" + dname)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
-
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
-                                                               dname, outdir, force)
+                                                               dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, force, quiet)
     prefix = os.path.join(aldir, dname)
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), quiet, threads)
