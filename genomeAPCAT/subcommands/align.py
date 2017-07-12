@@ -51,6 +51,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
                       "more information. Program will stop here, alignments won't be "
                       "grouped by genome."))
         sys.exit(1)
+    post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
 
 
 def build_parser(parser):
