@@ -25,7 +25,7 @@ def read_pangenome(pangenome, families=None):
     if families:
         fams_by_strain, all_strains = get_fams_info(families)
         if not os.path.isfile(pangenome + ".bin"):
-            logger.info("Saving all information to a binary file for later use")
+            logger.details("Saving all information to a binary file for later use")
             utils.save_bin([fams_by_strain, families, all_strains], pangenome + ".bin")
     elif os.path.isfile(pangenome + ".bin"):
         logger.info("Retrieving info from binary file")
