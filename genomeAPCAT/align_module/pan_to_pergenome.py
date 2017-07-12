@@ -60,7 +60,7 @@ def get_per_genome(persgen, list_gen, dname, outdir):
     # Write output files
     write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
     write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname)
-    return all_genomes, aldir, listdir
+    return all_genomes, aldir, listdir, fam_genomes.keys()
 
 
 def get_all_genomes(list_gen):
