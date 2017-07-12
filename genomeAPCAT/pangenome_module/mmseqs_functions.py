@@ -161,6 +161,7 @@ def mmseq_tsv_to_clusters(mmseq):
                 clusters[repres].append(other)
             else:
                 clusters[repres] = [repres]
+    logger.info("Pangenome has {} families.".format(len(clusters)))
     return clusters
 
 
