@@ -42,7 +42,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
 
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
-    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir)
+    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, quiet)
     prefix = os.path.join(aldir, dname)
     ali.align_all_families(prefix, fam_nums, len(all_genomes))
 

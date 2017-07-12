@@ -9,20 +9,21 @@ import progressbar
 logger = logging.getLogger("align.extract")
 
 
-def get_all_seqs(all_genomes, dname, dbpath, listdir):
+def get_all_seqs(all_genomes, dname, dbpath, listdir, quiet):
     """
     For all genomes, extract its proteins present in a persistent family to the file
     corresponding to this family.
     """
     logger.info("Extracting proteins and genes from all genomes")
     nbgen = len(all_genomes)
-    widgets = ['Gene and Protein extraction:',
-               progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
-               progressbar.Percentage(), ") - ", progressbar.Timer(), ' ',
-               progressbar.ETA()]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
-    curnum = 1
+    if not quiet:
+        widgets = ['Gene and Protein extraction:',
+                   progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
+                   progressbar.Percentage(), ") - ", progressbar.Timer(), ' ',
+                   progressbar.ETA()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        curnum = 1
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
         ge_prt = os.path.join(listdir, dname + "-getEntry_prt_" + genome + ".txt")
@@ -31,9 +32,11 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir):
         gendb = os.path.join(dbpath, "Genes", genome + ".gen")
         get_genome_seqs(prtdb, ge_prt)
         get_genome_seqs(gendb, ge_gen)
-        bar.update(curnum)
-        curnum += 1
-    bar.finish()
+        if not quiet:
+            bar.update(curnum)
+            curnum += 1
+    if not quiet:
+        bar.finish()
 
 
 def get_genome_seqs(fasta, tabfile, outfile=None):
