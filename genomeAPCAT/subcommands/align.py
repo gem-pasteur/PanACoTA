@@ -32,6 +32,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     from genomeAPCAT.align_module import pan_to_pergenome as p2g
     from genomeAPCAT.align_module import get_seqs as gseqs
     from genomeAPCAT.align_module import alignment as ali
+    from genomeAPCAT.align_module import post_align as post
 
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
@@ -45,6 +46,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, quiet)
     prefix = os.path.join(aldir, dname)
     ali.align_all_families(prefix, fam_nums, len(all_genomes))
+    post.concat_alignments(fam_nums, prefix, quiet)
 
 
 def build_parser(parser):
