@@ -12,6 +12,8 @@ March 2017
 import os
 import sys
 import logging
+import progressbar
+import multiprocessing
 from genomeAPCAT import utils
 
 logger = logging.getLogger("align.post")
@@ -26,7 +28,7 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     all_alns = concat_alignments(fam_nums, prefix, quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    group_by_genome(all_genomes, all_alns, treedir, dname, quiet)
+    launch_group_by_genome(all_genomes, all_alns, treedir, dname, quiet)
 
 
 def concat_alignments(fam_nums, prefix, quiet):
@@ -43,13 +45,37 @@ def concat_alignments(fam_nums, prefix, quiet):
     return output
 
 
-def group_by_genome(all_genomes, all_alns, treedir, dname, quiet):
+def launch_group_by_genome(all_genomes, all_alns, treedir, dname, quiet):
+    """
+    Function calling group_by_genome in a pool, while giving information to user
+    (time elapsed)
+    """
+    logger.info("Grouping alignments per genome")
+    if not quiet:
+        widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+                   "  -  ", progressbar.Timer()]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
+    pool = multiprocessing.Pool(1)
+    args = [all_genomes, all_alns, treedir, dname]
+    final = pool.map_async(group_by_genome, [args], chunksize=1)
+    pool.close()
+    if not quiet:
+        while(True):
+            if final.ready():
+                break
+            remaining = final._number_left
+            bar.update()
+        bar.finish()
+    pool.join()
+
+
+def group_by_genome(args):
     """
     From the alignment file 'all_alns' containing all proteins, group the alignments of
     proteins by their genome (listed in 'all_genomes'), and save the result
     in 'treedir'
     """
-    logger.info("Grouping alignments per genome")
+    all_genomes, all_alns, treedir, dname = args
     outfile = os.path.join(treedir, dname + ".grp.aln")
     sequences = read_alignments(all_alns, all_genomes)
     write_groups(outfile, sequences)
