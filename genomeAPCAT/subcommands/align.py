@@ -45,8 +45,12 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
                                                                dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, quiet)
     prefix = os.path.join(aldir, dname)
-    ali.align_all_families(prefix, fam_nums, len(all_genomes))
-    post.concat_alignments(fam_nums, prefix, quiet)
+    status = ali.align_all_families(prefix, fam_nums, len(all_genomes))
+    if not status:
+        logger.error(("At least one alignment did not run well. See detailed log file for "
+                      "more information. Program will stop here, alignments won't be "
+                      "grouped by genome."))
+        sys.exit(1)
 
 
 def build_parser(parser):

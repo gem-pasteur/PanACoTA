@@ -28,6 +28,8 @@ def align_all_families(prefix, all_fams, ngenomes):
     logger.info(("Starting alignment of all families: protein alignment, "
                  "back-translation to nucleotides, and add missing genomes in the family"))
 
+    all_ok = True
+
     # for fam in families : family_alignment() -> return btr_file, miss_file
     for num_fam in all_fams:
         # Get file names
@@ -41,6 +43,8 @@ def align_all_families(prefix, all_fams, ngenomes):
         # If it returned true, Add missing genomes
         if status:
             add_missing_genomes(btr_file, miss_file, num_fam, ngenomes)
+        all_ok = all_ok and status
+    return all_ok
 
 
 def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes):
