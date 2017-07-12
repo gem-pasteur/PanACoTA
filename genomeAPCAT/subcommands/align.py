@@ -19,10 +19,10 @@ def main_from_parse(args):
     Call main function from the arguments given by parser
     """
     main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
-         args.threads, args.verbose, args.quiet)
+         args.threads, args.force, args.verbose, args.quiet)
 
 
-def main(corepers, list_genomes, dname, dbpath, outdir, threads, verbose=0, quiet=False):
+def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
     """
     Align given core genome families
     """
@@ -47,8 +47,8 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, verbose=0, quie
     logger = logging.getLogger()
 
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
-                                                               dname, outdir)
-    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, quiet)
+                                                               dname, outdir, force)
+    gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, force, quiet)
     prefix = os.path.join(aldir, dname)
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), quiet, threads)
     if not status:
@@ -114,7 +114,13 @@ def build_parser(parser):
                               "Indicate on how many threads you want to parallelize. "
                               "By default, it uses 1 thread. Put 0 if you want to use "
                               "all threads of your computer."))
-
+    optional.add_argument("-F", "--force", dest="force", action="store_true",
+                        help=("Force run: Add this option if you want to redo all alignments "
+                              "for all families, even if their result file already exists. "
+                              "Without this option, if an alignment file already exists, "
+                              "it will be used for the next step. If you want to redo only "
+                              "a given alignment, just delete its file, without using "
+                              "this option."))
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
                         help=("Increase verbosity in stdout/stderr."))
