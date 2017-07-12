@@ -22,7 +22,7 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, quiet):
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer(), ' ',
                    progressbar.ETA()]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=150).start()
         curnum = 1
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
