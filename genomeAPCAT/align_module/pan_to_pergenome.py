@@ -122,15 +122,7 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
     all_genomes: list of all genomes
     """
     for strain, member in all_prots.items():
-        gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
-        geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
-        with open(gegenfile, "w") as gegf, open(geprtfile, "w") as gepf:
-            for mem, fam in member.items():
-                if strain not in several[fam]:
-                    genfile = os.path.join(aldir, dname + "-current." + fam + ".gen")
-                    gegf.write(mem + " " + genfile + "\n")
-                    prtfile = os.path.join(aldir, dname + "-current." + fam + ".prt")
-                    gepf.write(mem + " " + prtfile + "\n")
+        write_genome_file(listdir, aldir, dname, strain, member, several)
     error = []
     for strain in all_genomes:
         gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
@@ -143,6 +135,30 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
                           "The program will close, please fix this problem to be able to "
                           "run the alignments").format(gen))
         sys.exit(1)
+
+
+def write_genome_file(listdir, aldir, dname, strain, member, several):
+    """
+    For a given genome, write all the proteins and genes to extract to its file.
+    If one of the 2 files (proteins and genes) already exists, overwrite it.
+    If no file exists -> write them
+    If the 2 files exist -> warning saying that we use already existing files
+    """
+    gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
+    geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
+    # If one of the 2 files already exists, overwrite it
+    if os.path.isfile(gegenfile) and os.path.isfile(geprtfile):
+        logger.warning("For genome {}, {} and {} already exist. The program will use them "
+                       "to extract proteins and genes. If you prefer to rewrite them, use "
+                       "option -F (or --force).".format(strain, geprtfile, gegenfile))
+        return
+    with open(gegenfile, "w") as gegf, open(geprtfile, "w") as gepf:
+        for mem, fam in member.items():
+            if strain not in several[fam]:
+                genfile = os.path.join(aldir, dname + "-current." + fam + ".gen")
+                gegf.write(mem + " " + genfile + "\n")
+                prtfile = os.path.join(aldir, dname + "-current." + fam + ".prt")
+                gepf.write(mem + " " + prtfile + "\n")
 
 
 def write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname):
