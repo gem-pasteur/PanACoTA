@@ -19,10 +19,10 @@ def main_from_parse(args):
     Call main function from the arguments given by parser
     """
     main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
-         args.verbose, args.quiet)
+         args.threads, args.verbose, args.quiet)
 
 
-def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
+def main(corepers, list_genomes, dname, dbpath, outdir, threads, verbose=0, quiet=False):
     """
     Align given core genome families
     """
@@ -45,7 +45,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, verbose=0, quiet=False):
                                                                dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, quiet)
     prefix = os.path.join(aldir, dname)
-    status = ali.align_all_families(prefix, fam_nums, len(all_genomes))
+    status = ali.align_all_families(prefix, fam_nums, len(all_genomes), quiet, threads)
     if not status:
         logger.error(("At least one alignment did not run well. See detailed log file for "
                       "more information. Program will stop here, alignments won't be "
@@ -59,6 +59,26 @@ def build_parser(parser):
     Method to create a parser for command-line options
     """
     import argparse
+    import multiprocessing
+
+    def thread_num(param):
+        try:
+            param = int(param)
+        except Exception:
+            msg = "argument --threads threads: invalid int value: {}".format(param)
+            raise argparse.ArgumentTypeError(msg)
+        nb_cpu = multiprocessing.cpu_count()
+        if param > nb_cpu:
+            msg = ("You have {} threads on your computer, you cannot ask for more: "
+                   "invalid value: {}").format(nb_cpu, param)
+            raise argparse.ArgumentTypeError(msg)
+        elif param < 0:
+            msg = ("Please provide a positive number of threads (or 0 for all threads): "
+                   "Invalid value: {}").format(param)
+            raise argparse.ArgumentTypeError(msg)
+        elif param == 0:
+            return nb_cpu
+        return param
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
@@ -82,9 +102,12 @@ def build_parser(parser):
     required.add_argument("-o", dest="outdir", required=True,
                           help=("Output directory, where all results must be saved "))
 
-    # optional = parser.add_argument_group('Optional arguments')
-    # optional.add_argument("-m", dest="mafft_options",
-    #                       help=("If you want to add options to mafft, such as --quiet..."))
+    optional = parser.add_argument_group('Optional arguments')
+    optional.add_argument("--threads", dest="threads", default=1, type=thread_num,
+                        help=("add this option if you want to parallelize on several threads. "
+                              "Indicate on how many threads you want to parallelize. "
+                              "By default, it uses 1 thread. Put 0 if you want to use "
+                              "all threads of your computer."))
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,

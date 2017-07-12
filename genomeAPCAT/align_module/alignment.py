@@ -12,60 +12,119 @@ March 2017
 """
 
 import os
+import sys
 import logging
+import multiprocessing
+import progressbar
+import threading
+
 from genomeAPCAT import utils
 
-logger = logging.getLogger("align.alignment")
 
 
-def align_all_families(prefix, all_fams, ngenomes):
+def align_all_families(prefix, all_fams, ngenomes, quiet, threads):
     """
     For each family:
     - align all its proteins with mafft
     - back-translate to nucleotides
     - add missing genomes
     """
-    logger.info(("Starting alignment of all families: protein alignment, "
-                 "back-translation to nucleotides, and add missing genomes in the family"))
+    main_logger = logging.getLogger("align.alignment")
+    main_logger.info(("Starting alignment of all families: protein alignment, "
+                      "back-translation to nucleotides, and add missing genomes in the family"))
+    nbfam = len(all_fams)
+    if not quiet:
+        # Create progressbar
+        widgets = ['Alignment: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+                   ' ', progressbar.Counter(), "/{}".format(nbfam), ' (',
+                   progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfam,
+                                      term_width=100).start()
+    pool = multiprocessing.Pool(threads)
 
-    all_ok = True
+    # Create a Queue to put logs from processes, and handle them after from a single thread
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    # arguments : (gpath, cores_prokka, name, force, nbcont, q) for each genome
+    arguments = [(prefix, num_fam, ngenomes, q) for num_fam in all_fams]
+    try:
+        final = pool.map_async(handle_family, arguments, chunksize=1)
+        pool.close()
+        # Listen for logs in processes
+        lp = threading.Thread(target=utils.logger_thread, args=(q,))
+        lp.start()
+        if not quiet:
+            while(True):
+                if final.ready():
+                    break
+                remaining = final._number_left
+                bar.update(nbfam - remaining)
+            bar.finish()
+        pool.join()
+        q.put(None)
+        lp.join()
+        final = final.get()
+    # If an error occurs (or user kills with keybord), terminate pool and exit
+    except Exception as excp:  # pragma: no cover
+        pool.terminate()
+        main_logger.error(excp)
+        sys.exit(1)
+    return set(final) == set([True])
 
-    # for fam in families : family_alignment() -> return btr_file, miss_file
-    for num_fam in all_fams:
-        # Get file names
-        prt_file = "{}-current.{}.prt".format(prefix, num_fam)
-        gen_file = "{}-current.{}.gen".format(prefix, num_fam)
-        miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
-        mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
-        btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
-        status = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
-                                  num_fam, ngenomes)
-        # If it returned true, Add missing genomes
-        if status:
-            add_missing_genomes(btr_file, miss_file, num_fam, ngenomes)
-        all_ok = all_ok and status
-    return all_ok
+
+def handle_family(args):
+    """
+    For a given family:
+    - align its proteins with mafft
+    - back-translate to nucleotides
+    - add missing genomes
+    """
+    prefix, num_fam, ngenomes, q = args
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('run_prokka')
+    # Get file names
+    prt_file = "{}-current.{}.prt".format(prefix, num_fam)
+    gen_file = "{}-current.{}.gen".format(prefix, num_fam)
+    miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
+    mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
+    btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
+    status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
+                               num_fam, ngenomes, logger)
+    # If it returned true, Add missing genomes
+    status2 = False
+    if status1:
+        status2 = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, logger)
+    return status1 and status2
 
 
-def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes):
+def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, logger):
     """
     Once all family proteins are aligned, and back-translated to nucleotides,
     add missing genomes for the family to the alignment with '-'.
     """
-    logger.details("Adding missing genomes for family {}".format(num_fam))
-    len_aln, _ = check_lens(btr_file, num_fam)
+    logger.log(utils.detail_lvl(), "Adding missing genomes for family {}".format(num_fam))
+    len_aln, _ = check_lens(btr_file, num_fam, logger)
     with open(miss_file, "r") as missf, open(btr_file, "a") as btrf:
         for genome in missf:
             genome = genome.strip()
             toadd = ">" + genome + "\n" + "-" * len_aln + "\n"
             btrf.write(toadd)
-    _, nb = check_lens(btr_file, num_fam)
+    _, nb = check_lens(btr_file, num_fam, logger)
     if nb != ngenomes:
         logger.error(("ERROR: family {} contains {} in total instead of the {} "
                       "genomes in input.\n").format(num_fam, nb, ngenomes))
+        return False
+    return True
 
 
-def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam, ngenomes):
+def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
+                     num_fam, ngenomes, logger):
     """
     From a given family, align all its proteins with mafft, back-translate
     to nucleotides, and add missing genomes in this family.
@@ -73,22 +132,22 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fa
     Returns False if a problem occurred during alignment, checking, back-translation etc.
     Returns True if no problem found
     """
-    nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes)
+    nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
     if not nbfprt:
         return False
-    nbfal = mafft_align(num_fam, prt_file, mafft_file, nbfprt)
+    nbfal = mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
     if not nbfal:
         return False
-    return back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal)
+    return back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger)
 
 
-def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes):
+def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger):
     """
     Check that extractions went well for the given family:
     - check number of proteins and genes extracted compared to the
     number of genomes
     """
-    logger.details("Checking extractions for family {}".format(num_fam))
+    logger.log(utils.detail_lvl(), "Checking extractions for family {}".format(num_fam))
 
     # Check that extractions went well
     nbmiss = utils.count(miss_file)
@@ -105,21 +164,21 @@ def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes):
     return nbfprt
 
 
-def mafft_align(num_fam, prt_file, mafft_file, nbfprt):
+def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     """
     Align all proteins of the given family with mafft
     """
-    logger.details("Aligning family {}".format(num_fam))
+    logger.log(utils.detail_lvl(), "Aligning family {}".format(num_fam))
     cmd = "fftns --quiet {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
-    ret = utils.run_cmd(cmd, error, stdout=stdout)
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
     if ret != 0:
         return False
-    return check_mafft_align(num_fam, prt_file, mafft_file, nbfprt)
+    return check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
 
 
-def check_mafft_align(num_fam, prt_file, mafft_file, nbfprt):
+def check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     """
     Check that mafft alignment went well: the number of proteins in the alignment
     is the same as the number of proteins extracted
@@ -132,23 +191,23 @@ def check_mafft_align(num_fam, prt_file, mafft_file, nbfprt):
     return nbfal
 
 
-def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal):
+def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     """
     Backtranslate protein alignment to nucleotides
     """
-    logger.details("Back-translating family {}".format(num_fam))
+    logger.log(utils.detail_lvl(), "Back-translating family {}".format(num_fam))
     curpath = os.path.dirname(os.path.abspath(__file__))
     awk_script = os.path.join(curpath, "prt2codon.awk")
     cmd = "awk -f {} {} {}".format(awk_script, mafft_file, gen_file)
     stdout = open(btr_file, "w")
     error = "Problem while trying to backtranslate {} to a nucleotide alignment".format(mafft_file)
-    ret = utils.run_cmd(cmd, error, stdout=stdout)
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
     if ret != 0:
         return False
-    return check_backtranslate(num_fam, mafft_file, btr_file, nbfal)
+    return check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger)
 
 
-def check_backtranslate(num_fam, mafft_file, btr_file, nbfal):
+def check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger):
     """
     Check back-translation
     """
@@ -161,7 +220,7 @@ def check_backtranslate(num_fam, mafft_file, btr_file, nbfal):
     return True
 
 
-def check_lens(aln_file, num_fam):
+def check_lens(aln_file, num_fam, logger):
     """
     In the given alignment file, check that all sequences have the same length.
     If there is no problem, it returns the length of alignment, and the number
