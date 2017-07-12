@@ -11,6 +11,7 @@ April 2017
 
 import os
 import sys
+import re
 import glob
 import logging
 from logging.handlers import RotatingFileHandler
@@ -485,6 +486,43 @@ def cat(list_files, output, title = None):
                 shutil.copyfileobj(inf, outf)
     if title:
         bar.finish()
+
+
+def grep(filein, pattern, count=False):
+    """
+    By default, returns all the lines containing the given pattern.
+    If count = True, returns the number of lines containing the pattern.
+    """
+    num = 0
+    lines = []
+    with open(filein, "r") as inf:
+        for line in inf:
+            if re.search(pattern, line):
+                lines.append(line.strip())
+                num += 1
+    if count:
+        return num
+    else:
+        return lines
+
+
+def count(filein, get="lines"):
+    """
+    Count the number of what is given in 'get'. It can be:
+    - lines (default)
+    - words
+    """
+    gets = ["lines", "words"]
+    if get not in gets:
+        logger.error("Choose what you want to count among {}.".format(gets))
+    num = 0
+    with open(filein, "r") as inf:
+        for line in inf:
+            if get == "lines":
+                num += 1
+            elif get == "words":
+                num += len(line.strip())
+    return num
 
 
 def check_format(info):
