@@ -9,7 +9,7 @@ import progressbar
 logger = logging.getLogger("align.extract")
 
 
-def get_all_seqs(all_genomes, dname, dbpath, listdir, quiet):
+def get_all_seqs(all_genomes, dname, dbpath, listdir, force, quiet):
     """
     For all genomes, extract its proteins present in a persistent family to the file
     corresponding to this family.
@@ -24,14 +24,15 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, quiet):
                    progressbar.ETA()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=150).start()
         curnum = 1
+    files_explored = []
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
         ge_prt = os.path.join(listdir, dname + "-getEntry_prt_" + genome + ".txt")
         logger.details("Extracting proteins and genes from {}".format(genome))
         prtdb = os.path.join(dbpath, "Proteins", genome + ".prt")
         gendb = os.path.join(dbpath, "Genes", genome + ".gen")
-        get_genome_seqs(prtdb, ge_prt)
-        get_genome_seqs(gendb, ge_gen)
+        get_genome_seqs(prtdb, ge_prt, files_explored, force=force)
+        get_genome_seqs(gendb, ge_gen, files_explored, force=force)
         if not quiet:
             bar.update(curnum)
             curnum += 1
@@ -39,7 +40,7 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, quiet):
         bar.finish()
 
 
-def get_genome_seqs(fasta, tabfile, outfile=None):
+def get_genome_seqs(fasta, tabfile, files_explored, outfile=None, force=False):
     """
     From a fasta file, extract all sequences given in the tab file.
     The tab file can contain:
@@ -54,11 +55,22 @@ def get_genome_seqs(fasta, tabfile, outfile=None):
         to_extract = get_names_to_extract(tabf, outfile)
 
     if outfile:
-        with open(fasta, "r") as fasf, open(outfile, "a") as outf:
-            extract_sequences(to_extract, fasf, outf)
+        if outfile in files_explored:
+            mode = "a"
+        elif force:
+            mode = "w"
+            files_explored.append(outfile)
+        elif os.path.isfile(outfile):
+            logger.warning("Sequences are already extracted in {}. This will "
+                           "be used for next step. If you want "
+                           "to re-extract all sequences, use option -F (or "
+                           "--force)".format(outfile))
+            return
+        with open(fasta, "r") as fasf, open(outfile, mode) as outf:
+            extract_sequences(to_extract, fasf, outf=outf)
     else:
         with open(fasta, "r") as fasf:
-            extract_sequences(to_extract, fasf)
+            extract_sequences(to_extract, fasf, force=force, explored_files=files_explored)
 
 
 def get_names_to_extract(tabf, outfile):
@@ -83,22 +95,54 @@ def get_names_to_extract(tabf, outfile):
     return to_extract
 
 
-def extract_sequences(to_extract, fasf, outf=None):
+def extract_sequences(to_extract, fasf, force=False, explored_files=[], outf=None):
     """
     Extract sequences from an open fasta file 'fasf', and a list of sequences to
     extract
+
+    my_files = files already seen and for which we must append new sequences, corresponding
+    to the same kind of data as fasf (protein or gene)
+    files_other = same as my_files, but if fasf is proteins, the file has been seen as gene,
+    and if fasf is gene, the file has been seen as protein.
     """
     out_given = outf != None
+    change_ext = {".prt": ".gen", ".gen": ".prt"}
     extract = False
     for line in fasf:
         if line.startswith(">"):
             seq = line.split(">")[1].split()[0]
+            # Seq is part of sequences to extract
             if seq in to_extract:
+                # if out_given, outf is already open. Otherwise, open it only if must be written
                 if not out_given:
+                    # get corresponding outfile
                     out = to_extract[seq]
-                    outf = open(out, "a")
-                outf.write(line)
-                extract = True
+                    out_path, ext = os.path.splitext(out)
+                    out_base = os.path.basename(out_path)
+                    if out_base in explored_files:
+                        # file already seen before: add sequence to it
+                        outf = open(out, "a")
+                    elif (os.path.isfile(out) and os.path.isfile(out_path + change_ext[ext])
+                          and not force):
+                        # file never seen before, not force, and the 2 files already exist:
+                        # keep them
+                        logger.warning("Sequences are already extracted in {} and {}. This will "
+                                       "be used for next step. If you want to re-extract only "
+                                       "those sequences, erase the 2 files before. If you want "
+                                       "to re-extract all sequences, use option -F (or "
+                                       "--force)".format(out, out_path + change_ext[ext]))
+                        outf = None
+                    else:
+                        # file not seen before. overwrite them (either force, or not force but
+                        # at least one file does not exist)
+                        open(out_path + change_ext[ext], "w").close()
+                        outf = open(out, "w")
+                        explored_files.append(out_base)
+                if outf:
+                    outf.write(line)
+                    extract = True
+                else:
+                    extract = False
             else:
                 if not out_given and outf:
                     outf.close()
