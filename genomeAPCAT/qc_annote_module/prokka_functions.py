@@ -10,13 +10,13 @@ April 2017
 """
 
 import os
+import sys
 import shutil
 import glob
 import logging
 import subprocess
 import shlex
 import multiprocessing
-import sys
 import progressbar
 import threading
 
