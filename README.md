@@ -103,7 +103,7 @@ If you installed the dependencies (such as prokka) via our installation script, 
 - `annotate` (annotate all genomes of the dataset, after a quality control)
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
-- `align` (align core/persistent families) NOT IMPLEMENTED YET
+- `align` (align core/persistent families)
 - `tree` (infer phylogenetic tree from persistent genome) NOT IMPLEMENTED YET
 
 You can run them by typing:
