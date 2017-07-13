@@ -134,29 +134,11 @@ def build_parser(parser):
                         help="show this help message and exit")
 
 
-def check_args(parser, args):
-    """
-    Check that arguments given to parser are as expected.
-    """
-    # if args.multi and args.mixed:
-    #     parser.error("-M and -X options cannot be activated together. Choose if you want to:\n"
-    #                  "- allow several members in any number of genomes of a family (-M)\n"
-    #                  "- allow several members in only '1-tol'% of the genomes of a family "
-    #                  "(other 'tol'% genomes must have exactly 1 member) (-X)")
-    # if args.mixed and args.tol==1:
-    #     parser.error("You are asking for mixed families, while asking for 100% of the genomes of "
-    #                  "a family to have exactly one member, which is not compatible. Do you want "
-    #                  "to \n- lower the percentage of genomes required to have exactly "
-    #                  "1 member (-t tol)\n- not allow mixed families (remove -X option)")
-    return args
-
-
 def parse(parser, argu):
     """
     Parse arguments given to parser
     """
-    args = parser.parse_args(argu)
-    return check_args(parser, args)
+    return parser.parse_args(argu)
 
 
 if __name__ == '__main__':
