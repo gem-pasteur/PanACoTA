@@ -8,6 +8,7 @@ from genomeAPCAT.subcommands import qc_and_annote
 from genomeAPCAT.subcommands import pangenome
 from genomeAPCAT.subcommands import corepers
 from genomeAPCAT.subcommands import align
+from genomeAPCAT.subcommands import tree
 
 
 def main():
@@ -78,7 +79,14 @@ def parse_arguments(argv):
     align.build_parser(parser_align)
     actions["align"] = align.main_from_parse
 
-    # and tree part
+    # tree part
+    parser_tree = subparsers.add_parser('tree',
+                                       help=("Infer phylogenetic tree based on "
+                                             "core/persistent genome"),
+                                       add_help=False)
+    tree.build_parser(parser_tree)
+    actions["tree"] = tree.main_from_parse
+    checks["tree"] = tree.check_args
 
     # Parse arguments and execute corresponding action
     arguments = parser.parse_args(argv)
