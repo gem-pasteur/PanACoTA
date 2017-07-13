@@ -25,38 +25,51 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     - concatenate all alignment files
     - group the alignment by genome
     """
-    all_alns = concat_alignments(fam_nums, prefix, quiet)
+    all_alns, status = concat_alignments(fam_nums, prefix, quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    launch_group_by_genome(all_genomes, all_alns, treedir, dname, quiet)
+    launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
 
 
 def concat_alignments(fam_nums, prefix, quiet):
     """
     Concatenate all family alignment files to a unique file
     """
+    output = "{}-complete.cat.aln".format(prefix)
+    if os.path.isfile(output):
+        logger.info("Alignments already concatenated")
+        logger.warning(("Alignments already concatenated in {}. Program will use "
+                        "it for next steps").format(output))
+        return output, "OK"
     logger.info("Concatenating all alignment files")
     list_files = ["{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam) for num_fam in fam_nums]
-    output = "{}-complete.cat.aln".format(prefix)
     if quiet:
         utils.cat(list_files, output)
     else:
         utils.cat(list_files, output, title = "Concatenation")
-    return output
+    return output, "Done"
 
 
-def launch_group_by_genome(all_genomes, all_alns, treedir, dname, quiet):
+def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet):
     """
     Function calling group_by_genome in a pool, while giving information to user
     (time elapsed)
     """
+    outfile = os.path.join(treedir, dname + ".grp.aln")
+    if status == "Done":
+        utils.remove(outfile)
+    if os.path.isfile(outfile):
+        logger.info("Alignments already grouped by genome")
+        logger.warning(("Alignments already grouped by genome in {}. "
+                        "Program will end. ").format(outfile))
+        return
     logger.info("Grouping alignments per genome")
     if not quiet:
         widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
                    "  -  ", progressbar.Timer()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
     pool = multiprocessing.Pool(1)
-    args = [all_genomes, all_alns, treedir, dname]
+    args = [all_genomes, all_alns, outfile]
     final = pool.map_async(group_by_genome, [args], chunksize=1)
     pool.close()
     if not quiet:
@@ -75,8 +88,7 @@ def group_by_genome(args):
     proteins by their genome (listed in 'all_genomes'), and save the result
     in 'treedir'
     """
-    all_genomes, all_alns, treedir, dname = args
-    outfile = os.path.join(treedir, dname + ".grp.aln")
+    all_genomes, all_alns, outfile = args
     sequences = read_alignments(all_alns, all_genomes)
     write_groups(outfile, sequences)
 
