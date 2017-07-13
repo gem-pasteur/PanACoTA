@@ -38,7 +38,8 @@ def parse_requirements(requirements):
                 and not l.startswith('#')]
 
 packages = ['genomeAPCAT', 'genomeAPCAT.qc_annote_module', 'genomeAPCAT.pangenome_module',
-            'genomeAPCAT.corepers_module', 'genomeAPCAT.subcommands']
+            'genomeAPCAT.corepers_module', 'genomeAPCAT.align_module',
+            'genomeAPCAT.subcommands']
 requires = parse_requirements("requirements.txt")
 scripts = ['bin/genomeAPCAT']
 
