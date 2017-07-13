@@ -6,9 +6,9 @@ import os
 import logging
 import progressbar
 
+from genomeAPCAT import utils
+
 logger = logging.getLogger("align.extract")
-
-
 
 
 def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
@@ -19,6 +19,8 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
     # Get list of files not already existing
     files_todo = check_existing_extract(all_fams, aldir, dname)
     if len(files_todo) == 0:
+        logger.info(("All extraction files already existing (see detailed log for "
+                     "more information)"))
         logger.warning("All prt and gene files for all families already exist. The program "
                        "will use them for the next step. If you want to re-extract a given "
                        "family, remove its prt and gen extraction files. If you want to "
@@ -62,12 +64,24 @@ def check_existing_extract(all_fams, aldir, dname):
         genfile = os.path.join(aldir, "{}-current.{}.gen".format(dname, fam))
         prtfile = os.path.join(aldir, "{}-current.{}.prt".format(dname, fam))
         if not os.path.isfile(genfile) or not os.path.isfile(prtfile):
-            if os.path.isfile(genfile):
-                os.remove(genfile)
-            elif os.path.isfile(prtfile):
-                os.remove(prtfile)
+            # At least 1 file missing: re-extract all proteins and all genes
+            utils.remove(genfile)
+            utils.remove(prtfile)
+            # As we re-extract proteins and genes, redo alignments
+            mafft_file = os.path.join(aldir, "{}-mafft-align.{}.aln".format(dname, fam))
+            btr_file = os.path.join(aldir, "{}-mafft-prt2nuc.{}.aln".format(dname, fam))
+            utils.remove(mafft_file)
+            utils.remove(btr_file)
             extract_fams.append(genfile)
             extract_fams.append(prtfile)
+    # If we re-extract at least 1 family, redo the final files (concatenation and group by genome)
+    if len(extract_fams) > 0:
+        concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+        outdir = os.path.split(aldir)[0]
+        treedir = os.path.join(outdir, "Phylo-" + dname)
+        grpfile = os.path.join(treedir, dname + ".grp.aln")
+        utils.remove(concat)
+        utils.remove(grpfile)
     return extract_fams
 
 
@@ -156,15 +170,4 @@ def extract_sequences(to_extract, fasf, files_todo=[], outf=None):
         else:
             if extract:
                 outf.write(line)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        for _ in range(200):
-            get_genome_seqs(sys.argv[1], sys.argv[2])
-    elif len(sys.argv) == 4:
-        get_seqs(sys.argv[1], sys.argv[2], sys.argv[3])
-    else:
-        print("please give fasta, tabfile, [outfile]")
-
 
