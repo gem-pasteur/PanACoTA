@@ -40,10 +40,8 @@ def main(align, boot, outfile, threads, verbose, quiet):
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
-    print(type(threads), threads, " threads")
     ft.define_nb_threads(threads)
-    print("tree")
-    # FastTreeMP -nt -gtr -noml -nocat -log <logfile> <align_file> > <tree_file>` (+ `-nosupport` if no bootstrap wanted, or `-boot <n>`
+    ft.run_fasttree(alignfile, boot, outfile)
 
 
 def build_parser(parser):
