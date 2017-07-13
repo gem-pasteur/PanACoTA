@@ -628,3 +628,12 @@ def write_list(liste):
     """
     list_write = [str(l) for l in liste]
     return " ".join(list_write) + "\n"
+
+
+def remove(infile):
+    """
+    Remove the given file if it exists
+    """
+    if os.path.isfile(infile):
+        os.remove(infile)
+
