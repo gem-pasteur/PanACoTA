@@ -53,7 +53,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
                                                                dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
     prefix = os.path.join(aldir, dname)
-    status = ali.align_all_families(prefix, fam_nums, len(all_genomes), quiet, threads)
+    status = ali.align_all_families(prefix, fam_nums, len(all_genomes), dname, quiet, threads)
     if not status:
         logger.error(("At least one alignment did not run well. See detailed log file for "
                       "more information. Program will stop here, alignments won't be "
