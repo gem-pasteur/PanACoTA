@@ -17,9 +17,11 @@ genome APCAT is a software providing tools for large scale comparative genomics:
 genomeAPCAT is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- prokka (to annotate the genomes)
-- mmseqs (to generate pangenomes) NOT INSTALLED BY 'make' FOR NOW
-- fftns (from mafft, to align persistent genome) NOT INSTALLED BY 'make' FOR NOW
+- [**prokka**](https://github.com/tseemann/prokka) (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `genomeAPCAT` (see [Install section](#install)
+)
+- [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes) 
+- [**fftns**](http://mafft.cbrc.jp/alignment/software/) (from mafft, to align persistent genome)
+- [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install) (to infer a phylogenetic tree) We advise to download C code, and compile as described here above.
 
 You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
@@ -29,6 +31,12 @@ To be able to install the dependencies (by yourself, or with the installation sc
 - `git`
 - `wget`
 - bioperl, java and some other base packages required for prokka: see [Prokka README](https://github.com/tseemann/prokka) for more information.
+
+For FastTree, we advise to download C code from [here](http://www.microbesonline.org/fasttree/#Install), and compile it using:
+
+    gcc -DOPENMP -fopenmp -DUSE_DOUBLE -Wall -O3 -finline-functions -funroll-loops -o FastTreeMP -lm FastTree-2.1.9.c
+
+You can then add the output `FastTreeMP` to your `$PATH` to be able to run it from everywhere.
 
 
 ## Downloading and updating `genomeAPCAT`
@@ -47,7 +55,7 @@ If a new version of `genomeAPCAT` is released, and you want to use it, type the 
 
 Then, you will be able to upgrade to the new version (see bellow).
 
-## Installing `genomeAPCAT` (final mode)
+## <a name="install"></a> Installing `genomeAPCAT` (final mode)
 
 
 To install `genomeAPCAT`, and all its dependencies, from the root directory, type:
@@ -104,7 +112,7 @@ If you installed the dependencies (such as prokka) via our installation script, 
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
 - `align` (align core/persistent families)
-- `tree` (infer phylogenetic tree from persistent genome) NOT IMPLEMENTED YET
+- `tree` (infer phylogenetic tree from persistent genome)
 
 You can run them by typing:
 
