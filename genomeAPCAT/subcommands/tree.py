@@ -41,7 +41,7 @@ def main(align, boot, outfile, threads, verbose, quiet):
     logger = logging.getLogger()
 
     ft.define_nb_threads(threads)
-    ft.run_fasttree(alignfile, boot, outfile)
+    ft.run_fasttree(align, boot, outfile, quiet)
 
 
 def build_parser(parser):

@@ -24,10 +24,11 @@ def define_nb_threads(threads):
     os.environ["OMP_NUM_THREADS"] = str(threads)
 
 
-def run_fasttree(alignfile, boot, treefile):
+def run_fasttree(alignfile, boot, treefile, quiet):
     """
     Run fasttree on given alignment
     """
+    logger.info("Running FasttreeMP...")
     if not boot:
         bootinfo = "-nosupport"
     else:
@@ -35,8 +36,12 @@ def run_fasttree(alignfile, boot, treefile):
     logfile = alignfile + ".fasttree.log"
     if not treefile:
         treefile = alignfile + ".fasttree_tree.nwk"
-    cmd = "FastTreeMP -nt -gtr -noml -nocat -log {} {} {}".format(logfile, alignfile, bootinfo)
+    cmd = "FastTreeMP -nt -gtr -noml -nocat {} -log {} {}".format(bootinfo, logfile, alignfile)
+    if quiet:
+        FNULL = open(os.devnull, 'w')
+    else:
+        FNULL = None
     stdout = open(treefile, "w")
     error = ("Problem while running Fasttree. See log file ({}) for "
              "more information.").format(logfile)
-    utils.run_cmd(cmd, error, stdout=stdout, eof=True, logger=logger)
+    utils.run_cmd(cmd, error, stdout=stdout, eof=True, logger=logger, stderr=FNULL)

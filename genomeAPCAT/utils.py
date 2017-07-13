@@ -184,6 +184,8 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     """
     if not "logger" in kwargs:
         logger = logging.getLogger("utils.run_cmd")
+    else:
+        logger = kwargs["logger"]
     if not "stdout" in kwargs:
         kwargs["stdout"] = None
     if not "stderr" in kwargs:
