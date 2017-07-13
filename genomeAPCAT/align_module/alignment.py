@@ -22,7 +22,7 @@ from genomeAPCAT import utils
 
 
 
-def align_all_families(prefix, all_fams, ngenomes, quiet, threads):
+def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     """
     For each family:
     - align all its proteins with mafft
@@ -70,7 +70,16 @@ def align_all_families(prefix, all_fams, ngenomes, quiet, threads):
         pool.terminate()
         main_logger.error(excp)
         sys.exit(1)
-    return set(final) == set([True])
+    # We re-aligned at least one family -> remove concatenated files and groupby
+    if set(final) != set(["OK"]):
+        aldir = os.path.split(prefix)[0]
+        concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+        outdir = os.path.split(aldir)[0]
+        treedir = os.path.join(outdir, "Phylo-" + dname)
+        grpfile = os.path.join(treedir, dname + ".grp.aln")
+        utils.remove(concat)
+        utils.remove(grpfile)
+    return not False in final
 
 
 def handle_family(args):
@@ -99,27 +108,65 @@ def handle_family(args):
     # If it returned true, Add missing genomes
     status2 = False
     if status1:
-        status2 = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, logger)
-    return status1 and status2
+        status2 = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+        return status2
+    return False
 
 
-def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, logger):
+def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger):
     """
     Once all family proteins are aligned, and back-translated to nucleotides,
     add missing genomes for the family to the alignment with '-'.
     """
+    # btr_file should always exist.
+    # Sometimes it comes from previous step ('missing genomes' are missing)
+    # Sometimes it comes from a previous run (all genomes should be here)
+    status = check_add_missing(btr_file, num_fam, ngenomes, logger, prev=True)
+    # If btr_file has the correct number of sequences, all the same length, return True
+    if status == True:
+        if status1 == "OK":
+            logger.warning(("Alignment already done for family {}. The program will use "
+                        "it for next steps").format(num_fam))
+            return "OK"
+        else:
+            return True
+    # If btr_files has problem in alignment (not all sequences with same size)
+    elif status == False:
+        return False
+    # All sequences have same length but some genomes are missing -> Add missing genomes
     logger.log(utils.detail_lvl(), "Adding missing genomes for family {}".format(num_fam))
-    len_aln, _ = check_lens(btr_file, num_fam, logger)
+    len_aln = status
     with open(miss_file, "r") as missf, open(btr_file, "a") as btrf:
         for genome in missf:
             genome = genome.strip()
             toadd = ">" + genome + "\n" + "-" * len_aln + "\n"
             btrf.write(toadd)
-    _, nb = check_lens(btr_file, num_fam, logger)
-    if nb != ngenomes:
-        logger.error(("ERROR: family {} contains {} in total instead of the {} "
-                      "genomes in input.\n").format(num_fam, nb, ngenomes))
+    ret = check_add_missing(btr_file, num_fam, ngenomes, logger)
+    # Return True only if all genomes found with all same length (check_add_missing = True)
+    return ret == True
+
+
+def check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False):
+    """
+    Check alignment while missing genomes have been added
+
+    Returns:
+    - False if sequences do not have the same length in alignment
+    - len_aln if sequences all have the same length but there are genomes missing
+    - True if all sequences are present and have the same length
+    """
+    res = check_lens(btr_file, num_fam, logger)
+    # If all sequences have the same length, get number of sequences
+    if res:
+        len_aln, nb = res
+    # otherwise, return False: problem while aligning or back-translating
+    else:
         return False
+    if nb != ngenomes:
+        if not prev:
+            logger.error(("ERROR: family {} contains {} genomes in total instead of the {} "
+                          "genomes in input.\n").format(num_fam, nb, ngenomes))
+        return len_aln
     return True
 
 
@@ -134,10 +181,21 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     """
     nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
     if not nbfprt:
+        utils.remove(mafft_file)
+        utils.remove(btr_file)
         return False
-    nbfal = mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
+    if os.path.isfile(mafft_file):
+        nbfal = check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
+        if not nbfal:
+            os.remove(mafft_file)
+            utils.remove(btr_file)
+    if not os.path.isfile(mafft_file):
+        utils.remove(btr_file)
+        nbfal = mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
     if not nbfal:
         return False
+    if os.path.isfile(btr_file):
+        return "OK"
     return back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger)
 
 
@@ -224,7 +282,11 @@ def check_lens(aln_file, num_fam, logger):
     """
     In the given alignment file, check that all sequences have the same length.
     If there is no problem, it returns the length of alignment, and the number
-    of sequences aligned
+    of sequences aligned.
+
+    Returns False if there is a problem in the alignment (sequences do not all have the
+    same length).
+    If they all have the same length, returns this length and the number of sequences
     """
     nb_gen = 0
     all_sums = set()
@@ -244,4 +306,5 @@ def check_lens(aln_file, num_fam, logger):
     if len(all_sums) > 1:
         logger.error(("alignments for family {} do not all have the same "
                       "length. Lengths found are: {}\n").format(num_fam, all_sums))
+        return False
     return list(all_sums)[0], nb_gen
