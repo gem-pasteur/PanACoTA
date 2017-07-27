@@ -31,6 +31,11 @@ def convert2phylip(infile, outfile):
     Input alignment is in fasta format. Input of fastME must be in Phylip-relaxed format.
     Convert it here.
     """
+    if os.path.isfile(outfile):
+        logger.info("Phylip alignment file already existing.")
+        logger.warning(("The Phylip alignment file {} already exists. The program "
+                        "will use it instead of re-converting {}.").format(outfile, infile))
+        return
     logger.info("Converting fasta alignment to PHYLIP-relaxed format.")
     with open(infile, 'r') as input_handle, open(outfile, 'w') as output_handle:
         alignments = AlignIO.parse(input_handle, "fasta")
