@@ -48,6 +48,8 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
 
     tree.run_tree(align, boot, threads, outfile, quiet, model, write_boot)
 
+    logger.info("END")
+
 
 def build_parser(parser):
     """
