@@ -149,9 +149,23 @@ You can infer a phylogenetic tree from the alignment of persistent families. By 
 
     genomeAPCAT tree -a my_results/Phylogeny/Phylo-GENO3-1/GENO3-1.grp.aln --threads 5
 
+In your output directory, `my_results/Phylogeny/Phylo-GENO3-1`, you will find:
+
+- `GENO3-1.grp.aln.fasttree.log`: logfile of FastTree, with information on running steps, and intermediate trees inferred.
+- `GENO3-1.grp.aln.fasttree_tree.nwk`: the final tree inferred, in Newick format.
+- `genomeAPCAT-tree-fasttree.log*`: the 3 log files as in the other steps.
+
 If you want to use FastME instead of FastTree, with all default parameters (TN93 substitution model, no bootstrap), using 5 threads, run:
 
     genomeAPCAT tree -a my_results/Phylogeny/Phylo-GENO3-1/GENO3-1.grp.aln -s fastme --threads 5
+
+In your output directory, `my_results/Phylogeny/Phylo-GENO3-1`, you will find:
+
+- `GENO3-1.grp.aln.phylip`: alignment converted in Phylip-relaxed format, the input of FastME
+- `GENO3-1.grp.aln.phylip.fastme.log`: logfile of FastME, with information on running steps.
+- `GENO3-1.grp.aln.phylip.fastme_dist-mat.txt`: distance matrix of all given genomes
+- `GENO3-1.grp.aln.phylip.fastme_tree.nwk`: the final tree inferred in Newick format. Here, it is empty, as FastME does not compute trees with less than 4 taxa.
+- `genomeAPCAT-tree-fastme.log*`: the 3 log files as in the other steps
 
 See `genomeAPCAT tree -h` to have an overview of all options available.
 
