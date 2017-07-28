@@ -191,8 +191,10 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     if not "stderr" in kwargs:
         kwargs["stderr"] = None
     try:
-        retcode = subprocess.call(shlex.split(cmd), stdout=kwargs["stdout"],
+        call = subprocess.Popen(shlex.split(cmd), stdout=kwargs["stdout"],
                                   stderr=kwargs["stderr"])
+        call.wait()
+        retcode = call.returncode
     except OSError:
         logger.error(error + ": " + "{} does not exist".format(cmd))
         if eof:
@@ -203,7 +205,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         logger.error(error)
         if eof:
             sys.exit(retcode)
-    return retcode
+    return call
 
 
 def plot_distr(values, limit, outfile, title, text):
