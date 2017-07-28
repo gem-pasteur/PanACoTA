@@ -22,6 +22,7 @@ Its external dependencies are:
 - [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes) 
 - [**fftns**](http://mafft.cbrc.jp/alignment/software/) (from mafft, to align persistent genome)
 - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install) (to infer a phylogenetic tree) We advise to download C code, and compile as described here above.
+- or [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php) (to infer a phylogenetic tree)
 
 You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
@@ -71,19 +72,11 @@ just as any other software.
 
 If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
 
-**Warning:** If you plan to work on the scripts, or to download a new version after, choose the development installation (see below).
+**Warning:** If you plan to work on the scripts, choose the development installation (see [Development section](#develop)).
 
 **Note**: Dependencies installed by make:
 - prokka
-
-
-## Installing `genomeAPCAT` (development mode)
-
-If you want to install `genomeAPCAT` while still working on modifying the scripts, type:
-
-    ./make develop
-
-Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
+- barrnap (if prokka is not already installed)
 
 ## Uninstalling `genomeAPCAT`
 
@@ -94,8 +87,8 @@ If you don't want `genomeAPCAT` anymore, or if you want to install a newer versi
 ## Upgrade to new version
 
 If you want to install a new version of `genomeAPCAT`:
-- update to the new version (`git pull`)
-- upgrade to the new version (`./make upgrade`)
+- update source code to the new version (`git pull`)
+- upgrade installation to the new version (`./make upgrade`)
 
 ## Cleaning dependencies
 
@@ -127,15 +120,24 @@ Each subcommand has its own options and inputs. To get the list of required argu
 We provide a folder, `Examples`, containing genomic sequences (in `Examples/genomes`) and examples of input files (in `Examples/input_files`) for the software.  
 In this folder, you will also find a README file, explaining you how to run the different modules of `genomeAPCAT` with this dataset, so that you can try the software. We also describe the results that should be created by each command line.
 
-**Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations. Hence, the examples results should not be interpreted biologically!
+**Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations, but running very fast. Hence, the examples results should not be interpreted biologically!
 
 ## Documentation
 
 Not done yet, there will be a documentation describing each module and its arguments/options...
 
-# Development
+# <a name="develop"></a>  Development
 
 This part is for people who want to work on developing `genomeAPCAT` package.
+
+## Installing `genomeAPCAT` (development mode)
+
+If you want to install `genomeAPCAT` while still working on modifying the scripts, type:
+
+    ./make develop
+
+Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
+
 
 ## Running Tests
 
@@ -144,7 +146,7 @@ If you want to work on the scripts, you can use the tests provided with the soft
     PYTHONPATH+=. py.test test/test_unit
     PYTHONPATH+=. py.test test/test_functional
 
-or, if you installed the package (final or development mode)::
+or, if you installed the package (final or development mode):
 
     py.test test/test_unit
     py.test test/test_functional
