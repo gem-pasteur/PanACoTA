@@ -5,10 +5,19 @@ Welcome to genomeAPCAT's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: User documentation
 
    whatis
-   using
+   starting
+   examples
+
+
+.. toctree::
+    :maxdepth: 2
+    :caption: Developer documentation
+
+    develop
+    api
 
 
 Indices and tables
