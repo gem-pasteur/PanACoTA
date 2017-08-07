@@ -89,7 +89,7 @@ just as any other software.
 
 .. note:: Dependencies installed by ``make`` script are: 'prokka'.
 
-.. warning:: If you plan to work on the scripts, choose the development installation (see 'Developer documentation').
+.. warning:: If you plan to work on the scripts, choose the development installation (see :doc:`Developer documentation <develop>`).
 
 Uninstalling ``genomeAPCAT``
 ----------------------------
