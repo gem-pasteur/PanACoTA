@@ -39,6 +39,12 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         if not utils.check_installed("fastme"):  # pragma: no cover
             logger.error("fastme is not installed. 'genomeAPCAT tree' cannot run.")
             sys.exit(1)
+    elif soft == "quicktree":
+        from genomeAPCAT.tree_module import quicktree_func as tree
+        # test if fastME is installed and in the path
+        if not utils.check_installed("quicktree"):  # pragma: no cover
+            logger.error("quicktree is not installed. 'genomeAPCAT tree' cannot run.")
+            sys.exit(1)
     outdir = os.path.dirname(align)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "genomeAPCAT-tree-" + soft)
@@ -46,7 +52,7 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
-    tree.run_tree(align, boot, threads, outfile, quiet, model, write_boot)
+    tree.run_tree(align, boot, outfile, quiet, threads, model, write_boot)
 
     logger.info("END")
 
@@ -86,7 +92,7 @@ def build_parser(parser):
 
     # Choose with which soft inferring phylogenetic tree
     softparse = parser.add_argument_group('Choose soft to use (default is fasttree)')
-    softs = ["fasttree", "fastme"]
+    softs = ["fasttree", "fastme", "quicktree"]
     softparse.add_argument("-s", "--soft", dest="soft", choices=softs, default="fasttree",
                            help=("Choose with which software you want to infer the "
                                  "phylogenetic tree. Default is FastTree"))
@@ -103,7 +109,7 @@ def build_parser(parser):
                         help=("add this option if you want to parallelize on several threads. "
                               "Indicate on how many threads you want to parallelize. "
                               "By default, it uses 1 thread. Put 0 if you want to use "
-                              "all threads of your computer."))
+                              "all threads of your computer. Not available with quicktree."))
     optional.add_argument("-m", "--model", dest="model",
                           help=("Choose your DNA substitution model. "
                                 "Default for FastTree: GTR. Default for FastME: TN93. "
@@ -142,6 +148,19 @@ def check_args(parser, args):
             return choice
         msg = ("{} is not an available model for {}. Please choose an available DNA model "
                "(see -h for more details)").format(choice, args.soft)
+        parser.error(msg)
+
+    if args.soft == "quicktree" and args.threads != 1:
+        msg = ("You cannot run quicktree with multiple threads. Choose another software, "
+               "or remove the --threads option.")
+        parser.error(msg)
+
+    if args.soft == "quicktree" and args.model:
+        msg = ("Quicktree only runs the NJ algorithm. You cannot choose a DNA substitution model.")
+        parser.error(msg)
+
+    if args.soft == "quicktree" and args.write_boot:
+        msg = ("'-B' option is only available with FastME, not with quicktree")
         parser.error(msg)
 
     if args.soft == "fastme":

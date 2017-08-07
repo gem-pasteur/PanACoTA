@@ -16,7 +16,7 @@ from genomeAPCAT import utils
 logger = logging.getLogger("tree.fasttree")
 
 
-def run_tree(alignfile, boot, threads, treefile, quiet, model, *args):
+def run_tree(alignfile, boot, treefile, quiet, threads, model, *args):
     """
     Run fastme for the given alignment file and options
     """
