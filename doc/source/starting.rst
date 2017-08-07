@@ -4,6 +4,30 @@ Starting with genomeAPCAT
 
 ``genomeAPCAT`` is a Python package, developed in Python 3.
 
+Downloading and updating
+========================
+
+
+You can download ``genomeAPCAT`` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+
+.. code-block:: bash
+
+    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
+
+Give your gitlab login, and password.
+
+This will create a repository called ``pipeline_annotation``. Go inside this repository to install ``genomeAPCAT``, as described hereafter.
+
+If a new version of ``genomeAPCAT`` is released, and you want to use it, type the following command to update the source code:
+
+.. code-block:: bash
+
+    git pull
+
+Then, you will be able to upgrade to the new version (see bellow).
+
+
+
 Installation: '**./make**' and its options
 ========================================================
 
@@ -40,28 +64,6 @@ For FastTree, we advise to download C code from `here <http://www.microbesonline
 
 You can then add the output ``FastTreeMP`` to your ``$PATH`` to be able to run it from everywhere.
 
-
-Downloading and updating ``genomeAPCAT``
-----------------------------------------
-
-You can download ``genomeAPCAT`` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
-
-.. code-block:: bash
-
-    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
-
-Give your gitlab login, and password.
-
-This will create a repository called ``pipeline_annotation``. Go inside this repository to install ``genomeAPCAT``, as described hereafter.
-
-If a new version of ``genomeAPCAT`` is released, and you want to use it, type the following command to update the source code:
-
-.. code-block:: bash
-
-    git pull
-
-Then, you will be able to upgrade to the new version (see bellow).
-
 .. _installing:
 
 Installing ``genomeAPCAT``
@@ -85,10 +87,9 @@ just as any other software.
 
 If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access, use ``./make --user`` to install it locally.
 
-.. warning:: If you plan to work on the scripts, choose the development installation (see 'Developer documentation').
-
 .. note:: Dependencies installed by ``make`` script: 'prokka'.
 
+.. warning:: If you plan to work on the scripts, choose the development installation (see 'Developer documentation').
 
 Uninstalling ``genomeAPCAT``
 ----------------------------
