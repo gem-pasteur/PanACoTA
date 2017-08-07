@@ -85,9 +85,9 @@ or
 You will then be able to use the package from any directory in your computer,
 just as any other software.
 
-If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access, use ``./make --user`` to install it locally.
+.. note:: If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access, use ``./make --user`` to install it locally.
 
-.. note:: Dependencies installed by ``make`` script: 'prokka'.
+.. note:: Dependencies installed by ``make`` script are: 'prokka'.
 
 .. warning:: If you plan to work on the scripts, choose the development installation (see 'Developer documentation').
 
@@ -100,6 +100,9 @@ If you don't want ``genomeAPCAT`` anymore, uninstall it by typing:
 
     ./make uninstall
 
+.. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the previous command line to uninstall it.
+
+
 Upgrade to new version
 ----------------------
 
@@ -109,6 +112,8 @@ If you want to install a new version of ``genomeAPCAT``:
 
     git pull         # update source code to the new version
     ./make upgrade   # upgrade to the new version
+
+.. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the second command line (``sudo ./make upgrade``) to upgrade. Or, if you installed the package locally, use ``./make upgrade --user`` to upgrade this local version.
 
 
 Cleaning dependencies
