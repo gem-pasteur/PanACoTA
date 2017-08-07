@@ -9,11 +9,13 @@ Welcome to genomeAPCAT's documentation!
 
    whatis
    starting
+   usage
    examples
+   about
 
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
     :caption: Developer documentation
 
     develop
