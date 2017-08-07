@@ -21,8 +21,10 @@ Its external dependencies are:
 )
 - [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes) 
 - [**fftns**](http://mafft.cbrc.jp/alignment/software/) (from mafft, to align persistent genome)
-- [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install) (to infer a phylogenetic tree) We advise to download C code, and compile as described here above.
-- or [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php) (to infer a phylogenetic tree)
+- At least one of those softwares, to infer a phylogenetic tree:
+    - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install): We advise to download C code, and compile as described here above.
+    - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
+    - [**Quicktree**](https://github.com/tseemann/quicktree/releases)
 
 You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
 
