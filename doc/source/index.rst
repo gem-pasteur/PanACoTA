@@ -29,6 +29,3 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
- *Copyright* © `GEM <https://research.pasteur.fr/en/team/microbial-evolutionary-genomics/>`_ - Institut Pasteur, CNRS, UMR 3525
-
- *contact:* amandine.perrin@pasteur.fr
