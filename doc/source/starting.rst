@@ -14,9 +14,9 @@ You can download ``genomeAPCAT`` source code by downloading an archive (zip, tar
 
     git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
 
-Give your gitlab login, and password.
+When asked, give your gitlab login, and password.
 
-This will create a repository called ``pipeline_annotation``. Go inside this repository to install ``genomeAPCAT``, as described hereafter.
+This will create a repository called ``pipeline_annotation``. Go inside this repository (``cd pipeline_annotation``) to install ``genomeAPCAT``, as described hereafter.
 
 If a new version of ``genomeAPCAT`` is released, and you want to use it, type the following command to update the source code:
 
@@ -24,7 +24,7 @@ If a new version of ``genomeAPCAT`` is released, and you want to use it, type th
 
     git pull
 
-Then, you will be able to upgrade to the new version (see bellow).
+Then, you will be able to upgrade to the new version (see :ref:`Upgrade section <upgrade>`).
 
 
 
@@ -43,7 +43,7 @@ Its external dependencies are:
 - `fftns <http://mafft.cbrc.jp/alignment/software/>`_ (from mafft, to align persistent genome)
 - At least one of those softwares, to infer a phylogenetic tree:
 
-    - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described here above.
+    - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described :ref:`here above <fasttree>`.
     - `FastME <http://www.atgc-montpellier.fr/fastme/binaries.php>`_
     - `Quicktree <https://github.com/tseemann/quicktree/releases>`_
 
@@ -56,11 +56,13 @@ To be able to install the dependencies (by yourself, or with the installation sc
 - ``wget``
 - bioperl, java and some other base packages required for prokka: see `Prokka README <https://github.com/tseemann/prokka>`_ for more information.
 
+.. _fasttree:
+
 For FastTree, we advise to download C code from `here <http://www.microbesonline.org/fasttree/#Install>`_, and compile it using:
 
 .. code-block:: bash
 
-    gcc -DOPENMP -fopenmp -DUSE_DOUBLE -Wall -O3 -finline-functions -funroll-loops -o FastTreeMP -lm FastTree-2.1.9.c
+    gcc -DOPENMP -fopenmp -DUSE_DOUBLE -Wall -O3 -finline-functions -funroll-loops -o FastTreeMP -lm FastTree.c
 
 You can then add the output ``FastTreeMP`` to your ``$PATH`` to be able to run it from everywhere.
 
@@ -70,7 +72,7 @@ Installing ``genomeAPCAT``
 --------------------------
 
 
-To install ``genomeAPCAT``, and all its dependencies, from the root directory, type:
+To install ``genomeAPCAT`` from the ``pipeline_annotation`` directory, type:
 
 .. code-block:: bash
 
@@ -87,7 +89,7 @@ just as any other software.
 
 .. note:: If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access, use ``./make --user`` to install it locally.
 
-.. note:: Dependencies installed by ``make`` script are: 'prokka'.
+.. warning:: Dependencies installed by ``make`` script are: 'prokka'. You must install the other dependencies yourself. After installation of these programs, they should be in your ``$PATH`` (i.e. you can type in a terminal ``mmseqs``, ``fftns``, ``FastTreeMP``, ``fastme`` or ``quicktree`` and no ``command not found`` should be displayed).
 
 .. warning:: If you plan to work on the scripts, choose the development installation (see :doc:`Developer documentation <develop>`).
 
@@ -102,6 +104,7 @@ If you don't want ``genomeAPCAT`` anymore, uninstall it by typing:
 
 .. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the previous command line to uninstall it.
 
+.. _upgrade:
 
 Upgrade to new version
 ----------------------
