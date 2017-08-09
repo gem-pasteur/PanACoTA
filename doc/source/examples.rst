@@ -1,5 +1,6 @@
+========
 Examples
-********
+========
 
 We provide a folder, ``Examples``, containing genomic sequences (in ``Examples/genomes``) and examples of input files (in ``Examples/input_files``) for the software.
 

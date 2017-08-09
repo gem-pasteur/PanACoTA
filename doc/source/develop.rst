@@ -1,5 +1,6 @@
+========================
 Work on genomeAPCAT code
-************************
+========================
 
 This part is for people who want to work on developing `genomeAPCAT` package: adding new features, correcting bugs etc.
 

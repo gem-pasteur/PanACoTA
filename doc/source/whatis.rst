@@ -1,5 +1,6 @@
+===================
 What is genomeAPCAT
-*******************
+===================
 
 ``genomeAPCAT`` is a software providing tools for large scale bacterial comparative genomics. From a set of complete and/or draft genomes, you can:
 

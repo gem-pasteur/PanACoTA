@@ -1,5 +1,6 @@
+=========================
 Starting with genomeAPCAT
-*************************
+=========================
 
 
 ``genomeAPCAT`` is a Python package, developed in Python 3.
