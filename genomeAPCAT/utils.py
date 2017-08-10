@@ -350,7 +350,13 @@ def sort_proteins(x):
     - in each species, strain number
     - in each species and strain number, by protein number
     """
-    return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
+    try:
+        return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
+    except IndexError:
+        logger = logging.getLogger("utils")
+        logger.error(("ERROR: Protein {} does not have the required format. "
+                      "Please change its name.").format(x))
+        sys.exit(1)
 
 
 def read_genomes(list_file, name, date, dbpath, tmp_path):
