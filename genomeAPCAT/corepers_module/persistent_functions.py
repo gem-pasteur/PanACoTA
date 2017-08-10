@@ -29,7 +29,8 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
     mixed: bool, True if mixed families are allowed (exactly 1 member per family
     for at least tol% of the genomes, 0 or several members allowed for other (1-tol)%)
     """
-    logger.info("Generating Persistent genome")
+    logger.info(("Generating Persistent genome of a dataset "
+                 "containing {} genomes").format(nb_strains))
     pers = {} # {fam_num: {strain1: [genes from strain1], strain2: [genes from strain2]}}
     fams = {} # {fam_num: [list of members]}
     min_members = math.ceil(tol * nb_strains)
