@@ -350,7 +350,7 @@ def sort_proteins(x):
     - in each species, strain number
     - in each species and strain number, by protein number
     """
-    return (x.split(".")[0], int(x.split(".")[2]), int(x.split("_")[-1]))
+    return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
 
 
 def read_genomes(list_file, name, date, dbpath, tmp_path):
