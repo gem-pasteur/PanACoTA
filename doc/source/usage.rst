@@ -17,12 +17,12 @@ Each subcommand has its own options and inputs. To get the list of required argu
 
     genomeAPCAT <subcommand> -h
 
-We will now describe each subcommand, with its options.
-
-.. note:: The different options will be shown separately to describe their behaviour, but they can be used alltogether unless otherwise stated.
-
 
 .. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
+
+.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. For example, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``, and your sequence file is the same as previously, and the default parameters are 10 for ``-t`` and 0.5 for ``-i``. You can run either ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5), ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``), ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``) or ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``) according to your needs (if default values are ok, you do not need to specify the option).
+
+
 
 Here are the options shared by all subcommands:
 
@@ -33,7 +33,7 @@ Here are the options shared by all subcommands:
         + ``-v`` will add warnings in stderr (by default, only errors are displayed in stderr, warning are just in log files),
         + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
 
-
+We will now describe each subcommand, with its options.
 
 
 ``annotate`` subcommand
@@ -251,11 +251,13 @@ Annotation
 
 When you know the limits you want to use for the L90 and number of contigs, you can run the full annotation step, and not only the quality control. Use::
 
-    genomeAPCAT annotate <list_file> -d <dbpath> -r <res_path> -n <name>
+    genomeAPCAT annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num>]
 
 with:
     - same arguments as before
     - ``-n <name>`` the default species name to use, for lines of the list_file which do not contain this information. This name must contain 4 alpha-numeric characters.
+    - ``--l90 <num>``: *optional*. If the default value (max L90 = 100) does not fit your data, choose your own maximum limit.
+    - ``--nbcont <num>``: *optional*. If the default value (max nb_contigs = 999) does not fit your data, choose your own maximum limit.
 
 This command will run the same steps as described in quality control only, with additional steps:
 
