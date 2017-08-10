@@ -261,7 +261,9 @@ with:
 
 This command will run the same steps as described in quality control only, with additional steps:
 
-    - annotation of each genome with prokka
+    - Keeping only genomes with L90 lower than the limit and number of contigs lower than the limit
+    - For each species, ordering the genomes by increasing L90 and number of contigs, and assigning them a strain number
+    - annotating of each genome with prokka
     - formatting prokka results to the 4 output folders (see :ref:`output formats <outform>`)
 
 This will also create a folder ``<res_path>``, with the following files inside:
