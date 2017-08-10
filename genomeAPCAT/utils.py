@@ -336,9 +336,13 @@ def sort_genomes(x):
     - in each species, by strain number
     """
     if isinstance(x, tuple):
-        return (x[1][0].split(".")[0], int(x[1][0].split(".")[-1]))
-    else:
+        x = x[1][0]
+
+    # if format is ESCO.1512.00001 sort by ESCO, then 00001
+    if "." in x and len(x.split(".")) >= 3:
         return (x.split(".")[0], int(x.split(".")[-1]))
+    # if format is not like this, just return alphabetical order
+    return (x,)
 
 
 def sort_proteins(x):
@@ -351,10 +355,17 @@ def sort_proteins(x):
     - in each species and strain number, by protein number
     """
     try:
-        return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
+        # if format is ESCO.1512.00001.i0002_12124, sort by ESCO, then 00001, then 12124
+        if "." in x and len(x.split(".")) >= 3:
+            return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
+        # if format is not like this, it must be something_00001:
+        # sort by 'something' and then 00001
+        return (x.split("_")[0], int(x.split("_")[-1]))
     except IndexError:
         logger = logging.getLogger("utils")
         logger.error(("ERROR: Protein {} does not have the required format. "
+                      "It must contain, at least <alpha-num>_<num_only>, and at best "
+                      "<name>.<date>.<strain_num>.<contig_info>_<prot_num>."
                       "Please change its name.").format(x))
         sys.exit(1)
 

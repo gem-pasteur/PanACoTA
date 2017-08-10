@@ -91,7 +91,12 @@ def read_gene(gene, num, fams_by_strain, all_strains):
     """
     Read information from a given gene name, and save it to appropriate dicts
     """
-    strain = ".".join(gene.split(".")[:3])
+    # if format is ESCO.1512.00001.i001_12313 genome name is ESCO.1512.00001
+    if "." in gene and len(gene.split(".")) >= 3:
+        strain = ".".join(gene.split("_")[0].split(".")[:3])
+    # otherwise, genename is everything before the last "_"
+    else:
+        strain = "_".join(gene.split("_")[:-1])
     if strain in fams_by_strain[num]:
         fams_by_strain[num][strain].append(gene)
     else:
