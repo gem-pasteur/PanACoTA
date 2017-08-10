@@ -482,7 +482,46 @@ You can also specify other options with:
 ``corepers`` subcommand
 =======================
 
-dgfdgdf
+You can see all required arguments and available options with::
+
+    genomeAPCAT corepers -h
+
+As core and persistent genomes are inferred from the pangenome, the only file required to generate a core or persistent genome is the pangenome of your dataset, in the format described in :ref:`pangenome part<panfile>`.
+
+Input file format
+-----------------
+
+Your pangenome file must be in the same format as :ref:`described here<panfile>`, and the protein names must follow the format described :ref:`here<protname>`.
+
+Output file format
+------------------
+
+Your persistent genome file has the same format as the pangenome file. The family numbers in the first column correspond to pangenome family numbers.
+
+
+Do corepers
+-----------
+
+
+To do a coregenome, run the following command::
+
+    genomeAPCAT corepers -p <pangenome_file>
+
+If you want to do a persistent genome, use the following options to specify what you want:
+
+    - ``-t <tol>``:  min % of genomes (between 0 and 1) having exactly 1 member in a family to consider the family as persistent. Default value is 1, and 100% of genomes required corresponds to the coregenome (so no need to put this option if you want a coregenome)
+    - ``-X``: the ``-t`` parameter defines how many genomes must have exactly 1 member in the family to consider it as persistent. By default, all genomes present in a family must have exactly 1 member. You can put this option to get a ``mixed persistent genome``, meaning that a family is considered as persistent if at least ``tol%`` of the genomes have exactly 1 member, and other genomes have either 0 either several members. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
+    - ``-M``: *not compatible with -X*. You can put this option if you want to allow several member in any genome of a family. With this option, ``-t`` now defines the minimum percentage of genomes having at least 1 member in a family to consider it as persistent.
+
+You can also specify your core/persistent genome file path and name with ``-o <path/to/outfile``. By default, it will be saved in the same directory as your pangenome, and be called ``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst``, where:
+
+    - ``<pangenome>`` is your given pangenome filename
+    - ``<tol>`` is the number between 0 and 1 used in ``-t`` option (1 if not given)
+    - ``-multi`` will be added if you put the ``-M`` option
+    - ``-mixed`` will be added if you put the ``-X`` option
+
+In your pangenome folder (or where you specified if you used the ``-o`` option), you will find your persistent genome file.
+
 
 ``align`` subcommand
 ====================
