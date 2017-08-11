@@ -96,7 +96,7 @@ def handle_family(args):
     root.handlers = []
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
-    logger = logging.getLogger('run_prokka')
+    logger = logging.getLogger('align.align_family')
     # Get file names
     prt_file = "{}-current.{}.prt".format(prefix, num_fam)
     gen_file = "{}-current.{}.gen".format(prefix, num_fam)
@@ -230,7 +230,7 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     cmd = "fftns --quiet {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
     if ret != 0:
         return False
     return check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
@@ -259,7 +259,7 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     cmd = "awk -f {} {} {}".format(awk_script, mafft_file, gen_file)
     stdout = open(btr_file, "w")
     error = "Problem while trying to backtranslate {} to a nucleotide alignment".format(mafft_file)
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
     if ret != 0:
         return False
     return check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger)
