@@ -502,6 +502,7 @@ Output file format
 
 Your persistent genome file has the same format as the pangenome file. The family numbers in the first column correspond to pangenome family numbers.
 
+.. _docorepers:
 
 Do corepers
 -----------
@@ -656,6 +657,8 @@ Then, we concatenate all family alignment files, and group the alignments by gen
     ------------------------------------------------
     ------------------------------
 
+.. _doalign:
+
 Align
 -----
 
@@ -670,6 +673,8 @@ with:
     - ``-n <dataset_name>``: name of the dataset to align. For example, ESCO200-0.9-mixed to align the mixed persistent genome of 200 *E. coli* strains, where mixed persistent genome was generated such that there are at least 90% of the genomes in each family.
     - ``-d <dbdir>``: directory containing the ``Proteins`` and ``Genes`` folders, with files corresponding to :ref:`list_file<lfilealign>`
     - ``-o <resdir>``: directory where you want to have the temporary and result files
+
+Add ``--threads <num>`` to parallelize the alignments. Put 0 to use all cores of your computer.
 
 In your ``<resdir>`` directory, you will find:
 
@@ -707,6 +712,9 @@ Corresponding to this phylogenetic tree:
 .. figure:: images/tree.jpg
     :align: center
     :width: 20%
+
+
+.. _dotree:
 
 Do tree
 -------
