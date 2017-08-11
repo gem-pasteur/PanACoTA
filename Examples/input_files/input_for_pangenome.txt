@@ -1,4 +1,0 @@
-gembase_name	orig_name	gsize	nb_conts	L90
-GEN4.1111.00001	genome4.fst	7134	1	1
-GENO.0617.00001	genome1.fst	9808	2	2
-GENO.1216.00002	genome3-chromo.fst-all.fna	8817	3	3
