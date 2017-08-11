@@ -689,6 +689,94 @@ In your ``<resdir>`` directory, you will find:
 ``tree`` subcommand
 ===================
 
+You can see all required arguments and available options with::
 
-fdgfdgdf
+    genomeAPCAT tree -h
 
+To infer a phylogenetic tree, you need to provide an alignment file, in fasta format. Each fasta entry will be a leaf of the phylogenetic tree.
+
+Output files
+------------
+
+The output tree files are in Newick format. Here is an example of a phylogenetic tree file::
+
+    ((C:0.0034,(A:0.005,B:0.006):0.003):0.0065,(D:0.002,E:0.0009):0.005);
+
+Corresponding to this phylogenetic tree:
+
+.. figure:: images/tree.jpg
+    :align: center
+    :width: 20%
+
+Do tree
+-------
+
+By default, 'tree' subcommand will use `FastTreeMP <http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0009490>`_ software to infer the phylogenetic tree. To infer the tree from your alignment file, run:
+
+.. code-block:: bash
+
+    genomeAPCAT tree -a <align_file>
+
+However, we also provide the possibility to use `FastME <https://academic.oup.com/mbe/article/32/10/2798/1212138/FastME-2-0-A-Comprehensive-Accurate-and-Fast>`_ or `Quicktree <https://www.ncbi.nlm.nih.gov/pubmed/12424131>`_. For that, add the option ``-s <soft>`` with ``fastme`` or ``quicktree`` in ``<soft>``.
+
+
+See `genomeAPCAT tree -h` to have an overview of all options available.
+
+FastTree options
+^^^^^^^^^^^^^^^^
+
+If you use FastTree (default one), you can use the following options:
+
+    - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated
+    - ``-o <outfile>``: by default, the output tree file will be called ``<align_file>.fasttree_tree.nwk``. You can give a custom output name with this option
+    - ``--threads <num>``: Indicate how many threads you want to use. By default, it uses only 1 thread. Put 0 if you want to use all your computer cores
+    - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is GTR. You can choose between: ``GTR`` (Generalized Time Reversible) and ``JC`` (Jukes-Cantor)
+
+In your ``<outdir>`` directory, you will find:
+
+    - ``<dataset_name>.grp.aln.fasttree.log``: logfile of FastTree, with information on running steps, and intermediate trees inferred
+    - ``<dataset_name>.grp.aln.fasttree_tree.nwk``: the final tree inferred, in Newick format
+    - ``genomeAPCAT-tree-fasttree.log*``: the 3 log files as in the :ref:`other steps<logf>`
+
+
+FastME options
+^^^^^^^^^^^^^^
+
+To use fastme with default options, run::
+
+    genomeAPCAT tree -a <align_file> -s fastme
+
+You can also specify the following options:
+
+    - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated
+    - ``-B``: Add this option if you want to write all bootstrap pseudo-trees
+    - ``-o <outfile>``: by default, the output tree file will be called ``<align_file>.fastme_tree.nwk``. You can give a custom output name with this option
+    - ``--threads <num>``: Indicate how many threads you want to use. By default, it uses only 1 thread. Put 0 if you want to use all your computer cores
+    - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is TN93. You can choose between: ``p-distance`` (or ``p``), ``RY symmetric`` (or ``Y``), ``RY`` (or ``R``), ``JC69`` (or ``J``), ``K2P`` (or ``K``), ``F81`` (or ``1``), ``F84`` (or ``4``), ``TN93`` (or ``T``) and ``LogDet`` (or ``L``)
+
+In your ``<outdir>`` directory, you will find:
+
+    - ``<dataset_name>.grp.aln.phylip``: alignment converted in Phylip-relaxed format, the input of FastME
+    - ``<dataset_name>.grp.aln.phylip.fastme.log``: logfile of FastME, with information on running steps
+    - ``<dataset_name>.grp.aln.phylip.fastme_dist-mat.txt``: distance matrix of all given genomes
+    - ``<dataset_name>.grp.aln.phylip.fastme_tree.nwk``: the final tree inferred in Newick format
+    - ``genomeAPCAT-tree-fastme.log*``: the 3 log files as in the :ref:`other steps<logf>`
+
+Quicktree options
+^^^^^^^^^^^^^^^^^
+
+To use Quicktree with default options, run::
+
+    genomeAPCAT tree -a <align_file> -s quicktree
+
+You can also specify the following options:
+
+    - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated.
+    - ``-o <outfile>``: by default, the output tree file will be called ``<align_file>.quicktree_tree.nwk``. You can give a custom output name with this option.
+
+In your ``<outdir>`` directory, you will find:
+
+    - ``<dataset_name>.grp.aln.stockholm``: alignment converted in Stockholm format, the input of Quicktree
+    - ``<dataset_name>.grp.aln.stockholm.quicktree.log``: logfile of quicktree, empty if no error occurred
+    - ``<dataset_name>.grp.aln.stockholm.quicktree_tree.nwk``: the final tree inferred in Newick format
+    - ``genomeAPCAT-tree-quicktree.log*``: the 3 log files as in the :ref:`other steps<logf>`
