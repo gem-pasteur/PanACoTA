@@ -124,7 +124,7 @@ sphinx-doc:
     - ls html-doc
   artifacts:
     paths:
-      - html-doc
+      - doc/source/html-doc
     expire_in: 1 hour
 
 pages:
