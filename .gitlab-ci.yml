@@ -119,10 +119,9 @@ sphinx-doc:
   script:
     - cd doc/source
     - make html
-    - mv ../build/html html-doc
   artifacts:
     paths:
-      - doc/source/html-doc
+      - doc/build/html
     expire_in: 1 hour
 
 pages:
@@ -134,6 +133,7 @@ pages:
     - mkdir -p public/htmlcov
     - mv htmlcov public
     - mkdir -p public/html-doc
+    - mv doc/build/html html-doc
     - mv html-doc public
   artifacts:
     paths:
