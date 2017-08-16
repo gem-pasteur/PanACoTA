@@ -30,7 +30,7 @@ Here are the options shared by all subcommands:
     - ``--quiet``: do not write anything on stdout nor stderr. Log files are still created, so you can check what is running.
     - ``-v`` or ``--verbose``: be more verbose:
 
-        + ``-v`` will add warnings in stderr (by default, only errors are displayed in stderr, warning are just in log files),
+        + ``-v`` will add warnings in stderr (by default, only errors are displayed in stderr, warnings are just in log files),
         + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
 
 We will now describe each subcommand, with its options.
@@ -269,7 +269,7 @@ This command will run the same steps as described in quality control only, with 
 
     - Keeping only genomes with L90 lower than the limit and number of contigs lower than the limit
     - For each species, ordering the genomes by increasing L90 and number of contigs, and assigning them a strain number
-    - annotating of each genome with prokka
+    - annotating each genome with prokka
     - formatting prokka results to the 4 output folders (see :ref:`output formats <outform>`)
 
 This will also create a folder ``<res_path>``, with the following files inside:
@@ -612,50 +612,58 @@ We then backtranslate protein alignments to nucleotide alignments, using the fil
 .. code-block:: text
 
     >ESCO.0217.00001.i0001_00015
-    MSTLLYLHGFNSSPRSAKACQLKNWL--RHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLGGYYATWLSQCAAAPAVVVN
+    AAATCCCCGAGGACACACATTTAT--ACACAGCAGGACACACACAATT
+    AACCCCGGGGGGGACACACAATTTTTTACACAGGGGCCAACTATACAG
+    AACCGGGTGAC
     >ESCO.1216.00002.i0001_00006
-    MSTLLYLHGFNSSPRSAKA-------AERHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLGGYYATWLSQCFMLPAVVVN
+    AAATCCCCGAGGACACACATTTATTTACACAGCAGGACACACACAATT
+    AACCCCGGGGGGGAC---------TTTACACAGGGGCCAACTATACAG
+    AACCGGGTGAC
     >ESCO.0217.00003.i0001_00100
-    MSTLLYLHGFNSSPRSAKACQLK-WLAERHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLLLYYATWLSQCFMLPAVVVN
+    AAATCCCCGAGGACACACATTTATTTACACAGCAGCACACACACAATT
+    AACCCCGGGGGG-ACACACAATTTTTTACACACGGGCCAACTATACAG
+    AACCGGGTGAC
     >ESCO.0217.00004
     ------------------------------------------------
-    ------------------------------------------
+    ------------------------------------------------
+    -----------
 
 Then, we concatenate all family alignment files, and group the alignments by genome, to obtain the final alignment file, which looks like:
 
 .. code-block:: text
 
     >ESCO.0217.00001
-    MSTLLYLHGFNSSPRSAKACQLKNWL--RHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLGGYYATWLSQCAAAPAVVVNMSTLLY
-    LHGFNSSPRSAKACQLKNWL--RHPHVEMIVPQLPPYPADAAELLESL
-    VLEHGGAPLGLVGSSLGGYYATWLSQCAAAPAVVVNMSTLLYLHGFNS
-    SPRSAKACQLKNWL--RHPHVEMIVPQLPPYPADAAELLESLVLEHGG
-    APLGLVGSSLGGYYATWLSQCAAAPAVVVN
+    AAATCCCCGAGGACACACATTTAT--ACACAGCAGGACACACACAATT
+    AACCCCGGGGGGGACACACAATTTTTTACACAGGGGCCAACTATACAG
+    AACCGGGTGACAAATCCCCGAGGACACACATTTAT--ACACAGCAGGA
+    CACACACAATTAACCCCGGGGGGGACACACAATTTTTTACACAGGGGC
+    CAACTATACAGAACCGGGTGACAAATCCCCGAGGACACACATTTAT--
+    ACACAGCAGGACACACACAATTAACCCCGGGGGGGACACACAATTTTT
+    TACACAGGGGCCAACTATACAGAACCGGGTGAC
     >ESCO.1216.00002
-    MSTLLYLHGFNSSPRSAKA-------AERHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLGGYYATWLSQCFMLPAVVVNMSTLLY
-    LHGFNSSPRSAKA-------AERHPHVEMIVPQLPPYPADAAELLESL
-    VLEHGGAPLGLVGSSLGGYYATWLSQCFMLPAVVVNMSTLLYLHGFNS
-    SPRSAKA-------AERHPHVEMIVPQLPPYPADAAELLESLVLEHGG
-    APLGLVGSSLGGYYATWLSQCFMLPAVVVN
+    AAATCCCCGAGGACACACATTTATTTACACAGCAGGACACACACAATT
+    AACCCCGGGGGGGAC---------TTTACACAGGGGCCAACTATACAG
+    AACCGGGTGACAAATCCCCGAGGACACACATTTATTTACACAGCAGGA
+    CACACACAATTAACCCCGGGGGGGAC---------TTTACACAGGGGC
+    CAACTATACAGAACCGGGTGACAAATCCCCGAGGACACACATTTATTT
+    ACACAGCAGGACACACACAATTAACCCCGGGGGGGAC---------TT
+    TACACAGGGGCCAACTATACAGAACCGGGTGAC
     >ESCO.0217.00003
-    MSTLLYL----------KACQLKNWLAERHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLGGYYATWLSQCF---AVVVN------
+    AAATCCCCGAGGACACACATTTATTTACACAGCAGCACACACACAATT
+    AACCCCGGGGGG-ACACACAATTTTTTACACACGGGCCAACTATACAG
+    AACCGGGTGAC-------------------------------------
     ------------------------------------------------
-    ------------------------------------MSTLLYL-----
-    -----KACQLKNWLAERHPHVEMIVPQLPPYPADAAELLESLVLEHGG
-    APLGLVGSSLGGYYATWLSQCF---AVVVN
+    ----------------------AAATCCCCGAGGACACACATTTATTT
+    ACACAGCAGCACACACACAATTAACCCCGGGGGG-ACACACAATTTTT
+    TACACACGGGCCAACTATACAGAACCGGGTGAC
     >ESCO.0217.00004
-    MSTLLYLHGFNSSPRSAKACQLK-WLAERHPHVEMIVPQLPPYPADAA
-    ELLESLVLEHGGAPLGLVGSSLLLYYATWLSQCFMLPAVVVNMSTLLY
-    LHGFNSSPRSAKACQLK-WLAERHPHVEMIVPQLPPYPADAAELLESL
-    VLEHGGAPLGLVGSSLLLYYATWLSQCFMLPAVVVN------------
+    AAATCCCCGAGG-------TTTATTTACACAGCAGCACACACACAATT
+    AACCCCGGGGGG-ACACACAA------ACACACGGGCCAACTATACAG
+    AACCGGGTGACAAATCCCCGAGG-------TTTATTTACACAGCAGCA
+    CACACACAATTAACCCCGGGGGG-ACACACAA------ACACACGGGC
+    CAACTATACAGAACCGGGTGAC--------------------------
     ------------------------------------------------
-    ------------------------------
+    ---------------------------------
 
 .. _doalign:
 
@@ -728,7 +736,7 @@ By default, 'tree' subcommand will use `FastTreeMP <http://journals.plos.org/plo
 However, we also provide the possibility to use `FastME <https://academic.oup.com/mbe/article/32/10/2798/1212138/FastME-2-0-A-Comprehensive-Accurate-and-Fast>`_ or `Quicktree <https://www.ncbi.nlm.nih.gov/pubmed/12424131>`_. For that, add the option ``-s <soft>`` with ``fastme`` or ``quicktree`` in ``<soft>``.
 
 
-See `genomeAPCAT tree -h` to have an overview of all options available.
+See ``genomeAPCAT tree -h`` to have an overview of all options available.
 
 FastTree options
 ^^^^^^^^^^^^^^^^
