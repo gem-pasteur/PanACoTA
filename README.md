@@ -44,7 +44,7 @@ You can then add the output `FastTreeMP` to your `$PATH` to be able to run it fr
 
 ## Downloading and updating `genomeAPCAT`
 
-You can download `genomeAPCAT` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download `genomeAPCAT` source code by downloading a [zip file](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/repository/archive.zip?ref=master), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
     git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
 
@@ -126,7 +126,7 @@ In this folder, you will also find a README file, explaining you how to run the 
 
 ## Documentation
 
-Not done yet, there will be a documentation describing each module and its arguments/options...
+You can find more information in [genomeAPCAT documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)!
 
 # <a name="develop"></a>  Development
 
