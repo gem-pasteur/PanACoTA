@@ -4,6 +4,7 @@ stages:
   - build
   - test
   - coverage
+  - doc
   - deploy
 
 build-from-base:
@@ -63,6 +64,7 @@ unit-test-ubuntu16.04:
   stage: test
   except:
     - docker
+    - helpers
   before_script:
     - ./make
   script:
@@ -77,6 +79,7 @@ func-test-ubuntu16.04:
   stage: test
   except:
     - docker
+    - helpers
   before_script:
     - ./make
   script:
@@ -91,6 +94,7 @@ coverage:
   stage: coverage
   except:
     - docker
+    - helpers
   dependencies:
     - unit-test-ubuntu16.04
     - func-test-ubuntu16.04
@@ -105,16 +109,36 @@ coverage:
       - htmlcov
     expire_in: 1 hour
 
+sphinx-doc:
+  stage: doc
+  except:
+    - docker
+    - helpers
+  before_script:
+    - ./make
+  script:
+    - cd doc/source
+    - make html
+    - mv ../build/html html-doc
+  artifacts:
+    paths:
+      - html-doc
+    expire_in: 1 hour
+
 pages:
   stage: deploy
   dependencies:
     - coverage
+    - sphinx-doc
   script:
     - mkdir -p public/htmlcov
     - mv htmlcov public
+    - mkdir -p public/html-doc
+    - mv html-doc public
   artifacts:
     paths:
       - public
     expire_in: 1 hour
   only:
     - master
+    - doc
