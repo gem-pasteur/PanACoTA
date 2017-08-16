@@ -15,11 +15,15 @@ Welcome to genomeAPCAT's documentation!
 
 
 .. toctree::
+    :includehidden:
     :maxdepth: 1
     :caption: Developer documentation
 
     develop
     api
+
+
+
 
 
 Indices and tables
