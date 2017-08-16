@@ -1,4 +1,4 @@
-image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:testing-ubuntu
+image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/testing-ubuntu
 
 stages:
   - build
@@ -8,7 +8,7 @@ stages:
   - deploy
 
 build-from-base:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-base
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-base
   stage: build
   only:
     - install
@@ -23,7 +23,7 @@ build-from-base:
     - echo $(genomeAPCAT -h)
 
 build-from-barrnap:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-barrnapOnly
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
   stage: build
   only:
     - install
@@ -34,7 +34,7 @@ build-from-barrnap:
     - genomeAPCAT -h
 
 build-from-prokka:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
   stage: build
   only:
     - install
@@ -45,7 +45,7 @@ build-from-prokka:
     - genomeAPCAT -h
 
 build-from-prokka-user:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation:install-ubuntu-prokkaOnly
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
   stage: build
   only:
     - install
