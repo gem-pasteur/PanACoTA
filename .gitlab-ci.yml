@@ -120,6 +120,8 @@ sphinx-doc:
     - cd doc/source
     - make html
     - mv ../build/html html-doc
+    - ls
+    - ls html-doc
   artifacts:
     paths:
       - html-doc
