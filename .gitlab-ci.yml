@@ -111,9 +111,9 @@ coverage:
 
 sphinx-doc:
   stage: doc
-  except:
-    - docker
-    - helpers
+  only:
+    - master
+    - doc
   before_script:
     - ./make
   script:
