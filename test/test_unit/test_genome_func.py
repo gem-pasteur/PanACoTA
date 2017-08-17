@@ -13,7 +13,7 @@ import test.test_unit.utilities_for_tests as util_tests
 
 @pytest.fixture(scope="module")
 def dbpath():
-    return os.path.join("test", "data", "genomes")
+    return os.path.join("test", "data", "annotate", "genomes")
 
 
 def test_sort_genomes():
@@ -45,7 +45,7 @@ def test_save_contig_5N():
     cur_cont_name = ">ESCO.0216.00001_cont2"
     # one contig saved before running, check that it is not erased
     contig_sizes = {">ESCO.0216.00001_cont1": 1623}
-    seq_file = os.path.join("test", "data", "test_save_contig5N.faa")
+    seq_file = os.path.join("test", "data", "annotate", "test_save_contig5N.faa")
     resf = open(seq_file, "w")
     gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf, -1)
     resf.close()
@@ -53,7 +53,7 @@ def test_save_contig_5N():
            ">ESCO.0216.0000_1": 33, ">ESCO.0216.0000_2": 20}
     assert contig_sizes == exp
 
-    exp_file = os.path.join("test", "data", "exp_files", "res_save_contig5N.faa")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_save_contig5N.faa")
     with open(exp_file, "r") as expf, open(seq_file, "r") as seqf:
         for line_exp, line_seq in zip(expf, seqf):
             assert line_exp == line_seq
@@ -72,7 +72,7 @@ def test_save_contig_ATCG():
     cur_cont_name = ">ESCO.0216.00001_cont2"
     # one contig saved before running, check that it is not erased
     contig_sizes = {">ESCO.0216.00001_cont1": 1623}
-    seq_file = os.path.join("test", "data", "test_save_contigATCG.faa")
+    seq_file = os.path.join("test", "data", "annotate", "test_save_contigATCG.faa")
     resf = open(seq_file, "w")
     gfunc.save_contig(pat, cur_cont, cur_cont_name, contig_sizes, resf, -1)
     resf.close()
@@ -82,7 +82,7 @@ def test_save_contig_ATCG():
            ">ESCO.0216.0000_5": 6, ">ESCO.0216.0000_6": 5}
     assert contig_sizes == exp
 
-    exp_file = os.path.join("test", "data", "exp_files", "res_save_contigATCG.faa")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_save_contigATCG.faa")
     with open(exp_file, "r") as expf, open(seq_file, "r") as seqf:
         for line_exp, line_seq in zip(expf, seqf):
             assert line_exp == line_seq
@@ -115,7 +115,7 @@ def test_rename_genomes():
     order them by species, and by decreasing quality (L90, nb_cont), and rename them,
     as well as their contigs.
     """
-    genomes_dir = os.path.join("test", "data", "genomes")
+    genomes_dir = os.path.join("test", "data", "annotate", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
 
@@ -126,7 +126,7 @@ def test_rename_genomes():
                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
-    res_path = os.path.join("test", "data")
+    res_path = os.path.join("test", "data", "annotate")
     gfunc.rename_all_genomes(genomes, res_path)
     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
     # so take into account both choices
@@ -151,7 +151,7 @@ def test_analyse1genome_nocut(dbpath):
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
     genome = gs[1]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     # Put genome file in tmppath instead of dbpath, as if it was
     # the result of concatenation of several files for the same genome,
     # done in the first step.
@@ -186,7 +186,7 @@ def test_analyse1genome_nocut_empty(dbpath):
                gs[2]: ["ESCO.0416"],
                gs[3]: ["ESCO.0415"]}
     genome = gs[3]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     cut = False
     pat = "NNNNN+"
     assert not gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
@@ -210,7 +210,7 @@ def test_analyse1genome_cut(dbpath):
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
     genome = gs[1]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     cut = True
     pat = "NNNNN+"
     assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
@@ -234,12 +234,12 @@ def test_analyse1genome_cut_same_names(dbpath):
     """
     genome = "genome_long_header.fst"
     genomes = {genome: ["SAEN.1015.0117"]}
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     cut = True
     pat = "NNNNN+"
     assert gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
     out_f = os.path.join(tmp_path, genome + "-split5N.fna")
-    exp_f = os.path.join("test", "data", "exp_files", "res_genome_short-long_header.fst")
+    exp_f = os.path.join("test", "data", "annotate", "exp_files", "res_genome_short-long_header.fst")
     exp_genomes = {genome: ["SAEN.1015.0117", out_f, 151, 3, 3]}
     assert genomes == exp_genomes
     with open(out_f, "r") as outf, open(exp_f, "r") as expf:
@@ -260,7 +260,7 @@ def test_analyse1genome_cut_empty(dbpath):
                gs[2]: ["ESCO.0416"],
                gs[3]: ["ESCO.0415"]}
     genome = gs[3]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     cut = True
     pat = "NNNNN+"
     assert not gfunc.analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes)
@@ -287,7 +287,7 @@ def test_analyseAllGenomes_nocut(dbpath):
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
     gpaths = [os.path.join(dbpath, gname) for gname in gs]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
     nbn = 0
     # Run analysis
@@ -314,7 +314,7 @@ def test_analyseAllGenomes_nocut_empty(dbpath):
                gs[2]: ["ESCO.0416"],
                gs[3]: ["ESCO.0123"]}
     gpaths = [os.path.join(dbpath, gname) for gname in gs]
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
     nbn = 0
     # Run analysis
@@ -339,7 +339,7 @@ def test_analyseAllGenomes_cut(dbpath):
     genomes = {gs[0]: ["SAEN.1113"],
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"]}
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
     nbn = 5
     # Run analysis
@@ -370,7 +370,7 @@ def test_analyseAllGenomes_cut_empty(dbpath):
                gs[1]: ["SAEN.1114"],
                gs[2]: ["ESCO.0416"],
                gs[3]: ["ESCO.0123"]}
-    tmp_path = os.path.join("test", "data")
+    tmp_path = os.path.join("test", "data", "annotate")
     gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
     nbn = 5
     # Run analysis
@@ -399,7 +399,7 @@ def test_plot_dist():
     Add a vertical line at the given threshold.
     genomes: {genome: [name, path, size, nbcont, l90]}
     """
-    genomes_dir = os.path.join("test", "data", "genomes")
+    genomes_dir = os.path.join("test", "data", "annotate", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
     genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 2, 2],
@@ -409,7 +409,7 @@ def test_plot_dist():
                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 17, 12],
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 60, 50],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 20, 12]}
-    res_path = os.path.join("test", "data")
+    res_path = os.path.join("test", "data", "annotate")
     exp_path = os.path.join(res_path, "exp_files")
     listfile_base = "test_plot_dist"
     l90 = 13

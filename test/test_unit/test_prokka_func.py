@@ -36,7 +36,7 @@ def test_count_tbl():
     Count the different features found in the tbl file, and return
     nbcont, nbCDS, nbGene, nbCRISPR
     """
-    tblfile = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes",
+    tblfile = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes",
                            "prokka_out_for_test.tbl")
     ncont, ncds, ngene, ncris = pfunc.count_tbl(tblfile)
     assert ncont == 7
@@ -49,7 +49,7 @@ def test_count_headers():
     """
     Count how many sequences there are in the given multi-fasta file
     """
-    seqfile = os.path.join("test", "data", "genomes", "genome4.fasta")
+    seqfile = os.path.join("test", "data", "annotate", "genomes", "genome4.fasta")
     nb = pfunc.count_headers(seqfile)
     assert nb == 5
 
@@ -74,9 +74,9 @@ def test_check_prokka_notbl(logger):
     """
     Check that check_prokka returns false when a tbl file is missing, and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_notbl")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_notbl")
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
@@ -99,9 +99,9 @@ def test_check_prokka_sevtbl(logger):
     Check that check_prokka returns false when there is more than 1 tbl file,
     and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_notbl")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_notbl")
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
@@ -127,9 +127,9 @@ def test_check_prokka_nofaa(logger):
     """
     Check that check_prokka returns false when a faa file is missing, and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_nofaa")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
@@ -152,9 +152,9 @@ def test_check_prokka_sevfaa(logger):
     Check that check_prokka returns false when there is more than 1 faa file,
     and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_nofaa")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
@@ -180,9 +180,9 @@ def test_check_prokka_noffn(logger):
     """
     Check that check_prokka returns false when a ffn file is missing, and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_noffn")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
@@ -205,9 +205,9 @@ def test_check_prokka_sevffn(logger):
     Check that check_prokka returns false when there is more than 1 ffn file,
     and an error message
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "out_test_noffn")
+    out_dir = os.path.join("test", "data", "annotate", "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
@@ -234,7 +234,7 @@ def test_check_prokka_wrong_cont(logger):
     Check that check_prokka returns an error message when the number of contigs in tbl
     file is not as expected
     """
-    outdir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    outdir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     name = "prokka_out_for_test"
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -252,12 +252,12 @@ def test_check_prokka_wrong_tblCDS(logger):
     Check that check_prokka returns an error message when the number of CDS in tbl
     file is different from the number of headers in faa file
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "res_checkProkkaWrongTbl")
+    out_dir = os.path.join("test", "data", "annotate", "res_checkProkkaWrongTbl")
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongCDS"
-    tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
+    tblfile = os.path.join("test", "data", "annotate", "test_files", name + ".tbl")
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -285,12 +285,12 @@ def test_check_prokka_wrong_tblCRISPR(logger):
     Check that check_prokka returns an error message when the number of headers in ffn
     file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPR")
+    out_dir = os.path.join("test", "data", "annotate", "res_checkProkkaWrongCRISPR")
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongtblCRISP"
-    tblfile = os.path.join("test", "data", "test_files", name + ".tbl")
+    tblfile = os.path.join("test", "data", "annotate", "test_files", name + ".tbl")
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -316,12 +316,12 @@ def test_check_prokka_tblCRISPR_newversion(logger):
     does not contain the CRISPRs found in tbl
     As the new version of prokka (1.12) does not put crisprs in .ffn
     """
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    out_dir = os.path.join("test", "data", "res_checkProkkaWrongCRISPRnewversion")
+    out_dir = os.path.join("test", "data", "annotate", "res_checkProkkaWrongCRISPRnewversion")
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongtblCRISPnewversion"
-    ffnfile = os.path.join("test", "data", "test_files", name + ".ffn")
+    ffnfile = os.path.join("test", "data", "annotate", "test_files", name + ".ffn")
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -339,7 +339,7 @@ def test_check_prokka_ok(logger):
     Check that everything is ok with prokka results (tbl, faa and ffn files exist,
     and number of CDS, CRISPR and genes correspond between them)
     """
-    outdir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    outdir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     name = "prokka_out_for_test"
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -355,7 +355,7 @@ def test_run_prokka_out_exists_ok(logger):
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     gpath = "path/to/nogenome/original_name.fna"
-    outdir = os.path.join("test", "data", "test_files")
+    outdir = os.path.join("test", "data", "annotate", "test_files")
     cores_prokka = 1
     name = "prokka_out_for_test"
     force = False
@@ -375,9 +375,9 @@ def test_run_prokka_out_exists_error(logger):
     """
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
-    ori_prok_dir = os.path.join("test", "data", "test_files", "original_name.fna-prokkaRes")
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
-    new_prok_dir = os.path.join("test", "data", "test_files", "original_name-error-prokkaRes")
+    new_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name-error-prokkaRes")
     name = "prokka_out_for_test-wrongCDS"
     os.makedirs(new_prok_dir)
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -385,7 +385,7 @@ def test_run_prokka_out_exists_error(logger):
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(new_prok_dir, name + ".faa"))
     gpath = "path/to/nogenome/original_name-error"
-    outdir = os.path.join("test", "data", "test_files")
+    outdir = os.path.join("test", "data", "annotate", "test_files")
     cores_prokka = 1
     force = False
     nbcont = 7
@@ -410,8 +410,8 @@ def test_run_prokka_out_exists_force(logger):
     """
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
-    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
-    outdir = os.path.join("test", "data")
+    gpath = os.path.join("test", "data", "annotate", "genomes", "H299_H561.fasta")
+    outdir = os.path.join("test", "data", "annotate")
     out_prokdir = os.path.join(outdir, "H299_H561.fasta-prokkaRes")
     name = "test_runprokka_H299"
     # Put empty tbl, faa, ffn files in prokka output dir, to check that they are overridden
@@ -425,7 +425,7 @@ def test_run_prokka_out_exists_force(logger):
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
     # Check content of tbl, ffn and faa files
-    exp_dir = os.path.join("test", "data", "exp_files",
+    exp_dir = os.path.join("test", "data", "annotate", "exp_files",
                            "H299_H561.fasta-short-contig.fna-prokkaRes",
                            "test_runprokka_H299")
     out_tbl = os.path.join(out_prokdir, name + ".tbl")
@@ -457,8 +457,8 @@ def test_run_prokka_out_doesnt_exist(logger):
     """
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
-    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
-    prok_dir = os.path.join("test", "data")
+    gpath = os.path.join("test", "data", "annotate", "genomes", "H299_H561.fasta")
+    prok_dir = os.path.join("test", "data", "annotate")
     out_dir = os.path.join(prok_dir, "H299_H561.fasta-prokkaRes")
     cores_prokka = 5
     name = "test_runprokka_H299"
@@ -480,8 +480,8 @@ def test_run_prokka_out_problem_running(logger):
     """
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
-    gpath = os.path.join("test", "data", "genomes", "H299 H561.fasta")
-    outdir = os.path.join("test", "data")
+    gpath = os.path.join("test", "data", "annotate", "genomes", "H299 H561.fasta")
+    outdir = os.path.join("test", "data", "annotate")
     cores_prokka = 5
     name = "test_runprokka_H299"
     force = False
@@ -490,7 +490,7 @@ def test_run_prokka_out_problem_running(logger):
     assert not pfunc.run_prokka(arguments)
     q = logger[0]
     assert q.qsize() == 2
-    msg = ("Prokka could not run properly. Look at test/data/H299 H561.fasta-prokka.log "
+    msg = ("Prokka could not run properly. Look at test/data/annotate/H299 H561.fasta-prokka.log "
            "for more information.")
     q.get()
     assert q.get().message == msg
@@ -509,15 +509,15 @@ def test_run_all_1by1():
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
-    gpath1 = os.path.join("test", "data", "genomes", genome1)
+    gpath1 = os.path.join("test", "data", "annotate", "genomes", genome1)
     genome2 = "A_H738.fasta"
-    gpath2 = os.path.join("test", "data", "genomes", genome2)
+    gpath2 = os.path.join("test", "data", "annotate", "genomes", genome2)
     genomes = {genome1: ["test_runall_1by1_1", gpath1, 12656, 3, 0],
                genome2: ["test_runall_1by1_2", gpath2, 456464645, 1, 465]}
     threads = 3
     force = False
-    prok_folder = os.path.join("test", "data")
-    res_dir = os.path.join("test", "data")
+    prok_folder = os.path.join("test", "data", "annotate")
+    res_dir = os.path.join("test", "data", "annotate")
     final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[genome1]
     assert final[genome2]
@@ -539,15 +539,15 @@ def test_run_all_parallel_more_threads():
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
-    gpath1 = os.path.join("test", "data", "genomes", genome1)
+    gpath1 = os.path.join("test", "data", "annotate", "genomes", genome1)
     genome2 = "A_H738.fasta"
-    gpath2 = os.path.join("test", "data", "genomes", genome2)
+    gpath2 = os.path.join("test", "data", "annotate", "genomes", genome2)
     genomes = {genome1: ["test_runall_1by1_1", gpath1, 12656, 3, 0],
                genome2: ["test_runall_1by1_2", gpath2, 456464645, 1, 465]}
     threads = 8
     force = False
-    prok_folder = os.path.join("test", "data")
-    res_dir = os.path.join("test", "data")
+    prok_folder = os.path.join("test", "data", "annotate")
+    res_dir = os.path.join("test", "data", "annotate")
     final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[genome1]
     assert final[genome2]
@@ -571,7 +571,7 @@ def test_run_all_parallel_less_threads():
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
-    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
     genomes = {gnames[0]: ["test_runall_1by1_1", gpaths[0], 12656, 3, 1],
                gnames[1]: ["test_runall_1by1_2", gpaths[1], 456464645, 1, 1],
                gnames[2]: ["test_runall_1by1_2", gpaths[2], 456464645, 4, 1],
@@ -580,8 +580,8 @@ def test_run_all_parallel_less_threads():
               }
     threads = 4
     force = False
-    prok_folder = os.path.join("test", "data")
-    res_dir = os.path.join("test", "data")
+    prok_folder = os.path.join("test", "data", "annotate")
+    res_dir = os.path.join("test", "data", "annotate")
     final = pfunc.run_prokka_all(genomes, threads, force, prok_folder)
     assert final[gnames[0]]
     assert final[gnames[1]]

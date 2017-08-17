@@ -33,10 +33,10 @@ def test_plot_dist():
     """
     values = [1, 1, 1, 1, 1, 1, 2, 2, 2, 3, 3, 10]
     limit = 3
-    res_dir = os.path.join("test", "data")
+    res_dir = os.path.join("test", "data", "annotate")
     os.makedirs(res_dir, exist_ok=True)
     outfile = os.path.join(res_dir, "distrib.png")
-    reffile = os.path.join("test", "data", "exp_files", "res_plot_distr.png")
+    reffile = os.path.join("test", "data", "annotate", "exp_files", "res_plot_distr.png")
     title = "Distribution test"
     text = "Max L90 ="
     utils.plot_distr(values, limit, outfile, title, text)
@@ -94,7 +94,7 @@ def test_write_discarded():
     Test that the list of discarded genomes is written as expected.
     """
     gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome1", "genome2", "genome3"]
-    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
     genomes = {gnames[0]: ["toto.0417", gpaths[0], 12656, 3, 1],
                gnames[1]: ["toto.0417", gpaths[1], 456464645, 5, 1],
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
@@ -102,11 +102,11 @@ def test_write_discarded():
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
               }
     kept_genomes = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome3"]
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    res_path = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
-    outfile = os.path.join("test", "data", "discarded-list_genomes.lst")
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_write_discard.lst")
+    outfile = os.path.join("test", "data", "annotate", "discarded-list_genomes.lst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_discard.lst")
     # There is no order in the discarded file. So, just check that the lines
     # written are as expected.
     with open (outfile, "r") as outf, open(exp_file, "r") as expf:
@@ -122,7 +122,7 @@ def test_write_discarded_qc():
     written as expected
     """
     gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome1", "genome2", "genome3"]
-    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
     genomes = {gnames[0]: ["toto.0417", gpaths[0], 12656, 3, 1],
                gnames[1]: ["toto.0417", gpaths[1], 456464645, 5, 1],
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
@@ -130,11 +130,11 @@ def test_write_discarded_qc():
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
               }
     kept_genomes = []
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    res_path = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path, qc=True)
-    outfile = os.path.join("test", "data", "info-genomes-list_genomes.lst")
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_write_info_qc.lst")
+    outfile = os.path.join("test", "data", "annotate", "info-genomes-list_genomes.lst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_info_qc.lst")
     # There is no order in the discarded file. So, just check that the lines
     # written are as expected.
     with open (outfile, "r") as outf, open(exp_file, "r") as expf:
@@ -151,10 +151,10 @@ def test_write_discarded_empty():
     """
     genomes = {}
     kept_genomes = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome3"]
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    res_path = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
-    outfile = os.path.join("test", "data", "discarded-list_genomes.lst")
+    outfile = os.path.join("test", "data", "annotate", "discarded-list_genomes.lst")
     with open (outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
@@ -168,7 +168,7 @@ def test_write_discarded_allKept():
     header line.
     """
     gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome1", "genome2", "genome3"]
-    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
     genomes = {gnames[0]: ["toto.0417", gpaths[0], 12656, 3, 1],
                gnames[1]: ["toto.0417", gpaths[1], 456464645, 5, 1],
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
@@ -176,10 +176,10 @@ def test_write_discarded_allKept():
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
               }
     kept_genomes = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome3", "genome2", "genome1"]
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    res_path = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
-    outfile = os.path.join("test", "data", "discarded-list_genomes.lst")
+    outfile = os.path.join("test", "data", "annotate", "discarded-list_genomes.lst")
     with open (outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
@@ -192,18 +192,18 @@ def test_write_lstinfo():
     Test that lstinfo file is written as expected.
     """
     gnames = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome1", "genome2", "genome3"]
-    gpaths = [os.path.join("test", "data", "genomes", name) for name in gnames]
+    gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
     genomes = {gnames[0]: ["toto.0417.00010", gpaths[0], 12656, 3, 1],
                gnames[1]: ["toto.0417.00006", gpaths[1], 456464645, 5, 1],
                gnames[2]: ["genome.0417.00008", gpaths[2], 4564855, 156, 40],
                gnames[3]: ["toto.0417.00008", gpaths[3], 6549, 16, 8],
                gnames[4]: ["genome.0417.00001", gpaths[4], 9876546, 6, 2]
               }
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    outdir = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    outdir = os.path.join("test", "data", "annotate")
     utils.write_lstinfo(list_file, genomes, outdir)
     outfile = os.path.join(outdir, "LSTINFO-list_genomes.lst")
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_write_lstinfo.lst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_lstinfo.lst")
     with open (outfile, "r") as outf, open(exp_file, "r") as expf:
         for line_out, line_exp in zip(outf, expf):
             assert line_out == line_exp
@@ -216,11 +216,11 @@ def test_write_lstinfo_nogenome():
     only header.
     """
     genomes = {}
-    list_file = os.path.join("test", "data", "list_genomes.txt")
-    outdir = os.path.join("test", "data")
+    list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
+    outdir = os.path.join("test", "data", "annotate")
     utils.write_lstinfo(list_file, genomes, outdir)
     outfile = os.path.join(outdir, "LSTINFO-list_genomes.lst")
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_write_lstinfo.lst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_lstinfo.lst")
     with open (outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
@@ -270,9 +270,9 @@ def test_read_genomes_wrongName():
     """
     name = "ESCO"
     date = "0417"
-    dbpath = os.path.join("test", "data", "genomes")
+    dbpath = os.path.join("test", "data", "annotate", "genomes")
     tmppath = "tmppath"
-    list_file = os.path.join("test", "data", "test_files", "list_genomes-wrongNames.txt")
+    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-wrongNames.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     assert genomes == {}
 
@@ -286,9 +286,9 @@ def test_read_genomes_ok(capsys):
     utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
-    dbpath = os.path.join("test", "data", "genomes")
+    dbpath = os.path.join("test", "data", "annotate", "genomes")
     tmppath = "tmppath"
-    list_file = os.path.join("test", "data", "test_files", "list_genomes.lst")
+    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes.lst")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta": ["ESCO.0417"],
            "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
@@ -312,9 +312,9 @@ def test_read_genomes_errors(capsys):
     utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
-    dbpath = os.path.join("test", "data", "genomes")
+    dbpath = os.path.join("test", "data", "annotate", "genomes")
     tmppath = "tmppath"
-    list_file = os.path.join("test", "data", "test_files", "list_genomes-errors.txt")
+    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-errors.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -367,9 +367,9 @@ def test_read_genomes_multi_files(capsys):
     utils.init_logger(logfile_base, 0, '', verbose=1)
     name = "ESCO"
     date = "0417"
-    dbpath = os.path.join("test", "data", "genomes")
-    tmppath = os.path.join("test", "data")
-    list_file = os.path.join("test", "data", "test_files", "list_genomes-multi-files.txt")
+    dbpath = os.path.join("test", "data", "annotate", "genomes")
+    tmppath = os.path.join("test", "data", "annotate")
+    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-multi-files.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta-all.fna": ["ESCO.0417"],
            "H299_H561.fasta-all.fna": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -412,7 +412,7 @@ def test_check_resdirLst(capsys):
     Test that when the result directory already contains .lst files in LSTINFO,
     program ends with an error message.
     """
-    resdir = os.path.join("test", "data", "test_check_resdir")
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir")
     # Create output directory with a lst file in LSTINFO
     os.makedirs(os.path.join(resdir, "LSTINFO"))
     open(os.path.join(resdir, "LSTINFO", "toto.lst"), "w").close()
@@ -430,7 +430,7 @@ def test_check_resdirPrt(capsys):
     Test that when the result directory already contains .prt files in Proteins,
     program ends with an error message.
     """
-    resdir = os.path.join("test", "data", "test_check_resdir")
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir")
     # Create output directory with a lst file in LSTINFO
     os.makedirs(os.path.join(resdir, "Proteins"))
     open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
@@ -448,7 +448,7 @@ def test_check_resdirGen(capsys):
     Test that when the result directory already contains .gen files in Genes,
     program ends with an error message.
     """
-    resdir = os.path.join("test", "data", "test_check_resdir")
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir")
     # Create output directory with a lst file in LSTINFO
     os.makedirs(os.path.join(resdir, "Genes"))
     open(os.path.join(resdir, "Genes", "toto.gen"), "w").close()
@@ -466,7 +466,7 @@ def test_check_resdirRep(capsys):
     Test that when the result directory already contains .fna files in Replicons,
     program ends with an error message.
     """
-    resdir = os.path.join("test", "data", "test_check_resdir")
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir")
     # Create output directory with a lst file in LSTINFO
     os.makedirs(os.path.join(resdir, "Replicons"))
     open(os.path.join(resdir, "Replicons", "toto.fna"), "w").close()
@@ -484,7 +484,7 @@ def test_check_resdirOtherExt():
     Test that when the result directory contains txt files in Replicons dir,
     there is no problem.
     """
-    resdir = os.path.join("test", "data", "test_check_resdir")
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir")
     # Create output directory with a lst file in LSTINFO
     os.makedirs(os.path.join(resdir, "Replicons"))
     open(os.path.join(resdir, "Replicons", "toto.txt"), "w").close()
@@ -556,10 +556,10 @@ def test_run_cmd_error_stderrFile():
     """
     cmd = "toto"
     error = "error trying to run toto"
-    outfile = open(os.path.join("test", "data", "stderr_run_cmd.txt"), "w")
+    outfile = open(os.path.join("test", "data", "annotate", "stderr_run_cmd.txt"), "w")
     assert utils.run_cmd(cmd, error, stderr=outfile) == -1
     outfile.close()
-    os.remove(os.path.join("test", "data", "stderr_run_cmd.txt"))
+    os.remove(os.path.join("test", "data", "annotate", "stderr_run_cmd.txt"))
 
 
 def test_rename_contigs():
@@ -568,11 +568,11 @@ def test_rename_contigs():
     and save the output sequence to the given res_path.
     Check that the output file is as expected.
     """
-    gpath = os.path.join("test", "data", "genomes", "H299_H561.fasta")
+    gpath = os.path.join("test", "data", "annotate", "genomes", "H299_H561.fasta")
     gembase_name = "ESCO.0216.00005"
-    res_path = os.path.join("test", "data")
+    res_path = os.path.join("test", "data", "annotate")
     outfile = os.path.join(res_path, "H299_H561.fasta-short-contig.fna")
-    exp_file = os.path.join("test", "data", "exp_files", "res_H299_H561-ESCO00005.fna")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_H299_H561-ESCO00005.fna")
     utils.rename_genome_contigs(gembase_name, gpath, outfile)
     with open(exp_file, "r") as expf, open(outfile, "r") as of:
         for line_exp, line_seq in zip(expf, of):
@@ -586,10 +586,10 @@ def test_cat_nobar(capsys):
     contains what is expected (concatenation of content of all input files)
     """
     import glob
-    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    list_files = glob.glob(os.path.join("test", "data", "annotate", "genomes", "*.fasta"))
     outfile = "test_catfile.txt"
     utils.cat(list_files, outfile)
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_cat_genomes_fasta.fst")
     with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
         lines_exp = expf.readlines()
         lines_out = outf.readlines()
@@ -605,11 +605,11 @@ def test_cat_bar():
     contains what is expected (concatenation of content of all input files)
     """
     import glob
-    list_files = glob.glob(os.path.join("test", "data", "genomes", "*.fasta"))
+    list_files = glob.glob(os.path.join("test", "data", "annotate", "genomes", "*.fasta"))
     outfile = "test_catfile.txt"
     title = "test cat progressbar"
     utils.cat(list_files, outfile, title=title)
-    exp_file = os.path.join("test", "data", "exp_files", "res_test_cat_genomes_fasta.fst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_cat_genomes_fasta.fst")
     with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
         lines_exp = expf.readlines()
         lines_out = outf.readlines()
