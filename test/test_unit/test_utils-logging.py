@@ -603,3 +603,37 @@ def test_log_no_listen(capsys):
     os.remove(logfile + ".log.err")
     os.remove(logfile + ".log.details")
 
+
+def test_logger_thread(capsys):
+    """
+    Test that, when we put some fake logs in the Queue given to logger_thread,
+    those logs are given to logger, and printed to err.
+    """
+    import multiprocessing
+    import threading
+    m = multiprocessing.Manager()
+    q = m.Queue()
+    lp = threading.Thread(target=utils.logger_thread, args=(q,))
+    lp.start()
+    q.put(fake_log("myname", "hello!!"))
+    q.put(fake_log("other name", "that's me!!!"))
+    q.put(None)
+    lp.join()
+    out, err = capsys.readouterr()
+    assert out == ""
+    assert "hello!!" in err
+    assert "that's me!!!" in err
+
+
+class fake_log():
+
+    def __init__(self, name, text, levelno=100):
+        self.name = name
+        self.text = text
+        self.levelno = levelno
+        self.exc_info = ""
+        self.exc_text = ""
+        self.stack_info = ""
+
+    def getMessage(self):
+        return self.text
