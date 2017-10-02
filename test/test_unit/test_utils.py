@@ -8,6 +8,7 @@ Unit tests for utils.py
 import genomeAPCAT.utils as utils
 import pytest
 import os
+import logging
 import shutil
 import test.test_unit.utilities_for_tests as util_tests
 
@@ -233,6 +234,21 @@ def test_sort_gene():
     Test that genomes are sorted by species first, and then by strain number.
     """
     # genomes = {genome_orig, [gembase, path, gsize, nbcont, L90]}
+    genomes = ["genome.0417.00010", "toto.0417.00010", "genome1.0417.00002",
+               "genome.0417.00015", "totn.0417.00010", "genome.0417.00009",
+               "genome.0517.00001", "toto.0417.00011"]
+    sorted_genomes = sorted(genomes, key=utils.sort_genomes)
+    exp = ["genome.0517.00001", "genome.0417.00009", "genome.0417.00010",
+           "genome.0417.00015", "genome1.0417.00002", "totn.0417.00010",
+           "toto.0417.00010", "toto.0417.00011"]
+    assert sorted_genomes == exp
+
+
+def test_sort_gene_tuple():
+    """
+    Test that genomes are sorted by species first, and then by strain number.
+    """
+    # genomes = {genome_orig, [gembase, path, gsize, nbcont, L90]}
     genomes = {"name1": ["genome.0417.00010", "path/to/genome", 123456, 50, 3],
                "name2": ["toto.0417.00010", "path/to/genome", 123456, 50, 3],
                "name3": ["genome1.0417.00002", "path/to/genome", 123456, 50, 3],
@@ -247,6 +263,84 @@ def test_sort_gene():
            ("name3", genomes["name3"]), ("name5", genomes["name5"]),
            ("name2", genomes["name2"]), ("name8", genomes["name8"])]
     assert sorted_genomes == exp
+
+
+def test_sort_gene_noformat():
+    """
+    Test that when genomes are not in the gembase format, it returns
+    genomes in alphabetical order
+    """
+    # genomes = {genome_orig, [gembase, path, gsize, nbcont, L90]}
+    genomes = {"name1": ["genome.0417.00010", "path/to/genome", 123456, 50, 3],
+               "name2": ["toto.0417.00010", "path/to/genome", 123456, 50, 3],
+               "name3": ["genome1.0417.00002", "path/to/genome", 123456, 50, 3],
+               "name4": ["genome.0417.00015", "path/to/genome", 123456, 50, 3],
+               "name5": ["mygenome.0416", "path/to/genome", 123456, 50, 3],
+               "name6": ["genome.0417", "path/to/genome", 123456, 50, 3],
+               "name7": ["genome.0517.00001", "path/to/genome", 123456, 50, 3],
+               "name8": ["toto.0417.00011", "path/to/genome", 123456, 50, 3],}
+    sorted_genomes = sorted(genomes.items(), key=utils.sort_genomes)
+    exp = [("name7", genomes["name7"]), ("name1", genomes["name1"]),
+           ("name4", genomes["name4"]), ("name6", genomes["name6"]),
+           ("name3", genomes["name3"]), ("name5", genomes["name5"]),
+           ("name2", genomes["name2"]), ("name8", genomes["name8"])]
+    assert sorted_genomes == exp
+
+
+def test_sort_proteins():
+    """
+    Test that when a list of proteins is given, it returns the list sorted by :
+    - species
+    - strain number
+    - protein number
+    """
+    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005",
+                "ESCO.0517.00001.i0001_12354", "ESCO.0417.00010.i0001_1",
+                "TOTO.0417.00001.i0001_12", "TOTO.0717.00001.i0008_9"]
+    sorted_prot = sorted(proteins, key=utils.sort_proteins)
+    exp = ["ESCO.0617.00001.i0001_005", "ESCO.0517.00001.i0001_12354",
+           "ESCO.0417.00010.i0001_1", "ESCO.0417.00010.i0001_12354",
+           "TOTO.0717.00001.i0008_9", "TOTO.0417.00001.i0001_12"]
+    assert sorted_prot == exp
+
+
+def test_sort_proteins_other_format():
+    """
+    Test that when a list of proteins is given, it returns the list sorted by :
+    - species
+    - strain number
+    - protein number
+    for all proteins where this information is available,
+    and then, the other proteins, sorted by :
+    - species (string before "_")
+    - protein number (num after "_")
+    """
+    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005", "myprotein_0002",
+                "ESCO.0517.00001.i0001_12354", "myprotein_0001", "ESCO.0417.00010.i0001_1",
+                "aprot_15", "aprot_2",
+                "TOTO.0417.00001.i0001_12", "TOTO.0717.00001.i0008_9"]
+    sorted_prot = sorted(proteins, key=utils.sort_proteins)
+    exp = ["ESCO.0617.00001.i0001_005", "ESCO.0517.00001.i0001_12354",
+           "ESCO.0417.00010.i0001_1", "ESCO.0417.00010.i0001_12354",
+           "TOTO.0717.00001.i0008_9", "TOTO.0417.00001.i0001_12",
+           "aprot_2", "aprot_15", "myprotein_0001", "myprotein_0002"]
+    assert sorted_prot == exp
+
+
+def test_sort_proteins_error_format1(capsys):
+    """
+    Test that when a protein name does not follow the format <alpha_num>_<num>,
+    it gives an error.
+    """
+    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005",
+                "ESCO.0517.00001.i0001_12354", "error-protein"]
+    with pytest.raises(SystemExit):
+        sorted(proteins, key=utils.sort_proteins)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Protein error-protein does not have the required format. It must contain, "
+            "at least <alpha-num>_<num_only>, and at best "
+            "<name>.<date>.<strain_num>.<contig_info>_<prot_num>. "
+            "Please change its name.") in err
 
 
 def test_read_genomes_nofile(capsys):
@@ -511,6 +605,19 @@ def test_run_cmd_error_noQuit(capsys):
     assert ("error trying to run toto: toto does not exist") in err
 
 
+def test_run_cmd_error_noQuit_logger(capsys):
+    """
+    Test that when we try to run a command which does not exist, it returns an error message,
+    but does not exit the program (eof=False).
+    """
+    cmd = "toto"
+    logger = logging.getLogger("default")
+    error = "error trying to run toto"
+    assert utils.run_cmd(cmd, error, logger=logger) == -1
+    out, err = capsys.readouterr()
+    assert ("error trying to run toto: toto does not exist") in err
+
+
 def test_run_cmd_error_Quit(capsys):
     """
     Test that when we try to run a command which does not exist, it returns an error message,
@@ -622,3 +729,146 @@ def test_detail():
     Check value returned for detail level
     """
     assert utils.detail_lvl() == 15
+
+
+def test_grep():
+    """
+    Check that it returns all lines containing the given pattern
+    """
+    lines = ("1toto.txt otherletters\n"
+             "123toto.txtotherletters\n"
+             "123toto.txt other letters\n"
+             "123toto:txt otherletters\n"
+             "123toto.txt otherletters\n")
+    filein = "filein.txt"
+    with open(filein, "w") as ff:
+        ff.write(lines)
+    pattern = "[0-9]+toto\.txt [a-z]{6}"
+    lines_grep = utils.grep(filein, pattern)
+    exp = ["1toto.txt otherletters",
+           "123toto.txt otherletters"]
+    assert exp == lines_grep
+    os.remove(filein)
+
+
+def test_grep_count():
+    """
+    Check that it returns the number of lines containing the given pattern
+    """
+    lines = ("1toto.txt otherletters\n"
+             "123toto.txtotherletters\n"
+             "123toto.txt other letters\n"
+             "123toto:txt otherletters\n"
+             "123toto.txt otherletters\n")
+    filein = "filein.txt"
+    with open(filein, "w") as ff:
+        ff.write(lines)
+    pattern = "[0-9]+toto\.txt [a-z]{6}"
+    lines_grep = utils.grep(filein, pattern, count=True)
+    assert lines_grep == 2
+    os.remove(filein)
+
+
+def test_count_lines():
+    """
+    Test that it returns the number of lines in given file
+    """
+    lines = ("1toto.txt otherletters\n"
+             "123toto.txtotherletters\n"
+             "123toto.txt other letters\n"
+             "123toto:txt otherletters\n"
+             "123toto.txt otherletters\n")
+    filein = "filein.txt"
+    with open(filein, "w") as ff:
+        ff.write(lines)
+    nbline = utils.count(filein)
+    assert nbline == 5
+    os.remove(filein)
+
+
+def test_count_words():
+    """
+    Test that it returns the number of words in given file
+    """
+    lines = ("1toto.txt otherletters\n"
+             "123toto.txtotherletters\n"
+             "123toto.txt other letters\n"
+             "123toto:txt otherletters\n"
+             "123toto.txt otherletters\n")
+    filein = "filein.txt"
+    with open(filein, "w") as ff:
+        ff.write(lines)
+    nbword = utils.count(filein, get="words")
+    assert nbword == 10
+    os.remove(filein)
+
+def test_count_error(capsys):
+    """
+    test that when we want to count something else than 'lines' or 'words', it returns an error
+    """
+    with pytest.raises(SystemExit):
+        utils.count("filein", get="letters")
+    _, err = capsys.readouterr()
+    assert "Choose what you want to count among ['lines', 'words']" in err
+
+
+def test_save_bin():
+    """
+    Test that python objects are correctly saved into binary file
+    """
+    obj1 = {1: "toto", "key": 455, "key2": "val"}
+    obj2 = [1, 2, 5, "toto", "plop"]
+    obj3 = "a string"
+    objects = [obj1, obj2, obj3]
+    fileout = "filout.bin"
+    utils.save_bin(objects, fileout)
+    import _pickle as pickle
+    with open(fileout, "rb") as binf:
+        obj = pickle.load(binf)
+    assert objects == obj
+    os.remove(fileout)
+
+
+def test_load_bin():
+    """
+    Test that python objects are correctly recovered from binary file
+    """
+    fileout = os.path.join("test", "data", "utils", "objects_saved.bin")
+    found = utils.load_bin(fileout)
+    obj1 = {1: "toto", "key": 455, "key2": "val"}
+    obj2 = [1, 2, 5, "toto", "plop"]
+    obj3 = "a string"
+    objects = [obj1, obj2, obj3]
+    assert found == objects
+
+
+def test_write_list():
+    """
+    Test that the given list is returned as expected string
+    """
+    inlist = [1, 2, "toto", {1:2, "1": 5}, 1e-6]
+    tostr = utils.write_list(inlist)
+    exp = "1 2 toto {1: 2, '1': 5} 1e-06\n"
+    assert tostr == exp
+
+
+def test_remove_exits():
+    """
+    Test that a given file is removed if it exists
+    """
+    infile = "toto.txt"
+    open(infile, "w").close()
+    assert os.path.isfile(infile)
+    utils.remove(infile)
+    assert not os.path.isfile(infile)
+
+
+def test_remove_not_exist():
+    """
+    Test that removing a file which does not exist brings no error
+    """
+    infile = "toto.txt"
+    assert not os.path.isfile(infile)
+    utils.remove(infile)
+    assert not os.path.isfile(infile)
+

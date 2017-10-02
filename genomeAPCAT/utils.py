@@ -360,12 +360,12 @@ def sort_proteins(x):
             return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
         # if format is not like this, it must be something_00001:
         # sort by 'something' and then 00001
-        return (x.split("_")[0], int(x.split("_")[-1]))
+        return (x.split("_")[0], int(x.split("_")[1]))
     except IndexError:
         logger = logging.getLogger("utils")
         logger.error(("ERROR: Protein {} does not have the required format. "
                       "It must contain, at least <alpha-num>_<num_only>, and at best "
-                      "<name>.<date>.<strain_num>.<contig_info>_<prot_num>."
+                      "<name>.<date>.<strain_num>.<contig_info>_<prot_num>. "
                       "Please change its name.").format(x))
         sys.exit(1)
 
@@ -536,14 +536,16 @@ def count(filein, get="lines"):
     """
     gets = ["lines", "words"]
     if get not in gets:
+        logger = logging.getLogger("utils")
         logger.error("Choose what you want to count among {}.".format(gets))
+        sys.exit(1)
     num = 0
     with open(filein, "r") as inf:
         for line in inf:
             if get == "lines":
                 num += 1
             elif get == "words":
-                num += len(line.strip())
+                num += len(line.split())
     return num
 
 
