@@ -41,7 +41,7 @@ def test_plot_dist():
     title = "Distribution test"
     text = "Max L90 ="
     utils.plot_distr(values, limit, outfile, title, text)
-    assert util_tests.compare_files(outfile, reffile)
+    assert util_tests.compare_files_bin(outfile, reffile)
     os.remove(outfile)
 
 

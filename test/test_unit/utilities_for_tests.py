@@ -7,6 +7,7 @@ This script contains functions used by several tests.
 
 import hashlib
 import os
+import pytest
 
 
 def get_file_hash(filepath):
@@ -25,10 +26,11 @@ def get_file_hash(filepath):
     return m.hexdigest()
 
 
-def compare_files(file1, file2):
+def compare_files_bin(file1, file2):
     """
     Checks if the two files are the same or not, by comparing their signatures.
     """
     sig_file1 = get_file_hash(file1)
     sig_file2 = get_file_hash(file2)
     return sig_file1 == sig_file2
+

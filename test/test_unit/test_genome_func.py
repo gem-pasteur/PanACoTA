@@ -420,6 +420,6 @@ def test_plot_dist():
     expfiles = [os.path.join(exp_path, "res_QC_L90-" + listfile_base + ".png"),
                 os.path.join(exp_path, "res_QC_nb-contigs-" + listfile_base + ".png")]
     for out, exp in zip(outfiles, expfiles):
-        assert util_tests.compare_files(out, exp)
+        assert util_tests.compare_files_bin(out, exp)
         os.remove(out)
 
