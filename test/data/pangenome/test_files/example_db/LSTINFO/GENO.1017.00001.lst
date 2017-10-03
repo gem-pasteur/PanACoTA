@@ -1,0 +1,11 @@
+213	1880	D	CDS	GENO.1017.00001.b0001_00001	glnS	| Glutamine--tRNA ligase | 6.1.1.18 | similar to AA sequence:UniProtKB:P00962
+1916	2746	D	CDS	GENO.1017.00001.b0001_00002	amiD	| N-acetylmuramoyl-L-alanine amidase AmiD | 3.5.1.28 | similar to AA sequence:UniProtKB:P75820
+16	396	D	CDS	GENO.1017.00001.b0002_00003	hpcD	| 5-carboxymethyl-2-hydroxymuconate Delta-isomerase | 5.3.3.10 | similar to AA sequence:UniProtKB:Q05354
+428	1837	D	CDS	GENO.1017.00001.i0002_00004	NA	| hypothetical protein | NA | NA
+1869	2642	D	CDS	GENO.1017.00001.i0002_00005	hisP	| Histidine transport ATP-binding protein HisP | NA | similar to AA sequence:UniProtKB:P02915
+2709	3443	D	CDS	GENO.1017.00001.i0002_00006	trmD_1	| tRNA (guanine-N(1)-)-methyltransferase | 2.1.1.228 | similar to AA sequence:UniProtKB:P0A873
+3427	4254	D	CDS	GENO.1017.00001.i0002_00007	trmD_2	| tRNA (guanine-N(1)-)-methyltransferase | 2.1.1.228 | similar to AA sequence:UniProtKB:P0A873
+4299	4763	D	CDS	GENO.1017.00001.i0002_00008	NA	| hypothetical protein | NA | NA
+4818	5078	D	CDS	GENO.1017.00001.i0002_00009	NA	| hypothetical protein | NA | NA
+5117	5698	D	CDS	GENO.1017.00001.i0002_00010	NA	| hypothetical protein | NA | NA
+5717	7024	D	CDS	GENO.1017.00001.b0002_00011	dctM	| C4-dicarboxylate TRAP transporter large permease protein DctM | NA | similar to AA sequence:UniProtKB:O07838
