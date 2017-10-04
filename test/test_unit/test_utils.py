@@ -294,11 +294,11 @@ def test_sort_proteins():
     - strain number
     - protein number
     """
-    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005",
+    proteins = ["ESCO.0417.00010.i0001_12354", "ESCA.0617.00001.i0001_005",
                 "ESCO.0517.00001.i0001_12354", "ESCO.0417.00010.i0001_1",
                 "TOTO.0417.00001.i0001_12", "TOTO.0717.00001.i0008_9"]
     sorted_prot = sorted(proteins, key=utils.sort_proteins)
-    exp = ["ESCO.0617.00001.i0001_005", "ESCO.0517.00001.i0001_12354",
+    exp = ["ESCA.0617.00001.i0001_005", "ESCO.0517.00001.i0001_12354",
            "ESCO.0417.00010.i0001_1", "ESCO.0417.00010.i0001_12354",
            "TOTO.0717.00001.i0008_9", "TOTO.0417.00001.i0001_12"]
     assert sorted_prot == exp
