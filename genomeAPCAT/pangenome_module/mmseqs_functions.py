@@ -168,6 +168,7 @@ def mmseq_tsv_to_clusters(mmseq):
 def clusters_to_file(clust, fileout):
     """
     Write all clusters to a file
+    clust: {first_member: [all members = protein names]}
     """
     families = {}  # {famnum: [members]}
     with open(fileout, "w") as fout:
