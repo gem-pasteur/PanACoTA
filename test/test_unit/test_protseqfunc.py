@@ -67,7 +67,7 @@ def test_build_bank_spedir(path_test_files, path_exp_files):
     shutil.rmtree("test_build_prt")
 
 
-def test_build_bank_exists(path_test_files, path_exp_files, capsys):
+def test_build_bank_exists(path_test_files, path_exp_files, caplog):
     """
     Test that when we want to create a bank but the output file already exists, it prints
     a warning, and closes without redoing the bank
@@ -82,14 +82,13 @@ def test_build_bank_exists(path_test_files, path_exp_files, capsys):
     quiet = True
     outfile = psf.build_prt_bank(lstinfo, dbpath, name, spedir, quiet)
     assert outfile == exp_out
-    out, err = capsys.readouterr()
-    assert out == ""
     assert ("Protein bank test/data/pangenome/test_files/example_db/Proteins/EXEM.All.prt "
-            "already exists. It will be used by mmseqs.") in err
+            "already exists. It will be used by mmseqs.") in caplog.text
+    assert caplog.records[0].levelname == "WARNING"
     os.remove(outfile)
 
 
-def test_build_bank_noquiet(path_test_files, path_exp_files, capsys):
+def test_build_bank_noquiet(path_test_files, path_exp_files, caplog):
     """
     Test that when the bank is created without the quiet option, it also works as expected
     """
@@ -105,5 +104,6 @@ def test_build_bank_noquiet(path_test_files, path_exp_files, capsys):
     with open(outfile, "r") as of, open(exp_file, "r") as ef:
         for l1, l2 in zip(of, ef):
             assert l1 == l2
-    out, err = capsys.readouterr()
+    assert ("Building bank with all proteins to EXEM.All.prt") in caplog.text
+    assert caplog.records[0].levelname == "INFO"
     os.remove(outfile)
