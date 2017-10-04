@@ -619,6 +619,7 @@ def logger_thread(q):
         logger = logging.getLogger(record.name)
         logger.handle(record)
 
+
 def detail_lvl():
     """
     Returns the int level corresponding to "DETAIL"
