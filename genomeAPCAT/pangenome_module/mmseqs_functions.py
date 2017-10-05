@@ -151,7 +151,7 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
 
 def mmseq_tsv_to_clusters(mmseq):
     """
-    Reads the output of mmseq as a tsv file, and converts it to a python dist
+    Reads the output of mmseq as a tsv file, and converts it to a python dict
     """
     clusters = {}  # {representative: [all members]}
     with open(mmseq, "r") as mmsf:
