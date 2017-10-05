@@ -665,6 +665,8 @@ def test_annote_all():
         assert os.path.isfile(f + ".tbl")
         assert os.path.isfile(f + ".faa")
         assert os.path.isfile(f + ".ffn")
+        assert os.path.isfile(f + ".gff")
+
 
     # Check content of result database files
     exp_dir = os.path.join("test", "data", "annotate", "exp_files", "results_test_func-default")
