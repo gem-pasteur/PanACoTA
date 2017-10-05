@@ -50,14 +50,16 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
     prot_dir = os.path.join(res_path, "Proteins")
     gene_dir = os.path.join(res_path, "Genes")
     rep_dir = os.path.join(res_path, "Replicons")
+    gff_dir = os.path.join(res_path, "gff3")
     os.makedirs(lst_dir, exist_ok=True)
     os.makedirs(prot_dir, exist_ok=True)
     os.makedirs(gene_dir, exist_ok=True)
     os.makedirs(rep_dir, exist_ok=True)
+    os.makedirs(gff_dir, exist_ok=True)
 
     nbgen = len(genomes)
     if not quiet:
-    # Create progressbar
+        # Create progressbar
         widgets = ['Formatting genomes: ',
                    progressbar.Bar(marker='█', left='', right='', fill=' '),
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
@@ -68,7 +70,8 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
     q = m.Queue()
     skipped = []  # list of genomes skipped: no format step run
     skipped_format = []  # List of genomes for which forat step had problems
-    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q)
+    params = [(genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir,
+               rep_dir, gff_dir, results, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
     pool = multiprocessing.Pool(threads)
     final = pool.map_async(handle_genome, params, chunksize=1)
@@ -100,7 +103,8 @@ def handle_genome(args):
     problems (result = True). In that case, format the genome and get the output to
     see if everything went ok.
     """
-    genome, name, gpath, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, results, q = args
+    (genome, name, gpath, prok_path, lst_dir, prot_dir,
+     gene_dir, rep_dir, gff_dir, results, q) = args
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -116,11 +120,12 @@ def handle_genome(args):
     if not results[genome]:
         return ("bad_prokka", genome)
     ok_format = format_one_genome(gpath, name, prok_path, lst_dir,
-                                  prot_dir, gene_dir, rep_dir, logger)
+                                  prot_dir, gene_dir, rep_dir, gff_dir, logger)
     return (ok_format, genome)
 
 
-def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_dir, logger):
+def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
+                      rep_dir, gff_dir, logger):
     """
     Format the given genome, and create its corresponding files in the following folders:
     - Proteins
@@ -148,6 +153,15 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # L90 threshold), and wants to format again its genomes with the new names, but without
     # running prokka again, we must change here the contig names (containing genome name).
     same_name = tbl2lst(tblgenome, lstgenome, name)
+
+    # Create gff3 file for annotations
+    prokka_gff = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
+    gffgenome = os.path.join(gff_dir, name + ".gff")
+    ok_gff = generate_gff(prokka_gff, gffgenome, lstgenome)
+    if not ok_gff:
+        os.remove(lstgenome)
+        return False
+
     # create Genes file (and check no problem occurred with return code)
     ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
     gengenome = os.path.join(gene_dir, name + ".gen")
@@ -155,6 +169,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
     if not ok_gene:
+        os.remove(gffgenome)
         os.remove(lstgenome)
         return False
     # If gene file was created, create Proteins file
@@ -164,6 +179,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
 
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
+        os.remove(gffgenome)
         os.remove(lstgenome)
         os.remove(gengenome)
         return False
@@ -177,6 +193,49 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir, rep_d
     else:
         utils.rename_genome_contigs(name, gpath, rep_file)
     return True
+
+
+def generate_gff(prokka_gff, gffgenome, lstgenome):
+    """
+    From the lstinfo file, generate a gff file.
+    """
+    with open(prokka_gff, "r") as prokf, open(lstgenome, "r") as lstf,\
+         open(gffgenome, "w") as gfff:
+        headers = []
+        line_gff = prokf.readline()
+        while line_gff.startswith("#"):
+            headers.append(line_gff)
+            line_gff = prokf.readline()
+        [gfff.write(line_head) for line_head in headers]
+        line_lst = lstf.readline()
+        handle_line_gff(line_lst, line_gff, gfff)
+        for line_lst, line_gff in zip(lstf, prokf):
+            handle_line_gff(line_lst, line_gff, gfff)
+    return True
+
+
+def handle_line_gff(line_lst, line_gff, gfff):
+    """
+    Read a line from prokka gff output and a line from lstinfo, and get needed information
+    """
+    start, end, strand, tp, name, gene, other = line_lst.strip().split("\t")
+    _, product, ecnum, pred = other.split("|")
+    soft = line_gff.strip().split("\t")[1]
+    cont_num = name.split(".")[-1].split("_")[0][1:]
+    contig_name = ".".join(name.split(".")[:3]) + "." + cont_num
+    strands = {"D": "+", "C": "-"}
+    att = "ID={}".format(name)
+    if ecnum.strip() != "NA":
+        att += ";eC_number={}".format(ecnum.strip())
+    if gene != "NA":
+        att += ";Name={0};gene={0}".format(gene)
+    if pred.strip() != "NA":
+        att += ";inference={}".format(pred.strip())
+    att += ";locus_tag={}".format(name)
+    if product.strip() != "NA":
+        att += ";product={}".format(product.strip())
+    infos = [contig_name, soft, tp, start, end, ".", strands[strand], ".", att]
+    gfff.write("\t".join(infos) + "\n")
 
 
 def create_gen(ffnseq, lstfile, genseq, logger):
