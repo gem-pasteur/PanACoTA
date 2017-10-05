@@ -458,6 +458,141 @@ def test_create_gen_Ok(logger):
     os.remove(genseq)
 
 
+def test_handle_line_gff():
+    """
+    Check that given a line in lstinfo with no information (gene name, ecnumber, product,
+    inference), it returns the good gff line
+    """
+    line_lst = ("201\t743\tC\tCDS\tESCO.1015.00001.b0001_00001\tNA\t"
+                "| NA | NA | NA")
+    line_gff = ("H561_S27_L001__1\tProdigal:2.6\tCDS\t201\t743\t.\t-\t0\t"
+                "ID=ONKACNIE_00001;inference=ab initio "
+                "prediction:Prodigal:2.6;locus_tag=ONKACNIE_00001;product=hypothetical protein")
+    outgff = "test_handle_line_gff.gff"
+    gfff = open(outgff, "w")
+    ffunc.handle_line_gff(line_lst, line_gff, gfff)
+    gfff.close()
+    with open(outgff, "r") as gf:
+        lines = gf.readlines()
+        assert len(lines) == 1
+        exp_line = ("ESCO.1015.00001.0001\tProdigal:2.6\tCDS\t201\t743\t.\t-\t.\t"
+                    "ID=ESCO.1015.00001.b0001_00001;locus_tag=ESCO.1015.00001.b0001_00001\n")
+        assert lines[0] == exp_line
+    os.remove(outgff)
+
+
+def test_handle_line_gff_ecnum():
+    """
+    Check that given a line in lstinfo with only ec_number information,
+    it returns the good gff line
+    """
+    line_lst = ("201\t743\tC\tCDS\tESCO.1015.00001.b0001_00001\tNA\t"
+                "| NA | 123.995.4546 | NA")
+    line_gff = ("H561_S27_L001__1\tProdigal:2.6\tCDS\t201\t743\t.\t-\t0\t"
+                "ID=ONKACNIE_00001;inference=ab initio "
+                "prediction:Prodigal:2.6;locus_tag=ONKACNIE_00001;product=hypothetical protein")
+    outgff = "test_handle_line_gff-ecnum.gff"
+    gfff = open(outgff, "w")
+    ffunc.handle_line_gff(line_lst, line_gff, gfff)
+    gfff.close()
+    with open(outgff, "r") as gf:
+        lines = gf.readlines()
+        assert len(lines) == 1
+        exp_line = ("ESCO.1015.00001.0001\tProdigal:2.6\tCDS\t201\t743\t.\t-\t.\t"
+                    "ID=ESCO.1015.00001.b0001_00001;eC_number=123.995.4546;"
+                    "locus_tag=ESCO.1015.00001.b0001_00001\n")
+        assert lines[0] == exp_line
+    os.remove(outgff)
+
+
+def test_handle_line_gff_gene():
+    """
+    Check that given a line in lstinfo with only gene name information,
+    it returns the good gff line
+    """
+    line_lst = ("201\t743\tC\tCDS\tESCO.1015.00001.b0001_00001\tge4a\t"
+                "| NA | NA | NA")
+    line_gff = ("H561_S27_L001__1\tProdigal:2.6\tCDS\t201\t743\t.\t-\t0\t"
+                "ID=ONKACNIE_00001;inference=ab initio "
+                "prediction:Prodigal:2.6;locus_tag=ONKACNIE_00001;product=hypothetical protein")
+    outgff = "test_handle_line_gff-gene.gff"
+    gfff = open(outgff, "w")
+    ffunc.handle_line_gff(line_lst, line_gff, gfff)
+    gfff.close()
+    with open(outgff, "r") as gf:
+        lines = gf.readlines()
+        assert len(lines) == 1
+        exp_line = ("ESCO.1015.00001.0001\tProdigal:2.6\tCDS\t201\t743\t.\t-\t.\t"
+                    "ID=ESCO.1015.00001.b0001_00001;Name=ge4a;gene=ge4a;"
+                    "locus_tag=ESCO.1015.00001.b0001_00001\n")
+        assert lines[0] == exp_line
+    os.remove(outgff)
+
+
+def test_handle_line_gff_inf():
+    """
+    Check that given a line in lstinfo with only inference information,
+    it returns the good gff line
+    """
+    line_lst = ("201\t743\tC\tCDS\tESCO.1015.00001.b0001_00001\tNA\t"
+                "| NA | NA | ab initio prediction:Prodigal:2.6")
+    line_gff = ("H561_S27_L001__1\tProdigal:2.6\tCDS\t201\t743\t.\t-\t0\t"
+                "ID=ONKACNIE_00001;inference=ab initio "
+                "prediction:Prodigal:2.6;locus_tag=ONKACNIE_00001;product=hypothetical protein")
+    outgff = "test_handle_line_gff-inf.gff"
+    gfff = open(outgff, "w")
+    ffunc.handle_line_gff(line_lst, line_gff, gfff)
+    gfff.close()
+    with open(outgff, "r") as gf:
+        lines = gf.readlines()
+        assert len(lines) == 1
+        exp_line = ("ESCO.1015.00001.0001\tProdigal:2.6\tCDS\t201\t743\t.\t-\t.\t"
+                    "ID=ESCO.1015.00001.b0001_00001;inference=ab initio "
+                    "prediction:Prodigal:2.6;locus_tag=ESCO.1015.00001.b0001_00001\n")
+        assert lines[0] == exp_line
+    os.remove(outgff)
+
+
+def test_handle_line_gff_prod():
+    """
+    Check that given a line in lstinfo with only product information,
+    it returns the good gff line
+    """
+    line_lst = ("201\t743\tC\tCDS\tESCO.1015.00001.b0001_00001\tNA\t"
+                "| hypothetical protein | NA | NA")
+    line_gff = ("H561_S27_L001__1\tProdigal:2.6\tCDS\t201\t743\t.\t-\t0\t"
+                "ID=ONKACNIE_00001;inference=ab initio "
+                "prediction:Prodigal:2.6;locus_tag=ONKACNIE_00001;product=hypothetical protein")
+    outgff = "test_handle_line_gff-prod.gff"
+    gfff = open(outgff, "w")
+    ffunc.handle_line_gff(line_lst, line_gff, gfff)
+    gfff.close()
+    with open(outgff, "r") as gf:
+        lines = gf.readlines()
+        assert len(lines) == 1
+        exp_line = ("ESCO.1015.00001.0001\tProdigal:2.6\tCDS\t201\t743\t.\t-\t.\t"
+                    "ID=ESCO.1015.00001.b0001_00001;locus_tag=ESCO.1015.00001.b0001_00001;"
+                    "product=hypothetical protein\n")
+        assert lines[0] == exp_line
+    os.remove(outgff)
+
+
+def test_generate_gff():
+    """
+    Test creating gff file.
+    """
+    prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff.gff")
+    gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
+    lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
+    assert ffunc.generate_gff(prokgff, gffout, lstgenome)
+    exp_gff = os.path.join("test", "data", "annotate", "exp_files", "res_create_gff.gff")
+    with open(gffout, "r") as gffo, open(exp_gff, "r") as expf:
+        for line_exp, line_out in zip(expf, gffo):
+            assert line_exp == line_out
+    os.remove(gffout)
+
+
+
 def test_handle_genome_nores(logger):
     """
     Test that when we try to format a genome which is not in results,
@@ -465,7 +600,7 @@ def test_handle_genome_nores(logger):
     """
     results = {"abcd.fasta": True}
     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-            "gene/dir", "rep/dir", results, logger[0])
+            "gene/dir", "rep/dir", "gff/dir", results, logger[0])
     res = ffunc.handle_genome(args)
     assert res == ("no_res", "toto.fasta")
 
@@ -477,7 +612,7 @@ def test_handle_genome_badprok(logger):
     """
     results = {"abcd.fasta": True, "toto.fasta": False}
     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-            "gene/dir", "rep/dir", results, logger[0])
+            "gene/dir", "rep/dir", "gff/dir", results, logger[0])
     res = ffunc.handle_genome(args)
     assert res == ("bad_prokka", "toto.fasta")
 
@@ -494,10 +629,11 @@ def test_handle_genome_formatok(logger):
     prot_dir = lst_dir
     gene_dir = lst_dir
     rep_dir = lst_dir
+    gff_dir = lst_dir
     results = {"B2_A3_5.fasta-split5N.fna-short-contig.fna": True, "toto.fasta": False}
     args = ("B2_A3_5.fasta-split5N.fna-short-contig.fna", name, gpath, prok_path,
             lst_dir, prot_dir,
-            gene_dir, rep_dir, results, logger[0])
+            gene_dir, rep_dir, gff_dir, results, logger[0])
     res = ffunc.handle_genome(args)
     assert res == (True, "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     os.remove(os.path.join(lst_dir, name + ".prt"))
