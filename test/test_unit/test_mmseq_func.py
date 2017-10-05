@@ -7,6 +7,7 @@ Unit tests for the mmseqs_functions submodule in pangenome module
 
 import pytest
 import os
+import time
 
 import genomeAPCAT.pangenome_module.mmseqs_functions as mmseqs
 
@@ -19,6 +20,50 @@ def path_test_pan():
 @pytest.fixture(scope="function")
 def path_test_files():
     return os.path.join(path_test_pan(), "test_files")
+
+
+@pytest.fixture(scope="function")
+def path_exp_files():
+    return os.path.join(path_test_pan(), "exp_files")
+
+
+@pytest.fixture(scope="function")
+def exp_clusters():
+    """
+    Expected clusters generated my mmseq
+    """
+    clusters = {"GEN4.1111.00001.b0001_00001":
+                ["GEN4.1111.00001.b0001_00001", "GENO.0817.00001.b0001_00002",
+                 "GENO.1216.00002.b0001_00001", "GENO.1216.00002.i0001_00002"],
+                "GEN4.1111.00001.i0001_00003": ["GEN4.1111.00001.i0001_00003"],
+                "GEN4.1111.00001.b0001_00009":
+                 ["GEN4.1111.00001.b0001_00009", "GENO.0817.00001.b0002_00011",
+                  "GENO.1216.00002.b0002_00010"],
+                "GENO.0817.00001.b0001_00001": ["GENO.0817.00001.b0001_00001"],
+                "GENO.0817.00001.b0002_00003":
+                 ["GENO.0817.00001.b0002_00003", "GEN4.1111.00001.i0001_00002",
+                  "GENO.1216.00002.i0001_00003"],
+                "GENO.0817.00001.i0002_00006":
+                 ["GENO.0817.00001.i0002_00006", "GENO.0817.00001.i0002_00007",
+                  "GENO.1216.00002.i0001_00007", "GEN4.1111.00001.i0001_00006"],
+                "GENO.0817.00001.i0002_00008": ["GENO.0817.00001.i0002_00008"],
+                "GENO.0817.00001.i0002_00009":
+                 ["GENO.0817.00001.i0002_00009", "GENO.1216.00002.b0001_00008",
+                  "GEN4.1111.00001.i0001_00007"],
+                "GENO.1216.00002.i0001_00004": ["GENO.1216.00002.i0001_00004"],
+                "GENO.1216.00002.i0001_00005":
+                 ["GENO.1216.00002.i0001_00005", "GENO.0817.00001.i0002_00004",
+                  "GEN4.1111.00001.i0001_00004"],
+                "GENO.1216.00002.i0001_00006":
+                 ["GENO.1216.00002.i0001_00006", "GENO.0817.00001.i0002_00005",
+                  "GEN4.1111.00001.i0001_00005"],
+                "GENO.1216.00002.b0002_00009":
+                 ["GENO.1216.00002.b0002_00009", "GEN4.1111.00001.i0001_00008",
+                  "GENO.0817.00001.i0002_00010"],
+                "GENO.1216.00002.b0003_00011": ["GENO.1216.00002.b0003_00011"],
+                "GENO.1216.00002.b0003_00012": ["GENO.1216.00002.b0003_00012"]
+                }
+    return clusters
 
 
 def test_create_mmseqdb(path_test_files, caplog):
@@ -105,3 +150,105 @@ def test_cluster2file():
             assert fam in exp_fams
     os.remove(fileout)
 
+
+def test_tsv2cluster(path_test_files, exp_clusters):
+    """
+    Check that conversion from mmseq tsv file to clusters is as expected.
+    """
+    filein = os.path.join(path_test_files, "mmseq_tsvfile.tsv")
+    clusters = mmseqs.mmseq_tsv_to_clusters(filein)
+    assert clusters == exp_clusters
+
+
+def test_tsv2pangenome_outgiven(path_test_files, path_exp_files, exp_clusters):
+    """
+    From mmseq tsv file, generate output pangenome file
+    """
+    mmseqclust = os.path.join(path_test_files, "mmseq_tsvfile")
+    logmmseq = "test_tsv2pan.log"
+    start = time.strftime('%Y-%m-%d_%H-%M-%S')
+    outfile1 = "test_tsv2pan_outpangenome.txt"
+    fams, outfile = mmseqs.mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile1)
+    assert outfile1 == outfile
+    for num, fam in fams.items():
+        assert num in list(range(1, 15))
+        found = False
+        for expfam in list(exp_clusters.values()):
+            if fam == expfam:
+                found = True
+                break
+        assert found
+    exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
+    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+        for line_exp, line in zip(ep, pan):
+            assert line_exp.strip() == line.strip()
+    os.remove(outfile)
+    with open(logmmseq, "r") as logf:
+        first_lines = [logf.readline() for _ in range(3)]
+        assert first_lines == ["\n", "------------\n", "\n"]
+        start_line = logf.readline().strip()
+        assert start_line == "Start: {}".format(start)
+        end_line = logf.readline().strip()
+        assert "End: " in end_line
+    os.remove(logmmseq)
+
+
+def test_tsv2pangenome_default(path_test_files, path_exp_files, exp_clusters):
+    """
+    From mmseq tsv file, generate output pangenome file
+    """
+    mmseqclust = os.path.join(path_test_files, "mmseq_tsvfile")
+    logmmseq = "test_tsv2pan-def.log"
+    start = time.strftime('%Y-%m-%d_%H-%M-%S')
+    fams, outfile = mmseqs.mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start)
+    exp_out = os.path.join(path_test_files, "PanGenome-mmseq_tsvfile.tsv.lst")
+    assert outfile == exp_out
+    for num, fam in fams.items():
+        assert num in list(range(1, 15))
+        found = False
+        for expfam in list(exp_clusters.values()):
+            if fam == expfam:
+                found = True
+                break
+        assert found
+    exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
+    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+        for line_exp, line in zip(ep, pan):
+            assert line_exp.strip() == line.strip()
+    os.remove(outfile)
+    with open(logmmseq, "r") as logf:
+        first_lines = [logf.readline() for _ in range(3)]
+        assert first_lines == ["\n", "------------\n", "\n"]
+        start_line = logf.readline().strip()
+        assert start_line == "Start: {}".format(start)
+        end_line = logf.readline().strip()
+        assert "End: " in end_line
+    os.remove(logmmseq)
+
+
+def test_mmseq2pan_givenout(path_test_files, path_exp_files, exp_clusters):
+    """
+    From mmseq output, convert to pangenome (with steps inside, already tested by the other
+    functions called)
+    """
+    outfile1 = "test_mmseq2pan.lst"
+    mmseqclust = os.path.join(path_test_files, "mmseq_clust-out")
+    mmseqdb = os.path.join(path_test_files, "mmseq_db")
+    start = time.strftime('%Y-%m-%d_%H-%M-%S')
+    logmmseq = "test_mmseq2pan-out.log"
+    fams, outf = mmseqs.mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile1)
+    assert outfile1 == outf
+    for num, fam in fams.items():
+        assert num in list(range(1, 15))
+        found = False
+        for expfam in list(exp_clusters.values()):
+            if fam == expfam:
+                found = True
+                break
+        assert found
+    exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
+    with open(exp_pan, "r") as ep, open(outf, "r") as pan:
+        for line_exp, line in zip(ep, pan):
+            assert line_exp.strip() == line.strip()
+    os.remove(outf)
+    os.remove(logmmseq)
