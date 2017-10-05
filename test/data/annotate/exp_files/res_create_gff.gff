@@ -1,0 +1,24 @@
+##gff-version 3
+##sequence-region H561_S27_L001__1 1 3480
+##sequence-region H561_S28_L001__2 1 7080
+##sequence-region H561_S29_L001__3 1 2583
+##sequence-region contig1_dgfdgd_4 1 2
+##sequence-region contig2_5 1 47
+##sequence-region contig3_6 1 65
+##sequence-region contig4_7 1 2
+ESCO.1015.00001.0001	Prodigal:2.6	CDS	201	743	.	-	.	ID=ESCO.1015.00001.b0001_00001;locus_tag=ESCO.1015.00001.b0001_00001;product=hypothetical protein
+ESCO.1015.00001.0001	Prodigal:2.6	CDS	740	1339	.	-	.	ID=ESCO.1015.00001.i0001_00002;locus_tag=ESCO.1015.00001.i0001_00002;product=hypothetical protein
+ESCO.1015.00001.0001	Prodigal:2.6	CDS	1489	2187	.	-	.	ID=ESCO.1015.00001.i0001_00003;locus_tag=ESCO.1015.00001.i0001_00003;product=hypothetical protein
+ESCO.1015.00001.0001	Prodigal:2.6	CDS	2187	2483	.	-	.	ID=ESCO.1015.00001.i0001_00004;locus_tag=ESCO.1015.00001.i0001_00004;product=hypothetical protein
+ESCO.1015.00001.0001	Prodigal:2.6	CDS	2518	3453	.	-	.	ID=ESCO.1015.00001.b0001_00005;locus_tag=ESCO.1015.00001.b0001_00005;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	201	743	.	-	.	ID=ESCO.1015.00001.b0002_00006;locus_tag=ESCO.1015.00001.b0002_00006;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	740	1483	.	-	.	ID=ESCO.1015.00001.i0002_00007;locus_tag=ESCO.1015.00001.i0002_00007;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	1489	2187	.	-	.	ID=ESCO.1015.00001.i0002_00008;locus_tag=ESCO.1015.00001.i0002_00008;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	2187	2516	.	-	.	ID=ESCO.1015.00001.i0002_00009;locus_tag=ESCO.1015.00001.i0002_00009;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	2513	5092	.	-	.	ID=ESCO.1015.00001.i0002_00010;locus_tag=ESCO.1015.00001.i0002_00010;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	5085	5519	.	-	.	ID=ESCO.1015.00001.i0002_00011;locus_tag=ESCO.1015.00001.i0002_00011;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	5501	5923	.	-	.	ID=ESCO.1015.00001.i0002_00012;locus_tag=ESCO.1015.00001.i0002_00012;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	5939	6679	.	-	.	ID=ESCO.1015.00001.i0002_00013;locus_tag=ESCO.1015.00001.i0002_00013;product=hypothetical protein
+ESCO.1015.00001.0002	Prodigal:2.6	CDS	6687	6842	.	-	.	ID=ESCO.1015.00001.b0002_00014;locus_tag=ESCO.1015.00001.b0002_00014;product=hypothetical protein
+ESCO.1015.00001.0003	Prodigal:2.6	CDS	163	870	.	+	.	ID=ESCO.1015.00001.b0003_00015;locus_tag=ESCO.1015.00001.b0003_00015;product=hypothetical protein
+ESCO.1015.00001.0003	Prodigal:2.6	CDS	863	1795	.	+	.	ID=ESCO.1015.00001.b0003_00016;locus_tag=ESCO.1015.00001.b0003_00016;product=hypothetical protein
