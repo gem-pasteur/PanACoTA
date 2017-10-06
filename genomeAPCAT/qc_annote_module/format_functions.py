@@ -157,8 +157,9 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     # Create gff3 file for annotations
     prokka_gff = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
     gffgenome = os.path.join(gff_dir, name + ".gff")
-    ok_gff = generate_gff(prokka_gff, gffgenome, lstgenome)
+    ok_gff = generate_gff(prokka_gff, gffgenome, lstgenome, logger)
     if not ok_gff:
+        os.remove(gffgenome)
         os.remove(lstgenome)
         return False
 
@@ -195,7 +196,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     return True
 
 
-def generate_gff(prokka_gff, gffgenome, lstgenome):
+def generate_gff(prokka_gff, gffgenome, lstgenome, logger):
     """
     From the lstinfo file, generate a gff file.
     """
@@ -209,7 +210,13 @@ def generate_gff(prokka_gff, gffgenome, lstgenome):
         line_lst = lstf.readline()
         handle_line_gff(line_lst, line_gff, gfff)
         for line_lst, line_gff in zip(lstf, prokf):
-            handle_line_gff(line_lst, line_gff, gfff)
+            try:
+                handle_line_gff(line_lst, line_gff, gfff)
+            except IndexError:
+                logger.error("Problem with your gff file. '{}' is not a gff entry "
+                             "line, whereas it should correspond "
+                             "to '{}'".format(line_gff.strip(), line_lst.strip()))
+                return False
     return True
 
 

@@ -577,19 +577,35 @@ def test_handle_line_gff_prod():
     os.remove(outgff)
 
 
-def test_generate_gff():
+def test_generate_gff(logger):
     """
     Test creating gff file.
     """
     prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff.gff")
     gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
     lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
-    assert ffunc.generate_gff(prokgff, gffout, lstgenome)
+    assert ffunc.generate_gff(prokgff, gffout, lstgenome, logger[1])
     exp_gff = os.path.join("test", "data", "annotate", "exp_files", "res_create_gff.gff")
     with open(gffout, "r") as gffo, open(exp_gff, "r") as expf:
         for line_exp, line_out in zip(expf, gffo):
             assert line_exp == line_out
     os.remove(gffout)
+
+
+def test_generate_gff_error(logger, caplog):
+    """
+    Test creating gff file.
+    """
+    prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
+    lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
+    gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
+    assert not ffunc.generate_gff(prokgff, gffout, lstgenome, logger[1])
+    os.remove(gffout)
+    assert len(caplog.records) == 1
+    assert caplog.records[0].levelname == "ERROR"
+    assert ("Problem with your gff file. '##FASTA' is not a gff entry line, whereas it should "
+            "correspond to '863\t1795\tD\tCDS\tESCO.1015.00001.b0003_00016\tNA\t"
+            "| hypothetical protein | NA | NA'") in caplog.text
 
 
 def test_handle_genome_nores(logger):
@@ -892,6 +908,48 @@ def test_format1genome_problemprt(logger):
     os.remove(gffout)
 
 
+def test_format1genome_problemgff(logger):
+    """
+    Test that formatting a genome (making .prt, .gen, .fna, .lst) returns an error message
+    and does not create any output file if there is a problem while converting the
+    .ffn to .gen
+    """
+    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
+    name = "test.0417.00002"
+    prok_path = os.path.join("test", "data", "annotate", "exp_files")
+    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                           name + ".tbl")
+    tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+                           name + ".tbl")
+    shutil.copyfile(tblInit, tblout)
+    gffInit = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
+    gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+                           name + ".gff")
+    shutil.copyfile(gffInit, gffout)
+    lst_dir = os.path.join("test", "data", "annotate")
+    prot_dir = lst_dir
+    gene_dir = lst_dir
+    rep_dir = lst_dir
+    gff_dir = lst_dir
+    assert not ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir,
+                                       gene_dir, rep_dir, gff_dir, logger[1])
+    # Check that all files were not created
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+    assert not os.path.isfile(os.path.join(lst_dir, name + ".gff"))
+    msg = ("Problem with your gff file. '##FASTA' is not a gff entry line, whereas it should "
+           "correspond to '11249\t12328\tD\tCDS\ttest.0417.00002.i0002_00016\tNA\t"
+           "| hypothetical protein | NA | NA'")
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+    # remove tblout which was copied for this test
+    os.remove(tblout)
+    os.remove(gffout)
+
+
 def test_format_all():
     """
     Test that when giving a list of genomes, for which prokka ran without problem,
@@ -1007,7 +1065,7 @@ def test_format_all_notResult():
     prtfiles = os.path.join(res_path, "Proteins")
     genfiles = os.path.join(res_path, "Genes")
     repfiles = os.path.join(res_path, "Replicons")
-    repfiles = os.path.join(res_path, "gff3")
+    gfffiles = os.path.join(res_path, "gff3")
     assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
     assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
     assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
@@ -1026,7 +1084,7 @@ def test_format_all_notResult():
     for f in gpaths:
         os.remove(f)
 
-    probleme avec .fna de onames[0] qui n'est pas créé...
+    # probleme avec .fna de onames[0] qui n'est pas créé...
 
 
 def test_format_all_error():
@@ -1054,6 +1112,11 @@ def test_format_all_error():
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            name + ".tbl")
     shutil.copyfile(tblInit, tblout)
+    gffInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                           name + ".gff")
+    gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+                           name + ".gff")
+    shutil.copyfile(gffInit, gffout)
     results = {gnames[0]: True, gnames[1]: True}
     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
     assert skipped == []
@@ -1062,6 +1125,7 @@ def test_format_all_error():
     prtfiles = os.path.join(res_path, "Proteins")
     genfiles = os.path.join(res_path, "Genes")
     repfiles = os.path.join(res_path, "Replicons")
+    gfffiles = os.path.join(res_path, "gff3")
     assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
     assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
     assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
@@ -1070,11 +1134,15 @@ def test_format_all_error():
     assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
     assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
     assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
+    assert os.path.isfile(os.path.join(gfffiles, onames[0] + ".gff"))
+    assert not os.path.isfile(os.path.join(gfffiles, onames[1] + ".gff"))
     shutil.rmtree(os.path.join(res_path, "LSTINFO"))
     shutil.rmtree(os.path.join(res_path, "Proteins"))
     shutil.rmtree(os.path.join(res_path, "Genes"))
     shutil.rmtree(os.path.join(res_path, "Replicons"))
+    shutil.rmtree(os.path.join(res_path, "gff3"))
     os.remove(tblout)
+    os.remove(gffout)
     for f in gpaths:
         os.remove(f)
 
