@@ -421,8 +421,8 @@ def test_main_onExistingProkkaDir(logger):
 def test_main_onExistingProkkaDirErrorProkk(logger, capsys):
     """
     Test that, when the pipeline is run with a given prokka dir, where prokka results have
-    problems (no tbl file), it returns an error message and the genome with problems
-    is in skipped.
+    problems (no tbl file and no gff file), it returns an error message and the genome with
+    problems is in skipped.
     """
     list_file = os.path.join("test", "data", "annotate", "test_files",
                              "list_genomes-func-test-exist-dir-err.txt")
@@ -493,6 +493,11 @@ def test_main_onExistingProkkaDirErrorForm(logger, capsys):
     tblHere = os.path.join(prokdir, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
                            "test.0417.00002.tbl")
     shutil.copyfile(tblInit, tblHere)
+    gffInit = os.path.join(prokdir, "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes",
+                           "test.0417.00002.gff")
+    gffHere = os.path.join(prokdir, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+                           "test.0417.00002.gff")
+    shutil.copyfile(gffInit, gffHere)
     name = "ESCO"
     date = "0417"
     allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
@@ -533,6 +538,7 @@ def test_main_onExistingProkkaDirErrorForm(logger, capsys):
     shutil.rmtree(resdir, ignore_errors=True)
     os.remove(genome_here)
     os.remove(tblHere)
+    os.remove(gffHere)
 
 
 def test_run_exist_resdir(capsys):
@@ -619,7 +625,8 @@ def test_annote_all():
     """
     date = time.strftime("%m%y")
     fulldate = time.strftime("%Y-%m-%d")
-    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-func-test-default.txt")
+    list_file = os.path.join("test", "data", "annotate", "test_files",
+                             "list_genomes-func-test-default.txt")
     dbpath = os.path.join("test", "data", "annotate", "genomes")
     respath = os.path.join("test", "data", "annotate", "res_test_funcDefault")
     name = "GENO"
@@ -707,7 +714,6 @@ def test_annote_all():
             assert line.startswith("[" + fulldate)
             assert line.count("::") == 2
             infos.append(line.split("::")[-1].strip())
-        print(infos)
         assert ("Start annotating GENO.1015.00001 {}/A_H738.fasta-all.fna"
                 "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
         assert ("Start annotating ESCO.1015.00001 {}/H299_H561.fasta-all.fna"
