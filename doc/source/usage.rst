@@ -206,6 +206,11 @@ Replicons folder
 
 This folder contains 1 file per genome, called ``<genome_name>.fna``. It corresponds to the input file, containing all replicons of the genome, but with contigs renamed.
 
+gff3 folder
+^^^^^^^^^^^
+
+This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_
+
 .. _qco:
 
 Quality Control only
@@ -277,7 +282,7 @@ This will also create a folder ``<res_path>``, with the following files inside:
     - same files as quality control only, except ``info-genomes-<list_file>.lst``.
     - ``LSTINFO_<list_file>.lst``: information on annotated genomes, as described :ref:`here<lstinfof>`
     - prokka result folders in your ``tmp_files`` directory
-    - The 4 folders ``LSTINFO``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
+    - The 5 folders ``LSTINFO``, ``gff3``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
 
 .. _option:
 

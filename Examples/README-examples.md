@@ -66,7 +66,7 @@ In your `my_results` directory, you should now have:
     - genome4 was named using 'GEN4' (specified in list file) and the date specified in list file (1111)
 - log files as previously. Check in the `.log.err` file that no error occurred. Note that if you used the same output directory as for the previous step, and did not remove the log files, the new ones do not erase the existing ones: they now have a timestamp corresponding to the time/date when you launched this annotation step.
 - in `tmp_files`, you still have the 'split5N' genomic sequence files, as well as prokka result folders.
-- You have 4 new folders: `Replicons`, `LSTINFO`, `Genes`, `Proteins` each one containing 3 files (1 per genome) with your results.
+- You have 5 new folders: `Replicons`, `LSTINFO`, `Genes`, `Proteins`, `gff3` each one containing 3 files (1 per genome) with your results.
 
 ## PanGenome step
 
