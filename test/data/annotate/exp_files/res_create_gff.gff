@@ -1,11 +1,4 @@
 ##gff-version 3
-##sequence-region H561_S27_L001__1 1 3480
-##sequence-region H561_S28_L001__2 1 7080
-##sequence-region H561_S29_L001__3 1 2583
-##sequence-region contig1_dgfdgd_4 1 2
-##sequence-region contig2_5 1 47
-##sequence-region contig3_6 1 65
-##sequence-region contig4_7 1 2
 ESCO.1015.00001.0001	Prodigal:2.6	CDS	201	743	.	-	.	ID=ESCO.1015.00001.b0001_00001;locus_tag=ESCO.1015.00001.b0001_00001;product=hypothetical protein
 ESCO.1015.00001.0001	Prodigal:2.6	CDS	740	1339	.	-	.	ID=ESCO.1015.00001.i0001_00002;locus_tag=ESCO.1015.00001.i0001_00002;product=hypothetical protein
 ESCO.1015.00001.0001	Prodigal:2.6	CDS	1489	2187	.	-	.	ID=ESCO.1015.00001.i0001_00003;locus_tag=ESCO.1015.00001.i0001_00003;product=hypothetical protein

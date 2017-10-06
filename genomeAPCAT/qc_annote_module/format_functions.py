@@ -201,12 +201,11 @@ def generate_gff(prokka_gff, gffgenome, lstgenome):
     """
     with open(prokka_gff, "r") as prokf, open(lstgenome, "r") as lstf,\
          open(gffgenome, "w") as gfff:
-        headers = []
+        # write header line
         line_gff = prokf.readline()
+        gfff.write(line_gff)
         while line_gff.startswith("#"):
-            headers.append(line_gff)
             line_gff = prokf.readline()
-        [gfff.write(line_head) for line_head in headers]
         line_lst = lstf.readline()
         handle_line_gff(line_lst, line_gff, gfff)
         for line_lst, line_gff in zip(lstf, prokf):

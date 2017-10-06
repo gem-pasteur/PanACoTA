@@ -640,6 +640,9 @@ def test_handle_genome_formatok(logger):
     os.remove(os.path.join(lst_dir, name + ".fna"))
     os.remove(os.path.join(lst_dir, name + ".gen"))
     os.remove(os.path.join(lst_dir, name + ".lst"))
+    os.remove(os.path.join(lst_dir, name + ".gff"))
+
+    # passer prokka sur gpath. Et récupérer le .gff, le mettre dans test/data/annotate/exp_files/B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes.
 
 
 def test_handle_genome_formaterror(logger):
