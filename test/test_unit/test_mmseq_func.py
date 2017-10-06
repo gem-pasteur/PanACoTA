@@ -180,8 +180,12 @@ def test_tsv2pangenome_outgiven(path_test_files, path_exp_files, exp_clusters):
         assert found
     exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+        lines_exp = []
+        lines_out = []
         for line_exp, line in zip(ep, pan):
-            assert line_exp.strip() == line.strip()
+            lines_exp += line_exp.split()[1:]
+            lines_out += line.split()[1:]
+    assert set(lines_exp) == set(lines_out)
     os.remove(outfile)
     with open(logmmseq, "r") as logf:
         first_lines = [logf.readline() for _ in range(3)]
@@ -213,8 +217,12 @@ def test_tsv2pangenome_default(path_test_files, path_exp_files, exp_clusters):
         assert found
     exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+        lines_exp = []
+        lines_out = []
         for line_exp, line in zip(ep, pan):
-            assert line_exp.strip() == line.strip()
+            lines_exp += line_exp.split()[1:]
+            lines_out += line.split()[1:]
+    assert set(lines_exp) == set(lines_out)
     os.remove(outfile)
     with open(logmmseq, "r") as logf:
         first_lines = [logf.readline() for _ in range(3)]
@@ -248,7 +256,11 @@ def test_mmseq2pan_givenout(path_test_files, path_exp_files, exp_clusters):
         assert found
     exp_pan = os.path.join(path_exp_files, "exp_pangenome.txt")
     with open(exp_pan, "r") as ep, open(outf, "r") as pan:
+        lines_exp = []
+        lines_out = []
         for line_exp, line in zip(ep, pan):
-            assert line_exp.strip() == line.strip()
+            lines_exp += line_exp.split()[1:]
+            lines_out += line.split()[1:]
+    assert set(lines_exp) == set(lines_out)
     os.remove(outf)
     os.remove(logmmseq)
