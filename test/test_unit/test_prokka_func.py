@@ -84,6 +84,8 @@ def test_check_prokka_notbl(logger):
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     nbcont = 7
     assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
@@ -113,6 +115,8 @@ def test_check_prokka_sevtbl(logger):
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + "2.tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     nbcont = 7
     assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
@@ -136,6 +140,8 @@ def test_check_prokka_nofaa(logger):
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
@@ -165,6 +171,8 @@ def test_check_prokka_sevfaa(logger):
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + "2.faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
@@ -189,6 +197,8 @@ def test_check_prokka_noffn(logger):
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
@@ -218,11 +228,70 @@ def test_check_prokka_sevffn(logger):
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + "2.ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 7
     assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
     msg = "prokka_out_for_test-missffn original_name.fna: several .ffn files"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+    shutil.rmtree(out_dir)
+
+
+def test_check_prokka_nogff(logger):
+    """
+    Check that check_prokka returns false when a ffn file is missing, and an error message
+    """
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "annotate", "out_test_noffn")
+    name = "prokka_out_for_test-missgff"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missgff original_name.fna: no .gff file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+    shutil.rmtree(out_dir)
+
+
+def test_check_prokka_sevgff(logger):
+    """
+    Check that check_prokka returns false when there is more than 1 ffn file,
+    and an error message
+    """
+    ori_prok_dir = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join("test", "data", "annotate", "out_test_noffn")
+    name = "prokka_out_for_test-sevgff"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + "2.gff"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = "prokka.log"
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not pfunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-sevgff original_name.fna: several .gff files"
     q = logger[0]
     assert q.qsize() == 1
     assert q.get().message == msg
@@ -262,6 +331,9 @@ def test_check_prokka_wrong_tblCDS(logger):
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+
     shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -295,6 +367,8 @@ def test_check_prokka_wrong_tblCRISPR(logger):
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -326,6 +400,8 @@ def test_check_prokka_tblCRISPR_newversion(logger):
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
     shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
     logf = "prokka.log"
     gpath = "path/to/nogenome/original_name.fna"
@@ -384,6 +460,8 @@ def test_run_prokka_out_exists_error(logger):
                     os.path.join(new_prok_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(new_prok_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(new_prok_dir, name + ".gff"))
     gpath = "path/to/nogenome/original_name-error"
     outdir = os.path.join("test", "data", "annotate", "test_files")
     cores_prokka = 1
