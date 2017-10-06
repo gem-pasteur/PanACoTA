@@ -848,8 +848,9 @@ def test_write_list():
     """
     inlist = [1, 2, "toto", {1:2, "1": 5}, 1e-6]
     tostr = utils.write_list(inlist)
-    exp = "1 2 toto {1: 2, '1': 5} 1e-06\n"
-    assert tostr == exp
+    exp1 = "1 2 toto {1: 2, '1': 5} 1e-06\n"
+    exp2 = "1 2 toto {'1': 5, 1: 2} 1e-06\n"
+    assert tostr == exp1 or tostr == exp2
 
 
 def test_remove_exits():
