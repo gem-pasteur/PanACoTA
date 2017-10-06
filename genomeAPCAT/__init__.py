@@ -1,3 +1,3 @@
 """pipeline annotation package"""
 
-__version__ = 20170405
+__version__ = 20171006
