@@ -122,7 +122,7 @@ In your ``my_results`` directory, you should now have:
     - genome2 does not appear as it was discarded because its L90 is higher than the given limit, 3.
 - log files as previously. Check in the ``.log.err`` file that no error occurred. Note that if you used the same output directory as for the previous step, and did not remove the log files, the new ones do not erase the existing ones: they now have a timestamp corresponding to the time/date when you launched this annotation step. In the ``.log.details`` file, you now have more details, such as the start and end times of annotation of all genomes.
 - in ``tmp_files``, you still have the 'split5N' genomic sequence files, as well as prokka result folders.
-- You have 4 new folders: ``Replicons``, ``LSTINFO``, ``Genes``, ``Proteins`` each one containing 3 files (1 per genome) with your results.
+- You have 5 new folders: ``Replicons``, ``LSTINFO``, ``gff3``, ``Genes``, ``Proteins`` each one containing 3 files (1 per genome) with your results.
 
 PanGenome step
 ==============
