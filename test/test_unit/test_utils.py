@@ -32,7 +32,7 @@ def test_check_install_error():
     assert not utils.check_installed("plop false command...")
 
 
-@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=5)
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=5, backend="agg")
 def test_plot_dist():
     """
     Plot a given distribution, and check that output is as expected

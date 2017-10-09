@@ -424,7 +424,7 @@ def get_plot_distribs():
     return outdist
 
 
-@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6)
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6, backend="agg")
 def test_dist_l90():
     """
     For created L90 graph, check that calculated L90 values are as expected,
@@ -446,7 +446,7 @@ def test_dist_l90():
     return dist
 
 
-@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6)
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6, backend="agg")
 def test_dist_nbcont():
     """
     For created L90 graph, check that calculated L90 values are as expected,
