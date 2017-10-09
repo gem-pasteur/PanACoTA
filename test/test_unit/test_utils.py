@@ -608,7 +608,7 @@ def test_run_cmd_error_noQuit(capsys):
 def test_run_cmd_error_noQuit_logger(capsys):
     """
     Test that when we try to run a command which does not exist, it returns an error message,
-    but does not exit the program (eof=False).
+    but does not exit the program (eof=False). With a given logger where error is written.
     """
     cmd = "toto"
     logger = logging.getLogger("default")
@@ -631,19 +631,18 @@ def test_run_cmd_error_Quit(capsys):
     assert ("error trying to run toto: toto does not exist") in err
 
 
-def test_run_cmd_retcode_non0(capsys):
+def test_run_cmd_retcode_non0(caplog):
     """
     Test that when the command fails, it returns a non-zero int, writes an error message,
     but does not quit the program (eof=False by default).
     """
     cmd = "prodigal -u"
     error = "error trying to run prodigal"
-    assert utils.run_cmd(cmd, error) != 0
-    _, err = capsys.readouterr()
-    assert error in err
+    assert utils.run_cmd(cmd, error).returncode != 0
+    assert error in caplog.text
 
 
-def test_run_cmd_retcode_non0_quit(capsys):
+def test_run_cmd_retcode_non0_quit(caplog):
     """
     Test that when the command fails, it returns a non-zero int, writes an error message,
     and exits the program (eof=True).
@@ -652,8 +651,7 @@ def test_run_cmd_retcode_non0_quit(capsys):
     error = "error trying to run prodigal"
     with pytest.raises(SystemExit):
         utils.run_cmd(cmd, error, eof=True)
-    _, err = capsys.readouterr()
-    assert error in err
+    assert error in caplog.text
 
 
 def test_run_cmd_error_stderrFile():
