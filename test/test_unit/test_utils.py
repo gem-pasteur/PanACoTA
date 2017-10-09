@@ -636,7 +636,7 @@ def test_run_cmd_retcode_non0(caplog):
     Test that when the command fails, it returns a non-zero int, writes an error message,
     but does not quit the program (eof=False by default).
     """
-    cmd = "prodigal -u"
+    cmd = "prokka"
     error = "error trying to run prodigal"
     assert utils.run_cmd(cmd, error).returncode != 0
     assert error in caplog.text
