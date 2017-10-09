@@ -208,7 +208,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     return call
 
 
-def plot_distr(values, limit, outfile, title, text):
+def plot_distr(values, limit, title, text):
     """ Plot histogram of given 'values', and add a vertical line corresponding to the chosen
      'limit' and saves the image into the 'outfile'
 
@@ -224,7 +224,9 @@ def plot_distr(values, limit, outfile, title, text):
     import matplotlib
     matplotlib.use('AGG')
     from matplotlib import pyplot as plt
-    plt.figure(figsize=(10,7))
+    plt.close("all")
+    fig = plt.figure(figsize=(10,7))
+    ax = fig.add_subplot(1,1,1)
     max_x = max(values)
     # if too many values, group them to have less bins in the histogram.
     # Put 'group_values' values in each bin ->
@@ -233,14 +235,13 @@ def plot_distr(values, limit, outfile, title, text):
     dec_ax = math.exp(0.001 * max_x) - 1
     dec_text = 3 * dec_ax
     bins = np.arange(0, max_x + 2*group_values, group_values) - 0.5
-    axes = plt.hist(values, bins = bins, edgecolor="black", color="blue")
-    plt.xlim(0.5, max_x + 0.5*group_values)
-    plt.axvline(x=limit + 0.5*group_values + dec_ax, color="r")
-    plt.text(x=limit + 0.5*group_values + dec_text, y=plt.ylim()[1]/2,
+    axes = ax.hist(values, bins = bins, edgecolor="black", color="blue")
+    ax.set_xlim(0.5, max_x + 0.5*group_values)
+    ax.axvline(x=limit + 0.5*group_values + dec_ax, color="r")
+    ax.text(x=limit + 0.5*group_values + dec_text, y=plt.ylim()[1]/2,
              s=text + " " + str(limit), color="r", rotation=90)
-    plt.title(title)
-    plt.savefig(outfile)
-    plt.close("all")
+    ax.set_title(title)
+    return fig
 
 
 def write_warning_skipped(skipped, format=False):

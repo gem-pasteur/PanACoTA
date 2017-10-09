@@ -16,6 +16,11 @@ def dbpath():
     return os.path.join("test", "data", "annotate", "genomes")
 
 
+@pytest.fixture(scope="module")
+def baseline_dir():
+    return os.path.join("..", "data", "annotate", "exp_files", "baseline")
+
+
 def test_sort_genomes():
     """
     Test the function sorting genomes by L90 and nb contigs.
@@ -393,11 +398,13 @@ def test_analyseAllGenomes_cut_empty(dbpath):
     os.remove(os.path.join(dbpath, gs[3]))
 
 
-def test_plot_dist():
+def get_plot_distribs():
     """
     For all genomes, plot the distribution of their L90 values, and their number of contigs.
     Add a vertical line at the given threshold.
     genomes: {genome: [name, path, size, nbcont, l90]}
+    output of plot_distributions is L90_vals, nbcont_vals, l90_dist, nbcont_dist
+    these outputs will be compared to expected results in tests
     """
     genomes_dir = os.path.join("test", "data", "annotate", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
@@ -410,16 +417,52 @@ def test_plot_dist():
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 60, 50],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 20, 12]}
     res_path = os.path.join("test", "data", "annotate")
-    exp_path = os.path.join(res_path, "exp_files")
     listfile_base = "test_plot_dist"
     l90 = 13
     nbconts = 19
-    gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbconts)
-    outfiles = [os.path.join(res_path, "QC_L90-" + listfile_base + ".png"),
-                os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")]
-    expfiles = [os.path.join(exp_path, "res_QC_L90-" + listfile_base + ".png"),
-                os.path.join(exp_path, "res_QC_nb-contigs-" + listfile_base + ".png")]
-    for out, exp in zip(outfiles, expfiles):
-        assert util_tests.compare_files_bin(out, exp)
-        os.remove(out)
+    outdist = gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbconts)
+    return outdist
 
+
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6)
+def test_dist_l90():
+    """
+    For created L90 graph, check that calculated L90 values are as expected,
+    and graph is also as expected
+    """
+    res_path = os.path.join("test", "data", "annotate")
+    listfile_base = "test_plot_dist"
+    outfile1 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
+    outfile2 = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
+    l90, _, dist, _ = get_plot_distribs()
+    # Check that png file was created
+    assert os.path.isfile(outfile1)
+    assert os.path.isfile(outfile2)
+    os.remove(outfile1)
+    os.remove(outfile2)
+    # Check values calculated for l90
+    assert l90 == [2, 13, 11, 11, 12, 50 , 12]
+    # Check that output plot is as expected
+    return dist
+
+
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=6)
+def test_dist_nbcont():
+    """
+    For created L90 graph, check that calculated L90 values are as expected,
+    and graph is also as expected
+    """
+    res_path = os.path.join("test", "data", "annotate")
+    listfile_base = "test_plot_dist"
+    outfile1 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
+    outfile2 = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
+    _, nbcont, _, dist = get_plot_distribs()
+    # Check that png file was created
+    assert os.path.isfile(outfile1)
+    assert os.path.isfile(outfile2)
+    os.remove(outfile1)
+    os.remove(outfile2)
+    # Check values calculated for l90
+    assert nbcont == [2, 15, 15, 17, 17, 60 ,20]
+    # Check that output plot is as expected
+    return dist

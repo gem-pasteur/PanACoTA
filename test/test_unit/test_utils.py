@@ -13,6 +13,10 @@ import shutil
 import test.test_unit.utilities_for_tests as util_tests
 
 
+def baseline_dir():
+    return os.path.join("..", "data", "annotate", "exp_files", "baseline")
+
+
 def test_check_install():
     """
     Try to run prokka, which is installed, and check that there is no problem
@@ -28,6 +32,7 @@ def test_check_install_error():
     assert not utils.check_installed("plop false command...")
 
 
+@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=5)
 def test_plot_dist():
     """
     Plot a given distribution, and check that output is as expected
@@ -36,13 +41,11 @@ def test_plot_dist():
     limit = 3
     res_dir = os.path.join("test", "data", "annotate")
     os.makedirs(res_dir, exist_ok=True)
-    outfile = os.path.join(res_dir, "distrib.png")
-    reffile = os.path.join("test", "data", "annotate", "exp_files", "res_plot_distr.png")
+    # reffile = os.path.join("test", "data", "annotate", "exp_files", "res_plot_distr.png")
     title = "Distribution test"
     text = "Max L90 ="
-    utils.plot_distr(values, limit, outfile, title, text)
-    assert util_tests.compare_files_bin(outfile, reffile)
-    os.remove(outfile)
+    myfig = utils.plot_distr(values, limit, title, text)
+    return myfig
 
 
 def test_skipped_prokka(capsys):
