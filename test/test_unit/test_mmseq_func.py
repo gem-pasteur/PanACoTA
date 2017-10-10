@@ -8,6 +8,7 @@ Unit tests for the mmseqs_functions submodule in pangenome module
 import pytest
 import os
 import time
+import shutil
 
 import genomeAPCAT.pangenome_module.mmseqs_functions as mmseqs
 
@@ -264,3 +265,41 @@ def test_mmseq2pan_givenout(path_test_files, path_exp_files, exp_clusters):
     assert set(lines_exp) == set(lines_out)
     os.remove(outf)
     os.remove(logmmseq)
+
+
+def test_run_clust(path_test_files):
+    """
+    Checks that, when we run mmseq clust, it creates all files needed for after to do
+    the pangenome. We do not check the content of the mmseq output files, as it could
+    depend on its version, and we are here testing genomeAPCAT.
+    """
+    mmseqdb = os.path.join(path_test_files, "mmseq_db")
+    mmseqclust = "test_mmseq_cluster-out"
+    tmpdir = "test_mmseq_tmp"
+    os.makedirs(tmpdir)
+    logmmseq = "test_mmseq_cluster.log"
+    min_id = 0.8
+    threads = 1
+    clust_mode = 1
+    args = (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode)
+    assert not os.path.isfile(mmseqclust)
+    mmseqs.run_mmseqs_clust(args)
+    assert os.path.isfile(mmseqclust)
+    assert os.path.isfile(mmseqclust + ".index")
+    assert os.path.isfile(logmmseq)
+    assert os.path.isdir(tmpdir)
+    shutil.rmtree(tmpdir)
+    os.remove(mmseqclust)
+    os.remove(mmseqclust + ".index")
+    os.remove(logmmseq)
+
+
+def test_get_logmmseq():
+    """
+    Check that the given log filename is as expected according to given information
+    """
+    outdir = "toto"
+    prt_bank = "bank_prt"
+    infoname = "GENO115"
+    log = mmseqs.get_logmmseq(outdir, prt_bank, infoname)
+    assert log == "toto/mmseq_bank_prt_GENO115.log"

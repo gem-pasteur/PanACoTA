@@ -23,6 +23,14 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     - create mmseqs database from protein bank
     - cluster proteins
     - convert to pangenome
+
+    min_id : minimum percentage of identity to be in the same family
+    clust_mode : 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    outdir : directory where output cluster file must be saved
+    prt_path : path to file containing all proteins to cluster.
+    threads : number of threads used
+    panfile : name for output pangenome file. Otherwise, will use default name
+    quiet : True if nothing must be written on stdout, False otherwise.
     """
     # Get general information and file/directory names
     prt_bank = os.path.basename(prt_path)
