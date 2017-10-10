@@ -13,6 +13,8 @@ import shutil
 import time
 import logging
 import argparse
+import matplotlib
+matplotlib.use('AGG')
 
 from genomeAPCAT.subcommands import qc_and_annote as annot
 import genomeAPCAT.utils as utils

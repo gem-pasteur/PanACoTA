@@ -443,7 +443,7 @@ def test_dist_l90():
     os.remove(outfile1)
     os.remove(outfile2)
     # Check values calculated for l90
-    assert l90 == [2, 13, 11, 11, 12, 50 , 12]
+    assert set(l90) == set([2, 13, 11, 11, 12, 50 , 12])
     # Check that output plot is as expected
     return dist
 
@@ -465,6 +465,6 @@ def test_dist_nbcont():
     os.remove(outfile1)
     os.remove(outfile2)
     # Check values calculated for l90
-    assert nbcont == [2, 15, 15, 17, 17, 60 ,20]
+    assert set(nbcont) == set([2, 15, 15, 17, 17, 60 ,20])
     # Check that output plot is as expected
     return dist
