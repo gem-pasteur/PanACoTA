@@ -9,6 +9,8 @@ import pytest
 import os
 import genomeAPCAT.qc_annote_module.genome_seq_functions as gfunc
 import test.test_unit.utilities_for_tests as util_tests
+import matplotlib
+matplotlib.use('AGG')
 
 
 @pytest.fixture(scope="module")

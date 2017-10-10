@@ -11,6 +11,8 @@ import os
 import logging
 import shutil
 import test.test_unit.utilities_for_tests as util_tests
+import matplotlib
+matplotlib.use('AGG')
 
 
 def baseline_dir():
