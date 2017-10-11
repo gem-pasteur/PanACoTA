@@ -79,6 +79,16 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
                  quiet=False):
     """
     Use mmseqs to cluster proteins
+
+    outdir: directory where output files are saved
+    prt_bank : name of the file containing all proteins to cluster, without path
+    mmseqdb : path to base filename for output mmseq db
+    min_id : min percentage of identity to be considered in the same family (between 0 and 1)
+    clust_mode : 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    threads : number of threads to use
+    start : start time
+    panfile : if a pangenome file is specified. Otherwise, default pangenome name will be used
+    quiet : true if nothing must be print on stdout/stderr, false otherwise (show progress bar)
     """
     infoname = get_info(prt_bank, threads, min_id, clust_mode, start)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
@@ -182,9 +192,10 @@ def clusters_to_file(clust, fileout):
     with open(fileout, "w") as fout:
         num = 1
         for _, fam in clust.items():
-            families[num] = fam
+            families[num] = []
             fout.write(str(num))
             for mem in sorted(fam, key=utils.sort_proteins):
+                families[num].append(mem)
                 fout.write(" " + mem)
             fout.write("\n")
             num += 1
