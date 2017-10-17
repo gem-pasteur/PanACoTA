@@ -15,7 +15,8 @@ from genomeAPCAT import utils
 logger = logging.getLogger("corepers.pers")
 
 
-def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mixed=False):
+def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mixed=False,
+             floor=False):
     """
     From the list of families, get the Pers Genome families, that are families having at least
     tol% of 'nb_strain' members.
@@ -28,12 +29,18 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
     multi: bool, True if multiple genes from the same isolate are tolerated, False otherwise
     mixed: bool, True if mixed families are allowed (exactly 1 member per family
     for at least tol% of the genomes, 0 or several members allowed for other (1-tol)%)
+    floor: bool. Use a minimum number of genomes containing a gene to consider the family
+    persistent equal to: floor(nb_strains*tol) genomes if True, ceil(nb_strains*tol)
+    if False.
     """
     logger.info(("Generating Persistent genome of a dataset "
                  "containing {} genomes").format(nb_strains))
     pers = {} # {fam_num: {strain1: [genes from strain1], strain2: [genes from strain2]}}
     fams = {} # {fam_num: [list of members]}
-    min_members = math.ceil(tol * nb_strains)
+    if floor:
+        min_members = math.floor(tol * nb_strains)
+    else:
+        min_members = math.ceil(tol * nb_strains)
     for fam_num, family in fam_by_strain.items():
         # If enough strains and multi accepted, or multi not accepted but 1 member per strain, add family to core
         if mixed:
@@ -44,7 +51,8 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
             if len(family) >= min_members and (multi or uniq_members(family)):
                 pers[fam_num] = family
                 fams[fam_num] = fam_all_members[fam_num]
-    logger.info("The persistent genome contains {} families.".format(len(pers)))
+    logger.info("The persistent genome contains {} families having at least {} genomes "
+                "in each family.".format(len(pers), min_members))
     return fams
 
 

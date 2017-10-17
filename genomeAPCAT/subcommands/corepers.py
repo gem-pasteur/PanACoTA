@@ -16,10 +16,11 @@ def main_from_parse(args):
     """
     Call main function from the arguments given by parser
     """
-    main(args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile)
+    main(args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile,
+         floor=args.floor)
 
 
-def main(pangenome, tol, multi, mixed, outputfile=None):
+def main(pangenome, tol, multi, mixed, outputfile=None, floor=False):
     """ Read pangenome and deduce Persistent genome according to the user criteria
 
     pangenome: file containing pangenome
@@ -43,7 +44,10 @@ def main(pangenome, tol, multi, mixed, outputfile=None):
 
     # Define output filename
     if not outputfile:
-        outputfile = os.path.join(path_pan, "PersGenome_" + base_pan + "_" + str(tol))
+        outputfile = os.path.join(path_pan, "PersGenome_" + base_pan + "_")
+        if floor:
+            outputfile += "F"
+        outputfile += str(tol)
         if multi:
             outputfile += "-multi.lst"
         elif mixed:
@@ -52,24 +56,29 @@ def main(pangenome, tol, multi, mixed, outputfile=None):
             outputfile += ".lst"
     else:
         outputfile = os.path.join(path_pan, outputfile)
-    logger.info(get_info(tol, multi, mixed))
+    logger.info(get_info(tol, multi, mixed, floor))
 
     # Read pangenome
     fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome)
     # Generate persistent genome
-    fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed)
+    fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed, floor)
     pers.write_persistent(fams, outputfile)
 
 
-def get_info(tol, multi, mixed):
+def get_info(tol, multi, mixed, floor):
     """
     Get a string corresponding to the information that will be given to logger.
     """
     if tol == 1:
         return "Will generate a CoreGenome."
     else:
+        if floor:
+            floorstr = "floor"
+        else:
+            floorstr = "ceil"
         toprint = ("Will generate a Persistent genome with member(s) in at least {}"
-                   "% of all genomes in each family.\n").format(100*tol)
+                   "% of all genomes (meaning at least {}({}*nb_strains) genomes) in each "
+                   "family.\n").format(100*tol, floorstr, tol)
         if multi:
             toprint += ("Multigenic families are allowed (several members in "
                         "any genome of a family).")
@@ -108,10 +117,13 @@ def build_parser(parser):
                         help=("PanGenome file (1 line per family, first column is fam number)"))
 
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-t", dest="tol", default=1, type=percentage,
+    optional.add_argument("-t", "--tol", dest="tol", default=1, type=percentage,
                           help=("min %% of genomes having at least 1 member in a family to "
                                 "consider the family as persistent (between 0 and 1, "
-                                "default is 1 = 100%% of genomes = Core genome)"))
+                                "default is 1 = 100%% of genomes = Core genome)."
+                                "By default, the minimum number of genomes will be "
+                                "ceil('tol'*N) (N being the total number of genomes). If "
+                                "you want to use floor('tol'*N) instead, add the '-F' option."))
     optional.add_argument("-M", dest="multi", action='store_true',
                           help=("Add this option if you allow several members in any genome "
                                 "of a family. By default, only 1 (or 0 if tol<1) member "
@@ -130,6 +142,11 @@ def build_parser(parser):
                                 " for the Persistent genome "
                                 "deduced from Pan. If not given, it will be saved as "
                                 "PersGenome_<pangenome>_tol[-multi][-mixed].lst"))
+    optional.add_argument("-F", dest="floor", action="store_true",
+                          help="When you specify the '-tol' option, with a number lower "
+                               "than 1, you can add this option to use floor('tol'*N) "
+                               "as a minimum number of genomes instead of ceil('tol'*N) "
+                               "which is the default behavior.")
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
@@ -155,6 +172,11 @@ def check_args(parser, args):
                      "a family to have exactly one member, which is not compatible. Do you want "
                      "to \n- lower the percentage of genomes required to have exactly "
                      "1 member (-t tol)\n- not allow mixed families (remove -X option)")
+    if args.floor and args.tol == 1:
+        parser.error("You are asking to use floor('tol'*N) as a minimum number of genomes "
+                     "present in a family, but with 'tol'=1: the minimum number of genomes "
+                     "will always be equal to N, using floor or the default ceil! Either "
+                     "use a 'tol' lower than 1, or remove the '-F' option.")
     return args
 
 
