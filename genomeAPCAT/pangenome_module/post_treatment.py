@@ -18,6 +18,8 @@ logger = logging.getLogger("pangenome.post-treat")
 
 def post_treat(families, pangenome):
     """
+    families: {num: [members]}
+    pangenome: pangenome filename
     From clusters = {num: [members]}, create:
     - a pan_quali matrix (lines = families, columns = genomes, 1 if genome present in
     family, 0 otherwise)
