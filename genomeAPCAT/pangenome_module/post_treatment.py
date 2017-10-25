@@ -9,7 +9,6 @@ as a summary file for the pangenome.
 April 2017
 """
 import logging
-import os
 from genomeAPCAT import utils
 from genomeAPCAT import utils_pangenome as utilsp
 
@@ -18,14 +17,14 @@ logger = logging.getLogger("pangenome.post-treat")
 
 def post_treat(families, pangenome):
     """
-    families: {num: [members]}
-    pangenome: pangenome filename
     From clusters = {num: [members]}, create:
-    - a pan_quali matrix (lines = families, columns = genomes, 1 if genome present in
-    family, 0 otherwise)
-    - a pan_quanti matrix (lines = families, columns = genomes, number of members from given
-    genome in the given family)
+
+    - a pan_quali matrix (lines = families, columns = genomes, 1 if genome present in\
+     family, 0 otherwise)
+    - a pan_quanti matrix (lines = families, columns = genomes, number of members from given\
+     genome in the given family)
     - a summary file: lines = families. For each family:
+
         - nb_members: total number of members
         - sum_quanti: should be the same as nb_members!
         - sum_quali: number of different genomes in family
@@ -34,30 +33,48 @@ def post_treat(families, pangenome):
         - nb_multi: number of genomes with more than 1 member
         - sum_0-mono-multi: should be equal to the total number of genomes in dataset
         - max_multi: maximum number of members from 1 genome
+
+    Parameters
+    ----------
+    families : dict
+        {num_fam: [list of members]}. Can be None, and then they will be retrieved from the\
+        pangenome file
+    pangenome : str
+        file containing pangenome
     """
     fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome, families)
-    res = open_outputs_to_write(fams_by_strain, families, all_strains, pangenome)
-    # res = (qualis, quantis, summaries)
+    open_outputs_to_write(fams_by_strain, families, all_strains, pangenome)
+    # result of open_outputs_to_write = (qualis, quantis, summaries)
 
 
 def open_outputs_to_write(fams_by_strain, families, all_strains, pangenome):
-    """ Open output files, and call function to generate the matrix and summary file,
+    """
+    Open output files, and call function to generate the matrix and summary file,
     and write it in those output files
 
-    :param fams_by_strain: {fam_num: {strain: [members]}}
-    :type fams_by_strain: dict
-    :param families: {fam_num: [all members]}
-    :type families: dict
-    :param all_strains: list of all genome names
-    :type all_strains: list
-    :param pangenome: filename containing pangenome. Will be extended for the 3 output files
-    :type pangenome: str
-    :returns: qualis = {fam_num: [0 if no gene for species, 1 if at least 1 gene, for each
-    species in all_strains]}
-    quantis = {fam_num: [number of genes for each strain in all_strains]}
-    summaries = {fam_num: [nb_members, sum_quanti, sum_quali,
-                           nb_0, nb_mono, nb_multi, sum_0-mono-multi, max_multi]}
-    :rtype: tuple(dict, dict, dict)
+    Parameters
+    ----------
+    fams_by_strain : dict
+        {fam_num: {strain: [members]}}
+    families : dict
+        {fam_num: [all members]}
+    all_strains : list
+        list of all genome names
+    pangenome : str
+        filename containing pangenome. Will be extended for the 3 output files
+
+    Returns
+    -------
+    (qualis, quantis, summaries) : tuple
+
+        with:
+
+        - qualis = {fam_num: [0 if no gene for species, 1 if at least 1 gene, for each\
+          species in all_strains]}
+        - quantis = {fam_num: [number of genes for each strain in all_strains]}
+        - summaries = {fam_num: [nb_members, sum_quanti, sum_quali,\
+          nb_0, nb_mono, nb_multi, sum_0-mono-multi, max_multi]}
+
     """
     panquali = pangenome + ".quali.txt"
     panquanti = pangenome + ".quanti.txt"
@@ -73,21 +90,37 @@ def open_outputs_to_write(fams_by_strain, families, all_strains, pangenome):
 
 
 def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf, psf):
-    """ From the python objects of pangenome, generate qualitative and quantitative matrix,
+    """
+    From the python objects of pangenome, generate qualitative and quantitative matrix,
     as well as summary file.
 
-    :param fams_by_strain: {fam_num: {strain: [members]}}
-    :type fams_by_strain: dict
-    :param families: {fam_num: [all members]}
-    :type families: dict
-    :param all_strains: list of all strains
-    :type all_strains: list
-    :returns: qualis = {fam_num: [0 if no gene for species, 1 if at least 1 gene, for each
-    species in all_strains]}
-    quantis = {fam_num: [number of genes for each strain in all_strains]}
-    summaries = {fam_num: [nb_members, sum_quanti, sum_quali,
-                           nb_0, nb_mono, nb_multi, sum_0-mono-multi, max_multi]}
-    :rtype: tuple(dict, dict, dict)
+    Parameters
+    ----------
+    fams_by_strain : dict
+        {fam_num: {strain: [members]}}
+    families : dict
+        {fam_num: [all members]}
+    all_strains : list
+        list of all strains
+    pqlf : _io.TextIOWrapper
+        open file where qualitative matrix will be written
+    pqtf : _io.TextIOWrapper
+        open file where quantitative matrix will be written
+    psf : _io.TextIOWrapper
+        open file where summary will be written
+
+    Returns
+    -------
+    (qualis, quantis, summaries) : tuple
+
+        with:
+
+        - qualis = {fam_num: [0 if no gene for species, 1 if at least 1 gene, for each\
+        species in all_strains]}
+        - quantis = {fam_num: [number of genes for each strain in all_strains]}
+        - summaries = {fam_num: [nb_members, sum_quanti, sum_quali,\
+         nb_0, nb_mono, nb_multi, sum_0-mono-multi, max_multi]}
+
     """
     logger.info("Generating qualitative and quantitative matrix, and summary file")
     qualis = {}
@@ -99,7 +132,7 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
         quanti = [len(strains[strain]) if strain in strains else 0 for strain in all_strains]
         nb_0 = quanti.count(0)
         nb_mono = quanti.count(1)
-        nb_multi = len(quanti) - nb_0 -nb_mono
+        nb_multi = len(quanti) - nb_0 - nb_mono
         max_multi = max(quanti)
         summ = [len(families[fam_num]), sum(quanti), sum(quali),
                 nb_0, nb_mono, nb_multi, nb_0 + nb_mono + nb_multi, max_multi]
@@ -110,4 +143,3 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
         quantis[fam_num] = quanti
         summaries[fam_num] = summ
     return qualis, quantis, summaries
-
