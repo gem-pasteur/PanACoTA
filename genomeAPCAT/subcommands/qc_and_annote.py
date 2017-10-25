@@ -181,7 +181,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
         return genomes, kept_genomes
     # Rename genomes kept, ordered by decreasing quality
-    gfunc.rename_all_genomes(kept_genomes, tmp_dir)
+    gfunc.rename_all_genomes(kept_genomes)
     # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
