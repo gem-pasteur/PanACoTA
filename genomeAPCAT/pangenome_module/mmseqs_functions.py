@@ -20,17 +20,35 @@ logger = logging.getLogger("pangnome.mmseqs")
 def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None, quiet=False):
     """
     Run all steps to build a pangenome:
+
     - create mmseqs database from protein bank
     - cluster proteins
     - convert to pangenome
 
-    min_id : minimum percentage of identity to be in the same family
-    clust_mode : 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
-    outdir : directory where output cluster file must be saved
-    prt_path : path to file containing all proteins to cluster.
-    threads : number of threads used
-    panfile : name for output pangenome file. Otherwise, will use default name
-    quiet : True if nothing must be written on stdout, False otherwise.
+
+    Parameters
+    ----------
+    min_id : float
+        minimum percentage of identity to be in the same family
+    clust_mode : [0, 1, 2]
+        0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    outdir : str
+        directory where output cluster file must be saved
+    prt_path : str
+        path to file containing all proteins to cluster.
+    threads : int
+        number of threads which can be used
+    panfile : str
+        name for output pangenome file. Otherwise, will use default name
+    quiet : bool
+        True if nothing must be written on stdout, False otherwise.
+
+    Returns
+    -------
+    (families, outfile) : tuple
+
+        - families : {fam_num: [all members]}
+        - outfile : pangenome filename
     """
     # Get general information and file/directory names
     prt_bank = os.path.basename(prt_path)
@@ -43,7 +61,7 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
         information += "\n\t- {} threads".format(threads)
     logger.info(information)
 
-    infoname = get_info(prt_bank, threads, min_id, clust_mode, start)
+    infoname = get_info(threads, min_id, clust_mode, start)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
     # Create ffindex of DB if not already done
     create_mmseqs_db(mmseqdb, prt_path, logmmseq)
@@ -52,13 +70,29 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     if panfile:
         panfile = os.path.join(outdir, panfile)
     families, outfile = do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                            clust_mode, threads, start, panfile, quiet)
+                                     clust_mode, threads, start, panfile, quiet)
     return families, outfile
 
 
-def get_info(prt_bank, threads, min_id, clust_mode, start):
+def get_info(threads, min_id, clust_mode, start):
     """
     Get string containing all information on future run
+
+    Parameters
+    ----------
+    threads : int
+        max number of threads to use
+    min_id : float
+        min percentage of identity to consider 2 proteins in hte same family
+    clust_mode : [0, 1, 2]
+        0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    start : str
+        string containing starting date and time
+
+    Returns
+    -------
+    str
+        string containing info on current run, to put in filenames
     """
     if threads != 1:
         threadinfo = "-th" + str(threads)
@@ -71,6 +105,20 @@ def get_info(prt_bank, threads, min_id, clust_mode, start):
 def get_logmmseq(outdir, prt_bank, infoname):
     """
     Get filename of logfile, given information
+
+    Parameters
+    ----------
+    outdir : str
+        output directory
+    prt_bank : str
+        name of file (without path) containing all proteins to cluster
+    infoname : str
+        string containing information on the current run
+
+    Returns
+    -------
+    str
+        path to mmseq logfile
     """
     return os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
 
@@ -80,21 +128,40 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
     """
     Use mmseqs to cluster proteins
 
-    outdir: directory where output files are saved
-    prt_bank : name of the file containing all proteins to cluster, without path
-    mmseqdb : path to base filename for output mmseq db
-    min_id : min percentage of identity to be considered in the same family (between 0 and 1)
-    clust_mode : 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
-    threads : number of threads to use
-    start : start time
-    panfile : if a pangenome file is specified. Otherwise, default pangenome name will be used
-    quiet : true if nothing must be print on stdout/stderr, false otherwise (show progress bar)
+    Parameters
+    ----------
+    outdir : str
+        directory where output files are saved
+    prt_bank : str
+        name of the file containing all proteins to cluster, without path
+    mmseqdb : str
+        path to base filename for output mmseq db
+    min_id : float
+        min percentage of identity to be considered in the same family (between 0 and 1)
+    clust_mode : [0, 1, 2]
+        0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    threads : int
+        max number of threads to use
+    start : str
+        string containing trat date and time
+    panfile : str
+        if a pangenome file is specified. Otherwise, default pangenome name will be used
+    quiet : bool
+        true if nothing must be print on stdout/stderr, false otherwise (show progress bar)
+
+    Returns
+    -------
+    (families, outfile) : tuple
+
+        - families : {fam_num: [all members]}
+        - outfile : pangenome filename
     """
-    infoname = get_info(prt_bank, threads, min_id, clust_mode, start)
+    infoname = get_info(threads, min_id, clust_mode, start)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
     mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
     tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
-    os.makedirs(tmpdir, exist_ok = True)
+    os.makedirs(tmpdir, exist_ok=True)
+    bar = None
     if os.path.isfile(mmseqclust):
         logger.warning(("mmseqs clustering {} already exists. The program will now convert "
                         "it to a pangenome file.").format(mmseqclust))
@@ -109,10 +176,9 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
         final = pool.map_async(run_mmseqs_clust, [args], chunksize=1)
         pool.close()
         if not quiet:
-            while(True):
+            while True:
                 if final.ready():
                     break
-                remaining = final._number_left
                 bar.update()
             bar.finish()
         pool.join()
@@ -124,6 +190,21 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
 def run_mmseqs_clust(args):
     """
     Run mmseqs clustering
+
+    Parameters
+    ----------
+    args : tuple
+         (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode), with:
+
+            * mmseqdb: path to base filename for output mmseq db
+            * mmseqclust: path to base filename for output of mmseq clustering
+            * tmpdir : path to folder which will contain mmseq temporary files
+            * logmmseq : path to file where logs must be written
+            * min_id : min percentage of identity to be considered in the same family\
+             (between 0 and 1)
+            * threads : max number of threads to use
+            * clust_mode : [0, 1, 2], 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+
     """
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
@@ -136,8 +217,29 @@ def run_mmseqs_clust(args):
 def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     """
     Convert mmseqs clustering to a pangenome file:
+
     - convert mmseqs results to tsv file
     - convert tsv file to pangenome
+
+    Parameters
+    ----------
+    mmseqdb : str
+         path to base filename for output mmseq db
+    mmseqclust : str
+        path to base filename for output of mmseq clustering
+    logmmseq : str
+         path to file where logs must be written
+    start : str
+        string containing start date and time
+    outfile : str
+        pangenome filename, or None if default one must be used
+
+    Returns
+    -------
+    (families, outfile) : tuple
+
+        - families : {fam_num: [all members]}
+        - outfile : pangenome filename
     """
     cmd = "mmseqs createtsv {0} {0} {1} {1}.tsv".format(mmseqdb, mmseqclust)
     msg = "Problem while trying to convert mmseq result file to tsv file"
@@ -151,6 +253,24 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
 def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
     """
     Convert the tsv output file of mmseqs to the pangenome file
+
+    Parameters
+    ----------
+    mmseqclust : str
+        path to base filename for output of mmseq clustering
+    logmmseq : str
+        path to file where logs must be written
+    start : str
+        string containing start date and time
+    outfile : str
+        pangenome filename, or None if default one must be used
+
+    Returns
+    -------
+    (families, outfile) : tuple
+
+        - families : {fam_num: [all members]}
+        - outfile : pangenome filename
     """
     logger.info("Converting mmseqs results to pangenome file")
     tsvfile = mmseqclust + ".tsv"
@@ -170,9 +290,20 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
 def mmseq_tsv_to_clusters(mmseq):
     """
     Reads the output of mmseq as a tsv file, and converts it to a python dict
+
+    Parameters
+    ----------
+    mmseq : str
+        filename of mmseq clustering output in tsv format
+
+    Returns
+    -------
+    dict
+        {representative_of_cluster: [list of members]}
+
     """
     clusters = {}  # {representative: [all members]}
-    with open(mmseq, "r") as mmsf:
+    with open(mmseq) as mmsf:
         for line in mmsf:
             repres, other = line.strip().split()
             if repres in clusters:
@@ -186,7 +317,16 @@ def mmseq_tsv_to_clusters(mmseq):
 def clusters_to_file(clust, fileout):
     """
     Write all clusters to a file
-    clust: {first_member: [all members = protein names]}
+
+    Parameters
+    ----------
+    clust : {first_member: [all members = protein names]}
+    fileout : filename of pangenome where families must be written
+
+    Returns
+    -------
+    dict
+        families : {famnum: [members]}
     """
     families = {}  # {famnum: [members]}
     with open(fileout, "w") as fout:
@@ -206,6 +346,15 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     """
     Create ffindex of protein bank if not already done. If done, just write a message
     to tell the user that the current existing file will be used.
+
+    Parameters
+    ----------
+    mmseqdb : str
+         path to base filename for output mmseq db
+    prt_path : str
+        path to the file containing all proteins to cluster
+    logmmseq : str
+         path to file where logs must be written
     """
     if not os.path.isfile(mmseqdb):
         logger.info("Creating database")
@@ -217,4 +366,3 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     else:
         logger.warning(("mmseq database {} already exists. The program will "
                         "use it.").format(mmseqdb))
-
