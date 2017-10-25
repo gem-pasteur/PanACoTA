@@ -1,12 +1,14 @@
 argparse
+progressbar2 >= 3.18.0
+numpy>=1.11
+matplotlib>=2.0.0
+biopython>=1.60
+
+sphinx
+sphinx_rtd_theme
+numpydoc
 pytest>=2.5.2
 pytest-cov>=1.6
 pytest-mpl>=0.8
 pytest-catchlog>=1.2.2
 coverage>=4
-progressbar2 >= 3.18.0
-numpy>=1.11
-matplotlib>=2.0.0
-biopython>=1.60
-sphinx
-sphinx_rtd_theme
