@@ -356,7 +356,7 @@ def test_get_info():
     min_id = 0.8
     clust_mode = 1
     start = "STARTTIME"
-    info = mmseqs.get_info(prt_bank, threads, min_id, clust_mode, start)
+    info = mmseqs.get_info(threads, min_id, clust_mode, start)
     assert info == "0.8-mode1_STARTTIME"
 
 
@@ -369,7 +369,7 @@ def test_get_info_parallel():
     min_id = 0.8
     clust_mode = 1
     start = "STARTTIME"
-    info = mmseqs.get_info(prt_bank, threads, min_id, clust_mode, start)
+    info = mmseqs.get_info(threads, min_id, clust_mode, start)
     assert info == "0.8-mode1-th12_STARTTIME"
 
 

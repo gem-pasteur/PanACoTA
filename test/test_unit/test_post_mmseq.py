@@ -226,3 +226,5 @@ def test_all_post(logger):
     os.remove(logname + ".log.err")
     os.remove(logname + ".log.details")
 
+# missing tests for utils_pangenome
+# and functional tests for subcommands/pangenome

@@ -133,8 +133,7 @@ def test_rename_genomes():
                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
-    res_path = os.path.join("test", "data", "annotate")
-    gfunc.rename_all_genomes(genomes, res_path)
+    gfunc.rename_all_genomes(genomes)
     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
     # so take into account both choices
     exp_genomes =  {gs[0]: ["SAEN.1113.00003", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
