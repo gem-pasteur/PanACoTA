@@ -18,13 +18,26 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
     """
     Build a file containing all proteins of all genomes contained in lstinfo.
 
-    lstinfo: 1 line per genome, only 1st column considered here, as the genome name
-    without extension
-    dbpath: Proteins folder, containing all proteins for each genome. Each genome has
-    its own protein file, called `<genome_name>.prt`.
-    name: dataset name, used to name the output databank: <outdir>/<name>.All.prt
-    spedir: By default, output file is saved in dbpath directory. If it must be saved somewhere
-    else, it is specified here.
+    Parameters
+    ----------
+    lstinfo : str
+        1 line per genome, only 1st column considered here, as the genome name\
+        without extension
+    dbpath : str
+        Proteins folder, containing all proteins for each genome. Each genome has\
+        its own protein file, called `<genome_name>.prt`.
+    name : str
+        dataset name, used to name the output databank: <outdir>/<name>.All.prt
+    spedir : str
+        By default, output file is saved in dbpath directory. If it must be saved somewhere\
+        else, it is specified here.
+    quiet : bool
+        True if nothing must be written in stdout/stderr, False otherwise
+
+    Returns
+    -------
+    str
+        name (with path) of the protein databank generated
     """
     if not spedir:
         outdir = dbpath
@@ -38,7 +51,7 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
         return outfile
     logger.info("Building bank with all proteins to {}".format(name + ".All.prt"))
     genomes = []
-    with open(lstinfo, 'r') as lstf:
+    with open(lstinfo) as lstf:
         for line in lstf:
             # skip header
             if "_name" in line:
