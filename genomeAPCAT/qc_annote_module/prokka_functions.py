@@ -25,28 +25,39 @@ import genomeAPCAT.utils as utils
 
 def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     """
-    for each genome in genomes, run prokka to annotate the genome.
+    For each genome in genomes, run prokka to annotate the genome.
 
-    * genomes = {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
-    * threads: max number of threads that can be used
-    * force: if False, do not override prokka outdir and result dir if they exist. If
-    True, rerun prokka and override existing results, for all genomes.
-    * prok_dir: folder where prokka results must be written: for each genome,
-    a directory <genome_name>-prokkaRes will be created in this folder, and all the results
-    of prokka for the genome will be written inside
+    Parameters
+    ----------
+    genomes : dict
+        {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
+    threads : int
+        max number of threads that can be used
+    force : bool
+        if False, do not override prokka outdir and result dir if they exist. If\
+        True, rerun prokka and override existing results, for all genomes.
+    prok_folder : str
+        folder where prokka results must be written: for each genome,\
+        a directory <genome_name>-prokkaRes will be created in this folder, and all the results\
+        of prokka for the genome will be written inside
+    quiet : bool
+        True if nothing must be written to stderr/stdout, False otherwise
 
-    Returns:
-        final: {genome: boolean} -> with True if prokka ran well, False otherwise.
+    Returns
+    -------
+    dict
+        {genome: boolean} -> with True if prokka ran well, False otherwise.
     """
     main_logger = logging.getLogger("qc_annote.prokka")
     main_logger.info("Annotating all genomes with prokka")
     nbgen = len(genomes)
+    bar = None
     if not quiet:
         # Create progressbar
-        widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
+        widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right=''),
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
-                  ]
+                   ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
                                       term_width=100).start()
     if threads <= 3:
@@ -56,11 +67,11 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
         # use multiprocessing
         # if there are more threads than genomes, use as many threads as possible per genome
         if len(genomes) <= threads:
-            cores_prokka = int(threads/len(genomes))
+            cores_prokka = int(threads / len(genomes))
         # otherwise, use 2 threads per genome (and nb_genome/2 genomes at the same time)
         else:
             cores_prokka = 2
-        pool_size = int(threads/cores_prokka)
+        pool_size = int(threads / cores_prokka)
     pool = multiprocessing.Pool(pool_size)
     # Create a Queue to put logs from processes, and handle them after from a single thread
     m = multiprocessing.Manager()
@@ -76,7 +87,7 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
         lp = threading.Thread(target=utils.logger_thread, args=(q,))
         lp.start()
         if not quiet:
-            while(True):
+            while True:
                 if final.ready():
                     break
                 remaining = final._number_left
@@ -89,7 +100,7 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     # If an error occurs, terminate pool and exit
     except Exception as excp:  # pragma: no cover
         pool.terminate()
-        logger.error(excp)
+        main_logger.error(excp)
         sys.exit(1)
     final = {genome: res for genome, res in zip(sorted(genomes), final)}
     return final
@@ -97,18 +108,25 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
 
 def run_prokka(arguments):
     """
-    arguments : (gpath, prok_folder, cores_prokka, name, force, nbcont)
+    Run prokka for the given genome.
 
-    gpath: path and filename of genome to annotate
-    prok_dir: path to folder where prokka results must be written
-    prok_folder: path to folder where all prokka folders for all genomes are saved
-    cores_prokka: how many cores can use prokka
-    name: output name of annotated genome
-    force: True if force run (override existing files), False otherwise
-    nbcont: number of contigs in the input genome, to check prokka results
+    Parameters
+    ----------
+    arguments : tuple
+        (gpath, prok_folder, cores_prokka, name, force, nbcont, q) with:
 
-    returns:
-        boolean. True if eveything went well (all needed output files present,
+        * gpath: path and filename of genome to annotate
+        * prok_folder: path to folder where all prokka folders for all genomes are saved
+        * cores_prokka: how many cores can use prokka
+        * name: output name of annotated genome
+        * force: True if force run (override existing files), False otherwise
+        * nbcont: number of contigs in the input genome, to check prokka results
+        * q : queue where logs are put
+
+    Returns
+    -------
+    boolean
+        True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
     gpath, prok_folder, threads, name, force, nbcont, q = arguments
@@ -123,7 +141,7 @@ def run_prokka(arguments):
     logger.log(utils.detail_lvl(), "Start annotating {} {}".format(name, gpath))
     # Define prokka directory and logfile, and check their existence
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
-    FNULL = open(os.devnull, 'w')
+    fnull = open(os.devnull, 'w')
     prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
         logger.warning(("Prokka results folder already exists. Prokka did not run again, "
@@ -141,8 +159,9 @@ def run_prokka(arguments):
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
     # logger.debug(cmd)
     prokf = open(prok_logfile, "w")
+    ok = None
     try:
-        retcode = subprocess.call(shlex.split(cmd), stdout=FNULL, stderr=prokf)
+        subprocess.call(shlex.split(cmd), stdout=fnull, stderr=prokf)
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
         prokf.close()
         if ok:
@@ -161,11 +180,25 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
     Prokka writes everything to stderr, and always returns a non-zero return code. So, we
     check if it ran well by checking the content of output directory.
 
-    * outdir: output directory, where all files are written by prokka
-    * logf: prokka logfile, containing stderr of prokka (prokka prints everything to stderr)
-    * name: genome name in gembase format
-    * gpath: path to fasta file given as input for prokka
-    * nbcont: number of contigs in fasta file given to prokka
+    Parameters
+    ----------
+    outdir : str
+        output directory, where all files are written by prokka
+    logf : str
+        prokka logfile, containing stderr of prokka (prokka prints everything to stderr)
+    name : str
+        genome name in gembase format
+    gpath : str
+        path to fasta file given as input for prokka
+    nbcont : int
+        number of contigs in fasta file given to prokka
+    logger : logging.Logger
+        logger object to get logs
+
+    Returns
+    -------
+    bool
+        True if everything went well, False otherwise
     """
     missing_file = False
     problem = False
@@ -180,48 +213,49 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
         ffnfile = glob.glob(os.path.join(outdir, "*.ffn"))
         gfffile = glob.glob(os.path.join(outdir, "*.gff"))
         if len(tblfile) == 0:
-            logger.error(("{} {}: no .tbl file").format(name, oriname))
+            logger.error("{} {}: no .tbl file".format(name, oriname))
             missing_file = True
         elif len(tblfile) > 1:
-            logger.error(("{} {}: several .tbl files").format(name, oriname))
+            logger.error("{} {}: several .tbl files".format(name, oriname))
             missing_file = True
         if len(faafile) == 0:
-            logger.error(("{} {}: no .faa file").format(name, oriname))
+            logger.error("{} {}: no .faa file".format(name, oriname))
             missing_file = True
         elif len(faafile) > 1:
-            logger.error(("{} {}: several .faa files").format(name, oriname))
+            logger.error("{} {}: several .faa files".format(name, oriname))
             missing_file = True
         if len(ffnfile) == 0:
-            logger.error(("{} {}: no .ffn file").format(name, oriname))
+            logger.error("{} {}: no .ffn file".format(name, oriname))
             missing_file = True
         elif len(ffnfile) > 1:
-            logger.error(("{} {}: several .ffn files").format(name, oriname))
+            logger.error("{} {}: several .ffn files".format(name, oriname))
             missing_file = True
         if len(gfffile) == 0:
-            logger.error(("{} {}: no .gff file").format(name, oriname))
+            logger.error("{} {}: no .gff file".format(name, oriname))
             missing_file = True
         elif len(gfffile) > 1:
-            logger.error(("{} {}: several .gff files").format(name, oriname))
+            logger.error("{} {}: several .gff files".format(name, oriname))
             missing_file = True
         if not missing_file:
             tblfile = tblfile[0]
             faafile = faafile[0]
             ffnfile = ffnfile[0]
-            fnbcont, tnbCDS, tnbGene, tnbCRISPR = count_tbl(tblfile)
+            fnbcont, tnb_cds, nb_gene, tnb_crispr = count_tbl(tblfile)
             faaprot = count_headers(faafile)
             ffngene = count_headers(ffnfile)
             if nbcont != fnbcont:
                 logger.error(("{} {}: no matching number of contigs; "
                               "nbcontig={}; in tbl ={}").format(name, oriname, nbcont, fnbcont))
                 problem = True
-            if tnbCDS != faaprot:
+            if tnb_cds != faaprot:
                 logger.error(("{} {}: no matching number of proteins between tbl and faa; "
-                              "faa={}; in tbl ={}").format(name, oriname, faaprot, tnbCDS))
+                              "faa={}; in tbl ={}").format(name, oriname, faaprot, tnb_cds))
                 problem = True
-            if tnbGene + tnbCRISPR != ffngene and tnbGene != ffngene:
+            if nb_gene + tnb_crispr != ffngene and nb_gene != ffngene:
                 logger.error(("{} {}: no matching number of genes between tbl and ffn; "
-                        "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
-                                                                   ffngene, tnbGene, tnbCRISPR))
+                              "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
+                                                                         ffngene, nb_gene,
+                                                                         tnb_crispr))
                 problem = True
     return not problem and not missing_file
 
@@ -229,34 +263,55 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
 def count_tbl(tblfile):
     """
     Count the different features found in the tbl file:
+
     - number of contigs
     - number of proteins (CDS)
     - number of genes (locus_tag)
     - number of CRISPR arrays (repeat_region)
+
+    Parameters
+    ----------
+    tblfile : str
+        tbl file generated by prokka
+
+    Returns
+    -------
+    (nbcont, nb_cds, nb_gene, nb_crispr)
+        information on features found in the tbl file.
     """
     nbcont = 0
-    nbCDS = 0
-    nbGene = 0
-    nbCRISPR = 0
-    with open(tblfile, "r") as tblf:
+    nb_cds = 0
+    nb_gene = 0
+    nb_crispr = 0
+    with open(tblfile) as tblf:
         for line in tblf:
             if line.startswith(">"):
                 nbcont += 1
             if "CDS" in line:
-                nbCDS += 1
+                nb_cds += 1
             if "locus_tag" in line:
-                nbGene += 1
+                nb_gene += 1
             if "repeat_region" in line:
-                nbCRISPR += 1
-    return nbcont, nbCDS, nbGene, nbCRISPR
+                nb_crispr += 1
+    return nbcont, nb_cds, nb_gene, nb_crispr
 
 
 def count_headers(seqfile):
     """
     Count how many sequences there are in the given file
+
+    Parameters
+    ----------
+    seqfile : str
+        file containing a sequence in multi-fasta format
+
+    Returns
+    -------
+    int
+        number of contigs in the given multi-fasta file
     """
     nbseq = 0
-    with open(seqfile, "r") as faaf:
+    with open(seqfile) as faaf:
         for line in faaf:
             if line.startswith(">"):
                 nbseq += 1
