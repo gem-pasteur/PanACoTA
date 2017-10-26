@@ -19,12 +19,13 @@ import subprocess
 import shutil
 import shlex
 import progressbar
+
 try:
     import cPickle as pickle
 except:
     try:
         import _pickle as pickle
-    except: # pragma: no cover
+    except:  # pragma: no cover
         import pickle
 
 
@@ -32,25 +33,36 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
-    level hierarchy:
-    CRITICAL > ERROR > WARNING > INFO > DEBUG
+    level hierarchy: ``CRITICAL > ERROR > WARNING > INFO > DEBUG``
 
     Messages from all levels are written in 'logfile'.log
+
     Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
-    Messages for levels equal or higher than WARNING written to stderr
+
+    Messages for levels equal or hi`gher than WARNING written to stderr
+
     Messages for levels equal or higher than WARNING written in `logfile`.log.err
 
-    level: minimum level that must be considered.
-    name: if we need to name the logger (used for tests)
-    verbose: be more verbose: 1 = add warnings in stderr (by default, only error),
-    2 = like 1 + add DETAIL to stdout (by default only INFO)
-    quiet: do not print anything to stderr/stdout
+
+    Parameters
+    ----------
+    logfile_base : str
+        base of filename to use for logs. Will add '.log', '.log.details' and '.log.err' for\
+        the 3 log files created
+    level : int
+        minimum level that must be considered.
+    name : str or None
+        if we need to name the logger (used for tests)
+    verbose : int
+        be more verbose: 1 = add warnings in stderr (by default, only error),\
+        2 = like 1 + add DETAIL to stdout (by default only INFO)
+    quiet : bool
+        True if nothing must be sent to stdout/stderr, False otherwise
     """
     import time
     time_start = time.strftime("_%y-%m-%d_%H-%m-%S")
     # create logger
     logger = logging.getLogger(name)
-
 
     # Determine logfile names
     logfile = logfile_base + ".log"
@@ -68,9 +80,14 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     # the possibility to put debug messages, used only for development.
     logging.addLevelName(detail_lvl(), "DETAIL")
     logging.DETAIL = detail_lvl()
+
     def details(self, message, *args, **kws):
+        """
+        Define a new log level: details
+        """
         if self.isEnabledFor(logging.DETAIL):
             self._log(logging.DETAIL, message, args, **kws)
+
     logging.Logger.details = details
 
     # set level of logger
@@ -80,9 +97,9 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     # :: %(name)s  to add the logger name
     # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
     my_format = '[%(asctime)s] %(name)s :: %(levelname)s :: %(message)s'
-    formatterFile = logging.Formatter(my_format,
-                                      '%Y-%m-%d %H:%M:%S')
-    formatterStream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
+    formatter_file = logging.Formatter(my_format,
+                                       '%Y-%m-%d %H:%M:%S')
+    formatter_stream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
@@ -92,13 +109,13 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     logfile_handler = RotatingFileHandler(logfile, 'w', 10000000, 5)
     # set level to the same as the logger level
     logfile_handler.setLevel(logging.INFO)
-    logfile_handler.setFormatter(formatterFile)  # add formatter
+    logfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(logfile_handler)  # add handler to logger
 
     # Create handler 2: errfile. Write only warnings and errors
     errfile_handler = RotatingFileHandler(errfile, 'w', 10000000, 5)
     errfile_handler.setLevel(logging.WARNING)
-    errfile_handler.setFormatter(formatterFile)  # add formatter
+    errfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
     # Create handler 3: detailsfile. Write everything to this file.
@@ -107,7 +124,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     if level < logging.INFO:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(level)
-        detfile_handler.setFormatter(formatterFile)  # add formatter
+        detfile_handler.setFormatter(formatter_file)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
@@ -119,7 +136,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
         stream_handler.addFilter(LessThanFilter(logging.WARNING))
         if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DETAIL))
-        stream_handler.setFormatter(formatterStream)
+        stream_handler.setFormatter(formatter_stream)
         logger.addHandler(stream_handler)  # add handler to logger
 
         # Create handler 5: write to stderr
@@ -128,7 +145,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
             err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
         else:
             err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
-        err_handler.setFormatter(formatterStream)
+        err_handler.setFormatter(formatter_stream)
         logger.addHandler(err_handler)  # add handler to logger
 
 
@@ -139,11 +156,24 @@ class LessThanFilter(logging.Filter):
     a given level (no levels higher than the specified one), use this class like this:
     handler.addFilter(LessThanFilter(level))
     """
+
     def __init__(self, level):
         self._level = level
         logging.Filter.__init__(self)
 
     def filter(self, rec):
+        """
+        Function to decide if given log has to be logged or not, according to its level
+
+        Parameters
+        ----------
+        rec : current record handled by logger
+
+        Returns
+        -------
+        bool
+            True if level of current log is less than the defined limit, False otherwise
+        """
         return rec.levelno < self._level
 
 
@@ -154,11 +184,24 @@ class NoLevelFilter(logging.Filter):
     DEBUG (for development use) and INFO levels, but not DETAILS level (which is between
     DEBUG and INFO). We want to print DETAIL only if verbose option was set
     """
+
     def __init__(self, level):
         self._level = level
         logging.Filter.__init__(self)
 
     def filter(self, rec):
+        """
+        Function to decide if given log has to be logged or not, according to its level
+
+        Parameters
+        ----------
+        rec : current record handled by logger
+
+        Returns
+        -------
+        bool
+            True if level of current log is different from forbidden level, False if it is the same
+        """
         return rec.levelno != self._level
 
 
@@ -166,7 +209,15 @@ def check_installed(cmd):
     """
     Check if the command 'cmd' is in $PATH and can then be executed
 
-    return True or False
+    Parameters
+    ----------
+    cmd : str
+        command to run
+
+    Returns
+    -------
+    bool
+        True if installed, False otherwise
     """
     torun = "which " + cmd
     trying = subprocess.Popen(shlex.split(torun), stdout=subprocess.PIPE)
@@ -181,18 +232,35 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     """
     Run the given command line. If the return code is not 0, print error message.
     if eof (exit on fail) is True, exit program if error code is not 0.
+
+    Parameters
+    ----------
+    cmd : str
+        command to run
+    error : str
+        error message to print if error while running command
+    eof : bool
+        True: exit program if command failed, False: do not exit even if command fails
+    kwargs : Object
+        Can provide a logger, stdout and/or stderr streams
+
+    Returns
+    -------
+    subprocess.Popen
+        returns object of subprocess call (has attributes returncode, pid, communicate etc.)
+
     """
-    if not "logger" in kwargs:
+    if "logger" not in kwargs:
         logger = logging.getLogger("utils.run_cmd")
     else:
         logger = kwargs["logger"]
-    if not "stdout" in kwargs:
+    if "stdout" not in kwargs:
         kwargs["stdout"] = None
-    if not "stderr" in kwargs:
+    if "stderr" not in kwargs:
         kwargs["stderr"] = None
     try:
         call = subprocess.Popen(shlex.split(cmd), stdout=kwargs["stdout"],
-                                  stderr=kwargs["stderr"])
+                                stderr=kwargs["stderr"])
         call.wait()
         retcode = call.returncode
     except OSError:
@@ -209,15 +277,25 @@ def run_cmd(cmd, error, eof=False, **kwargs):
 
 
 def plot_distr(values, limit, title, text):
-    """ Plot histogram of given 'values', and add a vertical line corresponding to the chosen
-     'limit' and saves the image into the 'outfile'
+    """
+    Plot histogram of given 'values', and add a vertical line corresponding to the chosen
+    'limit' and saves the image into the 'outfile'
 
-    :param values: list of values
-    :type values: list
-    :param limit: limit for which a vertical line must be drawn
-    :type limit: int
-    :param outfile: file in which the output image must be saved
-    :type outfile: str
+    Parameters
+    ----------
+    values : list
+        list of values
+    limit : int
+        limit for which a vertical line must be drawn
+    title : str
+        Title to give to plot
+    text : str
+        text to write near the vertical line representing the limit
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        figure generated
     """
     import math
     import numpy as np
@@ -225,38 +303,42 @@ def plot_distr(values, limit, title, text):
     matplotlib.use('AGG')
     from matplotlib import pyplot as plt
     plt.close("all")
-    fig = plt.figure(figsize=(10,7))
-    ax = fig.add_subplot(1,1,1)
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(1, 1, 1)
     max_x = max(values)
     # if too many values, group them to have less bins in the histogram.
     # Put 'group_values' values in each bin ->
     # if less than 300 values, 1 value per bin, otherwise more values per bin
-    group_values = int(max_x/300) + 1
+    group_values = int(max_x / 300) + 1
     dec_ax = math.exp(0.001 * max_x) - 1
     dec_text = 3 * dec_ax
-    bins = np.arange(0, max_x + 2*group_values, group_values) - 0.5
-    axes = ax.hist(values, bins = bins, edgecolor="black", color="blue")
-    ax.set_xlim(0.5, max_x + 0.5*group_values)
-    ax.axvline(x=limit + 0.5*group_values + dec_ax, color="r")
-    ax.text(x=limit + 0.5*group_values + dec_text, y=plt.ylim()[1]/2,
-             s=text + " " + str(limit), color="r", rotation=90)
+    bins = np.arange(0, max_x + 2 * group_values, group_values) - 0.5
+    ax.hist(values, bins=bins, edgecolor="black", color="blue")
+    ax.set_xlim(0.5, max_x + 0.5 * group_values)
+    ax.axvline(x=limit + 0.5 * group_values + dec_ax, color="r")
+    ax.text(x=limit + 0.5 * group_values + dec_text, y=plt.ylim()[1] / 2,
+            s=text + " " + str(limit), color="r", rotation=90)
     ax.set_title(title)
     return fig
 
 
-def write_warning_skipped(skipped, format=False):
+def write_warning_skipped(skipped, do_format=False):
     """
     At the end of the script, write a warning to the user with the names of the genomes
     which had problems with prokka.
 
-    skipped: list of genomes with problems
+    Parameters
+    ----------
+    skipped : list
+        list of genomes with problems
+    do_format : bool
+        if False, genomes were not skipped because of format step, but before that.\
+        if True, they were skipped because of format
 
-    format: if False, genomes were not skipped because of format step, but before that.
-    if True, they were skipped because of format
     """
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
-    if not format:
+    if not do_format:
         logger.warning(("Prokka had problems while annotating some genomes, or did not "
                         "find any gene. Hence, they are not "
                         "formatted, and absent from your output database. Please look at their "
@@ -277,12 +359,20 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     Write the list of genomes discarded to a file, so that users can keep a trace of them,
     with their information (nb contigs, L90 etc.)
 
-    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
-    kept_genomes: list of genomes kept
-    list_file: input file containing the list of genomes
-    res_path: folder where results must be saved
-    qc: if it is the file written after qc only, call it info-genomes-<list_file>.txt
-    otherwise, call it discarded-<list_file>.txt
+    Parameters
+    ----------
+    genomes : dict
+        {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+    kept_genomes : list
+        list of genomes kept
+    list_file : str
+        input file containing the list of genomes
+    res_path : str
+        folder where results must be saved
+    qc : bool
+        if it is the file written after qc only (True), call it info-genomes-<list_file>.txt\
+        otherwise (False), call it discarded-<list_file>.txt
+
     """
     logger = logging.getLogger("utils")
     nb_disc = len(genomes) - len(kept_genomes)
@@ -313,13 +403,19 @@ def write_lstinfo(list_file, genomes, outdir):
     Write lstinfo file, with following columns:
     gembase_name, orig_name, size, nbcontigs, l90
 
-    list_file: input file containing the list of genomes
-    genomes: {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
-    outdir: folder where results must be saved
+    Parameters
+    ----------
+    list_file : str
+        input file containing the list of genomes
+    genomes : dict
+        {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+    outdir : str
+        folder where results must be saved
+
     """
     _, name_lst = os.path.split(list_file)
 
-    outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) +".lst")
+    outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
     with open(outlst, "w") as outf:
         outf.write("\t".join(["gembase_name", "orig_name", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in sorted(genomes.items(), key=sort_genomes):
@@ -329,39 +425,59 @@ def write_lstinfo(list_file, genomes, outdir):
 
 def sort_genomes(x):
     """
-    x = (genome_orig, [gembase, path, gsize, nbcont, L90]}
-    with gembase = species.date.strain
-
     order by:
-    - species
-    - in each species, by strain number
+
+        - species
+        - in each species, by strain number
+
+    Parameters
+    ----------
+    x : tuple or str
+        [genome_orig, [gembase, path, gsize, nbcont, L90]] with gembase = species.date.strain
+
+    Returns
+    -------
+    str
+        variable to take into account for sorting. If format is ESCO.1512.00001 return\
+        ESCO and 00001. Otherwise, just return x itself (sort by alphabetical order)
     """
     if isinstance(x, tuple):
         x = x[1][0]
 
     # if format is ESCO.1512.00001 sort by ESCO, then 00001
     if "." in x and len(x.split(".")) >= 3:
-        return (x.split(".")[0], int(x.split(".")[-1]))
+        return x.split(".")[0], int(x.split(".")[-1])
     # if format is not like this, just return alphabetical order
-    return (x,)
+    return x,
 
 
 def sort_proteins(x):
     """
-    x = species.date.strain.contig_protnum
-
     order by:
+
     - species
     - in each species, strain number
     - in each species and strain number, by protein number
+
+    Parameters
+    ----------
+    x : str
+        species.date.strain.contig_protnum
+
+    Returns
+    -------
+    str
+        variable to take into account for sorting. If format is ESCO.1512.00001.i0002_12124,\
+        return ESCO, 00001 and 12124. If not, it must be something_00001:\
+        return something and 00001.
     """
     try:
         # if format is ESCO.1512.00001.i0002_12124, sort by ESCO, then 00001, then 12124
         if "." in x and len(x.split(".")) >= 3:
-            return (x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1]))
+            return x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1])
         # if format is not like this, it must be something_00001:
         # sort by 'something' and then 00001
-        return (x.split("_")[0], int(x.split("_")[1]))
+        return x.split("_")[0], int(x.split("_")[1])
     except IndexError:
         logger = logging.getLogger("utils")
         logger.error(("ERROR: Protein {} does not have the required format. "
@@ -379,7 +495,25 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     Check that the given genome file exists in dbpath. Otherwise, put an error message,
     and ignore this file.
 
-    genomes = {genome: spegenus.date} spegenus.date = name.date
+    Parameters
+    ----------
+    list_file : str
+        input file containing the list of genomes
+    name : str
+        Default species name
+    date : str
+        Default date
+    dbpath : str
+        path to folder containing original genome files
+    tmp_path : str
+        path to folder which will contain the genome files to use before annotation, if\
+        needed to change them from original file (for example, merging several contig files\
+        in one file, split at each stretch of 5 'N', etc.).
+
+    Returns
+    -------
+    dict
+        {genome: spegenus.date} spegenus.date = name.date
     """
     logger = logging.getLogger("utils")
     logger.info("Reading genomes")
@@ -414,7 +548,7 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                         logger.warning(("{} genome file does not exist. Its file will be "
                                         "ignored when concatenating {}").format(file, genomes_inf))
                 # If there are files to concatenate, concatenate them
-                if to_concat != []:
+                if to_concat:
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
@@ -442,7 +576,26 @@ def read_info(name_inf, name, date, genomes_inf):
     format is ok) and if there is a date (and if its format is ok).
     If no name (resp. no date), return default name (resp. default date).
 
-    Return name and date.
+    Parameters
+    ----------
+    name_inf : str
+        information on current genome, which could contain a species name and a date
+    name : str
+        default species name
+    date : str
+        default date
+    genomes_inf : str
+        current genome filename. Used to complete information when there is a warning (species\
+        name or date given not in the right format...)
+
+    Returns
+    -------
+    (cur_name, cur_date) : tuple
+        with:
+
+        - curname: name to use for this genome (can be the default one, or the one read from\
+        'name_inf'
+        - curdate: date to use for this genome (default or read from 'name_inf')
     """
     logger = logging.getLogger("utils")
     name_inf = name_inf.strip().split(".")
@@ -487,17 +640,32 @@ def read_info(name_inf, name, date, genomes_inf):
     return cur_name, cur_date
 
 
-def cat(list_files, output, title = None):
+def cat(list_files, output, title=None):
     """
+    Equivalent of 'cat' unix command.
+
     Concatenate all files in 'list_files' and save result in 'output'
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
+
+    Parameters
+    ----------
+    list_files : list
+        list of filenames to concatenate
+    output : str
+        output filename, where all concatenated files will be written
+    title : str or None
+        if you want to show a progressbar while concatenating files, add a title for this\
+        progressbar here. If no title, nothing will be shown during concatenation.
+
     """
+    bar = None
+    curnum = None
     if title:
         nbfiles = len(list_files)
         widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-               ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
-               progressbar.Percentage(), ") - ", progressbar.Timer()]
+                   ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
+                   progressbar.Percentage(), ") - ", progressbar.Timer()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
         curnum = 1
     with open(output, "w") as outf:
@@ -511,10 +679,27 @@ def cat(list_files, output, title = None):
         bar.finish()
 
 
-def grep(filein, pattern, count=False):
+def grep(filein, pattern, counts=False):
     """
+    Equivalent of 'grep' unix command
+
     By default, returns all the lines containing the given pattern.
-    If count = True, returns the number of lines containing the pattern.
+    If counts = True, returns the number of lines containing the pattern.
+
+    Parameters
+    ----------
+    filein : str
+        path to the file in which pattern must be searched
+    pattern : str
+        pattern to search
+    counts : bool
+        True if you want to count how many lines have the pattern and return this number,\
+        False if you want to return all lines containing the pattern.
+
+    Returns
+    -------
+    list or int
+        list of lines if counts=False; number of lines if counts=True
     """
     num = 0
     lines = []
@@ -523,7 +708,7 @@ def grep(filein, pattern, count=False):
             if re.search(pattern, line):
                 lines.append(line.strip())
                 num += 1
-    if count:
+    if counts:
         return num
     else:
         return lines
@@ -531,9 +716,25 @@ def grep(filein, pattern, count=False):
 
 def count(filein, get="lines"):
     """
+    Similar to 'wc' unix command.
+
     Count the number of what is given in 'get'. It can be:
+
     - lines (default)
     - words
+
+    Parameters
+    ----------
+    filein : str
+        path to the file for which we want to count lines or words
+    get : ["lines", "words"]
+        either lines to count the number of lines in the file, or words to count the number\
+        of words.
+
+    Returns
+    -------
+    int
+        Number of lines or words according to value of 'get' parameter.
     """
     gets = ["lines", "words"]
     if get not in gets:
@@ -554,6 +755,16 @@ def check_format(info):
     """
     Check that the given information (can be the genomes name or the date) is in the right
     format: it should have 4 characters, all alphanumeric.
+
+    Parameters
+    ----------
+    info : str
+        information to check
+
+    Returns
+    -------
+    bool
+        True if right format, False otherwise
     """
     if len(info) != 4:
         return False
@@ -563,30 +774,43 @@ def check_format(info):
 def check_out_dirs(resdir):
     """
     Check that there is no file in:
+
     - resdir/LSTINFO
     - resdir/Genes
     - resdir/Proteins
     - resdir/Replicons
+    - resdir/gff3
+
+    Parameters
+    ----------
+    resdir : str
+        path to result directory
+
     """
     logger = logging.getLogger("utils")
-    if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")) != []:
+    if glob.glob(os.path.join(resdir, "LSTINFO", "*.lst")):
         logger.error("ERROR: Your output directory already has .lst files in the "
                      "LSTINFO folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
-    if glob.glob(os.path.join(resdir, "Proteins", "*.prt")) != []:
+    if glob.glob(os.path.join(resdir, "Proteins", "*.prt")):
         logger.error("ERROR: Your output directory already has .prt files in the "
                      "Proteins folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
-    if glob.glob(os.path.join(resdir, "Genes", "*.gen")) != []:
+    if glob.glob(os.path.join(resdir, "Genes", "*.gen")):
         logger.error("ERROR: Your output directory already has .gen files in the "
                      "Genes folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
-    if glob.glob(os.path.join(resdir, "Replicons", "*.fna")) != []:
+    if glob.glob(os.path.join(resdir, "Replicons", "*.fna")):
         logger.error("ERROR: Your output directory already has .fna files in the "
                      "Replicons folder. Provide another result directory, or remove the "
+                     "files in this one.\nEnding program.")
+        sys.exit(1)
+    if glob.glob(os.path.join(resdir, "gff3", "*.gff")):
+        logger.error("ERROR: Your output directory already has .gff files in the "
+                     "gff3 folder. Provide another result directory, or remove the "
                      "files in this one.\nEnding program.")
         sys.exit(1)
 
@@ -595,6 +819,16 @@ def rename_genome_contigs(gembase_name, gpath, outfile):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name', and save the output sequence in outfile
+
+    Parameters
+    ----------
+    gembase_name : str
+        genome name to use (species.date.strain)
+    gpath : str
+        path to the genome sequence
+    outfile : str
+        path to the new file, containing 'gpath' sequence, but with 'gembase_name' in headers
+
     """
     contig_num = 1
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
@@ -611,8 +845,13 @@ def logger_thread(q):
     """
     Queue listener used in a thread to handle the logs put to a QueueHandler
     by several processes (multiprocessing.pool.map_async for example)
+
+    Parameters
+    ----------
+    q : multiprocessing.managers.AutoProxy[Queue]
+        queue to listen
+
     """
-    logger = logging.getLogger("utils")
     while True:
         record = q.get()
         if record is None:
@@ -623,7 +862,12 @@ def logger_thread(q):
 
 def detail_lvl():
     """
-    Returns the int level corresponding to "DETAIL"
+    Get the int level corresponding to "DETAIL"
+
+    Returns
+    -------
+    int
+        int corresponding to the level "DETAIL"
     """
     return 15
 
@@ -631,6 +875,14 @@ def detail_lvl():
 def save_bin(objects, fileout):
     """
     Save python 'objects' in a binary file called 'fileout'
+
+    Parameters
+    ----------
+    objects : Object
+        python object to save
+    fileout : str
+        path to binary file where objects must be saved
+
     """
     with open(fileout, "wb") as binf:
         pickle.dump(objects, binf)
@@ -639,6 +891,17 @@ def save_bin(objects, fileout):
 def load_bin(binfile):
     """
     Unpickle python objects from the binary file 'binfile'
+
+    Parameters
+    ----------
+    binfile : str
+        path to binary file containing python object
+
+    Returns
+    -------
+    Object
+        The python objects unpickled
+
     """
     with open(binfile, "rb") as binf:
         objects = pickle.load(binf)
@@ -648,8 +911,19 @@ def load_bin(binfile):
 def write_list(liste):
     """
     Return a string corresponding to the given liste, with all elements separated
-    by a space. Used to write a list into a file
-    Ex: [1, 2, "toto"] -> "1 2 toto"
+    by a space. Used to write a list into a file. Ex::
+
+        [1, 2, "toto"] -> "1 2 toto"
+
+    Parameters
+    ----------
+    liste : list
+        list of elements that we would like to write
+
+    Returns
+    -------
+    str
+        the string to write
     """
     list_write = [str(l) for l in liste]
     return " ".join(list_write) + "\n"
@@ -658,7 +932,12 @@ def write_list(liste):
 def remove(infile):
     """
     Remove the given file if it exists
+
+    Parameters
+    ----------
+    infile : str
+        path to file to remove
+
     """
     if os.path.isfile(infile):
         os.remove(infile)
-

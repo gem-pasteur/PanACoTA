@@ -10,15 +10,15 @@ import pytest
 import os
 import logging
 import shutil
-import test.test_unit.utilities_for_tests as util_tests
 import matplotlib
+
 matplotlib.use('AGG')
 
+# Define variables used by several tests
+BASELINE_DIR = os.path.join("..", "data", "annotate", "exp_files", "baseline")
 
-def baseline_dir():
-    return os.path.join("..", "data", "annotate", "exp_files", "baseline")
 
-
+# Start tests
 def test_check_install():
     """
     Try to run prokka, which is installed, and check that there is no problem
@@ -34,7 +34,7 @@ def test_check_install_error():
     assert not utils.check_installed("plop false command...")
 
 
-@pytest.mark.mpl_image_compare(baseline_dir=baseline_dir(), tolerance=5, backend="agg")
+@pytest.mark.mpl_image_compare(baseline_dir=BASELINE_DIR, tolerance=5, backend="agg")
 def test_plot_dist():
     """
     Plot a given distribution, and check that output is as expected
@@ -83,7 +83,7 @@ def test_skipped_format(capsys):
     logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '', verbose=1)
     skipped_format = ["toto", "genome", "genome2"]
-    utils.write_warning_skipped(skipped_format, format=True)
+    utils.write_warning_skipped(skipped_format, do_format=True)
     out, err = capsys.readouterr()
     assert ("Some genomes were annotated by prokka, but could not be formatted, "
             "and are hence absent from your output database. Please look at log "
@@ -106,7 +106,7 @@ def test_write_discarded():
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
                gnames[3]: ["toto.0417", gpaths[3], 6549, 16, 8],
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
-              }
+               }
     kept_genomes = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome3"]
     list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
     res_path = os.path.join("test", "data", "annotate")
@@ -115,7 +115,7 @@ def test_write_discarded():
     exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_discard.lst")
     # There is no order in the discarded file. So, just check that the lines
     # written are as expected.
-    with open (outfile, "r") as outf, open(exp_file, "r") as expf:
+    with open(outfile, "r") as outf, open(exp_file, "r") as expf:
         exp_lines = expf.readlines()
         out_lines = outf.readlines()
     assert set(out_lines) == set(exp_lines)
@@ -134,7 +134,7 @@ def test_write_discarded_qc():
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
                gnames[3]: ["toto.0417", gpaths[3], 6549, 16, 8],
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
-              }
+               }
     kept_genomes = []
     list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
     res_path = os.path.join("test", "data", "annotate")
@@ -143,7 +143,7 @@ def test_write_discarded_qc():
     exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_info_qc.lst")
     # There is no order in the discarded file. So, just check that the lines
     # written are as expected.
-    with open (outfile, "r") as outf, open(exp_file, "r") as expf:
+    with open(outfile, "r") as outf, open(exp_file, "r") as expf:
         exp_lines = expf.readlines()
         out_lines = outf.readlines()
     assert set(out_lines) == set(exp_lines)
@@ -161,14 +161,14 @@ def test_write_discarded_empty():
     res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
     outfile = os.path.join("test", "data", "annotate", "discarded-list_genomes.lst")
-    with open (outfile, "r") as outf:
+    with open(outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
         assert all_lines[0] == "orig_name\tgsize\tnb_conts\tL90\n"
     os.remove(outfile)
 
 
-def test_write_discarded_allKept():
+def test_write_discarded_all_kept():
     """
     Test that when all genomes are kept, the discarded lst file only contains the
     header line.
@@ -180,13 +180,13 @@ def test_write_discarded_allKept():
                gnames[2]: ["toto.0417", gpaths[2], 4564855, 156, 40],
                gnames[3]: ["toto.0417", gpaths[3], 6549, 16, 8],
                gnames[4]: ["toto.0417", gpaths[4], 9876546, 6, 2]
-              }
+               }
     kept_genomes = ["H299_H561.fasta", "B2_A3_5.fasta-problems", "genome3", "genome2", "genome1"]
     list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
     res_path = os.path.join("test", "data", "annotate")
     utils.write_discarded(genomes, kept_genomes, list_file, res_path)
     outfile = os.path.join("test", "data", "annotate", "discarded-list_genomes.lst")
-    with open (outfile, "r") as outf:
+    with open(outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
         assert all_lines[0] == "orig_name\tgsize\tnb_conts\tL90\n"
@@ -204,13 +204,13 @@ def test_write_lstinfo():
                gnames[2]: ["genome.0417.00008", gpaths[2], 4564855, 156, 40],
                gnames[3]: ["toto.0417.00008", gpaths[3], 6549, 16, 8],
                gnames[4]: ["genome.0417.00001", gpaths[4], 9876546, 6, 2]
-              }
+               }
     list_file = os.path.join("test", "data", "annotate", "list_genomes.txt")
     outdir = os.path.join("test", "data", "annotate")
     utils.write_lstinfo(list_file, genomes, outdir)
     outfile = os.path.join(outdir, "LSTINFO-list_genomes.lst")
     exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_lstinfo.lst")
-    with open (outfile, "r") as outf, open(exp_file, "r") as expf:
+    with open(outfile, "r") as outf, open(exp_file, "r") as expf:
         for line_out, line_exp in zip(outf, expf):
             assert line_out == line_exp
     os.remove(outfile)
@@ -226,8 +226,7 @@ def test_write_lstinfo_nogenome():
     outdir = os.path.join("test", "data", "annotate")
     utils.write_lstinfo(list_file, genomes, outdir)
     outfile = os.path.join(outdir, "LSTINFO-list_genomes.lst")
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_lstinfo.lst")
-    with open (outfile, "r") as outf:
+    with open(outfile, "r") as outf:
         all_lines = outf.readlines()
         assert len(all_lines) == 1
         assert all_lines[0] == "gembase_name\torig_name\tgsize\tnb_conts\tL90\n"
@@ -261,7 +260,7 @@ def test_sort_gene_tuple():
                "name5": ["totn.0417.00010", "path/to/genome", 123456, 50, 3],
                "name6": ["genome.0417.00009", "path/to/genome", 123456, 50, 3],
                "name7": ["genome.0517.00001", "path/to/genome", 123456, 50, 3],
-               "name8": ["toto.0417.00011", "path/to/genome", 123456, 50, 3],}
+               "name8": ["toto.0417.00011", "path/to/genome", 123456, 50, 3], }
     sorted_genomes = sorted(genomes.items(), key=utils.sort_genomes)
     exp = [("name7", genomes["name7"]), ("name6", genomes["name6"]),
            ("name1", genomes["name1"]), ("name4", genomes["name4"]),
@@ -283,7 +282,7 @@ def test_sort_gene_noformat():
                "name5": ["mygenome.0416", "path/to/genome", 123456, 50, 3],
                "name6": ["genome.0417", "path/to/genome", 123456, 50, 3],
                "name7": ["genome.0517.00001", "path/to/genome", 123456, 50, 3],
-               "name8": ["toto.0417.00011", "path/to/genome", 123456, 50, 3],}
+               "name8": ["toto.0417.00011", "path/to/genome", 123456, 50, 3], }
     sorted_genomes = sorted(genomes.items(), key=utils.sort_genomes)
     exp = [("name7", genomes["name7"]), ("name1", genomes["name1"]),
            ("name4", genomes["name4"]), ("name6", genomes["name6"]),
@@ -356,13 +355,13 @@ def test_read_genomes_nofile(capsys):
     with pytest.raises(SystemExit):
         utils.read_genomes("toto.txt", "TOTO", "0417", "db/path", "tmppath")
     out, err = capsys.readouterr()
-    assert ("ERROR: Your list file ") in err
-    assert ("toto.txt") in err
-    assert ("does not exist. Please provide a list file.") in err
-    assert ("Ending program.") in err
+    assert "ERROR: Your list file " in err
+    assert "toto.txt" in err
+    assert "does not exist. Please provide a list file." in err
+    assert "Ending program." in err
 
 
-def test_read_genomes_wrongName():
+def test_read_genomes_wrongname():
     """
     Test that when the list file contains only genome names which do not exist,
     it returns an empty list of genomes to annotate/format.
@@ -371,7 +370,8 @@ def test_read_genomes_wrongName():
     date = "0417"
     dbpath = os.path.join("test", "data", "annotate", "genomes")
     tmppath = "tmppath"
-    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-wrongNames.txt")
+    list_file = os.path.join("test", "data", "annotate", "test_files",
+                             "list_genomes-wrongNames.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     assert genomes == {}
 
@@ -415,7 +415,8 @@ def test_read_genomes_errors(capsys):
     tmppath = "tmppath"
     list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-errors.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
-    exp = {"A_H738.fasta": ["ESCO.0417"], "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
+    exp = {"A_H738.fasta": ["ESCO.0417"],
+           "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["ESCO.0417"],
            "genome5.fasta": ["ESCO.0417"]}
@@ -425,10 +426,11 @@ def test_read_genomes_errors(capsys):
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default name (ESCO) and date (0417) will "
             "be used.") in err
-    assert ("Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-short-contig.fna. Only put "
-            "4 alphanumeric characters in your date and name. For "
-            "this genome, the default name (ESCO) will "
-            "be used.") in err
+    assert (
+           "Invalid name abc given for genome B2_A3_5.fasta-split5N.fna-short-contig.fna. Only put "
+           "4 alphanumeric characters in your date and name. For "
+           "this genome, the default name (ESCO) will "
+           "be used.") in err
     assert ("Invalid date 152 given for genome H299_H561.fasta. Only put "
             "4 alphanumeric characters in your date and name. For "
             "this genome, the default date (0417) will "
@@ -468,7 +470,8 @@ def test_read_genomes_multi_files(capsys):
     date = "0417"
     dbpath = os.path.join("test", "data", "annotate", "genomes")
     tmppath = os.path.join("test", "data", "annotate")
-    list_file = os.path.join("test", "data", "annotate", "test_files", "list_genomes-multi-files.txt")
+    list_file = os.path.join("test", "data", "annotate", "test_files",
+                             "list_genomes-multi-files.txt")
     genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
     exp = {"A_H738.fasta-all.fna": ["ESCO.0417"],
            "H299_H561.fasta-all.fna": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -479,7 +482,7 @@ def test_read_genomes_multi_files(capsys):
     _, err = capsys.readouterr()
     assert ("genome.fna genome file does not exist. Its file will be ignored "
             "when concatenating ['H299_H561.fasta', 'genome6.fasta', 'genome.fna']") in err
-    assert ("genome.fst genome file does not exist. It will be ignored.") in err
+    assert "genome.fst genome file does not exist. It will be ignored." in err
     assert ("toto.fst genome file does not exist. Its file will be ignored "
             "when concatenating ['toto.fst', 'toto.fasta', 'genome.fst']") in err
     assert ("toto.fasta genome file does not exist. Its file will be ignored "
@@ -506,7 +509,7 @@ def test_read_genomes_multi_files(capsys):
     os.remove(logfile_base + ".log.err")
 
 
-def test_check_resdirLst(capsys):
+def test_check_resdirlst(capsys):
     """
     Test that when the result directory already contains .lst files in LSTINFO,
     program ends with an error message.
@@ -524,7 +527,7 @@ def test_check_resdirLst(capsys):
     shutil.rmtree(resdir)
 
 
-def test_check_resdirPrt(capsys):
+def test_check_resdirprt(capsys):
     """
     Test that when the result directory already contains .prt files in Proteins,
     program ends with an error message.
@@ -542,7 +545,7 @@ def test_check_resdirPrt(capsys):
     shutil.rmtree(resdir)
 
 
-def test_check_resdirGen(capsys):
+def test_check_resdirgen(capsys):
     """
     Test that when the result directory already contains .gen files in Genes,
     program ends with an error message.
@@ -560,7 +563,7 @@ def test_check_resdirGen(capsys):
     shutil.rmtree(resdir)
 
 
-def test_check_resdirRep(capsys):
+def test_check_resdirrep(capsys):
     """
     Test that when the result directory already contains .fna files in Replicons,
     program ends with an error message.
@@ -578,7 +581,25 @@ def test_check_resdirRep(capsys):
     shutil.rmtree(resdir)
 
 
-def test_check_resdirOtherExt():
+def test_check_resdirgff(capsys):
+    """
+    Test that when the result directory already contains .fna files in Replicons,
+    program ends with an error message.
+    """
+    resdir = os.path.join("test", "data", "annotate", "test_check_resdir_gff")
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(resdir, "gff3"))
+    open(os.path.join(resdir, "gff3", "toto.gff"), "w").close()
+    with pytest.raises(SystemExit):
+        utils.check_out_dirs(resdir)
+    out, err = capsys.readouterr()
+    assert ("ERROR: Your output directory already has .gff files in the "
+            "gff3 folder. Provide another result directory, or remove the "
+            "files in this one.") in err
+    shutil.rmtree(resdir)
+
+
+def test_check_resdirotherext():
     """
     Test that when the result directory contains txt files in Replicons dir,
     there is no problem.
@@ -591,14 +612,14 @@ def test_check_resdirOtherExt():
     shutil.rmtree(resdir)
 
 
-def test_check_resdirNoDir():
+def test_check_resdirnodir():
     """
     Test that when the result directory does not already exist, there is no problem.
     """
     utils.check_out_dirs("totoresdir")
 
 
-def test_run_cmd_error_noQuit(capsys):
+def test_run_cmd_error_noquit(capsys):
     """
     Test that when we try to run a command which does not exist, it returns an error message,
     but does not exit the program (eof=False).
@@ -607,10 +628,10 @@ def test_run_cmd_error_noQuit(capsys):
     error = "error trying to run toto"
     assert utils.run_cmd(cmd, error) == -1
     out, err = capsys.readouterr()
-    assert ("error trying to run toto: toto does not exist") in err
+    assert "error trying to run toto: toto does not exist" in err
 
 
-def test_run_cmd_error_noQuit_logger(capsys):
+def test_run_cmd_error_noquit_logger(capsys):
     """
     Test that when we try to run a command which does not exist, it returns an error message,
     but does not exit the program (eof=False). With a given logger where error is written.
@@ -620,10 +641,10 @@ def test_run_cmd_error_noQuit_logger(capsys):
     error = "error trying to run toto"
     assert utils.run_cmd(cmd, error, logger=logger) == -1
     out, err = capsys.readouterr()
-    assert ("error trying to run toto: toto does not exist") in err
+    assert "error trying to run toto: toto does not exist" in err
 
 
-def test_run_cmd_error_Quit(capsys):
+def test_run_cmd_error_quit(capsys):
     """
     Test that when we try to run a command which does not exist, it returns an error message,
     and exits the program (eof=True)
@@ -633,7 +654,7 @@ def test_run_cmd_error_Quit(capsys):
     with pytest.raises(SystemExit):
         utils.run_cmd(cmd, error, eof=True)
     out, err = capsys.readouterr()
-    assert ("error trying to run toto: toto does not exist") in err
+    assert "error trying to run toto: toto does not exist" in err
 
 
 def test_run_cmd_retcode_non0(caplog):
@@ -659,7 +680,7 @@ def test_run_cmd_retcode_non0_quit(caplog):
     assert error in caplog.text
 
 
-def test_run_cmd_error_stderrFile():
+def test_run_cmd_error_stderrfile():
     """
     Test that when we try to run a command which does not exist, and direct its output to
     a file instead of stderr, we have the expected error written in the given error file.
@@ -699,7 +720,8 @@ def test_cat_nobar(capsys):
     list_files = glob.glob(os.path.join("test", "data", "annotate", "genomes", "*.fasta"))
     outfile = "test_catfile.txt"
     utils.cat(list_files, outfile)
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_cat_genomes_fasta.fst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files",
+                            "res_test_cat_genomes_fasta.fst")
     with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
         lines_exp = expf.readlines()
         lines_out = outf.readlines()
@@ -719,7 +741,8 @@ def test_cat_bar():
     outfile = "test_catfile.txt"
     title = "test cat progressbar"
     utils.cat(list_files, outfile, title=title)
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_cat_genomes_fasta.fst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files",
+                            "res_test_cat_genomes_fasta.fst")
     with open(exp_file, 'r') as expf, open(outfile, 'r') as outf:
         lines_exp = expf.readlines()
         lines_out = outf.readlines()
@@ -767,7 +790,7 @@ def test_grep_count():
     with open(filein, "w") as ff:
         ff.write(lines)
     pattern = "[0-9]+toto\.txt [a-z]{6}"
-    lines_grep = utils.grep(filein, pattern, count=True)
+    lines_grep = utils.grep(filein, pattern, counts=True)
     assert lines_grep == 2
     os.remove(filein)
 
@@ -804,6 +827,7 @@ def test_count_words():
     nbword = utils.count(filein, get="words")
     assert nbword == 10
     os.remove(filein)
+
 
 def test_count_error(capsys):
     """
@@ -849,7 +873,7 @@ def test_write_list():
     """
     Test that the given list is returned as expected string
     """
-    inlist = [1, 2, "toto", {1:2, "1": 5}, 1e-6]
+    inlist = [1, 2, "toto", {1: 2, "1": 5}, 1e-6]
     tostr = utils.write_list(inlist)
     exp1 = "1 2 toto {1: 2, '1': 5} 1e-06\n"
     exp2 = "1 2 toto {'1': 5, 1: 2} 1e-06\n"
@@ -875,4 +899,3 @@ def test_remove_not_exist():
     assert not os.path.isfile(infile)
     utils.remove(infile)
     assert not os.path.isfile(infile)
-
