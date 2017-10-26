@@ -614,20 +614,24 @@ def test_generate_gff():
     os.remove(gffout)
 
 
-def test_generate_gff_error(caplog):
+def test_generate_gff_error():
     """
     Test creating gff file.
     """
+    logger = my_logger()
     prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
     lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
     gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
-    assert not ffunc.generate_gff(prokgff, gffout, lstgenome, my_logger()[1])
+    assert not ffunc.generate_gff(prokgff, gffout, lstgenome, logger[1])
     os.remove(gffout)
-    assert len(caplog.records) == 1
-    assert caplog.records[0].levelname == "ERROR"
-    assert ("Problem with your gff file. '##FASTA' is not a gff entry line, whereas it should "
-            "correspond to '863\t1795\tD\tCDS\tESCO.1015.00001.b0003_00016\tNA\t"
-            "| hypothetical protein | NA | NA'") in caplog.text
+    q = logger[0]
+    assert q.qsize() == 1
+    logfound = q.get()
+    msg = ("Problem with your gff file. '##FASTA' is not a gff entry line, whereas it should "
+           "correspond to '863\t1795\tD\tCDS\tESCO.1015.00001.b0003_00016\tNA\t"
+           "| hypothetical protein | NA | NA'")
+    assert msg in logfound.message
+    assert logfound.levelname == "ERROR"
 
 
 def test_handle_genome_nores():
