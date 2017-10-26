@@ -15,12 +15,28 @@ logger = logging.getLogger("utils.pan")
 
 
 def read_pangenome(pangenome, families=None):
-    """ Read pangenome information
+    """
+    Read pangenome information
 
     Read pangenome according to what is available. First, check if python objects are available,
     then if not, search for the binary file, and if not, read the text file.
-    pangenome: pangenome file
-    families: {num: [members]}
+
+    Parameters
+    ----------
+    pangenome : str
+        path to pangenome file
+    families : dict or None
+        {num: [members]} if families are given. If not (must read them from binary file if exists\
+        or pangenome file otherwise), None.
+
+    Returns
+    -------
+    (fams_by_strain, families, all_strains) : tuple
+        with:
+
+        - fams_by_strain: {fam_num: {strain: [members]}}
+        - families: {fam_num: [all members]}
+        - all_strains: list of all genome names
     """
     if families:
         fams_by_strain, all_strains = get_fams_info(families)
@@ -39,10 +55,22 @@ def read_pangenome(pangenome, families=None):
 
 def get_fams_info(families):
     """
-    input: families = {num: [members]}
-    output:
-    - fams_by_strain = {fam_num: {strain: [members], strain: [members]}}
-    - all_strains = list of all strains found in the pangenome
+    From all families as list of members, get more information:
+
+    - all strains found, sorted by species name
+    - for each family, sort members by strain
+
+    Parameters
+    ----------
+    families : {num: [members]}
+
+    Returns
+    -------
+    (fams_by_strain, sorted_all_strains) : tuple
+        with:
+
+        - fams_by_strain: {fam_num: {strain: [members], strain: [members]}}
+        - sorted_all_strains: list of all strains found, sorted by species
     """
     logger.info("Calculating pan_summary, pan_quali and pan_quanti")
     fams_by_strain = {}
@@ -56,17 +84,22 @@ def get_fams_info(families):
 
 
 def read_pan_file(filein):
-    """ Read PanGenome file in 'filein', and put it into Python objects
+    """
+    Read PanGenome file in 'filein', and put it into Python objects
 
-    Save all the python objects to a binary file, so that, if the script is ran several
-    times, there is no need to parse again all the file.
+    Parameters
+    ----------
+    filein : str
+        path to pangenome file
 
-    :param filein: name of the PanGenome file
-    :type filein: str
-    :returns: fams_by_strain = {fam_num: {strain: [members], strain: [members]}} and
-    families = {fam_num: [all members]}
-    all_strains = list of all strains found in the pangenome
-    :rtype: tuple(dict, dict, list)
+    Returns
+    -------
+    (fams_by_strain, families, sort_all_strains) : tuple
+        with:
+
+        - fams_by_strain: {fam_num: {strain: [members]}}
+        - families: {fam_num: [all members]}
+        - sort_all_strains: list of all genome names, sorted by species name
     """
     logger.info("Reading and getting information from pangenome file")
     fams_by_strain = {}
@@ -90,6 +123,18 @@ def read_pan_file(filein):
 def read_gene(gene, num, fams_by_strain, all_strains):
     """
     Read information from a given gene name, and save it to appropriate dicts
+
+    Parameters
+    ----------
+    gene : str
+        gene name (species.date.strain.contig_number
+    num : str
+        num of family from which the given gene is
+    fams_by_strain : dict
+        {fam_num: {strain: [members]}}
+    all_strains : list
+        list of all strains
+
     """
     # if format is ESCO.1512.00001.i001_12313 genome name is ESCO.1512.00001
     if "." in gene and len(gene.split(".")) >= 3:
@@ -103,4 +148,3 @@ def read_gene(gene, num, fams_by_strain, all_strains):
         fams_by_strain[num][strain] = [gene]
     if strain not in all_strains:
         all_strains.append(strain)
-
