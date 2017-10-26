@@ -53,10 +53,11 @@ def test_count_headers():
     assert nb == 5
 
 
-def test_check_prokka_no_outdir(logger):
+def test_check_prokka_no_outdir():
     """
     Test that prokka returns the right error message when output directory does not exist
     """
+    logger = my_logger()
     outdir = "toto"
     name = "prokka_out_for_test"
     logf = "prokka.log"
@@ -69,10 +70,11 @@ def test_check_prokka_no_outdir(logger):
     assert q.get().message == msg
 
 
-def test_check_prokka_notbl(logger):
+def test_check_prokka_notbl():
     """
     Check that check_prokka returns false when a tbl file is missing, and an error message
     """
+    logger = my_logger()
     ori_prok_dir = os.path.join("test", "data", "annotate", "test_files",
                                 "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
@@ -96,11 +98,12 @@ def test_check_prokka_notbl(logger):
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_sevtbl(logger):
+def test_check_prokka_sevtbl():
     """
     Check that check_prokka returns false when there is more than 1 tbl file,
     and an error message
     """
+    logger = my_logger()
     ori_prok_dir = os.path.join("test", "data", "annotate", "test_files",
                                 "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
@@ -128,10 +131,11 @@ def test_check_prokka_sevtbl(logger):
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_nofaa(logger):
+def test_check_prokka_nofaa():
     """
     Check that check_prokka returns false when a faa file is missing, and an error message
     """
+    logger = my_logger()
     ori_prok_dir = os.path.join("test", "data", "annotate", "test_files",
                                 "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
@@ -155,11 +159,12 @@ def test_check_prokka_nofaa(logger):
     shutil.rmtree(out_dir)
 
 
-def test_check_prokka_sevfaa(logger):
+def test_check_prokka_sevfaa():
     """
     Check that check_prokka returns false when there is more than 1 faa file,
     and an error message
     """
+    logger = my_logger()
     ori_prok_dir = os.path.join("test", "data", "annotate", "test_files",
                                 "original_name.fna-prokkaRes")
     ori_name = "prokka_out_for_test"
