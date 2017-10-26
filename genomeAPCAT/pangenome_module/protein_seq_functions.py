@@ -28,7 +28,7 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
         its own protein file, called `<genome_name>.prt`.
     name : str
         dataset name, used to name the output databank: <outdir>/<name>.All.prt
-    spedir : str
+    spedir : str or None
         By default, output file is saved in dbpath directory. If it must be saved somewhere\
         else, it is specified here.
     quiet : bool

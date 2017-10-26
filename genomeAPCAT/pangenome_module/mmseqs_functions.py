@@ -38,7 +38,7 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
         path to file containing all proteins to cluster.
     threads : int
         number of threads which can be used
-    panfile : str
+    panfile : str or None
         name for output pangenome file. Otherwise, will use default name
     quiet : bool
         True if nothing must be written on stdout, False otherwise.
