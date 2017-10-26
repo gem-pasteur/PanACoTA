@@ -21,7 +21,6 @@ import threading
 from genomeAPCAT import utils
 
 
-
 def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     """
     For each family:
@@ -33,12 +32,13 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     main_logger.info(("Starting alignment of all families: protein alignment, "
                       "back-translation to nucleotides, and add missing genomes in the family"))
     nbfam = len(all_fams)
+    bar = None
     if not quiet:
         # Create progressbar
         widgets = ['Alignment: ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                    ' ', progressbar.Counter(), "/{}".format(nbfam), ' (',
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
-                  ]
+                   ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfam,
                                       term_width=100).start()
     pool = multiprocessing.Pool(threads)
@@ -55,7 +55,7 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
         lp = threading.Thread(target=utils.logger_thread, args=(q,))
         lp.start()
         if not quiet:
-            while(True):
+            while True:
                 if final.ready():
                     break
                 remaining = final._number_left
@@ -71,7 +71,7 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
         main_logger.error(excp)
         sys.exit(1)
     # We re-aligned at least one family -> remove concatenated files and groupby
-    if set(final) != set(["OK"]):
+    if set(final) != {["OK"]}:
         aldir = os.path.split(prefix)[0]
         concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
         outdir = os.path.split(aldir)[0]
@@ -79,7 +79,7 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
         grpfile = os.path.join(treedir, dname + ".grp.aln")
         utils.remove(concat)
         utils.remove(grpfile)
-    return not False in final
+    return False not in final
 
 
 def handle_family(args):
@@ -106,10 +106,8 @@ def handle_family(args):
     status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
                                num_fam, ngenomes, logger)
     # If it returned true, Add missing genomes
-    status2 = False
     if status1:
-        status2 = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
-        return status2
+        return add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
     return False
 
 
@@ -126,7 +124,7 @@ def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
     if status == True:
         if status1 == "OK":
             logger.warning(("Alignment already done for family {}. The program will use "
-                        "it for next steps").format(num_fam))
+                            "it for next steps").format(num_fam))
             return "OK"
         else:
             return True
@@ -143,7 +141,10 @@ def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
             btrf.write(toadd)
     ret = check_add_missing(btr_file, num_fam, ngenomes, logger)
     # Return True only if all genomes found with all same length (check_add_missing = True)
-    return ret == True
+    if ret:
+        return True
+    else:
+        return False
 
 
 def check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False):
@@ -180,6 +181,7 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     Returns True if no problem found
     """
     nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
+    nbfal = None
     if not nbfprt:
         utils.remove(mafft_file)
         utils.remove(btr_file)
@@ -209,8 +211,8 @@ def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger):
 
     # Check that extractions went well
     nbmiss = utils.count(miss_file)
-    nbfprt = utils.grep(prt_file, "^>", count=True)
-    nbfgen = utils.grep(gen_file, "^>", count=True)
+    nbfprt = utils.grep(prt_file, "^>", counts=True)
+    nbfgen = utils.grep(gen_file, "^>", counts=True)
     if nbmiss + nbfprt != ngenomes:
         logger.error(("fam {}: wrong sum of missing genomes ({}) and prt "
                       "extracted ({}).").format(num_fam, nbmiss, nbfprt))
@@ -241,7 +243,7 @@ def check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     Check that mafft alignment went well: the number of proteins in the alignment
     is the same as the number of proteins extracted
     """
-    nbfal = utils.grep(mafft_file, "^>", count=True)
+    nbfal = utils.grep(mafft_file, "^>", counts=True)
     if nbfprt != nbfal:
         logger.error("fam {}: different number of proteins extracted in {} ({}) and proteins "
                      "aligned in {} ({}).".format(num_fam, prt_file, nbfprt, mafft_file, nbfal))
@@ -269,7 +271,7 @@ def check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger):
     """
     Check back-translation
     """
-    nbfalnuc = utils.grep(btr_file, "^>", count=True)
+    nbfalnuc = utils.grep(btr_file, "^>", counts=True)
     if nbfal != nbfalnuc:
         logger.error("fam {}: different number of proteins aligned in {} ({}) and genes "
                      "back-translated in {} ({})".format(num_fam, mafft_file, nbfal,
