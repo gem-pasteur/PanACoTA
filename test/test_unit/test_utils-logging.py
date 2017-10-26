@@ -6,7 +6,6 @@ Unit tests for the functions of utils.py dealing with logging
 """
 
 import genomeAPCAT.utils as utils
-import pytest
 import logging
 import os
 
@@ -378,6 +377,9 @@ def test_logger_warning_verbose2(capsys):
 
 
 def check_warning_verbose(logfile, capsys):
+    """
+    Function checking that warnings were given as expected
+    """
     logger = logging.getLogger("warn")
     logger.debug("info debug")
     logger.details("info details")
@@ -615,8 +617,8 @@ def test_logger_thread(capsys):
     q = m.Queue()
     lp = threading.Thread(target=utils.logger_thread, args=(q,))
     lp.start()
-    q.put(fake_log("myname", "hello!!"))
-    q.put(fake_log("other name", "that's me!!!"))
+    q.put(FakeLog("myname", "hello!!"))
+    q.put(FakeLog("other name", "that's me!!!"))
     q.put(None)
     lp.join()
     out, err = capsys.readouterr()
@@ -625,7 +627,10 @@ def test_logger_thread(capsys):
     assert "that's me!!!" in err
 
 
-class fake_log():
+class FakeLog:
+    """
+    Class simulating a logger
+    """
 
     def __init__(self, name, text, levelno=100):
         self.name = name
@@ -636,4 +641,7 @@ class fake_log():
         self.stack_info = ""
 
     def getMessage(self):
+        """
+        returns text of log
+        """
         return self.text

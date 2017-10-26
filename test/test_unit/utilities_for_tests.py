@@ -6,8 +6,6 @@ This script contains functions used by several tests.
 """
 
 import hashlib
-import os
-import pytest
 
 
 def get_file_hash(filepath):
@@ -33,4 +31,3 @@ def compare_files_bin(file1, file2):
     sig_file1 = get_file_hash(file1)
     sig_file2 = get_file_hash(file2)
     return sig_file1 == sig_file2
-

@@ -5,7 +5,6 @@
 Unit tests for format_functions.py
 """
 
-import pytest
 import os
 import logging
 import shutil
@@ -14,8 +13,8 @@ import genomeAPCAT.qc_annote_module.format_functions as ffunc
 import genomeAPCAT.utils as utils
 
 
-@pytest.fixture(scope="function")
-def logger():
+# Define variables and functions used by several tests
+def my_logger():
     """
     logger given to function called by a subprocess
     """
@@ -31,6 +30,7 @@ def logger():
     return q, logging.getLogger('process')
 
 
+# Start tests
 def test_write_gene():
     """
     Test that lstinfo line is written as expected when writing info for
@@ -63,7 +63,7 @@ def test_write_gene():
     os.remove(lstfile)
 
 
-def test_write_CRISPR():
+def test_write_crispr():
     """
     Test that lstinfo line is written as expected when writing info for CRISPR,
     and that crispr num increased by 1
@@ -87,7 +87,8 @@ def test_write_CRISPR():
                            cont_loc, genome, cont_num, ecnum, inf2, strand,
                            start, end, lstopenfile)
     lstopenfile.close()
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_geneCRISPR.lst")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files",
+                            "res_test_write_geneCRISPR.lst")
     assert res == 2
     with open(exp_file, "r") as expf, open(lstfile, "r") as lstf:
         for line_exp, line_out in zip(expf, lstf):
@@ -123,7 +124,7 @@ def test_tbl_to_lst():
     os.remove(lstfile)
 
 
-def test_tbl_to_lst_newName():
+def test_tbl_to_lst_new_name():
     """
     Check that generated lstinfo file is as expected, when the genome name has changed between
     the one given to prokka, and the name given now.
@@ -168,7 +169,7 @@ def test_write_header_gene():
     outfile.close()
 
 
-def test_write_header_geneNoName():
+def test_write_header_gene_no_name():
     """
     From a given line of lstinfo file, giving info for a gene with many unknown parts (gene
     name, product, EC number and more information are NAs), check that the header line of the
@@ -179,7 +180,7 @@ def test_write_header_geneNoName():
                "| NA | NA")
     ffunc.write_header(lstline, outfile)
     res = outfile.getvalue()
-    exp = (">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA\n")
+    exp = ">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA\n"
     assert res == exp
     outfile.close()
 
@@ -194,18 +195,20 @@ def test_write_header_crispr():
                "crispr-array | NA | NA")
     ffunc.write_header(lstline, outfile)
     res = outfile.getvalue()
-    exp = (">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA\n")
+    exp = ">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA\n"
     assert res == exp
     outfile.close()
 
 
-def test_create_prt_wrongHeaderSep(logger):
+def test_create_prt_wrong_header_sep():
     """
     Test that, when creating prt file from faa and lst, if a header of faa file is
     not in the right format (protein name and number are not separated by '_'),
     it writes an error, erases prt file, and returns False.
     """
-    faaseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-wrongHeaderSep.faa")
+    logger = my_logger()
+    faaseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-wrongHeaderSep.faa")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "annotate", "test_create_prt-wrongHeadSep.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq, logger[1])
@@ -219,13 +222,15 @@ def test_create_prt_wrongHeaderSep(logger):
     assert q.get().message == msg
 
 
-def test_create_prt_wrongHeaderInt(logger):
+def test_create_prt_wrong_header_int():
     """
     Test that, when creating prt file from faa and lst, if a header of faa file is
     not in the right format (protein name and number are separated by '_', but protein num
     contains a letter), it writes an error, erases prt file, and returns False.
     """
-    faaseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-wrongHeaderInt.faa")
+    logger = my_logger()
+    faaseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-wrongHeaderInt.faa")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "annotate", "test_create_prt-wrongHeadInt.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq, logger[1])
@@ -239,12 +244,14 @@ def test_create_prt_wrongHeaderInt(logger):
     assert q.get().message == msg
 
 
-def test_create_prt_missLst(logger):
+def test_create_prt_miss_lst():
     """
     Test that, when creating prt file from faa and lst, if a protein of faa file is not present in
     the lst file, it writes an error, removes the prt file, and returns False.
     """
-    faaseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-supHeader.faa")
+    logger = my_logger()
+    faaseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-supHeader.faa")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "annotate", "test_create_prt-missLst.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq, logger[1])
@@ -260,13 +267,15 @@ def test_create_prt_missLst(logger):
     assert q.get().message == msg
 
 
-def test_create_prt_wrongOrder(logger):
+def test_create_prt_wrong_order():
     """
     Test that, when creating prt file from faa and lst, if a protein of faa file is not in
     increasing protein number, so that it does not correspond to the protein in the lstinfo file,
     it writes an error, removes the prt file, and returns False.
     """
-    faaseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-wrongOrder.faa")
+    logger = my_logger()
+    faaseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-wrongOrder.faa")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "annotate", "test_create_prt-wrongOrder.prt")
     assert not ffunc.create_prt(faaseq, lstfile, prtseq, logger[1])
@@ -282,11 +291,12 @@ def test_create_prt_wrongOrder(logger):
     assert q.get().message == msg
 
 
-def test_create_prt_Ok(logger):
+def test_create_prt_ok():
     """
     Test that when everything is ok in both faa and lst files, the prt file is
     created as expected.
     """
+    logger = my_logger()
     faaseq = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes",
                           "prokka_out_for_test.faa")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
@@ -299,7 +309,7 @@ def test_create_prt_Ok(logger):
     os.remove(prtseq)
 
 
-def test_create_gen_supCRISPR(logger):
+def test_create_gen_sup_crispr():
     """
     Test that when there is a CRISPR in the ffn file, but not in lstinfo,
     it generates an error, because the CRISPR ID does not correspond to the gene ID in lstinfo.
@@ -307,7 +317,9 @@ def test_create_gen_supCRISPR(logger):
     Moreover, the CRISPR ID is not in the same format as a gene ID, so the error should
     be on the format.
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-supCRISPR.ffn")
+    logger = my_logger()
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-supCRISPR.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen_supCRISPR.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq, logger[1])
@@ -319,12 +331,14 @@ def test_create_gen_supCRISPR(logger):
     assert q.get().message == msg
 
 
-def test_create_gen_supGene(logger):
+def test_create_gen_sup_gene():
     """
     Test that, when creating gen file from ffn and lst, if a gene of ffn file is not present in
     the lst file, it writes an error, removes the gen file, and returns False.
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-supGene.ffn")
+    logger = my_logger()
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-supGene.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     prtseq = os.path.join("test", "data", "annotate", "test_create_gen-supgene.prt")
     assert not ffunc.create_gen(ffnseq, lstfile, prtseq, logger[1])
@@ -339,7 +353,7 @@ def test_create_gen_supGene(logger):
     assert q.get().message == msg
 
 
-def test_create_gen_missCRISPR(logger):
+def test_create_gen_miss_crispr():
     """
     Test for situation where there are 2 CRISPRs in the lstinfo file, the first one
     is not in the ffn file, while the second one is in the ffn file.
@@ -347,7 +361,9 @@ def test_create_gen_missCRISPR(logger):
     the first CRISPR found in ffn (CRISPR 1) corresponds to CRISPR2 in lstinfo file.
     Gene file should be removed, and the function should return False
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-missCRISPR.ffn")
+    logger = my_logger()
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-missCRISPR.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen_missCRISPR.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq, logger[1])
@@ -360,31 +376,35 @@ def test_create_gen_missCRISPR(logger):
     assert q.get().message == msg
 
 
-def test_create_gen_noCRISPRffn(logger):
+def test_create_gen_no_crispr_ffn():
     """
     Test that when the there is a CRISPR in the lst file, but not in the ffn file,
     everything goes well, as in some versions of prokka (1.12)n CRISPRs are not in ffn while
     they are specified in lst. Function should return True, and gene file created.
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-noCRISPRffn.ffn")
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-noCRISPRffn.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen_noCRISPRffn.gen")
-    assert ffunc.create_gen(ffnseq, lstfile, genseq, logger[1])
+    assert ffunc.create_gen(ffnseq, lstfile, genseq, my_logger()[1])
     assert os.path.isfile(genseq)
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_create_gen_noCRISPRffn.gen")
+    exp_file = os.path.join("test", "data", "annotate", "exp_files",
+                            "res_create_gen_noCRISPRffn.gen")
     with open(exp_file, "r") as expf, open(genseq, "r") as prtf:
         for line_exp, line_out in zip(expf, prtf):
             assert line_exp == line_out
     os.remove(genseq)
 
 
-def test_create_gen_wrongHeaderSep(logger):
+def test_create_gen_wrong_header_sep():
     """
     Test that, when creating gen file from ffn and lst, if a header of ffn file is
     not in the right format (gene name and number are not separated by '_'),
     it writes an error, erases gen file, and returns False.
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-wrongFormat.ffn")
+    logger = my_logger()
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-wrongFormat.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen_wrongHeadSep.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq, logger[1])
@@ -397,13 +417,15 @@ def test_create_gen_wrongHeaderSep(logger):
     assert q.get().message == msg
 
 
-def test_create_gen_wrongHeaderInt(logger):
+def test_create_gen_wrong_header_int():
     """
     Test that, when creating gen file from ffn and lst, if a header of ffn file is
     not in the right format (gene name and number are separated by '_', but gene num
     contains a letter), it writes an error, erases gen file, and returns False.
     """
-    ffnseq = os.path.join("test", "data", "annotate", "test_files", "prokka_out_for_test-wrongInt.ffn")
+    logger = my_logger()
+    ffnseq = os.path.join("test", "data", "annotate", "test_files",
+                          "prokka_out_for_test-wrongInt.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen_wrongHeadInt.gen")
     assert not ffunc.create_gen(ffnseq, lstfile, genseq, logger[1])
@@ -416,13 +438,14 @@ def test_create_gen_wrongHeaderInt(logger):
     assert q.get().message == msg
 
 
-def test_create_gen_wrongLstInt(logger):
+def test_create_gen_wrong_lst_int():
     """
     Test that, when creating gen file from ffn and lst, if a gene name in lst file is
     not in the right format (gene name and number are separated by '_', but gene num
     contains a letter), it writes an error, erases gen file, and returns False.
     Because the gene name in ffn won't be found in lst (a it contains an error in lst).
     """
+    logger = my_logger()
     ffnseq = os.path.join("test", "data", "annotate", "test_files", "original_name.fna-prokkaRes",
                           "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst-wrongGeneName.lst")
@@ -440,8 +463,7 @@ def test_create_gen_wrongLstInt(logger):
     assert q.get().message == msg
 
 
-
-def test_create_gen_Ok(logger):
+def test_create_gen_ok():
     """
     Test that when everything is ok in both ffn and lst files, the gen file is
     created as expected.
@@ -450,7 +472,7 @@ def test_create_gen_Ok(logger):
                           "prokka_out_for_test.ffn")
     lstfile = os.path.join("test", "data", "annotate", "exp_files", "res_tbl2lst.lst")
     genseq = os.path.join("test", "data", "annotate", "test_create_gen.gen")
-    assert ffunc.create_gen(faaseq, lstfile, genseq, logger[1])
+    assert ffunc.create_gen(faaseq, lstfile, genseq, my_logger()[1])
     exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_create_gen.gen")
     with open(exp_file, "r") as expf, open(genseq, "r") as prtf:
         for line_exp, line_out in zip(expf, prtf):
@@ -577,14 +599,14 @@ def test_handle_line_gff_prod():
     os.remove(outgff)
 
 
-def test_generate_gff(logger):
+def test_generate_gff():
     """
     Test creating gff file.
     """
     prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff.gff")
     gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
     lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
-    assert ffunc.generate_gff(prokgff, gffout, lstgenome, logger[1])
+    assert ffunc.generate_gff(prokgff, gffout, lstgenome, my_logger()[1])
     exp_gff = os.path.join("test", "data", "annotate", "exp_files", "res_create_gff.gff")
     with open(gffout, "r") as gffo, open(exp_gff, "r") as expf:
         for line_exp, line_out in zip(expf, gffo):
@@ -592,14 +614,14 @@ def test_generate_gff(logger):
     os.remove(gffout)
 
 
-def test_generate_gff_error(logger, caplog):
+def test_generate_gff_error(caplog):
     """
     Test creating gff file.
     """
     prokgff = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
     lstgenome = os.path.join("test", "data", "annotate", "test_files", "lstinfo_for_gff.lst")
     gffout = os.path.join("test", "data", "annotate", "test_creategff.gff")
-    assert not ffunc.generate_gff(prokgff, gffout, lstgenome, logger[1])
+    assert not ffunc.generate_gff(prokgff, gffout, lstgenome, my_logger()[1])
     os.remove(gffout)
     assert len(caplog.records) == 1
     assert caplog.records[0].levelname == "ERROR"
@@ -608,36 +630,37 @@ def test_generate_gff_error(logger, caplog):
             "| hypothetical protein | NA | NA'") in caplog.text
 
 
-def test_handle_genome_nores(logger):
+def test_handle_genome_nores():
     """
     Test that when we try to format a genome which is not in results,
     it returns a tuple with "no_res" and the genome name.
     """
     results = {"abcd.fasta": True}
     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-            "gene/dir", "rep/dir", "gff/dir", results, logger[0])
+            "gene/dir", "rep/dir", "gff/dir", results, my_logger()[0])
     res = ffunc.handle_genome(args)
     assert res == ("no_res", "toto.fasta")
 
 
-def test_handle_genome_badprok(logger):
+def test_handle_genome_badprok():
     """
     Test that when we try to format a genome which is in results, but with False,
     it returns a tuple with "bad_prokka" and the genome name.
     """
     results = {"abcd.fasta": True, "toto.fasta": False}
     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-            "gene/dir", "rep/dir", "gff/dir", results, logger[0])
+            "gene/dir", "rep/dir", "gff/dir", results, my_logger()[0])
     res = ffunc.handle_genome(args)
     assert res == ("bad_prokka", "toto.fasta")
 
 
-def test_handle_genome_formatok(logger):
+def test_handle_genome_formatok():
     """
     Test that when we try to format a genome which is in results, with True,
     it returns a tuple with "True" and the genome name.
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-split5N.fna-short-contig.fna")
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     lst_dir = os.path.join("test", "data", "annotate")
@@ -648,7 +671,7 @@ def test_handle_genome_formatok(logger):
     results = {"B2_A3_5.fasta-split5N.fna-short-contig.fna": True, "toto.fasta": False}
     args = ("B2_A3_5.fasta-split5N.fna-short-contig.fna", name, gpath, prok_path,
             lst_dir, prot_dir,
-            gene_dir, rep_dir, gff_dir, results, logger[0])
+            gene_dir, rep_dir, gff_dir, results, my_logger()[0])
     res = ffunc.handle_genome(args)
     assert res == (True, "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     os.remove(os.path.join(lst_dir, name + ".prt"))
@@ -658,24 +681,26 @@ def test_handle_genome_formatok(logger):
     os.remove(os.path.join(lst_dir, name + ".gff"))
 
 
-def test_handle_genome_formaterror(logger):
+def test_handle_genome_formaterror():
     """
     Test that when we try to format a genome which is in results, but with False,
     it returns a tuple with "bad_prokka" and the genome name.
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
+    logger = my_logger()
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
+    tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".tbl")
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
-    shutil.copyfile(tblInit, tblout)
-    gffInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
+                          name + ".tbl")
+    shutil.copyfile(tbl_init, tblout)
+    gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".gff")
     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
-    shutil.copyfile(gffInit, gffout)
+                          name + ".gff")
+    shutil.copyfile(gff_init, gffout)
     lst_dir = os.path.join("test", "data", "annotate")
     prot_dir = lst_dir
     gene_dir = lst_dir
@@ -703,12 +728,13 @@ def test_handle_genome_formaterror(logger):
     os.remove(gffout)
 
 
-def test_format1genome(logger):
+def test_format1genome():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
     which did not change name between prokka run and format step.
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-split5N.fna-short-contig.fna")
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-split5N.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     lst_dir = os.path.join("test", "data", "annotate")
@@ -717,7 +743,7 @@ def test_format1genome(logger):
     rep_dir = lst_dir
     gff_dir = lst_dir
     assert ffunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir,
-                                   gene_dir, rep_dir, gff_dir, logger[1])
+                                   gene_dir, rep_dir, gff_dir, my_logger()[1])
     # Check that all files were created
     assert os.path.isfile(os.path.join(lst_dir, name + ".lst"))
     assert os.path.isfile(os.path.join(lst_dir, name + ".fna"))
@@ -751,7 +777,7 @@ def test_format1genome(logger):
     os.remove(os.path.join(lst_dir, name + ".gff"))
 
 
-def test_format1genome_changeHead(logger):
+def test_format1genome_change_head():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
     which changed its name between prokka and format step.
@@ -768,7 +794,7 @@ def test_format1genome_changeHead(logger):
     rep_dir = lst_dir
     gff_dir = lst_dir
     assert ffunc.format_one_genome(gpath, name, prok_path, lst_dir,
-                                   prot_dir, gene_dir, rep_dir, gff_dir, logger[1])
+                                   prot_dir, gene_dir, rep_dir, gff_dir, my_logger()[1])
     # Check that all files were created
     assert os.path.isfile(os.path.join(lst_dir, name + ".lst"))
     assert os.path.isfile(os.path.join(lst_dir, name + ".fna"))
@@ -805,25 +831,27 @@ def test_format1genome_changeHead(logger):
     os.remove(gpath)
 
 
-def test_format1genome_problemgen(logger):
+def test_format1genome_problemgen():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) returns an error message
     and does not create any output file if there is a problem while converting the
     .ffn to .gen
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
+    logger = my_logger()
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
+    tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".tbl")
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
-    shutil.copyfile(tblInit, tblout)
-    gffInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
+                          name + ".tbl")
+    shutil.copyfile(tbl_init, tblout)
+    gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".gff")
     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
-    shutil.copyfile(gffInit, gffout)
+                          name + ".gff")
+    shutil.copyfile(gff_init, gffout)
     lst_dir = os.path.join("test", "data", "annotate")
     prot_dir = lst_dir
     gene_dir = lst_dir
@@ -849,36 +877,38 @@ def test_format1genome_problemgen(logger):
     os.remove(gffout)
 
 
-def test_format1genome_problemprt(logger):
+def test_format1genome_problemprt():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) works, with a genome
     which did not change name between prokka run and format step.
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
+    logger = my_logger()
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     # copy tbl without errors to error prokka dir
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
+    tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".tbl")
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
-    shutil.copyfile(tblInit, tblout)
+                          name + ".tbl")
+    shutil.copyfile(tbl_init, tblout)
     # copy gff without errors to error prokka dir
-    gffInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
+    gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".gff")
     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
-    shutil.copyfile(gffInit, gffout)
+                          name + ".gff")
+    shutil.copyfile(gff_init, gffout)
     # copy ffn without error to error prokka dir
-    ffnInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".ffn")
-    ffnOk = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".ffn")
-    ffnError = ffnOk + "-error"
+    ffn_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".ffn")
+    ffn_ok = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+                          name + ".ffn")
+    ffn_error = ffn_ok + "-error"
     # change name of ffn file with error to keep it for later (used for tests)
-    shutil.copyfile(ffnOk, ffnError)
+    shutil.copyfile(ffn_ok, ffn_error)
     # copy ffn without error to prokka res (erasing ffn with error)
-    shutil.copyfile(ffnInit, ffnOk)
+    shutil.copyfile(ffn_init, ffn_ok)
     lst_dir = os.path.join("test", "data", "annotate")
     prot_dir = lst_dir
     gene_dir = lst_dir
@@ -903,29 +933,31 @@ def test_format1genome_problemprt(logger):
     assert q.get().message == msg
     # remove files which were copied for this test (tblout). And rename ffn with errors
     # to its original name.
-    os.rename(ffnError, ffnOk)
+    os.rename(ffn_error, ffn_ok)
     os.remove(tblout)
     os.remove(gffout)
 
 
-def test_format1genome_problemgff(logger):
+def test_format1genome_problemgff():
     """
     Test that formatting a genome (making .prt, .gen, .fna, .lst) returns an error message
     and does not create any output file if there is a problem while converting the
     .ffn to .gen
     """
-    gpath = os.path.join("test", "data", "annotate", "genomes", "B2_A3_5.fasta-problems.fna-short-contig.fna")
+    logger = my_logger()
+    gpath = os.path.join("test", "data", "annotate", "genomes",
+                         "B2_A3_5.fasta-problems.fna-short-contig.fna")
     name = "test.0417.00002"
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
+    tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".tbl")
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
-    shutil.copyfile(tblInit, tblout)
-    gffInit = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
+                          name + ".tbl")
+    shutil.copyfile(tbl_init, tblout)
+    gff_init = os.path.join("test", "data", "annotate", "test_files", "prokka_out_gff-error.gff")
     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
-    shutil.copyfile(gffInit, gffout)
+                          name + ".gff")
+    shutil.copyfile(gff_init, gffout)
     lst_dir = os.path.join("test", "data", "annotate")
     prot_dir = lst_dir
     gene_dir = lst_dir
@@ -965,7 +997,7 @@ def test_format_all():
         shutil.copyfile(f1, f2)
     genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
                gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
-              }
+               }
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     res_path = os.path.join("test", "data", "annotate")
     results = {gname: True for gname in gnames}
@@ -989,7 +1021,7 @@ def test_format_all():
         os.remove(f)
 
 
-def test_format_all_resultFalse():
+def test_format_all_result_false():
     """
     Test that when giving a list of 2 genomes, 1 for which prokka ran without problem,
     1 for which prokka had problems (given with False in results),
@@ -1006,7 +1038,7 @@ def test_format_all_resultFalse():
         shutil.copyfile(f1, f2)
     genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
                gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
-              }
+               }
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     res_path = os.path.join("test", "data", "annotate")
     results = {gnames[0]: True, gnames[1]: False}
@@ -1037,7 +1069,7 @@ def test_format_all_resultFalse():
         os.remove(f)
 
 
-def test_format_all_notResult():
+def test_format_all_not_result():
     """
     Test that when giving a list of 2 genomes, but only 1 is in the results list (and prokka ran
     without problems for it), the correct genome is formatted, with all
@@ -1054,7 +1086,7 @@ def test_format_all_notResult():
         shutil.copyfile(f1, f2)
     genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
                gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
-              }
+               }
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     res_path = os.path.join("test", "data", "annotate")
     results = {gnames[0]: True}
@@ -1084,14 +1116,15 @@ def test_format_all_notResult():
     for f in gpaths:
         os.remove(f)
 
-    # probleme avec .fna de onames[0] qui n'est pas créé...
+        # probleme avec .fna de onames[0] qui n'est pas créé...
 
 
 def test_format_all_error():
     """
     Test that when giving a list of 2 genomes, prokka ran without problem for both.
     But a problem appears while formatting the 2nd one. So, the 2nd one is not formatted,
-    and appears in skipped_format. The first one is formated, and check that all output files are created.
+    and appears in skipped_format. The first one is formated, and check that all
+    output files are created.
     """
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     name = "test.0417.00002"
@@ -1104,19 +1137,19 @@ def test_format_all_error():
         shutil.copyfile(f1, f2)
     genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
                gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
-              }
+               }
     prok_path = os.path.join("test", "data", "annotate", "exp_files")
     res_path = os.path.join("test", "data", "annotate")
-    tblInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
+    tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".tbl")
     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".tbl")
-    shutil.copyfile(tblInit, tblout)
-    gffInit = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
+                          name + ".tbl")
+    shutil.copyfile(tbl_init, tblout)
+    gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+                            name + ".gff")
     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                           name + ".gff")
-    shutil.copyfile(gffInit, gffout)
+                          name + ".gff")
+    shutil.copyfile(gff_init, gffout)
     results = {gnames[0]: True, gnames[1]: True}
     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
     assert skipped == []
@@ -1145,5 +1178,3 @@ def test_format_all_error():
     os.remove(gffout)
     for f in gpaths:
         os.remove(f)
-
-
