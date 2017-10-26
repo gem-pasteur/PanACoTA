@@ -193,7 +193,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     if skipped:
         utils.write_warning_skipped(skipped)
     if skipped_format:
-        utils.write_warning_skipped(skipped_format, format=True)
+        utils.write_warning_skipped(skipped_format, do_format=True)
     return genomes, kept_genomes, skipped, skipped_format
 
 
