@@ -673,7 +673,7 @@ def test_run_cmd_retcode_non0_quit(caplog):
     Test that when the command fails, it returns a non-zero int, writes an error message,
     and exits the program (eof=True).
     """
-    cmd = "prodigal -u"
+    cmd = "prokka"
     error = "error trying to run prodigal"
     with pytest.raises(SystemExit):
         utils.run_cmd(cmd, error, eof=True)
@@ -691,6 +691,19 @@ def test_run_cmd_error_stderrfile():
     assert utils.run_cmd(cmd, error, stderr=outfile) == -1
     outfile.close()
     os.remove(os.path.join("test", "data", "annotate", "stderr_run_cmd.txt"))
+
+
+def test_run_cmd_error_stdoutfile():
+    """
+    Test that when we try to run a command which does not exist, and direct its output to
+    a file instead of stderr, we have the expected error written in the given error file.
+    """
+    cmd = "toto"
+    error = "error trying to run toto"
+    outfile = open(os.path.join("test", "data", "annotate", "stdout_run_cmd.txt"), "w")
+    assert utils.run_cmd(cmd, error, stdout=outfile) == -1
+    outfile.close()
+    os.remove(os.path.join("test", "data", "annotate", "stdout_run_cmd.txt"))
 
 
 def test_rename_contigs():
