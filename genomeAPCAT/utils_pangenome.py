@@ -72,7 +72,7 @@ def get_fams_info(families):
         - fams_by_strain: {fam_num: {strain: [members], strain: [members]}}
         - sorted_all_strains: list of all strains found, sorted by species
     """
-    logger.info("Calculating pan_summary, pan_quali and pan_quanti")
+    logger.info("Retrieving information from pan families")
     fams_by_strain = {}
     all_strains = []
     for num, fam in families.items():

@@ -4,8 +4,31 @@
 """
 Unit tests for the utils_pangenome submodule of genomeAPCAT
 """
+import logging
 import os
-from genomeAPCAT import utils_pangenome as upan
+
+import shutil
+
+from genomeAPCAT import utils_pangenome as upan, utils
+
+
+# Define functions and variables shared by several tests
+def my_logger():
+    """
+    logger given to function called by a subprocess
+    """
+
+    def make_logger(name="test_post_mmseq"):
+        """
+        Create logger according to name given
+        """
+        logfile_base = "log_" + name
+        level = logging.DEBUG
+        utils.init_logger(logfile_base, level, name, verbose=0, quiet=False)
+        return logfile_base
+
+    return make_logger
+
 
 # Define common variables
 
@@ -78,6 +101,7 @@ FAMILIES = {'1': ['GEN4.1111.00001.b0001_00001', 'GENO.0817.00001.b0001_00002',
 
 ALL_STRAINS = ['GEN4.1111.00001', 'GENO.0817.00001', 'GENO.1216.00002']
 
+
 def test_read_gene():
     """
     Check that when reading a given gene name, it extracts expected information
@@ -130,3 +154,93 @@ def test_read_panfile(caplog):
     assert fams == FAMILIES
     assert sas == ALL_STRAINS
     assert "Reading and getting information from pangenome file" in caplog.text
+
+
+def test_get_fams(caplog):
+    """
+    Test that when giving all members for each family, it returns all strains involved in
+    those families, and all families with members sorted by strain
+    """
+    bystrain, sortedf = upan.get_fams_info(FAMILIES)
+    assert bystrain == FAMS_BY_STRAIN
+    assert sortedf == ALL_STRAINS
+    assert "Retrieving information from pan families" in caplog.text
+
+
+def test_read_pan_filetxt(caplog):
+    """
+    Test that when giving a pangenome file, it returns all families as expected.
+    """
+    fbs, fams, ass = upan.read_pangenome(PAN_FILE)
+    assert fbs == FAMS_BY_STRAIN
+    assert fams == FAMILIES
+    assert ass == ALL_STRAINS
+    assert "Reading and getting information from pangenome file" in caplog.text
+    assert "Saving all information to a binary file for later use" in caplog.text
+    assert os.path.isfile(PAN_FILE + ".bin")
+    # os.remove(PAN_FILE + ".bin")
+
+
+def test_read_pan_filebin(caplog):
+    """
+    Test that when giving only a pangenome filename, and the corresponding bin file exists,
+    it reads the binary file, and returns expected objects.
+    """
+    panbin = os.path.join("test", "data", "pangenome", "test_files", "pangenome.bin")
+    panbinres = PAN_FILE + ".bin"
+    shutil.copyfile(panbin, panbinres)
+    fbs, fams, ass = upan.read_pangenome(PAN_FILE)
+    assert fbs == FAMS_BY_STRAIN
+    assert fams == FAMILIES
+    assert ass == ALL_STRAINS
+    assert "Retrieving info from binary file" in caplog.text
+    os.remove(panbinres)
+
+
+def test_read_pan_fams(caplog):
+    """
+    Test that when giving a pangenome file, and families, it directly extracts strain information
+    from the families: pangenome file does not need to exist, and a binary file is created
+    """
+    logger = my_logger()
+    name = "test_read_panfams"
+    logger(name)
+    panfile = "test_readpanbin.txt"
+    fbs, fams, ass = upan.read_pangenome(panfile, FAMILIES)
+    assert fbs == FAMS_BY_STRAIN
+    assert fams == FAMILIES
+    assert ass == ALL_STRAINS
+    assert "Retrieving information from pan families" in caplog.text
+    assert "Saving all information to a binary file for later use" in caplog.text
+    assert os.path.isfile(panfile + ".bin")
+    os.remove(panfile + ".bin")
+    os.remove("log_" + name + ".log")
+    os.remove("log_" + name + ".log.details")
+    os.remove("log_" + name + ".log.err")
+
+
+def test_read_pan_fams_binok(caplog):
+    """
+    Test that when giving a pangenome file, and families, it directly extracts strain information
+    from the families: pangenome file does not need to exist. However, the pangenome.bin file
+    already exists (whatever its content), and is then not recreated.
+    """
+    logger = my_logger()
+    name = "test_read_panfams_bin"
+    logger(name)
+    panfile = "test_readpanbinok.txt"
+    # Create bn pangenome file (which is empty
+    open(panfile + ".bin", "w").close()
+    fbs, fams, ass = upan.read_pangenome(panfile, FAMILIES)
+    assert fbs == FAMS_BY_STRAIN
+    assert fams == FAMILIES
+    assert ass == ALL_STRAINS
+    with open(panfile + ".bin", "r") as panf:
+        all_lines = panf.readlines()
+    assert all_lines == []
+    assert "Retrieving information from pan families" in caplog.text
+    assert os.path.isfile(panfile + ".bin")
+    os.remove(panfile + ".bin")
+    os.remove("log_" + name + ".log")
+    os.remove("log_" + name + ".log.details")
+    os.remove("log_" + name + ".log.err")
