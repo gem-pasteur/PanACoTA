@@ -5,80 +5,90 @@
 annotate is a subcommand of genomeAPCAT
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
+
 - optional: find stretches of at least 'n' N (default 5), and cut into a new contig at this stretch
 - for each genome, calc L90 and number of contigs (after cut at N stretches if used)
 - keep only genomes with:
+
     - L90 <= x (default = 100)
     - #contig <= y (default = 999)
 - rename those genomes and their contigs, with strain name increasing with quality (L90 and
- #contig)
+  #contig)
 - annotate kept genomes with prokka
 - gembase format
 
 Input:
+
 - **list_file:** list of genome filenames to annotate. This file contains 1 line per genome. It
-contains the name(s) of the (multi-)fasta file(s) corresponding to the genome (separated
-by space if several fasta files for the genome). After quality control, selected genomes
-will be named as following: `<gen-spe>.<date>.<strain>`, with:
-    * `<gen_spe>` 4 alphanumeric characters. Usually it corresponds to the 2 first letters
-    of genus, and 2 first letters of species, like ESCO for Escherichia coli.
-    * `<date>` date at which the genome was downloaded, formatted as MMYY (M=Month, Y=Year)
-    * `<strain>` is the strain number of the genome in the species, ordered by quality.
-Default values for `<gen_spe>` and `date` are given as input (see after). However, if some
+  contains the name(s) of the (multi-)fasta file(s) corresponding to the genome (separated
+  by space if several fasta files for the genome). After quality control, selected genomes
+  will be named as following: ``<gen-spe>.<date>.<strain>``, with:
+
+    * ``<gen_spe>`` 4 alphanumeric characters. Usually it corresponds to the 2 first letters
+      of genus, and 2 first letters of species, like ESCO for Escherichia coli.
+    * ``<date>`` date at which the genome was downloaded, formatted as MMYY (M=Month, Y=Year)
+    * ``<strain>`` is the strain number of the genome in the species, ordered by quality.
+
+Default values for ``<gen_spe>`` and ``<date>`` are given as input (see after). However, if some
 genomes do not have the same date and/or genus/species as the others, you can add
 this information for those genomes in the list file. fasta filenames and information are
-separated by `::`. `<gen_spe>` is given after the `::`, and `<date>` is preceded by a `.`. Here
-is an example:
-```
-genome1.fasta
-genome2_ch1.fna genome2_pl.fst
-genome3.fst genome3_plasmid.fst :: name
-genome4.fna genome4.p1.fna genome4.p2.fna :: name.
-genome5.fasta :: name.date
-genome6.chromo.fst genome6.pl.fst  :: .date
-```
+separated by ``::``. ``<gen_spe>`` is given after the ``::``, and ``<date>`` is preceded by a ``.``. Here
+is an example::
+
+    genome1.fasta
+    genome2_ch1.fna genome2_pl.fst
+    genome3.fst genome3_plasmid.fst :: name
+    genome4.fna genome4.p1.fna genome4.p2.fna :: name.
+    genome5.fasta :: name.date
+    genome6.chromo.fst genome6.pl.fst  :: .date
+
 - **species:** with 4 alphanumeric characters, used to rename genomes (except those whose
-species name is specified in the list file)
+  species name is specified in the list file)
 - **date:** optional. By default, takes the current date. Used to rename genomes (except those
-whose date is specified in the list file)
+  whose date is specified in the list file)
 - **dbpath:** path to folder containing all multi-fasta sequences of genomes
 - **respath:** path to folder where outputs must be saved (folders Genes, Replicons, Proteins,
-LSTINFO and LSTINFO_dataset.lst file)
+  LSTINFO, gff3 and LSTINFO_dataset.lst file)
 - **tmppath** optional. Path where tmp files must be saved. Default is respath/tmp_files
 - **prokpath** optional. Path where prokka output folders for all genomes must be saved.
-Default is respath/tmp_files
+  Default is respath/tmp_files
 - **threads:** number of threads that can be used (default 1)
 
 Output:
-- In your given respath, you will find 4 folders:
+
+- In your given ``respath``, you will find 5 folders:
+
     * LSTINFO (information on each genome, with gene annotations),
     * Genes (nuc. gene sequences),
     * Proteins (aa proteins sequences),
     * Replicons (input sequences but with formatted headers).
-- In your given tmppath folder, folders with prokka results will be created for each input
-genome (1 folder per genome, called <genome_name>-prokkaRes). If errors are generated during
-prokka step, you can look at the log file to see what was wrong (<genome_name>-prokka.log).
-- In your given respath, a file called `annote-genomes-<list_file>.log` will be generated.
-You can find there all logs.
-- In your given respath, a file called `annote-genomes-<list_file>.log.err` will be generated,
-containing information on errors and warnings that occurred: problems during annotation (hence
-no formatting step ran), and problems during formatting step. If this file is empty, then
-annotation and formatting steps finished without any problem for all genomes.
-- In your given respath, you will find a file called `LSTINFO-<list_file>.lst` with information
-on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
-- In your given respath, you will find a file called `discarded-<list_file>.lst` with
-information on genomes that were discarded (and hence not annotated) because of the
- L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
-- In your given respath, you will find 2 png files: `QC_L90-<list_file>.png` and
-`QC_nb-contigs-<list_file>.png`, containing the histograms of L90 and nb_contigs values for
-all genomes, with a vertical red line representing the limit applied here.
+    * gff3 (information on genes as gff3 format)
+
+- In your given ``tmppath`` folder, folders with prokka results will be created for each input
+  genome (1 folder per genome, called ``<genome_name>-prokkaRes``). If errors are generated during
+  prokka step, you can look at the log file to see what was wrong (``<genome_name>-prokka.log``).
+- In your given ``respath``, a file called ``annote-genomes-<list_file>.log`` will be generated.
+  You can find there all logs.
+- In your given ``respath``, a file called ``annote-genomes-<list_file>.log.err`` will be generated,
+  containing information on errors and warnings that occurred: problems during annotation (hence
+  no formatting step ran), and problems during formatting step. If this file is empty, then
+  annotation and formatting steps finished without any problem for all genomes.
+- In your given ``respath``, you will find a file called ``LSTINFO-<list_file>.lst`` with information
+  on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
+- In your given ``respath``, you will find a file called ``discarded-<list_file>.lst`` with
+  information on genomes that were discarded (and hence not annotated) because of the
+  L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
+- In your given ``respath``, you will find 2 png files: ``QC_L90-<list_file>.png`` and
+  ``QC_nb-contigs-<list_file>.png``, containing the histograms of L90 and nb_contigs values for
+  all genomes, with a vertical red line representing the limit applied here.
 
 Requested:
-- in prokka results, all genes are called <whatever>_<number> -> the number will be kept.
+
+- in prokka results, all genes are called ``<whatever>_<number>`` -> the number will be kept.
 - The number of the genes annotated by prokka are in increasing order in tbl, faa and ffn files
 - genome names given to prokka should not end with '_<number>'. Ideally, they should always have
-the same format: <spegenus>.<date>.<strain_number> but they can have another format, as long as
-they don't end by '_<number>', which is the format of a gene name.
+  the same format: ``<spegenus>.<date>.<strain_number>`` but they can have another format, as long as
+  they don't end by '_<number>', which is the format of a gene name.
 
 @author gem
 April 2017
@@ -91,6 +101,12 @@ import sys
 def main_from_parse(arguments):
     """
     Call main function from the arguments given by parser
+
+    Parameters
+    ----------
+    arguments : argparse.Namespace
+        result of argparse parsing of all arguments in command line
+
     """
     main(arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
@@ -103,6 +119,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          verbose=0, quiet=False):
     """
     Main method, doing all steps:
+
     - analyze genomes (nb contigs, L90, stretches of N...)
     - keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     - rename genomes with strain number in decreasing quality
@@ -110,9 +127,64 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     - format annotated genomes
 
     verbosity:
+
     - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
     - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
     - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+
+    Parameters
+    ----------
+    list_file : str
+        file containing the list of genome files, 1 genome per line, separated by a
+        space if a genome is split in several fasta files. This file can also
+        specify date and/or species information, according to the format described
+        in documentation.
+    db_path : str
+        Path to the folder containing all the fasta files which will be annotated
+    res_dir : str
+        Path to the folder which will contain result folders and files
+    name : str
+        4 alpha numeric characters, describing the species (for example ESCO). Used by default
+        if no species name is given in list_file line.
+    date : str
+        4 alpha numeric characters, defining the default date, for strains where it is not specified
+        in the list_file
+    l90 : int
+        Max L90 allowed to keep a genome
+    nbcont : int
+        Max number of contigs allowed to keep a genome
+    cutn : int
+        cut at each stretch of this number of 'N'. Don't cut if equal to 0
+    threads : int
+        max number of threads to use
+    force : bool
+        If True, overwrite previous results, if False keep what is already calculated
+    qc_only : bool
+        If True, do only quality control, if False, also do annotation
+    tmp_dir : str or None
+        Path to folder where tmp files must be saved. None to use the default tmp folder
+    prok_dir : str or None
+        Path to folder where are the prokka result folders for the genomes. None
+        to use the default prokka folder
+    verbose : int
+        verbosity:
+
+        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
+        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+        - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+    quiet : bool
+        True if nothing must be sent to stdout/stderr, False otherwise
+
+    Returns
+    -------
+    (genomes, kept_genomes, skipped, skipped_format) : tuple
+        with:
+
+        - genomes: dict with all genomes in list_file:
+          {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
+        - kept_genomes: dict with all genomes kept for annotation (same format as genomes)
+        - skipped: list of genomes skipped because they had a problem in prokka step
+        - skipped_format : list of genomes skipped because they had a problem in format step
     """
     # import needed packages
     import shutil
@@ -125,7 +197,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
-            logger.error("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
+            print("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
             sys.exit(1)
 
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
@@ -200,9 +272,16 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 def build_parser(parser):
     """
     Method to create a parser for command-line options
+
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        The parser to configure
+
     """
     import argparse
     from genomeAPCAT import utils
+
     def gen_name(param):
         if not utils.check_format(param):
             msg = ("The genome name must contain 4 characters. For example, this name can "
@@ -228,84 +307,84 @@ def build_parser(parser):
         except Exception:
             msg = "argument --nbcont: invalid int value: {}".format(param)
             raise argparse.ArgumentTypeError(msg)
-        if param < 0 :
-            msg = ("The maximum number of contigs allowed must be a positive number.")
+        if param < 0:
+            msg = "The maximum number of contigs allowed must be a positive number."
             raise argparse.ArgumentTypeError(msg)
         if param >= 10000:
-            msg = ("We do not support genomes with more than 9999 contigs.")
+            msg = "We do not support genomes with more than 9999 contigs."
             raise argparse.ArgumentTypeError(msg)
         return param
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
     required.add_argument(dest="list_file",
-                        help=("File containing the list of genome filenames to annotate (1 genome"
-                              " per line). Each genome is in multi-fasta format. You can "
-                              "specify the species name (4 characters) you want to give to each "
-                              "genome by adding it after the genome filename(s), separated "
-                              "by '::'. If not given, the species name will be the one given in "
-                              "'species' argument. You can also specify the date (4 digits) "
-                              "by adding '.' + your date choice after the genome "
-                              "filename(s), '::' and, if given, the species name."))
+                          help=("File containing the list of genome filenames to annotate (1 genome"
+                                " per line). Each genome is in multi-fasta format. You can "
+                                "specify the species name (4 characters) you want to give to each "
+                                "genome by adding it after the genome filename(s), separated "
+                                "by '::'. If not given, the species name will be the one given in "
+                                "'species' argument. You can also specify the date (4 digits) "
+                                "by adding '.' + your date choice after the genome "
+                                "filename(s), '::' and, if given, the species name."))
     required.add_argument("-d", dest="db_path", required=True,
-                        help=("Path to folder containing all multifasta genome files"))
+                          help="Path to folder containing all multifasta genome files")
     required.add_argument("-r", dest="res_path", required=True,
-                        help=("Path to folder where output annotated genomes must be saved"))
+                          help="Path to folder where output annotated genomes must be saved")
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-n", dest="name", type=gen_name,
-                        help=("Choose a name for your annotated genomes. This name should contain "
-                              "4 alphanumeric characters. Generally, they correspond to the 2 "
-                              "first letters of genus, and 2 first letters of species, e.g. "
-                              "ESCO for Escherichia Coli."))
+                          help=("Choose a name for your annotated genomes. This name should contain "
+                                "4 alphanumeric characters. Generally, they correspond to the 2 "
+                                "first letters of genus, and 2 first letters of species, e.g. "
+                                "ESCO for Escherichia Coli."))
     optional.add_argument("-Q", dest="qc_only", action="store_true", default=False,
-                        help=("Add this option if you want only to do quality control on your "
-                              "genomes (cut at 5N if asked, calculate L90 and number of contigs "
-                              "and plot their distributions). This allows you to check which "
-                              "genomes would be annotated with the given parameters, and to "
-                              "modify those parameters if you want, before you launch the "
-                              "annotation and formatting steps."))
+                          help="Add this option if you want only to do quality control on your "
+                               "genomes (cut at 5N if asked, calculate L90 and number of contigs "
+                               "and plot their distributions). This allows you to check which "
+                               "genomes would be annotated with the given parameters, and to "
+                               "modify those parameters if you want, before you launch the "
+                               "annotation and formatting steps.")
     optional.add_argument("--l90", dest="l90", type=int, default=100,
-                        help=("Maximum value of L90 allowed to keep a genome. Default is 100."))
+                          help="Maximum value of L90 allowed to keep a genome. Default is 100.")
     optional.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
-                        help=("Maximum number of contigs allowed to keep a genome. "
-                              "Default is 999."))
+                          help=("Maximum number of contigs allowed to keep a genome. "
+                                "Default is 999."))
     optional.add_argument("--cutN", dest="cutn", type=int, default=5,
-                        help=("By default, each genome will be cut into new contigs at each "
-                              "stretch of at least 5 'N' in its sequence. If you don't want to "
-                              "cut genomes into new contigs when there are stretches of 'N', "
-                              "put 0 to this option. If you want to cut from a different number "
-                              "of 'N' stretches, put this value to this option."))
+                          help=("By default, each genome will be cut into new contigs at each "
+                                "stretch of at least 5 'N' in its sequence. If you don't want to "
+                                "cut genomes into new contigs when there are stretches of 'N', "
+                                "put 0 to this option. If you want to cut from a different number "
+                                "of 'N' stretches, put this value to this option."))
     optional.add_argument("--date", dest="date", default=get_date(), type=date_name,
-                        help=("Specify the date (MMYY) to give to your annotated genomes. "
-                              "By default, will give today's date. The only requirement on the"
-                              " given date is that it is 4 characters long. You can use letters"
-                              " if you want. But the common way is to use 4 digits, "
-                              "corresponding to MMYY."))
+                          help=("Specify the date (MMYY) to give to your annotated genomes. "
+                                "By default, will give today's date. The only requirement on the"
+                                " given date is that it is 4 characters long. You can use letters"
+                                " if you want. But the common way is to use 4 digits, "
+                                "corresponding to MMYY."))
     optional.add_argument("--tmp", dest="tmpdir",
-                        help=("Specify where the temporary files (sequence split by stretches "
-                              "of 'N', sequence with new contig names etc.) must be saved. "
-                              "By default, it will be saved in your result_directory/tmp_files."))
+                          help=("Specify where the temporary files (sequence split by stretches "
+                                "of 'N', sequence with new contig names etc.) must be saved. "
+                                "By default, it will be saved in your result_directory/tmp_files."))
     optional.add_argument("--prok", dest="prokkadir",
-                        help=("Specify in which directory the prokka output files "
-                              "(1 folder per genome, called <genome_name>-prokkaRes) must be "
-                              "saved. By default, they are saved in the same directory as "
-                              "your temporary files (see --tmp option to change it)."))
+                          help=("Specify in which directory the prokka output files "
+                                "(1 folder per genome, called <genome_name>-prokkaRes) must be "
+                                "saved. By default, they are saved in the same directory as "
+                                "your temporary files (see --tmp option to change it)."))
     optional.add_argument("-F", "--force", dest="force", action="store_true",
-                        help=("Force run: Add this option if you want to run prokka and "
-                              "formatting steps for all genomes "
-                              "even if their result folder (for prokka step) or files (for "
-                              "format step) already exist: override "
-                              "existing results.\n"
-                              "Without this option, if there already are results in the given "
-                              "result folder, the program stops. If there are no results, but "
-                              "prokka folder already exists, prokka won't run again, and the "
-                              "formating step will use the already existing folder if correct, "
-                              "or skip the genome if there are problems in prokka folder."))
+                          help=("Force run: Add this option if you want to run prokka and "
+                                "formatting steps for all genomes "
+                                "even if their result folder (for prokka step) or files (for "
+                                "format step) already exist: override "
+                                "existing results.\n"
+                                "Without this option, if there already are results in the given "
+                                "result folder, the program stops. If there are no results, but "
+                                "prokka folder already exists, prokka won't run again, and the "
+                                "formating step will use the already existing folder if correct, "
+                                "or skip the genome if there are problems in prokka folder."))
     optional.add_argument("--threads", dest="threads", type=int, default=1,
-                        help=("Specify how many threads can be used (default=1)"))
+                          help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
-                        help=("Increase verbosity in stdout/stderr."))
+                        help="Increase verbosity in stdout/stderr.")
     helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
                         help=("Do not display anything to stdout/stderr. log files will "
                               "still be created."))
@@ -315,7 +394,19 @@ def build_parser(parser):
 
 def parse(parser, argu):
     """
-    Parse arguments given to parser
+    arse arguments given to parser
+
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        the parser used
+    argu : str
+        command-line given by user, to parse using parser
+
+    Returns
+    -------
+    argparse.Namespace
+        Parsed arguments
     """
     args = parser.parse_args(argu)
     return check_args(parser, args)
@@ -324,14 +415,28 @@ def parse(parser, argu):
 def check_args(parser, args):
     """
     Check that arguments given to parser are as expected.
+
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        The parser used to parse command-line
+    args : argparse.Namespace
+        Parsed arguments
+
+    Returns
+    -------
+    argparse.Namespace or None
+        The arguments parsed, updated according to some rules. Exit program
+        with error message if error occurs with arguments given.
+
     """
     if not args.qc_only and not args.name:
-      parser.error("You must specify your genomes dataset name in 4 characters with "
-                   "'-n name' option (type -h for more information). Or, if you do not want "
-                   "to annotate and format your genomes but just to run quality control, use "
-                   "option '-Q")
+        parser.error("You must specify your genomes dataset name in 4 characters with "
+                     "'-n name' option (type -h for more information). Or, if you do not want "
+                     "to annotate and format your genomes but just to run quality control, use "
+                     "option '-Q")
     if args.qc_only and not args.name:
-      args.name = "NONE"
+        args.name = "NONE"
     if args.verbose and args.quiet:
         parser.error("Choose between a verbose output (-v) or quiet output (-q)."
                      " You cannot have both...")
@@ -340,7 +445,8 @@ def check_args(parser, args):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description=("Annotate all genomes"), add_help=False)
-    build_parser(parser)
-    OPTIONS = parse(parser, sys.argv[1:])
+
+    my_parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
+    build_parser(my_parser)
+    OPTIONS = parse(my_parser, sys.argv[1:])
     main_from_parse(OPTIONS)
