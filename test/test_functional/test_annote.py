@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for annote_pipeline.py
+Functional tests for genomeAPCAT annotate
 """
 
 import pytest
@@ -20,22 +20,23 @@ import genomeAPCAT.utils as utils
 from genomeAPCAT.subcommands import qc_and_annote as annot
 
 
-def logger():
-    """
-    Initializing a logger
-    """
-    print("--- Init logger ---")
-    logfile_base = "test_main_from_parse"
-    utils.init_logger(logfile_base, 0, '', verbose=1)
-    yield logging.getLogger()
-    print("--- Clean logs ---")
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
+LOGFILE_BASE = "test_main_from_parse"
 
 
-# Initialize logger
-logger()
+def setup_module():
+    """
+    create logger at start of this test module
+    """
+    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
+
+
+def teardown_module(module):
+    """
+    Remove log files at the end of this test module
+    """
+    os.remove(LOGFILE_BASE + ".log")
+    os.remove(LOGFILE_BASE + ".log.details")
+    os.remove(LOGFILE_BASE + ".log.err")
 
 
 def test_main_from_parse():
