@@ -114,24 +114,24 @@ def test_main_given_tmp():
     assert skip == []
     assert skipf == []
     expk = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-                 20031, 5, 1]
+            ["ESCO.1015.00001",
+             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
+             20031, 5, 1]
             }
     assert kept == expk
     expg = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-                 20031, 5, 1],
+            ["ESCO.1015.00001",
+             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
+             20031, 5, 1],
             'H299_H561.fasta-all.fna':
-                ['ESCO.1015',
-                 'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
-                 13259, 7, 3],
+            ['ESCO.1015',
+             'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
+             13259, 7, 3],
             'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.1116',
-                 'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
-                 '.fna',
-                 120529, 5, 4]
+            ['ESCO.1116',
+             'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
+             '.fna',
+             120529, 5, 4]
             }
     assert allg == expg
     # Check that tmp files exist in the right folder
@@ -160,27 +160,27 @@ def test_main_given_prokka():
     assert skip == []
     assert skipf == []
     expk = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
-                 '-contig.fna',
-                 20031, 5, 1]
+            ["ESCO.1015.00001",
+             'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
+             '-contig.fna',
+             20031, 5, 1]
             }
     assert kept == expk
     expg = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
-                 '-contig.fna',
-                 20031, 5, 1],
+            ["ESCO.1015.00001",
+             'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
+             '-contig.fna',
+             20031, 5, 1],
             'H299_H561.fasta-all.fna':
-                ['ESCO.1015',
-                 ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
-                  'H299_H561.fasta-all.fna-short-contig.fna'),
-                 13259, 7, 3],
+            ['ESCO.1015',
+             ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
+              'H299_H561.fasta-all.fna-short-contig.fna'),
+             13259, 7, 3],
             'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.1116',
-                 ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
-                  'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4]
+            ['ESCO.1116',
+             ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
+              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4]
             }
     assert allg == expg
     # Check that tmp files exist in the right folder (result/tmp_files)
@@ -211,24 +211,24 @@ def test_main_given_tmp_and_prokka():
     assert skip == []
     assert skipf == []
     expk = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-                 20031, 5, 1]
+            ["ESCO.1015.00001",
+             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
+             20031, 5, 1]
             }
     assert kept == expk
     expg = {"A_H738.fasta-all.fna":
-                ["ESCO.1015.00001",
-                 'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-                 20031, 5, 1],
+            ["ESCO.1015.00001",
+             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
+             20031, 5, 1],
             'H299_H561.fasta-all.fna':
-                ['ESCO.1015',
-                 'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
-                 13259, 7, 3],
+            ['ESCO.1015',
+             'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
+             13259, 7, 3],
             'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.1116',
-                 'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
-                 '.fna',
-                 120529, 5, 4]
+            ['ESCO.1116',
+             'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
+             '.fna',
+             120529, 5, 4]
             }
     assert allg == expg
     # Check that tmp files exist in the right folder (result/tmp_files)
@@ -264,17 +264,17 @@ def test_main_all_discard_nbcont():
     assert skipf == []
     assert kept == {}
     expg = {'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                               'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
+                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4],
             'H299_H561.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                               'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
+                           'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3],
             'genome1.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                               'genome1.fasta-short-contig.fna'),
-                 51, 4, 2]
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
+                           'genome1.fasta-short-contig.fna'),
+             51, 4, 2]
             }
     assert allg == expg
     shutil.rmtree(resdir, ignore_errors=True)
@@ -303,17 +303,17 @@ def test_main_all_discard_l90():
     assert skipf == []
     assert kept == {}
     expg = {'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                               'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
+                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4],
             'H299_H561.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                               'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
+                           'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3],
             'genome1.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                               'genome1.fasta-short-contig.fna'),
-                 51, 4, 2]
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
+                           'genome1.fasta-short-contig.fna'),
+             51, 4, 2]
             }
     assert allg == expg
     shutil.rmtree(resdir, ignore_errors=True)
@@ -341,17 +341,17 @@ def test_main_qc():
                             cutn, threads, force, qc_only)
     assert kept == {}
     expg = {'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                               'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
+                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4],
             'H299_H561.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                               'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
+                           'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3],
             'genome1.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                               'genome1.fasta-short-contig.fna'),
-                 51, 4, 2]
+            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
+                           'genome1.fasta-short-contig.fna'),
+             51, 4, 2]
             }
     assert allg == expg
     shutil.rmtree(resdir, ignore_errors=True)
@@ -381,13 +381,13 @@ def test_main_wrong_seq_names():
     assert skipf == []
     assert kept == {}
     expg = {'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                               'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4],
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
+                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4],
             'H299_H561.fasta':
-                ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                               'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3]
+            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
+                           'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3]
             }
     assert allg == expg
     shutil.rmtree(resdir, ignore_errors=True)
@@ -410,15 +410,15 @@ def test_main_onexistingprokkadir():
     assert skip == []
     assert skipf == []
     expg = {'H299_H561.fasta':
-                ['ESCO.1015.00001',
-                 ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
-                  'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3],
+            ['ESCO.1015.00001',
+             ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
+              'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3],
             'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.1116.00002',
-                 ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
-                  'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4]
+            ['ESCO.1116.00002',
+             ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
+              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4]
             }
     assert allg == expg
     assert kept == expg
@@ -459,14 +459,14 @@ def test_main_onexistingprokkadirerrorprokk(capsys):
     assert skip == ['B2_A3_5.fasta-problems.fna']
     assert skipf == []
     expg = {'H299_H561.fasta':
-                ['ESCO.1015.00001',
-                 'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
-                 13143, 3, 3],
+            ['ESCO.1015.00001',
+             'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
+             13143, 3, 3],
             'B2_A3_5.fasta-problems.fna':
-                ['ESCO.1116.00002',
-                 'test/data/annotate/res_test_ProkErr/tmp_files/B2_A3_5.fasta-problems.fna-short'
-                 '-contig.fna',
-                 120529, 5, 4]
+            ['ESCO.1116.00002',
+             'test/data/annotate/res_test_ProkErr/tmp_files/B2_A3_5.fasta-problems.fna-short'
+             '-contig.fna',
+             120529, 5, 4]
             }
     assert allg == expg
     assert kept == expg
@@ -526,14 +526,14 @@ def test_main_onexistingprokkadirerrorform(capsys):
     assert skip == []
     assert skipf == ['B2_A3_5.fasta-problems.fna']
     expg = {'H299_H561.fasta':
-                ['ESCO.1015.00001',
-                 'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
-                 13143, 3, 3],
+            ['ESCO.1015.00001',
+             'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
+             13143, 3, 3],
             'B2_A3_5.fasta-problems.fna':
-                ['ESCO.1116.00002',
-                 ('test/data/annotate/res_test_ProkErr/tmp_files/'
-                  'B2_A3_5.fasta-problems.fna-short-contig.fna'),
-                 120529, 5, 4]
+            ['ESCO.1116.00002',
+             ('test/data/annotate/res_test_ProkErr/tmp_files/'
+              'B2_A3_5.fasta-problems.fna-short-contig.fna'),
+             120529, 5, 4]
             }
     assert allg == expg
     assert kept == expg
@@ -604,20 +604,20 @@ def test_main_onexistresdirforce():
     # 2 solutions as genome2 and H299 have the same L90 and nbcontig: randomly choose the
     # order between the 2.
     expg = {'H299_H561.fasta':
-                ['ESCO.0417.00002',
-                 ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-                  'H299_H561.fasta-short-contig.fna'),
-                 13143, 3, 3],
+            ['ESCO.0417.00002',
+             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
+              'H299_H561.fasta-short-contig.fna'),
+             13143, 3, 3],
             'B2_A3_5.fasta-changeName.fna':
-                ['ESCO.0417.00003',
-                 ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-                  'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-                 120529, 5, 4],
+            ['ESCO.0417.00003',
+             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
+              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
+             120529, 5, 4],
             'genome1.fasta':
-                ['ESCO.0417.00001',
-                 ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-                  'genome1.fasta-short-contig.fna'),
-                 51, 4, 2]
+            ['ESCO.0417.00001',
+             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
+              'genome1.fasta-short-contig.fna'),
+             51, 4, 2]
             }
 
     assert allg == expg
@@ -687,7 +687,7 @@ def test_annote_all():
 
     # Check all output files exist
     for f in (log_files + lstfile + discfile + qc_files + split5n_files +
-                  proklogfiles + lstinffiles + prtfiles + genfiles + repfiles):
+              proklogfiles + lstinffiles + prtfiles + genfiles + repfiles):
         assert os.path.isfile(f)
     for f in prokka_files:
         assert os.path.isfile(f + ".tbl")
