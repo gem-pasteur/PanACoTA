@@ -45,9 +45,9 @@ def test_main(caplog):
     threads = 1
 
     pan.main(lstinfo, name, DBPATH, min_id, outdir, clust_mode, spe_dir, threads)
-    prtbank = os.path.join(DBPATH, "testPAN4.1ll.prt")
+    prtbank = os.path.join(DBPATH, "testPAN4.All.prt")
     assert os.path.isfile(prtbank)
     os.remove(prtbank)
     assert os.path.isdir(outdir)
-    check outdir content (presence of mmseq db, mmseq clust, tmp folder,
-    families found in pangenome.)
+    #check outdir content (presence of mmseq db, mmseq clust, tmp folder,
+    #families found in pangenome.)
