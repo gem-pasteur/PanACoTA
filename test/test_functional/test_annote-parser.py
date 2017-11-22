@@ -36,7 +36,7 @@ def test_parser_noname(capsys):
     parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse(parser, "list_file -d dbpath -r respath".split())
+        annot.parse(parser, "listfile -d dbpath -r respath".split())
     _, err = capsys.readouterr()
     assert ("You must specify your genomes dataset name in 4 characters with "
             "'-n name' option (type -h for more information). Or, if you do not want "

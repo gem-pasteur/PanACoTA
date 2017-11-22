@@ -400,7 +400,7 @@ def parse(parser, argu):
     ----------
     parser : argparse.ArgumentParser
         the parser used
-    argu : str
+    argu : [str]
         command-line given by user, to parse using parser
 
     Returns

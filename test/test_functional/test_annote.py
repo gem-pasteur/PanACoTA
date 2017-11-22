@@ -5,19 +5,17 @@
 Functional tests for genomeAPCAT annotate
 """
 
+from genomeAPCAT.subcommands import qc_and_annote as annot
+import genomeAPCAT.utils as utils
+
 import pytest
 import os
 import subprocess
 import shutil
 import time
-import logging
 import argparse
 import matplotlib
-
 matplotlib.use('AGG')
-
-import genomeAPCAT.utils as utils
-from genomeAPCAT.subcommands import qc_and_annote as annot
 
 
 LOGFILE_BASE = "test_main_from_parse"
@@ -30,7 +28,7 @@ def setup_module():
     utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
 
 
-def teardown_module(module):
+def teardown_module():
     """
     Remove log files at the end of this test module
     """
