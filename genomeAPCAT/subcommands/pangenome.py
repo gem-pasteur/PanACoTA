@@ -202,7 +202,7 @@ def parse(parser, argu):
     ----------
     parser : argparse.ArgumentParser
         Parser to use to parse command-line arguments
-    argu : str
+    argu : [str]
         command-line given
 
     Returns

@@ -311,6 +311,62 @@ def test_main_outfile(caplog):
     shutil.rmtree(outdir)
 
 
+def test_main_from_parse():
+    """
+    Test main when we give the output of the parser
+    """
+    import argparse
+    lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
+    name = "testFromParsePAN4"
+    min_id = 0.8
+    outdir = "test_all_main-from-parse_pangenome_dir"
+    args = argparse.Namespace()
+    args.lstinfo_file = lstinfo
+    args.dataset_name = name
+    args.dbpath = DBPATH
+    args.min_id = min_id
+    args.outdir = outdir
+    args.clust_mode = 1
+    args.spedir = None
+    args.threads = 1
+    args.outfile = None
+    args.verbose = 0
+    args.quiet = False
+    pan.main_from_parse(args)
+
+    prtbank = os.path.join(DBPATH, name + ".All.prt")
+    assert os.path.isfile(prtbank)
+    os.remove(prtbank)
+    assert os.path.isdir(outdir)
+    # Check presence of tmp folder
+    tmp_base = os.path.join(outdir, "tmp_testFromParsePAN4.All.prt_0.8-mode1_*")
+    assert len(glob.glob(tmp_base)) == 1
+    # Check presence of pangenome files (pangenome, matrices, summary)
+    cluster = os.path.join(outdir, name + ".All.prt-clust-0.8-mode1_*")
+    clust_files = glob.glob(cluster)
+    assert len(clust_files) == 3
+    clust_base = [cl for cl in clust_files if not cl.endswith(".index")
+                  and not cl.endswith(".tsv")][0]
+    pan_base = os.path.join(outdir, "PanGenome-{}.tsv.lst".format(os.path.basename(clust_base)))
+    assert os.path.isfile(pan_base)
+    assert os.path.isfile(pan_base + ".quali.txt")
+    assert os.path.isfile(pan_base + ".quanti.txt")
+    assert os.path.isfile(pan_base + ".summary.txt")
+    # Check content of pangenome
+    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
+    with open(exp_pan, "r") as ep, open(pan_base, "r") as panf:
+        lines_exp = []
+        lines_out = []
+        for line_exp in ep:
+            lines_exp.append(" ".join(line_exp.split()[1:]))
+        for line_out in panf:
+            lines_out.append(" ".join(line_out.split()[1:]))
+    assert len(lines_exp) == len(lines_out)
+    assert set(lines_exp) == set(lines_out)
+    # Remove output directory
+    shutil.rmtree(outdir)
+
+
 def test_pangenome_all():
     """
     Test when calling pangenome from command line, it runs and gives expected output files
