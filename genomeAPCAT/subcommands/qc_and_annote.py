@@ -32,8 +32,8 @@ Input:
 Default values for ``<gen_spe>`` and ``<date>`` are given as input (see after). However, if some
 genomes do not have the same date and/or genus/species as the others, you can add
 this information for those genomes in the list file. fasta filenames and information are
-separated by ``::``. ``<gen_spe>`` is given after the ``::``, and ``<date>`` is preceded by a ``.``. Here
-is an example::
+separated by ``::``. ``<gen_spe>`` is given after the ``::``, and ``<date>`` is preceded by a
+``.``. Here is an example::
 
     genome1.fasta
     genome2_ch1.fna genome2_pl.fst
@@ -73,8 +73,8 @@ Output:
   containing information on errors and warnings that occurred: problems during annotation (hence
   no formatting step ran), and problems during formatting step. If this file is empty, then
   annotation and formatting steps finished without any problem for all genomes.
-- In your given ``respath``, you will find a file called ``LSTINFO-<list_file>.lst`` with information
-  on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
+- In your given ``respath``, you will find a file called ``LSTINFO-<list_file>.lst`` with
+ information on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
 - In your given ``respath``, you will find a file called ``discarded-<list_file>.lst`` with
   information on genomes that were discarded (and hence not annotated) because of the
   L90 and/or nb_contig threshold: original_name, genome_size, L90, nb_contigs
@@ -87,8 +87,8 @@ Requested:
 - in prokka results, all genes are called ``<whatever>_<number>`` -> the number will be kept.
 - The number of the genes annotated by prokka are in increasing order in tbl, faa and ffn files
 - genome names given to prokka should not end with '_<number>'. Ideally, they should always have
-  the same format: ``<spegenus>.<date>.<strain_number>`` but they can have another format, as long as
-  they don't end by '_<number>', which is the format of a gene name.
+  the same format: ``<spegenus>.<date>.<strain_number>`` but they can have another format, as long
+  as they don't end by '_<number>', which is the format of a gene name.
 
 @author gem
 April 2017
@@ -332,10 +332,10 @@ def build_parser(parser):
                           help="Path to folder where output annotated genomes must be saved")
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-n", dest="name", type=gen_name,
-                          help=("Choose a name for your annotated genomes. This name should contain "
-                                "4 alphanumeric characters. Generally, they correspond to the 2 "
-                                "first letters of genus, and 2 first letters of species, e.g. "
-                                "ESCO for Escherichia Coli."))
+                          help=("Choose a name for your annotated genomes. This name should "
+                                "contain 4 alphanumeric characters. Generally, they correspond "
+                                "to the 2 first letters of genus, and 2 first letters of "
+                                "species, e.g. ESCO for Escherichia Coli."))
     optional.add_argument("-Q", dest="qc_only", action="store_true", default=False,
                           help="Add this option if you want only to do quality control on your "
                                "genomes (cut at 5N if asked, calculate L90 and number of contigs "

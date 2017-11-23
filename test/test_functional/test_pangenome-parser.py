@@ -176,8 +176,6 @@ def test_parser_1thread():
     all default values are as expected, and the number of threads is equal to the total
     number of threads.
     """
-    import multiprocessing
-    nb = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 "
