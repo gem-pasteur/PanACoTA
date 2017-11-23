@@ -21,28 +21,42 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
     From the list of families, get the Pers Genome families, that are families having at least
     tol% of 'nb_strain' members.
 
-    Parameters:
-    fam_by_strain: dict, {fam_num: {strain: [members], strain: [members]}}
-    fam_all_members: dict, {fam_num: [all members]}
-    nb_strains: int, number of strains in dataset
-    tol: float, percentage of isolates a gene must be in to be persistent
-    multi: bool, True if multiple genes from the same isolate are tolerated, False otherwise
-    mixed: bool, True if mixed families are allowed (exactly 1 member per family
-    for at least tol% of the genomes, 0 or several members allowed for other (1-tol)%)
-    floor: bool. Use a minimum number of genomes containing a gene to consider the family
-    persistent equal to: floor(nb_strains*tol) genomes if True, ceil(nb_strains*tol)
-    if False.
+    Parameters
+    ----------
+    fam_by_strain : dict
+        {fam_num: {strain: [members], strain: [members]}}
+    fam_all_members : dict
+        {fam_num: [all members]}
+    nb_strains : int
+        number of strains in dataset
+    tol : float
+        percentage of isolates a gene must be in to be persistent
+    multi : bool
+        True if multiple genes from the same isolate are tolerated, False otherwise
+    mixed : bool
+        True if mixed families are allowed (exactly 1 member per family
+        for at least tol% of the genomes, 0 or several members allowed for other (1-tol)%)
+    floor : bool
+        Use a minimum number of genomes containing a gene to consider the family
+        persistent equal to: floor(nb_strains*tol) genomes if True, ceil(nb_strains*tol)
+        if False.
+
+    Returns
+    -------
+    dict
+        {fam_num: [list of members]} for persistent families
     """
     logger.info(("Generating Persistent genome of a dataset "
                  "containing {} genomes").format(nb_strains))
-    pers = {} # {fam_num: {strain1: [genes from strain1], strain2: [genes from strain2]}}
-    fams = {} # {fam_num: [list of members]}
+    pers = {}  # {fam_num: {strain1: [genes from strain1], strain2: [genes from strain2]}}
+    fams = {}  # {fam_num: [list of members]}
     if floor:
         min_members = math.floor(tol * nb_strains)
     else:
         min_members = math.ceil(tol * nb_strains)
     for fam_num, family in fam_by_strain.items():
-        # If enough strains and multi accepted, or multi not accepted but 1 member per strain, add family to core
+        # If enough strains and multi accepted, or multi not accepted but 1 member per
+        # strain, add family to core
         if mixed:
             if mixed_family(family, min_members):
                 pers[fam_num] = family
@@ -57,12 +71,19 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
 
 
 def mixed_family(family, thres):
-    """Returns True if at least 'thres' genomes of the family have exactly 1 member.
+    """
+    Returns True if at least 'thres' genomes of the family have exactly 1 member.
 
-    :param family: dict, {strain1: [members in strain1]}
-    :type family: dict
-    :param thres: minimum number of genomes which must have 1 member
-    :type thres: number
+    Parameters
+    ----------
+    family : dict
+        {strain1: [members in strain1]}
+    thres : float
+         minimum number of genomes which must have 1 member
+
+    Returns
+    -------
+    bool
     """
     nb_uniq = 0
     for ref, members in family.items():
@@ -81,9 +102,16 @@ def uniq_members(family, num=1):
     Returns True if, in the family, each genome has no more than 'num' member(s),
     False otherwise (multigenic family)
 
-    Parameters:
-    family: dict, {strain1: [members in strain1], strain2: [members in strain2]}
-    num: int, max number of members allowed in each genome to return True
+    Parameters
+    ----------
+    family : dict
+        {strain1: [members in strain1], strain2: [members in strain2]}
+    num : int
+        max number of members allowed in each genome to return True
+
+    Returns
+    -------
+    bool
     """
     for ref, members in family.items():
         if len(members) == 0:
@@ -94,12 +122,15 @@ def uniq_members(family, num=1):
 
 
 def write_persistent(fams, outfile):
-    """ Write persistent families into output file
+    """
+    Write persistent families into output file
 
-    :param fams: {num_fam: [members]}
-    :type fams: dict
-    :param outfile: output file to write all families
-    :type outfile: str
+    Parameters
+    ----------
+    fams : dict
+        {num_fam: [members]}
+    outfile : str
+        output file to write all families
     """
     with open(outfile, "w") as outf:
         for num_fam in sorted(fams, key=lambda x: int(x)):
@@ -108,4 +139,3 @@ def write_persistent(fams, outfile):
             for mem in sorted(fam, key=utils.sort_proteins):
                 outf.write(" " + mem)
             outf.write("\n")
-
