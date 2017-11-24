@@ -138,7 +138,8 @@ def get_info(tol, multi, mixed, floor):
                         "several members.".format(tol*100, round((1-tol)*100), 3))
         else:
             toprint += ("To be considered as persistent, a family must contain exactly 1 member "
-                        "in at least {}% of all genomes.").format(tol*100)
+                        "in at least {}% of all genomes. The other genomes are absent from the"
+                        "family.").format(tol*100)
         return toprint
 
 
