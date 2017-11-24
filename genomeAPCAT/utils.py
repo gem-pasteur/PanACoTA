@@ -477,8 +477,8 @@ def sort_proteins(x):
             return x.split(".")[0], int(x.split(".")[2].split("_")[0]), int(x.split("_")[-1])
         # if format is not like this, it must be something_00001:
         # sort by 'something' and then 00001
-        return x.split("_")[0], int(x.split("_")[1])
-    except IndexError:
+        return "_".join(x.split("_")[:-1]), int(x.split("_")[-1])
+    except (IndexError, ValueError):
         logger = logging.getLogger("utils")
         logger.error(("ERROR: Protein {} does not have the required format. "
                       "It must contain, at least <alpha-num>_<num_only>, and at best "
