@@ -59,7 +59,10 @@ def test_mixed_empty(caplog):
     """
     family = {"strain1": ["member"],
               "strain2": ["member2"],
+              "strain2b": [],
+              "strain3b": [],
+              "strain4": [],
               "strain3": ["member3"],
               "strain4": []}
     assert persf.mixed_family(family, 3)
-    assert "problem, no members for strain4!" in caplog.text
+    assert "problem, no members for strain" in caplog.text
