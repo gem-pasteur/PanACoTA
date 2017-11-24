@@ -319,15 +319,15 @@ def test_sort_proteins_other_format():
     - species (string before "_")
     - protein number (num after "_")
     """
-    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005", "myprotein_0002",
-                "ESCO.0517.00001.i0001_12354", "myprotein_0001", "ESCO.0417.00010.i0001_1",
-                "aprot_15", "aprot_2",
+    proteins = ["ESCO.0417.00010.i0001_12354", "ESCO.0617.00001.i0001_005", "my_protein_0002",
+                "ESCO.0517.00001.i0001_12354", "my_protein_0001", "ESCO.0417.00010.i0001_1",
+                "a_my_prot_15", "a_my_prot_2",
                 "TOTO.0417.00001.i0001_12", "TOTO.0717.00001.i0008_9"]
     sorted_prot = sorted(proteins, key=utils.sort_proteins)
     exp = ["ESCO.0617.00001.i0001_005", "ESCO.0517.00001.i0001_12354",
            "ESCO.0417.00010.i0001_1", "ESCO.0417.00010.i0001_12354",
            "TOTO.0717.00001.i0008_9", "TOTO.0417.00001.i0001_12",
-           "aprot_2", "aprot_15", "myprotein_0001", "myprotein_0002"]
+           "a_my_prot_2", "a_my_prot_15", "my_protein_0001", "my_protein_0002"]
     assert sorted_prot == exp
 
 
