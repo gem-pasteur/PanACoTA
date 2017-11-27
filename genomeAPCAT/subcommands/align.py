@@ -13,7 +13,6 @@ import os
 import sys
 
 
-
 def main_from_parse(args):
     """
     Call main function from the arguments given by parser
@@ -37,7 +36,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
 
     # test if prokka is installed and in the path
     if not utils.check_installed("fftns"):  # pragma: no cover
-        logger.error("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
+        print("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
         sys.exit(1)
 
     if force:
@@ -92,41 +91,41 @@ def build_parser(parser):
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
     required.add_argument("-c", dest="corepers", required=True,
-                        help=("Core or persistent genome whose families must be aligned."))
+                          help="Core or persistent genome whose families must be aligned.")
     required.add_argument("-l", dest="list_genomes", required=True,
-                        help=("File containing the list of all the genomes you want "
-                              "to align from their core/persistent families. "
-                              "1 genome per line: it can be the "
-                              "LSTINFO-<list_file>.lst file of 'genomeAPCAT annotate' module. "
-                              "Here, only the first column (genome name without extension) "
-                              "will be used. The final alignment file will contain "
-                              "1 alignment per genome in this file."))
+                          help=("File containing the list of all the genomes you want "
+                                "to align from their core/persistent families. "
+                                "1 genome per line: it can be the "
+                                "LSTINFO-<list_file>.lst file of 'genomeAPCAT annotate' module. "
+                                "Here, only the first column (genome name without extension) "
+                                "will be used. The final alignment file will contain "
+                                "1 alignment per genome in this file."))
     required.add_argument("-n", dest="dataset_name", required=True,
-                        help=("Name of the dataset which will be aligned (for example, "
-                              "SAEN1234 for 1234 Salmonella enterica genomes). This name will "
-                              "be used to name the alignment file."))
+                          help=("Name of the dataset which will be aligned (for example, "
+                                "SAEN1234 for 1234 Salmonella enterica genomes). This name will "
+                                "be used to name the alignment file."))
     required.add_argument("-d", dest="dbpath", required=True,
-                        help=("Path to the folder containing the directories 'Proteins' "
-                              "and 'Genes', created by 'genomeAPCAT annotate'."))
+                          help=("Path to the folder containing the directories 'Proteins' "
+                                "and 'Genes', created by 'genomeAPCAT annotate'."))
     required.add_argument("-o", dest="outdir", required=True,
-                          help=("Output directory, where all results must be saved "))
+                          help="Output directory, where all results must be saved ")
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("--threads", dest="threads", default=1, type=thread_num,
-                        help=("add this option if you want to parallelize on several threads. "
-                              "Indicate on how many threads you want to parallelize. "
-                              "By default, it uses 1 thread. Put 0 if you want to use "
-                              "all threads of your computer."))
+                          help=("add this option if you want to parallelize on several threads. "
+                                "Indicate on how many threads you want to parallelize. "
+                                "By default, it uses 1 thread. Put 0 if you want to use "
+                                "all threads of your computer."))
     optional.add_argument("-F", "--force", dest="force", action="store_true",
-                        help=("Force run: Add this option if you want to redo all alignments "
-                              "for all families, even if their result file already exists. "
-                              "Without this option, if an alignment file already exists, "
-                              "it will be used for the next step. If you want to redo only "
-                              "a given alignment, just delete its file, without using "
-                              "this option."))
+                          help=("Force run: Add this option if you want to redo all alignments "
+                                "for all families, even if their result file already exists. "
+                                "Without this option, if an alignment file already exists, "
+                                "it will be used for the next step. If you want to redo only "
+                                "a given alignment, just delete its file, without using "
+                                "this option."))
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
-                        help=("Increase verbosity in stdout/stderr."))
+                        help="Increase verbosity in stdout/stderr.")
     helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
                         help=("Do not display anything to stdout/stderr. log files will "
                               "still be created."))
@@ -143,9 +142,9 @@ def parse(parser, argu):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description=("Align Core/Persistent families"),
-                                     add_help=False)
-    build_parser(parser)
-    OPTIONS = parse(parser, sys.argv[1:])
-    main_from_parse(OPTIONS)
 
+    myparser = argparse.ArgumentParser(description="Align Core/Persistent families",
+                                       add_help=False)
+    build_parser(myparser)
+    OPTIONS = parse(myparser, sys.argv[1:])
+    main_from_parse(OPTIONS)
