@@ -184,7 +184,7 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
         geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
         if not os.path.isfile(gegenfile) or not os.path.isfile(geprtfile):
             error.append(strain)
-    if error != []:
+    if error:
         for gen in error:
             logger.error(("There is not any protein for genome {} in any family! "
                           "The program will close, please fix this problem to be able to "
