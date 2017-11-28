@@ -133,9 +133,17 @@ def proteins_per_strain(persgen):
             fam_genomes[fam_num] = []
             several[fam_num] = []
             for mem in members:
-                strain = ".".join(mem.split(".")[:3])
+                # if format is ESCO.1512.00001.i0002_12124, strain is 3 first fields
+                # separated by '.'
+                if "." in mem and len(mem.split(".")) >= 3:
+                    strain = ".".join(mem.split(".")[:3])
+                # if format is not like this, it must be something_00001:
+                else:
+                    strain = "_".join(mem.split("_")[:-1])
+                # if strain not already in fam_genomes, add it
                 if strain not in fam_genomes[fam_num]:
                     fam_genomes[fam_num].append(strain)
+                # If strain already in fam_genomes, it has several members: add it to several
                 elif strain not in several[fam_num]:
                     several[fam_num].append(strain)
                 if strain not in all_prots:
