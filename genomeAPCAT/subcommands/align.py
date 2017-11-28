@@ -16,6 +16,11 @@ import sys
 def main_from_parse(args):
     """
     Call main function from the arguments given by parser
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        result of argparse parsing of all arguments in command line
     """
     main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
          args.threads, args.force, args.verbose, args.quiet)
@@ -24,6 +29,32 @@ def main_from_parse(args):
 def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
     """
     Align given core genome families
+
+    Parameters
+    ----------
+    corepers : str
+        File containing persistent genome families
+    list_genomes : str
+        File containing the list of all genomes in the dataset. Only first column is
+        considered.
+    dname : str
+        Dataset name, used to name output files
+    dbpath : str
+        path to the directory containing 'Proteins' and 'Genes' folders
+    outdir : str
+        path to the directory where output files must be saved
+    threads : int
+        Max number of threads to use
+    force : bool
+        Remove existing output files and rerun everything if True.
+    verbose : int
+        verbosity:
+
+        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
+        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+        - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+    quiet : bool
+        True if nothing must be sent to stdout/stderr, False otherwise
     """
     # import needed packages
     import logging
@@ -64,8 +95,13 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
 
 def build_parser(parser):
     """
-    Method to create a parser for command-line options
-    """
+        Method to create a parser for command-line options
+
+        Parameters
+        ----------
+        parser : argparse.ArgumentParser
+            parser to configure in order to extract command-line arguments
+        """
     import argparse
     import multiprocessing
 
@@ -136,6 +172,18 @@ def build_parser(parser):
 def parse(parser, argu):
     """
     Parse arguments given to parser
+
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        the parser used
+    argu : [str]
+        command-line given by user, to parse using parser
+
+    Returns
+    -------
+    argparse.Namespace
+        Parsed arguments
     """
     return parser.parse_args(argu)
 
