@@ -15,6 +15,23 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
     """
     For all genomes, extract its proteins present in a persistent family to the file
     corresponding to this family.
+
+    Parameters
+    ----------
+    all_genomes : []
+        list of all genome names
+    dname : str
+        name of dataset
+    dbpath : str
+        path to folder containing 'Proteins' and 'Genes' folders
+    listdir : str
+        path to folder containing the lists of proteins/genes to extract
+    aldir : str
+        path to folder where extracted proteins/genes must be saved
+    all_fams : []
+        list of all family numbers
+    quiet : bool
+        True if nothin must be written to stdout/stderr, False otherwise
     """
     # Get list of files not already existing
     files_todo = check_existing_extract(all_fams, aldir, dname)
@@ -29,6 +46,8 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
 
     logger.info("Extracting proteins and genes from all genomes")
     nbgen = len(all_genomes)
+    bar = None
+    curnum = 1
     if not quiet:
         widgets = ['Gene and Protein extraction:',
                    progressbar.Bar(marker='█', left='', right='', fill=' '),
@@ -37,7 +56,6 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
                    progressbar.ETA()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=150).start()
         curnum = 1
-    files_explored = []
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
         ge_prt = os.path.join(listdir, dname + "-getEntry_prt_" + genome + ".txt")
@@ -56,8 +74,22 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
 def check_existing_extract(all_fams, aldir, dname):
     """
     For each family, check if its prt and gen extraction file already exist.
-    If both exist, no need to re-extract for those families
+    If both exist, no need to re-extract for those families.
     If only one or no one exists, put to list to extract.
+
+    Parameters
+    ----------
+    all_fams : list
+        list of all family numbers
+    aldir : str
+        path to directory where extraction files must be saved
+    dname : str
+        name of the dataset
+
+    Returns
+    -------
+    []
+        list of files that must be generated (prt and gen files)
     """
     extract_fams = []
     for fam in all_fams:
@@ -89,12 +121,27 @@ def get_genome_seqs(fasta, tabfile, files_todo, outfile=None):
     """
     From a fasta file, extract all sequences given in the tab file.
     The tab file can contain:
+
     - 1 sequence name per line -> all sequences will be extracted to the same file
     - 1 sequence + 1 filename per line -> each sequence will be extracted in the given file
 
     If outfile not given, the tab file must contain 2 columns (1 for the sequence name,
     1 for its output file). If an outfile is given, only the 1st column of tab file
     will be considered, and all sequences will be extracted to the given outfile.
+
+    Parameters
+    ----------
+    fasta : str
+        path to fasta file from which sequences must be extracted
+    tabfile : str
+        path to the tab file containing the names of sequences to extract
+    files_todo : list
+        list of files which must be generated (prt and gen files). Others
+        already exist, so ignore them.
+    outfile : str or None
+        if None, the tab file must contain 2 columns (1 for the sequence name,
+        1 for its output file). If an outfile is given (not None), only the 1st column of tab file
+        will be considered, and all sequences will be extracted to the given outfile.
     """
     with open(tabfile, "r") as tabf:
         to_extract = get_names_to_extract(tabf, outfile)
@@ -116,6 +163,20 @@ def get_genome_seqs(fasta, tabfile, files_todo, outfile=None):
 def get_names_to_extract(tabf, outfile):
     """
     From the tab file, get names of sequences to extract.
+
+    Parameters
+    ----------
+    tabf : _io.TextIOWrapper
+        open file containing names of sequences to extract
+    outfile : str or None
+        if None, the tab file must contain 2 columns (1 for the sequence name,
+        1 for its output file). If an outfile is given (not None), only the 1st column of tab file
+        will be considered, and all sequences will be given 'outfile' as output file
+
+    Returns
+    -------
+    dict
+        {sequence_to_extract: file_to_which_it_will_be_extracted}
     """
     to_extract = {}
     for line in tabf:
@@ -135,15 +196,28 @@ def get_names_to_extract(tabf, outfile):
     return to_extract
 
 
-def extract_sequences(to_extract, fasf, files_todo=[], outf=None):
+def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     """
     Extract sequences from an open fasta file 'fasf', and a list of sequences to
     extract
 
-    files_todo = list of files for which proteins and genes must be extracted. Others
-    already exist, so ignore them.
+    Parameters
+    ----------
+    to_extract : dict
+        {sequence_to_extract: file_to_which_it_will_be_extracted}
+    fasf : _io.TextIOWrapper
+        open file containing sequences in multi-fasta format
+    files_todo : list or None
+        list of files which must be generated (prt and gen files). Others
+        already exist, so ignore them.
+    outf : _io.TextIOWrapper or None
+        if None, the tab file must contain 2 columns (1 for the sequence name,
+        1 for its output file). If an outfile is given (not None), only the 1st column of tab file
+        will be considered, and all sequences will be given 'outfile' as output file
     """
-    out_given = outf != None
+    if files_todo is None:
+        files_todo = []
+    out_given = (outf is not None)
     extract = False
     for line in fasf:
         if line.startswith(">"):
@@ -170,4 +244,3 @@ def extract_sequences(to_extract, fasf, files_todo=[], outf=None):
         else:
             if extract:
                 outf.write(line)
-
