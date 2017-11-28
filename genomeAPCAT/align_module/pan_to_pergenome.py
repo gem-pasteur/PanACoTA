@@ -6,20 +6,22 @@ From the Persistent Genome file, group all persistent proteins per genome, in or
 able to extract them faster after.
 
 Input:
+
 - Persistent genome (1 line per family, 1st column is family number, others are all members)
 - list of all genomes (1 genome per line, only first column is considered)
 - output directory
 - dname: the name of the dataset, used to name output files
 
 Output:
-- for each genome: <outdir>/List-<dname>/<dname>-getEntry_gen_<genome>.txt: list of all
-genes from the 'genome' which correspond to persistent proteins. 2 columns:
-the first one is the protein name, the second is the filename to which it must be extracted
-(corresponding to the family in the persistent genome).
-- for each genome: <outdir>/List-<dname>/<dname>-getEntry_prt_<genome>.txt: same as
-previous file but with the list of proteins to extract instead of genes.
-- for each family: <outdir>/Align-<dname>/<dname>-current.<fam_num>.miss.lst: list of
- genomes which do not have members in family 'fam_num'.
+
+- for each genome: ``<outdir>/List-<dname>/<dname>-getEntry_gen_<genome>.txt``: list of all
+  genes from the 'genome' which correspond to persistent proteins. 2 columns:
+  the first one is the protein name, the second is the filename to which it must be extracted
+  (corresponding to the family in the persistent genome).
+- for each genome: ``<outdir>/List-<dname>/<dname>-getEntry_prt_<genome>.txt``: same as
+  previous file but with the list of proteins to extract instead of genes.
+- for each family: ``<outdir>/Align-<dname>/<dname>-current.<fam_num>.miss.lst``: list of
+  genomes which do not have members in family 'fam_num'.
 
 @author GEM
 November 2016
@@ -27,24 +29,40 @@ November 2016
 
 import os
 import sys
-import datetime
 import logging
 
 logger = logging.getLogger("align.pan_to_pergenome")
 
 
 def get_per_genome(persgen, list_gen, dname, outdir):
-    """ From persistent genome and list of all genomes, sort persistent proteins by genome
+    """
+    From persistent genome and list of all genomes, sort persistent proteins by genome
 
     For each genome, write all persistent proteins to a file, with the family from which they
     are, in order to extract those proteins after.
     For each family, also save the names of genomes which do not have any member. This will
     be used to complete the alignments by stretches of '-'.
-    persgen: file containing persistent genome
-    list_gen: file containing the list of all genomes
-    dname: name of the dataset
-    outdir: Directory where files must be saved. Will create 2 subfolders: Align-<dname>
-    and List-<dname>
+
+    Parameters
+    ----------
+    persgen : str
+        file containing persistent genome
+    list_gen : str
+        file containing the list of all genomes
+    dname : str
+        name of the dataset
+    outdir : str
+        Directory where files must be saved. Will create 2 subfolders: ``Align-<dname>``
+        and ``List-<dname>``
+
+    Returns
+    -------
+    (all_genomes, aldir, listdir, families) : tuple
+
+        * all_genomes : [] list of all genome names
+        * aldir : str, path to align directory
+        * listdir : str, path to List directory
+        * families : str, list of family numbers
     """
     logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     # Define output directories
@@ -64,10 +82,19 @@ def get_per_genome(persgen, list_gen, dname, outdir):
 
 
 def get_all_genomes(list_gen):
-    """ Read the file containing the genomes list and get all genome names
+    """
+    Read the file containing the genomes list and get all genome names
 
-    :param list_gen: file containing the list of genome names in 1st column
-    :type list_gen: str
+    Parameters
+    ----------
+    list_gen : str
+        File containing the list of all genomes
+
+    Returns
+    -------
+    list
+        list of all genome names
+
     """
     all_genomes = []
     with open(list_gen, "r") as lgf:
@@ -79,11 +106,22 @@ def get_all_genomes(list_gen):
 
 
 def proteins_per_strain(persgen):
-    """ From the persistentGenome file, get all persistent proteins, and classify them
+    """
+    From the persistentGenome file, get all persistent proteins, and classify them
     according to the strain from which they are.
 
-    :param persgen: file containing persistent genome.
-    :type persgen: str
+    Parameters
+    ----------
+    persgen : str
+        File containing persistent genome
+
+    Returns
+    -------
+    (all_prots, fam_genomes, several) : tuple
+
+        * all_prots: dict, {strain: {member: fam_num}}
+        * fam_genomes: dict, {fam_num: [genomes having a member in fam]}
+        * several: dict, {fam_num: [genomes having several members in fam]}
     """
     all_prots = {}  # {strain: {member: fam_num}}
     fam_genomes = {}  # {fam_num: [genomes having a member in fam]}
@@ -110,16 +148,25 @@ def proteins_per_strain(persgen):
 
 
 def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes):
-    """ For each species, write all its persistent proteins into a file, with the
+    """
+    For each species, write all its persistent proteins into a file, with the
     persistent family in which they are. Those files will be used to extract all
     proteins.
 
-    all_prots: {strain: {member: fam_num}}
-    several: {fam_num: [genomes having several members in family]}
-    listdir: directory where lists of proteins per genome must be saved
-    aldir: directory where extracted proteins per family must be saved
-    dname: name of dataset.
-    all_genomes: list of all genomes
+    Parameters
+    ----------
+    all_prots : dict
+        {strain: {member: fam_num}}
+    several : dict
+        {fam_num: [genomes having several members in family]}
+    listdir : str
+        directory where lists of proteins per genome must be saved
+    aldir : str
+         directory where extracted proteins per family must be saved
+    dname : str
+        name of dataset
+    all_genomes : list
+        list of all genomes
     """
     for strain, member in all_prots.items():
         write_genome_file(listdir, aldir, dname, strain, member, several)
@@ -141,8 +188,23 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
     """
     For a given genome, write all the proteins and genes to extract to its file.
     If one of the 2 files (proteins and genes) already exists, overwrite it.
-    If no file exists -> write them
-    If the 2 files exist -> warning saying that we use already existing files
+    If no file exists -> write them.
+    If the 2 files exist -> warning saying that we use already existing files.
+
+    Parameters
+    ----------
+    listdir : str
+        path to List directory
+    aldir : str
+        path to Align directory
+    dname : str
+        name of dataset
+    strain : str
+        current genome name
+    member : dict
+        {member: fam_num}
+    several : dict
+        {fam_num: [genomes having several members in family]}
     """
     # If the 2 files exist, use them as they are
     gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
@@ -154,7 +216,7 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
         return
 
     # If one of the 2 files already exists, overwrite both files (same behaviour
-    # as if no file exist)
+    # as if no file exists)
     with open(gegenfile, "w") as gegf, open(geprtfile, "w") as gepf:
         for mem, fam in member.items():
             if strain not in several[fam]:
@@ -165,14 +227,22 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
 
 
 def write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname):
-    """ For each family, write the names of all genomes which do not have any member in
+    """
+    For each family, write the names of all genomes which do not have any member in
     the family.
 
-    fam_genomes: {fam_num: [genomes having a member in fam]}
-    several: {fam_num: [genomes having several members in family]}
-    all_genomes: list of all genomes
-    aldir: directory where the lists of missing genomes per family must be saved
-    dname: name of dataset
+    Parameters
+    ----------
+    fam_genomes : dict
+        {fam_num: [genomes having a member in fam]}
+    several : dict
+        {fam_num: [genomes having several members in family]}
+    all_genomes : list
+        list of all genomes
+    aldir : str
+        directory where the lists of missing genomes per family must be saved
+    dname : str
+        name of dataset
     """
     for fam, genomes in fam_genomes.items():
         missfile = os.path.join(aldir, dname + "-current." + fam + ".miss.lst")
