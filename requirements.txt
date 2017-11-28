@@ -1,9 +1,11 @@
+# user
 argparse
 progressbar2 >= 3.18.0
 numpy>=1.11
 matplotlib>=2.0.0
 biopython>=1.60
 
+# developper
 sphinx
 sphinx_rtd_theme
 numpydoc
