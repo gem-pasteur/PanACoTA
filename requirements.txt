@@ -12,5 +12,4 @@ numpydoc
 pytest>=2.5.2
 pytest-cov>=1.6
 pytest-mpl>=0.8
-pytest-catchlog>=1.2.2
 coverage>=4
