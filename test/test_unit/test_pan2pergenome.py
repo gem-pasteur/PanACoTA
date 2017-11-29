@@ -71,7 +71,7 @@ def test_get_per_genome(caplog):
     exp_genomes = ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]
     assert all_genomes == exp_genomes
     exp_fams = ['1', '3', '5', '8', '10', '11', '12']
-    assert list(fams) == exp_fams
+    assert set(fams) == set(exp_fams)
     shutil.rmtree(outdir)
 
 
