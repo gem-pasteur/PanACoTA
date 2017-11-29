@@ -203,17 +203,19 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
 
     Parameters
     ----------
-    to_extract : dict
-        {sequence_to_extract: file_to_which_it_will_be_extracted}
+    to_extract : dict or []
+        {sequence_to_extract: file_to_which_it_will_be_extracted} or list of sequences to
+        extract (if an output filename is also given in 'outf')
     fasf : _io.TextIOWrapper
         open file containing sequences in multi-fasta format
     files_todo : list or None
         list of files which must be generated (prt and gen files). Others
         already exist, so ignore them.
     outf : _io.TextIOWrapper or None
-        if None, the tab file must contain 2 columns (1 for the sequence name,
-        1 for its output file). If an outfile is given (not None), only the 1st column of tab file
-        will be considered, and all sequences will be given 'outfile' as output file
+        If an outfile is given (not None), and 'to_extract' is a dict, only its keys will be
+        considered, and all these sequences will be extracted to 'outfile' (if 'to_extract' is a
+        list, will extract all sequences of this list). Otherwise, if None,
+        each sequence will be extracted to its corresponding value in 'to_extract'.
     """
     if files_todo is None:
         files_todo = []
