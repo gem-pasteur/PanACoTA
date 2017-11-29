@@ -345,289 +345,289 @@ def test_get_info_parallel():
     assert info == "0.8-mode1-th12_STARTTIME"
 
 
-def test_do_pangenome(caplog):
-    """
-    Check that expected output files are created,
-    and compare output pangenome to the expected one.
-    """
-    outdir = "test_do_pangenome_outdir"
-    prt_bank = "exp_EXEM.All.prt"
-    mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
-    min_id = 0.8
-    clust_mode = 1
-    threads = 1
-    start = "STARTTIME"
-    quiet = False
-    assert not os.path.isdir(outdir)
-    fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                                        clust_mode, threads, start, quiet=quiet)
-    # Check creation of output directory
-    assert os.path.isdir(outdir)
-    # Check creation of tmp directory
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
-    assert os.path.isdir(tmp_dir)
-    # Check presence of pangenome file
-    exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
-    assert exp_out == outfile
-    assert os.path.isfile(outfile)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 15))
-        found = False
-        for expfam in list(EXP_CLUSTERS.values()):
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    assert "Clustering proteins..." in caplog.text
-    shutil.rmtree(outdir)
-
-
-def test_do_pangenome_given_panfile(caplog):
-    """
-    Check that expected output files are created,
-    and compare output pangenome to the expected one.
-    """
-    outdir = "test_do_pangenome_outdir"
-    prt_bank = "exp_EXEM.All.prt"
-    mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
-    min_id = 0.8
-    clust_mode = 1
-    threads = 1
-    start = "STARTTIME"
-    quiet = False
-    panfile = "test_res_pangenome"
-    assert not os.path.isdir(outdir)
-    fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                                        clust_mode, threads, start, quiet=quiet, panfile=panfile)
-    # Check creation of output directory
-    assert os.path.isdir(outdir)
-    # Check creation of tmp directory
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
-    assert os.path.isdir(tmp_dir)
-    # Check presence of pangenome file
-    assert panfile == outfile
-    assert os.path.isfile(outfile)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 15))
-        found = False
-        for expfam in list(EXP_CLUSTERS.values()):
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    assert "Clustering proteins..." in caplog.text
-    shutil.rmtree(outdir)
-    os.remove(panfile)
-
-
-def test_do_pangenome_quiet(caplog):
-    """
-    Check that expected output files are created,
-    and compare output pangenome to the expected one.
-    Check that no error appears when choosing quiet option.
-    """
-    outdir = "test_do_pangenome_outdir"
-    prt_bank = "exp_EXEM.All.prt"
-    mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
-    min_id = 0.8
-    clust_mode = 1
-    threads = 1
-    start = "STARTTIME"
-    quiet = True
-    assert not os.path.isdir(outdir)
-    fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                                        clust_mode, threads, start, quiet=quiet)
-    # Check creation of output directory
-    assert os.path.isdir(outdir)
-    # Check creation of tmp directory
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
-    assert os.path.isdir(tmp_dir)
-    # Check presence of pangenome file
-    exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
-    assert exp_out == outfile
-    assert os.path.isfile(outfile)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 15))
-        found = False
-        for expfam in list(EXP_CLUSTERS.values()):
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    assert "Clustering proteins..." in caplog.text
-    shutil.rmtree(outdir)
-
-
-def test_do_pangenome_exist(caplog):
-    """
-    Check that if the mmseq output file of clustering already exists, it does not
-    run mmseq again, but just converts it to pangenome.
-    """
-    outdir = "test_do_pangenome_outdir_exist"
-    prt_bank = "exp_EXEM.All.prt"
-    mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
-    min_id = 0.8
-    clust_mode = 1
-    threads = 1
-    start = "STARTTIME"
-    # Create clustering results in outdir
-    os.makedirs(outdir)
-    orig_clust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
-    out_clust = os.path.join(outdir, "exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME")
-    shutil.copyfile(orig_clust, out_clust)
-    shutil.copyfile(orig_clust + ".index", out_clust + ".index")
-    fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                                        clust_mode, threads, start)
-    assert ("mmseqs clustering test_do_pangenome_outdir_exist/exp_EXEM.All.prt-clust-0.8-"
-            "mode1_STARTTIME already exists. The program will now convert it to a "
-            "pangenome file.") in caplog.text
-    # Check creation of empty tmp directory
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
-    assert os.path.isdir(tmp_dir)
-    assert glob.glob(os.path.join(tmp_dir, "*")) == []
-    # Check presence of pangenome file
-    exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
-    assert exp_out == outfile
-    assert os.path.isfile(outfile)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 15))
-        found = False
-        for expfam in list(EXP_CLUSTERS.values()):
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    assert "Clustering proteins..." not in caplog.text
-    shutil.rmtree(outdir)
-
-
-def test_run_all_pangenome(caplog):
-    """
-    Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
-    outputs the expected pangenome file.
-    """
-    min_id = 0.8
-    clust_mode = 1
-    outdir = "test_run_allpangenome"
-    os.makedirs(outdir)
-    prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
-    threads = 1
-    panfile = None
-    quiet = False
-    fams, outfile = mmseqs.run_all_pangenome(min_id, clust_mode, outdir, prt_path,
-                                             threads, panfile=panfile, quiet=quiet)
-    # check that tmp dir was created and not empty
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_*")
-    assert glob.glob(os.path.join(tmp_dir, "*")) != []
-    # check that pangenome file is present
-    exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_*")
-    found_out = glob.glob(exp_out)
-    assert len(found_out) == 1
-    found_out = found_out[0]
-    assert outfile == found_out
-    assert os.path.isfile(outfile)
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 17))
-        found = False
-        for expfam in FAMILIES4G:
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    assert ("Will run MMseqs2 with:\n\t- minimum sequence identity = 0.8\n"
-            "\t- cluster mode 1") in caplog.text
-    shutil.rmtree(outdir)
-
-
-def test_run_all_pangenome_givenfile_parallel(caplog):
-    """
-    Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
-    outputs the expected pangenome file.
-    """
-    min_id = 0.8
-    clust_mode = 1
-    outdir = "test_run_allpangenome"
-    os.makedirs(outdir)
-    prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
-    threads = 2
-    panfile = "pangenome_test_run-all-pan.lst"
-    quiet = True
-    fams, outfile = mmseqs.run_all_pangenome(min_id, clust_mode, outdir, prt_path,
-                                             threads, panfile=panfile, quiet=quiet)
-    # check that tmp dir was created and not empty
-    tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1-th2*")
-    assert glob.glob(os.path.join(tmp_dir, "*")) != []
-    # check that pangenome file is present
-    assert outfile == os.path.join(outdir, panfile)
-    assert os.path.isfile(outfile)
-    # Check content of output pangenome file
-    exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
-    with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
-        lines_exp = []
-        lines_out = []
-        for line_exp, line in zip(ep, pan):
-            lines_exp.append(tuple(line_exp.split()[1:]))
-            lines_out.append(tuple(line.split()[1:]))
-    assert set(lines_exp) == set(lines_out)
-    # Check families returned
-    for num, fam in fams.items():
-        assert num in list(range(1, 17))
-        found = False
-        for expfam in FAMILIES4G:
-            if fam == expfam:
-                found = True
-                break
-        assert found
-    assert ("Will run MMseqs2 with:\n\t- minimum sequence identity = 0.8\n"
-            "\t- cluster mode 1\n\t- 2 threads") in caplog.text
-    shutil.rmtree(outdir)
+# def test_do_pangenome(caplog):
+#     """
+#     Check that expected output files are created,
+#     and compare output pangenome to the expected one.
+#     """
+#     outdir = "test_do_pangenome_outdir"
+#     prt_bank = "exp_EXEM.All.prt"
+#     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
+#     min_id = 0.8
+#     clust_mode = 1
+#     threads = 1
+#     start = "STARTTIME"
+#     quiet = False
+#     assert not os.path.isdir(outdir)
+#     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
+#                                         clust_mode, threads, start, quiet=quiet)
+#     # Check creation of output directory
+#     assert os.path.isdir(outdir)
+#     # Check creation of tmp directory
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
+#     assert os.path.isdir(tmp_dir)
+#     # Check presence of pangenome file
+#     exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
+#     assert exp_out == outfile
+#     assert os.path.isfile(outfile)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 15))
+#         found = False
+#         for expfam in list(EXP_CLUSTERS.values()):
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     assert "Clustering proteins..." in caplog.text
+#     shutil.rmtree(outdir)
+#
+#
+# def test_do_pangenome_given_panfile(caplog):
+#     """
+#     Check that expected output files are created,
+#     and compare output pangenome to the expected one.
+#     """
+#     outdir = "test_do_pangenome_outdir"
+#     prt_bank = "exp_EXEM.All.prt"
+#     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
+#     min_id = 0.8
+#     clust_mode = 1
+#     threads = 1
+#     start = "STARTTIME"
+#     quiet = False
+#     panfile = "test_res_pangenome"
+#     assert not os.path.isdir(outdir)
+#     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
+#                                         clust_mode, threads, start, quiet=quiet, panfile=panfile)
+#     # Check creation of output directory
+#     assert os.path.isdir(outdir)
+#     # Check creation of tmp directory
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
+#     assert os.path.isdir(tmp_dir)
+#     # Check presence of pangenome file
+#     assert panfile == outfile
+#     assert os.path.isfile(outfile)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 15))
+#         found = False
+#         for expfam in list(EXP_CLUSTERS.values()):
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     assert "Clustering proteins..." in caplog.text
+#     shutil.rmtree(outdir)
+#     os.remove(panfile)
+#
+#
+# def test_do_pangenome_quiet(caplog):
+#     """
+#     Check that expected output files are created,
+#     and compare output pangenome to the expected one.
+#     Check that no error appears when choosing quiet option.
+#     """
+#     outdir = "test_do_pangenome_outdir"
+#     prt_bank = "exp_EXEM.All.prt"
+#     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
+#     min_id = 0.8
+#     clust_mode = 1
+#     threads = 1
+#     start = "STARTTIME"
+#     quiet = True
+#     assert not os.path.isdir(outdir)
+#     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
+#                                         clust_mode, threads, start, quiet=quiet)
+#     # Check creation of output directory
+#     assert os.path.isdir(outdir)
+#     # Check creation of tmp directory
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
+#     assert os.path.isdir(tmp_dir)
+#     # Check presence of pangenome file
+#     exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
+#     assert exp_out == outfile
+#     assert os.path.isfile(outfile)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 15))
+#         found = False
+#         for expfam in list(EXP_CLUSTERS.values()):
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     assert "Clustering proteins..." in caplog.text
+#     shutil.rmtree(outdir)
+#
+#
+# def test_do_pangenome_exist(caplog):
+#     """
+#     Check that if the mmseq output file of clustering already exists, it does not
+#     run mmseq again, but just converts it to pangenome.
+#     """
+#     outdir = "test_do_pangenome_outdir_exist"
+#     prt_bank = "exp_EXEM.All.prt"
+#     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
+#     min_id = 0.8
+#     clust_mode = 1
+#     threads = 1
+#     start = "STARTTIME"
+#     # Create clustering results in outdir
+#     os.makedirs(outdir)
+#     orig_clust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
+#     out_clust = os.path.join(outdir, "exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME")
+#     shutil.copyfile(orig_clust, out_clust)
+#     shutil.copyfile(orig_clust + ".index", out_clust + ".index")
+#     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
+#                                         clust_mode, threads, start)
+#     assert ("mmseqs clustering test_do_pangenome_outdir_exist/exp_EXEM.All.prt-clust-0.8-"
+#             "mode1_STARTTIME already exists. The program will now convert it to a "
+#             "pangenome file.") in caplog.text
+#     # Check creation of empty tmp directory
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_STARTTIME")
+#     assert os.path.isdir(tmp_dir)
+#     assert glob.glob(os.path.join(tmp_dir, "*")) == []
+#     # Check presence of pangenome file
+#     exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME.tsv.lst")
+#     assert exp_out == outfile
+#     assert os.path.isfile(outfile)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 15))
+#         found = False
+#         for expfam in list(EXP_CLUSTERS.values()):
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome.txt")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     assert "Clustering proteins..." not in caplog.text
+#     shutil.rmtree(outdir)
+#
+#
+# def test_run_all_pangenome(caplog):
+#     """
+#     Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
+#     outputs the expected pangenome file.
+#     """
+#     min_id = 0.8
+#     clust_mode = 1
+#     outdir = "test_run_allpangenome"
+#     os.makedirs(outdir)
+#     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
+#     threads = 1
+#     panfile = None
+#     quiet = False
+#     fams, outfile = mmseqs.run_all_pangenome(min_id, clust_mode, outdir, prt_path,
+#                                              threads, panfile=panfile, quiet=quiet)
+#     # check that tmp dir was created and not empty
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1_*")
+#     assert glob.glob(os.path.join(tmp_dir, "*")) != []
+#     # check that pangenome file is present
+#     exp_out = os.path.join(outdir, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1_*")
+#     found_out = glob.glob(exp_out)
+#     assert len(found_out) == 1
+#     found_out = found_out[0]
+#     assert outfile == found_out
+#     assert os.path.isfile(outfile)
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 17))
+#         found = False
+#         for expfam in FAMILIES4G:
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     assert ("Will run MMseqs2 with:\n\t- minimum sequence identity = 0.8\n"
+#             "\t- cluster mode 1") in caplog.text
+#     shutil.rmtree(outdir)
+#
+#
+# def test_run_all_pangenome_givenfile_parallel(caplog):
+#     """
+#     Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
+#     outputs the expected pangenome file.
+#     """
+#     min_id = 0.8
+#     clust_mode = 1
+#     outdir = "test_run_allpangenome"
+#     os.makedirs(outdir)
+#     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
+#     threads = 2
+#     panfile = "pangenome_test_run-all-pan.lst"
+#     quiet = True
+#     fams, outfile = mmseqs.run_all_pangenome(min_id, clust_mode, outdir, prt_path,
+#                                              threads, panfile=panfile, quiet=quiet)
+#     # check that tmp dir was created and not empty
+#     tmp_dir = os.path.join(outdir, "tmp_exp_EXEM.All.prt_0.8-mode1-th2*")
+#     assert glob.glob(os.path.join(tmp_dir, "*")) != []
+#     # check that pangenome file is present
+#     assert outfile == os.path.join(outdir, panfile)
+#     assert os.path.isfile(outfile)
+#     # Check content of output pangenome file
+#     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
+#     with open(exp_pan, "r") as ep, open(outfile, "r") as pan:
+#         lines_exp = []
+#         lines_out = []
+#         for line_exp, line in zip(ep, pan):
+#             lines_exp.append(tuple(line_exp.split()[1:]))
+#             lines_out.append(tuple(line.split()[1:]))
+#     assert set(lines_exp) == set(lines_out)
+#     # Check families returned
+#     for num, fam in fams.items():
+#         assert num in list(range(1, 17))
+#         found = False
+#         for expfam in FAMILIES4G:
+#             if fam == expfam:
+#                 found = True
+#                 break
+#         assert found
+#     assert ("Will run MMseqs2 with:\n\t- minimum sequence identity = 0.8\n"
+#             "\t- cluster mode 1\n\t- 2 threads") in caplog.text
+#     shutil.rmtree(outdir)
