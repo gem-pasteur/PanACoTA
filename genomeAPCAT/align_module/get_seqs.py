@@ -190,7 +190,7 @@ def get_names_to_extract(tabf, outfile):
                 logger.error(("Your file {} does not contain an output filename for {}. "
                               "Please give an output filename for each sequence to extract, "
                               "or give a general output filename where all sequences will "
-                              "be extracted.").format(tabf, line.strip()))
+                              "be extracted.").format(tabf.name, line.strip()))
                 sys.exit(1)
         to_extract[seq] = out
     return to_extract
