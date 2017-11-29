@@ -68,7 +68,7 @@ unit-test-ubuntu16.04:
   before_script:
     - ./make
   script:
-    - py.test test/test_unit
+    - py.test test/test_unit -vs
     - mv .coverage .coverage-unit
   artifacts:
     paths:
