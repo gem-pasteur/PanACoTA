@@ -300,6 +300,9 @@ def test_run_clust():
     args = (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode)
     assert not os.path.isfile(mmseqclust)
     mmseqs.run_mmseqs_clust(args)
+    with open(logmmseq, "r") as logf:
+        for line in logf:
+            print(line)
     assert os.path.isfile(mmseqclust)
     assert os.path.isfile(mmseqclust + ".index")
     assert os.path.isfile(logmmseq)
