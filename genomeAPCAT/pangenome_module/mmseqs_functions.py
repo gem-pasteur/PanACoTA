@@ -211,7 +211,7 @@ def run_mmseqs_clust(args):
            "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
     msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
     with open(logmmseq, "a") as logm:
-        utils.run_cmd(cmd, msg, eof=True, stdout=logm, stderr=logm)
+        utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
 
 
 def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
