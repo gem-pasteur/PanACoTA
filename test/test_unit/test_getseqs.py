@@ -5,10 +5,12 @@
 Unit tests for the get_seqs submodule in align module
 """
 import os
+import shutil
 
 import pytest
 
 import genomeAPCAT.align_module.get_seqs as gseq
+from genomeAPCAT import utils
 
 # Define common variables
 FASTA = os.path.join("test", "data", "pangenome", "test_files", "example_db", "Proteins",
@@ -16,8 +18,28 @@ FASTA = os.path.join("test", "data", "pangenome", "test_files", "example_db", "P
 ALDIR = os.path.join("test", "data", "align")
 EXPPATH = os.path.join(ALDIR, "exp_files")
 TESTPATH = os.path.join(ALDIR, "test_files")
+DBPATH = os.path.join("test", "data", "pangenome", "test_files", "example_db")
+LOGFILE_BASE = "test_getseqs-logs"
 
 
+# Setup and teardown: create logger
+def setup_module():
+    """
+    create logger at start of this test module
+    """
+    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
+
+
+def teardown_module():
+    """
+    Remove log files at the end of this test module
+    """
+    os.remove(LOGFILE_BASE + ".log")
+    os.remove(LOGFILE_BASE + ".log.details")
+    os.remove(LOGFILE_BASE + ".log.err")
+
+
+# Start tests
 def test_extract_noseq_out_given():
     """
     Test that when giving an open fasta file, an empty list of sequences to extract, and
@@ -268,6 +290,320 @@ def test_get_genome_seqs_exists(caplog):
     with open(outfile, "r") as outf:
         assert outf.readlines() == []
     os.remove(outfile)
+
+
+def test_check_extract_empty():
+    """
+    Test that when no file is present, it returns all gen and prt files, for all families
+    """
+    all_fams = [1, 6, 10, 11, 13, 14]
+    aldir = "Aldir"
+    dname = "TESTcheckExtract"
+    files_todo = gseq.check_existing_extract(all_fams, aldir, dname)
+    assert len(files_todo) == 12
+    gens = [os.path.join(aldir, "{}-current.{}.gen").format(dname, num) for num in all_fams]
+    prts = [os.path.join(aldir, "{}-current.{}.prt").format(dname, num) for num in all_fams]
+    assert len(gens + prts) == 12
+    assert set(gens + prts) == set(files_todo)
+
+
+def test_check_extract_prtfile():
+    """
+    Test that when there is only the prt files for 2 families in aldir (no gen file), and mafft
+    file, prt2nuc file for a family + concatenated file, it removes all these files,
+    and returns all prt and gen files for all families
+    """
+    all_fams = [1, 6, 10, 11, 13, 14]
+    aldir = "Aldir-notempty"
+    dname = "TESTcheckExtract"
+    # Create prt files for families 6 and 13
+    # Create mafft and prt2nuc files for family 6
+    # Create concatenated file
+    os.makedirs(aldir)
+    prt1 = os.path.join(aldir, "{}-current.6.prt".format(dname))
+    prt2 = os.path.join(aldir, "{}-current.13.prt".format(dname))
+    mafft = os.path.join(aldir, "{}-mafft-align.6.aln".format(dname))
+    btr = os.path.join(aldir, "{}-mafft-prt2nuc.6.aln".format(dname))
+    concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+    for outf in [prt1, prt2, mafft, btr, concat]:
+        open(outf, "w").close()
+    # Run check extract
+    files_todo = gseq.check_existing_extract(all_fams, aldir, dname)
+    assert len(files_todo) == 12
+    gens = [os.path.join(aldir, "{}-current.{}.gen").format(dname, num) for num in all_fams]
+    prts = [os.path.join(aldir, "{}-current.{}.prt").format(dname, num) for num in all_fams]
+    assert len(gens + prts) == len(files_todo)
+    assert set(gens + prts) == set(files_todo)
+    for outf in [prt1, prt2, mafft, btr, concat]:
+        assert not os.path.isfile(outf)
+    shutil.rmtree(aldir)
+
+
+def test_check_extract_files1genome():
+    """
+    Test that when there are already prt, gen, mafft and prt2nuc files for a family, it keeps them,
+    and returns all prt and gen files for all other families (except the one already existing).
+    + if concatenation file exists, it is removed (as we will realign all families except 1).
+    """
+    all_fams = [1, 6, 10, 11, 13, 14]
+    aldir = "Aldir-notempty"
+    dname = "TESTcheckExtract"
+    # Create prt, gen, mafft and prt2nuc files for family 6 + concatenated file
+    os.makedirs(aldir)
+    prt = os.path.join(aldir, "{}-current.6.prt".format(dname))
+    gen = os.path.join(aldir, "{}-current.6.gen".format(dname))
+    mafft = os.path.join(aldir, "{}-mafft-align.6.aln".format(dname))
+    btr = os.path.join(aldir, "{}-mafft-prt2nuc.6.aln".format(dname))
+    concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+    for outf in [prt, gen, mafft, btr, concat]:
+        open(outf, "w").close()
+    # Run check extract
+    files_todo = gseq.check_existing_extract(all_fams, aldir, dname)
+    assert len(files_todo) == 10
+    fams_todo = [1, 10, 11, 13, 14]
+    gens = [os.path.join(aldir, "{}-current.{}.gen").format(dname, num) for num in fams_todo]
+    prts = [os.path.join(aldir, "{}-current.{}.prt").format(dname, num) for num in fams_todo]
+    assert len(gens + prts) == len(files_todo)
+    assert set(gens + prts) == set(files_todo)
+    for outf in [prt, gen, mafft, btr]:
+        assert os.path.isfile(outf)
+    assert not os.path.isfile(concat)
+    shutil.rmtree(aldir)
+
+
+def test_check_extract_allexist():
+    """
+    Test that when there are already all prt and gen files for all families,
+    it keeps them, and returns an empty list of files to extract.
+    If concatenation file exists, it is also kept.
+    """
+    all_fams = [1, 6, 10, 11, 13, 14]
+    aldir = "Aldir-notempty"
+    dname = "TESTcheckExtract"
+    # Create prt and gen files for all families
+    os.makedirs(aldir)
+    gens = [os.path.join(aldir, "{}-current.{}.gen").format(dname, num) for num in all_fams]
+    prts = [os.path.join(aldir, "{}-current.{}.prt").format(dname, num) for num in all_fams]
+    mafft = os.path.join(aldir, "{}-mafft-align.6.aln".format(dname))
+    btr = os.path.join(aldir, "{}-mafft-prt2nuc.6.aln".format(dname))
+    concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+    for outf in gens + prts + [mafft, btr, concat]:
+        open(outf, "w").close()
+    # Run check extract
+    files_todo = gseq.check_existing_extract(all_fams, aldir, dname)
+    assert files_todo == []
+    for outf in gens + prts + [mafft, btr, concat]:
+        assert os.path.isfile(outf)
+    shutil.rmtree(aldir)
+
+
+def test_get_all_seqs(caplog):
+    """
+    Test that when giving a list of family numbers, and output directories are empty,
+    it extracts all expected proteins and genes.
+    => Default. empty output, give database and 2 families to extract and getentry files
+    exist in Listdir
+    """
+    all_genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+    dname = "TESTgetAllSeq"
+    listdir = "Listdir"
+    aldir = "Align"
+    all_fams = [1, 6]
+    quiet = False
+    # Create listdir and aldir and put all getentry files in listdir
+    os.makedirs(listdir)
+    os.makedirs(aldir)
+    ref_listdir = os.path.join(TESTPATH, "test_listdir")
+    ref_aldir = os.path.join(EXPPATH, "exp_aldir")
+    for gen in all_genomes:
+        genome_gen = os.path.join(ref_listdir, "getentry-gen_{}".format(gen))
+        genome_prt = os.path.join(ref_listdir, "getentry-prt_{}".format(gen))
+        gen_out = os.path.join(listdir, "{}-getEntry_gen_{}.txt".format(dname, gen))
+        prt_out = os.path.join(listdir, "{}-getEntry_prt_{}.txt".format(dname, gen))
+        shutil.copyfile(genome_gen, gen_out)
+        shutil.copyfile(genome_prt, prt_out)
+    gseq.get_all_seqs(all_genomes, dname, DBPATH, listdir, aldir, all_fams, quiet)
+    # For each family, check that prt and gen files exist, and their content
+    for fam in all_fams:
+        fam_prt = os.path.join(aldir, "{}-current.{}.prt".format(dname, fam))
+        assert os.path.isfile(fam_prt)
+        exp_fam_prt = os.path.join(ref_aldir, "current.{}.prt".format(fam))
+        same_files(fam_prt, exp_fam_prt)
+        fam_gen = os.path.join(aldir, "{}-current.{}.gen".format(dname, fam))
+        assert os.path.isfile(fam_gen)
+        exp_fam_gen = os.path.join(ref_aldir, "current.{}.gen".format(fam))
+        same_files(fam_gen, exp_fam_gen)
+    # Check logs
+    assert "Extracting proteins and genes from all genomes" in caplog.text
+    for gen in all_genomes:
+        assert "Extracting proteins and genes from {}".format(gen) in caplog.text
+    shutil.rmtree(listdir)
+    shutil.rmtree(aldir)
+
+
+def test_get_all_seqs_prt6(caplog):
+    """
+    Test that when giving a list of family numbers, and output directories contain only a prt
+    file for 1 family, it removes this prt file and it extracts all expected proteins and genes.
+    => Aldir with prt file for fam 6. Others as default
+    """
+    all_genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+    dname = "TESTgetAllSeq"
+    listdir = "Listdir"
+    aldir = "Align"
+    all_fams = [1, 6]
+    quiet = False
+    # Create listdir and aldir and put all getentry files in listdir
+    os.makedirs(listdir)
+    os.makedirs(aldir)
+    ref_listdir = os.path.join(TESTPATH, "test_listdir")
+    ref_aldir = os.path.join(EXPPATH, "exp_aldir")
+    prt6 = os.path.join(aldir, "{}-current.6.prt".format(dname))
+    # Create empty file for prt of family 6
+    open(prt6, "w").close()
+    for gen in all_genomes:
+        genome_gen = os.path.join(ref_listdir, "getentry-gen_{}".format(gen))
+        genome_prt = os.path.join(ref_listdir, "getentry-prt_{}".format(gen))
+        gen_out = os.path.join(listdir, "{}-getEntry_gen_{}.txt".format(dname, gen))
+        prt_out = os.path.join(listdir, "{}-getEntry_prt_{}.txt".format(dname, gen))
+        shutil.copyfile(genome_gen, gen_out)
+        shutil.copyfile(genome_prt, prt_out)
+    assert os.path.isfile(prt6)
+    gseq.get_all_seqs(all_genomes, dname, DBPATH, listdir, aldir, all_fams, quiet)
+    # For each family, check that prt and gen files exist, and their content
+    for fam in all_fams:
+        fam_prt = os.path.join(aldir, "{}-current.{}.prt".format(dname, fam))
+        assert os.path.isfile(fam_prt)
+        exp_fam_prt = os.path.join(ref_aldir, "current.{}.prt".format(fam))
+        same_files(fam_prt, exp_fam_prt)
+        fam_gen = os.path.join(aldir, "{}-current.{}.gen".format(dname, fam))
+        assert os.path.isfile(fam_gen)
+        exp_fam_gen = os.path.join(ref_aldir, "current.{}.gen".format(fam))
+        same_files(fam_gen, exp_fam_gen)
+    # Check logs
+    assert "Extracting proteins and genes from all genomes" in caplog.text
+    for gen in all_genomes:
+        assert "Extracting proteins and genes from {}".format(gen) in caplog.text
+    shutil.rmtree(listdir)
+    shutil.rmtree(aldir)
+
+
+def test_get_all_seqs_prtgen6(caplog):
+    """
+    Test that when giving a list of family numbers, and output directories contain a prt and a gen
+    file for 1 family, it extracts all expected proteins and genes for other families, but keeps
+    the current file for family already having prt and gen
+    + add mafft and prt2nuc files for this family, and check that they are not removed
+    + add concatenate file, and check that it is removed
+    => prt and gen files in Aldir for fam 6. Others as default
+    """
+    all_genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+    dname = "TESTgetAllSeq"
+    listdir = "Listdir"
+    aldir = "Align"
+    all_fams = [1, 6]
+    quiet = False
+    # Create listdir and aldir and put all getentry files in listdir
+    os.makedirs(listdir)
+    os.makedirs(aldir)
+    ref_listdir = os.path.join(TESTPATH, "test_listdir")
+    ref_aldir = os.path.join(EXPPATH, "exp_aldir")
+    # Create empty files for prt, gen, mafft and prt2nuc files of family 6
+    prt6 = os.path.join(aldir, "{}-current.6.prt".format(dname))
+    gen6 = os.path.join(aldir, "{}-current.6.gen".format(dname))
+    mafft6 = os.path.join(aldir, "{}-mafft-align.6.aln".format(dname))
+    prt2nuc6 = os.path.join(aldir, "{}-mafft-prt2nuc.6.aln".format(dname))
+    # Add concatenate file
+    concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+    for outf in [prt6, gen6, mafft6, prt2nuc6, concat]:
+        open(outf, "w").close()
+    for gen in all_genomes:
+        genome_gen = os.path.join(ref_listdir, "getentry-gen_{}".format(gen))
+        genome_prt = os.path.join(ref_listdir, "getentry-prt_{}".format(gen))
+        gen_out = os.path.join(listdir, "{}-getEntry_gen_{}.txt".format(dname, gen))
+        prt_out = os.path.join(listdir, "{}-getEntry_prt_{}.txt".format(dname, gen))
+        shutil.copyfile(genome_gen, gen_out)
+        shutil.copyfile(genome_prt, prt_out)
+    gseq.get_all_seqs(all_genomes, dname, DBPATH, listdir, aldir, all_fams, quiet)
+    # For family 1, check that prt and gen files exist and are as expected
+    fam_prt = os.path.join(aldir, "{}-current.1.prt".format(dname))
+    assert os.path.isfile(fam_prt)
+    exp_fam_prt = os.path.join(ref_aldir, "current.1.prt")
+    same_files(fam_prt, exp_fam_prt)
+    fam_gen = os.path.join(aldir, "{}-current.1.gen".format(dname))
+    assert os.path.isfile(fam_gen)
+    exp_fam_gen = os.path.join(ref_aldir, "current.1.gen")
+    same_files(fam_gen, exp_fam_gen)
+    # For family 6 , check that all filesare present and empty
+    for outf in [prt6, gen6, mafft6, prt2nuc6]:
+        assert os.path.isfile(outf)
+        with open(outf, "r") as out:
+            assert out.readlines() == []
+    # Check that concat file was removed
+    assert not os.path.isfile(concat)
+    # Check logs
+    assert "Extracting proteins and genes from all genomes" in caplog.text
+    for gen in all_genomes:
+        assert "Extracting proteins and genes from {}".format(gen) in caplog.text
+    shutil.rmtree(listdir)
+    shutil.rmtree(aldir)
+
+
+def test_get_all_seqs_allexist(caplog):
+    """
+    Test that when giving a list of family numbers, and all prt and gen extraction files for this
+    family already exist in Aldir, it does not change them, and returns an warning message saying
+    that all prt and gen are already extracted.
+    + concat file present, and not removed
+    """
+    all_genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+    dname = "TESTgetAllSeq"
+    listdir = "Listdir"
+    aldir = "Align"
+    all_fams = [1, 6]
+    quiet = False
+    # Create listdir and aldir and put all getentry files in listdir
+    os.makedirs(listdir)
+    os.makedirs(aldir)
+    ref_listdir = os.path.join(TESTPATH, "test_listdir")
+    ref_aldir = os.path.join(EXPPATH, "exp_aldir")
+    # Create empty files for prt, gen, mafft and prt2nuc files of family 6
+    created_files = []
+    for fam in all_fams:
+        prt = os.path.join(aldir, "{}-current.{}.prt".format(dname, fam))
+        gen = os.path.join(aldir, "{}-current.{}.gen".format(dname, fam))
+        mafft = os.path.join(aldir, "{}-mafft-align.{}.aln".format(dname, fam))
+        prt2nuc = os.path.join(aldir, "{}-mafft-prt2nuc.{}.aln".format(dname, fam))
+        created_files += [prt, gen, mafft, prt2nuc]
+        for outf in [prt, gen, mafft, prt2nuc]:
+            open(outf, "w").close()
+    # Add concatenate file
+    concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+    open(concat, "w").close()
+    for gen in all_genomes:
+        genome_gen = os.path.join(ref_listdir, "getentry-gen_{}".format(gen))
+        genome_prt = os.path.join(ref_listdir, "getentry-prt_{}".format(gen))
+        gen_out = os.path.join(listdir, "{}-getEntry_gen_{}.txt".format(dname, gen))
+        prt_out = os.path.join(listdir, "{}-getEntry_prt_{}.txt".format(dname, gen))
+        shutil.copyfile(genome_gen, gen_out)
+        shutil.copyfile(genome_prt, prt_out)
+    gseq.get_all_seqs(all_genomes, dname, DBPATH, listdir, aldir, all_fams, quiet)
+    # check that all files are present and empty
+    for outf in created_files:
+        assert os.path.isfile(outf)
+        with open(outf, "r") as out:
+            assert out.readlines() == []
+    # Check that concat file was removed
+    assert os.path.isfile(concat)
+    # Check logs
+    assert ("All extraction files already existing (see detailed log for " 
+            "more information)") in caplog.text
+    assert ("All prt and gene files for all families already exist. The program " 
+            "will use them for the next step. If you want to re-extract a given " 
+            "family, remove its prt and gen extraction files. If you want to " 
+            "re-extract all families, use option -F (or --force).") in caplog.text
+    shutil.rmtree(listdir)
+    shutil.rmtree(aldir)
 
 
 def same_files(file_out, file_exp):
