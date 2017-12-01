@@ -14,7 +14,7 @@ matplotlib.use('AGG')
 
 # Define variables used by several tests
 DBPATH = os.path.join("test", "data", "annotate", "genomes")
-BASELINE_DIR = os.path.join("..", "data", "annotate", "exp_files", "baseline")
+BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
 
 
 # Start tests
