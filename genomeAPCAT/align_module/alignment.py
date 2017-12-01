@@ -313,7 +313,9 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # If mafft file already exists, check the number of proteins aligned corresponds to number of
     #  proteins extracted. If not, remove mafft and btr files.
     if os.path.isfile(mafft_file):
-        nbfal = check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
+        message = ("fam {}: different number of proteins extracted in {} ({}) and proteins "
+                   "aligned in {}").format(num_fam, prt_file, nbfprt, mafft_file)
+        nbfal = check_nb_seqs(mafft_file, nbfprt, logger, message)
         if not nbfal:
             os.remove(mafft_file)
             utils.remove(btr_file)
@@ -371,12 +373,12 @@ def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger):
     nbfprt = utils.grep(prt_file, "^>", counts=True)
     nbfgen = utils.grep(gen_file, "^>", counts=True)
     if nbmiss + nbfprt != ngenomes:
-        logger.error(("fam {}: wrong sum of missing genomes ({}) and prt "
-                      "extracted ({}).").format(num_fam, nbmiss, nbfprt))
+        logger.error(("fam {}: wrong sum of missing genomes ({}) and prt extracted ({}) for {} "
+                      "genomes in the dataset.").format(num_fam, nbmiss, nbfprt, ngenomes))
         return False
     if nbmiss + nbfgen != ngenomes:
-        logger.error(("fam {}: wrong sum of missing genomes ({}) and gen "
-                      "extracted ({}).").format(num_fam, nbmiss, nbfgen))
+        logger.error(("fam {}: wrong sum of missing genomes ({}) and gen extracted ({}) for {} "
+                      "genomes in the dataset.").format(num_fam, nbmiss, nbfgen, ngenomes))
         return False
     return nbfprt
 
@@ -411,39 +413,9 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
     if ret != 0:
         return False
-    return check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
-
-
-def check_mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
-    """
-    Check that mafft alignment went well: the number of proteins in the alignment
-    is the same as the number of proteins extracted
-
-    Parameters
-    ----------
-    num_fam : int
-        current family number. Used for log messages
-    prt_file : str
-        path to file containing all proteins extracted. Used for log message if problem
-    mafft_file : str
-        path to file containing protein alignment by mafft
-    nbfprt : int
-        number of proteins extracted in prt file.
-    logger : logging.Logger
-        logger with queueHandler to give logs to main logger
-
-    Returns
-    -------
-    bool or int
-        False if different number of proteins aligned and extracted, number of proteins
-        aligned if no problem
-    """
-    nbfal = utils.grep(mafft_file, "^>", counts=True)
-    if nbfprt != nbfal:
-        logger.error("fam {}: different number of proteins extracted in {} ({}) and proteins "
-                     "aligned in {} ({}).".format(num_fam, prt_file, nbfprt, mafft_file, nbfal))
-        return False
-    return nbfal
+    message = ("fam {}: different number of proteins extracted in {} ({}) and proteins "
+               "aligned in {}").format(num_fam, prt_file, nbfprt, mafft_file)
+    return check_nb_seqs(mafft_file, nbfprt, logger, message)
 
 
 def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
@@ -480,39 +452,37 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
     if ret != 0:
         return False
-    return check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger)
+    message = ("fam {}: different number of proteins aligned in {} ({}) and genes "
+               "back-translated in {}").format(num_fam, mafft_file, nbfal, btr_file)
+    return check_nb_seqs(mafft_file, nbfal, logger, message)
 
 
-def check_backtranslate(num_fam, mafft_file, btr_file, nbfal, logger):
+def check_nb_seqs(alnfile, nbfal, logger, message):
     """
-    Check back-translation
+    Check the number of sequences in the given alignment file
 
     Parameters
     ----------
-    num_fam : int
-        current family number. Used for log message if problem
-    mafft_file : str
-        path to file containing mafft alignment of the family
-    btr_file : str
-        path to file containing back-translation of alignments
+    alnfile : str
+        path to alignment file
     nbfal : int
-        number of proteins aligned in the family (= corresponding to proteins with a unique
-        member in their genome)
+        expected number of sequences
     logger : logging.Logger
         logger with queueHandler to give logs to main logger
+    message : str
+        message to write when sequence numbers do not match
 
     Returns
     -------
-    bool
-        True if same number of sequences in back-translated as in mafft_file, False otherwise
+    bool or int
+        - False if not same number of sequences
+        - nbseqs if same number
     """
-    nbfalnuc = utils.grep(btr_file, "^>", counts=True)
-    if nbfal != nbfalnuc:
-        logger.error("fam {}: different number of proteins aligned in {} ({}) and genes "
-                     "back-translated in {} ({})".format(num_fam, mafft_file, nbfal,
-                                                         btr_file, nbfalnuc))
+    nbseqs = utils.grep(alnfile, "^>", counts=True)
+    if nbseqs != nbfal:
+        logger.error(message + ' ({})'.format(nbseqs))
         return False
-    return True
+    return nbseqs
 
 
 def check_lens(aln_file, num_fam, logger):
