@@ -298,7 +298,8 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     -------
     bool or str
         - False if problem with extractions or with alignment or with backtranslation
-        - True if everything went well (extractions and alignment ok, btr created without problem)
+        - 'nb_seqs' = number of sequences aligned if everything went well (extractions and
+          alignment ok, btr created without problem)
         - "OK" if extractions and alignments went well, and btr already exists
     """
     # Check number of proteins extracted
@@ -313,8 +314,9 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # If mafft file already exists, check the number of proteins aligned corresponds to number of
     #  proteins extracted. If not, remove mafft and btr files.
     if os.path.isfile(mafft_file):
-        message = ("fam {}: different number of proteins extracted in {} ({}) and proteins "
-                   "aligned in {}").format(num_fam, prt_file, nbfprt, mafft_file)
+        message = ("fam {}: Will redo alignment, because found a different number of proteins "
+                   "extracted in {} ({}) and proteins aligned in "
+                   "existing {}").format(num_fam, prt_file, nbfprt, mafft_file)
         nbfal = check_nb_seqs(mafft_file, nbfprt, logger, message)
         if not nbfal:
             os.remove(mafft_file)
@@ -331,7 +333,14 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # extractions and mafft files are ok. So, return True, saying that btr file is done,
     # next step will be to check it, add missing genomes etc.
     if os.path.isfile(btr_file):
-        return "OK"
+        message = ("fam {}: Will redo back-translation, because found a different number of "
+                   "proteins aligned in {} ({}) and genes back-translated in "
+                   "existing {}").format(num_fam, mafft_file, nbfal, btr_file)
+        res = check_nb_seqs(btr_file, nbfal, logger, message)
+        if not res:
+            utils.remove(btr_file)
+        else:
+            return "OK"
     # If btr file does not exist (removed because problem with mafft generated before,
     # or just not generated yet), do back-translation, and return True if it went well,
     # False otherwise

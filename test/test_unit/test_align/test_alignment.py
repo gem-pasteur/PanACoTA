@@ -10,7 +10,6 @@ import os
 import shutil
 
 import genomeAPCAT.align_module.alignment as al
-import test.test_unit.utilities_for_tests as utt
 
 
 # Define common variables
@@ -71,7 +70,7 @@ def test_check_btr_wrongnbfam(caplog):
     logger = logging.getLogger("test_check_btr")
     message = "Problem with fam 1"
     assert not al.check_nb_seqs(btr_file, nbfal, logger, message)
-    assert ("Problem with fam 1 (4)") in caplog.text
+    assert "Problem with fam 1 (4)" in caplog.text
 
 
 def test_backtranslate(caplog):
@@ -295,21 +294,195 @@ def test_check_extract_wrongnbgen(caplog):
     os.remove(prt_file)
 
 
-def test_family_align():
+def test_family_align(caplog):
     """
-
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 4, it aligns all families, and backtranslates the alignment to
+    nucleotides as expected, and returns the number of sequences aligned.
     """
-    prt_file = os.path.join(EXPPATH, "exp_aldir-pres", "current.8.prt")
-    gen_file = os.path.join(EXPPATH, "exp_aldir-pres", "current.8.gen")
-    miss_file = os.path.join(EXPPATH, "exp_aldir-pres", "current.8.miss.mst")
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
     mafft_file = "test_fam_align.8.aln"
     btr_file = "test_fam_align_btr.8.aln"
     num_fam = 8
     ngenomes = 4
     logger = logging.getLogger("test_fam_align")
     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
-                               ngenomes, logger) is True
+                               ngenomes, logger) == 3
+    assert "Checking extractions for family 8" in caplog.text
+    assert "Aligning family 8" in caplog.text
+    assert "Back-translating family 8" in caplog.text
+    # Check content of mafft and btr files
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    same_files(mafft_file, exp_mafft)
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    same_files(btr_file, exp_btr)
+    os.remove(mafft_file)
+    os.remove(btr_file)
 
+
+def test_family_align_wrongextract(caplog):
+    """
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 5, it returns False, error message for wrong sum of prt + miss,
+    and removes existing mafft and btr files.
+    """
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    mafft_file = "test_fam_align.8.aln"
+    btr_file = "test_fam_align_btr.8.aln"
+    open(mafft_file, "w").close()
+    open(btr_file, "w").close()
+    num_fam = 8
+    ngenomes = 5
+    logger = logging.getLogger("test_fam_align")
+    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+                               ngenomes, logger) is False
+    assert "Checking extractions for family 8" in caplog.text
+    assert ("fam 8: wrong sum of missing genomes (1) and prt extracted (3) for 5 genomes in "
+            "the dataset") in caplog.text
+    # Check that mafft and btr files were removed
+    assert not os.path.isfile(mafft_file)
+    assert not os.path.isfile(btr_file)
+
+
+def test_family_align_mafftok_nobtr(caplog):
+    """
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
+    it back-translates it and returns 3, the number of sequences back-translated
+    """
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    # Create mafft file with all alignments
+    mafft_file = "test_fam_align.8.aln"
+    ref_mafft_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    shutil.copyfile(ref_mafft_file, mafft_file)
+    btr_file = "test_fam_align_btr.8.aln"
+    num_fam = 8
+    ngenomes = 4
+    logger = logging.getLogger("test_fam_align")
+    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+                               ngenomes, logger) == 3
+    assert "Checking extractions for family 8" in caplog.text
+    assert "Back-translating family 8" in caplog.text
+    # Check content of mafft and btr files
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    same_files(mafft_file, exp_mafft)
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    same_files(btr_file, exp_btr)
+    os.remove(mafft_file)
+    os.remove(btr_file)
+
+
+def test_family_align_mafftempty_btrempty(caplog):
+    """
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
+    it back-translates it and returns 3, the number of sequences back-translated
+    """
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    # Create empty mafft file
+    mafft_file = "test_fam_align.8.aln"
+    open(mafft_file, "w").close()
+    # Create empty btr
+    btr_file = "test_fam_align_btr.8.aln"
+    open(btr_file, "w").close()
+    num_fam = 8
+    ngenomes = 4
+    logger = logging.getLogger("test_fam_align")
+    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+                               ngenomes, logger) == 3
+    assert "Checking extractions for family 8" in caplog.text
+    assert ("fam 8: Will redo alignment, because found a different number of proteins extracted "
+            "in test/data/align/exp_files/exp_aldir-pers/current.8.prt (3) and proteins aligned "
+            "in existing test_fam_align.8.aln (0)") in caplog.text
+    assert "Aligning family 8" in caplog.text
+    assert "Back-translating family 8" in caplog.text
+    # Check content of mafft and btr files
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    same_files(mafft_file, exp_mafft)
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    same_files(btr_file, exp_btr)
+    os.remove(mafft_file)
+    os.remove(btr_file)
+
+
+def test_family_align_mafftexists_emptybtr(caplog):
+    """
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
+    and an empty btr file, it regenerates the back-translated file, and returns 3,
+    the number of sequences back-translated.
+    """
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    # Create mafft file with all alignments
+    mafft_file = "test_fam_align.8.aln"
+    ref_mafft_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    shutil.copyfile(ref_mafft_file, mafft_file)
+    # Create empty btr file
+    btr_file = "test_fam_align_btr.8.aln"
+    open(btr_file, "w").close()
+    num_fam = 8
+    ngenomes = 4
+    logger = logging.getLogger("test_fam_align")
+    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+                               ngenomes, logger) == 3
+    assert "Checking extractions for family 8" in caplog.text
+    assert ("fam 8: Will redo back-translation, because found a different number of "
+            "proteins aligned in test_fam_align.8.aln (3) and genes back-translated in existing "
+            "test_fam_align_btr.8.aln (0)") in caplog.text
+    assert "Back-translating family 8" in caplog.text
+    # Check content of mafft and btr files
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    same_files(mafft_file, exp_mafft)
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    same_files(btr_file, exp_btr)
+    os.remove(mafft_file)
+    os.remove(btr_file)
+
+
+def test_family_align_mafftexists_btrok(caplog):
+    """
+    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+    and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
+    and the already generated back-translated file, it returns "OK" as it did not generate any
+    new file.
+    """
+    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    # Create mafft file with all alignments
+    mafft_file = "test_fam_align.8.aln"
+    ref_mafft_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    shutil.copyfile(ref_mafft_file, mafft_file)
+    # Create btr file with alignments
+    btr_file = "test_fam_align_btr.8.aln"
+    ref_btr_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    shutil.copyfile(ref_btr_file, btr_file)
+    num_fam = 8
+    ngenomes = 4
+    logger = logging.getLogger("test_fam_align")
+    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+                               ngenomes, logger) == "OK"
+    assert "Checking extractions for family 8" in caplog.text
+    # Check content of mafft and btr files
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    same_files(mafft_file, exp_mafft)
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
+    same_files(btr_file, exp_btr)
+    os.remove(mafft_file)
+    os.remove(btr_file)
+
+# TODO: no mafft file, btr file (empty), and problem while running mafft -> should return False,
+# and btr file removed.
 
 
 def same_files(file_out, file_exp):
