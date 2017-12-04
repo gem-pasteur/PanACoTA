@@ -94,7 +94,7 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
         main_logger.error(excp)
         sys.exit(1)
     # We re-aligned at least one family -> remove concatenated files and groupby
-    if set(final) != {["OK"]}:
+    if set(final) != {"OK"}:
         aldir = os.path.split(prefix)[0]
         concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
         outdir = os.path.split(aldir)[0]
@@ -130,7 +130,7 @@ def handle_family(args):
           ``align_all_families`` function, to know if something was regenerated, or if everything
           already existed with the expected format. If something was redone and concat/group files
           exist, it removes them.
-        - False if any problem (alignment, btr, add missing genomes...)
+        - False if any problem (extractions, alignment, btr, add missing genomes...)
         - True if just generated all files, and everything is ok
     """
     prefix, num_fam, ngenomes, q = args
@@ -300,7 +300,7 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
         - False if problem with extractions or with alignment or with backtranslation
         - 'nb_seqs' = number of sequences aligned if everything went well (extractions and
           alignment ok, btr created without problem)
-        - "OK" if extractions and alignments went well, and btr already exists
+        - "OK" if extractions and alignments went well, and btr already exists and is ok
     """
     # Check number of proteins extracted
     nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
@@ -336,7 +336,7 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
         message = ("fam {}: Will redo back-translation, because found a different number of "
                    "proteins aligned in {} ({}) and genes back-translated in "
                    "existing {}").format(num_fam, mafft_file, nbfal, btr_file)
-        res = check_nb_seqs(btr_file, nbfal, logger, message)
+        res = check_nb_seqs(btr_file, [nbfal, ngenomes], logger, message)
         if not res:
             utils.remove(btr_file)
         else:
@@ -419,8 +419,12 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     cmd = "fftns --quiet {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    stdout.close()
+    if not isinstance(ret, int):
+        ret = ret.returncode
     if ret != 0:
+        os.remove(mafft_file)
         return False
     message = ("fam {}: different number of proteins extracted in {} ({}) and proteins "
                "aligned in {}").format(num_fam, prt_file, nbfprt, mafft_file)
@@ -450,7 +454,8 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     Returns
     -------
     bool
-        True if everything went well (back-translation, same number of families), False otherwise
+        - False if problem (back-translation, different number of families...)
+        - number of sequences in btr file if everything went well
     """
     logger.log(utils.detail_lvl(), "Back-translating family {}".format(num_fam))
     curpath = os.path.dirname(os.path.abspath(__file__))
@@ -458,8 +463,12 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     cmd = "awk -f {} {} {}".format(awk_script, mafft_file, gen_file)
     stdout = open(btr_file, "w")
     error = "Problem while trying to backtranslate {} to a nucleotide alignment".format(mafft_file)
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger).returncode
+    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    stdout.close()
+    if not isinstance(ret, int):
+        ret = ret.returncode
     if ret != 0:
+        os.remove(btr_file)
         return False
     message = ("fam {}: different number of proteins aligned in {} ({}) and genes "
                "back-translated in {}").format(num_fam, mafft_file, nbfal, btr_file)
@@ -474,8 +483,8 @@ def check_nb_seqs(alnfile, nbfal, logger, message):
     ----------
     alnfile : str
         path to alignment file
-    nbfal : int
-        expected number of sequences
+    nbfal : int or []
+        expected number of sequences, or list of expected numbers of sequences
     logger : logging.Logger
         logger with queueHandler to give logs to main logger
     message : str
@@ -485,13 +494,17 @@ def check_nb_seqs(alnfile, nbfal, logger, message):
     -------
     bool or int
         - False if not same number of sequences
-        - nbseqs if same number
+        - nbseqs in align file if found among values in 'nbfal'
     """
     nbseqs = utils.grep(alnfile, "^>", counts=True)
-    if nbseqs != nbfal:
-        logger.error(message + ' ({})'.format(nbseqs))
-        return False
-    return nbseqs
+    if isinstance(nbfal, int):
+        nbfal = [nbfal]
+    for num in nbfal:
+        if nbseqs == num:
+            return nbseqs
+
+    logger.error(message + ' ({})'.format(nbseqs))
+    return False
 
 
 def check_lens(aln_file, num_fam, logger):
