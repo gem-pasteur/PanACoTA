@@ -166,7 +166,7 @@ def get_names_to_extract(tabf, outfile):
 
     Parameters
     ----------
-    tabf : _io.TextIOWrapper
+    tabf : _io.TextIO
         open file containing names of sequences to extract
     outfile : str or None
         if None, the tab file must contain 2 columns (1 for the sequence name,
@@ -206,12 +206,12 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     to_extract : dict or []
         {sequence_to_extract: file_to_which_it_will_be_extracted} or list of sequences to
         extract (if an output filename is also given in 'outf')
-    fasf : _io.TextIOWrapper
+    fasf : _io.TextIO
         open file containing sequences in multi-fasta format
     files_todo : list or None
         list of files which must be generated (prt and gen files). Others
         already exist, so ignore them.
-    outf : _io.TextIOWrapper or None
+    outf : _io.TextIO or None
         If an outfile is given (not None), and 'to_extract' is a dict, only its keys will be
         considered, and all these sequences will be extracted to 'outfile' (if 'to_extract' is a
         list, will extract all sequences of this list). Otherwise, if None,

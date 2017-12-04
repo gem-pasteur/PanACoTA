@@ -22,8 +22,24 @@ logger = logging.getLogger("align.post")
 def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     """
     After the alignment of all proteins by family:
+
     - concatenate all alignment files
     - group the alignment by genome
+
+    Parameters
+    ----------
+    fam_nums : []
+        list of family numbers
+    all_genomes : []
+        list of all genomes in dataset
+    prefix : str
+        path to ``aldir/<name of dataset>`` (used to get extraction, alignment and btr files easily)
+    outdir : str
+        path to output directory, containing Aldir and Listdir, and that will also contain Treedir
+    dname : str
+        name of dataset (used to name concat and grouped files, as well as tree folder)
+    quiet : bool
+        True if nothing must be sent to sdtout/stderr, False otherwise
     """
     all_alns, status = concat_alignments(fam_nums, prefix, quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
@@ -34,6 +50,23 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
 def concat_alignments(fam_nums, prefix, quiet):
     """
     Concatenate all family alignment files to a unique file
+
+    Parameters
+    ----------
+    fam_nums : []
+        list of family numbers
+    prefix : str
+        path to ``aldir/<name of dataset>`` (used to get extraction, alignment and btr files easily)
+    quiet : bool
+        True if nothing must be sent to sdtout/stderr, False otherwise
+
+    Returns
+    -------
+    tuple
+        (output, str) with:
+
+        - output: path to file containing concatenation of all alignments
+        - str: "OK" if concatenation file already exists, "Done" if just did concatenation
     """
     output = "{}-complete.cat.aln".format(prefix)
     if os.path.isfile(output):
@@ -46,7 +79,7 @@ def concat_alignments(fam_nums, prefix, quiet):
     if quiet:
         utils.cat(list_files, output)
     else:
-        utils.cat(list_files, output, title = "Concatenation")
+        utils.cat(list_files, output, title="Concatenation")
     return output, "Done"
 
 
@@ -54,6 +87,21 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
     """
     Function calling group_by_genome in a pool, while giving information to user
     (time elapsed)
+
+    Parameters
+    ----------
+    all_genomes : []
+        list of all genomes in the dataset
+    all_alns : str
+        path to file containing all alignments concatenated
+    status : str
+        "OK" if concatenation file already existed before running, "Done" if just did concatenation
+    treedir : str
+        path to tree directory
+    dname : str
+        name of dataset
+    quiet : bool
+        True if nothing must be sent to sdtout/stderr, False otherwise
     """
     outfile = os.path.join(treedir, dname + ".grp.aln")
     if status == "Done":
@@ -64,6 +112,7 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
                         "Program will end. ").format(outfile))
         return
     logger.info("Grouping alignments per genome")
+    bar = None
     if not quiet:
         widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
                    "  -  ", progressbar.Timer()]
@@ -73,10 +122,9 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
     final = pool.map_async(group_by_genome, [args], chunksize=1)
     pool.close()
     if not quiet:
-        while(True):
+        while True:
             if final.ready():
                 break
-            remaining = final._number_left
             bar.update()
         bar.finish()
     pool.join()
@@ -87,6 +135,13 @@ def group_by_genome(args):
     From the alignment file 'all_alns' containing all proteins, group the alignments of
     proteins by their genome (listed in 'all_genomes'), and save the result
     in 'treedir'
+
+    Parameters
+    ----------
+    args : tuple
+        - all_genomes: list of all genomes
+        - all_alns: path to file containing all alignments concatenated
+        - outfile: path to file which will contain alignments grouped by genome
     """
     all_genomes, all_alns, outfile = args
     sequences = read_alignments(all_alns, all_genomes)
@@ -96,6 +151,18 @@ def group_by_genome(args):
 def read_alignments(all_alns, all_genomes):
     """
     Read alignment file, and assign each sequence to a genome
+
+    Parameters
+    ----------
+    all_alns : str
+        path to file containing all alignments concatenated
+    all_genomes : []
+        list of all genomes
+
+    Returns
+    -------
+    dict
+        {genome_name: [list of sequences for this genome]}
     """
     sequences = {}  # name: [list of sequences]
     genome = None
@@ -128,6 +195,13 @@ def read_alignments(all_alns, all_genomes):
 def write_groups(outfile, sequences):
     """
     Writing alignments per genome to output file.
+
+    Parameters
+    ----------
+    outfile : str
+        path to file that will contain alignments grouped by genome
+    sequences : dict
+        {genome_name: [list of sequences for this genome]}
     """
     logger.details("Writing alignments per genome")
     with open(outfile, "w") as outf:
@@ -141,10 +215,23 @@ def write_groups(outfile, sequences):
 def get_genome(header, all_genomes):
     """
     Find to which genome belongs 'header'
+
+    Parameters
+    ----------
+    header : str
+        header read in alignment file
+    all_genomes : []
+        list of all genomes
+
+    Returns
+    -------
+    str
+        name of genome from which the header is
     """
     header = header.split(">")[1].split()[0]
     for genome in all_genomes:
         if genome in header:
             return genome
-    logger.error("Protein {} does not correspond to any genome name given... {}".format(header))
+    logger.error(("Protein {} does not correspond to any genome name "
+                  "given... {}").format(header, all_genomes))
     sys.exit(1)

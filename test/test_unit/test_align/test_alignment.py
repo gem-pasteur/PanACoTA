@@ -651,7 +651,7 @@ def test_add_missing_btrmiss(caplog):
     status1 = "OK"
     logger = logging.getLogger("test_add_missing")
     assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) is True
-    assert ("Adding missing genomes for family 8") in caplog.text
+    assert "Adding missing genomes for family 8" in caplog.text
     final_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     same_files(btr_file, final_btr)
     os.remove(btr_file)
