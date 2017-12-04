@@ -95,13 +95,13 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
 
 def build_parser(parser):
     """
-        Method to create a parser for command-line options
+    Method to create a parser for command-line options
 
-        Parameters
-        ----------
-        parser : argparse.ArgumentParser
-            parser to configure in order to extract command-line arguments
-        """
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        parser to configure in order to extract command-line arguments
+    """
     import argparse
     import multiprocessing
 
