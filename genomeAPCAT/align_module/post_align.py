@@ -76,6 +76,12 @@ def concat_alignments(fam_nums, prefix, quiet):
         return output, "OK"
     logger.info("Concatenating all alignment files")
     list_files = ["{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam) for num_fam in fam_nums]
+    # Check that all files exist
+    for f in list_files:
+        if not os.path.isfile(f):
+            logger.error("The alignment file {} does not exist. Please check the families you "
+                         "want, and their corresponding alignment files".format(f))
+            sys.exit(1)
     if quiet:
         utils.cat(list_files, output)
     else:
@@ -201,7 +207,7 @@ def write_groups(outfile, sequences):
     outfile : str
         path to file that will contain alignments grouped by genome
     sequences : dict
-        {genome_name: [list of sequences for this genome]}
+        {genome_name: [list of sequences (DNA, prot...) for this genome]}
     """
     logger.details("Writing alignments per genome")
     with open(outfile, "w") as outf:
