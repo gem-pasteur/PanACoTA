@@ -1049,7 +1049,6 @@ def same_sequences(file_out, file_exp):
     for name, seq in seq_out.items():
         assert len(seq) == len(seq_exp[name])
         assert set(seq) == set(seq_exp[name])
-    assert seq_out == seq_exp
 
 
 def get_seqs(filein):
