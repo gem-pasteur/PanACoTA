@@ -11,9 +11,11 @@ import subprocess
 import pytest
 
 import genomeAPCAT.subcommands.align as al
+from genomeAPCAT import utils
 
 
 # Define common variables
+
 ALDIR = os.path.join("test", "data", "align")
 EXPPATH = os.path.join(ALDIR, "exp_files")
 TESTPATH = os.path.join(ALDIR, "test_files")
