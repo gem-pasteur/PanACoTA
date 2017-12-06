@@ -207,7 +207,7 @@ def test_launch_gbg_existsempty(caplog):
     open(out_grp, "w").close()
     dname = "TESTlaunch"
     quiet = False
-    assert pal.launch_group_by_genome(all_genomes, alnfile, status, treedir, dname, quiet) is None
+    assert pal.launch_group_by_genome(all_genomes, alnfile, status, treedir, dname, quiet) is True
     assert "Grouping alignments per genome" not in caplog.text
     with open(out_grp, "r") as outf:
         assert outf.readlines() == []
@@ -285,7 +285,7 @@ def test_concat(caplog):
     quiet = False
     output, mess = pal.concat_alignments(fam_nums, prefix, quiet)
     assert output == os.path.join(aldir, dname + "-complete.cat.aln")
-    ref_concat = os.path.join(EXPPATH, "exp_aldir-pers", "complete.cat.aln")
+    ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     same_files(output, ref_concat)
     assert mess == "Done"
     assert "Concatenating all alignment files" in caplog.text
@@ -320,7 +320,7 @@ def test_concat_quiet(caplog):
     quiet = True
     output, mess = pal.concat_alignments(fam_nums, prefix, quiet)
     assert output == os.path.join(aldir, dname + "-complete.cat.aln")
-    ref_concat = os.path.join(EXPPATH, "exp_aldir-pers", "complete.cat.aln")
+    ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     same_files(output, ref_concat)
     assert mess == "Done"
     assert "Concatenating all alignment files" in caplog.text
@@ -422,7 +422,7 @@ def test_postalign(caplog):
     # Check that concatenated file is created and with expected content
     out_concat = os.path.join(aldir, dname + "-complete.cat.aln")
     assert os.path.isfile(out_concat)
-    ref_concat = os.path.join(EXPPATH, "exp_aldir-pers", "complete.cat.aln")
+    ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     same_files(out_concat, ref_concat)
     # Check that grouped by genome file is created, with expected content
     treedir = os.path.join(outdir, "Phylo-" + dname)
@@ -501,7 +501,7 @@ def test_postalign_missgenome(caplog):
     # Check that concatenated file is created and with expected content
     out_concat = os.path.join(aldir, dname + "-complete.cat.aln")
     assert os.path.isfile(out_concat)
-    ref_concat = os.path.join(EXPPATH, "exp_aldir-pers", "complete.cat.aln")
+    ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     same_files(out_concat, ref_concat)
     # Check that grouped by genome file is not created
     treedir = os.path.join(outdir, "Phylo-" + dname)

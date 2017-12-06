@@ -114,7 +114,7 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
     Returns
     -------
     bool
-        - True if everything went well
+        - True if everything went well or was already done
         - False if error occurred in at least one step
     """
     outfile = os.path.join(treedir, dname + ".grp.aln")
@@ -124,7 +124,7 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
         logger.info("Alignments already grouped by genome")
         logger.warning(("Alignments already grouped by genome in {}. "
                         "Program will end. ").format(outfile))
-        return
+        return True
     logger.info("Grouping alignments per genome")
     bar = None
     if not quiet:
