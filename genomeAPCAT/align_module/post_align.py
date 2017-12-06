@@ -74,7 +74,8 @@ def concat_alignments(fam_nums, prefix, quiet):
     if os.path.isfile(output):
         logger.info("Alignments already concatenated")
         logger.warning(("Alignments already concatenated in {}. Program will use "
-                        "it for next steps").format(output))
+                        "it for next steps. If you want to redo it, remove it before "
+                        "running.").format(output))
         return output, "OK"
     logger.info("Concatenating all alignment files")
     list_files = ["{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam) for num_fam in fam_nums]

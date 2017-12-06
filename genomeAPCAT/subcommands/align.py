@@ -70,7 +70,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
         print("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
         sys.exit(1)
 
-    if force:
+    if force and os.path.isdir(outdir):
         shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
 
