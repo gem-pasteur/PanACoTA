@@ -44,7 +44,9 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     all_alns, status = concat_alignments(fam_nums, prefix, quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
+    res = launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
+    if not res:
+        logger.error("An error occurred. We could not group sequences by genome.")
 
 
 def concat_alignments(fam_nums, prefix, quiet):
@@ -108,6 +110,12 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
         name of dataset
     quiet : bool
         True if nothing must be sent to sdtout/stderr, False otherwise
+
+    Returns
+    -------
+    bool
+        - True if everything went well
+        - False if error occurred in at least one step
     """
     outfile = os.path.join(treedir, dname + ".grp.aln")
     if status == "Done":
@@ -134,6 +142,7 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
             bar.update()
         bar.finish()
     pool.join()
+    return False not in final.get()
 
 
 def group_by_genome(args):
@@ -148,10 +157,19 @@ def group_by_genome(args):
         - all_genomes: list of all genomes
         - all_alns: path to file containing all alignments concatenated
         - outfile: path to file which will contain alignments grouped by genome
+
+    Returns
+    -------
+    bool
+        - True if everything went well
+        - False if problem when trying to group by genomes
     """
     all_genomes, all_alns, outfile = args
     sequences = read_alignments(all_alns, all_genomes)
+    if not sequences:
+        return False
     write_groups(outfile, sequences)
+    return True
 
 
 def read_alignments(all_alns, all_genomes):
@@ -167,8 +185,9 @@ def read_alignments(all_alns, all_genomes):
 
     Returns
     -------
-    dict
-        {genome_name: [list of sequences for this genome]}
+    dict or None
+        - {genome_name: [list of sequences for this genome]}
+        - None if problem with a protein for which we don't find the genome
     """
     sequences = {}  # name: [list of sequences]
     genome = None
@@ -182,6 +201,8 @@ def read_alignments(all_alns, all_genomes):
                     seq = ""
                 # Get new genome header
                 genome = get_genome(line, all_genomes)
+                if not genome:
+                    return None
                 if genome not in sequences:
                     sequences[genome] = []
             else:
@@ -193,7 +214,7 @@ def read_alignments(all_alns, all_genomes):
         logger.error("Problems occurred while grouping alignments by genome: all genomes "
                      "do not have the same number of sequences. Check that each protein "
                      "name contains the name of the genome from which it comes.")
-        sys.exit(1)
+        return None
     logger.details("{} sequences found per genome".format(per_genome[0]))
     return sequences
 
@@ -231,8 +252,9 @@ def get_genome(header, all_genomes):
 
     Returns
     -------
-    str
+    str or None
         name of genome from which the header is
+        None if no genome found
     """
     header = header.split(">")[1].split()[0]
     for genome in all_genomes:
@@ -240,4 +262,4 @@ def get_genome(header, all_genomes):
             return genome
     logger.error(("Protein {} does not correspond to any genome name "
                   "given... {}").format(header, all_genomes))
-    sys.exit(1)
+    return None
