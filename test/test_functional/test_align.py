@@ -20,6 +20,24 @@ TESTPATH = os.path.join(ALDIR, "test_files")
 LOGFILE_BASE = "logs_test_postalign"
 
 
+def setup_module():
+    """
+    create logger at start of this test module
+    """
+    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
+    print("Createc logger")
+
+
+def teardown_module():
+    """
+    Remove log files at the end of this test module
+    """
+    os.remove(LOGFILE_BASE + ".log")
+    os.remove(LOGFILE_BASE + ".log.details")
+    os.remove(LOGFILE_BASE + ".log.err")
+    print("Remove log files")
+
+
 def test_main(caplog):
     """
     Test that when giving a database, a persistent genome and a list of genomes, it extracts
@@ -1025,6 +1043,10 @@ def same_sequences(file_out, file_exp):
     """
     seq_out = get_seqs(file_out)
     seq_exp = get_seqs(file_exp)
+    assert seq_out.keys() == seq_exp.keys()
+    for name, seq in seq_out.items():
+        assert len(seq) == len(seq_exp[name])
+        assert set(seq) == set(seq_exp[name])
     assert seq_out == seq_exp
 
 
