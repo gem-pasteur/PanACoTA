@@ -439,7 +439,7 @@ def test_main_exist_emptyp2n(caplog):
     ref_btr1 = os.path.join(ex_aldir, "mafft-prt2nuc.1.aln")
     same_files(outbtr1, ref_btr1)
     # Check concat and group files
-    same_files(refcat, outcat)
+    same_sequences(refcat, outcat)
     same_sequences(outgrp, refgrp)
     # Check logs
     assert ("Reading PersGenome and constructing lists of missing genomes in "
