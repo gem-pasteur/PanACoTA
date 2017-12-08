@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functions generating a phylogenetic tree from a persistent genome, using FastTree
+Function to infer a phylogenetic tree from a persistent genome, using FastTree
 
 @author gem
 June 2017
