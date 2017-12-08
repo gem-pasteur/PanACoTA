@@ -16,7 +16,7 @@ from genomeAPCAT import utils
 
 logger = logging.getLogger("tree.quicktree")
 
-quickt
+
 def run_tree(alignfile, boot, treefile, *args, **kwargs):
     """
     Run quicktree for the given alignment file and options
