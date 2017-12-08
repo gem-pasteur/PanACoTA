@@ -98,7 +98,7 @@ def build_parser(parser):
                                  "phylogenetic tree. Default is FastTree"))
 
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-b", "--boot", dest="boot",
+    optional.add_argument("-b", "--boot", dest="boot", type=int,
                           help=("Indicate how many bootstraps you want to compute. By "
                                 "default, no bootstrap is calculated."))
     optional.add_argument("-o", dest="outfile",
