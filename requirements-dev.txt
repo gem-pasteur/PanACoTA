@@ -1,0 +1,7 @@
+sphinx
+sphinx_rtd_theme
+numpydoc
+pytest>=2.5.2
+pytest-cov>=1.6
+pytest-mpl>=0.8
+coverage>=4
