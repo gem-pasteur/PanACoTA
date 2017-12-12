@@ -84,25 +84,25 @@ def uninstall():
     run_cmd(cmd, error)
     link_dest = os.path.join(os.sep + "usr", "local", "bin", "genomeAPCAT")
     if os.path.exists(link_dest):
-    	os.remove(link_dest)
+        os.remove(link_dest)
 
 
 def upgrade(user=False):
-	"""
-	Upgrade genomeAPCAT module to the latest version. User must update the sources
-	before running upgrade!
-	"""
-	logger.info("Upgrading genomeAPCAT...")
-	if user:
-		cmd = "pip3 install --upgrade --no-deps --user ."
-	else:
-		cmd = "pip3 install --upgrade --no-deps ."
-	error = ("An error occurred whyle trying to update genomeAPCAT. If you have "
+    """
+    Upgrade genomeAPCAT module to the latest version. User must update the sources
+    before running upgrade!
+    """
+    logger.info("Upgrading genomeAPCAT...")
+    if user:
+        cmd = "pip3 install --upgrade --no-deps --user ."
+    else:
+        cmd = "pip3 install --upgrade --no-deps ."
+    error = ("An error occurred whyle trying to update genomeAPCAT. If you have "
              "permission errors, try to add 'sudo' before your command line.")
-	run_cmd(cmd, error, eof=True)
+    run_cmd(cmd, error, eof=True)
 
 
-def install_all(install_dir, dev=False, user=False):
+def install_all(install_dir, target, dev=False, user=False):
     """
     Install all needed software(s).
     First, check if dependencies are installed.
@@ -112,8 +112,8 @@ def install_all(install_dir, dev=False, user=False):
     dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
     user: install in user mode if True
     """
-    to_install = check_dependencies()
-    if to_install != []:
+    to_install, msg = check_dependencies(target)
+    if to_install:
         binpath = os.path.join(os.getcwd(), "binaries")
         deppath = os.path.join(os.getcwd(), "dependencies")
         os.makedirs(deppath, exist_ok=True)
@@ -125,19 +125,23 @@ def install_all(install_dir, dev=False, user=False):
                                "not predict RNA.")
         if "prokka" in to_install:
             install_prokka()
-        if "mmseqs" in to_install:
-        	install_mmseqs()
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
     if user:
-    	logger.info("Installing genomeAPCAT in user mode...")
-    	opt = "--user"
+        logger.info("Installing genomeAPCAT in user mode...")
+        opt = "--user"
     else:
         logger.info("Installing genomeAPCAT...")
         opt = ""
     if dev:
+        logger.info("Installing developer packages needed for genomeAPCAT")
         cmd = "pip3 install " + opt + " -e ."
+        cmd2 = "pip3 install -r requirements-dev.txt"
+        error2 = ("Problem while trying to install developper tools. If you have "
+                  "permission errors, try to add 'sudo' before your command line. If "
+                  "you do not have root access, install with the '--user' option")
+        run_cmd(cmd2, error2, eof=True)
     else:
         cmd = "pip3 install " + opt + " ."
     error = ("A problem occurred while trying to install genomeAPCAT. If you have "
@@ -147,9 +151,11 @@ def install_all(install_dir, dev=False, user=False):
     if user:
         gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
         os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
+    if msg:
+        logger.warning(msg)
 
 
-def check_dependencies():
+def check_dependencies(target):
     """
     Check that all required tools are available.
 
@@ -157,8 +163,12 @@ def check_dependencies():
         - if barrnap is not installed: check that wget and tar are available
         - check that git is available
     - check that pip3 is available
+    - for other steps (pangenome, align, tree), just check if the tools are installed. If not,
+    return a message for user, so that he can install them if needed.
     """
     to_install = []
+    to_install_user = []
+    msg = None
     if target == "install" or target == "develop":
         if not cmd_exists("prokka"):
             if not cmd_exists("barrnap"):
@@ -179,27 +189,30 @@ def check_dependencies():
             logger.error("You need pip3 to install genomeAPCAT.")
             sys.exit(1)
         if not cmd_exists("mmseqs"):
-        	to_install.append("mmseqs")
-    return to_install
-
-
-def install_mmseqs():
-	"""
-	Install MMseqs2
-	"""
-	logger.error("Please install MMseqs2 to be able to get pan and core genomes")
-	# avoir installé : git, g++ (4.6 or higher) and cmake (3.0 or higher) g++ pas de clang, mais de homebrew.
-
-	# if mac, check if homebrew is installed. otherwise install homebrew.
-	# check if g++ is installed with homebrew. otherwise install it.
-	# git clone https://github.com/soedinglab/MMseqs2.git
-    # cd MMseqs2
-    # mkdir build
-    # cd build
-    # cmake -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=. ..
-    # make
-    # make install
-    # export PATH=$(pwd)/bin/:$PATH
+            to_install_user.append("mmseqs")
+        if not cmd_exists("fftns"):
+            to_install_user.append("mafft")
+        if not cmd_exists("FastTreeMP") and not cmd_exists("fastme") and not cmd_exists(
+                "quicktree"):
+            to_install_user.append("trees")
+    if to_install_user:
+        msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
+               "Here is the list of missing dependencies, and for what they are used. If you plan "
+               "to use the subcommands hereafter, first install required dependencies:\n")
+        if "mmseqs" in to_install_user:
+            msg += "\t- mmseqs (for pangenome subcommand)\n"
+        if "mafft" in to_install_user:
+            msg += ("\t- mafft (to align persistent genomes in order to infer a phylogenetic tree "
+                    "after")
+        if "trees" in to_install_user:
+            msg += ("\t- One of the 3 following softwares, used to infer a phylogenetic tree:\n"
+                    "\t\t* FastTree (see README or documentation for more information on how to "
+                    "install it)\n"
+                    "\t\t* FastME\n"
+                    "\t\t* Quicktree\n")
+        msg += ("See more information on how to download/install those softwares in README or in "
+                "documentation.")
+    return to_install, msg
 
 
 def install_barrnap():
@@ -219,7 +232,7 @@ def install_barrnap():
         return ret
     cmd = "rm 0.8.tar.gz"
     error = "A problem occurred while removing barrnap archive. See log above."
-    ret = run_cmd(cmd, error)
+    run_cmd(cmd, error)
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
     cmd = "mv barrnap-0.8 " + srcpath
@@ -240,15 +253,15 @@ def install_prokka():
     logger.info("Installing prokka...")
     cmd = "git clone https://github.com/tseemann/prokka.git"
     error = "A problem occurred while trying to download prokka. See log above."
-    ret = run_cmd(cmd, error, eof=True)
+    run_cmd(cmd, error, eof=True)
     cmd = "mv prokka dependencies"
     error = "A problem occurred while moving prokka to 'dependencies'. See log above."
-    ret = run_cmd(cmd, error, eof=True)
+    run_cmd(cmd, error, eof=True)
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
-    cmd = os.path.join(srcpath, "prokka", "bin", "prokka") +  " --setupdb"
+    cmd = os.path.join(srcpath, "prokka", "bin", "prokka") + " --setupdb"
     error = "A problem occurred while initializing prokka db. See log above."
-    ret = run_cmd(cmd, error, eof=True)
+    run_cmd(cmd, error, eof=True)
     os.symlink(os.path.join(srcpath, "prokka", "bin", "prokka"),
                os.path.join(binpath, "prokka"))
 
@@ -313,8 +326,8 @@ def parse():
     parser.add_argument("--user", dest="user", action="store_true",
                         help="Install package in user mode.")
     args = parser.parse_args()
-    if args.user and args.target not in  ["install", "upgrade"]:
-    	parser.error("--user option can only be used when installing (or upgrading) the package.")
+    if args.user and args.target not in ["install", "upgrade"]:
+        parser.error("--user option can only be used when installing (or upgrading) the package.")
     return args
 
 
@@ -322,8 +335,6 @@ if __name__ == '__main__':
     # Init logger
     logger = logging.getLogger()
     level = logging.INFO
-    # logging.basicConfig(level=level,
-                        # datefmt='%a, %d %b %Y %H:%M:%S')
     logger.setLevel(level)
     # create formatter for log messages: "timestamp :: level :: message"
     formatterFile = logging.Formatter('[%(asctime)s] :: %(levelname)s :: %(message)s',
@@ -345,25 +356,24 @@ if __name__ == '__main__':
 
     # Get user arguments
     OPTIONS = parse()
-    user = OPTIONS.user
+    user_mode = OPTIONS.user
     if not OPTIONS.install_dir:
-        install_dir = os.path.join(os.sep + "usr", "local", "bin")
+        my_install_dir = os.path.join(os.sep + "usr", "local", "bin")
     else:
-        install_dir = OPTIONS.install_dir
-    target = OPTIONS.target
+        my_install_dir = OPTIONS.install_dir
+    my_target = OPTIONS.target
     # Execute target
-    if target == "install":
+    if my_target == "install":
         # Check that installation directory is in $PATH
-        check_path(install_dir)
-        install_all(install_dir, user=user)
-    elif target == "develop":
+        check_path(my_install_dir)
+        install_all(my_install_dir, my_target, user=user_mode)
+    elif my_target == "develop":
         # Check that installation directory is in $PATH
-        check_path(install_dir)
-        install_all(install_dir, dev=True)
-    elif target == "upgrade":
-    	upgrade(user=user)
-    elif target == "clean":
-        clean_dependencies(install_dir)
-    elif target == "uninstall":
+        check_path(my_install_dir)
+        install_all(my_install_dir, my_target, dev=True)
+    elif my_target == "upgrade":
+        upgrade(user=user_mode)
+    elif my_target == "clean":
+        clean_dependencies(my_install_dir)
+    elif my_target == "uninstall":
         uninstall()
-
