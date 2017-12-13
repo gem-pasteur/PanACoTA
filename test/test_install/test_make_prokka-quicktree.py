@@ -130,6 +130,7 @@ def test_develop():
         for line in lines:
             assert "/usr/local/lib" not in line
         assert "/tmp" or "/Users" in lines[7]
+        print(lines[7])
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
@@ -240,8 +241,10 @@ def test_install_user():
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
     with open(stdout, "r") as stdof:
         lines = stdof.readlines()
-        assert "/lib/python" in lines[7]
-        assert "/site-packages" in lines[7]
+        for line in lines:
+            assert "/usr/local/lib" not in line
+            assert "/tmp" not in line
+            assert "/Users" not in line
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT in user mode...",
