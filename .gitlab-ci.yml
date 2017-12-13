@@ -34,7 +34,14 @@ build-from-prokka:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_prokka.py
 
-
+build-from-annote-quicktree:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-annote-quicktree
+  stage: build
+  only:
+    - install
+  script:
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_prokka-quicktree.py
 
 unit-test-ubuntu16.04:
   stage: test
