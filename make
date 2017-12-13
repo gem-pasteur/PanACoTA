@@ -203,7 +203,7 @@ def check_dependencies(target):
             msg += "\t- mmseqs (for pangenome subcommand)\n"
         if "mafft" in to_install_user:
             msg += ("\t- mafft (to align persistent genomes in order to infer a phylogenetic tree "
-                    "after")
+                    "after)\n")
         if "trees" in to_install_user:
             msg += ("\t- One of the 3 following softwares, used to infer a phylogenetic tree:\n"
                     "\t\t* FastTree (see README or documentation for more information on how to "
