@@ -31,26 +31,10 @@ build-from-prokka:
   only:
     - install
   script:
-    - python3 make
-    - echo $(barrnap -h)
-    - echo $(prokka -h)
-    - genomeAPCAT -h
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_prokka.py
 
-build-from-prokka-user:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
-  stage: build
-  only:
-    - install
-  script:
-    - echo $(genomeAPCAT -h)
-    - python3 make --user
-    - echo $(barrnap -h)
-    - echo $(prokka -h)
-    - genomeAPCAT -h
-    - ./make upgrade
-    - echo $(genomeAPCAT -h)
-    - ./make uninstall
-    - echo $(genomeAPCAT -h)
+
 
 unit-test-ubuntu16.04:
   stage: test
