@@ -41,7 +41,15 @@ build-from-annote-quicktree:
     - install
   script:
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prokka-quicktree.py
+    - py.test test/test_install/test_make_prokka-quicktree.py -sv
+
+build-from-test-image:
+  stage: build
+  only:
+    - install
+  script:
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_all-installed.py
 
 unit-test-ubuntu16.04:
   stage: test
