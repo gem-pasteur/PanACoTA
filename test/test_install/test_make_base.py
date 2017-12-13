@@ -4,10 +4,9 @@
 """
 Tests for make script, installing genomeAPCAT according to already existing dependencies
 """
-import importlib.util
 import os
 
-from genomeAPCAT import utils
+from . import utilities as utils
 
 
 def teardown_module():
@@ -63,11 +62,11 @@ def test_build_base():
         for linef, linee in zip(logf, content):
             assert linee in linef
     # Check that needed packages are installed
-    assert is_package_installed("argparse")
-    assert is_package_installed("progressbar")
-    assert is_package_installed("numpy")
-    assert is_package_installed("matplotlib")
-    assert is_package_installed("Bio")
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
     os.remove(logfile)
 
 
@@ -128,11 +127,11 @@ def test_develop():
         for linef, linee in zip(logf, content):
             assert linee in linef
     # Check that needed packages are installed
-    assert is_package_installed("argparse")
-    assert is_package_installed("progressbar")
-    assert is_package_installed("numpy")
-    assert is_package_installed("matplotlib")
-    assert is_package_installed("Bio")
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
     os.remove(logfile)
 
 
@@ -169,21 +168,3 @@ def test_uninstall_nodep():
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("genomeAPCAT")
-
-
-def is_package_installed(pkg_name):
-    """
-    Check if package is installed or not
-
-    Parameters
-    ----------
-    pkg_name : str
-        name of package to check
-
-    Returns
-    -------
-    bool
-        True if package is installed, False otherwise
-    """
-    spec = importlib.util.find_spec(pkg_name)
-    return spec is not None
