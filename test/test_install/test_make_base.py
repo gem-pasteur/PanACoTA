@@ -70,7 +70,28 @@ def test_build_base():
     os.remove(logfile)
 
 
-def test_uninstall_dep():
+def test_upgrade():
+    """
+    Test upgrading genomeAPCAT when dependencies are still installed
+    """
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    cmd = "python3 make upgrade"
+    error = "Error upgrade"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 1
+        assert "Upgrading genomeAPCAT" in lines[0]
+    os.remove(logfile)
+
+
+def test_uninstall_withdep():
     """
     Test uninstalling genomeAPCAT when dependencies are still installed
     """
@@ -108,7 +129,6 @@ def test_develop():
         lines = stdof.readlines()
         for line in lines:
             assert "/usr/local/lib" not in line
-        assert "/tmp" or "/Users" in lines[7]
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
@@ -168,3 +188,25 @@ def test_uninstall_nodep():
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("genomeAPCAT")
+
+
+def test_upgrade_notinstalled_nodep():
+    """
+    Test upgrading genomeAPCAT when dependencies are not installed (only barrnap),
+    and genomeAPCAT is not installed. It just installs genomeAPCAT, without prokka dep
+    """
+    assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    assert not utils.check_installed("genomeAPCAT")
+    cmd = "python3 make upgrade"
+    error = "Error upgrade"
+    utils.run_cmd(cmd, error)
+    assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 1
+        assert "Upgrading genomeAPCAT" in lines[0]
+    os.remove(logfile)
