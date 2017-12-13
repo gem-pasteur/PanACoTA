@@ -129,7 +129,6 @@ def test_develop():
         lines = stdof.readlines()
         for line in lines:
             assert "/usr/local/lib" not in line
-        assert "/tmp" or "/Users" in lines[7]
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
