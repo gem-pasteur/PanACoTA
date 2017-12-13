@@ -61,6 +61,7 @@ unit-test-ubuntu16.04:
     - docker
     - helpers
   before_script:
+    - pip3 install -r requirements-dev.txt
     - ./make
   script:
     - py.test test/test_unit
@@ -77,6 +78,7 @@ func-test-ubuntu16.04:
     - docker
     - helpers
   before_script:
+    - pip3 install -r requirements-dev.txt
     - ./make
   script:
     - py.test test/test_functional
@@ -95,7 +97,7 @@ coverage:
     - unit-test-ubuntu16.04
     - func-test-ubuntu16.04
   before_script:
-    - pip3 install -r requirements.txt
+    - pip3 install -r requirements-dev.txt
   script:
     - coverage combine .coverage-unit .coverage-functional
     - coverage report
