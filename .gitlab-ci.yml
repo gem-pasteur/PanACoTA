@@ -13,14 +13,8 @@ build-from-base:
   only:
     - install
   script:
-    - python3 make
-    - echo $(barrnap -h)
-    - echo $(prokka -h)
-    - genomeAPCAT -h
-    - ./make upgrade
-    - genomeAPCAT -h
-    - ./make uninstall
-    - echo $(genomeAPCAT -h)
+    - py.test test/test_install/test_make_base.py
+
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
