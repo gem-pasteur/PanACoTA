@@ -41,7 +41,7 @@ build-from-annote-quicktree:
     - install
   script:
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prokka-quicktree.py -sv
+    - py.test test/test_install/test_make_prokka-quicktree.py
 
 build-from-test-image:
   stage: build
