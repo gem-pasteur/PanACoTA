@@ -13,13 +13,13 @@ def teardown_module():
     """
     Uninstall genomeAPCAT and installed dependencies
     """
-    # cmd = "python3 make clean"
-    # error = "Error clean"
-    # utils.run_cmd(cmd, error)
-    # cmd = "python3 make uninstall"
-    # error = "Error uninstall"
-    # utils.run_cmd(cmd, error)
-    # os.remove("install.log")
+    cmd = "python3 make clean"
+    error = "Error clean"
+    utils.run_cmd(cmd, error)
+    cmd = "python3 make uninstall"
+    error = "Error uninstall"
+    utils.run_cmd(cmd, error)
+    os.remove("install.log")
     print("cleaning repo")
 
 
@@ -240,7 +240,6 @@ def test_install_user():
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
     with open(stdout, "r") as stdof:
         lines = stdof.readlines()
-        assert "/Users" in lines[7]
         assert "/lib/python" in lines[7]
         assert "/site-packages" in lines[7]
     os.remove(stdout)
