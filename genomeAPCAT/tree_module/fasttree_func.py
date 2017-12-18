@@ -26,7 +26,7 @@ def run_tree(alignfile, boot, treefile, quiet, threads, model, *args):
         path to file containing all persistent families aligned, and grouped by genome
     boot: int or None
         number of bootstraps to calculate, None if no bootstrap asked
-    treefile: str
+    treefile: str or None
         Path to the tree file that must be created
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
@@ -65,7 +65,7 @@ def run_fasttree(alignfile, boot, treefile, model, quiet):
         Path to file containing all families aligned, grouped by genome
     boot: int or None
         Number of bootstraps to calculate (None if no bootstrap asked)
-    treefile: str
+    treefile: str or None
         Path to the tree file that must be created
     model: str
         DNA substitution model

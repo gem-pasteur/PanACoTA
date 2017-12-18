@@ -8,12 +8,11 @@ import subprocess
 
 import os
 
-from Bio import Phylo
-
 import genomeAPCAT.tree_module.fasttree_func as ft
 
 # Define common variables
 from genomeAPCAT import utils
+from . import utilities
 
 ALIGN = os.path.join("test", "data", "align", "exp_files", "exp_pers4genomes.grp.aln")
 LOGFILE_BASE = "log_test_fasttree"
@@ -54,43 +53,132 @@ def test_def_nb_threads():
     assert "OpenMP (1 threads)" in stdout1.decode()
 
 
-# def test_run_fasttree_default(caplog):
-#     """
-#     Test that when running fasttree without bootstrap, and with default model, it returns a file
-#     in the expected format (all branches have lengths, no bootstrap value).
-#     """
-#     boot = None
-#     treefile = "test_tree-fasttree-default"
-#     model = "-gtr"
-#     quiet = False
-#     ft.run_fasttree(ALIGN, boot, treefile, model, quiet)
-#     assert os.path.isfile(treefile)
-#     logs = ALIGN + ".fasttree.log"
-#     assert os.path.isfile(logs)
-#     assert "Running FasttreeMP..." in caplog.text
-#     assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
-#             "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
-#     is_tree_lengths(treefile)
+def test_run_fasttree_default(caplog):
+    """
+    Test that when running fasttree without bootstrap, and with default model, it returns a file
+    in the expected format (all branches have lengths, no bootstrap value).
+    """
+    boot = None
+    treefile = "test_tree-fasttree-default"
+    model = "-gtr"
+    quiet = False
+    ft.run_fasttree(ALIGN, boot, treefile, model, quiet)
+    assert os.path.isfile(treefile)
+    logs = ALIGN + ".fasttree.log"
+    assert os.path.isfile(logs)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert utilities.is_tree_lengths(treefile)
+    assert not utilities.is_tree_bootstrap(treefile)
+    os.remove(treefile)
+    os.remove(logs)
 
 
-# def is_tree_lengths(treefile):
-#     """
-#     Check that given tree is in newick format with branch lengths only (no bootstrap)
+def test_run_fasttree_boot(caplog):
+    """
+    Test that when running fasttree with 10 bootstrap, and with default model, it returns a file
+    in the expected format (all branches have lengths, and bootstrap value).
+    """
+    boot = 10
+    treefile = "test_tree-fasttree-boot"
+    model = "-gtr"
+    quiet = False
+    ft.run_fasttree(ALIGN, boot, treefile, model, quiet)
+    assert os.path.isfile(treefile)
+    logs = ALIGN + ".fasttree.log"
+    assert os.path.isfile(logs)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt -gtr -noml -nocat -boot 10 "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert not utilities.is_tree_lengths(treefile)
+    assert utilities.is_tree_bootstrap(treefile)
+    os.remove(treefile)
+    os.remove(logs)
 
-#     Parameters
-#     ----------
-#     treefile: str
-#         Path to file containing tree to check
 
-#     Returns
-#     -------
-#     bool
-#     """
-#     mytree = Phylo.read(treefile, "newick")
-#     for elem in mytree.find_elements():
-#         if isinstance(elem, Phylo.Newick.Clade):
-#             if elem.name == ""
-#                 # elem.confidence
-#         # elem.name = leaf name if leaf, None otherwise
-#         # elem.confidence bootstrap value if not leaf and bootstrap asked, None otherwise
-#         # elem.branch_length: should always exist
+def test_run_fasttree_boot_noname_jc(caplog):
+    """
+    Test that when running fasttree with bootstrap, and with JC model, it returns a file
+    in the expected format (all branches have lengths, and bootstrap value).
+    """
+    boot = 100
+    model = ""
+    quiet = False
+    ft.run_fasttree(ALIGN, boot, None, model, quiet)
+    treefile = ALIGN + ".fasttree_tree.nwk"
+    assert os.path.isfile(treefile)
+    logs = ALIGN + ".fasttree.log"
+    assert os.path.isfile(logs)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt  -noml -nocat -boot 100 "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert not utilities.is_tree_lengths(treefile)
+    assert utilities.is_tree_bootstrap(treefile)
+    os.remove(treefile)
+    os.remove(logs)
+
+
+def test_run_fasttree_default_quiet(caplog):
+    """
+    Test that when running fasttree without bootstrap, and with default model, it returns a file
+    in the expected format (all branches have lengths, no bootstrap value).
+    Check that no bug when launch in quiet mode
+    """
+    boot = None
+    treefile = "test_tree-fasttree-default"
+    model = "-gtr"
+    quiet = True
+    ft.run_fasttree(ALIGN, boot, treefile, model, quiet)
+    logs = ALIGN + ".fasttree.log"
+    assert os.path.isfile(logs)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert utilities.is_tree_lengths(treefile)
+    assert not utilities.is_tree_bootstrap(treefile)
+    os.remove(treefile)
+    os.remove(logs)
+
+
+def test_run_tree(caplog):
+    """
+    Test that when running run_tree it defines the expected number of threads, and outputs the
+    expected tree.
+    """
+    boot = None
+    treefile = None
+    quiet = False
+    threads = 15
+    model = "-gtr"
+    ft.run_tree(ALIGN, boot, treefile, quiet, threads, model)
+    res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, _ = res.communicate()
+    assert "OpenMP (15 threads)" in stdout.decode()
+    out_tree = ALIGN + ".fasttree_tree.nwk"
+    assert os.path.isfile(out_tree)
+    out_log = ALIGN + ".fasttree.log"
+    assert os.path.isfile(out_log)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert utilities.is_tree_lengths(out_tree)
+    assert not utilities.is_tree_bootstrap(out_tree)
+    os.remove(out_tree)
+    os.remove(out_log)
+
+    boot = 127
+    quiet = True
+    ft.run_tree(ALIGN, boot, treefile, quiet, 1, model)
+    res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, _ = res.communicate()
+    assert "OpenMP (1 threads)" in stdout.decode()
+    assert os.path.isfile(out_tree)
+    assert os.path.isfile(out_log)
+    assert "Running FasttreeMP..." in caplog.text
+    assert ("FastTreeMP -nt -gtr -noml -nocat -boot 127 "
+            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+    assert not utilities.is_tree_lengths(out_tree)
+    assert utilities.is_tree_bootstrap(out_tree)
+    os.remove(out_tree)
+    os.remove(out_log)
