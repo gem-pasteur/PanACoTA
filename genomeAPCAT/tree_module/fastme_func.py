@@ -80,9 +80,9 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     threads: int
         Maximum number of threads to use
-    model: str
-        DNA substitution model chosen by user
-    treefile: str
+    model: str or None
+        DNA substitution model chosen by user. None if default one
+    treefile: str or None
         Path to file which will contain the tree inferred
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
@@ -111,8 +111,8 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
     logfile = alignfile + ".fastme.log"
     matrix = alignfile + ".fastme_dist-mat.txt"
     cmd = ("fastme -i {align} -d{model} -nB -s {th} {bs} -o {out} -I {log} "
-           "-O {mat} {wb}").format(align=alignfile, bs=bootinfo, th=threadinfo, model=model,
-                                   out=treefile, log=logfile, mat=matrix, wb=outboot)
+           "{wb}").format(align=alignfile, bs=bootinfo, th=threadinfo, model=model,
+                          out=treefile, log=logfile, wb=outboot)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:

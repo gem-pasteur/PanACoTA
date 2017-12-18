@@ -4,6 +4,7 @@
 """
 Functions used by tree unit tests
 """
+import numbers
 
 from Bio import Phylo
 
@@ -54,7 +55,7 @@ def is_tree_bootstrap(treefile):
         root = False
         for elem in mytree.find_clades():
             # Check that each clade has a branch length
-            if not isinstance(elem.branch_length, float):
+            if not isinstance(elem.branch_length, numbers.Real):
                 if not root:
                     root = True
                     continue
@@ -63,8 +64,8 @@ def is_tree_bootstrap(treefile):
                     return False
             # If it is a leaf, check that no bootstrap value. Otherwise, check that bootstrap value
             if elem.name is None:
-                if not isinstance(elem.confidence, float):
-                    print("No bootstrap")
+                if not isinstance(elem.confidence, numbers.Real):
+                    print("No bootstrap", elem.confidence)
                     return False
             else:
                 if elem.confidence is not None:
