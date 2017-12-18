@@ -27,7 +27,7 @@ def run_tree(alignfile, boot, treefile, *args, **kwargs):
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    treefile: str
+    treefile: str or None
         Path to file which will contain the tree inferred
     args: tuple
         Used to be compatible with the 'run_tree' function of other softs like fastME and
@@ -76,7 +76,7 @@ def run_quicktree(alignfile, boot, treefile):
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    treefile: str
+    treefile: str or None
         Path to file which will contain the tree inferred
     """
     logger.info("Running Quicktree...")
