@@ -240,3 +240,120 @@ def test_main_noquicktree(capsys):
     assert out == "quicktree is not installed. 'genomeAPCAT tree' cannot run.\n"
     # 're-install fasttreeMP
     shutil.move(temps_qui, orig_qui)
+
+
+def test_main_from_parse(caplog):
+    """
+    Test main when we give the output of the parser
+    run fastme with K2P model, no bootstrap
+    """
+    import argparse
+    boot = None
+    outfile = None
+    soft = "fastme"
+    model = "K"
+    write_boot = False
+    threads = 1
+    args = argparse.Namespace()
+    args.alignment = ALIGN
+    args.boot = boot
+    args.outfile = outfile
+    args.soft = soft
+    args.model = model
+    args.write_boot = write_boot
+    args.threads = threads
+    args.verbose = 1
+    args.quiet = False
+    tree.main_from_parse(args)
+    # Check output files
+    # phylip alignments
+    phylip = ALIGN + ".phylip"
+    assert os.path.isfile(phylip)
+    os.remove(phylip)
+    # fastme logfile
+    log_file = phylip + ".fastme.log"
+    assert os.path.isfile(log_file)
+    lines_exp = {"Input data type  DNA": False,
+                 "evolutionary model  K2P": False}
+    with open(log_file, "r") as logf:
+        lines = logf.readlines()
+        for line in lines:
+            for exp in lines_exp:
+                if exp in line:
+                    lines_exp[exp] = True
+    assert list(lines_exp.values()) == [True] * 2
+    os.remove(log_file)
+    # tree file
+    tree_file = phylip + ".fastme_tree.nwk"
+    assert os.path.isfile(tree_file)
+    assert utilities.is_tree_lengths(tree_file)
+    assert not utilities.is_tree_bootstrap(tree_file)
+    os.remove(tree_file)
+    # log files
+    logs_base = os.path.join(ALDIR, "genomeAPCAT-tree-fastme.log")
+    assert os.path.isfile(logs_base)
+    assert os.path.isfile(logs_base + ".details")
+    assert os.path.isfile(logs_base + ".err")
+    os.remove(logs_base)
+    os.remove(logs_base + ".details")
+    os.remove(logs_base + ".err")
+    # Check logs
+    assert "Converting fasta alignment to PHYLIP-relaxed format." in caplog.text
+    assert "Running FastME..." in caplog.text
+    assert ("fastme -i {0} -dK -nB -s -T 1  -o {0}.fastme_tree.nwk "
+            "-I {0}.fastme.log".format(phylip)) in caplog.text
+    assert "END" in caplog.text
+
+
+def test_tree_all():
+    """
+    Test when calling tree from command line, it runs and gives expected output files
+    """
+    outfile = "test_all_tree.nwk"
+    soft = "fastme"
+    model = "p-distance"
+
+    cmd = "genomeAPCAT tree -a {} -s {} -o {} -m {}".format(ALIGN, soft, outfile, model)
+    ret = subprocess.call(cmd.split())
+    assert ret == 0
+
+    # Check output files
+    # phylip alignments
+    phylip = ALIGN + ".phylip"
+    assert os.path.isfile(phylip)
+    os.remove(phylip)
+    # fastme logfile
+    log_file = phylip + ".fastme.log"
+    assert os.path.isfile(log_file)
+    lines_exp = {"Input data type  DNA": False,
+                 "evolutionary model  p-distance": False}
+    with open(log_file, "r") as logf:
+        lines = logf.readlines()
+        for line in lines:
+            for exp in lines_exp:
+                if exp in line:
+                    lines_exp[exp] = True
+    assert list(lines_exp.values()) == [True] * 2
+    os.remove(log_file)
+    # tree file
+    assert os.path.isfile(outfile)
+    assert utilities.is_tree_lengths(outfile)
+    assert not utilities.is_tree_bootstrap(outfile)
+    os.remove(outfile)
+    # log files
+    exp_logs = ["Converting fasta alignment to PHYLIP-relaxed format.",
+                "Running FastME...",
+                "fastme -i {0} -dp -nB -s -T 1  -o {1} -I {0}.fastme.log".format(phylip, outfile),
+                "END"]
+    logs_base = os.path.join(ALDIR, "genomeAPCAT-tree-fastme.log")
+    assert os.path.isfile(logs_base)
+    assert os.path.isfile(logs_base + ".details")
+    assert os.path.isfile(logs_base + ".err")
+    with open(logs_base + ".details", "r") as logf:
+        lines = logf.readlines()
+    assert len(lines) == len(exp_logs)
+    for line, exp in zip(lines, exp_logs):
+        assert exp in line
+    os.remove(logs_base)
+    os.remove(logs_base + ".details")
+    os.remove(logs_base + ".err")

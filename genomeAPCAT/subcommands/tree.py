@@ -37,8 +37,8 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         Path to file which will contain the tree inferred
     soft: str
         Soft to use to infer the phylogenetic tree: 1 of quicktree, fasttree or fastme
-    model: str
-        DNA substitution model chosen by user
+    model: str or None
+        DNA substitution model chosen by user, None if quicktree used
     write_boot: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     threads: int
