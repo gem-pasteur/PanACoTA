@@ -33,7 +33,7 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    outfile: str
+    outfile: str or None
         Path to file which will contain the tree inferred
     soft: str
         Soft to use to infer the phylogenetic tree: 1 of quicktree, fasttree or fastme
@@ -64,17 +64,17 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
             sys.exit(1)
         from genomeAPCAT.tree_module import fasttree_func as tree
     elif soft == "fastme":
-        from genomeAPCAT.tree_module import fastme_func as tree
         # test if fastME is installed and in the path
         if not utils.check_installed("fastme"):
             print("fastme is not installed. 'genomeAPCAT tree' cannot run.")
             sys.exit(1)
+        from genomeAPCAT.tree_module import fastme_func as tree
     elif soft == "quicktree":
-        from genomeAPCAT.tree_module import quicktree_func as tree
         # test if fastME is installed and in the path
         if not utils.check_installed("quicktree"):
             print("quicktree is not installed. 'genomeAPCAT tree' cannot run.")
             sys.exit(1)
+        from genomeAPCAT.tree_module import quicktree_func as tree
     outdir = os.path.dirname(align)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "genomeAPCAT-tree-" + soft)
