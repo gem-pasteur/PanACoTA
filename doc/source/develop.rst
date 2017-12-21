@@ -30,7 +30,7 @@ needed for development by running:
 Running Tests
 =============
 
-If you want to work on the scripts, you can use the tests provided with the software, used to check each of its functionalities. Tests are done with ``pytest`` framework.
+If you want to work on the scripts, you can use the tests provided with the software, used to check each of its functionalities. Tests are done with `pytest <https://docs.pytest.org/en/latest/>`_ framework.
 
 To run the tests, run, from the root of the project::
 
@@ -44,11 +44,19 @@ or, if you did not install the package::
 
 Add ``-v`` to get more detailed information on each test run.
 
-This will also generate the coverage report. Open ``htmlcov/index.html`` on your browser if you want to check code coverage of your new function/module. The on-line version can be found `here <http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov/>`_, and is automatically updated at each push on master branch.
+If you want to run only a specific test file, run::
+
+    py.test test/test_<unit or functional>/<test_file.py>
+
+If you want to run only a specific test, run::
+
+    py.test test/test_<unit or functional>/<test_file.py>::<test_name>
+
+When you run tests (all of them or individual ones), it will also always generate the coverage report. Open ``htmlcov/index.html`` on your browser if you want to check code coverage of your new function/module. The on-line version can be found `here <http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov/>`_, and is automatically updated at each push on master branch.
 
 .. warning:: If you add new features, or modify existing scripts please complete/update the tests!
 
-
+We created one test file per module. If you create a new module, please create the corresponding test file in ``test/test_unit`` for unit tests, and ``test/test_functional`` for functional tests. The only condition is that your test filename must start with ``test_``, and each test name must start with ``test_``. This is required so that they are automatically run with ``py.test``, and is useful to differentiate tests and helper functions. If you modified a module, please modify/update the corresponding tests.
 
 
 Contributing to documentation
