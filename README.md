@@ -150,8 +150,8 @@ needed for development by running:
     pip3 install -r requirements-dev.txt  # libraries used to run tests, generate documentation etc.
 
 **Note:** biopython is only used for 'tree' subcommand, with option ``--soft fastme`` or ``--soft quicktree``. If you do not
-plan to use this, you do not need to install biopython. You can comment (add a ``#`` at the beginning of the line) the
-``biopython>=1.60`` line in ``requirements.txt``. 
+plan to use this, you do not need to install biopython. You can comment the ``biopython>=1.60`` line in 
+``requirements.txt`` (add a ``#`` at the beginning of the line). 
 
 ## Running Tests
 
