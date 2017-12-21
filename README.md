@@ -142,6 +142,16 @@ If you want to install `genomeAPCAT` while still working on modifying the script
 
 Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
 
+If you don't want to install the software, you can still test it, and contribute to the tests and documentation
+ by installing the libraries needed for the software, and those 
+needed for development by running:
+
+    pip3 install -r requirements.txt  # dependencies used by genomeAPCAT
+    pip3 install -r requirements-dev.txt  # libraries used to run tests, generate documentation etc.
+
+**Note:** biopython is only used for 'tree' subcommand, with option ``--soft fastme`` or ``--soft quicktree``. If you do not
+plan to use this, you do not need to install biopython. You can comment (add a ``#`` at the beginning of the line) the
+``biopython>=1.60`` line in ``requirements.txt``. 
 
 ## Running Tests
 
@@ -154,3 +164,16 @@ or, if you installed the package (final or development mode):
 
     py.test test/test_unit
     py.test test/test_functional
+
+
+## Contributing to documentation
+
+The full documentation, found [here](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc) is generated with
+ [sphinx](http://www.sphinx-doc.org/en/stable/).
+You can add your contribution to it. To generate the html documentation locally, go to ``doc/sources`` directory, and run:
+
+    make html
+    
+Then, open ``doc/build/html/index.html`` on your browser.
+
+The online version will be automatically updated when pushed on master branch.
