@@ -109,6 +109,7 @@ sphinx-doc:
     - master
     - doc
   before_script:
+    - pip3 install -r requirements-dev.txt
     - ./make
   script:
     - cd doc/source
