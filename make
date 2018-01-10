@@ -112,7 +112,7 @@ def install_all(install_dir, target, dev=False, user=False):
     dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
     user: install in user mode if True
     """
-    to_install, msg = check_dependencies(target)
+    to_install = check_dependencies(target)
     if to_install:
         binpath = os.path.join(os.getcwd(), "binaries")
         deppath = os.path.join(os.getcwd(), "dependencies")
@@ -124,7 +124,12 @@ def install_all(install_dir, target, dev=False, user=False):
                 logger.warning("Barrnap was not installed (see above). Prokka will "
                                "not predict RNA.")
         if "prokka" in to_install:
-            install_prokka()
+            ret = install_prokka()
+            if ret != 0:
+            	logger.warning("Problems while trying to install prokka (see above). While "
+            				   "prokka is not installed, you will not be able to use the "
+            				   "'annotate' subcommand of genomeAPCAT.")
+            	to_install_user.append("prokka")
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
@@ -151,6 +156,25 @@ def install_all(install_dir, target, dev=False, user=False):
     if user:
         gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
         os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
+    if to_install_user:
+        msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
+               "Here is the list of missing dependencies, and for what they are used. If you plan "
+               "to use the subcommands hereafter, first install required dependencies:\n")
+		if "prokka" in to_install_user:
+			msg += "\t- prokka (for annotate subcommand)\n"
+        if "mmseqs" in to_install_user:
+            msg += "\t- mmseqs (for pangenome subcommand)\n"
+        if "mafft" in to_install_user:
+            msg += ("\t- mafft (to align persistent genomes in order to infer a phylogenetic tree "
+                    "after)\n")
+        if "trees" in to_install_user:
+            msg += ("\t- One of the 3 following softwares, used to infer a phylogenetic tree:\n"
+                    "\t\t* FastTree (see README or documentation for more information on how to "
+                    "install it)\n"
+                    "\t\t* FastME\n"
+                    "\t\t* Quicktree\n")
+        msg += ("See more information on how to download/install those softwares in README or in "
+                "documentation.")
     if msg:
         logger.warning(msg)
 
@@ -190,29 +214,12 @@ def check_dependencies(target):
             sys.exit(1)
         if not cmd_exists("mmseqs"):
             to_install_user.append("mmseqs")
-        if not cmd_exists("fftns"):
+        if not cmd_exists("mafft"):
             to_install_user.append("mafft")
         if not cmd_exists("FastTreeMP") and not cmd_exists("fastme") and not cmd_exists(
                 "quicktree"):
             to_install_user.append("trees")
-    if to_install_user:
-        msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
-               "Here is the list of missing dependencies, and for what they are used. If you plan "
-               "to use the subcommands hereafter, first install required dependencies:\n")
-        if "mmseqs" in to_install_user:
-            msg += "\t- mmseqs (for pangenome subcommand)\n"
-        if "mafft" in to_install_user:
-            msg += ("\t- mafft (to align persistent genomes in order to infer a phylogenetic tree "
-                    "after)\n")
-        if "trees" in to_install_user:
-            msg += ("\t- One of the 3 following softwares, used to infer a phylogenetic tree:\n"
-                    "\t\t* FastTree (see README or documentation for more information on how to "
-                    "install it)\n"
-                    "\t\t* FastME\n"
-                    "\t\t* Quicktree\n")
-        msg += ("See more information on how to download/install those softwares in README or in "
-                "documentation.")
-    return to_install, msg
+    return to_install
 
 
 def install_barrnap():
@@ -253,17 +260,24 @@ def install_prokka():
     logger.info("Installing prokka...")
     cmd = "git clone https://github.com/tseemann/prokka.git"
     error = "A problem occurred while trying to download prokka. See log above."
-    run_cmd(cmd, error, eof=True)
+    ret = run_cmd(cmd, error)
+    if ret != 0:
+    	return ret
     cmd = "mv prokka dependencies"
     error = "A problem occurred while moving prokka to 'dependencies'. See log above."
-    run_cmd(cmd, error, eof=True)
+    ret = run_cmd(cmd, error)
+    if ret != 0:
+    	return ret
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
     cmd = os.path.join(srcpath, "prokka", "bin", "prokka") + " --setupdb"
     error = "A problem occurred while initializing prokka db. See log above."
-    run_cmd(cmd, error, eof=True)
+    ret = run_cmd(cmd, error)
+    if ret != 0:
+    	return ret
     os.symlink(os.path.join(srcpath, "prokka", "bin", "prokka"),
                os.path.join(binpath, "prokka"))
+    return ret
 
 
 def run_cmd(cmd, error, eof=False):
