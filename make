@@ -126,10 +126,10 @@ def install_all(install_dir, target, dev=False, user=False):
         if "prokka" in to_install:
             ret = install_prokka()
             if ret != 0:
-            	logger.warning("Problems while trying to install prokka (see above). While "
-            				   "prokka is not installed, you will not be able to use the "
-            				   "'annotate' subcommand of genomeAPCAT.")
-            	to_install_user.append("prokka")
+                logger.warning("Problems while trying to install prokka (see above). While "
+                                           "prokka is not installed, you will not be able to use the "
+                                           "'annotate' subcommand of genomeAPCAT.")
+                to_install_user.append("prokka")
         logger.info("Finalizing dependencies installation...")
         for binf in glob.glob(os.path.join(binpath, "*")):
             os.symlink(binf, os.path.join(install_dir, os.path.basename(binf)))
@@ -160,8 +160,8 @@ def install_all(install_dir, target, dev=False, user=False):
         msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
                "Here is the list of missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:\n")
-		if "prokka" in to_install_user:
-			msg += "\t- prokka (for annotate subcommand)\n"
+            if "prokka" in to_install_user:
+                msg += "\t- prokka (for annotate subcommand)\n"
         if "mmseqs" in to_install_user:
             msg += "\t- mmseqs (for pangenome subcommand)\n"
         if "mafft" in to_install_user:
@@ -262,19 +262,19 @@ def install_prokka():
     error = "A problem occurred while trying to download prokka. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	return ret
+        return ret
     cmd = "mv prokka dependencies"
     error = "A problem occurred while moving prokka to 'dependencies'. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	return ret
+        return ret
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
     cmd = os.path.join(srcpath, "prokka", "bin", "prokka") + " --setupdb"
     error = "A problem occurred while initializing prokka db. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	return ret
+        return ret
     os.symlink(os.path.join(srcpath, "prokka", "bin", "prokka"),
                os.path.join(binpath, "prokka"))
     return ret
