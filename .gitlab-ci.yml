@@ -60,7 +60,7 @@ unit-test-ubuntu16.04:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_unit/test_align/test_alignment.py::test_family_align_nomafft_btrempty_errormafft -sv
+    - py.test test/test_unit
     - more test_mmseq_cluster.log
     - mv .coverage .coverage-unit
   artifacts:
