@@ -507,7 +507,7 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     and total nb genomes = 4, no alignment file, and an empty btr file, and make changes in
     path so that mafft crashes -> should return False, and remove btr and mafft files.
     """
-    orig_mafft = subprocess.check_output("which fftns".split()).decode().strip()
+    orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
     temp_mafft = orig_mafft + "-orig"
     shutil.move(orig_mafft, temp_mafft)
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
@@ -926,7 +926,7 @@ def test_handle_family_erroralign():
     Giving an aldir with correct prt, gen, miss files, and problem while running mafft. Returns
     False, with error message for alignment part
     """
-    orig_mafft = subprocess.check_output("which fftns".split()).decode().strip()
+    orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
     temp_mafft = orig_mafft + "-orig"
     shutil.move(orig_mafft, temp_mafft)
     prefix = "aldir/TESThandlefam"
@@ -957,7 +957,7 @@ def test_handle_family_erroralign():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("Problem while trying to align fam 8: fftns --quiet aldir/TESThandlefam-current.8.prt "
+    assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 aldir/TESThandlefam-current.8.prt "
             "does not exist") in q.get().message
     assert not q.get()
 

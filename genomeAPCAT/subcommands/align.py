@@ -66,7 +66,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     from genomeAPCAT.align_module import post_align as post
 
     # test if prokka is installed and in the path
-    if not utils.check_installed("fftns"):  # pragma: no cover
+    if not utils.check_installed("mafft"):  # pragma: no cover
         print("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
         sys.exit(1)
 

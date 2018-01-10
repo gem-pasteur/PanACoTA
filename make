@@ -190,7 +190,7 @@ def check_dependencies(target):
             sys.exit(1)
         if not cmd_exists("mmseqs"):
             to_install_user.append("mmseqs")
-        if not cmd_exists("fftns"):
+        if not cmd_exists("mafft"):
             to_install_user.append("mafft")
         if not cmd_exists("FastTreeMP") and not cmd_exists("fastme") and not cmd_exists(
                 "quicktree"):

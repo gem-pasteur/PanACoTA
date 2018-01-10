@@ -416,7 +416,7 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
         False otherwise
     """
     logger.log(utils.detail_lvl(), "Aligning family {}".format(num_fam))
-    cmd = "fftns --quiet {}".format(prt_file)
+    cmd = "mafft --quiet --retree 2 --maxiterate 0 {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
     ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)

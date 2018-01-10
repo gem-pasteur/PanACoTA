@@ -41,7 +41,7 @@ Its external dependencies are:
 
 - `prokka <https://github.com/tseemann/prokka>`_  (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `genomeAPCAT` (see :ref:`Install section <installing>`)
 - `mmseqs <https://github.com/soedinglab/MMseqs2>`_  (to generate pangenomes)
-- `fftns <http://mafft.cbrc.jp/alignment/software/>`_ (from mafft, to align persistent genome)
+- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ (to align persistent genome)
 - At least one of those softwares, to infer a phylogenetic tree:
 
     - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described :ref:`here above <fasttree>`.
