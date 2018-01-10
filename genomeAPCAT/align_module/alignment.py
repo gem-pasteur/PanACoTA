@@ -420,11 +420,10 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
     ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
-    print(mafft_file)
-    print(ret)
     stdout.close()
     if not isinstance(ret, int):
         ret = ret.returncode
+        print("ret = ", ret)
     if ret != 0:
         os.remove(mafft_file)
         return False
