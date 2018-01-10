@@ -508,15 +508,8 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     path so that mafft crashes -> should return False, and remove btr and mafft files.
     """
     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
-    print(os.path.isfile(orig_mafft))
     temp_mafft = orig_mafft + "-orig"
-    print(orig_mafft)
-    print(temp_mafft)
     shutil.move(orig_mafft, temp_mafft)
-    print(subprocess.check_output("which mafft".split()).decode().strip())
-    print(os.path.isfile(orig_mafft))
-    subprocess.check_output("mafft")
-    subprocess.check_output("mafft-orig")
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
     gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
     miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
@@ -530,6 +523,9 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
                                ngenomes, logger) is False
     assert "Checking extractions for family 8" in caplog.text
+    assert "Aligning family 8" in caplog.text
+    assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 "
+            "test/data/align/exp_files/exp_aldir-pers/current.8.prt does not exist") in caplog.text
     # Check content of mafft and btr files
     assert not os.path.isfile(mafft_file)
     assert not os.path.isfile(btr_file)
