@@ -510,7 +510,7 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
     temp_mafft = orig_mafft + "-orig"
     shutil.move(orig_mafft, temp_mafft)
-    subprocess.check_output("which mafft".split())
+    subprocess.check_output("which mafftgfgf".split())
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
     gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
     miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
