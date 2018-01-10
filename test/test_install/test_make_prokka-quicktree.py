@@ -32,10 +32,12 @@ def test_build_prokka_quicktree():
     error = "Error trying to install genomeAPCAT from base"
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
+    assert utils.check_installed('quicktree')
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
     cmd = "pip3 show genomeAPCAT"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -77,12 +79,14 @@ def test_upgrade():
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -104,6 +108,7 @@ def test_uninstall_withdep():
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
 
 
 def test_develop():
@@ -119,6 +124,7 @@ def test_develop():
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
     cmd = "pip3 show genomeAPCAT"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -169,6 +175,7 @@ def test_clean():
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed('quicktree')
     assert not os.path.isdir("binaries")
     assert not os.path.isdir("dependencies")
     logfile = "install.log"
