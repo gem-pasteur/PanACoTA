@@ -112,7 +112,7 @@ def install_all(install_dir, target, dev=False, user=False):
     dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
     user: install in user mode if True
     """
-    to_install = check_dependencies(target)
+    to_install, to_install_user = check_dependencies(target)
     if to_install:
         binpath = os.path.join(os.getcwd(), "binaries")
         deppath = os.path.join(os.getcwd(), "dependencies")
@@ -219,7 +219,7 @@ def check_dependencies(target):
         if not cmd_exists("FastTreeMP") and not cmd_exists("fastme") and not cmd_exists(
                 "quicktree"):
             to_install_user.append("trees")
-    return to_install
+    return to_install, to_install_user
 
 
 def install_barrnap():
