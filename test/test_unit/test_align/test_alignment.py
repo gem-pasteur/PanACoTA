@@ -507,8 +507,8 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     and total nb genomes = 4, no alignment file, and an empty btr file, and make changes in
     path so that mafft crashes -> should return False, and remove btr and mafft files.
     """
-    subprocess.check_output("man mafft")
     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
+    print(os.path.isfile(orig_mafft))
     temp_mafft = orig_mafft + "-orig"
     print(orig_mafft)
     print(temp_mafft)
