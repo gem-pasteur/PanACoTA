@@ -175,7 +175,6 @@ def install_all(install_dir, target, dev=False, user=False):
                     "\t\t* Quicktree\n")
         msg += ("See more information on how to download/install those softwares in README or in "
                 "documentation.")
-    if msg:
         logger.warning(msg)
 
 
