@@ -160,7 +160,7 @@ def install_all(install_dir, target, dev=False, user=False):
         msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
                "Here is the list of missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:\n")
-            if "prokka" in to_install_user:
+        if "prokka" in to_install_user:
                 msg += "\t- prokka (for annotate subcommand)\n"
         if "mmseqs" in to_install_user:
             msg += "\t- mmseqs (for pangenome subcommand)\n"
