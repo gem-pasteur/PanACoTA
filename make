@@ -263,13 +263,13 @@ def install_prokka():
     error = "A problem occurred while trying to download prokka. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	rmdir(os.path.join(os.getcwd(), "prokka"))
+        rmdir(os.path.join(os.getcwd(), "prokka"))
         return ret
     cmd = "mv prokka dependencies"
     error = "A problem occurred while moving prokka to 'dependencies'. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	rmdir(os.path.join(os.getcwd(), "dependencies", "prokka"))
+        rmdir(os.path.join(os.getcwd(), "dependencies", "prokka"))
         return ret
     binpath = os.path.join(os.getcwd(), "binaries")
     srcpath = os.path.join(os.getcwd(), "dependencies")
@@ -277,7 +277,7 @@ def install_prokka():
     error = "A problem occurred while initializing prokka db. See log above."
     ret = run_cmd(cmd, error)
     if ret != 0:
-    	rmdir(os.path.join(os.getcwd(), "dependencies", "prokka"))
+        rmdir(os.path.join(os.getcwd(), "dependencies", "prokka"))
         return ret
     os.symlink(os.path.join(srcpath, "prokka", "bin", "prokka"),
                os.path.join(binpath, "prokka"))
