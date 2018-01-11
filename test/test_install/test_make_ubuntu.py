@@ -28,9 +28,6 @@ def test_build_prokka_only():
     Test that when installing from a computer containing the basic ubuntu, it fails to install
     prokka, but still installs genomeAPCAT, without any dependence (warning message)
     """
-    cmd = "apt-get install -y python3-pip"
-    error = "Error apt-get install python3 and pip3"
-    utils.run_cmd(cmd, error)
     cmd = "python3 make"
     error = "Error trying to install genomeAPCAT from ubuntu"
     assert not utils.check_installed("barrnap")
