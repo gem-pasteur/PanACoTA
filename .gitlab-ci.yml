@@ -9,7 +9,7 @@ stages:
 
 
 build-from-ubuntu:
-  image: ubuntu:latest
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu
   stage: build
   only:
     - install
