@@ -60,6 +60,7 @@ build-from-test-image:
   script:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py
+    - mmseqs --version
 
 unit-test-ubuntu16.04:
   stage: test
