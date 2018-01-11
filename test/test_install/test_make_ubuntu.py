@@ -95,6 +95,8 @@ def test_clean():
     assert os.path.isdir("dependencies")
     assert os.path.isdir("binaries")
     cmd = "python3 make clean"
+    error = "not clean"
+    utils.run_cmd(cmd, error)
     assert not os.path.isdir("dependencies")
     assert not os.path.isdir("binaries")
     assert not utils.check_installed("barrnap")
