@@ -161,7 +161,7 @@ def install_all(install_dir, target, dev=False, user=False):
                "Here is the list of missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:\n")
         if "prokka" in to_install_user:
-                msg += "\t- prokka (for annotate subcommand)\n"
+            msg += "\t- prokka (for annotate subcommand)\n"
         if "mmseqs" in to_install_user:
             msg += "\t- mmseqs (for pangenome subcommand)\n"
         if "mafft" in to_install_user:
@@ -195,7 +195,7 @@ def check_dependencies(target):
     if target == "install" or target == "develop":
         if not cmd_exists("prokka"):
             if not cmd_exists("barrnap"):
-            	install_bar = True
+                install_bar = True
                 if not cmd_exists("wget"):
                     logger.error(("You need wget to install barrnap, the RNA predictor"
                                   " used by prokka."))
@@ -205,7 +205,7 @@ def check_dependencies(target):
                                   " used by prokka."))
                     install_bar = False
                 if install_bar:
-                	to_install.append("barrnap")
+                    to_install.append("barrnap")
             if not cmd_exists("git"):
                 logger.error("You need git to install prokka.")
                 sys.exit(1)
