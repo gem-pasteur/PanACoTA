@@ -7,6 +7,16 @@ stages:
   - doc
   - deploy
 
+
+build-from-ubuntu:
+  image: ubuntu:latest
+  stage: build
+  only:
+    - install
+  script:
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_ubuntu.py
+
 build-from-base:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-base
   stage: build
