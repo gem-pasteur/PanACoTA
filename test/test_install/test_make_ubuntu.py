@@ -84,4 +84,20 @@ def test_build_prokka_only():
     assert utils.is_package_installed("numpy")
     assert utils.is_package_installed("matplotlib")
     assert utils.is_package_installed("Bio")
+    assert not os.path.isdir(os.path.join("dependencies", "prokka"))
     os.remove(logfile)
+
+
+def test_clean():
+    """
+    Test cleaning dependencies. Should remove 'dependencies' and 'binaries' folders
+    """
+    assert os.path.isdir("dependencies")
+    assert os.path.isdir("binaries")
+    cmd = "python3 make clean"
+    assert not os.path.isdir("dependencies")
+    assert not os.path.isdir("binaries")
+    assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    assert not utils.check_installed("mafft")
+    assert utils.check_installed("genomeAPCAT")
