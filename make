@@ -198,11 +198,9 @@ def check_dependencies(target):
                 if not cmd_exists("wget"):
                     logger.error(("You need wget to install barrnap, the RNA predictor"
                                   " used by prokka."))
-                    sys.exit(1)
                 if not cmd_exists("tar"):
                     logger.error(("You need tar to install barrnap, the RNA predictor"
                                   " used by prokka."))
-                    sys.exit(1)
                 to_install.append("barrnap")
             if not cmd_exists("git"):
                 logger.error("You need git to install prokka.")
