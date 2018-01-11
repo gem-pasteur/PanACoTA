@@ -99,4 +99,5 @@ def test_clean():
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("mafft")
+    assert not utils.check_installed("FastTreeMP")
     assert utils.check_installed("genomeAPCAT")
