@@ -48,7 +48,12 @@ def test_build_prokka_only():
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
     with open(stdout, "r") as stdof:
         lines = stdof.readlines()
-        assert "/usr/local/lib" in lines[7]
+        found = False
+        for line in lines:
+            if "/usr/local/lib" in line:
+                found = True
+                break
+        assert found is True
     os.remove(stdout)
     logfile = "install.log"
     content = ["You need wget to install barrnap, the RNA predictor used by prokka.",
