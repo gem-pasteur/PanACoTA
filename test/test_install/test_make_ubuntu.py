@@ -61,7 +61,7 @@ def test_build_prokka_only():
                "Installing prokka...",
                "A problem occurred while initializing prokka db. See log above.",
                "Problems while trying to install prokka (see above). While prokka is not "
-               "installed, you will not be able to use the 'annotate' subcommand of genomeAPCAT"
+               "installed, you will not be able to use the 'annotate' subcommand of genomeAPCAT",
                "Installing genomeAPCAT...",
                "Finalizing dependencies installation...",
                "Installing genomeAPCAT",
