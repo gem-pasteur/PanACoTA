@@ -37,9 +37,10 @@ def parse_requirements(requirements):
         return [l.strip('\n') for l in req_file if l.strip('\n')
                 and not l.startswith('#')]
 
-packages = ['genomeAPCAT', 'genomeAPCAT.annote_module', 'genomeAPCAT.pangenome_module',
-            'genomeAPCAT.corepers_module', 'genomeAPCAT.align_module', 'genomeAPCAT.tree_module',
-            'genomeAPCAT.subcommands']
+
+packages = ['genomeAPCAT', 'genomeAPCAT.prepare_module', 'genomeAPCAT.annote_module',
+            'genomeAPCAT.pangenome_module', 'genomeAPCAT.corepers_module',
+            'genomeAPCAT.align_module', 'genomeAPCAT.tree_module', 'genomeAPCAT.subcommands']
 requires = parse_requirements("requirements.txt")
 scripts = ['bin/genomeAPCAT']
 
