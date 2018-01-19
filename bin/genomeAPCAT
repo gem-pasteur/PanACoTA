@@ -4,7 +4,7 @@
 import sys
 from genomeAPCAT import __version__ as version
 
-from genomeAPCAT.subcommands import qc_and_annote
+from genomeAPCAT.subcommands import annote
 from genomeAPCAT.subcommands import pangenome
 from genomeAPCAT.subcommands import corepers
 from genomeAPCAT.subcommands import align
@@ -31,22 +31,22 @@ def parse_arguments(argv):
                                      prog='genomeAPCAT')
 
     parser.add_argument('-V', '--version', action='version',
-            version='genomeAPCAT - v. ' + str(version),
-            help="Print the version number and exit")
+                        version='genomeAPCAT - v. ' + str(version),
+                        help="Print the version number and exit")
 
     # Create subparsers, for all submodules
     subparsers = parser.add_subparsers(dest='subparser_called')
     # dest: to be able to get the subparser called with args.subparser_called
     actions = {}  # to add the action to do according to the subparser called
-    checks = {}   # to add the function to call to check the subparser arguments
+    checks = {}  # to add the function to call to check the subparser arguments
 
     # QC and annotation part
     parser_annote = subparsers.add_parser('annotate',
-                                       help="Quality control and annotation of genomes",
-                                       add_help=False)
-    qc_and_annote.build_parser(parser_annote)
-    actions["annotate"] = qc_and_annote.main_from_parse
-    checks["annotate"] = qc_and_annote.check_args
+                                          help="Quality control and annotation of genomes",
+                                          add_help=False)
+    annote.build_parser(parser_annote)
+    actions["annotate"] = annote.main_from_parse
+    checks["annotate"] = annote.check_args
 
     # Pan genome part
     parser_pan = subparsers.add_parser('pangenome', help="Generate a pan-genome of your dataset",
@@ -56,8 +56,9 @@ def parse_arguments(argv):
 
     # Persistent genome part
     parser_corepers = subparsers.add_parser('corepers',
-                                     help="Compute a Core or Persistent genome of your dataset",
-                                     add_help=False)
+                                            help="Compute a Core or Persistent genome of your "
+                                                 "dataset",
+                                            add_help=False)
     corepers.build_parser(parser_corepers)
     actions["corepers"] = corepers.main_from_parse
     checks["corepers"] = corepers.check_args
@@ -71,9 +72,9 @@ def parse_arguments(argv):
 
     # tree part
     parser_tree = subparsers.add_parser('tree',
-                                       help=("Infer phylogenetic tree based on "
-                                             "core/persistent genome"),
-                                       add_help=False)
+                                        help=("Infer phylogenetic tree based on "
+                                              "core/persistent genome"),
+                                        add_help=False)
     tree.build_parser(parser_tree)
     actions["tree"] = tree.main_from_parse
     checks["tree"] = tree.check_args

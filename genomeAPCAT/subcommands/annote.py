@@ -189,9 +189,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # import needed packages
     import shutil
     import logging
-    from genomeAPCAT.qc_annote_module import genome_seq_functions as gfunc
-    from genomeAPCAT.qc_annote_module import prokka_functions as pfunc
-    from genomeAPCAT.qc_annote_module import format_functions as ffunc
+    from genomeAPCAT.annote_module import genome_seq_functions as gfunc
+    from genomeAPCAT.annote_module import prokka_functions as pfunc
+    from genomeAPCAT.annote_module import format_functions as ffunc
     from genomeAPCAT import utils
 
     if not qc_only:
