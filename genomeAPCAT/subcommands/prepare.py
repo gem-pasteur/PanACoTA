@@ -59,11 +59,12 @@ def main_from_parse(arguments):
         result of argparse parsing of all arguments in command line
 
     """
-    main(arguments.NCBI_species_taxid, arguments.outdir, arguments.min_dist, arguments.parallel)
+    main(arguments.NCBI_species_taxid, arguments.outdir, arguments.min_dist, arguments.parallel,
+         arguments.gembase_species, arguments.gembase_version)
 
 
-def main(ncbi_taxid, outdir, min_dist, parallel):
-    print(ncbi_taxid, outdir, min_dist, parallel)
+def main(ncbi_taxid, outdir, min_dist, parallel, gem_spe, gem_ver):
+    print(ncbi_taxid, outdir, min_dist, parallel, gem_spe, gem_ver)
 
 
 def build_parser(parser):
@@ -74,9 +75,7 @@ def build_parser(parser):
     ----------
     parser : argparse.ArgumentParser
         The parser to configure
-
     """
-    # TODO: add check that min distance is lower than 0.06 (and positive)
     import argparse
     import multiprocessing
 
@@ -99,6 +98,24 @@ def build_parser(parser):
             return nb_cpu
         return param
 
+    def min_dist(param):
+        try:
+            param = float(param)
+        except Exception:
+            msg = "argument -m min_dist: invalid float value: {}".format(param)
+            raise argparse.ArgumentTypeError(msg)
+        if param < 0:
+            msg = ("Your lower limit for the distance between 2 genomes cannot be negative: "
+                   "invalid value: {}").format(param)
+            raise argparse.ArgumentTypeError(msg)
+        if param < 0.06:
+            msg = ("The maximum distance allowed between 2 genomes of a same species is 0.06 ("
+                   "corresponding to 94% identity). You cannot set a minimum threshold higher "
+                   "than this: invalid value: {}").format(param)
+            raise argparse.ArgumentTypeError(msg)
+        return param
+
+
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
     required.add_argument("-t", dest="NCBI_species_taxid", required=True,
@@ -106,15 +123,16 @@ def build_parser(parser):
                                 "'species taxid' provided by the NCBI")
                           )
 
-    # # gem options (to download complete genomes from gembase on abgfour)
-    # gem = parser.add_argument_group('Specific arguments for GEM')
-    # gem.add_argument("-n", dest="gembase_species",
-    #                     help=("Species name in gembases, to add the complete genomes. "
-    #                           "For example ESCO001 for Escherichia coli."))
-    # gem.add_argument("-g", dest="gembase_version",
-    #                     help=("Gembase version from which you want to get the complete "
-    #                           "genomes. For example, 'Microbial_B_1116'."))
+    # gem options (to download complete genomes from gembase on abigfour)
+    gem = parser.add_argument_group('Specific arguments for GEM')
+    gem.add_argument("-n", dest="gembase_species",
+                        help=("Species name in gembases, to add the complete genomes. "
+                              "For example ESCO001 for Escherichia coli."))
+    gem.add_argument("-g", dest="gembase_version",
+                        help=("Gembase version from which you want to get the complete "
+                              "genomes. For example, 'Microbial_B_1116'."))
 
+    # Optional arguments
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-o", dest="outdir", default=".",
                           help=("Give the path to the directory where you want to save the "
@@ -135,7 +153,7 @@ def build_parser(parser):
     #                           "'info-genomes-list-<gembase_species>.lst'. "
     #                           "It will then get information on genomes quality from this "
     #                           "file, and run mash steps."))
-    optional.add_argument("-m", dest="min_dist", default=1e-4, type=float,
+    optional.add_argument("-m", dest="min_dist", default=1e-4, type=min_dist,
                           help="By default, genomes whose distance to the reference is not "
                                "between 1e-4 and 0.06 are discarded. You can specify your own "
                                "lower limit (instead of 1e-4) with this option.")
@@ -159,7 +177,10 @@ def check_args(parser, args):
         with error message if error occurs with arguments given.
 
     """
-    # TODO: Check that if a gembase species is given, gembase version also, and vice versa
+    if (args.gembase_species is None) ^ (args.gembase_version is None):
+        parser.error("If you want to add complete genomes from gembase, provide both options '-n "
+                     "species' and '-g gembase_version'. Otherwise, do not use any of those 2 "
+                     "options.")
     return args
 
 
