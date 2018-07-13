@@ -3,7 +3,9 @@
 [![build status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/build.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/commits/master)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
-This README file provides some essential information to install/use genomeAPCAT. But it is better to read the full documentation, providing more details [**here**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc).
+This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
+
+----------------------------------------------------
 
 genome APCAT is a software providing tools for large scale comparative genomics:
 - annotation of genomes
