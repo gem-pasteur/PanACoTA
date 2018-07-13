@@ -86,7 +86,7 @@ If you have permission issues, you can either use 'sudo' before the previous com
 - prokka
 - barrnap (if prokka is not already installed)
 
-## Uninstalling `genomeAPCAT`
+## <a name="uninstall"></a> Uninstalling `genomeAPCAT`
 
 If you don't want `genomeAPCAT` anymore, or if you want to install a newer version, uninstall it by typing:
 
@@ -94,9 +94,11 @@ If you don't want `genomeAPCAT` anymore, or if you want to install a newer versi
 
 ## Upgrade to new version
 
-If you want to install a new version of `genomeAPCAT`:
+If you want to install a new version of `genomeAPCAT` (and you downloaded it by cloning the gitlab repository):
 - update source code to the new version (`git pull`)
 - upgrade installation to the new version (`./make upgrade`)
+
+If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file)
 
 ## Cleaning dependencies
 
