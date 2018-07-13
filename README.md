@@ -98,7 +98,7 @@ If you want to install a new version of `genomeAPCAT` (and you downloaded it by 
 - update source code to the new version (`git pull`)
 - upgrade installation to the new version (`./make upgrade`)
 
-If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file)
+If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file).
 
 ## Cleaning dependencies
 
