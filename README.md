@@ -5,7 +5,9 @@
 
 This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
 
-----------------------------------------------------
+---
+---
+---
 
 genome APCAT is a software providing tools for large scale comparative genomics:
 - annotation of genomes
