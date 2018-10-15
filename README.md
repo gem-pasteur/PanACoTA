@@ -9,7 +9,7 @@ This README file provides some essential information to install/use genomeAPCAT.
 ---
 ---
 
-genome APCAT is a software providing tools for large scale comparative genomics:
+genomeAPCAT is a software providing tools for large scale comparative genomics:
 - annotation of genomes
 - pan-genome
 - persistent genome
