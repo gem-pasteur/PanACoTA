@@ -67,7 +67,10 @@ unit-test-ubuntu16.04:
     - docker
     - helpers
   before_script:
+    - pip3 install --upgrade pip
+    - pip3 install --upgrade pytest
     - pip3 install -r requirements-dev.txt
+    - py.test --version
     - ./make
   script:
     - py.test test/test_unit
