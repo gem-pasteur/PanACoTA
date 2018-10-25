@@ -6,6 +6,7 @@ Unit tests for fastme_func submodule of tree_module
 """
 
 import os
+import logging
 
 import genomeAPCAT.tree_module.fastme_func as fme
 from genomeAPCAT import utils
@@ -42,6 +43,7 @@ def test_convert_phylip(caplog):
     Test that when giving a valid fasta alignment file, it converts it to Stockholm format,
     as expected.
     """
+    caplog.set_level(logging.DEBUG)
     outfile = "test_2phylip"
     fme.convert2phylip(ALIGN, outfile)
     exp_stk = os.path.join(EXPPATH, "exp_align_phylip.ph")
@@ -56,6 +58,7 @@ def test_convert_exists(caplog):
     Test that when asking to convert a file in phylip format, but output file already exists,
     it does not convert again, and writes warning message saying that current file will be used.
     """
+    caplog.set_level(logging.DEBUG)
     exp_stk = os.path.join(EXPPATH, "exp_align_phylip.ph")
     assert fme.convert2phylip(ALIGN, exp_stk) is None
     assert 'Phylip alignment file already existing.' in caplog.text
@@ -69,6 +72,7 @@ def test_run_fme_default(caplog):
     Test that when running fastme without bootstrap, and with default model, it returns a file
     in the expected format (all branches have lengths, no bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = None
     write_boot = False
@@ -94,6 +98,7 @@ def test_run_fme_boot_j(caplog):
     Test that when running fastme without bootstrap, and with JC69 model, it returns a file
     in the expected format (all branches have lengths, no bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = False
@@ -123,6 +128,7 @@ def test_run_fme_boot_write_f84(caplog):
     in the expected format (all branches have lengths, + bootstrap value).
     + write bootstrap trees
     """
+    caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = True
@@ -151,6 +157,7 @@ def test_run_fme_notreename_rysym(caplog):
     Test that when running fastme without bootstrap, and with RY-symetric model, it returns a file
     in the expected format (all branches have lengths, no bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = True
@@ -178,6 +185,7 @@ def test_run_tree(caplog):
     """
     Test generating tree from fasta alignment with fastme (conversion)
     """
+    caplog.set_level(logging.DEBUG)
     boot = 110
     treefile = "test_run_tree-fastme"
     quiet = False
