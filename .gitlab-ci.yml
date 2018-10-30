@@ -159,6 +159,8 @@ pages:
     - ls public/html-doc
     - mv html-doc public
     - ls public
+    - ls public/htmlcov
+    - ls public/html-doc
   artifacts:
     paths:
       - public
