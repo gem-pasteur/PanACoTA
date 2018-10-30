@@ -137,11 +137,26 @@ pages:
     - coverage
     - sphinx-doc
   script:
+    - ls -l
     - mkdir -p public/htmlcov
+    - ls
+    - ls public
+    - ls public/htmlcov
     - mv htmlcov public
+    - ls
+    - ls public
+    - ls public/htmlcov
     - mkdir -p public/html-doc
+    - ls
+    - ls public
+    - ls public/html-doc
     - mv doc/build/html html-doc
+    - ls
+    - ls public 
+    - ls public/htmlcov
+    - ls public/html-doc
     - mv html-doc public
+    - ls public
   artifacts:
     paths:
       - public
