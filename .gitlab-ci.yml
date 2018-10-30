@@ -138,6 +138,8 @@ pages:
     - sphinx-doc
   script:
     - ls -l
+    - ls doc
+    - ls doc/build
     - mkdir -p public/htmlcov
     - ls
     - ls public
