@@ -4,6 +4,7 @@
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
 ![](agplv3.png)
+![hello](agplv3.png)
 
   
 ![test](https://github.com/favicon.ico | width=20)
