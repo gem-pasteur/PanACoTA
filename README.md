@@ -3,7 +3,7 @@
 [![build status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/build.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/commits/master)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
-![hello](https://www.gnu.org/graphics/agplv3-with-text-162x68.png)
+![](agplv3.png)
   
 This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
 
