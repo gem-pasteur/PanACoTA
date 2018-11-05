@@ -4,6 +4,10 @@
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
 ![](agplv3.png)
+
+![test](https://github.com/favicon.ico | width=24)![test](https://github.com/favicon.ico){:height="24px" width="48px"}
+
+![](https://www.freechurchaccounting.com/images/manual2.jpeg.pagespeed.ce.6WDD4pMQH9.jpg )
   
 This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [![ **full documentation** ](manual.png)](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
 
