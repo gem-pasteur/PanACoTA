@@ -6,7 +6,7 @@
 ![](agplv3.png)
 
   
-![](agplv3.png)
+![](agplv3.png | width=24)
 
 This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
 
