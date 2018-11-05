@@ -164,6 +164,7 @@ def test_read_panfile(caplog):
     """
     check that it reads the pangenome file and returns the expected objects
     """
+    caplog.set_level(logging.INFO)
     fbs, fams, sas = upan.read_pan_file(PAN_FILE)
     assert fbs == FAMS_BY_STRAIN
     assert fams == FAMILIES
@@ -176,6 +177,7 @@ def test_get_fams(caplog):
     Test that when giving all members for each family, it returns all strains involved in
     those families, and all families with members sorted by strain
     """
+    caplog.set_level(logging.INFO)
     bystrain, sortedf = upan.get_fams_info(FAMILIES)
     assert bystrain == FAMS_BY_STRAIN
     assert sortedf == ALL_STRAINS
@@ -186,6 +188,7 @@ def test_read_pan_filetxt(caplog):
     """
     Test that when giving a pangenome file, it returns all families as expected.
     """
+    caplog.set_level(logging.INFO)
     fbs, fams, ass = upan.read_pangenome(PAN_FILE)
     assert fbs == FAMS_BY_STRAIN
     assert fams == FAMILIES
@@ -201,6 +204,7 @@ def test_read_pan_filebin(caplog):
     Test that when giving only a pangenome filename, and the corresponding bin file exists,
     it reads the binary file, and returns expected objects.
     """
+    caplog.set_level(logging.INFO)
     panbin = os.path.join("test", "data", "pangenome", "test_files", "pangenome.bin")
     panbinres = PAN_FILE + ".bin"
     shutil.copyfile(panbin, panbinres)
@@ -217,6 +221,7 @@ def test_read_pan_fams(caplog):
     Test that when giving a pangenome file, and families, it directly extracts strain information
     from the families: pangenome file does not need to exist, and a binary file is created
     """
+    caplog.set_level(logging.DEBUG)
     logger = my_logger()
     name = "test_read_panfams"
     logger(name)
@@ -240,6 +245,7 @@ def test_read_pan_fams_binok(caplog):
     from the families: pangenome file does not need to exist. However, the pangenome.bin file
     already exists (whatever its content), and is then not recreated.
     """
+    caplog.set_level(logging.INFO)
     logger = my_logger()
     name = "test_read_panfams_bin"
     logger(name)

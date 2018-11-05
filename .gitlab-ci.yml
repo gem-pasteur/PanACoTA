@@ -67,8 +67,10 @@ unit-test-ubuntu16.04:
     - docker
     - helpers
   before_script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
+    - fastme -h
   script:
     - py.test test/test_unit
     - more test_mmseq_cluster.log

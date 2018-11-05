@@ -3,10 +3,15 @@
 [![build status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/build.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/commits/master)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
-This README file provides some essential information to install/use genomeAPCAT. You can find the full documentation with
-more details [here](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc).
+![](agplv3.png)
 
-genome APCAT is a software providing tools for large scale comparative genomics:
+This README file provides some essential information to install/use genomeAPCAT. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details.
+
+---
+---
+---
+
+genomeAPCAT is a software providing tools for large scale comparative genomics:
 - annotation of genomes
 - pan-genome
 - persistent genome
@@ -83,7 +88,7 @@ If you have permission issues, you can either use 'sudo' before the previous com
 - prokka
 - barrnap (if prokka is not already installed)
 
-## Uninstalling `genomeAPCAT`
+## <a name="uninstall"></a> Uninstalling `genomeAPCAT`
 
 If you don't want `genomeAPCAT` anymore, or if you want to install a newer version, uninstall it by typing:
 
@@ -91,9 +96,11 @@ If you don't want `genomeAPCAT` anymore, or if you want to install a newer versi
 
 ## Upgrade to new version
 
-If you want to install a new version of `genomeAPCAT`:
+If you want to install a new version of `genomeAPCAT` (and you downloaded it by cloning the gitlab repository):
 - update source code to the new version (`git pull`)
 - upgrade installation to the new version (`./make upgrade`)
+
+If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file).
 
 ## Cleaning dependencies
 
@@ -123,7 +130,7 @@ Each subcommand has its own options and inputs. To get the list of required argu
 ## Examples
 
 We provide a folder, `Examples`, containing genomic sequences (in `Examples/genomes`) and examples of input files (in `Examples/input_files`) for the software.
-In this folder, you will also find a README file, explaining you how to run the different modules of `genomeAPCAT` with this dataset, so that you can try the software. We also describe the results that should be created by each command line.
+In the [example part of documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/examples.html), you will find information explaining you how to run the different modules of `genomeAPCAT` with this dataset, so that you can try the software. We also describe the results that should be created by each command line.
 
 **Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations, but running very fast. Hence, the examples results should not be interpreted biologically!
 

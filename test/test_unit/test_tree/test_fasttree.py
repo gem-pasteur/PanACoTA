@@ -5,8 +5,8 @@
 Unit tests for the fasttree_func submodule in tree module
 """
 import subprocess
-
 import os
+import logging
 
 import genomeAPCAT.tree_module.fasttree_func as ft
 
@@ -58,6 +58,7 @@ def test_run_fasttree_default(caplog):
     Test that when running fasttree without bootstrap, and with default model, it returns a file
     in the expected format (all branches have lengths, no bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     boot = None
     treefile = "test_tree-fasttree-default"
     model = "-gtr"
@@ -80,6 +81,7 @@ def test_run_fasttree_boot(caplog):
     Test that when running fasttree with 10 bootstrap, and with default model, it returns a file
     in the expected format (all branches have lengths, and bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     boot = 10
     treefile = "test_tree-fasttree-boot"
     model = "-gtr"
@@ -102,6 +104,7 @@ def test_run_fasttree_boot_noname_jc(caplog):
     Test that when running fasttree with bootstrap, and with JC model, it returns a file
     in the expected format (all branches have lengths, and bootstrap value).
     """
+    caplog.set_level(logging.DEBUG)
     boot = 100
     model = ""
     quiet = False
@@ -125,6 +128,7 @@ def test_run_fasttree_default_quiet(caplog):
     in the expected format (all branches have lengths, no bootstrap value).
     Check that no bug when launch in quiet mode
     """
+    caplog.set_level(logging.DEBUG)
     boot = None
     treefile = "test_tree-fasttree-default"
     model = "-gtr"
@@ -146,6 +150,7 @@ def test_run_tree(caplog):
     Test that when running run_tree it defines the expected number of threads, and outputs the
     expected tree.
     """
+    caplog.set_level(logging.DEBUG)
     boot = None
     treefile = None
     quiet = False
