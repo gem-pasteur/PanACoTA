@@ -8,6 +8,7 @@ Unit tests for the protein_seq_functions in pangenome module
 import os
 import shutil
 import genomeAPCAT.pangenome_module.protein_seq_functions as psf
+import logging
 
 
 # Define variables and functions used by several tests
@@ -62,6 +63,7 @@ def test_build_bank_exists(caplog):
     Test that when we want to create a bank but the output file already exists, it prints
     a warning, and closes without redoing the bank
     """
+    caplog.set_level(logging.DEBUG)
     lstinfo = os.path.join(PATH_TEST_FILES, "list_to_pan.txt")
     dbpath = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
     name = "EXEM"
@@ -82,6 +84,7 @@ def test_build_bank_noquiet(caplog):
     """
     Test that when the bank is created without the quiet option, it also works as expected
     """
+    caplog.set_level(logging.DEBUG)
     lstinfo = os.path.join(PATH_TEST_FILES, "list_to_pan.txt")
     dbpath = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
     name = "EXEM"

@@ -5,6 +5,7 @@
 Unit tests for the persistent_functions submodule in corepers module
 """
 import os
+import logging
 
 import genomeAPCAT.corepers_module.persistent_functions as persf
 
@@ -109,6 +110,7 @@ def test_zero_mem(caplog):
     Test that when there are no member in 1 family, and 1 in all others, it
     returns True but with a warning message.
     """
+    caplog.set_level(logging.DEBUG)
     family = {"strain1": ["member"],
               "strain2": ["member2"],
               "strain3": ["member3"],
@@ -134,6 +136,7 @@ def test_mixed_empty(caplog):
     Test that when there is exactly 1 member in 3 genomes / 4 (and min 3 asked),
     and 0 in the other genome, it returns True, and a warning message
     """
+    caplog.set_level(logging.DEBUG)
     family = {"strain1": ["member"],
               "strain2": ["member2"],
               "strain2b": [],
@@ -194,6 +197,7 @@ def test_get_core_strict(caplog):
     """
     Getting a core genome (4 genomes, all having exactly 1 member)
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
     assert exp_fams == fams
@@ -205,6 +209,7 @@ def test_get_core_multi(caplog):
     """
     Getting a multi core genome (4 genomes, having at least 1 member)
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, multi=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5', '1', '12']}
     assert exp_fams == fams
@@ -217,6 +222,7 @@ def test_get_99pers_floor_strict(caplog):
     Getting a strict persistent at floor(99%) -> at least 3 genomes with 1 member, others
     absent.
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, floor=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5', '8', '10', '11']}
     assert exp_fams == fams
@@ -229,6 +235,7 @@ def test_get_99pers_floor_mixed(caplog):
     Getting a mixed persistent at floor(99%) -> at least 3 genomes with 1 member, others
     anything
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, floor=True, mixed=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '8', '10',
                                                                        '11', '12']}
@@ -241,6 +248,7 @@ def test_get_99pers_floor_multi(caplog):
     """
     Getting a multi persistent genome at floor(99%) -> at least 3 genomes (any number of members)
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, floor=True, multi=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '6', '8',
                                                                        '10', '11', '12']}
@@ -253,6 +261,7 @@ def test_get_99pers_strict(caplog):
     """
     Getting a persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
     assert exp_fams == fams
@@ -264,6 +273,7 @@ def test_get_99pers_mixed(caplog):
     """
     Getting a mixed persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, mixed=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
     assert exp_fams == fams
@@ -276,6 +286,7 @@ def test_get_99pers_multi(caplog):
     Getting a multi persistent genome at 99% (ceil) -> 3 genomes with exactly 1member,
     other with anything
     """
+    caplog.set_level(logging.DEBUG)
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, multi=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '12']}
     assert exp_fams == fams
