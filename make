@@ -109,12 +109,12 @@ def install_all(install_dir, target, dev=False, user=False):
         if "prodigal" in to_install_user:
             msg += ("\t- prodigal : for annotate subcommand, you at least need prodigal (for "
                     "syntaxic annotation only). If you even need functional annotation, also "
-                    "install prokka")
+                    "install prokka\n")
         if "prokka" in to_install_user:
             msg += "\t- prokka (for annotate subcommand, with syntaxic + functional annotation)\n"
         if "barrnap" in to_install_user:
-            msg += ("\t barrnap. If you use Prokka for functional annotation, it will not predict"
-                    " RNA.")
+            msg += ("\t- barrnap. If you use Prokka for functional annotation, it will not predict"
+                    " RNA.\n")
         if "mmseqs" in to_install_user:
             msg += "\t- mmseqs (for pangenome subcommand)\n"
         if "mafft" in to_install_user:
