@@ -61,29 +61,32 @@ def test_build_prokka_only():
         assert found is True
     os.remove(stdout)
     logfile = "install.log"
-    content = [":: INFO :: Installing genomeAPCAT...",
-               ":: WARNING :: Some dependencies needed for some subcommands of genomeAPCAT are "
-               "not installed. Here is the list of missing dependencies, and for what they are "
-               "used. If you plan to use the subcommands hereafter, first install required "
-               "dependencies:",
+    content = [":: INFO :: Installing genomeAPCAT...", ":: WARNING :: Some dependencies needed "
+               "for some subcommands of genomeAPCAT are not installed. Here is the list of "
+               "missing dependencies, and for what they are used. If you plan "
+               "to use the subcommands hereafter, first install required dependencies:",
+               "prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
+               "annotation only). If you even need functional annotation, also install prokka",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "- mafft (to align persistent genomes in order to infer a phylogenetic tree after)",
                "- mmseqs (for pangenome subcommand)",
+               "- mafft (to align persistent genomes in order to infer a phylogenetic "
+               "tree after)",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree"]
+               "install it)", "* FastME", "* Quicktree", "See more information on how to "
+               "download/install those softwares in README or in documentation."]
     print("###### LOGFILE :")
     with open(logfile, "r") as logf:
-        for line in logf:
-            print(line)
-    #     for linef, linee in zip(logf, content):
-    #         assert linee in linef
-    # # Check that needed packages are installed
-    # assert utils.is_package_installed("argparse")
-    # assert utils.is_package_installed("progressbar")
-    # assert utils.is_package_installed("numpy")
-    # assert utils.is_package_installed("matplotlib")
-    # assert utils.is_package_installed("Bio")
-    # assert not os.path.isdir(os.path.join("dependencies", "prokka"))
-    # os.remove(logfile)
+        for linef, linec in zip(logf, content):
+            print(linef)
+            print(linec)
+            assert linec in linef
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
+    assert not os.path.isdir(os.path.join("dependencies", "prokka"))
+    os.remove(logfile)
