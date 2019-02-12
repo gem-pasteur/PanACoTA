@@ -1,0 +1,9 @@
+[2019-02-12 13:18:41] root :: INFO :: Let's start!
+[2019-02-12 13:18:41] utils :: INFO :: Reading genomes
+[2019-02-12 13:18:41] qc_annote.gseq :: INFO :: Cutting genomes at each stretch of at least 5 'N', and then, calculating genome size, number of contigs and L90.
+[2019-02-12 13:18:41] qc_annote.gseq :: INFO :: Generating distribution of L90 and #contigs graphs.
+[2019-02-12 13:18:41] utils :: INFO :: 0 genome was discarded.
+[2019-02-12 13:18:41] utils :: INFO :: Writing discarded genomes to Examples/1-res-Annotate/discarded-list_genomes.lst
+[2019-02-12 13:18:41] qc_annote.gseq :: INFO :: Renaming kept genomes according to their quality.
+[2019-02-12 13:18:41] qc_annote.prokka :: INFO :: Annotating all genomes with prokka
+[2019-02-12 13:18:54] qc_annote.ffunc :: INFO :: Formatting all genomes

@@ -1,0 +1,12 @@
+1	831	D	CDS	EXAM.1216.00002.b0001_00001	amiD_1	| N-acetylmuramoyl-L-alanine amidase AmiD | 3.5.1.28 | similar to AA sequence:UniProtKB:P75820
+880	1710	D	CDS	EXAM.1216.00002.i0001_00002	amiD_2	| N-acetylmuramoyl-L-alanine amidase AmiD | 3.5.1.28 | similar to AA sequence:UniProtKB:P75820
+1655	2128	D	CDS	EXAM.1216.00002.i0001_00003	hpcD	| 5-carboxymethyl-2-hydroxymuconate Delta-isomerase | 5.3.3.10 | similar to AA sequence:UniProtKB:Q05354
+2172	2396	D	CDS	EXAM.1216.00002.i0001_00004	pspB	| Phage shock protein B | NA | similar to AA sequence:UniProtKB:P0AFM9
+2425	3828	D	CDS	EXAM.1216.00002.i0001_00005	NA	| hypothetical protein | NA | NA
+3863	4636	D	CDS	EXAM.1216.00002.i0001_00006	hisP	| Histidine transport ATP-binding protein HisP | NA | similar to AA sequence:UniProtKB:P02915
+4641	5432	D	CDS	EXAM.1216.00002.i0001_00007	trmD	| tRNA (guanine-N(1)-)-methyltransferase | 2.1.1.228 | similar to AA sequence:UniProtKB:P0A873
+5460	5747	D	CDS	EXAM.1216.00002.b0001_00008	NA	| hypothetical protein | NA | NA
+1	582	D	CDS	EXAM.1216.00002.b0002_00009	NA	| hypothetical protein | NA | NA
+629	1936	D	CDS	EXAM.1216.00002.b0002_00010	dctM	| C4-dicarboxylate TRAP transporter large permease protein DctM | NA | similar to AA sequence:UniProtKB:O07838
+26	280	D	CDS	EXAM.1216.00002.b0003_00011	NA	| hypothetical protein | NA | NA
+323	1102	D	CDS	EXAM.1216.00002.b0003_00012	NA	| Insertion sequence IS5376 putative ATP-binding protein | NA | similar to AA sequence:UniProtKB:Q45619
