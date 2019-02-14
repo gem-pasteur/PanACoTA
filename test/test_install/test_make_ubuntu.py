@@ -22,8 +22,8 @@ def teardown_module():
 
 def test_build_prokka_only():
     """
-    Test that when installing from a computer containing the basic ubuntu, it fails to install
-    prokka, but still installs genomeAPCAT, without any dependence (warning message)
+    Test that when installing from a computer containing the basic ubuntu, it installs
+    genomeAPCAT, without any dependence (show warning message)
     """
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from ubuntu"
@@ -55,7 +55,7 @@ def test_build_prokka_only():
         lines = stdof.readlines()
         found = False
         for line in lines:
-            if "/usr/local/lib" in line:
+            if "Summary: Large scale comparative genomics tools" in line:
                 found = True
                 break
         assert found is True
@@ -69,24 +69,31 @@ def test_build_prokka_only():
                "annotation only). If you even need functional annotation, also install prokka",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "- mmseqs (for pangenome subcommand)",
+               "- mmseqs (for pangenome subcommand)",  "* Quicktree",
                "- mafft (to align persistent genomes in order to infer a phylogenetic "
                "tree after)",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree", "See more information on how to "
+               "install it)", "* FastME", "See more information on how to "
                "download/install those softwares in README or in documentation."]
+
+    # Check output logfile content. Check that all content is present, in any order.
     print("###### LOGFILE :")
     with open(logfile, "r") as logf:
-        for linef, linec in zip(logf, content):
-            print(linef)
-            print(linec)
-            assert linec in linef
-    # Check that needed packages are installed
+        for linef in logf:
+            found=False
+            for linec in content:
+                if linec in linef:
+                    found=True
+                    break
+            assert found
+
+    # # Check that needed packages are installed
     assert utils.is_package_installed("argparse")
     assert utils.is_package_installed("progressbar")
     assert utils.is_package_installed("numpy")
     assert utils.is_package_installed("matplotlib")
     assert utils.is_package_installed("Bio")
-    assert not os.path.isdir(os.path.join("dependencies", "prokka"))
+    assert not os.path.isdir(os.path.join("dependencies"))
+    assert not os.path.isdir(os.path.join("binaries"))
     os.remove(logfile)
