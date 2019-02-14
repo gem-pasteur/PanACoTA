@@ -1,0 +1,798 @@
+Seq-entry ::= set {
+  class genbank ,
+  seq-set {
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14-dev from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 2 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 12 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2019 } } } ,
+        create-date
+          std {
+            year 2019 ,
+            month 2 ,
+            day 12 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "g4_1" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 7134 ,
+            seq-data
+              iupacna "ATGAAAGCGCTACTGTGGCTGGTGGGTCTCGCGTTGCTGTTAACAGGCTGCGCGA
+GCGAAAAAGGAATTATCGATAAAGAGGGATATCAGCTTGATACCCGACATCGGGCGCAGGCGGCCTATCCGCGCATTA
+AAGTCCTGGTGATTCACTATACGGCGGAAAACTTTGACGTTTCGCTGGCGACGTTAACGGGCCGCAACGTCAGTTCGC
+ATTACCTGATTCCCGCAACCCCGCCATTATATGGCGGTAAACCGCGCATCTGGCAACTGGTGCCGGAACAGGATCAGG
+CCTGGCATGCGGGCGTCAGTTTCTGGCGAGGCGCCACGCGTCTCAATGATACGTCTATTGGCATTGAGCTGGAAAATC
+GCGGCTGGCGAATGTCCGGCGGGGTGAAATCTTTCGCGCCGTTTGAATCCGCGCAAATTCAGGCATTGATTCCGTTAG
+CGAAGGACATTATCGCGCGCTATGACATCAAACCGCAGAATGTGGTGGCCCATGCGGATATCGCGCCGCAGCGTAAAG
+ACGATCCCGGCCCGCGCTTCCCGTGGCGCGAGCTGGCGGCGCAGGGGATTGGCGCCTGGCCTGACGCCCAGCGTGTGG
+CGTTTTATCTGGCTGGACGCGCGCCGTATACGCCAGTCGATACCGCAACGGTGCTTGCGTTACTCTCGCGCTATGGCT
+ATGAAGTCAAAGCCGATATGACGGCGCGCGAGCAGCAGCGGGTGATTATGGCGTTCCAGATGCACTTCCGTCCGGCGC
+AATGGAACGGTATCGCAGATGCCGAAACGCAGGCGATTGCCGAAGCATTACTGGAGAAGTACGGCCAGGATTAACGCG
+ATCGCGCGCATATCGCGCGCGATAGATGCCGCACTTTATTGCTGAATGTACTGAAAATATTCGCGAGCAGGCTGATTT
+ACCCGGCCTGTTCAGCAAGGTAAACGAGGCGCTGGCCGCCAGCGGGATTTTCCCCATCGGCGGTATCCGCAGTCGCGC
+CCACTGGCTGGATACCTGGCAGATGGCTGACGGTAAGCATGATTATGCGTTTGTGCATATGACGCTGAAAATCGGTAC
+CGGGCGCAGCCTGGAGAGCCGTCAGGAAGTCGGCGAAATGCTGTTTGGGCTGATTAAAGCCCACTTCGCCGACCTGAT
+GGAGAACCGCTATCTGGCGCTGTCGTTTGAGATTGCCGAGCTACATCCGACGCTCAATTACAAACAAAACAACGTACA
+CGCGTTATTTAAATAGCCGCATATGCGGCGCTCAGGAGCGCTAGCATGCTCGATAAACAGACCCATACCCTGATCGCC
+CAGCGACTTAATCAGGCTGAAAAACAGCGTGAACAAATTCGCGCAGTGTCGCTGGATTATCCCAACATCACTATTGAA
+GATGCCTATGCCGTACAGCGTGAATGGGTCAATATCAAGATCGCCGAAGGGCGCACGCTCAAAGGCCACAAAATCGGC
+CTGACCTCAAAAGCGATGCAGGCCAGCTCGCAAATCAGCGAACCGGATTACGGCGCGCTGCTTGACGATATGTTCTTC
+CATGACGGCGGCGATATCCCCACCGACCGTTTTATCGTCCCGCGTATTGAAGTGGAGCTGGCGTTCGTGCTGGCGAAA
+CCGCTGCGCGGCCCTCACTGCACGCTGTTCGACGTCTACAACGCCACGGATTATGTGATTCCGGCGCTGGAACTGATT
+GACGCCCGCAGCCACAACATCGACCCGGAAACCCAGCGCCCGCGCAAAGTGTTCGACACCATTTCCGACAACGCCGCC
+AACGCCGGGGTGATCCTCGGTGGTCGCCCCATCAAACCAGACGAGCTGGATCTGCGCTGGATCTCCGCGCTGCTCTAT
+CGCAACGGCGTGATCGAAGAAACCGGCGTCGCCGCAGGCGTGCTGAATCATCCGGCCAACGGCGTGGCGTGGCTGGCG
+AACAAGCTTGCCCCCTACGATGTCCAGCTTGAAGCCGGGCAGATCATCCTCGGCGGCTCGTTCACCCGCCCGGTGCCG
+GCGAGCAAGGGCGACACCTTCCATGTCGATTACGGCAACATGGGCGCGATCAGTTGCCGGTTTGTGTAACCAGATCCG
+CGCGCGCATATATATCGCGCGCATACGATGCCCGTGAATAAGTTCTCCCGACGTACCCTCCTGACGGCAGGTTCCGCG
+CTTGCTGTTCTTCCTTTTCTGCGCGCCTTGCCGGTACAGGCGCGTGAACCTCGCGAGACCGTCGATATTAAGGATTAT
+CCGGCGGATGACGGTATCGCCTCGTTCAAACAGGCCTTCGCCGACGGACAGACCGTGGTCTTACCGCCAGGATGGGTG
+TGTGAAAATATCAATGCGGCGATAACGATTCCGGCGGGAAAAACGCTGCGGGTACAGGGCGCGGTGCGTGGGAATGGC
+CGGGGACGGTTTATTTTGCAGGACGGGTGTCAGGTGGTGGGGGAGCAGGGCGGCAGTCTGCACAATGTGACGCTGGAT
+GTTCGCGGGTCGGACTGTGTGATTAAAGGCGTGACGATGAGCGGCTTTGGCCCCGTCGCGCAAATTTTCATCGGCGGT
+AAGGAACCGCAGGTGATGCGTAATCTCATTATCGATGACATCACCGTTACCCACGCCAACTACGCCATTCTCCGCCAG
+GGATTTCATAACCAAATGGACGGCGCGCGGATTACGCATAGCCGCTTTAGCGATTTGCAGGGGGACGCCATTGAGTGG
+AATGTCGCGATTCACGACCGCGACATCCTGATTTCCGATCATGTCATCGAACGCATTGATTGTACCAATGGCAAAATC
+AACTGGGGGATCGGCATCGGGCTGGCGGGTAGCACCTATGACAACAGTTATCCTGAAGATCAGGCAGTAAAAAACTTT
+GTGGTGGCCAATATTACCGGATCTGATTGCCGACAGCTGGTGCACGTAGAAAATGGCAAACATTTCGTCATTCGCAAT
+GTCAAAGCCAAAAACATCACGCCCGATTTCAGTAAAAATGCGGGTATTGATAACGCAACGATCGCCATTTATGGCTGT
+GATAATTTCGTCATTGATAATATTGATATGACGAATAGTGCTGGGATGCTCATCGGCTATGGCGTCGTTAAAGGAAAA
+TACCTGTCAATTCCGCAAAACTTTAAATTAAACGCTATTCGGTTGGATAATCGCCAGGTTGCTTATAAATTACGCGGC
+ATTCAAATTTCCTCCGGCAACATCCCCTCTTTTGTCGCCATCACCAATGTACGGATGACGCGTGCTACGCTGGAACTG
+CATAATCAACCGCAGCACCTCTTTCTGCGTAATATCAACGTGATGCAAACTTCAGCGATTGGCCCGGCGTTAAAAATG
+CATTTCGATTTGCGTAAAGATGTCCGTGGTCAATTTATGGCCCGCCAGGACACGCTGCTTTCCCTCGCTAATGTTCAT
+GCCATCAATGAAAACGGGCAGAGTTCCGTGGATATCGACAGGATTAATCACCAAACCGTGAATGTCGAAGCAGTGAAT
+TTTTCGCTGCCGAAGCGGGGAGGGTAACAGAGCTCGCGCGATCGCGAATGTCAGAAAATAAATTACACGTTATCGATT
+TGCACAAACGCTACGGCGGTCATGAAGTGCTGAAAGGGGTATCGTTGCAGGCCCGCGCCGGAGATGTGATTAGCATCA
+TCGGCTCGTCCGGCTCCGGTAAAAGCACTTTTTTGCGCTGTATTAACTTCCTCGAAAAACCGAGCGAAGGCGCGATTA
+TCGTGAACGGTCAGAACATTAATCTGGTGCGCGACAAAGACGGGCAGCTCAAAGTGGCGGATAAAAATCAGCTACGCT
+TGTTGCGTACCCGCCTGACGATGGTGTTTCAGCACTTTAACCTCTGGAGCCACATGACGGTGCTGGAAAATGTGATGG
+AAGCGCCGATTCAGGTACTGGGATTAAGCAAGCACGACGCGCGCGAGCGGGCGTTGAAATATCTGGCGAAGGTGGGGA
+TTGATGAGCGCGCTCAGGGCAAATATCCCGTCCATCTCTCCGGCGGCCAACAGCAGCGCGTTTCTATTGCGCGCGCGC
+TGGCGATGGAACCTGACGTTTTACTGTTCGATGAACCCACATCGGCGCTCGATCCTGAACTGGTCGGCGAAGTGTTGC
+GCATCATGCAACAACTGGCGGAAGAAGGCAAAACGATGGTGGTGGTCACGCATGAAATGGGCTTCGCCCGCCATGTCT
+CTTCGCACGTTATTTTTCTGCATCAGGGGAAAATTGAAGAAGAGGGCGATCCGGAGCAGGTGTTCGGCAATCCGCAAA
+GCCCGCGTTTACAGCAATTCCTGAAAGGCTCGCTGAAATAACAGATACGCGCATGGCGAGTGTTTATTGGCATCGTTA
+GCCTGTTTCCTGAAATGTTCCGCGCAATTACCGATTACGGGGTAACTGGCCGGGCAGTAAAAAAAGGCCTGCTGAACA
+TCCAAAGCTGGAGTCCTCGCGACTTCGCGCATGACCGGCACCGTACCGTGGACGACCGTCCTTACGGCGGCGGACCGG
+GGATGTTAATGATGGTGCAACCCTTGCGGGACGCCATTCACGCAGCAAAAGCCGCGGCAGGTGAAGGCGCTAAAGTGA
+TTTATCTGTCGCCTCAGGGACGCAAGCTTGATCAAGCGGGCGTTAGCGAGCTGGCCACGAATCAGAAGCTTATTCTGG
+TGTGTGGTCGCTACGAAGGCGTAGATGAGCGCGTAATTCAGACCGAAATTGACGAAGAATGGTCAATTGGCGATTACG
+TTCTCAGCGGTGGCGAACTACCGGCAATGACGCTGATTGACTCCGTCGCCCGGTTTATACCGGGGGTTCTGGGGCATG
+AGGCATCAGCAATCGAAGATTCGTTTGCTGATGGGTTGCTGGATTGTCCGCACTATACGCGCCCTGAAGTGTTAGAGG
+GGATGGAAGTACCGCCAGTATTGCTGTCGGGAAACCATGCCGAGATACGTCGCTGGCGCTTGAAACAGTCGCTGGGCC
+GAACCTGGCTTAGAAGACCTGAACTTCTGGAAAACCTGGCTCTGACTGAAGAGCAAGCAAGGTTGCTGGCGGAGTTCA
+AAACAGAACACGCACAACAGCAGCATAAACATGATGGGATGGCATAGCGATAGCGCTAGAGCGATGAATAATCATTTT
+GGGAAAGGGTTAATGGCTGGGTTGCACGCGCCATATGCATATAGCGCGCATCATGCGGTGAATTTCTGTTCTGAGTAT
+AAACGTGGCTTTGTATTGGGTTTTACACACCGTATGTTCGAAAAGACCGGCGATCGTCAACTTAGCGCGTGGGAGGCC
+GGAATTCTGACGCGTCGCTATGGTCTGGATAAAGAAATGGTGATGGATTTCTTTAAAGAGAATCATTCCGGGATGGCG
+GTTCGCTTCTTTATGGTCGGTTATCGACTCGAAGGTTGACAGATGCGCGATCGATGTCTACGCTTCTCTATTTGCACG
+GATTCAACAGTTCCCCTCGCTCGGCAAAAGCGTGCCAGCTAAAAAACTGGCTGGCGGAGCGTCATCCGCATGTCGAGA
+TGATCGTCCCTCAACTACCGCCGTATCCTGCCGATGCGGCGGAGTTGCTGGAATCTCTCGTGCTTGAGCATGGCGGTG
+CGCCATTAGGGCTGGTAGGATCGTCGCTGGGTGGTTATTACGCCACCTGGCTGTCGCAATGTTTTATGCTGCCGGCTG
+TGGTGGTGAATCCCGCCGTGCGGCCCTTTGAATTACTGACCGACTATCTCGGTCAGAACGAGAACCCCTACACCGGGC
+AGCAATATGTGCTAGAGTCTCGCCATATTTATGATCTTAAAGTCATGCAGATTGACCCGCTGGAAGCGCCGGACCTGA
+TCTGGCTACTGCAACAGACGGGCGATGAAGTGCTGGATTACCGCCAGGCGGTGGCATATTACGCCTCCTGCCGTCAGA
+CAGTGACCGAGGGTGGTAATCACGCATTCACGGGCTTCGAAGATTATTTCAACCAGATTGTCGATTTTCTTGGACTGC
+ACAGTTGCTGACACGGATGCGCCATCGGCTTGCTGGCCGTGCCGTTCTTCGTTTTGTCCGGGGTGATCATGAATAGCG
+GGGGAATTGCCGCCCGGCTGGTCAATTTTGCCAAACTGTTTACTGGCAAACTGCCCGGCTCGCTCTCTTATACCAACA
+TCGTCGGCAATATGATGTTCGGTGCAATTTCCGGATCGGCAATTGCCGCCTCAACCTCCATCGGCGGCGTGATGGTGC
+CGATGAGCGCGCGCGAAGGTTACGATCGCGGCTTTGCGGCCGCGGTGAATATCGCCTCCGCGCCGACGGGAATGTTAA
+TTCCGCCCACCACGGCTTTTATCCTTTATGCGCTGGCAAGCGGGGGAACATCGATTGCCGCTCTGTTCGCCGGCGGTC
+TGGTCGCGGGAGTGCTGTGGGGCGTTGGCTGTATGCTGGTCACGCTGGTGGTCGCTAAGCGTCGAAATTATCGGGTTT
+TCTTCACCGTCCAAAAAGGCATGGCGCTAAAAGTTGCCGTTGAGGCCATTCCCAGCCTGCTGCTGATCGTGATTATCG
+TCGGCGGCATTGTGCAGGGGATTTTCACCGCCATTGAAGCCTCCGCGATTGCCGTGGTGTATACATTATTGTTGACGA
+TGGTGTTTTACCGCACGCTGAAAATTAAGGATTTGCCTTCGATTTTGCTCCAGACAGTGGTAATGACCGGGGTCATCA
+TGTTCCTGCTGGCAACCTCTTCGGCGATGTCCTTCTCGATGTCGATCACCAATATTCCTGCGGCGCTGAGCGATATGA
+TCCTCGGTATTTCCGCCAATAAACTGGTTATCCTGTTAGTCATTACCGTCTTTTTGTTGATTATCGGCGCATTTATGG
+ATATCGGTCCGGCCATTCTGATTTTTACCCCGATTCTGCTGCCGATCATGGCTAAACTGGGCGTCGATCCGGTGCATT
+TTGGCATTATCATGATCTATAACCTGGCGATTGGCACCATTACGCCGCCAGTTGGCAGTGGTTTATATGTCGGGGCGA
+GCGTCGGTAAGGTCAAAGTTGAGGAAGTGATTAAACCGTTGCTGCCTTTTTACGGCGCGATTATCGGCGTTCTGTTAT
+TAATTACCTACATTCCGGAAATCACACTGTTCTTACCCCGTCTACTGGGCATCATGTAA" } } ,
+        seq {
+          id {
+            local
+              str "g4_1_1" } ,
+          descr {
+            title "N-acetylmuramoyl-L-alanine amidase AmiD [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 276 ,
+            seq-data
+              ncbieaa "MKALLWLVGLALLLTGCASEKGIIDKEGYQLDTRHRAQAAYPRIKVLVIHYTAEN
+FDVSLATLTGRNVSSHYLIPATPPLYGGKPRIWQLVPEQDQAWHAGVSFWRGATRLNDTSIGIELENRGWRMSGGVKS
+FAPFESAQIQALIPLAKDIIARYDIKPQNVVAHADIAPQRKDDPGPRFPWRELAAQGIGAWPDAQRVAFYLAGRAPYT
+PVDTATVLALLSRYGYEVKADMTAREQQRVIMAFQMHFRPAQWNGIADAETQAIAEALLEKYGQD" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 10 ,
+                    data
+                      prot {
+                        name {
+                          "N-acetylmuramoyl-L-alanine amidase AmiD" } ,
+                        ec {
+                          "3.5.1.28" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 275 ,
+                        id
+                          local
+                            str "g4_1_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_2" } ,
+          descr {
+            title "5-carboxymethyl-2-hydroxymuconate Delta-isomerase [Genus
+ species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 126 ,
+            seq-data
+              ncbieaa "MPHFIAECTENIREQADLPGLFSKVNEALAASGIFPIGGIRSRAHWLDTWQMADG
+KHDYAFVHMTLKIGTGRSLESRQEVGEMLFGLIKAHFADLMENRYLALSFEIAELHPTLNYKQNNVHALFK" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 11 ,
+                    data
+                      prot {
+                        name {
+                          "5-carboxymethyl-2-hydroxymuconate Delta-isomerase" } ,
+                        ec {
+                          "5.3.3.10" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 125 ,
+                        id
+                          local
+                            str "g4_1_2" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_3" } ,
+          descr {
+            title "2-oxo-hept-4-ene-1,7-dioate hydratase [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 267 ,
+            seq-data
+              ncbieaa "MLDKQTHTLIAQRLNQAEKQREQIRAVSLDYPNITIEDAYAVQREWVNIKIAEGR
+TLKGHKIGLTSKAMQASSQISEPDYGALLDDMFFHDGGDIPTDRFIVPRIEVELAFVLAKPLRGPHCTLFDVYNATDY
+VIPALELIDARSHNIDPETQRPRKVFDTISDNAANAGVILGGRPIKPDELDLRWISALLYRNGVIEETGVAAGVLNHP
+ANGVAWLANKLAPYDVQLEAGQIILGGSFTRPVPASKGDTFHVDYGNMGAISCRFV" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 12 ,
+                    data
+                      prot {
+                        name {
+                          "2-oxo-hept-4-ene-1,7-dioate hydratase" } ,
+                        ec {
+                          "4.2.1.163" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 266 ,
+                        id
+                          local
+                            str "g4_1_3" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_4" } ,
+          descr {
+            title "hypothetical protein LIKMDGFN_00004 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 467 ,
+            seq-data
+              ncbieaa "MPVNKFSRRTLLTAGSALAVLPFLRALPVQAREPRETVDIKDYPADDGIASFKQA
+FADGQTVVLPPGWVCENINAAITIPAGKTLRVQGAVRGNGRGRFILQDGCQVVGEQGGSLHNVTLDVRGSDCVIKGVT
+MSGFGPVAQIFIGGKEPQVMRNLIIDDITVTHANYAILRQGFHNQMDGARITHSRFSDLQGDAIEWNVAIHDRDILIS
+DHVIERIDCTNGKINWGIGIGLAGSTYDNSYPEDQAVKNFVVANITGSDCRQLVHVENGKHFVIRNVKAKNITPDFSK
+NAGIDNATIAIYGCDNFVIDNIDMTNSAGMLIGYGVVKGKYLSIPQNFKLNAIRLDNRQVAYKLRGIQISSGNIPSFV
+AITNVRMTRATLELHNQPQHLFLRNINVMQTSAIGPALKMHFDLRKDVRGQFMARQDTLLSLANVHAINENGQSSVDI
+DRINHQTVNVEAVNFSLPKRGG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 13 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 466 ,
+                        id
+                          local
+                            str "g4_1_4" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_5" } ,
+          descr {
+            title "Histidine transport ATP-binding protein HisP [Genus
+ species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 257 ,
+            seq-data
+              ncbieaa "MSENKLHVIDLHKRYGGHEVLKGVSLQARAGDVISIIGSSGSGKSTFLRCINFLE
+KPSEGAIIVNGQNINLVRDKDGQLKVADKNQLRLLRTRLTMVFQHFNLWSHMTVLENVMEAPIQVLGLSKHDARERAL
+KYLAKVGIDERAQGKYPVHLSGGQQQRVSIARALAMEPDVLLFDEPTSALDPELVGEVLRIMQQLAEEGKTMVVVTHE
+MGFARHVSSHVIFLHQGKIEEEGDPEQVFGNPQSPRLQQFLKGSLK" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 14 ,
+                    data
+                      prot {
+                        name {
+                          "Histidine transport ATP-binding protein HisP" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 256 ,
+                        id
+                          local
+                            str "g4_1_5" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_6" } ,
+          descr {
+            title "tRNA (guanine-N(1)-)-methyltransferase [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 255 ,
+            seq-data
+              ncbieaa "MFIGIVSLFPEMFRAITDYGVTGRAVKKGLLNIQSWSPRDFAHDRHRTVDDRPYG
+GGPGMLMMVQPLRDAIHAAKAAAGEGAKVIYLSPQGRKLDQAGVSELATNQKLILVCGRYEGVDERVIQTEIDEEWSI
+GDYVLSGGELPAMTLIDSVARFIPGVLGHEASAIEDSFADGLLDCPHYTRPEVLEGMEVPPVLLSGNHAEIRRWRLKQ
+SLGRTWLRRPELLENLALTEEQARLLAEFKTEHAQQQHKHDGMA" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 15 ,
+                    data
+                      prot {
+                        name {
+                          "tRNA (guanine-N(1)-)-methyltransferase" } ,
+                        ec {
+                          "2.1.1.228" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 254 ,
+                        id
+                          local
+                            str "g4_1_6" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_7" } ,
+          descr {
+            title "hypothetical protein LIKMDGFN_00007 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 86 ,
+            seq-data
+              ncbieaa "MAGLHAPYAYSAHHAVNFCSEYKRGFVLGFTHRMFEKTGDRQLSAWEAGILTRRY
+GLDKEMVMDFFKENHSGMAVRFFMVGYRLEG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 16 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 85 ,
+                        id
+                          local
+                            str "g4_1_7" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_8" } ,
+          descr {
+            title "hypothetical protein LIKMDGFN_00008 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 193 ,
+            seq-data
+              ncbieaa "MSTLLYLHGFNSSPRSAKACQLKNWLAERHPHVEMIVPQLPPYPADAAELLESLV
+LEHGGAPLGLVGSSLGGYYATWLSQCFMLPAVVVNPAVRPFELLTDYLGQNENPYTGQQYVLESRHIYDLKVMQIDPL
+EAPDLIWLLQQTGDEVLDYRQAVAYYASCRQTVTEGGNHAFTGFEDYFNQIVDFLGLHSC" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 17 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 192 ,
+                        id
+                          local
+                            str "g4_1_8" } } } } } } ,
+        seq {
+          id {
+            local
+              str "g4_1_9" } ,
+          descr {
+            title "C4-dicarboxylate TRAP transporter large permease protein
+ DctM [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 360 ,
+            seq-data
+              ncbieaa "MNSGGIAARLVNFAKLFTGKLPGSLSYTNIVGNMMFGAISGSAIAASTSIGGVMV
+PMSAREGYDRGFAAAVNIASAPTGMLIPPTTAFILYALASGGTSIAALFAGGLVAGVLWGVGCMLVTLVVAKRRNYRV
+FFTVQKGMALKVAVEAIPSLLLIVIIVGGIVQGIFTAIEASAIAVVYTLLLTMVFYRTLKIKDLPSILLQTVVMTGVI
+MFLLATSSAMSFSMSITNIPAALSDMILGISANKLVILLVITVFLLIIGAFMDIGPAILIFTPILLPIMAKLGVDPVH
+FGIIMIYNLAIGTITPPVGSGLYVGASVGKVKVEEVIKPLLPFYGAIIGVLLLITYIPEITLFLPRLLGIM" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 18 ,
+                    data
+                      prot {
+                        name {
+                          "C4-dicarboxylate TRAP transporter large permease
+ protein DctM" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 359 ,
+                        id
+                          local
+                            str "g4_1_9" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 1 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_1" ,
+                location
+                  int {
+                    from 0 ,
+                    to 830 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P75820" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "amiD" ,
+                        locus-tag "LIKMDGFN_00001" } } } } ,
+              {
+                id
+                  local
+                    id 2 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_2" ,
+                location
+                  int {
+                    from 860 ,
+                    to 1240 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:Q05354" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "hpcD" ,
+                        locus-tag "LIKMDGFN_00002" } } } } ,
+              {
+                id
+                  local
+                    id 3 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_3" ,
+                location
+                  int {
+                    from 1270 ,
+                    to 2073 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P42270" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "hpcG" ,
+                        locus-tag "LIKMDGFN_00003" } } } } ,
+              {
+                id
+                  local
+                    id 4 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_4" ,
+                location
+                  int {
+                    from 2110 ,
+                    to 3513 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "LIKMDGFN_00004" } } } } ,
+              {
+                id
+                  local
+                    id 5 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_5" ,
+                location
+                  int {
+                    from 3534 ,
+                    to 4307 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P02915" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "hisP" ,
+                        locus-tag "LIKMDGFN_00005" } } } } ,
+              {
+                id
+                  local
+                    id 6 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_6" ,
+                location
+                  int {
+                    from 4326 ,
+                    to 5093 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P0A873" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "trmD" ,
+                        locus-tag "LIKMDGFN_00006" } } } } ,
+              {
+                id
+                  local
+                    id 7 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_7" ,
+                location
+                  int {
+                    from 5137 ,
+                    to 5397 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "LIKMDGFN_00007" } } } } ,
+              {
+                id
+                  local
+                    id 8 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_8" ,
+                location
+                  int {
+                    from 5412 ,
+                    to 5993 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "LIKMDGFN_00008" } } } } ,
+              {
+                id
+                  local
+                    id 9 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "g4_1_9" ,
+                location
+                  int {
+                    from 6051 ,
+                    to 7133 ,
+                    strand plus ,
+                    id
+                      local
+                        str "g4_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:2.6" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:O07838" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "dctM" ,
+                        locus-tag "LIKMDGFN_00009" } } } } } } } } } }

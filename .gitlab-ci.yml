@@ -70,7 +70,11 @@ unit-test-ubuntu16.04:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
+    - prokka --version
+    - mmseqs -h | head
+    - mafft --version
     - fastme -h
+
   script:
     - py.test test/test_unit
     - more test_mmseq_cluster.log

@@ -1,9 +1,9 @@
 =================
-About genomeAPCAT
+About PanACoTA
 =================
 
 
-The genomeAPCAT program is available at `<https://gitlab.pasteur.fr/aperrin/pipeline_annotation>`_.
+The PanACoTA program is available at `<https://gitlab.pasteur.fr/aperrin/pipeline_annotation>`_.
 
 Copyright © `GEM <https://research.pasteur.fr/fr/team/microbial-evolutionary-genomics/>`_ - Institut Pasteur, CNRS UMR3525
 

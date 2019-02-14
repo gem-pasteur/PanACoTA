@@ -2,6 +2,8 @@
 # coding: utf-8
 
 import sys
+from textwrap import dedent
+
 from genomeAPCAT import __version__ as version
 
 from genomeAPCAT.subcommands import annote
@@ -26,9 +28,28 @@ def parse_arguments(argv):
     import argparse
 
     # Create main parser
-    parser = argparse.ArgumentParser(description=("genomeAPCAT - Large scale comparative"
-                                                  " genomics tools"),
-                                     prog='genomeAPCAT')
+
+    parser = argparse.ArgumentParser(
+                                epilog="For more details, visit the MacSyFinder website and see "
+                                       "the MacSyFinder documentation.",
+                                 formatter_class=argparse.RawDescriptionHelpFormatter,
+                                 description=dedent('''
+
+
+
+ ___                 _____  ___         _____  _____
+(  _`\              (  _  )(  _`\      (_   _)(  _  )
+| |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
+| ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
+| |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
+(_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
+
+
+       Large scale comparative genomics tools
+
+     -------------------------------------------
+     ''') )
+
 
     parser.add_argument('-V', '--version', action='version',
                         version='genomeAPCAT - v. ' + str(version),

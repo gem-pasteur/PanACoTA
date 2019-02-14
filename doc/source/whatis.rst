@@ -1,8 +1,8 @@
 ===================
-What is genomeAPCAT
+What is PanACoTA
 ===================
 
-``genomeAPCAT`` is a software providing tools for large scale bacterial comparative genomics. From a set of complete and/or draft genomes, you can:
+``PanACoTA`` is a software providing tools for large scale bacterial comparative genomics. From a set of complete and/or draft genomes, you can:
 
 - Do a quality control of your strains, to eliminate poor quality genomes, which would not give any information for the comparative study
 - Uniformly annotate all genomes
