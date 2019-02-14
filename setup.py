@@ -65,7 +65,7 @@ setup(
     long_description=long_description,
     author='Amandine Perrin',
     author_email='amandine.perrin@pasteur.fr',
-    license='???',
+    license='AGPL v3',
     platforms='OS Independent',
     package_data={'': ['LICENSE']},
     download_url='??',
