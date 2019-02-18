@@ -20,7 +20,7 @@ def teardown_module():
     print("cleaning repo")
 
 
-def test_build_prokka_only():
+def test_install_panacota_base_ubuntu():
     """
     Test that when installing from a computer containing the basic ubuntu, it installs
     genomeAPCAT, without any dependence (show warning message)
@@ -61,12 +61,14 @@ def test_build_prokka_only():
         assert found is True
     os.remove(stdout)
     logfile = "install.log"
-    content = [":: INFO :: Installing genomeAPCAT...", ":: WARNING :: Some dependencies needed "
+    content = [":: INFO :: Installing genomeAPCAT...",
+               ":: WARNING :: Some dependencies needed "
                "for some subcommands of genomeAPCAT are not installed. Here is the list of "
                "missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:",
                "prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
                "annotation only). If you even need functional annotation, also install prokka",
+               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "- mmseqs (for pangenome subcommand)",  "* Quicktree",
@@ -80,15 +82,11 @@ def test_build_prokka_only():
     # Check output logfile content. Check that all content is present, in any order.
     print("###### LOGFILE :")
     with open(logfile, "r") as logf:
-        for linef in logf:
-            found=False
-            for linec in content:
-                if linec in linef:
-                    found=True
-                    break
-            assert found
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
 
-    # # Check that needed packages are installed
+    # # # Check that needed packages are installed
     assert utils.is_package_installed("argparse")
     assert utils.is_package_installed("progressbar")
     assert utils.is_package_installed("numpy")
