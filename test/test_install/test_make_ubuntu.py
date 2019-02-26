@@ -3,7 +3,7 @@
 
 """
 Tests for make script, installing PanACoTA according to already existing dependencies
-Here, from ubuntu, so not having bioperl, git, etc.
+Here, from basic ubuntu, so not having bioperl, git, etc.
 """
 import os
 
