@@ -9,7 +9,7 @@ import os
 
 from . import utilities as utils
 
-def teardown_module():
+def teardown_function(function):
     """
     Uninstall PanACoTA and installed dependencies
     """
