@@ -95,3 +95,57 @@ def test_install_panacota_base_ubuntu():
     assert not os.path.isdir(os.path.join("dependencies"))
     assert not os.path.isdir(os.path.join("binaries"))
     os.remove(logfile)
+
+
+def test_develop():
+    """
+    Test installing genomeAPCAT in developer mode, when barrnap is already installed
+    """
+    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    cmd = "python3 make develop"
+    error = "Error develop"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    cmd = "pip3 show genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    # Check that it was not installed
+    with open(stdout, "r") as stdof:
+        for line in stdof:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                assert os.path.isdir(os.path.join(loc, "genomeAPCAT.egg-info"))
+    os.remove(stdout)
+    logfile = "install.log"
+    content = ["Installing developer packages needed for genomeAPCAT",
+               "Some dependencies needed for some subcommands of genomeAPCAT are "
+               "not installed. Here is the list of missing dependencies, and for what they are "
+               "used. If you plan to use the subcommands hereafter, first install required "
+               "dependencies:",
+               "- mmseqs (for pangenome subcommand)",
+               "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
+               "after)",
+               "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
+               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
+               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "* FastTree (see README or documentation for more information on how to "
+               "install it)", "* FastME", "* Quicktree"]
+    # Check output logfile content. Check that all content is present, in any order.
+    with open(logfile, "r") as logf:
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
+    assert utils.is_package_installed("sphinx")
+    assert utils.is_package_installed("coverage")
