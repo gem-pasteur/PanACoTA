@@ -144,6 +144,7 @@ def test_develop():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert os.path.isdir(os.path.join(loc, "genomeAPCAT.egg-info"))
+    os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for genomeAPCAT",
                "Some dependencies needed for some subcommands of genomeAPCAT are "
