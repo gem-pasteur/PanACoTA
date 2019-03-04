@@ -272,3 +272,6 @@ if __name__ == '__main__':
         upgrade(user=user_mode)
     elif my_target == "uninstall":
         uninstall()
+
+    # Print end of process (to get time)
+    logger.info("DONE")
