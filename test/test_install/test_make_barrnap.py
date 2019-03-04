@@ -6,6 +6,7 @@ Tests for make script, installing genomeAPCAT according to already existing depe
 From a computer with ubuntu and barrnap installed only
 """
 import os
+import glob
 import pytest
 
 from . import utilities as utils
@@ -49,8 +50,10 @@ def test_install():
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
     with open(stdout, "r") as stdof:
-        lines = stdof.readlines()
-        assert "Summary: Large scale comparative genomics tools" in lines[2]
+        for line in stdof:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                file = glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT",
@@ -96,8 +99,9 @@ def test_upgrade(install_panacota):
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
-        assert len(lines) == 1
+        assert len(lines) == 2
         assert "Upgrading genomeAPCAT" in lines[0]
+        assert "DONE" in lines[1]
 
 
 def test_uninstall(install_panacota):
@@ -117,9 +121,9 @@ def test_uninstall(install_panacota):
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
-        assert len(lines) == 1
+        assert len(lines) == 2
         assert ":: INFO :: Uninstalling genomeAPCAT" in lines[0]
-
+        assert "DONE" in lines[1]
 
 def test_develop():
     """
@@ -143,7 +147,7 @@ def test_develop():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert os.path.isdir(os.path.join(loc, "genomeAPCAT.egg-info"))
+                assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for genomeAPCAT",
@@ -158,7 +162,7 @@ def test_develop():
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree"]
+               "install it)", "* FastME", "* Quicktree", "DONE"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
