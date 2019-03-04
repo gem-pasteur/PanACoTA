@@ -53,7 +53,7 @@ def test_install():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                file = glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT",
