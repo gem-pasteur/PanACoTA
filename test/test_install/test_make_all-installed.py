@@ -56,6 +56,10 @@ def test_install_panacota():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                loc = line.split()[-1]
+                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                print(loc)
+                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...", "DONE"]
@@ -140,6 +144,10 @@ def test_develop():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+                loc = line.split()[-1]
+                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                print(loc)
+                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
