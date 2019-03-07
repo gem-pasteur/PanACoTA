@@ -205,6 +205,8 @@ def test_install_user():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                print(loc)
+                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT in user mode...", "DONE"]
