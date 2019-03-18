@@ -31,19 +31,10 @@ def teardown_function(function):
     print("cleaning repo")
 
 
-def test_install_panacota():
+def test_install_panacota(install_panacota):
     """
     Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
     """
-    cmd = "which genomeAPCAT"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            print(line)
-
     cmd = "python3 make"
     error = "Error trying to install genomeAPCAT from base"
     assert utils.check_installed("barrnap")
