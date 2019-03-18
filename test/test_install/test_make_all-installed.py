@@ -81,7 +81,9 @@ def test_test():
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, error)
     with open(stdout, "r") as stdof:
-        print(stdof.readlines)
+        for line in stdof:
+            print(line)
+
     # assert utils.check_installed("genomeAPCAT")
 # def test_upgrade(install_panacota):
 #     """
