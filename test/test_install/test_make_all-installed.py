@@ -76,7 +76,7 @@ def test_install_panacota():
 
 def test_test(install_panacota):
     install_panacota
-    genomeAPCAT -h
+    which("genomeAPCAT")
     print("toto")
 
     # assert utils.check_installed("genomeAPCAT")
