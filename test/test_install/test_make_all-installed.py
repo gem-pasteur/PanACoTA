@@ -77,6 +77,7 @@ def test_install_panacota():
 def test_test():
     cmd = "genomeAPCAT -h"
     error = "Error upgrade"
+    stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, error)
     with open(stdout, "r") as stdof:
