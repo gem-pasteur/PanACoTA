@@ -94,6 +94,7 @@ def test_test():
     with open(stdout, "r") as stdof:
         for line in stdof:
             print(line)
+            print("line")
 
     print("INSTALLED ???")
     cmd = "which genomeAPCAT"
@@ -104,6 +105,7 @@ def test_test():
     with open(stdout, "r") as stdof:
         for line in stdof:
             print(line)
+            print("line")
     print("toto")
     assert not utils.check_installed("genomeAPCAT")
 
