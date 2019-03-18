@@ -75,7 +75,10 @@ def test_install_panacota():
     assert utils.is_package_installed("Bio")
 
 def test_test():
-    assert utils.check_installed("genomeAPCAT")
+    cmd = "genomeAPCAT -h"
+    error = "Error upgrade"
+    utils.run_cmd(cmd, error)
+    # assert utils.check_installed("genomeAPCAT")
 # def test_upgrade(install_panacota):
 #     """
 #     Test upgrading genomeAPCAT when dependencies are still installed
