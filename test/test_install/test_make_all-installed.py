@@ -31,7 +31,7 @@ def teardown_function(function):
     print("cleaning repo")
 
 
-def test_install_panacota(install_panacota):
+def test_install_panacota():
     """
     Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
     """
