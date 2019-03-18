@@ -74,7 +74,7 @@ def test_install_panacota():
     assert utils.is_package_installed("matplotlib")
     assert utils.is_package_installed("Bio")
 
-def test_test(install_panacota):
+def test_test():
     assert not utils.check_installed("genomeAPCAT")
     print("INSTALLED ???")
     cmd = "which genomeAPCAT"
