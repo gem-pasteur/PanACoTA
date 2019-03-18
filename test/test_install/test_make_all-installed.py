@@ -47,7 +47,6 @@ def test_install_panacota():
     assert utils.check_installed("genomeAPCAT")
     # Check that panacota is installed (pip3 module exists)
     assert utils.is_package_installed("argparse")
-    assert utils.is_package_installed("genomeAPCAT")
     # Check that it is installed in "final mode"
     cmd = "pip3 show genomeAPCAT"
     err = "error pip3"
@@ -112,7 +111,6 @@ def test_upgrade(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    assert utils.is_package_installed("genomeAPCAT")
 
     cmd = "python3 make upgrade"
     error = "Error upgrade"
@@ -120,7 +118,6 @@ def test_upgrade(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    assert utils.is_package_installed("genomeAPCAT")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -136,14 +133,10 @@ def test_uninstall(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    assert utils.is_package_installed("genomeAPCAT")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
-    assert utils.check_installed("prokka")
     assert not utils.check_installed("genomeAPCAT")
-    assert not utils.is_package_installed("genomeAPCAT")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -151,50 +144,49 @@ def test_uninstall(install_panacota):
         assert "Uninstalling genomeAPCAT" in lines[0]
         assert "DONE" in lines[1]
 
-# def test_develop():
-#     """
-#     Test installing genomeAPCAT in developer mode, when prokka and barrnap are already installed
-#     """
-#     assert not utils.check_installed("genomeAPCAT")
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     cmd = "python3 make develop"
-#     error = "Error develop"
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     cmd = "pip3 show genomeAPCAT"
-#     err = "error pip3"
-#     stdout = "stdout_pip3show.out"
-#     with open(stdout, "w") as stdof:
-#         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-#     # Check installation in develop mode
-#     with open(stdout, "r") as stdof:
-#         lines = stdof.readlines()
-#         for line in lines:
-#             if line.startswith("Location"):
-#                 loc = line.split()[-1]
-#                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
-#     os.remove(stdout)
-#     logfile = "install.log"
-#     content = ["Installing genomeAPCAT...",
-#                "Installing developer packages needed for genomeAPCAT", "DONE"]
-#     with open(logfile, "r") as logf:
-#         logf_content = "".join(logf.readlines())
-#         for linec in content:
-#             assert linec in logf_content
-#     # Check that needed packages are installed
-#     assert utils.is_package_installed("argparse")
-#     assert utils.is_package_installed("progressbar")
-#     assert utils.is_package_installed("numpy")
-#     assert utils.is_package_installed("matplotlib")
-#     assert utils.is_package_installed("Bio")
-#     assert utils.is_package_installed("sphinx")
-#     assert utils.is_package_installed("numpydoc")
-#     assert utils.is_package_installed("pytest")
-#     assert utils.is_package_installed("pytest-mpl")
-#     assert utils.is_package_installed("coverage")
+def test_develop():
+    """
+    Test installing genomeAPCAT in developer mode, when prokka and barrnap are already installed
+    """
+    assert not utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    cmd = "python3 make develop"
+    error = "Error develop"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    cmd = "pip3 show genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    # Check installation in develop mode
+    with open(stdout, "r") as stdof:
+        lines = stdof.readlines()
+        for line in lines:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+    os.remove(stdout)
+    logfile = "install.log"
+    content = ["Installing genomeAPCAT...",
+               "Installing developer packages needed for genomeAPCAT", "DONE"]
+    with open(logfile, "r") as logf:
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
+    assert utils.is_package_installed("sphinx")
+    assert utils.is_package_installed("numpydoc")
+    assert utils.is_package_installed("pytest")
+    assert utils.is_package_installed("coverage")
 
 
 # def test_upgrade_notinstalled():
