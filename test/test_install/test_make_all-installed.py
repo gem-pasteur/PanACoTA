@@ -75,7 +75,7 @@ def test_install_panacota():
     assert utils.is_package_installed("Bio")
 
 def test_test(install_panacota):
-    install_panacota()
+    install_panacota
     genomeAPCAT -h
     print("toto")
 
