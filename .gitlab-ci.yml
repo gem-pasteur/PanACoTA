@@ -58,6 +58,7 @@ build-from-test-image:
   only:
     - install
   script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py -sv
 
