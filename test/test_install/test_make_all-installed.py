@@ -81,6 +81,16 @@ def test_test(install_panacota):
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+
+    with open(stdout, "r") as stdof:
+        for line in stdof:
+            print(line)
+    cmd = "which genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+
     with open(stdout, "r") as stdof:
         for line in stdof:
             print(line)
