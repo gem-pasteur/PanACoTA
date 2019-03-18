@@ -75,14 +75,7 @@ def test_install_panacota():
     assert utils.is_package_installed("Bio")
 
 def test_test():
-    cmd = "genomeAPCAT -h"
-    error = "Error upgrade"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, error)
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            print(line)
+    genomeAPCAT -h
     print("toto")
 
     # assert utils.check_installed("genomeAPCAT")
