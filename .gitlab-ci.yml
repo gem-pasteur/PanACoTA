@@ -61,89 +61,89 @@ build-from-test-image:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py -sv
 
-unit-test-ubuntu16.04:
-  stage: test
-  except:
-    - docker
-    - helpers
-  before_script:
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    - py.test test/test_unit
-    - more test_mmseq_cluster.log
-    - mv .coverage .coverage-unit
-  artifacts:
-    paths:
-      - .coverage-unit
-    expire_in: 1 hour
+# unit-test-ubuntu16.04:
+#   stage: test
+#   except:
+#     - docker
+#     - helpers
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#     - ./make
+#   script:
+#     - py.test test/test_unit
+#     - more test_mmseq_cluster.log
+#     - mv .coverage .coverage-unit
+#   artifacts:
+#     paths:
+#       - .coverage-unit
+#     expire_in: 1 hour
 
-func-test-ubuntu16.04:
-  stage: test
-  except:
-    - docker
-    - helpers
-  before_script:
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    - py.test test/test_functional
-    - mv .coverage .coverage-functional
-  artifacts:
-    paths:
-      - .coverage-functional
-    expire_in: 1 hour
+# func-test-ubuntu16.04:
+#   stage: test
+#   except:
+#     - docker
+#     - helpers
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#     - ./make
+#   script:
+#     - py.test test/test_functional
+#     - mv .coverage .coverage-functional
+#   artifacts:
+#     paths:
+#       - .coverage-functional
+#     expire_in: 1 hour
 
-coverage:
-  stage: coverage
-  except:
-    - docker
-    - helpers
-  dependencies:
-    - unit-test-ubuntu16.04
-    - func-test-ubuntu16.04
-  before_script:
-    - pip3 install -r requirements-dev.txt
-  script:
-    - coverage combine .coverage-unit .coverage-functional
-    - coverage report
-    - coverage html
-  artifacts:
-    paths:
-      - htmlcov
-    expire_in: 1 hour
+# coverage:
+#   stage: coverage
+#   except:
+#     - docker
+#     - helpers
+#   dependencies:
+#     - unit-test-ubuntu16.04
+#     - func-test-ubuntu16.04
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#   script:
+#     - coverage combine .coverage-unit .coverage-functional
+#     - coverage report
+#     - coverage html
+#   artifacts:
+#     paths:
+#       - htmlcov
+#     expire_in: 1 hour
 
-sphinx-doc:
-  stage: doc
-  only:
-    - master
-    - doc
-  before_script:
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    - cd doc/source
-    - make html
-  artifacts:
-    paths:
-      - doc/build/html
-    expire_in: 1 hour
+# sphinx-doc:
+#   stage: doc
+#   only:
+#     - master
+#     - doc
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#     - ./make
+#   script:
+#     - cd doc/source
+#     - make html
+#   artifacts:
+#     paths:
+#       - doc/build/html
+#     expire_in: 1 hour
 
-pages:
-  stage: deploy
-  dependencies:
-    - coverage
-    - sphinx-doc
-  script:
-    - mkdir -p public/htmlcov
-    - mv htmlcov public
-    - mkdir -p public/html-doc
-    - mv doc/build/html html-doc
-    - mv html-doc public
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 hour
-  only:
-    - master
-    - doc
+# pages:
+#   stage: deploy
+#   dependencies:
+#     - coverage
+#     - sphinx-doc
+#   script:
+#     - mkdir -p public/htmlcov
+#     - mv htmlcov public
+#     - mkdir -p public/html-doc
+#     - mv doc/build/html html-doc
+#     - mv html-doc public
+#   artifacts:
+#     paths:
+#       - public
+#     expire_in: 1 hour
+#   only:
+#     - master
+#     - doc

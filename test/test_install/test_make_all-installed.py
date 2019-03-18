@@ -46,6 +46,8 @@ def test_install_panacota():
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
     # Check that panacota is installed (pip3 module exists)
+    assert utils.is_package_installed("argparse")
+    # Check that it is installed in "final mode"
     cmd = "pip3 show genomeAPCAT"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -57,9 +59,6 @@ def test_install_panacota():
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
                 loc = line.split()[-1]
-                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
-                print(loc)
-                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...", "DONE"]
@@ -144,10 +143,6 @@ def test_develop():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
-                loc = line.split()[-1]
-                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
-                print(loc)
-                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
@@ -162,6 +157,11 @@ def test_develop():
     assert utils.is_package_installed("numpy")
     assert utils.is_package_installed("matplotlib")
     assert utils.is_package_installed("Bio")
+    assert utils.is_package_installed("sphinx")
+    assert utils.is_package_installed("numpydoc")
+    assert utils.is_package_installed("pytest")
+    assert utils.is_package_installed("pytest-mpl")
+    assert utils.is_package_installed("coverage")
 
 
 def test_upgrade_notinstalled():
