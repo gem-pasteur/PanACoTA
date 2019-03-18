@@ -85,8 +85,6 @@ def test_test(install_panacota):
         for line in stdof:
             print(line)
 
-    install_panacota
-
     print("INSTALLED ???")
     cmd = "which genomeAPCAT"
     err = "error pip3"
