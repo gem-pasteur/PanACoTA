@@ -75,35 +75,35 @@ def test_install_panacota():
     assert utils.is_package_installed("matplotlib")
     assert utils.is_package_installed("Bio")
 
-def test_test():
-    assert not utils.check_installed("genomeAPCAT")
-    print("INSTALLED ???")
-    cmd = "pip3 show genomeAPCAT"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    print("line")
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            print("line", line, "end")
-            print("line")
+# def test_test():
+#     assert not utils.check_installed("genomeAPCAT")
+#     print("INSTALLED ???")
+#     cmd = "pip3 show genomeAPCAT"
+#     err = "error pip3"
+#     stdout = "stdout_pip3show.out"
+#     with open(stdout, "w") as stdof:
+#         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+#     print("line")
+#     with open(stdout, "r") as stdof:
+#         for line in stdof:
+#             print("line", line, "end")
+#             print("line")
 
-    print("INSTALLED ???")
-    cmd = "which genomeAPCAT"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            print(line)
-            print("line")
-    print("toto")
-    assert not utils.check_installed("genomeAPCAT")
+#     print("INSTALLED ???")
+#     cmd = "which genomeAPCAT"
+#     err = "error pip3"
+#     stdout = "stdout_pip3show.out"
+#     with open(stdout, "w") as stdof:
+#         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+#     with open(stdout, "r") as stdof:
+#         for line in stdof:
+#             print(line)
+#             print("line")
+#     print("toto")
+#     assert not utils.check_installed("genomeAPCAT")
 
-    # assert utils.check_installed("genomeAPCAT")
-    #
+#     # assert utils.check_installed("genomeAPCAT")
+#     #
 
 def test_upgrade(install_panacota):
     """
@@ -120,7 +120,7 @@ def test_upgrade(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    assert not utils.is_package_installed("genomeAPCAT")
+    assert utils.is_package_installed("genomeAPCAT")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -129,26 +129,27 @@ def test_upgrade(install_panacota):
         assert "DONE" in lines[1]
 
 
-# def test_uninstall(install_panacota):
-#     """
-#     Test uninstalling genomeAPCAT when dependencies are still installed
-#     """
-#     install_panacota
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     cmd = "python3 make uninstall"
-#     error = "Error uninstalling"
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert not utils.check_installed("genomeAPCAT")
-#     logfile = "install.log"
-#     with open(logfile, "r") as logf:
-#         lines = logf.readlines()
-#         assert len(lines) == 2
-#         assert "Uninstalling genomeAPCAT" in lines[0]
-#         assert "DONE" in lines[1]
+def test_uninstall(install_panacota):
+    """
+    Test uninstalling genomeAPCAT when dependencies are still installed
+    """
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    assert utils.is_package_installed("genomeAPCAT")
+    cmd = "python3 make uninstall"
+    error = "Error uninstalling"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.is_package_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 2
+        assert "Uninstalling genomeAPCAT" in lines[0]
+        assert "DONE" in lines[1]
 
 # def test_develop():
 #     """
