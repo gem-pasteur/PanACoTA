@@ -83,6 +83,7 @@ def test_test():
     with open(stdout, "r") as stdof:
         for line in stdof:
             print(line)
+    print("toto")
 
     # assert utils.check_installed("genomeAPCAT")
 # def test_upgrade(install_panacota):
