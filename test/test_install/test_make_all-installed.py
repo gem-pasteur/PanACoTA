@@ -76,7 +76,14 @@ def test_install_panacota():
 
 def test_test(install_panacota):
     install_panacota
-    which("genomeAPCAT")
+    cmd = "which genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    with open(stdout, "r") as stdof:
+        for line in stdof:
+            print(line)
     print("toto")
 
     # assert utils.check_installed("genomeAPCAT")
