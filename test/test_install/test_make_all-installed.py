@@ -196,6 +196,8 @@ def test_develop():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+                print(loc
+                print(os.listdir(loc))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
