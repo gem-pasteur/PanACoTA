@@ -77,7 +77,10 @@ def test_install_panacota():
 def test_test():
     cmd = "genomeAPCAT -h"
     error = "Error upgrade"
-    utils.run_cmd(cmd, error)
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, error)
+    with open(stdout, "r") as stdof:
+        print(stdof.readlines)
     # assert utils.check_installed("genomeAPCAT")
 # def test_upgrade(install_panacota):
 #     """
