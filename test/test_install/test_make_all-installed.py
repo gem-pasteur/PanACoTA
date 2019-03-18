@@ -75,6 +75,7 @@ def test_install_panacota():
     assert utils.is_package_installed("Bio")
 
 def test_test(install_panacota):
+    assert not utils.check_installed("genomeAPCAT")
     print("INSTALLED ???")
     cmd = "which genomeAPCAT"
     err = "error pip3"
@@ -95,6 +96,7 @@ def test_test(install_panacota):
         for line in stdof:
             print(line)
     print("toto")
+    assert not utils.check_installed("genomeAPCAT")
 
     # assert utils.check_installed("genomeAPCAT")
 # def test_upgrade(install_panacota):
