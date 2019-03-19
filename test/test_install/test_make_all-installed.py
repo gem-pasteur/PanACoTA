@@ -30,33 +30,35 @@ def teardown_function(function):
     print("cleaning repo")
 
 
-# def test_install_panacota():
-#     """
-#     Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
-#     """
-#     cmd = "python3 make"
-#     error = "Error trying to install genomeAPCAT from base"
-#     assert utils.check_installed("barrnap")
-#     assert not utils.check_installed("genomeAPCAT")
-#     assert utils.check_installed("prokka")
-#     # Install panacota
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     # Check that panacota is installed (pip3 module exists)
-#     assert utils.is_package_installed("genomeAPCAT")
-#     # Check that it is installed in "final mode"
-#     cmd = "pip3 show genomeAPCAT"
-#     err = "error pip3"
-#     stdout = "stdout_pip3show.out"
-#     with open(stdout, "w") as stdof:
-#         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-#     with open(stdout, "r") as stdof:
-#         for line in stdof:
-#             if line.startswith("Location"):
-#                 loc = line.split()[-1]
-#                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+def test_install_panacota():
+    """
+    Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
+    """
+    cmd = "python3 make"
+    error = "Error trying to install genomeAPCAT from base"
+    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("prokka")
+    # Install panacota
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    # Check that panacota is installed (pip3 module exists)
+    assert utils.is_package_installed("genomeAPCAT")
+    # Check that it is installed in "final mode"
+    cmd = "pip3 show genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    with open(stdout, "r") as stdof:
+        for line in stdof:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                print(loc)
+                print(os.listdir(loc))
+                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
 #     os.remove(stdout)
 #     logfile = "install.log"
 #     content = ["Installing genomeAPCAT...", "DONE"]
@@ -218,33 +220,33 @@ def test_develop():
     print("test_develop done")
 
 
-# def test_install_user():
-#     """
-#     Test that when installing from a computer in user mode, it installs
-#     genomeAPCAT in /Users and returns list of dependencies
-#     """
-#     cmd = "python3 make --user"
-#     error = "Error trying to install genomeAPCAT from base"
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert not utils.check_installed("genomeAPCAT")
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     cmd = "pip3 show genomeAPCAT"
-#     err = "error pip3"
-#     stdout = "stdout_pip3show.out"
-#     with open(stdout, "w") as stdof:
-#         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-#     with open(stdout, "r") as stdof:
-#         lines = stdof.readlines()
-#         for line in lines:
-#             if line.startswith("Location"):
-#                 loc = line.split()[-1]
-#                 # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
-#                 print(loc)
-#                 print(os.listdir(loc))
+def test_install_user():
+    """
+    Test that when installing from a computer in user mode, it installs
+    genomeAPCAT in /Users and returns list of dependencies
+    """
+    cmd = "python3 make --user"
+    error = "Error trying to install genomeAPCAT from base"
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert not utils.check_installed("genomeAPCAT")
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    cmd = "pip3 show genomeAPCAT"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    with open(stdout, "r") as stdof:
+        lines = stdof.readlines()
+        for line in lines:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                print(loc)
+                print(os.listdir(loc))
 #     # os.remove(stdout)
 #     # logfile = "install.log"
 #     # content = ["Installing genomeAPCAT in user mode...", "DONE"]
