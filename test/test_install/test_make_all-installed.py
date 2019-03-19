@@ -7,6 +7,8 @@ Tests for make script, installing genomeAPCAT according to already existing depe
 import os
 import glob
 import pytest
+import subprocess
+import shlex
 
 from . import utilities as utils
 
@@ -56,120 +58,93 @@ def test_install_panacota():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                print(loc)
-                print(os.listdir(loc))
-                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
-#     os.remove(stdout)
-#     logfile = "install.log"
-#     content = ["Installing genomeAPCAT...", "DONE"]
-#     # Check output logfile content. Check that all content is present, in any order.
-#     with open(logfile, "r") as logf:
-#         logf_content = "".join(logf.readlines())
-#         for linec in content:
-#             assert linec in logf_content
-#     # Check that needed packages are installed
-#     assert utils.is_package_installed("argparse")
-#     assert utils.is_package_installed("progressbar")
-#     assert utils.is_package_installed("numpy")
-#     assert utils.is_package_installed("matplotlib")
-#     assert utils.is_package_installed("Bio")
-#     print("test_installed done")
-
-# # def test_test():
-# #     assert not utils.check_installed("genomeAPCAT")
-# #     print("INSTALLED ???")
-# #     cmd = "pip3 show genomeAPCAT"
-# #     err = "error pip3"
-# #     stdout = "stdout_pip3show.out"
-# #     with open(stdout, "w") as stdof:
-# #         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-# #     print("line")
-# #     with open(stdout, "r") as stdof:
-# #         for line in stdof:
-# #             print("line", line, "end")
-# #             print("line")
-
-# #     print("INSTALLED ???")
-# #     cmd = "which genomeAPCAT"
-# #     err = "error pip3"
-# #     stdout = "stdout_pip3show.out"
-# #     with open(stdout, "w") as stdof:
-# #         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-# #     with open(stdout, "r") as stdof:
-# #         for line in stdof:
-# #             print(line)
-# #             print("line")
-# #     print("toto")
-# #     assert not utils.check_installed("genomeAPCAT")
-
-# #     # assert utils.check_installed("genomeAPCAT")
-# #     #
-
-# def test_upgrade(install_panacota):
-#     """
-#     Test upgrading genomeAPCAT when dependencies are still installed
-#     """
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-
-#     cmd = "python3 make upgrade"
-#     error = "Error upgrade"
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     logfile = "install.log"
-#     with open(logfile, "r") as logf:
-#         lines = logf.readlines()
-#         assert len(lines) == 2
-#         assert "Upgrading genomeAPCAT" in lines[0]
-#         assert "DONE" in lines[1]
-#     print("test_upgrade done")
+                assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+    os.remove(stdout)
+    # Check not installed in user mode
+    cmd = "pip list --user"
+    list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
+    assert "genomeAPCAT" not in list_user_packages
+    # Check output logfile content. Check that all content is present, in any order.
+    logfile = "install.log"
+    content = ["Installing genomeAPCAT...", "DONE"]
+    with open(logfile, "r") as logf:
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
+    print("test_installed done")
 
 
-# def test_upgrade_notinstalled():
-#     """
-#     Test upgrading genomeAPCAT when dependencies are not installed (only barrnap),
-#     and genomeAPCAT is not installed. It just installs genomeAPCAT, without prokka dep
-#     """
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert not utils.check_installed("genomeAPCAT")
-#     cmd = "python3 make upgrade"
-#     error = "Error upgrade"
-#     utils.run_cmd(cmd, error)
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     logfile = "install.log"
-#     with open(logfile, "r") as logf:
-#         lines = logf.readlines()
-#         assert len(lines) == 2
-#         assert "Upgrading genomeAPCAT" in lines[0]
-#         assert "DONE" in lines[1]
-#     os.remove(logfile)
-#     print("test_upgrade_notinstalled done")
+def test_upgrade(install_panacota):
+    """
+    Test upgrading genomeAPCAT when dependencies are still installed
+    """
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    # Upgrade PanACoTA
+    cmd = "python3 make upgrade"
+    error = "Error upgrade"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 2
+        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "DONE" in lines[1]
+    print("test_upgrade done")
 
 
-# def test_uninstall(install_panacota):
-#     """
-#     Test uninstalling genomeAPCAT when dependencies are still installed
-#     """
-#     assert utils.check_installed("barrnap")
-#     assert utils.check_installed("prokka")
-#     assert utils.check_installed("genomeAPCAT")
-#     cmd = "python3 make uninstall"
-#     error = "Error uninstalling"
-#     utils.run_cmd(cmd, error)
-#     assert not utils.check_installed("genomeAPCAT")
-#     logfile = "install.log"
-#     with open(logfile, "r") as logf:
-#         lines = logf.readlines()
-#         assert len(lines) == 2
-#         assert "Uninstalling genomeAPCAT" in lines[0]
-#         assert "DONE" in lines[1]
-#     print("test_uninstall done")
+def test_upgrade_notinstalled():
+    """
+    Test upgrading genomeAPCAT when dependencies are not installed (only barrnap),
+    and genomeAPCAT is not installed. It just installs genomeAPCAT, without prokka dep
+    """
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert not utils.check_installed("genomeAPCAT")
+    cmd = "python3 make upgrade"
+    error = "Error upgrade"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 2
+        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "DONE" in lines[1]
+    os.remove(logfile)
+    print("test_upgrade_notinstalled done")
+
+
+def test_uninstall(install_panacota):
+    """
+    Test uninstalling genomeAPCAT when dependencies are still installed
+    """
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    cmd = "python3 make uninstall"
+    error = "Error uninstalling"
+    utils.run_cmd(cmd, error)
+    assert not utils.check_installed("genomeAPCAT")
+    logfile = "install.log"
+    with open(logfile, "r") as logf:
+        lines = logf.readlines()
+        assert len(lines) == 2
+        assert "Uninstalling genomeAPCAT" in lines[0]
+        assert "DONE" in lines[1]
+    print("test_uninstall done")
 
 
 def test_develop():
@@ -185,6 +160,7 @@ def test_develop():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
+    # Check installed in developper mode (egg-info file is present)
     cmd = "pip3 show genomeAPCAT"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -197,9 +173,12 @@ def test_develop():
             if line.startswith("Location"):
                 loc = line.split()[-1]
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
-                print(loc)
-                print(os.listdir(loc))
     os.remove(stdout)
+    # Check not installed in user mode
+    cmd = "pip list --user"
+    list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
+    assert "genomeAPCAT" not in list_user_packages
+    # check logfile content
     logfile = "install.log"
     content = ["Installing genomeAPCAT...",
                "Installing developer packages needed for genomeAPCAT", "DONE"]
@@ -222,8 +201,8 @@ def test_develop():
 
 def test_install_user():
     """
-    Test that when installing from a computer in user mode, it installs
-    genomeAPCAT in /Users and returns list of dependencies
+    Test that when installing from a computer in user mode, it really installs
+    genomeAPCAT in user mode (pip showing genomeAPCAT when asking for user installed packages)
     """
     cmd = "python3 make --user"
     error = "Error trying to install genomeAPCAT from base"
@@ -234,30 +213,20 @@ def test_install_user():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    cmd = "pip3 show genomeAPCAT"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    with open(stdout, "r") as stdof:
-        lines = stdof.readlines()
-        for line in lines:
-            if line.startswith("Location"):
-                loc = line.split()[-1]
-                # assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
-                print(loc)
-                print(os.listdir(loc))
-#     # os.remove(stdout)
-#     # logfile = "install.log"
-#     # content = ["Installing genomeAPCAT in user mode...", "DONE"]
-#     # # Check output logfile content. Check that all content is present, in any order.
-#     # with open(logfile, "r") as logf:
-#     #     logf_content = "".join(logf.readlines())
-#     #     for linec in content:
-#     #         assert linec in logf_content
-#     # # Check that needed packages are installed
-#     # assert utils.is_package_installed("argparse")
-#     # assert utils.is_package_installed("progressbar")
-#     # assert utils.is_package_installed("numpy")
-#     # assert utils.is_package_installed("matplotlib")
-#     # assert utils.is_package_installed("Bio")
+    # Check package is installed in user mode
+    cmd = "pip list --user"
+    list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
+    assert "genomeAPCAT" in list_user_packages
+    # Check logfile content
+    logfile = "install.log"
+    content = ["Installing genomeAPCAT in user mode...", "DONE"]
+    with open(logfile, "r") as logf:
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")
