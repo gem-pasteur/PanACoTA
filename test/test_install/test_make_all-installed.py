@@ -213,10 +213,6 @@ def test_install_user():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
-    # Check package is installed in user mode
-    cmd = "pip3 list --user"
-    list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
-    assert "genomeAPCAT" in list_user_packages
     # Check logfile content
     logfile = "install.log"
     content = ["Installing genomeAPCAT in user mode...", "DONE"]
