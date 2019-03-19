@@ -65,7 +65,8 @@ def test_install():
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
-               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
+               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
+               "annotation only). If you even need functional annotation, also install prokka",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
                "install it)", "* FastME", "* Quicktree"]
@@ -86,7 +87,6 @@ def test_upgrade(install_panacota):
     """
     Test upgrading genomeAPCAT when dependencies are still installed
     # """
-    install_panacota
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
@@ -108,7 +108,6 @@ def test_uninstall(install_panacota):
     """
     Test uninstalling PanACoTA
     """
-    install_panacota
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
@@ -176,3 +175,32 @@ def test_develop():
     assert utils.is_package_installed("Bio")
     assert utils.is_package_installed("sphinx")
     assert utils.is_package_installed("coverage")
+
+
+def test_install_user():
+    """
+    Test that when installing from a computer in user mode, it really installs
+    PanACoTA in user mode
+    """
+    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    assert not utils.check_installed("genomeAPCAT")
+    cmd = "python3 make --user"
+    error = "Error trying to install genomeAPCAT from base"
+    utils.run_cmd(cmd, error)
+    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("prokka")
+    assert utils.check_installed("genomeAPCAT")
+    # Check logfile content
+    logfile = "install.log"
+    content = ["Installing genomeAPCAT in user mode...", "DONE"]
+    with open(logfile, "r") as logf:
+        logf_content = "".join(logf.readlines())
+        for linec in content:
+            assert linec in logf_content
+    # Check that needed packages are installed
+    assert utils.is_package_installed("argparse")
+    assert utils.is_package_installed("progressbar")
+    assert utils.is_package_installed("numpy")
+    assert utils.is_package_installed("matplotlib")
+    assert utils.is_package_installed("Bio")

@@ -26,14 +26,15 @@ stages:
 #     - pip3 install -r requirements-dev.txt
 #     - py.test test/test_install/test_make_base.py
 
-# build-from-barrnap:
-#   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
-#   stage: build
-#   only:
-#     - install
-#   script:
-#     - pip3 install -r requirements-dev.txt
-#     - py.test test/test_install/test_make_barrnap.py
+build-from-barrnap:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
+  stage: build
+  only:
+    - install
+  script:
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_barrnap.py
 
 # build-from-prokka:
 #   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
@@ -60,7 +61,7 @@ build-from-test-image:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_all-installed.py -sv
+    - py.test test/test_install/test_make_all-installed.py
 
 # unit-test-ubuntu16.04:
 #   stage: test
