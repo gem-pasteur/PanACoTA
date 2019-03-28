@@ -146,7 +146,7 @@ def check_dependencies(target):
             sys.exit(1)
         if not cmd_exists("barrnap"):
             to_install_user.append("barrnap")
-        if not cmd_exists("prodigal"):
+        if not cmd_exists("prodigal") and not cmd_exists("prokka"):
             to_install_user.append("prodigal")
         if not cmd_exists("prokka"):
             to_install_user.append("prokka")
