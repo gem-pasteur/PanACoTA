@@ -20,7 +20,7 @@ def install_panacota():
 
 def teardown_function(function):
     """
-    Uninstall genomeAPCAT and installed dependencies at the end of each test
+    Uninstall PanACoTA and installed dependencies at the end of each test
     """
     print("TEARDOWN\n")
     cmd = "python3 make uninstall"
@@ -59,8 +59,8 @@ def test_install_prokka_quicktree():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...", "DONE",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA...", "DONE",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -69,8 +69,8 @@ def test_install_prokka_quicktree():
                "after)",
                "See more information on how to download/install those softwares in README or in "
                "documentation.",
-               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
-               "annotation only). If you even need functional annotation, also install prokka"]
+               "- barrnap. If you use Prokka for functional annotation, it will not predict RNA."
+               ]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:
@@ -86,7 +86,7 @@ def test_install_prokka_quicktree():
 
 def test_upgrade(install_panacota):
     """
-    Test upgrading genomeAPCAT when dependencies are still installed
+    Test upgrading PanACoTA when dependencies are still installed
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -103,13 +103,13 @@ def test_upgrade(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "Upgrading PanACoTA" in lines[0]
         assert "DONE" in lines[1]
 
 
 def test_uninstall_withdep(install_panacota):
     """
-    Test uninstalling genomeAPCAT when dependencies are still installed
+    Test uninstalling PanACoTA when dependencies are still installed
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -125,7 +125,7 @@ def test_uninstall_withdep(install_panacota):
 
 def test_develop():
     """
-    Test installing genomeAPCAT in developer mode, when prokka and barrnap are already installed
+    Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
     assert not utils.check_installed("genomeAPCAT")
     assert not utils.check_installed("barrnap")
@@ -151,9 +151,9 @@ def test_develop():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...",
-               "Installing developer packages needed for genomeAPCAT",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA...",
+               "Installing developer packages needed for PanACoTA",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -161,8 +161,6 @@ def test_develop():
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
-               "annotation only). If you even need functional annotation, also install prokka",
                "See more information on how to download/install those softwares in README or in "
                "documentation."]
 
@@ -183,21 +181,21 @@ def test_develop():
 def test_install_user():
     """
     Test that when installing from a computer containing only prokka, in user mode, it installs
-    genomeAPCAT in /Users and returns list of dependencies
+    PanACoTA in /Users and returns list of dependencies
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("genomeAPCAT")
     cmd = "python3 make --user"
-    error = "Error trying to install genomeAPCAT from base"
+    error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
     # Check logfile content
     logfile = "install.log"
-    content = ["Installing genomeAPCAT in user mode...",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA in user mode...",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",

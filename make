@@ -2,15 +2,15 @@
 # coding: utf-8
 
 """
-Installation script for genomeAPCAT
+Installation script for PanACoTA
 Targets available are:
 
 - `./make.py` = `./make.py install`: install all dependencies if not already present,
-and install genomeAPCAT
-- `./make.py upgrade`: upgrade genomeAPCAT package.
-- `./make.py develop`: same as install, but install genomeAPCAT in development mode, to be
+and install PanACoTA
+- `./make.py upgrade`: upgrade PanACoTA package.
+- `./make.py develop`: same as install, but install PanACoTA in development mode, to be
 able to change the script and run it.
-- `./make.py uninstall`: uninstall genomeAPCAT
+- `./make.py uninstall`: uninstall PanACoTA
 
 @author gem
 May 2017
@@ -43,11 +43,11 @@ def check_path(install_dir):
 
 def uninstall():
     """
-    Uninstall genomeAPCAT python package
+    Uninstall PanACoTA python package
     """
-    logger.info("Uninstalling genomeAPCAT...")
+    logger.info("Uninstalling PanACoTA...")
     cmd = "pip3 uninstall -y genomeAPCAT"
-    error = ("A problem occurred while trying to uninstall genomeAPCAT. If you have "
+    error = ("A problem occurred while trying to uninstall PanACoTA. If you have "
              "permission errors, try to add 'sudo' before your command line.")
     run_cmd(cmd, error)
     link_dest = os.path.join(os.sep + "usr", "local", "bin", "genomeAPCAT")
@@ -57,35 +57,35 @@ def uninstall():
 
 def upgrade(user=False):
     """
-    Upgrade genomeAPCAT module to the latest version. User must update the sources
+    Upgrade PanACoTA module to the latest version. User must update the sources
     before running upgrade!
     """
-    logger.info("Upgrading genomeAPCAT...")
+    logger.info("Upgrading PanACoTA...")
     if user:
         cmd = "pip3 install --upgrade --no-deps --user ."
     else:
         cmd = "pip3 install --upgrade --no-deps ."
-    error = ("An error occurred while trying to update genomeAPCAT. If you have "
+    error = ("An error occurred while trying to update PanACoTA. If you have "
              "permission errors, try to add 'sudo' before your command line.")
     run_cmd(cmd, error, eof=True)
 
 
 def install_all(install_dir, target, dev=False, user=False):
     """
-    Install genomeAPCAT.
+    Install PanACoTA.
     check dependencies and show missing ones
-    dev: install genomeAPCAT in development mode if true. Otherwise, install in final mode
+    dev: install PanACoTA in development mode if true. Otherwise, install in final mode
     user: install in user mode if True
     """
     to_install_user = check_dependencies(target)
     if user:
-        logger.info("Installing genomeAPCAT in user mode...")
+        logger.info("Installing PanACoTA in user mode...")
         opt = "--user"
     else:
-        logger.info("Installing genomeAPCAT...")
+        logger.info("Installing PanACoTA...")
         opt = ""
     if dev:
-        logger.info("Installing developer packages needed for genomeAPCAT")
+        logger.info("Installing developer packages needed for PanACoTA")
         cmd = "pip3 install " + opt + " -e ."
         cmd2 = "pip3 install -r requirements-dev.txt"
         error2 = ("Problem while trying to install developper tools. If you have "
@@ -94,7 +94,7 @@ def install_all(install_dir, target, dev=False, user=False):
         run_cmd(cmd2, error2, eof=True)
     else:
         cmd = "pip3 install " + opt + " ."
-    error = ("A problem occurred while trying to install genomeAPCAT. If you have "
+    error = ("A problem occurred while trying to install PanACoTA. If you have "
              "permission errors, try to add 'sudo' before your command line. If "
              "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
@@ -102,7 +102,7 @@ def install_all(install_dir, target, dev=False, user=False):
         gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
         os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
     if to_install_user:
-        msg = ("Some dependencies needed for some subcommands of genomeAPCAT are not installed. "
+        msg = ("Some dependencies needed for some subcommands of PanACoTA are not installed. "
                "Here is the list of missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:\n")
 
@@ -142,7 +142,7 @@ def check_dependencies(target):
     msg = None
     if target == "install" or target == "develop":
         if not cmd_exists("pip3"):
-            logger.error("You need pip3 to install genomeAPCAT.")
+            logger.error("You need pip3 to install PanACoTA.")
             sys.exit(1)
         if not cmd_exists("barrnap"):
             to_install_user.append("barrnap")
@@ -200,21 +200,21 @@ def parse():
     """
     import argparse
     parser = argparse.ArgumentParser(description=("Script to install, clean or uninstall "
-                                                  "genomeAPCAT"))
+                                                  "PanACoTA"))
     # Create command-line parser for all options and arguments to give
     targets = ['install', 'develop', 'upgrade', 'uninstall']
     parser.add_argument("target", default='install', choices=targets, nargs='?',
                         help=("Choose what you want to do:\n"
-                              " - install: install genomeAPCAT and its dependencies. If not "
+                              " - install: install PanACoTA and its dependencies. If not "
                               "already installed by user, dependencies packages "
                               "will be downloaded "
                               "and built in 'dependencies' folder, and their binary files will be "
                               "put to 'binaries' folder.\n"
-                              " - upgrade: upgrade genomeAPCAT module. \n"
-                              " - develop: same as install, but genomeAPCAT will be installed "
+                              " - upgrade: upgrade PanACoTA module. \n"
+                              " - develop: same as install, but PanACoTA will be installed "
                               "in development mode, so that you can modify the script and "
                               "take the changes into account while running.\n"
-                              " - uninstall: uninstall genomeAPCAT.\n"
+                              " - uninstall: uninstall PanACoTA.\n"
                               "Default is %(default)s."))
     parser.add_argument("--prefix", dest="install_dir",
                         help=("By default, all scripts will be installed in /usr/local/bin. "

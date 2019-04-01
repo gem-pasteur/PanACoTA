@@ -56,9 +56,9 @@ def test_build_prokka_only():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...",
+    content = ["Installing PanACoTA...",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -98,7 +98,7 @@ def test_upgrade(install_panacota):
         lines = logf.readlines()
         assert len(lines) == 2
         assert "DONE" in lines[1]
-        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "Upgrading PanACoTA" in lines[0]
 
 
 def test_uninstall_withdep(install_panacota):
@@ -118,7 +118,7 @@ def test_uninstall_withdep(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Uninstalling genomeAPCAT" in lines[0]
+        assert "Uninstalling PanACoTA" in lines[0]
         assert "DONE" in lines[1]
     print("test_uninstall done")
 
@@ -149,9 +149,9 @@ def test_develop():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...",
-               "Installing developer packages needed for genomeAPCAT",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA...",
+               "Installing developer packages needed for PanACoTA",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -190,8 +190,8 @@ def test_install_user():
     assert utils.check_installed("prokka")
     assert utils.check_installed("genomeAPCAT")
     logfile = "install.log"
-    content = ["Installing genomeAPCAT in user mode...",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA in user mode...",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",

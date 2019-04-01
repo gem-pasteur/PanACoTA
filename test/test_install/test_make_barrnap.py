@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Tests for make script, installing genomeAPCAT according to already existing dependencies
+Tests for make script, installing PanACoTA according to already existing dependencies
 From a computer with ubuntu and barrnap installed only
 """
 import os
@@ -21,7 +21,7 @@ def install_panacota():
 
 def teardown_function(function):
     """
-    Uninstall genomeAPCAT and installed dependencies
+    Uninstall PanACoTA and installed dependencies
     """
     print("TEARDOWN\n")
     cmd = "python3 make uninstall"
@@ -34,10 +34,10 @@ def teardown_function(function):
 def test_install():
     """
     Test that when installing from a computer containing only barrnap, it installs
-    genomeAPCAT, and returns the list of missing dependencies
+    PanACoTA, and returns the list of missing dependencies
     """
     cmd = "python3 make"
-    error = "Error trying to install genomeAPCAT from base"
+    error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     utils.run_cmd(cmd, error)
@@ -56,8 +56,8 @@ def test_install():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing genomeAPCAT",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing PanACoTA",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -85,7 +85,7 @@ def test_install():
 
 def test_upgrade(install_panacota):
     """
-    Test upgrading genomeAPCAT when dependencies are still installed
+    Test upgrading PanACoTA when dependencies are still installed
     # """
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
@@ -100,7 +100,7 @@ def test_upgrade(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "Upgrading PanACoTA" in lines[0]
         assert "DONE" in lines[1]
 
 
@@ -121,12 +121,12 @@ def test_uninstall(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert ":: INFO :: Uninstalling genomeAPCAT" in lines[0]
+        assert ":: INFO :: Uninstalling PanACoTA" in lines[0]
         assert "DONE" in lines[1]
 
 def test_develop():
     """
-    Test installing genomeAPCAT in developer mode, when barrnap is already installed
+    Test installing PanACoTA in developer mode, when barrnap is already installed
     """
     assert not utils.check_installed("genomeAPCAT")
     assert utils.check_installed("barrnap")
@@ -149,8 +149,8 @@ def test_develop():
                 assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing developer packages needed for genomeAPCAT",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing developer packages needed for PanACoTA",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
@@ -193,7 +193,7 @@ def test_install_user():
     assert utils.check_installed("genomeAPCAT")
     # Check logfile content
     logfile = "install.log"
-    content = ["Installing genomeAPCAT in user mode...", "DONE"]
+    content = ["Installing PanACoTA in user mode...", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:

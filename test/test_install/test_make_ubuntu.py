@@ -23,7 +23,7 @@ def teardown_function(function):
 def test_install_panacota_base_ubuntu():
     """
     Test that when installing from a computer containing the basic ubuntu, it installs
-    genomeAPCAT, without any dependence (show warning message)
+    PanACoTA, without any dependence (show warning message)
     """
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from ubuntu"
@@ -61,9 +61,9 @@ def test_install_panacota_base_ubuntu():
         assert found is True
     os.remove(stdout)
     logfile = "install.log"
-    content = [":: INFO :: Installing genomeAPCAT...",
+    content = [":: INFO :: Installing PanACoTA...",
                ":: WARNING :: Some dependencies needed "
-               "for some subcommands of genomeAPCAT are not installed. Here is the list of "
+               "for some subcommands of PanACoTA are not installed. Here is the list of "
                "missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:",
                "prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
@@ -99,7 +99,7 @@ def test_install_panacota_base_ubuntu():
 
 def test_develop():
     """
-    Test installing genomeAPCAT in developer mode, when barrnap is already installed
+    Test installing PanACoTA in developer mode, when barrnap is already installed
     """
     assert not utils.check_installed("genomeAPCAT")
     assert not utils.check_installed("barrnap")
@@ -123,8 +123,8 @@ def test_develop():
                 assert os.path.isdir(os.path.join(loc, "genomeAPCAT.egg-info"))
     os.remove(stdout)
     logfile = "install.log"
-    content = ["Installing developer packages needed for genomeAPCAT",
-               "Some dependencies needed for some subcommands of genomeAPCAT are "
+    content = ["Installing developer packages needed for PanACoTA",
+               "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",

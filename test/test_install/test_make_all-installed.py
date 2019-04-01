@@ -2,7 +2,8 @@
 # coding: utf-8
 
 """
-Tests for make script, installing genomeAPCAT according to already existing dependencies
+Tests for make script, installing PanACoTA according to already existing dependencies
+Here, all dependencies are installed
 """
 import os
 import glob
@@ -22,7 +23,7 @@ def install_panacota():
 
 def teardown_function(function):
     """
-    Uninstall genomeAPCAT and installed dependencies at the end of each test
+    Uninstall PanACoTA and installed dependencies at the end of each test
     """
     print("TEARDOWN\n")
     cmd = "python3 make uninstall"
@@ -37,7 +38,7 @@ def test_install_panacota():
     Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
     """
     cmd = "python3 make"
-    error = "Error trying to install genomeAPCAT from base"
+    error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("genomeAPCAT")
     assert utils.check_installed("prokka")
@@ -66,7 +67,7 @@ def test_install_panacota():
     assert "genomeAPCAT" not in list_user_packages
     # Check output logfile content. Check that all content is present, in any order.
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...", "DONE"]
+    content = ["Installing PanACoTA...", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:
@@ -82,7 +83,7 @@ def test_install_panacota():
 
 def test_upgrade(install_panacota):
     """
-    Test upgrading genomeAPCAT when dependencies are still installed
+    Test upgrading PanACoTA when dependencies are still installed
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -98,15 +99,15 @@ def test_upgrade(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "Upgrading PanACoTA" in lines[0]
         assert "DONE" in lines[1]
     print("test_upgrade done")
 
 
 def test_upgrade_notinstalled():
     """
-    Test upgrading genomeAPCAT when dependencies are not installed (only barrnap),
-    and genomeAPCAT is not installed. It just installs genomeAPCAT, without prokka dep
+    Test upgrading PanACoTA when dependencies are not installed (only barrnap),
+    and PanACoTA is not installed. It just installs PanACoTA, without prokka dep
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -121,7 +122,7 @@ def test_upgrade_notinstalled():
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Upgrading genomeAPCAT" in lines[0]
+        assert "Upgrading PanACoTA" in lines[0]
         assert "DONE" in lines[1]
     os.remove(logfile)
     print("test_upgrade_notinstalled done")
@@ -129,7 +130,7 @@ def test_upgrade_notinstalled():
 
 def test_uninstall(install_panacota):
     """
-    Test uninstalling genomeAPCAT when dependencies are still installed
+    Test uninstalling PanACoTA when dependencies are still installed
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -142,14 +143,14 @@ def test_uninstall(install_panacota):
     with open(logfile, "r") as logf:
         lines = logf.readlines()
         assert len(lines) == 2
-        assert "Uninstalling genomeAPCAT" in lines[0]
+        assert "Uninstalling PanACoTA" in lines[0]
         assert "DONE" in lines[1]
     print("test_uninstall done")
 
 
 def test_develop():
     """
-    Test installing genomeAPCAT in developer mode, when prokka and barrnap are already installed
+    Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
     assert not utils.check_installed("genomeAPCAT")
     assert utils.check_installed("barrnap")
@@ -180,8 +181,8 @@ def test_develop():
     assert "genomeAPCAT" not in list_user_packages
     # check logfile content
     logfile = "install.log"
-    content = ["Installing genomeAPCAT...",
-               "Installing developer packages needed for genomeAPCAT", "DONE"]
+    content = ["Installing PanACoTA...",
+               "Installing developer packages needed for PanACoTA", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:
@@ -202,10 +203,10 @@ def test_develop():
 def test_install_user():
     """
     Test that when installing from a computer in user mode, it really installs
-    genomeAPCAT in user mode (pip showing genomeAPCAT when asking for user installed packages)
+    PanACoTA in user mode (pip showing PanACoTA when asking for user installed packages)
     """
     cmd = "python3 make --user"
-    error = "Error trying to install genomeAPCAT from base"
+    error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("genomeAPCAT")
@@ -215,7 +216,7 @@ def test_install_user():
     assert utils.check_installed("genomeAPCAT")
     # Check logfile content
     logfile = "install.log"
-    content = ["Installing genomeAPCAT in user mode...", "DONE"]
+    content = ["Installing PanACoTA in user mode...", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:
