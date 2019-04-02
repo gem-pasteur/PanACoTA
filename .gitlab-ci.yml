@@ -15,8 +15,10 @@ build-from-ubuntu:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_ubuntu.py
+    - pip3 --version
+
+    # - pip3 install -r requirements-dev.txt
+    # - py.test test/test_install/test_make_ubuntu.py
 
 
 build-from-barrnap:
