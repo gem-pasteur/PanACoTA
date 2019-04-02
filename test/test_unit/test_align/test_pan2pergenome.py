@@ -6,6 +6,7 @@ Unit tests for the pan_to_pergenome submodule in align module
 """
 import os
 import shutil
+import logging
 
 import pytest
 
@@ -55,6 +56,7 @@ def test_get_per_genome(caplog):
     Test that when giving a persistent genome file and a list of genomes,
     it creates all expected files in output/Listdir
     """
+    caplog.set_level(logging.DEBUG)
     pers = os.path.join("test", "data", "persgenome", "exp_files", "exp_pers-floor-mixed.txt")
     list_gen = os.path.join(TESTPATH, "listfile.txt")
     dname = "TEST-all-gembase"
@@ -136,6 +138,7 @@ def test_prot_per_strain_member_bis(caplog):
     """
     Test parser of persistent genome file when a same member is in 2 different families
     """
+    caplog.set_level(logging.DEBUG)
     pers = os.path.join(TESTPATH, "pers_genome_member-bis.txt")
     all_prots, fams_genomes, several = p2p.proteins_per_strain(pers)
     assert "problem: ESCO2_2 already exists, in family 5. Conflict with family 32" in caplog.text
@@ -193,6 +196,7 @@ def test_write_getentry_error(caplog):
     Test that when giving a list of genomes with their persistent gene names,
     but for 2 genomes, there is no persistent gene, it exists, with an error message
     """
+    caplog.set_level(logging.DEBUG)
     all_prots = {"ESCO1": {"ESCO1_00001": '1',
                            "ESCO1_00002": '4'},
                  "ESCO2": {"ESCO2_00001": '1',
@@ -325,6 +329,7 @@ def test_write_genome_gen_prt_exist(caplog):
     Test that when gen and prt files already exist, it does not do anything.
     Those files will be used for next steps.
     """
+    caplog.set_level(logging.DEBUG)
     listdir = "Listdir"
     aldir = "Aldir"
     # Create align folder

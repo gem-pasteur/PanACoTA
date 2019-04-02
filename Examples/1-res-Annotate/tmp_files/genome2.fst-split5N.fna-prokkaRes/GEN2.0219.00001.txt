@@ -1,0 +1,4 @@
+organism: Genus species strain 
+contigs: 4
+bases: 10711
+CDS: 13

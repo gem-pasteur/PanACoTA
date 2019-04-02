@@ -9,7 +9,7 @@ import os
 import logging
 import shutil
 from io import StringIO
-import genomeAPCAT.qc_annote_module.format_functions as ffunc
+import genomeAPCAT.annote_module.format_functions as ffunc
 import genomeAPCAT.utils as utils
 
 

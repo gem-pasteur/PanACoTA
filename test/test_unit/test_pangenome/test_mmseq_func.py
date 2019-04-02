@@ -9,6 +9,7 @@ import os
 import time
 import shutil
 import glob
+import logging
 
 import genomeAPCAT.pangenome_module.mmseqs_functions as mmseqs
 
@@ -99,6 +100,7 @@ def test_create_mmseqdb(caplog):
     Test that mmseq DB is created. We do not check its content as it could change
     according to mmseq versions, and we are here testing genomeAPCAT, not mmseqs
     """
+    caplog.set_level(logging.DEBUG)
     filename = "test_create_mmseqsdb.msdb"
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     logfile = "test_create_mmseqsdb.log"
@@ -371,6 +373,7 @@ def test_do_pangenome(caplog):
     Check that expected output files are created,
     and compare output pangenome to the expected one.
     """
+    caplog.set_level(logging.DEBUG)
     outdir = "test_do_pangenome_outdir"
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
@@ -418,6 +421,7 @@ def test_do_pangenome_given_panfile(caplog):
     Check that expected output files are created,
     and compare output pangenome to the expected one.
     """
+    caplog.set_level(logging.DEBUG)
     outdir = "test_do_pangenome_outdir"
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
@@ -468,6 +472,7 @@ def test_do_pangenome_quiet(caplog):
     and compare output pangenome to the expected one.
     Check that no error appears when choosing quiet option.
     """
+    caplog.set_level(logging.DEBUG)
     outdir = "test_do_pangenome_outdir"
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
@@ -515,6 +520,7 @@ def test_do_pangenome_exist(caplog):
     Check that if the mmseq output file of clustering already exists, it does not
     run mmseq again, but just converts it to pangenome.
     """
+    caplog.set_level(logging.DEBUG)
     outdir = "test_do_pangenome_outdir_exist"
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
@@ -568,6 +574,7 @@ def test_run_all_pangenome(caplog):
     Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
     outputs the expected pangenome file.
     """
+    caplog.set_level(logging.DEBUG)
     min_id = 0.8
     clust_mode = 1
     outdir = "test_run_allpangenome"
@@ -616,6 +623,7 @@ def test_run_all_pangenome_givenfile_parallel(caplog):
     Check that, given a prt bank, it creates mmseq db, mmseq clustering, and
     outputs the expected pangenome file.
     """
+    caplog.set_level(logging.DEBUG)
     min_id = 0.8
     clust_mode = 1
     outdir = "test_run_allpangenome"

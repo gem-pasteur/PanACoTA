@@ -1,14 +1,14 @@
 ========================
-Work on genomeAPCAT code
+Work on PanACoTA code
 ========================
 
-This part is for people who want to work on developing `genomeAPCAT` package: adding new features, correcting bugs etc.
+This part is for people who want to work on developing `PanACoTA` package: adding new features, correcting bugs etc.
 
 
-Installing ``genomeAPCAT`` in development mode
+Installing ``PanACoTA`` in development mode
 ==============================================
 
-If you want to install ``genomeAPCAT`` while still working on modifying the scripts, type:
+If you want to install ``PanACoTA`` while still working on modifying the scripts, type:
 
 .. code-block:: bash
 
@@ -21,7 +21,7 @@ needed for development by running:
 
 .. code-block:: bash
 
-    pip3 install -r requirements.txt  # dependencies used by genomeAPCAT
+    pip3 install -r requirements.txt  # dependencies used by PanACoTA
     pip3 install -r requirements-dev.txt  # libraries used to run tests, generate documentation etc.
 
 .. note:: biopython is only used for 'tree' subcommand, with option ``--soft fastme`` or ``--soft quicktree``. If you do not plan to use this, you do not need to install biopython. You can comment  the ``biopython>=1.60`` line in ``requirements.txt`` (add a ``#`` at the beginning of the line).

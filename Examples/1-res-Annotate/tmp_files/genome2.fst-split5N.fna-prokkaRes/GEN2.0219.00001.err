@@ -1,0 +1,146 @@
+Discrepancy Report Results
+
+Summary
+FATAL: MISSING_PROTEIN_ID:13 proteins have invalid IDs.
+DISC_SOURCE_QUALS_ASNDISC:strain (all present, all same)
+DISC_SOURCE_QUALS_ASNDISC:taxname (all present, all same)
+DISC_FEATURE_COUNT:CDS: 13 present
+DISC_COUNT_NUCLEOTIDES:4 nucleotide Bioseqs are present
+FEATURE_LOCATION_CONFLICT:13 features have inconsistent gene locations.
+DISC_QUALITY_SCORES:Quality scores are missing on all sequences.
+ONCALLER_COMMENT_PRESENT:4 comment descriptors were found (all same)
+MISSING_GENOMEASSEMBLY_COMMENTS:4 bioseqs are missing GenomeAssembly structured comments
+MOLTYPE_NOT_MRNA:4 molecule types are not set as mRNA.
+TECHNIQUE_NOT_TSA:4 technique are not set as TSA
+MISSING_STRUCTURED_COMMENT:4 sequences do not include structured comments.
+MISSING_PROJECT:17 sequences do not include project.
+DISC_INCONSISTENT_MOLINFO_TECH:Molinfo Technique Report (some missing, all same)
+
+
+Detailed Report
+
+FATAL: DiscRep_ALL:MISSING_PROTEIN_ID::13 proteins halid nvalid IDs.
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1_1 (length 257)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1_2 (length 467)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_1 (length 74)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_2 (length 126)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_3 (length 277)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_4 (length 555)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_1 (length 255)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_2 (length 86)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_3 (length 193)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_4 (length 122)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_1 (length 435)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_2 (length 154)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_3 (length 337)
+
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::strain (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::4 sources have 'strain' for strain
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::taxname (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::4 sources have 'Genus species' for taxname
+DiscRep_ALL:DISC_FEATURE_COUNT::CDS: 13 present
+DiscRep_ALL:DISC_COUNT_NUCLEOTIDES::4 nucleotide Bioseqs are present
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+
+DiscRep_ALL:FEATURE_LOCATION_CONFLICT::13 features have inconsistent gene locations.
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	Histidine transport ATP-binding protein HisP	this_is_genome_1:1-774	OHLPOIIB_00001
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	hypothetical protein	this_is_genome_1:857-2260	OHLPOIIB_00002
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	Phage shock protein B	this_is_genome_2:28-252	OHLPOIIB_00003
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	5-carboxymethyl-2-hydroxymuconate Delta-isomerase	this_is_genome_2:301-681	OHLPOIIB_00004
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	N-acetylmuramoyl-L-alanine amidase AmiD	this_is_genome_2:764-1597	OHLPOIIB_00005
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	Glutamine--tRNA ligase	this_is_genome_2:1628-3295	OHLPOIIB_00006
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	tRNA (guanine-N(1)-)-methyltransferase	this_is_genome_3:30-797	OHLPOIIB_00007
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	hypothetical protein	this_is_genome_3:862-1122	OHLPOIIB_00008
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	hypothetical protein	this_is_genome_3:1170-1751	OHLPOIIB_00009
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	hypothetical protein	this_is_genome_3:1895-2263	OHLPOIIB_00010
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	C4-dicarboxylate TRAP transporter large permease protein DctM	this_is_genome_4:1-1308	OHLPOIIB_00011
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	hypothetical protein	this_is_genome_4:1340-1804	OHLPOIIB_00012
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:CDS	Tyrosine recombinase XerC	this_is_genome_4:1832-2845	OHLPOIIB_00013
+
+DiscRep_ALL:DISC_QUALITY_SCORES::Quality scores are missing on all sequences.
+
+DiscRep_ALL:ONCALLER_COMMENT_PRESENT::4 comment descriptors were found (all same)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1:Annotated using prokka 1.14-dev from https://github.com/tseemann/prokka
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2:Annotated using prokka 1.14-dev from https://github.com/tseemann/prokka
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3:Annotated using prokka 1.14-dev from https://github.com/tseemann/prokka
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4:Annotated using prokka 1.14-dev from https://github.com/tseemann/prokka
+
+DiscRep_ALL:MISSING_GENOMEASSEMBLY_COMMENTS::4 bioseqs are missing GenomeAssembly structured comments
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+
+DiscRep_ALL:MOLTYPE_NOT_MRNA::4 molecule types are not set as mRNA.
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+
+DiscRep_ALL:TECHNIQUE_NOT_TSA::4 technique are not set as TSA
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+
+DiscRep_ALL:MISSING_STRUCTURED_COMMENT::4 sequences do not include structured comments.
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+
+DiscRep_ALL:MISSING_PROJECT::17 sequences do not include project.
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1_1 (length 257)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1_2 (length 467)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_1 (length 74)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_2 (length 126)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_3 (length 277)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2_4 (length 555)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_1 (length 255)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_2 (length 86)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_3 (length 193)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3_4 (length 122)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_1 (length 435)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_2 (length 154)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4_3 (length 337)
+
+DiscRep_ALL:DISC_INCONSISTENT_MOLINFO_TECH::Molinfo Technique Report (some missing, all same)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::technique (all missing)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::4 Molinfos are missing field technique
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_3 (length 2263)
+Examples/1-res-Annotate/tmp_files/genome2.fst-split5N.fna-prokkaRes/GEN2.0219.00001:this_is_genome_4 (length 2845)
+

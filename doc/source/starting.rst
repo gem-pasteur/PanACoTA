@@ -1,15 +1,15 @@
 =========================
-Starting with genomeAPCAT
+Starting with PanACoTA
 =========================
 
 
-``genomeAPCAT`` is a Python package, developed in Python 3.
+``PanACoTA`` is a Python package, developed in Python 3.
 
 Downloading and updating
 ========================
 
 
-You can download ``genomeAPCAT`` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download ``PanACoTA`` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
 .. code-block:: bash
 
@@ -17,9 +17,9 @@ You can download ``genomeAPCAT`` source code by downloading an archive (zip, tar
 
 When asked, give your gitlab login, and password.
 
-This will create a repository called ``pipeline_annotation``. Go inside this repository (``cd pipeline_annotation``) to install ``genomeAPCAT``, as described hereafter.
+This will create a repository called ``pipeline_annotation``. Go inside this repository (``cd pipeline_annotation``) to install ``PanACoTA``, as described hereafter.
 
-If a new version of ``genomeAPCAT`` is released, and you want to use it, type the following command to update the source code:
+If a new version of ``PanACoTA`` is released, and you want to use it, type the following command to update the source code:
 
 .. code-block:: bash
 
@@ -35,11 +35,11 @@ Installation: '**./make**' and its options
 Dependencies
 ------------
 
-``genomeAPCAT`` is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
+``PanACoTA`` is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
 
-- `prokka <https://github.com/tseemann/prokka>`_  (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `genomeAPCAT` (see :ref:`Install section <installing>`)
+- `prokka <https://github.com/tseemann/prokka>`_  (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `PanACoTA` (see :ref:`Install section <installing>`)
 - `mmseqs <https://github.com/soedinglab/MMseqs2>`_  (to generate pangenomes)
 - `mafft <http://mafft.cbrc.jp/alignment/software/>`_ (to align persistent genome)
 - At least one of those softwares, to infer a phylogenetic tree:
@@ -69,11 +69,11 @@ You can then add the output ``FastTreeMP`` to your ``$PATH`` to be able to run i
 
 .. _installing:
 
-Installing ``genomeAPCAT``
+Installing ``PanACoTA``
 --------------------------
 
 
-To install ``genomeAPCAT`` from the ``pipeline_annotation`` directory, type:
+To install ``PanACoTA`` from the ``pipeline_annotation`` directory, type:
 
 .. code-block:: bash
 
@@ -94,10 +94,10 @@ just as any other software.
 
 .. warning:: If you plan to work on the scripts, choose the development installation (see :doc:`Developer documentation <develop>`).
 
-Uninstalling ``genomeAPCAT``
+Uninstalling ``PanACoTA``
 ----------------------------
 
-If you don't want ``genomeAPCAT`` anymore, uninstall it by typing:
+If you don't want ``PanACoTA`` anymore, uninstall it by typing:
 
 .. code-block:: bash
 
@@ -110,7 +110,7 @@ If you don't want ``genomeAPCAT`` anymore, uninstall it by typing:
 Upgrade to new version
 ----------------------
 
-If you want to install a new version of ``genomeAPCAT``:
+If you want to install a new version of ``PanACoTA``:
 
 .. code-block:: bash
 
@@ -133,7 +133,7 @@ If you installed the dependencies (such as prokka) via our installation script, 
 Quick run
 =========
 
-``genomeAPCAT`` contains 5 different subcommands:
+``PanACoTA`` contains 5 different subcommands:
 
 - ``annotate`` (annotate all genomes of the dataset, after a quality control)
 - ``pangenome`` (generate pan-genome)
@@ -145,11 +145,11 @@ You can run them by typing:
 
 .. code-block:: bash
 
-    genomeAPCAT <subcommand_name> <arguments_for_subcommand>
+    PanACoTA <subcommand_name> <arguments_for_subcommand>
 
 Each subcommand has its own options and inputs. To get the list of required arguments and other available options for the subcommand you want to run, type:
 
 .. code-block:: bash
 
-    genomeAPCAT <subcommand> -h
+    PanACoTA <subcommand> -h
 

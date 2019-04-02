@@ -8,7 +8,7 @@ Unit tests for utils.py
 import os
 import shutil
 import logging
-import genomeAPCAT.qc_annote_module.prokka_functions as pfunc
+import genomeAPCAT.annote_module.prokka_functions as pfunc
 import genomeAPCAT.utils as utils
 
 

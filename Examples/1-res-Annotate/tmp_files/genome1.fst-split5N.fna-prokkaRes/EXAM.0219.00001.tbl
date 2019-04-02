@@ -1,0 +1,71 @@
+>Feature genome1_1
+213	1880	CDS
+			EC_number	6.1.1.18
+			dbxref	COG:COG0008
+			gene	glnS
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P00962
+			locus_tag	GKEGNCBE_00001
+			product	Glutamine--tRNA ligase
+1916	2746	CDS
+			EC_number	3.5.1.28
+			dbxref	COG:COG3023
+			gene	amiD
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P75820
+			locus_tag	GKEGNCBE_00002
+			product	N-acetylmuramoyl-L-alanine amidase AmiD
+>Feature genome1_2
+16	396	CDS
+			EC_number	5.3.3.10
+			gene	hpcD
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:Q05354
+			locus_tag	GKEGNCBE_00003
+			product	5-carboxymethyl-2-hydroxymuconate Delta-isomerase
+428	1837	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	GKEGNCBE_00004
+			product	hypothetical protein
+1869	2642	CDS
+			dbxref	COG:COG4598
+			gene	hisP
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P02915
+			locus_tag	GKEGNCBE_00005
+			product	Histidine transport ATP-binding protein HisP
+2709	3443	CDS
+			EC_number	2.1.1.228
+			dbxref	COG:COG0336
+			gene	trmD_1
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P0A873
+			locus_tag	GKEGNCBE_00006
+			product	tRNA (guanine-N(1)-)-methyltransferase
+3427	4254	CDS
+			EC_number	2.1.1.228
+			dbxref	COG:COG0336
+			gene	trmD_2
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P0A873
+			locus_tag	GKEGNCBE_00007
+			product	tRNA (guanine-N(1)-)-methyltransferase
+4299	4763	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	GKEGNCBE_00008
+			product	hypothetical protein
+4818	5078	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	GKEGNCBE_00009
+			product	hypothetical protein
+5117	5698	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	GKEGNCBE_00010
+			product	hypothetical protein
+5717	7024	CDS
+			dbxref	COG:COG1593
+			gene	dctM
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:O07838
+			locus_tag	GKEGNCBE_00011
+			product	C4-dicarboxylate TRAP transporter large permease protein DctM

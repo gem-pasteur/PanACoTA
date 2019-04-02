@@ -208,7 +208,7 @@ def run_mmseqs_clust(args):
     """
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
-           "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
+           "{} --kmer-per-seq 80 --max-seqs 300").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
     msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
     with open(logmmseq, "a") as logm:
         utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
@@ -245,6 +245,10 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     msg = "Problem while trying to convert mmseq result file to tsv file"
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
+    print("log file create tsv mmseqs:")
+    with open(logmmseq, "r") as logf:
+        for line in logf:
+            print(line)
     # Convert the tsv file to a 'pangenome' file: one line per family
     families, outfile = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
     return families, outfile

@@ -7,7 +7,7 @@ Unit tests for utils.py
 
 import pytest
 import os
-import genomeAPCAT.qc_annote_module.genome_seq_functions as gfunc
+import genomeAPCAT.annote_module.genome_seq_functions as gfunc
 import matplotlib
 matplotlib.use('AGG')
 

@@ -1,0 +1,14 @@
+##gff-version 3
+GEN2.0219.00001.0001	Prodigal:2.6	CDS	1	774	.	+	.	ID=GEN2.0219.00001.b0001_00001;Name=hisP;gene=hisP;inference=similar to AA sequence:UniProtKB:P02915;locus_tag=GEN2.0219.00001.b0001_00001;product=Histidine transport ATP-binding protein HisP
+GEN2.0219.00001.0001	Prodigal:2.6	CDS	857	2260	.	+	.	ID=GEN2.0219.00001.b0001_00002;locus_tag=GEN2.0219.00001.b0001_00002;product=hypothetical protein
+GEN2.0219.00001.0002	Prodigal:2.6	CDS	28	252	.	+	.	ID=GEN2.0219.00001.b0002_00003;Name=pspB;gene=pspB;inference=similar to AA sequence:UniProtKB:P0AFM9;locus_tag=GEN2.0219.00001.b0002_00003;product=Phage shock protein B
+GEN2.0219.00001.0002	Prodigal:2.6	CDS	301	681	.	+	.	ID=GEN2.0219.00001.i0002_00004;eC_number=5.3.3.10;Name=hpcD;gene=hpcD;inference=similar to AA sequence:UniProtKB:Q05354;locus_tag=GEN2.0219.00001.i0002_00004;product=5-carboxymethyl-2-hydroxymuconate Delta-isomerase
+GEN2.0219.00001.0002	Prodigal:2.6	CDS	764	1597	.	+	.	ID=GEN2.0219.00001.i0002_00005;eC_number=3.5.1.28;Name=amiD;gene=amiD;inference=similar to AA sequence:UniProtKB:P75820;locus_tag=GEN2.0219.00001.i0002_00005;product=N-acetylmuramoyl-L-alanine amidase AmiD
+GEN2.0219.00001.0002	Prodigal:2.6	CDS	1628	3295	.	+	.	ID=GEN2.0219.00001.b0002_00006;eC_number=6.1.1.18;Name=glnS;gene=glnS;inference=similar to AA sequence:UniProtKB:P00962;locus_tag=GEN2.0219.00001.b0002_00006;product=Glutamine--tRNA ligase
+GEN2.0219.00001.0003	Prodigal:2.6	CDS	30	797	.	+	.	ID=GEN2.0219.00001.b0003_00007;eC_number=2.1.1.228;Name=trmD;gene=trmD;inference=similar to AA sequence:UniProtKB:P0A873;locus_tag=GEN2.0219.00001.b0003_00007;product=tRNA (guanine-N(1)-)-methyltransferase
+GEN2.0219.00001.0003	Prodigal:2.6	CDS	862	1122	.	+	.	ID=GEN2.0219.00001.i0003_00008;locus_tag=GEN2.0219.00001.i0003_00008;product=hypothetical protein
+GEN2.0219.00001.0003	Prodigal:2.6	CDS	1170	1751	.	+	.	ID=GEN2.0219.00001.i0003_00009;locus_tag=GEN2.0219.00001.i0003_00009;product=hypothetical protein
+GEN2.0219.00001.0003	Prodigal:2.6	CDS	1895	2263	.	+	.	ID=GEN2.0219.00001.b0003_00010;locus_tag=GEN2.0219.00001.b0003_00010;product=hypothetical protein
+GEN2.0219.00001.0004	Prodigal:2.6	CDS	1	1308	.	+	.	ID=GEN2.0219.00001.b0004_00011;Name=dctM;gene=dctM;inference=similar to AA sequence:UniProtKB:O07838;locus_tag=GEN2.0219.00001.b0004_00011;product=C4-dicarboxylate TRAP transporter large permease protein DctM
+GEN2.0219.00001.0004	Prodigal:2.6	CDS	1340	1804	.	+	.	ID=GEN2.0219.00001.i0004_00012;locus_tag=GEN2.0219.00001.i0004_00012;product=hypothetical protein
+GEN2.0219.00001.0004	Prodigal:2.6	CDS	1832	2845	.	+	.	ID=GEN2.0219.00001.b0004_00013;Name=xerC;gene=xerC;inference=similar to AA sequence:UniProtKB:P39776;locus_tag=GEN2.0219.00001.b0004_00013;product=Tyrosine recombinase XerC

@@ -8,7 +8,7 @@ import pytest
 import argparse
 import time
 
-from genomeAPCAT.subcommands import qc_and_annote as annot
+from genomeAPCAT.subcommands import annote as annot
 
 
 def test_parser_noarg(capsys):

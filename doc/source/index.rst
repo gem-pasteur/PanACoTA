@@ -1,6 +1,6 @@
-.. genomeAPCAT documentation master file
+.. PanACoTA documentation master file
 
-Welcome to genomeAPCAT's documentation!
+Welcome to PanACoTA's documentation!
 =======================================
 
 .. toctree::

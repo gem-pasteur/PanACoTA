@@ -1,8 +1,8 @@
 =============================
-Running genomeAPCAT: tutorial
+Running PanACoTA: tutorial
 =============================
 
-``genomeAPCAT`` contains 5 subcommands, for the different steps:
+``PanACoTA`` contains 5 subcommands, for the different steps:
     - ``annotate`` (annotate all genomes of the dataset, after a quality control)
     - ``pangenome`` (generate pan-genome)
     - ``corepers`` (generate core-genome or persistent-genome)
@@ -11,11 +11,11 @@ Running genomeAPCAT: tutorial
 
 You can run them by typing::
 
-    genomeAPCAT <subcommand_name> <arguments_for_subcommand>
+    PanACoTA <subcommand_name> <arguments_for_subcommand>
 
 Each subcommand has its own options and inputs. To get the list of required arguments and other available options for the subcommand you want to run, type::
 
-    genomeAPCAT <subcommand> -h
+    PanACoTA <subcommand> -h
 
 
 .. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
@@ -41,7 +41,7 @@ We will now describe each subcommand, with its options.
 
 You can see all required arguments and available options with::
 
-    genomeAPCAT annotate -h
+    PanACoTA annotate -h
 
 The input for annotation is a set of genomes, in (multi-)fasta format. All files to annotate must be in a same directory, referred after by ``<db_path>``. However, this directory can also contain other files/sequences, not used in this study. The program will only use the files specified in the ``<list_file>``, which is the main file you have to provide for this step.
 
@@ -109,7 +109,7 @@ With some softwares, the different contigs of a draft genome are all concatenate
     >genome_seq
     AACACACGATCTCGGCAGCGCANNNNNNNNNNNNNACAGCATNNNNTCGCGCCGACGNNACTATAACAGCAGACNNNNNNNNNNCACACCGGGTATCAGCAGCAGACGACGACGAACGAANNNNNNNNNNACACAGCACTATACGNACAGCA...
 
-This genome is a draft with 4 contigs. By default, ``genomeAPCAT`` will split the sequences each time there is stretch of at least 5 ``N``, in order to have 1 replicon per fasta entry. For example, with the previous file in input, it will create a new multi-fasta file with::
+This genome is a draft with 4 contigs. By default, ``PanACoTA`` will split the sequences each time there is stretch of at least 5 ``N``, in order to have 1 replicon per fasta entry. For example, with the previous file in input, it will create a new multi-fasta file with::
 
     >genome_seq_cont1
     AACACACGATCTCGGCAGCGCA
@@ -230,7 +230,7 @@ With this information, you will be able to see which genomes should be removed f
 
 You can run this quality control with (order of arguments does not matter)::
 
-    genomeAPCAT annotate <list_file> -d <dbpath> -r <res_path> -Q
+    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -Q
 
 with:
 
@@ -251,9 +251,9 @@ This will create a folder ``<res_path>``, with the following files inside:
 
 And log files:
 
-    - ``genomeAPCAT-annotate_<list_file>.log``: log file. See information on what happened during the run: traceback of stdout.
-    - ``genomeAPCAT-annotate_<list_file>.log.err``: log file but only with Warnings and errors. If it is empty, everything went well!
-    - ``genomeAPCAT-annotate_<list_file>.log.details``: same as ``.log`` file, but with more detailed information (for example, while running annotation, you can have the time of start/end of annotation of each individual genome). This file can be quite big if you have a lot of genomes.
+    - ``PanACoTA-annotate_<list_file>.log``: log file. See information on what happened during the run: traceback of stdout.
+    - ``PanACoTA-annotate_<list_file>.log.err``: log file but only with Warnings and errors. If it is empty, everything went well!
+    - ``PanACoTA-annotate_<list_file>.log.details``: same as ``.log`` file, but with more detailed information (for example, while running annotation, you can have the time of start/end of annotation of each individual genome). This file can be quite big if you have a lot of genomes.
 
 .. _annot:
 
@@ -262,7 +262,7 @@ Annotation
 
 When you know the limits you want to use for the L90 and number of contigs, you can run the full annotation step, and not only the quality control. Use::
 
-    genomeAPCAT annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num>]
+    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num>]
 
 with:
     - same arguments as before
@@ -289,7 +289,7 @@ This will also create a folder ``<res_path>``, with the following files inside:
 Options
 -------
 
-Here is the list of options available when running ``genomeAPCAT annotate``:
+Here is the list of options available when running ``PanACoTA annotate``:
 
     - ``-n <name>``: required when not running quality control only (see :ref:`annotation<annot>`)
     - ``-Q``: run quality control only (see :ref:`QC only<qco>`)
@@ -308,7 +308,7 @@ Here is the list of options available when running ``genomeAPCAT annotate``:
 
 You can see all required arguments and available options with::
 
-    genomeAPCAT pangenome -h
+    PanACoTA pangenome -h
 
 To construct a pangenome, you need to specify **which genomes** you want to include in the dataset. Each of these genomes must have a unique file, called ``<genome_name>.prt``, containing all **amino-acid sequences of its CDS**. Those ``.prt`` files must all be in **a same directory**, referenced here after by ``<dbdir>``. As for the annotation step, this folder can contain other files, but only the ones given in the list_file will be taken into account.
 
@@ -357,7 +357,7 @@ Ideally, you should follow the 'gembase_format', ``<name>.<date>.<strain_num>.<p
     - ``<strain_num>`` strain number (only numeric characters)
 
 
-If your protein files were generated by ``genomeAPCAT annotate``, they are already in this format!
+If your protein files were generated by ``PanACoTA annotate``, they are already in this format!
 
 Those fields will be used to sort pangenome families by species (if you do a pangenome containing different species), strain number (inside a same species), and protein number (inside a same strain). They will also be essential if you want to generate a core or persistent genome after.
 
@@ -444,7 +444,7 @@ Do pangenome
 
 To do a pangenome, run the following command::
 
-    genomeAPCAT pangenome -l <list_file> -n <dataset_name> -d <path/to/dbdir> -o <path/to/outdir> -i <min_id>
+    PanACoTA pangenome -l <list_file> -n <dataset_name> -d <path/to/dbdir> -o <path/to/outdir> -i <min_id>
 
 with:
 
@@ -468,7 +468,7 @@ It will also contain other files and directories, that could help you if you nee
     - ``tmp_<dataset_name>.All.prt-mode<mode_num_given>_<current_date_and_time>`` folder, containing all temporary files used by MMseqs2 to cluster your proteins.
     - ``<dataset_name>.All.prt-msDB*``: 5 files (``*`` being nothing, ``.index``, ``.lookup``, ``_h``, ``_h.index``) corresponding to the protein databank, in the format used by MMseqs2.
     - ``<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>*``: 3 files (``*`` being nothing, ``.index``, ``.tsv``) generated by MMseqs2 corresponding to the clustering of your proteins
-    - ``genomeAPCAT-pangenome_<dataset_name>.log*``: the 3 log files as in the annotate subcommand (.log, .log.details, .log.err). See their description :ref:`here<logf>`
+    - ``PanACoTA-pangenome_<dataset_name>.log*``: the 3 log files as in the annotate subcommand (.log, .log.details, .log.err). See their description :ref:`here<logf>`
     - ``mmseq_<dataset_name>.All.prt_<min_id>-mode<mode_num_given>_<current_date_and_time>.log``: MMseqs2 log file.
     - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.bin`` is a binary file containing Python objects corresponding to the pangenome. File only used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
 
@@ -492,7 +492,7 @@ You can also specify other options with:
 
 You can see all required arguments and available options with::
 
-    genomeAPCAT corepers -h
+    PanACoTA corepers -h
 
 As core and persistent genomes are inferred from the pangenome, the only file required to generate a core or persistent genome is the pangenome of your dataset, in the format described in :ref:`pangenome part<panfile>`.
 
@@ -515,7 +515,7 @@ Do corepers
 
 To do a coregenome, run the following command::
 
-    genomeAPCAT corepers -p <pangenome_file>
+    PanACoTA corepers -p <pangenome_file>
 
 If you want to do a persistent genome, use the following options to specify what you want:
 
@@ -538,9 +538,9 @@ In your pangenome folder (or where you specified if you used the ``-o`` option),
 
 You can see all required arguments and available options with::
 
-    genomeAPCAT align -h
+    PanACoTA align -h
 
-In order to align your persistent families, you need to provide your persistent genome file (as generated by genomeAPCAT corepers), and the list of genome names included in the dataset.
+In order to align your persistent families, you need to provide your persistent genome file (as generated by PanACoTA corepers), and the list of genome names included in the dataset.
 
 Input file formats
 ------------------
@@ -677,7 +677,7 @@ Align
 
 To do the alignment of all proteins of your persistent genome, run::
 
-    genomeAPCAT align -c <pers_genome> -l <list_file> -n <dataset_name> -d <dbdir> -o <resdir>
+    PanACoTA align -c <pers_genome> -l <list_file> -n <dataset_name> -d <dbdir> -o <resdir>
 
 with:
 
@@ -691,7 +691,7 @@ Add ``--threads <num>`` to parallelize the alignments. Put 0 to use all cores of
 
 In your ``<resdir>`` directory, you will find:
 
-    - ``genomeAPCAT-align_<dataset_name>.log*``: the 3 log files as in the :ref:`other steps<logf>`.
+    - ``PanACoTA-align_<dataset_name>.log*``: the 3 log files as in the :ref:`other steps<logf>`.
     - a folder ``List-<dataset_name>``: contains, for each genome, the list of persistent proteins (that must be extracted to align them).
     - a folder ``Align-<dataset_name>``: contains:
 
@@ -709,7 +709,7 @@ In your ``<resdir>`` directory, you will find:
 
 You can see all required arguments and available options with::
 
-    genomeAPCAT tree -h
+    PanACoTA tree -h
 
 To infer a phylogenetic tree, you need to provide an alignment file, in fasta format. Each fasta entry will be a leaf of the phylogenetic tree.
 
@@ -736,12 +736,12 @@ By default, 'tree' subcommand will use `FastTreeMP <http://journals.plos.org/plo
 
 .. code-block:: bash
 
-    genomeAPCAT tree -a <align_file>
+    PanACoTA tree -a <align_file>
 
 However, we also provide the possibility to use `FastME <https://academic.oup.com/mbe/article/32/10/2798/1212138/FastME-2-0-A-Comprehensive-Accurate-and-Fast>`_ or `Quicktree <https://www.ncbi.nlm.nih.gov/pubmed/12424131>`_. For that, add the option ``-s <soft>`` with ``fastme`` or ``quicktree`` in ``<soft>``.
 
 
-See ``genomeAPCAT tree -h`` to have an overview of all options available.
+See ``PanACoTA tree -h`` to have an overview of all options available.
 
 FastTree options
 ^^^^^^^^^^^^^^^^
@@ -757,7 +757,7 @@ In your ``<outdir>`` directory, you will find:
 
     - ``<dataset_name>.grp.aln.fasttree.log``: logfile of FastTree, with information on running steps, and intermediate trees inferred
     - ``<dataset_name>.grp.aln.fasttree_tree.nwk``: the final tree inferred, in Newick format
-    - ``genomeAPCAT-tree-fasttree.log*``: the 3 log files as in the :ref:`other steps<logf>`
+    - ``PanACoTA-tree-fasttree.log*``: the 3 log files as in the :ref:`other steps<logf>`
 
 
 FastME options
@@ -765,7 +765,7 @@ FastME options
 
 To use fastme with default options, run::
 
-    genomeAPCAT tree -a <align_file> -s fastme
+    PanACoTA tree -a <align_file> -s fastme
 
 You can also specify the following options:
 
@@ -781,14 +781,14 @@ In your ``<outdir>`` directory, you will find:
     - ``<dataset_name>.grp.aln.phylip.fastme.log``: logfile of FastME, with information on running steps
     - ``<dataset_name>.grp.aln.phylip.fastme_dist-mat.txt``: distance matrix of all given genomes
     - ``<dataset_name>.grp.aln.phylip.fastme_tree.nwk``: the final tree inferred in Newick format
-    - ``genomeAPCAT-tree-fastme.log*``: the 3 log files as in the :ref:`other steps<logf>`
+    - ``PanACoTA-tree-fastme.log*``: the 3 log files as in the :ref:`other steps<logf>`
 
 Quicktree options
 ^^^^^^^^^^^^^^^^^
 
 To use Quicktree with default options, run::
 
-    genomeAPCAT tree -a <align_file> -s quicktree
+    PanACoTA tree -a <align_file> -s quicktree
 
 You can also specify the following options:
 
@@ -800,4 +800,4 @@ In your ``<outdir>`` directory, you will find:
     - ``<dataset_name>.grp.aln.stockholm``: alignment converted in Stockholm format, the input of Quicktree
     - ``<dataset_name>.grp.aln.stockholm.quicktree.log``: logfile of quicktree, empty if no error occurred
     - ``<dataset_name>.grp.aln.stockholm.quicktree_tree.nwk``: the final tree inferred in Newick format
-    - ``genomeAPCAT-tree-quicktree.log*``: the 3 log files as in the :ref:`other steps<logf>`
+    - ``PanACoTA-tree-quicktree.log*``: the 3 log files as in the :ref:`other steps<logf>`

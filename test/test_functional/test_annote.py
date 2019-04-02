@@ -5,7 +5,7 @@
 Functional tests for genomeAPCAT annotate
 """
 
-from genomeAPCAT.subcommands import qc_and_annote as annot
+from genomeAPCAT.subcommands import annote as annot
 import genomeAPCAT.utils as utils
 
 import pytest

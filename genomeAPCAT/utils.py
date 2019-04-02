@@ -279,7 +279,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
 def plot_distr(values, limit, title, text):
     """
     Plot histogram of given 'values', and add a vertical line corresponding to the chosen
-    'limit' and saves the image into the 'outfile'
+    'limit' and return the mpl figure
 
     Parameters
     ----------
