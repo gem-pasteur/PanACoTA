@@ -17,7 +17,7 @@ build-from-ubuntu:
     # - pip3 install --upgrade pip
     - apt-get install python3-pip
     - pip3 --version
-    # - pip3 install -r requirements-dev.txt
+    - pip3 install -r requirements-dev.txt
     # - py.test test/test_install/test_make_ubuntu.py
 
 
