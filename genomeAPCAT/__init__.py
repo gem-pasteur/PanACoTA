@@ -1,3 +1,3 @@
 """genomeAPCAT"""
 
-__version__ = 2018_02_14
+__version__ = 20180214
