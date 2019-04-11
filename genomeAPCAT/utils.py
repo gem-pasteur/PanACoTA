@@ -39,7 +39,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
 
     Messages for levels less than WARNING (only INFO and DEBUG) written to stdout
 
-    Messages for levels equal or hi`gher than WARNING written to stderr
+    Messages for levels equal or higher than WARNING written to stderr
 
     Messages for levels equal or higher than WARNING written in `logfile`.log.err
 
