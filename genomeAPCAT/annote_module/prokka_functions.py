@@ -157,7 +157,6 @@ def run_prokka(arguments):
         shutil.rmtree(prok_dir)
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
-    # logger.debug(cmd)
     prokf = open(prok_logfile, "w")
     ok = None
     try:
