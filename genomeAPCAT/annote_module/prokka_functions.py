@@ -47,7 +47,12 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     -------
     dict
         {genome: boolean} -> with True if prokka ran well, False otherwise.
-    """
+    # """
+    # logging.debug("--------------\n")
+    # logging.debug(genomes)
+    # logging.debug(prok_folder)
+    # logging.debug(threads)
+    # logging.debug("---------------\n")
     main_logger = logging.getLogger("qc_annote.prokka")
     main_logger.info("Annotating all genomes with prokka")
     nbgen = len(genomes)
@@ -80,6 +85,9 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
                   force, genomes[g][3], q)
                  for g in sorted(genomes)]
+    # logging.debug("====================")
+    # logging.debug(arguments)
+    # logging.debug("===================")
     try:
         final = pool.map_async(run_prokka, arguments, chunksize=1)
         pool.close()
@@ -130,6 +138,9 @@ def run_prokka(arguments):
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
     gpath, prok_folder, threads, name, force, nbcont, q = arguments
+    # logging.debug('*****************')
+    # logging.debug(arguments)
+    # logging.debug("*****************")
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -160,7 +171,7 @@ def run_prokka(arguments):
         return ok
     elif os.path.isdir(prok_dir) and force:
         shutil.rmtree(prok_dir)
-        logger.debug("Prokka results folder already exists, but removed because --force option "
+        logger.warning("Prokka results folder already exists, but removed because --force option "
                      "used")
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
