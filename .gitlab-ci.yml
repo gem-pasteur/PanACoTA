@@ -72,7 +72,7 @@ unit-test-ubuntu16.04:
     - mafft --version
     - fastme -h
   script:
-    - py.test test/test_unit/test_annotate
+    - py.test test/test_unit/test_annote
     - more test_mmseq_cluster.log
     - mv .coverage .coverage-unit
   artifacts:
