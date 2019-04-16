@@ -579,7 +579,7 @@ def test_run_prokka_out_exists_force():
     q = logger[0]
     assert q.qsize() == 3
     assert q.get() .message.startswith("Start annotating")
-    assert q.get() .message == ("Out dir already exists, but removed because "
+    assert q.get() .message == ("Prokka results folder already exists, but removed because "
                                 "--force option used")
     assert q.get() .message.startswith("End annotating")
     os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
@@ -646,15 +646,15 @@ def test_run_prokka_out_problem_running():
     name = "test_runprokka_H299-error"
     force = False
     nbcont = 3
+    logf = os.path.join(outdir, "H299 H561.fasta-prokka.log")
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert not pfunc.run_prokka(arguments)
     q = logger[0]
     assert q.qsize() == 2
     assert q.get().message.startswith("Start annotating")
-    assert q.get().message.startswith("Error while trying to run prokka:")
-    # msg = ("Prokka could not run properly. Look at test/data/annotate/H299 H561.fasta-prokka.log
-    #       "for more information.")
-    os.remove(os.path.join(outdir, "H299 H561.fasta-prokka.log"))
+    assert q.get().message == ("Prokka could not run properly. Look at {} for more "
+                               "information.").format(logf)
+    os.remove(logf)
 
 
 

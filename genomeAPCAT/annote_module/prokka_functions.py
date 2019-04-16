@@ -160,7 +160,8 @@ def run_prokka(arguments):
         return ok
     elif os.path.isdir(prok_dir) and force:
         shutil.rmtree(prok_dir)
-        logger.debug("Out dir already exists, but removed because --force option used")
+        logger.debug("Prokka results folder already exists, but removed because --force option "
+                     "used")
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
     prokf = open(prok_logfile, "w")
