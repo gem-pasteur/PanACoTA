@@ -144,17 +144,23 @@ def run_prokka(arguments):
     fnull = open(os.devnull, 'w')
     prok_logfile = os.path.join(prok_folder, os.path.basename(gpath) + "-prokka.log")
     if os.path.isdir(prok_dir) and not force:
-        logger.warning(("Prokka results folder already exists. Prokka did not run again, "
-                        "formatting step used already generated results of Prokka in "
-                        "{}. If you want to re-run prokka, first remove this result folder, or "
-                        "use '-F' or '--force' option if you want to rerun prokka for "
-                        "all genomes.").format(prok_dir))
+        logger.warning(("Prokka results folder already exists.").format(prok_dir))
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
         if ok:
+            logger.log(utils.detail_lvl(), "Prokka did not run again, "
+                                           "formatting step used already generated results of "
+                                           "Prokka in {}. If you want to re-run prokka, first "
+                                           "remove this result folder, or use '-F' or '--force' "
+                                           "option if you want to rerun prokka for all genomes.")
             logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+        else:
+            logger.warning("Problems in the files contained in your already existing output dir "
+                           "({}). Please check it, or remove it to "
+                           "re-annotate.".format(prok_dir))
         return ok
     elif os.path.isdir(prok_dir) and force:
         shutil.rmtree(prok_dir)
+        logger.debug("Out dir already exists, but removed because --force option used")
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
     prokf = open(prok_logfile, "w")

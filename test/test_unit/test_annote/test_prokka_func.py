@@ -11,6 +11,7 @@ import logging
 import genomeAPCAT.annote_module.prokka_functions as pfunc
 import genomeAPCAT.utils as utils
 
+logfile_base = "panacota"
 
 # Define methods and variables shared by several tests
 def my_logger():
@@ -27,6 +28,20 @@ def my_logger():
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     return q, logging.getLogger('process')
+
+
+def teardown_function(function):
+    """
+    Remove logfiles when test is done
+    """
+    print("TEARDOWN\n")
+    if os.path.isfile(logfile_base + ".log"):
+        os.remove(logfile_base + ".log")
+    if os.path.isfile(logfile_base + ".log.err"):
+        os.remove(logfile_base + ".log.err")
+    if os.path.isfile(logfile_base + ".log.details"):
+        os.remove(logfile_base + ".log.details")
+    print("cleaning repo")
 
 
 # Start tests
@@ -454,7 +469,6 @@ def test_run_prokka_out_exists_ok():
     run_prokka returns True, with a warning message indicating that prokka did not rerun.
     """
     logger = my_logger()
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     gpath = "path/to/nogenome/original_name.fna"
     outdir = os.path.join("test", "data", "annotate", "test_files")
@@ -464,19 +478,27 @@ def test_run_prokka_out_exists_ok():
     nbcont = 7
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
+
+    q = logger[0]
+    assert q.qsize() == 4
+    # start annotating :
+    assert q.get().message.startswith("Start annotating")
+    # warning prokka results folder exists:
+    assert q.get().message.startswith("Prokka results folder already exists.")
+    # Results in result folder are ok
+    assert q.get().message.startswith("Prokka did not run again, formatting step used already "
+                                      "generated results of Prokka in ")
+    # End annotation:
+    assert q.get().message.startswith("End annotating")
 
 
 def test_run_prokka_out_exists_error():
     """
-    Test that when the output directory already exists, and some file is missing,
+    Test that when the output directory already exists, and 1 file is missing,
     run_prokka returns False, and writes the warning message saying that prokka did not
     rerun, + the warning message for the missing file(s).
     """
     logger = my_logger()
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     ori_prok_dir = os.path.join("test", "data", "annotate", "test_files",
                                 "original_name.fna-prokkaRes")
@@ -498,16 +520,19 @@ def test_run_prokka_out_exists_error():
     nbcont = 7
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert not pfunc.run_prokka(arguments)
-    msg = "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
     q = logger[0]
-    assert q.qsize() == 3
-    q.get()  # start annotating...
-    q.get()  # warning prokka results folder exists
+    assert q.qsize() == 4
+    # start annotating :
+    assert q.get().message.startswith("Start annotating")
+    # warning prokka results folder exists:
+    assert q.get().message == "Prokka results folder already exists."
+    # error, no tbl file
+    msg = "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
     assert q.get().message == msg
+    # warning, files in outdir are not as expected
+    assert q.get().message.startswith("Problems in the files contained in your already existing "
+                                      "output dir ")
     shutil.rmtree(new_prok_dir)
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_exists_force():
@@ -516,7 +541,6 @@ def test_run_prokka_out_exists_force():
     prokka is rerun and outputs the right files
     """
     logger = my_logger()
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "annotate", "genomes", "H299_H561.fasta")
     outdir = os.path.join("test", "data", "annotate")
@@ -552,10 +576,13 @@ def test_run_prokka_out_exists_force():
         for line_exp, line_out in zip(expf, outf):
             assert line_exp == line_out
     shutil.rmtree(out_prokdir)
+    q = logger[0]
+    assert q.qsize() == 3
+    assert q.get() .message.startswith("Start annotating")
+    assert q.get() .message == ("Out dir already exists, but removed because "
+                                "--force option used")
+    assert q.get() .message.startswith("End annotating")
     os.remove(os.path.join(outdir, "H299_H561.fasta-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_doesnt_exist():
@@ -564,7 +591,6 @@ def test_run_prokka_out_doesnt_exist():
     with all expected outfiles
     """
     logger = my_logger()
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "annotate", "genomes", "H299_H561.fasta")
     prok_dir = os.path.join("test", "data", "annotate")
@@ -575,11 +601,36 @@ def test_run_prokka_out_doesnt_exist():
     nbcont = 3
     arguments = (gpath, prok_dir, cores_prokka, name, force, nbcont, logger[0])
     assert pfunc.run_prokka(arguments)
+    # Check content of tbl, ffn and faa files
+    exp_dir = os.path.join("test", "data", "annotate", "exp_files",
+                           "H299_H561.fasta-short-contig.fna-prokkaRes",
+                           "test_runprokka_H299")
+    out_tbl = os.path.join(out_dir, name + ".tbl")
+    out_faa = os.path.join(out_dir, name + ".faa")
+    out_ffn = os.path.join(out_dir, name + ".ffn")
+    out_gff = os.path.join(out_dir, name + ".gff")
+    assert os.path.isfile(out_tbl)
+    with open(exp_dir + ".tbl", "r") as expf, open(out_tbl, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    assert os.path.isfile(out_faa)
+    with open(exp_dir + ".faa", "r") as expf, open(out_faa, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    assert os.path.isfile(out_ffn)
+    with open(exp_dir + ".ffn", "r") as expf, open(out_ffn, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    assert os.path.isfile(out_gff)
+    with open(exp_dir + ".gff", "r") as expf, open(out_gff, "r") as outf:
+        for line_exp, line_out in zip(expf, outf):
+            assert line_exp == line_out
+    q = logger[0]
+    assert q.qsize() == 2
+    assert q.get().message.startswith("Start annotating")
+    assert q.get().message.startswith("End annotating")
     shutil.rmtree(out_dir)
     os.remove(os.path.join(prok_dir, "H299_H561.fasta-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
 
 
 def test_run_prokka_out_problem_running():
@@ -588,26 +639,23 @@ def test_run_prokka_out_problem_running():
     and the error message indicating to read in the log why it couldn't run
     """
     logger = my_logger()
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     gpath = os.path.join("test", "data", "annotate", "genomes", "H299 H561.fasta")
     outdir = os.path.join("test", "data", "annotate")
     cores_prokka = 5
-    name = "test_runprokka_H299"
+    name = "test_runprokka_H299-error"
     force = False
     nbcont = 3
     arguments = (gpath, outdir, cores_prokka, name, force, nbcont, logger[0])
     assert not pfunc.run_prokka(arguments)
     q = logger[0]
     assert q.qsize() == 2
-    msg = ("Prokka could not run properly. Look at test/data/annotate/H299 H561.fasta-prokka.log "
-           "for more information.")
-    q.get()
-    assert q.get().message == msg
+    assert q.get().message.startswith("Start annotating")
+    assert q.get().message.startswith("Error while trying to run prokka:")
+    # msg = ("Prokka could not run properly. Look at test/data/annotate/H299 H561.fasta-prokka.log
+    #       "for more information.")
     os.remove(os.path.join(outdir, "H299 H561.fasta-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
+
 
 
 def test_run_all_1by1():
@@ -615,7 +663,6 @@ def test_run_all_1by1():
     Check that when running with 3 threads (not parallel), prokka runs as expected,
     and returns True for each genome
     """
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
@@ -635,9 +682,6 @@ def test_run_all_1by1():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_more_threads():
@@ -645,7 +689,6 @@ def test_run_all_parallel_more_threads():
     Check that there is no problem when running with more threads than genomes (each genome
     uses nb_threads/nb_genome threads)
     """
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     genome1 = "H299_H561.fasta"
@@ -665,9 +708,6 @@ def test_run_all_parallel_more_threads():
     shutil.rmtree(os.path.join(prok_folder, genome2 + "-prokkaRes"))
     os.remove(os.path.join(res_dir, genome1 + "-prokka.log"))
     os.remove(os.path.join(res_dir, genome2 + "-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
 
 
 def test_run_all_parallel_less_threads():
@@ -677,7 +717,6 @@ def test_run_all_parallel_less_threads():
     Genomes H299 and A_H738 should run well, but genomes genome* have problems (no CDS found),
     so check_prokka should return false.
     """
-    logfile_base = "test_prokka"
     utils.init_logger(logfile_base, 0, '')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
@@ -701,6 +740,4 @@ def test_run_all_parallel_less_threads():
     for name in gnames:
         shutil.rmtree(os.path.join(prok_folder, name + "-prokkaRes"))
         os.remove(os.path.join(res_dir, name + "-prokka.log"))
-    os.remove(logfile_base + ".log")
-    os.remove(logfile_base + ".log.details")
-    os.remove(logfile_base + ".log.err")
+
