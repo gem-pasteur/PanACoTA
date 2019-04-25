@@ -20,7 +20,7 @@ import multiprocessing
 import progressbar
 import threading
 
-import genomeAPCAT.utils as utils
+import PanACoTA.utils as utils
 
 
 def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):

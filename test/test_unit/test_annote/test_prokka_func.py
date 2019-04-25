@@ -8,8 +8,8 @@ Unit tests for utils.py
 import os
 import shutil
 import logging
-import genomeAPCAT.annote_module.prokka_functions as pfunc
-import genomeAPCAT.utils as utils
+import PanACoTA.annote_module.prokka_functions as pfunc
+import PanACoTA.utils as utils
 
 logfile_base = "panacota"
 
