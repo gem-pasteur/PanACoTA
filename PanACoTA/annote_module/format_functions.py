@@ -29,7 +29,7 @@ import progressbar
 import glob
 import multiprocessing
 import threading
-import genomeAPCAT.utils as utils
+import PanACoTA.utils as utils
 
 
 def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False):

@@ -9,8 +9,8 @@ import os
 import logging
 import shutil
 from io import StringIO
-import genomeAPCAT.annote_module.format_functions as ffunc
-import genomeAPCAT.utils as utils
+import PanACoTA.annote_module.format_functions as ffunc
+import PanACoTA.utils as utils
 
 
 # Define variables and functions used by several tests
