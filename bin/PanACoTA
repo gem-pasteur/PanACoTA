@@ -4,6 +4,7 @@
 import sys
 from textwrap import dedent
 
+<<<<<<< HEAD
 from PanACoTA import __version__ as version
 
 from PanACoTA.subcommands import annote
@@ -11,7 +12,6 @@ from PanACoTA.subcommands import pangenome
 from PanACoTA.subcommands import corepers
 from PanACoTA.subcommands import align
 from PanACoTA.subcommands import tree
-
 
 def main():
     """
@@ -52,7 +52,11 @@ def parse_arguments(argv):
 
 
     parser.add_argument('-V', '--version', action='version',
+<<<<<<< HEAD
                         version='PanACoTA - v. ' + str(version),
+=======
+                        version='genomeAPCAT - v. ' + str(version),
+>>>>>>> change-to-panacota
                         help="Print the version number and exit")
 
     # Create subparsers, for all submodules
