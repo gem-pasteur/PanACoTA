@@ -40,17 +40,17 @@ def test_install_panacota():
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("prokka")
     # Install panacota
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     # Check that panacota is installed (pip3 module exists)
-    assert utils.is_package_installed("genomeAPCAT")
+    assert utils.is_package_installed("PanACoTA")
     # Check that it is installed in "final mode"
-    cmd = "pip3 show genomeAPCAT"
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -59,12 +59,12 @@ def test_install_panacota():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*dist-info'))
     os.remove(stdout)
     # Check not installed in user mode
     cmd = "pip list --user"
     list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
-    assert "genomeAPCAT" not in list_user_packages
+    assert "PanACoTA" not in list_user_packages
     # Check output logfile content. Check that all content is present, in any order.
     logfile = "install.log"
     content = ["Installing PanACoTA...", "DONE"]
@@ -87,14 +87,14 @@ def test_upgrade(install_panacota):
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     # Upgrade PanACoTA
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -111,13 +111,13 @@ def test_upgrade_notinstalled():
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -134,11 +134,11 @@ def test_uninstall(install_panacota):
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -152,7 +152,7 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     cmd = "python3 make develop"
@@ -160,9 +160,9 @@ def test_develop():
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     # Check installed in developper mode (egg-info file is present)
-    cmd = "pip3 show genomeAPCAT"
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -173,12 +173,12 @@ def test_develop():
         for line in lines:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
     os.remove(stdout)
     # Check not installed in user mode
     cmd = "pip list --user"
     list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
-    assert "genomeAPCAT" not in list_user_packages
+    assert "PanACoTA" not in list_user_packages
     # check logfile content
     logfile = "install.log"
     content = ["Installing PanACoTA...",
@@ -209,11 +209,11 @@ def test_install_user():
     error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     # Check logfile content
     logfile = "install.log"
     content = ["Installing PanACoTA in user mode...", "DONE"]
