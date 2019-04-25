@@ -30,7 +30,7 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("prodigal")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("mafft")
     assert not utils.check_installed("mmseqs")
     assert not utils.check_installed("quicktree")
@@ -45,8 +45,8 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("quicktree")
     assert not utils.check_installed("fastme")
     assert not utils.check_installed("FastTreeMP")
-    assert utils.check_installed("genomeAPCAT")
-    cmd = "pip3 show genomeAPCAT"
+    assert utils.check_installed("PanACoTA")
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -101,16 +101,16 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when barrnap is already installed
     """
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    cmd = "pip3 show genomeAPCAT"
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -120,7 +120,7 @@ def test_develop():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert os.path.isdir(os.path.join(loc, "genomeAPCAT.egg-info"))
+                assert os.path.isdir(os.path.join(loc, "PanACoTA.egg-info"))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for PanACoTA",
