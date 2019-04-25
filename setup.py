@@ -5,7 +5,7 @@
 Setup script
 """
 
-import genomeAPCAT
+import PanACoTA
 try:
     from setuptools import setup
     from setuptools.command.test import test as TestCommand
@@ -38,16 +38,16 @@ def parse_requirements(requirements):
                 and not l.startswith('#')]
 
 
-packages = ['genomeAPCAT', 'genomeAPCAT.annote_module',
-            'genomeAPCAT.pangenome_module', 'genomeAPCAT.corepers_module',
-            'genomeAPCAT.align_module', 'genomeAPCAT.tree_module', 'genomeAPCAT.subcommands']
+packages = ['PanACoTA', 'PanACoTA.annote_module',
+            'PanACoTA.pangenome_module', 'PanACoTA.corepers_module',
+            'PanACoTA.align_module', 'PanACoTA.tree_module', 'PanACoTA.subcommands']
 requires = parse_requirements("requirements.txt")
-scripts = ['bin/genomeAPCAT']
+scripts = ['bin/PanACoTA']
 
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: Science/Research",
-    "License :: ???",
+    "License :: AGPL v3",
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
@@ -57,9 +57,9 @@ with open('README.md') as f:
     long_description = f.read()
 
 setup(
-    name='genomeAPCAT',
+    name='PanACoTA',
     packages=packages,
-    version=genomeAPCAT.__version__,
+    version=PanACoTA.__version__,
     description="Large scale comparative genomics tools: annotate genomes, do pangenome, "
                 "core/persistent genome, align core/persistent families, infer phylogenetic tree.",
     long_description=long_description,

@@ -162,6 +162,7 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
     tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
     os.makedirs(tmpdir, exist_ok=True)
     bar = None
+    logger.debug(mmseqclust)
     if os.path.isfile(mmseqclust):
         logger.warning(("mmseqs clustering {} already exists. The program will now convert "
                         "it to a pangenome file.").format(mmseqclust))
@@ -183,8 +184,9 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
             bar.finish()
         pool.join()
     # Convert output to tsv file (one line per comparison done)
-    families, outfile = mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)
-    return families, outfile
+    #  # Convert output to tsv file (one line per comparison done)
+    # -> returns (families, outfile)
+    return mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)
 
 
 def run_mmseqs_clust(args):
@@ -200,15 +202,15 @@ def run_mmseqs_clust(args):
             * mmseqclust: path to base filename for output of mmseq clustering
             * tmpdir : path to folder which will contain mmseq temporary files
             * logmmseq : path to file where logs must be written
-            * min_id : min percentage of identity to be considered in the same family\
-             (between 0 and 1)
+            * min_id : min percentage of identity to be considered in the same family
+            *         (between 0 and 1)
             * threads : max number of threads to use
             * clust_mode : [0, 1, 2], 0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
 
     """
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
-           "{} --kmer-per-seq 80 --max-seqs 300").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
+           "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
     msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
     with open(logmmseq, "a") as logm:
         utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)

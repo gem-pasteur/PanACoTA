@@ -46,11 +46,11 @@ def uninstall():
     Uninstall PanACoTA python package
     """
     logger.info("Uninstalling PanACoTA...")
-    cmd = "pip3 uninstall -y genomeAPCAT"
+    cmd = "pip3 uninstall -y PanACoTA"
     error = ("A problem occurred while trying to uninstall PanACoTA. If you have "
              "permission errors, try to add 'sudo' before your command line.")
     run_cmd(cmd, error)
-    link_dest = os.path.join(os.sep + "usr", "local", "bin", "genomeAPCAT")
+    link_dest = os.path.join(os.sep + "usr", "local", "bin", "PanACoTA")
     if os.path.exists(link_dest):
         os.remove(link_dest)
 
@@ -99,7 +99,7 @@ def install_all(install_dir, target, dev=False, user=False):
              "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
     if user:
-        gapcat_bin = os.path.join(os.getcwd(), "bin", "genomeAPCAT")
+        gapcat_bin = os.path.join(os.getcwd(), "bin", "PanACoTA")
         os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
     if to_install_user:
         msg = ("Some dependencies needed for some subcommands of PanACoTA are not installed. "
