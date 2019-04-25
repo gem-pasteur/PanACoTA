@@ -1,3 +1,3 @@
-"""genomeAPCAT"""
+"""PanACoTA"""
 
-__version__ = 20180214
+__version__ = 20190425
