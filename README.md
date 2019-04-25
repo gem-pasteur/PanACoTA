@@ -12,6 +12,7 @@ This README file provides some essential information to install/use PanACoTA. Bu
 ---
 
 PanACoTA is a software providing tools for large scale comparative genomics:
+
 - annotation of genomes
 - pan-genome
 - persistent genome
