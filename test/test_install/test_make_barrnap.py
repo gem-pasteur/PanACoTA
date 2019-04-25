@@ -43,8 +43,8 @@ def test_install():
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("prokka")
     assert utils.check_installed("barrnap")
-    assert utils.check_installed("genomeAPCAT")
-    cmd = "pip3 show genomeAPCAT"
+    assert utils.check_installed("PanACoTA")
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -53,7 +53,7 @@ def test_install():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing PanACoTA",
@@ -89,13 +89,13 @@ def test_upgrade(install_panacota):
     # """
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -110,13 +110,13 @@ def test_uninstall(install_panacota):
     """
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -128,16 +128,16 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when barrnap is already installed
     """
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    cmd = "pip3 show genomeAPCAT"
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -146,7 +146,7 @@ def test_develop():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for PanACoTA",
@@ -184,13 +184,13 @@ def test_install_user():
     """
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     cmd = "python3 make --user"
-    error = "Error trying to install genomeAPCAT from base"
+    error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     # Check logfile content
     logfile = "install.log"
     content = ["Installing PanACoTA in user mode...", "DONE"]
