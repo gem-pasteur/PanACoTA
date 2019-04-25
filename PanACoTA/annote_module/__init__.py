@@ -1,1 +1,1 @@
-"""qc_annote_module module of genomeAPCAT"""
+"""qc_annote_module module of PanACoTA"""

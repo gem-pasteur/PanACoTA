@@ -1,1 +1,1 @@
-"""pangenome module of genomeAPCAT"""
+"""pangenome module of PanACoTA"""

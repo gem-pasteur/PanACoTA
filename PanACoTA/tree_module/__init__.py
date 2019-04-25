@@ -1,3 +1,3 @@
 """
-genomeAPCAT tree_module
+PanACoTA tree_module
 """

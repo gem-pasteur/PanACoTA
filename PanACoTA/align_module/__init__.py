@@ -1,3 +1,3 @@
 """
-genomeAPCAT align submodule
+PanACoTA align submodule
 """
