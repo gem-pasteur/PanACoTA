@@ -1,1 +1,1 @@
-""" genomeAPCAT unit-tests"""
+""" PanACoTA unit-tests"""

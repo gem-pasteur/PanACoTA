@@ -1,1 +1,1 @@
-""" genomeAPCAT module unit-tests"""
+""" PanACoTA annotate module unit-tests"""

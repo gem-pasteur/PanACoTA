@@ -1,1 +1,1 @@
-""" genomeAPCAT tree_module unit-tests"""
+""" PanACoTA tree_module unit-tests"""
