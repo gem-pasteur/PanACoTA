@@ -39,12 +39,12 @@ def test_build_prokka_only():
     error = "Error trying to install PanACoTA from base"
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
-    cmd = "pip3 show genomeAPCAT"
+    assert utils.check_installed("PanACoTA")
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -53,7 +53,7 @@ def test_build_prokka_only():
         for line in stdof:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*dist-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*dist-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing PanACoTA...",
@@ -86,13 +86,13 @@ def test_upgrade(install_panacota):
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -107,13 +107,13 @@ def test_uninstall_withdep(install_panacota):
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -122,11 +122,12 @@ def test_uninstall_withdep(install_panacota):
         assert "DONE" in lines[1]
     print("test_uninstall done")
 
+
 def test_develop():
     """
     Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     cmd = "python3 make develop"
@@ -134,8 +135,8 @@ def test_develop():
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
-    cmd = "pip3 show genomeAPCAT"
+    assert utils.check_installed("PanACoTA")
+    cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
@@ -146,7 +147,7 @@ def test_develop():
         for line in lines:
             if line.startswith("Location"):
                 loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'genomeAPCAT*egg-info'))
+                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing PanACoTA...",
@@ -184,11 +185,11 @@ def test_install_user():
     error = "Error trying to install PanACoTA in user mode"
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert not utils.check_installed("genomeAPCAT")
+    assert not utils.check_installed("PanACoTA")
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("genomeAPCAT")
+    assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     content = ["Installing PanACoTA in user mode...",
                "Some dependencies needed for some subcommands of PanACoTA are "
