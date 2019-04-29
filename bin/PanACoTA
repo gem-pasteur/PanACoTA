@@ -4,7 +4,6 @@
 import sys
 from textwrap import dedent
 
-<<<<<<< HEAD
 from PanACoTA import __version__ as version
 
 from PanACoTA.subcommands import annote
@@ -27,13 +26,7 @@ def parse_arguments(argv):
     """
     import argparse
 
-    # Create main parser
-
-    parser = argparse.ArgumentParser(
-                                epilog="For more details, visit the MacSyFinder website and see "
-                                       "the MacSyFinder documentation.",
-                                 formatter_class=argparse.RawDescriptionHelpFormatter,
-                                 description=dedent('''
+    header = '''
 
 
 
@@ -48,15 +41,18 @@ def parse_arguments(argv):
        Large scale comparative genomics tools
 
      -------------------------------------------
-     ''') )
+     '''
+
+    footer = "For more details, see PanACoTA documentation."
+
+    # Create main parser
+    parser = argparse.ArgumentParser(epilog=footer,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     description=dedent(header))
 
 
     parser.add_argument('-V', '--version', action='version',
-<<<<<<< HEAD
                         version='PanACoTA - v. ' + str(version),
-=======
-                        version='genomeAPCAT - v. ' + str(version),
->>>>>>> change-to-panacota
                         help="Print the version number and exit")
 
     # Create subparsers, for all submodules
@@ -67,6 +63,10 @@ def parse_arguments(argv):
 
     # QC and annotation part
     parser_annote = subparsers.add_parser('annotate',
+                                          formatter_class=argparse.RawDescriptionHelpFormatter,
+                                          description=(dedent(header) +
+                                          "\n=> Quality control and annotation of genomes"),
+                                          epilog=footer,
                                           help="Quality control and annotation of genomes",
                                           add_help=False)
     annote.build_parser(parser_annote)
@@ -74,13 +74,22 @@ def parse_arguments(argv):
     checks["annotate"] = annote.check_args
 
     # Pan genome part
-    parser_pan = subparsers.add_parser('pangenome', help="Generate a pan-genome of your dataset",
+    parser_pan = subparsers.add_parser('pangenome',
+                                       formatter_class=argparse.RawDescriptionHelpFormatter,
+                                       description=(dedent(header) +
+                                       "\n=> Generate a pan-genome of your dataset"),
+                                       epilog=footer,help="Generate a pan-genome of your dataset",
                                        add_help=False)
     pangenome.build_parser(parser_pan)
     actions["pangenome"] = pangenome.main_from_parse
 
     # Persistent genome part
     parser_corepers = subparsers.add_parser('corepers',
+                                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                                            description=(dedent(header) +
+                                            "\n=> Compute a Core or Persistent genome of your "
+                                            "dataset"),
+                                            epilog=footer,
                                             help="Compute a Core or Persistent genome of your "
                                                  "dataset",
                                             add_help=False)
@@ -90,15 +99,24 @@ def parse_arguments(argv):
 
     # Alignment part
     parser_align = subparsers.add_parser('align',
-                                         help="Align Core/Persistent familiest",
+                                         formatter_class=argparse.RawDescriptionHelpFormatter,
+                                         description=(dedent(header) +
+                                         "\n=> Align Core/Persistent families"),
+                                         epilog=footer,
+                                         help="Align Core/Persistent families",
                                          add_help=False)
     align.build_parser(parser_align)
     actions["align"] = align.main_from_parse
 
     # tree part
     parser_tree = subparsers.add_parser('tree',
-                                        help=("Infer phylogenetic tree based on "
-                                              "core/persistent genome"),
+                                        formatter_class=argparse.RawDescriptionHelpFormatter,
+                                        description=(dedent(header) +
+                                        "\n=> Infer phylogenetic tree based on "
+                                        "core/persistent genome"),
+                                        epilog=footer,
+                                        help="Infer phylogenetic tree based on "
+                                             "core/persistent genome",
                                         add_help=False)
     tree.build_parser(parser_tree)
     actions["tree"] = tree.main_from_parse
