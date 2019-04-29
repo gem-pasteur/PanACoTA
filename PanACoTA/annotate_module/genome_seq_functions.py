@@ -20,7 +20,7 @@ import progressbar
 
 from PanACoTA import utils
 
-logger = logging.getLogger("qc_annote.gseq")
+logger = logging.getLogger("qc_annotate.gseq")
 
 
 def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, quiet=False):

@@ -65,7 +65,7 @@ def format_genomes(genomes, results, res_path, prok_path, threads=1, quiet=False
         * skipped : list of genomes skipped because they had a problem in prokka step
         * skipped_format : list of genomes skipped because they had a problem in format step
     """
-    main_logger = logging.getLogger("qc_annote.ffunc")
+    main_logger = logging.getLogger("qc_annotate.ffunc")
     main_logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
     prot_dir = os.path.join(res_path, "Proteins")
