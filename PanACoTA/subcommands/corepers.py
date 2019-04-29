@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-corepers is a subcommand of genomeAPCAT
+corepers is a subcommand of PanACoTA
 
 Generate a core genome (families containing 1 member in all genomes of the dataset)
 or a persistent genome (families with a given % of genomes having exactly 1 member).
@@ -64,13 +64,13 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     """
     # import needed packages
     import logging
-    from genomeAPCAT import utils
-    from genomeAPCAT import utils_pangenome as utilsp
-    import genomeAPCAT.corepers_module.persistent_functions as pers
+    from PanACoTA import utils
+    from PanACoTA import utils_pangenome as utilsp
+    import PanACoTA.corepers_module.persistent_functions as pers
 
     # name logfile, add timestamp if already existing
     path_pan, base_pan = os.path.split(pangenome)
-    logfile_base = os.path.join(path_pan, "genomeAPCAT-corepers")
+    logfile_base = os.path.join(path_pan, "PanACoTA-corepers")
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()

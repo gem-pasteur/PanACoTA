@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-pangenome is a subcommand of genomeAPCAT
+pangenome is a subcommand of PanACoTA
 
 
 @author gem
@@ -72,21 +72,22 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     """
     # import needed packages
     import logging
-    from genomeAPCAT import utils
-    from genomeAPCAT.pangenome_module import protein_seq_functions as protf
-    from genomeAPCAT.pangenome_module import mmseqs_functions as mmf
-    from genomeAPCAT.pangenome_module import post_treatment as pt
+    from PanACoTA import utils
+    from PanACoTA.pangenome_module import protein_seq_functions as protf
+    from PanACoTA.pangenome_module import mmseqs_functions as mmf
+    from PanACoTA.pangenome_module import post_treatment as pt
 
     # test if mmseqs is installed and in the path
     if not utils.check_installed("mmseqs"):  # pragma: no cover
-        print("mmseqs is not installed. 'genomeAPCAT pangenome' cannot run.")
+        print("mmseqs is not installed. 'PanACoTA pangenome' cannot run.")
         sys.exit(1)
 
     os.makedirs(outdir, exist_ok=True)
     # name logfile, add timestamp if already existing
-    logfile_base = os.path.join(outdir, "genomeAPCAT-pangenome_" + name)
+    logfile_base = os.path.join(outdir, "PanACoTA-pangenome_" + name)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    logger = logging.getLogger()
 
     # Build bank with all proteins to include in the pangenome
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
@@ -144,7 +145,7 @@ def build_parser(parser):
     required.add_argument("-l", dest="lstinfo_file", required=True,
                           help=("File containing the list of all genomes to include in "
                                 "the pan-genome, 1 genome per line: it can be the "
-                                "LSTINFO-<list_file>.lst file of 'genomeAPCAT annotate' module."
+                                "LSTINFO-<list_file>.lst file of 'PanACoTA annotate' module."
                                 "Here, only the first column (genome name without extension) "
                                 "will be used. All proteins of all these genomes will be "
                                 "concatenated in a file called <dataset_name>.All.prt."))
@@ -156,7 +157,7 @@ def build_parser(parser):
     required.add_argument("-d", dest="dbpath", required=True,
                           help=("Path to the folder containing all protein files corresponding "
                                 "to the genomes of the dataset (output directory 'Proteins' "
-                                "of 'genomeAPCAT annotate' module)."))
+                                "of 'PanACoTA annotate' module)."))
     required.add_argument("-i", dest="min_id", required=True, type=perc_id,
                           help=("Minimum sequence identity to be considered in the same "
                                 "cluster (number between 0 and 1)"))

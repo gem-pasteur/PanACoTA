@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-tree is a subcommand of genomeAPCAT
+tree is a subcommand of PanACoTA
 
 @author gem
 June 2017
@@ -55,29 +55,29 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     # import needed packages
     import logging
     import os
-    from genomeAPCAT import utils
+    from PanACoTA import utils
     tree = None
     if soft == "fasttree":
         # test if fasttree is installed and in the path
         if not utils.check_installed("FastTreeMP"):
-            print("FastTreeMP is not installed. 'genomeAPCAT tree' cannot run.")
+            print("FastTreeMP is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
-        from genomeAPCAT.tree_module import fasttree_func as tree
+        from PanACoTA.tree_module import fasttree_func as tree
     elif soft == "fastme":
         # test if fastME is installed and in the path
         if not utils.check_installed("fastme"):
-            print("fastme is not installed. 'genomeAPCAT tree' cannot run.")
+            print("fastme is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
-        from genomeAPCAT.tree_module import fastme_func as tree
+        from PanACoTA.tree_module import fastme_func as tree
     elif soft == "quicktree":
         # test if fastME is installed and in the path
         if not utils.check_installed("quicktree"):
-            print("quicktree is not installed. 'genomeAPCAT tree' cannot run.")
+            print("quicktree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
-        from genomeAPCAT.tree_module import quicktree_func as tree
+        from PanACoTA.tree_module import quicktree_func as tree
     outdir = os.path.dirname(align)
     # name logfile, add timestamp if already existing
-    logfile_base = os.path.join(outdir, "genomeAPCAT-tree-" + soft)
+    logfile_base = os.path.join(outdir, "PanACoTA-tree-" + soft)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()

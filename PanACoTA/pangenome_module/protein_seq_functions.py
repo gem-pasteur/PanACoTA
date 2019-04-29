@@ -7,7 +7,7 @@ Functions to build a bank of all proteins to include in the pangenome
 @author gem
 April 2017
 """
-from genomeAPCAT import utils
+from PanACoTA import utils
 import logging
 import os
 

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-annotate is a subcommand of genomeAPCAT
+annotate is a subcommand of PanACoTA
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
 
@@ -189,15 +189,15 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # import needed packages
     import shutil
     import logging
-    from genomeAPCAT.annote_module import genome_seq_functions as gfunc
-    from genomeAPCAT.annote_module import prokka_functions as pfunc
-    from genomeAPCAT.annote_module import format_functions as ffunc
-    from genomeAPCAT import utils
+    from PanACoTA.annote_module import genome_seq_functions as gfunc
+    from PanACoTA.annote_module import prokka_functions as pfunc
+    from PanACoTA.annote_module import format_functions as ffunc
+    from PanACoTA import utils
 
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
-            print("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
+            print("Prokka is not installed. 'PanACoTA annotate' cannot run.")
             sys.exit(1)
 
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
@@ -225,7 +225,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 
     # set level of logger (here debug to show everything during development)
     level = logging.DEBUG
-    logfile_base = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base)
+    logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
     utils.init_logger(logfile_base, level, name='', verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
 
@@ -280,7 +280,7 @@ def build_parser(parser):
 
     """
     import argparse
-    from genomeAPCAT import utils
+    from PanACoTA import utils
 
     def gen_name(param):
         if not utils.check_format(param):
