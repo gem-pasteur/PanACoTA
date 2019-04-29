@@ -12,7 +12,7 @@ import os
 import time
 import multiprocessing
 import progressbar
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("pangnome.mmseqs")
 
@@ -350,7 +350,7 @@ def clusters_to_file(clust, fileout):
 
 def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     """
-    Create ffindex of protein bank if not already done. If done, just write a message
+    Create ffindex of protein bank (prt_path) if not already done. If done, just write a message
     to tell the user that the current existing file will be used.
 
     Parameters
@@ -362,13 +362,30 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     logmmseq : str
          path to file where logs must be written
     """
-    if not os.path.isfile(mmseqdb):
+    outext = ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]
+    files_existing = []
+    if os.path.isfile(mmseqdb):
+        for file in [mmseqdb + ext for ext in outext]:
+            if not os.path.isfile(file):
+                break
+            files_existing.append(file)
+        if len(files_existing) != len(outext):
+            logger.warning(("mmseq database {} already exists, but at least 1 associated "
+                            "file (.dbtype, .index etc). is missing. The program will "
+                            "remove existing files and recreate the database.").format(mmseqdb))
+            for file in files_existing:
+                os.remove(file)
+                logger.details("Removing {}".format(file))
+        else:
+            logger.warning(("mmseq database {} already exists. The program will "
+                            "use it.").format(mmseqdb))
+            return
+    if len(files_existing) != len(outext):
         logger.info("Creating database")
+        logger.info("exiting files: {}".format(len(files_existing)))
+        logger.info("Expected extentions: {}".format(len(outext)))
         cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
         msg = ("Problem while trying to convert database {} to mmseqs "
                "database format.").format(prt_path)
-        with open(logmmseq, "w") as logf:
-            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-    else:
-        logger.warning(("mmseq database {} already exists. The program will "
-                        "use it.").format(mmseqdb))
+        # with open(logmmseq, "w") as logf:
+        #     utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)

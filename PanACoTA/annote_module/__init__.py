@@ -1,1 +1,1 @@
-"""qc_annote_module module of PanACoTA"""
+"""qc_annotate_module module of PanACoTA"""
