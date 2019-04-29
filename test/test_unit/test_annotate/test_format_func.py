@@ -9,7 +9,7 @@ import os
 import logging
 import shutil
 from io import StringIO
-import PanACoTA.annote_module.format_functions as ffunc
+import PanACoTA.annotate_module.format_functions as ffunc
 import PanACoTA.utils as utils
 
 

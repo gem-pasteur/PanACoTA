@@ -8,7 +8,7 @@ Unit tests for utils.py
 import os
 import shutil
 import logging
-import PanACoTA.annote_module.prokka_functions as pfunc
+import PanACoTA.annotate_module.prokka_functions as pfunc
 import PanACoTA.utils as utils
 
 logfile_base = "panacota"
