@@ -69,7 +69,6 @@ unit-test-ubuntu:
     - ./make
   script:
     - py.test test/test_unit/test_annotate
-    - more test_mmseq_cluster.log
     - mv .coverage .coverage-unit
   artifacts:
     paths:
