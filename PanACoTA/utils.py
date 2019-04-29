@@ -33,7 +33,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
-    level hierarchy: ``CRITICAL > ERROR > WARNING > INFO > DEBUG``
+    level hierarchy: ``CRITICAL > ERROR > WARNING > INFO > DETAILS > DEBUG``
 
     Messages from all levels are written in 'logfile'.log
 
