@@ -6,7 +6,7 @@ from textwrap import dedent
 
 from PanACoTA import __version__ as version
 
-from PanACoTA.subcommands import annote
+from PanACoTA.subcommands import annotate
 from PanACoTA.subcommands import pangenome
 from PanACoTA.subcommands import corepers
 from PanACoTA.subcommands import align
@@ -62,16 +62,16 @@ def parse_arguments(argv):
     checks = {}  # to add the function to call to check the subparser arguments
 
     # QC and annotation part
-    parser_annote = subparsers.add_parser('annotate',
+    parser_annotate = subparsers.add_parser('annotate',
                                           formatter_class=argparse.RawDescriptionHelpFormatter,
                                           description=(dedent(header) +
                                           "\n=> Quality control and annotation of genomes"),
                                           epilog=footer,
                                           help="Quality control and annotation of genomes",
                                           add_help=False)
-    annote.build_parser(parser_annote)
-    actions["annotate"] = annote.main_from_parse
-    checks["annotate"] = annote.check_args
+    annotate.build_parser(parser_annotate)
+    actions["annotate"] = annotate.main_from_parse
+    checks["annotate"] = annotate.check_args
 
     # Pan genome part
     parser_pan = subparsers.add_parser('pangenome',

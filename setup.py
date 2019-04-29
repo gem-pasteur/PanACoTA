@@ -38,7 +38,7 @@ def parse_requirements(requirements):
                 and not l.startswith('#')]
 
 
-packages = ['PanACoTA', 'PanACoTA.annote_module',
+packages = ['PanACoTA', 'PanACoTA.annotate_module',
             'PanACoTA.pangenome_module', 'PanACoTA.corepers_module',
             'PanACoTA.align_module', 'PanACoTA.tree_module', 'PanACoTA.subcommands']
 requires = parse_requirements("requirements.txt")

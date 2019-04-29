@@ -6,12 +6,12 @@ annotate is a subcommand of PanACoTA
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
 
-- optional: find stretches of at least 'n' N (default 5), and cut into a new contig at this stretch
+- optional: find stretches of at least 'n' N (default n=5), and cut into a new contig at this stretch
 - for each genome, calc L90 and number of contigs (after cut at N stretches if used)
 - keep only genomes with:
 
-    - L90 <= x (default = 100)
-    - #contig <= y (default = 999)
+    - L90 <= x (default x = 100)
+    - #contig <= y (default y = 999)
 - rename those genomes and their contigs, with strain name increasing with quality (L90 and
   #contig)
 - annotate kept genomes with prokka
@@ -67,9 +67,9 @@ Output:
 - In your given ``tmppath`` folder, folders with prokka results will be created for each input
   genome (1 folder per genome, called ``<genome_name>-prokkaRes``). If errors are generated during
   prokka step, you can look at the log file to see what was wrong (``<genome_name>-prokka.log``).
-- In your given ``respath``, a file called ``annote-genomes-<list_file>.log`` will be generated.
+- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log`` will be generated.
   You can find there all logs.
-- In your given ``respath``, a file called ``annote-genomes-<list_file>.log.err`` will be generated,
+- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log.err`` will be generated,
   containing information on errors and warnings that occurred: problems during annotation (hence
   no formatting step ran), and problems during formatting step. If this file is empty, then
   annotation and formatting steps finished without any problem for all genomes.
@@ -169,7 +169,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     verbose : int
         verbosity:
 
-        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
+        - defaut 0 : stdout contains INFO, stderr contains ERROR.
         - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
         - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
     quiet : bool
@@ -189,9 +189,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # import needed packages
     import shutil
     import logging
-    from PanACoTA.annote_module import genome_seq_functions as gfunc
-    from PanACoTA.annote_module import prokka_functions as pfunc
-    from PanACoTA.annote_module import format_functions as ffunc
+    from PanACoTA.annotate_module import genome_seq_functions as gfunc
+    from PanACoTA.annotate_module import prokka_functions as pfunc
+    from PanACoTA.annotate_module import format_functions as ffunc
     from PanACoTA import utils
 
     if not qc_only:

@@ -387,5 +387,5 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
         cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
         msg = ("Problem while trying to convert database {} to mmseqs "
                "database format.").format(prt_path)
-        # with open(logmmseq, "w") as logf:
-        #     utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
+        with open(logmmseq, "w") as logf:
+            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
