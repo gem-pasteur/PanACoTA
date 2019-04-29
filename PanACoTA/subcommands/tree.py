@@ -45,11 +45,11 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         Maximum number of threads to use
     verbose : int
         verbosity:
-
-        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
-        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+        - defaut 0 : stdout contains INFO, stderr contains ERROR.
+        - 1: stdout contains INFO, stderr contains WARNING and ERROR
         - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
-    quiet : bool
+        - >=15: Add DEBUG in stdout
+    quiet: bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
     # import needed packages
@@ -78,7 +78,17 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     outdir = os.path.dirname(align)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-tree-" + soft)
-    level = logging.DEBUG
+    # level is the minimum level that will be considered.
+    # for verbose = 0 or 1, ignore details and debug, start from info
+    if verbose <= 1:
+        level = logging.INFO
+    # for verbose = 2, ignore only debug
+    if verbose >= 2 and verbose < 15:
+        level = 15 # int corresponding to detail level
+    # for verbose >= 15, write everything
+    if verbose >= 15:
+        level = logging.DEBUG
+
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
