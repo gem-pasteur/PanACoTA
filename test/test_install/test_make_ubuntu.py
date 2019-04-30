@@ -69,7 +69,8 @@ def test_install_panacota_base_ubuntu():
                "prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
                "annotation only). If you even need functional annotation, also install prokka",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
-               "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
+               "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
+               "If you only need syntaxic annotation, prodigal is enough.",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "- mmseqs (for pangenome subcommand)",  "* Quicktree",
                "- mafft (to align persistent genomes in order to infer a phylogenetic "
@@ -131,7 +132,8 @@ def test_develop():
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
-               "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
+               "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
+               "If you only need syntaxic annotation, prodigal is enough.",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "

@@ -3,17 +3,19 @@
 
 """
 Tests for make script, installing PanACoTA according to already existing dependencies
-From a computer with ubuntu and barrnap installed only
+Here, all dependencies are installed
 """
 import os
 import glob
 import pytest
+import subprocess
+import shlex
 
 from . import utilities as utils
 
+
 @pytest.fixture
 def install_panacota():
-    print("INSTALLING PANACOTA")
     cmd = "python3 make"
     error = "Error installing"
     utils.run_cmd(cmd, error)
@@ -21,7 +23,7 @@ def install_panacota():
 
 def teardown_function(function):
     """
-    Uninstall PanACoTA and installed dependencies
+    Uninstall PanACoTA and installed dependencies at the end of each test
     """
     print("TEARDOWN\n")
     cmd = "python3 make uninstall"
@@ -31,19 +33,23 @@ def teardown_function(function):
     print("cleaning repo")
 
 
-def test_install():
+def test_install_panacota():
     """
-    Test that when installing from a computer containing only barrnap, it installs
+    Test that when installing from a computer containing only prodigal,it installs
     PanACoTA, and returns the list of missing dependencies
     """
+    # check installed softs before installing panacota
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from base"
-    assert utils.check_installed("barrnap")
-    assert not utils.check_installed("prokka")
+    assert utils.check_installed("prodigal")
+    assert not utils.check_installed("PanACoTA")
+    assert not utils.check_installed("barrnap")
+    # install panacota and check installation
     utils.run_cmd(cmd, error)
-    assert not utils.check_installed("prokka")
-    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert utils.check_installed("PanACoTA")
+    # Check that dist-info file exists (pip3 has panacota module)
     cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -64,9 +70,9 @@ def test_install():
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
-               "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
-               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
-               "annotation only). If you even need functional annotation, also install prokka",
+               "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
+               "If you only need syntaxic annotation, prodigal is enough.",
+               "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
                "install it)", "* FastME", "* Quicktree"]
@@ -85,16 +91,18 @@ def test_install():
 
 def test_upgrade(install_panacota):
     """
-    Test upgrading PanACoTA when dependencies are still installed
+    Test upgrading PanACoTA when dependencies (only prodigal) are still installed
     # """
-    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("prodigal")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
+    assert utils.check_installed("prodigal")
     assert utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
@@ -108,13 +116,13 @@ def test_uninstall(install_panacota):
     """
     Test uninstalling PanACoTA
     """
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     logfile = "install.log"
@@ -126,16 +134,16 @@ def test_uninstall(install_panacota):
 
 def test_develop():
     """
-    Test installing PanACoTA in developer mode, when barrnap is already installed
+    Test installing PanACoTA in developer mode, when prodigal is already installed
     """
     assert not utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
     cmd = "pip3 show PanACoTA"
     err = "error pip3"
@@ -155,11 +163,11 @@ def test_develop():
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
                "- mmseqs (for pangenome subcommand)",
+               "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
-               "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
                "- One of the 3 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
                "install it)", "* FastME", "* Quicktree", "DONE"]
@@ -183,18 +191,32 @@ def test_install_user():
     Test that when installing from a computer in user mode, it really installs
     PanACoTA in user mode
     """
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     cmd = "python3 make --user"
     error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("barrnap")
     assert utils.check_installed("PanACoTA")
     # Check logfile content
     logfile = "install.log"
-    content = ["Installing PanACoTA in user mode...", "DONE"]
+    content = ["Installing PanACoTA in user mode...",
+               "Some dependencies needed for some subcommands of PanACoTA are "
+               "not installed. Here is the list of missing dependencies, and for what they are "
+               "used. If you plan to use the subcommands hereafter, first install required "
+               "dependencies:",
+               "- mmseqs (for pangenome subcommand)",
+               "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
+               "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
+               "after)",
+               "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
+               "If you only need syntaxic annotation, prodigal is enough.",
+               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "* FastTree (see README or documentation for more information on how to "
+               "install it)", "* FastME", "* Quicktree", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:

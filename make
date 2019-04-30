@@ -111,7 +111,7 @@ def install_all(install_dir, target, dev=False, user=False):
                     "syntaxic annotation only). If you even need functional annotation, also "
                     "install prokka\n")
         if "prokka" in to_install_user:
-            msg += "\t- prokka (for annotate subcommand, with syntaxic + functional annotation)\n"
+            msg += ("\t- prokka (for annotate subcommand, with syntaxic + functional annotation). "    "If you only need syntaxic annotation, prodigal is enough.\n")
         if "barrnap" in to_install_user:
             msg += ("\t- barrnap. If you use Prokka for functional annotation, it will not predict"
                     " RNA.\n")
