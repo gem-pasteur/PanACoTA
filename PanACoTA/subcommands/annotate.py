@@ -2,16 +2,16 @@
 # coding: utf-8
 
 """
-annotate is a subcommand of genomeAPCAT
+annotate is a subcommand of PanACoTA
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
 
-- optional: find stretches of at least 'n' N (default 5), and cut into a new contig at this stretch
+- optional: find stretches of at least 'n' N (default n=5), and cut into a new contig at this stretch
 - for each genome, calc L90 and number of contigs (after cut at N stretches if used)
 - keep only genomes with:
 
-    - L90 <= x (default = 100)
-    - #contig <= y (default = 999)
+    - L90 <= x (default x = 100)
+    - #contig <= y (default y = 999)
 - rename those genomes and their contigs, with strain name increasing with quality (L90 and
   #contig)
 - annotate kept genomes with prokka
@@ -67,9 +67,9 @@ Output:
 - In your given ``tmppath`` folder, folders with prokka results will be created for each input
   genome (1 folder per genome, called ``<genome_name>-prokkaRes``). If errors are generated during
   prokka step, you can look at the log file to see what was wrong (``<genome_name>-prokka.log``).
-- In your given ``respath``, a file called ``annote-genomes-<list_file>.log`` will be generated.
+- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log`` will be generated.
   You can find there all logs.
-- In your given ``respath``, a file called ``annote-genomes-<list_file>.log.err`` will be generated,
+- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log.err`` will be generated,
   containing information on errors and warnings that occurred: problems during annotation (hence
   no formatting step ran), and problems during formatting step. If this file is empty, then
   annotation and formatting steps finished without any problem for all genomes.
@@ -128,9 +128,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 
     verbosity:
 
-    - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
-    - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+    - defaut 0 : stdout contains INFO, stderr contains ERROR.
+    - 1: stdout contains INFO, stderr contains WARNING and ERROR
     - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+    - >=15: Add DEBUG in stdout
 
     Parameters
     ----------
@@ -168,10 +169,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         to use the default prokka folder
     verbose : int
         verbosity:
-
-        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
-        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
-        - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+        default (0): info in stdout, error and more in stderr
+        1 = add warnings in stderr
+        2 = like 1 + add DETAIL to stdout (by default only INFO)
+        >15: add debug to stdout
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
 
@@ -189,15 +190,15 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # import needed packages
     import shutil
     import logging
-    from genomeAPCAT.annote_module import genome_seq_functions as gfunc
-    from genomeAPCAT.annote_module import prokka_functions as pfunc
-    from genomeAPCAT.annote_module import format_functions as ffunc
-    from genomeAPCAT import utils
+    from PanACoTA.annotate_module import genome_seq_functions as gfunc
+    from PanACoTA.annotate_module import prokka_functions as pfunc
+    from PanACoTA.annotate_module import format_functions as ffunc
+    from PanACoTA import utils
 
     if not qc_only:
         # test if prokka is installed and in the path
         if not utils.check_installed("prokka"):  # pragma: no cover
-            print("Prokka is not installed. 'genomeAPCAT annotate' cannot run.")
+            print("Prokka is not installed. 'PanACoTA annotate' cannot run.")
             sys.exit(1)
 
     # By default, all tmp files (split sequences, renamed sequences, prokka results) will
@@ -224,8 +225,18 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
 
     # set level of logger (here debug to show everything during development)
-    level = logging.DEBUG
-    logfile_base = os.path.join(res_dir, "genomeAPCAT-annotate_" + listfile_base)
+    # level is the minimum level that will be considered.
+
+    # for verbose = 0 or 1, ignore details and debug, start from info
+    if verbose <= 1:
+        level = logging.INFO
+    # for verbose = 2, ignore only debug
+    if verbose >= 2 and verbose < 15:
+        level = 15 # int corresponding to detail level
+    # for verbose >= 15, write everything
+    if verbose >= 15:
+        level = logging.DEBUG
+    logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
     utils.init_logger(logfile_base, level, name='', verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
 
@@ -280,7 +291,7 @@ def build_parser(parser):
 
     """
     import argparse
-    from genomeAPCAT import utils
+    from PanACoTA import utils
 
     def gen_name(param):
         if not utils.check_format(param):
@@ -437,8 +448,8 @@ def check_args(parser, args):
                      "option '-Q")
     if args.qc_only and not args.name:
         args.name = "NONE"
-    if args.verbose and args.quiet:
-        parser.error("Choose between a verbose output (-v) or quiet output (-q)."
+    if args.verbose >= 15 and args.quiet:
+        parser.error("Choose between a debug output (at least 15 'v') or quiet output (-q)."
                      " You cannot have both...")
     return args
 

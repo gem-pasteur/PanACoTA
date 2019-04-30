@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-align is a subcommand of genomeAPCAT
+align is a subcommand of PanACoTA
 
 
 @author gem
@@ -49,33 +49,44 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
         Remove existing output files and rerun everything if True.
     verbose : int
         verbosity:
-
-        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
-        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+        - defaut 0 : stdout contains INFO, stderr contains ERROR.
+        - 1: stdout contains INFO, stderr contains WARNING and ERROR
         - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+        - >=15: Add DEBUG in stdout
+
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
     # import needed packages
     import logging
     import shutil
-    from genomeAPCAT import utils
-    from genomeAPCAT.align_module import pan_to_pergenome as p2g
-    from genomeAPCAT.align_module import get_seqs as gseqs
-    from genomeAPCAT.align_module import alignment as ali
-    from genomeAPCAT.align_module import post_align as post
+    from PanACoTA import utils
+    from PanACoTA.align_module import pan_to_pergenome as p2g
+    from PanACoTA.align_module import get_seqs as gseqs
+    from PanACoTA.align_module import alignment as ali
+    from PanACoTA.align_module import post_align as post
 
     # test if prokka is installed and in the path
     if not utils.check_installed("mafft"):  # pragma: no cover
-        print("fftns (from mafft) is not installed. 'genomeAPCAT align' cannot run.")
+        print("fftns (from mafft) is not installed. 'PanACoTA align' cannot run.")
         sys.exit(1)
 
     if force and os.path.isdir(outdir):
         shutil.rmtree(outdir)
     os.makedirs(outdir, exist_ok=True)
-
+    # set level of logger (here debug to show everything during development)
+    # level is the minimum level that will be considered.
+    # for verbose = 0 or 1, ignore details and debug, start from info
+    if verbose <= 1:
+        level = logging.INFO
+    # for verbose = 2, ignore only debug
+    if verbose >= 2 and verbose < 15:
+        level = 15 # int corresponding to detail level
+    # for verbose >= 15, write everything
+    if verbose >= 15:
+        level = logging.DEBUG
     # name logfile, add timestamp if already existing
-    logfile_base = os.path.join(outdir, "genomeAPCAT-align_" + dname)
+    logfile_base = os.path.join(outdir, "PanACoTA-align_" + dname)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
@@ -132,7 +143,7 @@ def build_parser(parser):
                           help=("File containing the list of all the genomes you want "
                                 "to align from their core/persistent families. "
                                 "1 genome per line: it can be the "
-                                "LSTINFO-<list_file>.lst file of 'genomeAPCAT annotate' module. "
+                                "LSTINFO-<list_file>.lst file of 'PanACoTA annotate' module. "
                                 "Here, only the first column (genome name without extension) "
                                 "will be used. The final alignment file will contain "
                                 "1 alignment per genome in this file."))
@@ -142,7 +153,7 @@ def build_parser(parser):
                                 "be used to name the alignment file."))
     required.add_argument("-d", dest="dbpath", required=True,
                           help=("Path to the folder containing the directories 'Proteins' "
-                                "and 'Genes', created by 'genomeAPCAT annotate'."))
+                                "and 'Genes', created by 'PanACoTA annotate'."))
     required.add_argument("-o", dest="outdir", required=True,
                           help="Output directory, where all results must be saved ")
 
@@ -193,6 +204,7 @@ if __name__ == '__main__':
 
     myparser = argparse.ArgumentParser(description="Align Core/Persistent families",
                                        add_help=False)
+
     build_parser(myparser)
     OPTIONS = parse(myparser, sys.argv[1:])
     main_from_parse(OPTIONS)

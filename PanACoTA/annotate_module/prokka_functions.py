@@ -20,7 +20,7 @@ import multiprocessing
 import progressbar
 import threading
 
-import genomeAPCAT.utils as utils
+import PanACoTA.utils as utils
 
 
 def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
@@ -53,7 +53,7 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     # logging.debug(prok_folder)
     # logging.debug(threads)
     # logging.debug("---------------\n")
-    main_logger = logging.getLogger("qc_annote.prokka")
+    main_logger = logging.getLogger("qc_annotate.prokka")
     main_logger.info("Annotating all genomes with prokka")
     nbgen = len(genomes)
     bar = None

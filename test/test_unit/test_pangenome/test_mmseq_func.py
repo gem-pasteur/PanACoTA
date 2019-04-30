@@ -11,7 +11,7 @@ import shutil
 import glob
 import logging
 
-import genomeAPCAT.pangenome_module.mmseqs_functions as mmseqs
+import PanACoTA.pangenome_module.mmseqs_functions as mmseqs
 
 # Define variables shared by several tests
 PATH_TEST_PAN = os.path.join("test", "data", "pangenome")
@@ -99,20 +99,17 @@ def test_create_mmseqdb(caplog):
     """
     Test that mmseq DB is created. We do not check its content as it could change
     according to mmseq versions, and we are here testing PanACoTA, not mmseqs
+    Just check that all expected outfiles are present.
     """
     caplog.set_level(logging.DEBUG)
     filename = "test_create_mmseqsdb.msdb"
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     logfile = "test_create_mmseqsdb.log"
     mmseqs.create_mmseqs_db(filename, prt_path, logfile)
-    outext = ["", ".index", ".lookup", "_h", "_h.index"]
+    outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
         os.remove(file)
-    if os.path.isfile(filename + ".dbtype"):
-        os.remove(filename + ".dbtype")
-    if os.path.isfile(filename + "_h.dbtype"):
-        os.remove(filename + "_h.dbtype")
     assert os.path.isfile(logfile)
     os.remove(logfile)
     assert "Creating database" in caplog.text
@@ -121,22 +118,55 @@ def test_create_mmseqdb(caplog):
 
 def test_create_mmseqdb_exist(caplog):
     """
-    Check that, when trying to create mmseqdb while the output file already exists,
+    Check that, when trying to create mmseqdb while all output files already exist,
     it logs a warning message and quits without creating it
     """
     filename = "test_create_mmseqsdb.msdb"
-    open(filename, "w").close()
-    prt_path = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
-    logfile = "test_create_mmseqsdb.log"
-    mmseqs.create_mmseqs_db(filename, prt_path, logfile)
-    outext = [".index", ".lookup", "_h", "_h.index"]
+    outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
-        assert not os.path.isfile(file)
-    assert not os.path.isfile(logfile)
-    os.remove(filename)
+        open(file, "w").close()
+    prt_path = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
+    logfile = "test_create_mmseqsdb_exist.log"
+    mmseqs.create_mmseqs_db(filename, prt_path, logfile)
+    for file in [filename + ext for ext in outext]:
+        assert os.path.isfile(file)
+        os.remove(file)
+    if os.path.isfile(logfile):
+        os.remove(logfile)
     assert ("mmseq database test_create_mmseqsdb.msdb already exists. "
             "The program will use it.") in caplog.text
     assert caplog.records[0].levelname == "WARNING"
+
+
+def test_create_mmseqdb_not_all_exist(caplog):
+    """
+    Check that, when trying to create mmseqdb while the output database exists but at least
+    1 associated file is missing (here, "_h.dbtype") -> message saying that files already exist, except some associated so database will be recreated.
+    """
+    caplog.set_level(logging.DEBUG)
+    filename = "test_create_mmseqsdb.msdb"
+    outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype"]
+    for file in [filename + ext for ext in outext]:
+        open(file, "w").close()
+    prt_path = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
+    logfile = "test_create_mmseqsdb_exist.log"
+    mmseqs.create_mmseqs_db(filename, prt_path, logfile)
+    outext_exp = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
+    # for file in [filename + ext for ext in outext_exp]:
+    #     assert os.path.isfile(file)
+    #     os.remove(file)
+    # if os.path.isfile(logfile):
+    #     os.remove(logfile)
+    found_text = caplog.text
+    assert ("removing test_create_mmseqsdb.msdb.lookup") in found_text
+    assert ("removing test_create_mmseqsdb.msdb.dbtype") in found_text
+    assert not ("removing test_create_mmseqsdb.msdb_h.dbtype") in found_text
+    # assert ("mmseq database test_create_mmseqsdb.msdb already exists, "
+    #         "but at least 1 associated file (.dbtype, .index etc). is missing. "
+    #         "The program will remove existing files and recreate the database.") in found_text
+    # assert("Creating database") in caplog.text
+    # assert caplog.records[0].levelname == "WARNING"
+    # assert caplog.records[1].levelname == "INFO"
 
 
 def test_cluster2file():

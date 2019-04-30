@@ -1,1 +1,1 @@
-"""corepers module of genomeAPCAT"""
+"""corepers module of PanACoTA"""

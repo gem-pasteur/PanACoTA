@@ -9,8 +9,8 @@ as a summary file for the pangenome.
 April 2017
 """
 import logging
-from genomeAPCAT import utils
-from genomeAPCAT import utils_pangenome as utilsp
+from PanACoTA import utils
+from PanACoTA import utils_pangenome as utilsp
 
 logger = logging.getLogger("pangenome.post-treat")
 

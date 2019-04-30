@@ -33,7 +33,7 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
-    level hierarchy: ``CRITICAL > ERROR > WARNING > INFO > DEBUG``
+    level hierarchy: ``CRITICAL > ERROR > WARNING > INFO > DETAILS > DEBUG``
 
     Messages from all levels are written in 'logfile'.log
 
@@ -54,8 +54,11 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     name : str or None
         if we need to name the logger (used for tests)
     verbose : int
-        be more verbose: 1 = add warnings in stderr (by default, only error),\
+        be more verbose:
+        default (0): info in stdout, error and more in stderr
+        1 = add warnings in stderr
         2 = like 1 + add DETAIL to stdout (by default only INFO)
+        >15: add debug to stdout
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
@@ -74,6 +77,9 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     detailfile = logfile_base + ".log.details"
     if os.path.isfile(detailfile):
         detailfile = logfile_base + "-" + time_start + ".log.details"
+    debugfile = logfile_base + ".log.debug"
+    if os.path.isfile(debugfile):
+        debugfile = logfile_base + "-" + time_start + ".log.debug"
 
     # Create a new logging level: details (between info and debug)
     # Used to add details to the log file, but not to stdout, while still having
@@ -118,29 +124,43 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     errfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
-    # Create handler 3: detailsfile. Write everything to this file.
+    # Create handler 3: detailsfile. Write everything to this file, except debug
     # Create it only if level is less than INFO. otherwise, it is the
     # same file as .log
-    if level < logging.INFO:
+    if level < logging.INFO or quiet:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
-        detfile_handler.setLevel(level)
+        detfile_handler.setLevel(logging.DETAIL)
         detfile_handler.setFormatter(formatter_file)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
+
+    # Create handler 3: debug file. Write everything
+    if level < logging.DETAIL:
+        debugfile_handler = RotatingFileHandler(debugfile, 'w', 10000000, 5)
+        debugfile_handler.setLevel(logging.DEBUG)
+        debugfile_handler.setFormatter(formatter_file)  # add formatter
+        logger.addHandler(debugfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
     if not quiet:
         # Create handler 4: write to stdout
         stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setLevel(logging.DEBUG)  # write any message
-        # don't write messages >= WARNING
+        # By default, write everything
+        stream_handler.setLevel(logging.DEBUG)
+        # BUT: don't write messages >= WARNING (warning, error, critical)
         stream_handler.addFilter(LessThanFilter(logging.WARNING))
+        # if not verbose (level 0 or 1): only put info in stdout (remove details and debug)
         if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DETAIL))
+            stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
+        # if verbose (level 2): put info and details in stdout: only remove debug
+        if verbose < 2:
+            stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
         stream_handler.setFormatter(formatter_stream)
         logger.addHandler(stream_handler)  # add handler to logger
 
         # Create handler 5: write to stderr
         err_handler = logging.StreamHandler(sys.stderr)
+
         if verbose > 0:
             err_handler.setLevel(logging.WARNING)  # write all messages >= WARNING
         else:

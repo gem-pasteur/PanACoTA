@@ -18,9 +18,9 @@ import numpy as np
 import logging
 import progressbar
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
-logger = logging.getLogger("qc_annote.gseq")
+logger = logging.getLogger("qc_annotate.gseq")
 
 
 def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, quiet=False):
@@ -298,9 +298,9 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
 
     """
     """
-    genomes: 
-    res_path: 
-    listfile_base: 
+    genomes:
+    res_path:
+    listfile_base:
     l90: max value of l90 allowed
     nbconts: max value of nb contigs allowed
     """

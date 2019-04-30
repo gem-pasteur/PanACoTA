@@ -1,1 +1,1 @@
-""" genomeAPCAT pangenome_module unit-tests"""
+""" PanACoTA pangenome_module unit-tests"""

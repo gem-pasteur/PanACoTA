@@ -12,7 +12,7 @@ Hereafter is the genomeAPCAT API, describing all modules and their functions.
         * :doc:`align_module<genomeAPCAT.align_module>`,
         * :doc:`corepers_module<genomeAPCAT.corepers_module>`,
         * :doc:`pangenome_module<genomeAPCAT.pangenome_module>`,
-        * :doc:`qc_annote_module<genomeAPCAT.qc_annote_module>`
+        * :doc:`qc_annotate_module<genomeAPCAT.qc_annotate_module>`
         * :doc:`tree_module<genomeAPCAT.tree_module>`.
 
 
@@ -21,7 +21,7 @@ Hereafter is the genomeAPCAT API, describing all modules and their functions.
 
     genomeAPCAT.utils
     genomeAPCAT.subcommands
-    genomeAPCAT.qc_annote_module
+    genomeAPCAT.qc_annotate_module
     genomeAPCAT.pangenome_module
     genomeAPCAT.corepers_module
     genomeAPCAT.align_module

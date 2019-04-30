@@ -1,1 +1,1 @@
-""" genomeAPCAT tests """
+""" PanACoTA tests """

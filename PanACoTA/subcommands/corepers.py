@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-corepers is a subcommand of genomeAPCAT
+corepers is a subcommand of PanACoTA
 
 Generate a core genome (families containing 1 member in all genomes of the dataset)
 or a persistent genome (families with a given % of genomes having exactly 1 member).
@@ -55,23 +55,32 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
         Require at least floor(nb_genomes*tol) genomes if True, ceil(nb_genomes*tol) if False
     verbose : int
         verbosity:
-
-        - defaut 0 : stdout contains DEBUG and INFO, stderr contains ERROR.
-        - 1: stdout contains (DEBUG) and INFO, stderr contains WARNING and ERROR
+        - defaut 0 : stdout contains INFO, stderr contains ERROR.
+        - 1: stdout contains INFO, stderr contains WARNING and ERROR
         - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+        - >=15: Add DEBUG in stdout
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
     # import needed packages
     import logging
-    from genomeAPCAT import utils
-    from genomeAPCAT import utils_pangenome as utilsp
-    import genomeAPCAT.corepers_module.persistent_functions as pers
+    from PanACoTA import utils
+    from PanACoTA import utils_pangenome as utilsp
+    import PanACoTA.corepers_module.persistent_functions as pers
 
+    logfile_base = os.path.join(path_pan, "PanACoTA-corepers")
     # name logfile, add timestamp if already existing
     path_pan, base_pan = os.path.split(pangenome)
-    logfile_base = os.path.join(path_pan, "genomeAPCAT-corepers")
-    level = logging.DEBUG
+    # level is the minimum level that will be considered.
+    # for verbose = 0 or 1, ignore details and debug, start from info
+    if verbose <= 1:
+        level = logging.INFO
+    # for verbose = 2, ignore only debug
+    if verbose >= 2 and verbose < 15:
+        level = 15 # int corresponding to detail level
+    # for verbose >= 15, write everything
+    if verbose >= 15:
+        level = logging.DEBUG
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
