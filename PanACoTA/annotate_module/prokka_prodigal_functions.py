@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functions to deal with prokka
+Functions to deal with prokka or prodigal only, according to user request
 
 
 @author gem
@@ -23,9 +23,9 @@ import threading
 import PanACoTA.utils as utils
 
 
-def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
+def run_annotation_all(genomes, threads, force, prok_folder, prodigal_only=False, quiet=False):
     """
-    For each genome in genomes, run prokka to annotate the genome.
+    For each genome in genomes, run prokka (or only prodigal) to annotate the genome.
 
     Parameters
     ----------
@@ -40,6 +40,8 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
         folder where prokka results must be written: for each genome,\
         a directory <genome_name>-prokkaRes will be created in this folder, and all the results\
         of prokka for the genome will be written inside
+    prodigal_only : bool
+        True if only prodigal must run, False if prokka must run
     quiet : bool
         True if nothing must be written to stderr/stdout, False otherwise
 
@@ -48,13 +50,16 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
     dict
         {genome: boolean} -> with True if prokka ran well, False otherwise.
     # """
-    # logging.debug("--------------\n")
-    # logging.debug(genomes)
-    # logging.debug(prok_folder)
-    # logging.debug(threads)
-    # logging.debug("---------------\n")
-    main_logger = logging.getLogger("qc_annotate.prokka")
-    main_logger.info("Annotating all genomes with prokka")
+
+    if prodigal_only:
+        message = "Annotating all genomes with prodigal"
+        run_annot = run_prodigal
+        main_logger = logging.getLogger("qc_annotate.prodigal")
+    else:
+        message = "Annotating all genomes with prokka"
+        run_annot = run_prokka
+        main_logger = logging.getLogger("qc_annotate.prokka")
+    main_logger.info(message)
     nbgen = len(genomes)
     bar = None
     if not quiet:
@@ -66,30 +71,27 @@ def run_prokka_all(genomes, threads, force, prok_folder, quiet=False):
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
                                       term_width=100).start()
     if threads <= 3:
-        cores_prokka = threads
+        cores_annot = threads
         pool_size = 1
     else:
         # use multiprocessing
         # if there are more threads than genomes, use as many threads as possible per genome
         if len(genomes) <= threads:
-            cores_prokka = int(threads / len(genomes))
+            cores_annot = int(threads / len(genomes))
         # otherwise, use 2 threads per genome (and nb_genome/2 genomes at the same time)
         else:
-            cores_prokka = 2
-        pool_size = int(threads / cores_prokka)
+            cores_annot = 2
+        pool_size = int(threads / cores_annot)
     pool = multiprocessing.Pool(pool_size)
     # Create a Queue to put logs from processes, and handle them after from a single thread
     m = multiprocessing.Manager()
     q = m.Queue()
-    # arguments : (gpath, cores_prokka, name, force, nbcont, q) for each genome
-    arguments = [(genomes[g][1], prok_folder, cores_prokka, genomes[g][0],
+    # arguments : (gpath, cores_annot, name, force, nbcont, q) for each genome
+    arguments = [(genomes[g][1], prok_folder, cores_annot, genomes[g][0],
                   force, genomes[g][3], q)
                  for g in sorted(genomes)]
-    # logging.debug("====================")
-    # logging.debug(arguments)
-    # logging.debug("===================")
     try:
-        final = pool.map_async(run_prokka, arguments, chunksize=1)
+        final = pool.map_async(run_annot, arguments, chunksize=1)
         pool.close()
         # Listen for logs in processes
         lp = threading.Thread(target=utils.logger_thread, args=(q,))
@@ -121,11 +123,11 @@ def run_prokka(arguments):
     Parameters
     ----------
     arguments : tuple
-        (gpath, prok_folder, cores_prokka, name, force, nbcont, q) with:
+        (gpath, prok_folder, cores_annot, name, force, nbcont, q) with:
 
         * gpath: path and filename of genome to annotate
         * prok_folder: path to folder where all prokka folders for all genomes are saved
-        * cores_prokka: how many cores can use prokka
+        * cores_annot: how many cores can use prokka
         * name: output name of annotated genome
         * force: True if force run (override existing files), False otherwise
         * nbcont: number of contigs in the input genome, to check prokka results
@@ -138,9 +140,6 @@ def run_prokka(arguments):
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
     gpath, prok_folder, threads, name, force, nbcont, q = arguments
-    # logging.debug('*****************')
-    # logging.debug(arguments)
-    # logging.debug("*****************")
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -190,6 +189,89 @@ def run_prokka(arguments):
         if ok:
             logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
         return False
+
+
+def run_prodigal(arguments):
+    """
+    Run prokka for the given genome.
+
+    Parameters
+    ----------
+    arguments : tuple
+        (gpath, prok_folder, cores_annot, name, force, nbcont, q) with:
+
+        * gpath: path and filename of genome to annotate
+        * prodigal_folder: path to folder where all prodigal folders for all genomes are saved
+        * cores_annot: how many cores can use prodigal
+        * name: output name of annotated genome
+        * force: True if force run (override existing files), False otherwise
+        * nbcont: number of contigs in the input genome, to check prodigal results
+        * q : queue where logs are put
+
+    Returns
+    -------
+    boolean
+        True if eveything went well (all needed output files present,
+        corresponding numbers of proteins, genes etc.). False otherwise.
+    """
+    gpath, prodigal_folder, threads, name, force, nbcont, q = arguments
+
+    # Set logger for this process, given to all subprocess
+    qh = logging.handlers.QueueHandler(q)
+    root = logging.getLogger()
+    root.setLevel(logging.DEBUG)
+    root.handlers = []
+    logging.addLevelName(utils.detail_lvl(), "DETAIL")
+    root.addHandler(qh)
+    logger = logging.getLogger('run_prodigal')
+    logger.log(utils.detail_lvl(), "Start annotating {} {}".format(name, gpath))
+
+    # Define prodigal directory and logfile, and check their existence
+    # By default, prodigal is in tmp_folder -> resdir/tmp_files/genome-prodigalRes
+    prodigal_dir = os.path.join(prodigal_folder, os.path.basename(gpath) + "-prodigalRes")
+    fnull = open(os.devnull, 'w')
+    prodigal_logfile = os.path.join(prodigal_folder, os.path.basename(gpath) + "-prodigal.log")
+    if os.path.isdir(prodigal_dir) and not force:
+        logger.warning(("Prodigal results folder already exists.").format(prodigal_dir))
+        return True
+        # ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+        # if ok:
+        #     logger.log(utils.detail_lvl(), "Prokka did not run again, "
+        #                                    "formatting step used already generated results of "
+        #                                    "Prokka in {}. If you want to re-run prokka, first "
+        #                                    "remove this result folder, or use '-F' or '--force' "
+        #                                    "option if you want to rerun prokka for all genomes.")
+        #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+        # else:
+        #     logger.warning("Problems in the files contained in your already existing output dir "
+        #                    "({}). Please check it, or remove it to "
+        #                    "re-annotate.".format(prok_dir))
+        # return ok
+    elif os.path.isdir(prodigal_dir) and force:
+        shutil.rmtree(prodigal_dir)
+        logger.warning("Prodigal results folder already exists, but removed because --force "
+                       "option used")
+    # cmd = ("prodigal -i {} -d {}").format(gpath, )
+    prodigalf = open(prodigal_logfile, "w")
+    ok = None
+    try:
+        logger.info("runnning prodigal")
+        # subprocess.call(shlex.split(cmd), stdout=fnull, stderr=prokf)
+        # # ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+        # prodigalf.close()
+        # if ok:
+        #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+        # return ok
+    except Exception as err:  # pragma: no cover
+        logger.error("Error while trying to run prodigal: {}".format(err))
+        prodigalf.close()
+        # if ok:
+        #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+        logger.log(utils.detail_lvl(), "done")
+        return False
+
+
+
 
 
 def check_prokka(outdir, logf, name, gpath, nbcont, logger):
