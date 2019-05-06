@@ -248,7 +248,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         level = logging.INFO
     # for verbose = 2, ignore only debug
     if verbose >= 2 and verbose < 15:
-        level = utils.detail_lvl # int corresponding to detail level
+        level = utils.detail_lvl() # int corresponding to detail level
     # for verbose >= 15, write everything
     if verbose >= 15:
         level = logging.DEBUG
@@ -278,6 +278,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # If only QC, stop here.
     if qc_only:
         utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
+        logger.info("QC only done.")
         return genomes, kept_genomes
     # Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
@@ -294,6 +295,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         utils.write_warning_skipped(skipped)
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True)
+    logger.info("Annotation step done.")
     return genomes, kept_genomes, skipped, skipped_format
 
 
