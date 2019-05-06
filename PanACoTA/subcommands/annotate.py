@@ -14,7 +14,7 @@ It is a pipeline to do quality control and annotate genomes. Steps are:
     - #contig <= y (default y = 999)
 - rename those genomes and their contigs, with strain name increasing with quality (L90 and
   #contig)
-- annotate kept genomes with prokka
+- annotate kept genomes with prokka (default) or only prodigal
 - gembase format
 
 Input:
@@ -50,7 +50,7 @@ separated by ``::``. ``<gen_spe>`` is given after the ``::``, and ``<date>`` is 
 - **respath:** path to folder where outputs must be saved (folders Genes, Replicons, Proteins,
   LSTINFO, gff3 and LSTINFO_dataset.lst file)
 - **tmppath** optional. Path where tmp files must be saved. Default is respath/tmp_files
-- **prokpath** optional. Path where prokka output folders for all genomes must be saved.
+- **annotepath** optional. Path where prokka/prodigal output folders for all genomes must be saved.
   Default is respath/tmp_files
 - **threads:** number of threads that can be used (default 1)
 
@@ -64,15 +64,17 @@ Output:
     * Replicons (input sequences but with formatted headers).
     * gff3 (information on genes as gff3 format)
 
-- In your given ``tmppath`` folder, folders with prokka results will be created for each input
-  genome (1 folder per genome, called ``<genome_name>-prokkaRes``). If errors are generated during
-  prokka step, you can look at the log file to see what was wrong (``<genome_name>-prokka.log``).
+- In your given ``tmppath`` folder, folders with prokka/prodigal results will
+  be created for each input genome (1 folder per genome, called
+  ``<genome_name>-[prokka, prodigal]Res``). If errors are generated during prokka/prodigal
+  step, you can look at the log file to see what was wrong
+  (``<genome_name>-[prokka, prodigal].log``).
 - In your given ``respath``, a file called ``annotate-genomes-<list_file>.log`` will be generated.
   You can find there all logs.
-- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log.err`` will be generated,
-  containing information on errors and warnings that occurred: problems during annotation (hence
-  no formatting step ran), and problems during formatting step. If this file is empty, then
-  annotation and formatting steps finished without any problem for all genomes.
+- In your given ``respath``, a file called ``annotate-genomes-<list_file>.log.err`` will be
+  generated, containing information on errors and warnings that occurred: problems during
+  annotation (hence no formatting step ran), and problems during formatting step. If this file is
+  empty, then annotation and formatting steps finished without any problem for all genomes.
 - In your given ``respath``, you will find a file called ``LSTINFO-<list_file>.lst`` with
  information on all genomes: gembase_name, original_name, genome_size, L90, nb_contigs
 - In your given ``respath``, you will find a file called ``discarded-<list_file>.lst`` with
@@ -84,11 +86,13 @@ Output:
 
 Requested:
 
-- in prokka results, all genes are called ``<whatever>_<number>`` -> the number will be kept.
-- The number of the genes annotated by prokka are in increasing order in tbl, faa and ffn files
-- genome names given to prokka should not end with '_<number>'. Ideally, they should always have
-  the same format: ``<spegenus>.<date>.<strain_number>`` but they can have another format, as long
-  as they don't end by '_<number>', which is the format of a gene name.
+- in prokka/prodigal results, all genes are called ``<whatever>_<number>``
+   -> the number will be kept.
+- The number of the genes annotated by prokka/prodigal are in increasing order
+  in tbl, faa and ffn files
+- genome names given to prokka/prodigal should not end with '_<number>'. Ideally, they should
+  always have the same format: ``<spegenus>.<date>.<strain_number>`` but they can have
+  another format, as long as they don't end by '_<number>', which is the format of a gene name.
 
 @author gem
 April 2017
@@ -110,20 +114,20 @@ def main_from_parse(arguments):
     """
     main(arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
-         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.prokkadir,
-         arguments.verbose, arguments.quiet)
+         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.annotdir,
+         arguments.verbose, arguments.quiet, arguments.prodigal_only)
 
 
 def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
-         threads=1, force=False, qc_only=False, tmp_dir=None, prok_dir=None,
-         verbose=0, quiet=False):
+         threads=1, force=False, qc_only=False, tmp_dir=None, res_annot_dir=None,
+         verbose=0, quiet=False, prodigal_only=False):
     """
     Main method, doing all steps:
 
     - analyze genomes (nb contigs, L90, stretches of N...)
     - keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     - rename genomes with strain number in decreasing quality
-    - annotate genome with prokka
+    - annotate genome with prokka or only prodigal
     - format annotated genomes
 
     verbosity:
@@ -164,9 +168,9 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         If True, do only quality control, if False, also do annotation
     tmp_dir : str or None
         Path to folder where tmp files must be saved. None to use the default tmp folder
-    prok_dir : str or None
-        Path to folder where are the prokka result folders for the genomes. None
-        to use the default prokka folder
+    res_annot_dir : str or None
+        Path to folder where are the prokka/prodigal result folders for the genomes. None
+        to use the default prokka/prodigal folder
     verbose : int
         verbosity:
         default (0): info in stdout, error and more in stderr
@@ -175,6 +179,8 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         >15: add debug to stdout
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
+    prodigal_only : bool
+        True -> run only prodigal. False -> run prokka
 
     Returns
     -------
@@ -184,39 +190,52 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
         - genomes: dict with all genomes in list_file:
           {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
         - kept_genomes: dict with all genomes kept for annotation (same format as genomes)
-        - skipped: list of genomes skipped because they had a problem in prokka step
+        - skipped: list of genomes skipped because they had a problem in annotation step
         - skipped_format : list of genomes skipped because they had a problem in format step
     """
     # import needed packages
     import shutil
     import logging
     from PanACoTA.annotate_module import genome_seq_functions as gfunc
-    from PanACoTA.annotate_module import prokka_functions as pfunc
+    from PanACoTA.annotate_module import prokka_prodigal_functions as pfunc
     from PanACoTA.annotate_module import format_functions as ffunc
     from PanACoTA import utils
 
-    if not qc_only:
-        # test if prokka is installed and in the path
-        if not utils.check_installed("prokka"):  # pragma: no cover
-            print("Prokka is not installed. 'PanACoTA annotate' cannot run.")
-            sys.exit(1)
+    prokka = utils.check_installed("prokka")
+    prodigal = utils.check_installed("prodigal")
 
-    # By default, all tmp files (split sequences, renamed sequences, prokka results) will
+    if not qc_only:
+        # If user using prokka: check prokka is installed and in the path
+            if not prodigal_only and not prokka:
+                print("Prokka is not installed. 'PanACoTA annotate' cannot run. Install prokka "
+                      "to be able to annotate genomes. If you only need syntactical annotation, "
+                      "check that prodigal is installed, and add '--prodigal' option.")
+                sys.exit(1)
+            if prodigal_only and not prodigal:
+                print("Prodigal is not installed. 'PanACoTA annotate' cannot run. Install "
+                      "prodigal to be able to annotate genomes. If you also need functional "
+                      "annotation, check that prokka is installed, and remove '--prodigal' "
+                      "option.")
+                sys.exit(1)
+
+
+    # By default, all tmp files (split sequences, renamed sequences, prokka/prodigal results) will
     # be saved in the given <res_dir>/tmp_files.
     # Create output (results, tmp...) directories if not already existing
     if not tmp_dir:
         tmp_dir = os.path.join(res_dir, "tmp_files")
-    if not prok_dir:
-        prok_dir = tmp_dir
+    if not res_annot_dir:
+        res_annot_dir = tmp_dir
     os.makedirs(res_dir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
-    os.makedirs(prok_dir, exist_ok=True)
+    os.makedirs(res_annot_dir, exist_ok=True)
     # If force was set, remove result folders (Proteins, Replicons, Genes, LSTINFO)
     if force:
         shutil.rmtree(os.path.join(res_dir, "LSTINFO"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Proteins"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Genes"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Replicons"), ignore_errors=True)
+        shutil.rmtree(os.path.join(res_dir, "gff3"), ignore_errors=True)
     else:
         # Check that resultdir is not already used
         utils.check_out_dirs(res_dir)
@@ -224,15 +243,12 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
 
-    # set level of logger (here debug to show everything during development)
-    # level is the minimum level that will be considered.
-
-    # for verbose = 0 or 1, ignore details and debug, start from info
+    # set level of logger: level is the minimum level that will be considered.
     if verbose <= 1:
         level = logging.INFO
     # for verbose = 2, ignore only debug
     if verbose >= 2 and verbose < 15:
-        level = 15 # int corresponding to detail level
+        level = utils.detail_lvl # int corresponding to detail level
     # for verbose >= 15, write everything
     if verbose >= 15:
         level = logging.DEBUG
@@ -242,13 +258,13 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
 
     logger.info("Let's start!")
     # Read genome names.
+    # genomes = {genome: [spegenus.date]}
     genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
     if not genomes:
         logger.error(("We did not find any genome listed in {} in the folder {}. "
                       "Please check your list to give valid genome "
                       "names.").format(list_file, db_path))
         sys.exit(-1)
-    # genomes = {genome: [spegenus.date]}
     # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
     # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
@@ -269,9 +285,10 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # Annotate all kept genomes
-    results = pfunc.run_prokka_all(kept_genomes, threads, force, prok_dir, quiet=quiet)
+    results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
+                                       prodigal_only, quiet=quiet)
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, prok_dir,
+    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, res_annot_dir,
                                                    threads, quiet=quiet)
     if skipped:
         utils.write_warning_skipped(skipped)
@@ -354,6 +371,10 @@ def build_parser(parser):
                                "genomes would be annotated with the given parameters, and to "
                                "modify those parameters if you want, before you launch the "
                                "annotation and formatting steps.")
+    optional.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
+                          help="Add this option if you only want syntactical annotation, given "
+                               "by prodigal, and not functional annotation requiring prokka and "
+                               "is slower.")
     optional.add_argument("--l90", dest="l90", type=int, default=100,
                           help="Maximum value of L90 allowed to keep a genome. Default is 100.")
     optional.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
@@ -374,23 +395,25 @@ def build_parser(parser):
     optional.add_argument("--tmp", dest="tmpdir",
                           help=("Specify where the temporary files (sequence split by stretches "
                                 "of 'N', sequence with new contig names etc.) must be saved. "
-                                "By default, it will be saved in your result_directory/tmp_files."))
-    optional.add_argument("--prok", dest="prokkadir",
-                          help=("Specify in which directory the prokka output files "
-                                "(1 folder per genome, called <genome_name>-prokkaRes) must be "
+                                "By default, it will be saved in your "
+                                "result_directory/tmp_files."))
+    optional.add_argument("--annot", dest="annotdir",
+                          help=("Specify in which directory the prokka/prodigal output files "
+                                "(1 folder per genome, called "
+                                "<genome_name>-[prokka, Prodigal]Res) must be "
                                 "saved. By default, they are saved in the same directory as "
                                 "your temporary files (see --tmp option to change it)."))
     optional.add_argument("-F", "--force", dest="force", action="store_true",
-                          help=("Force run: Add this option if you want to run prokka and "
+                          help=("Force run: Add this option if you want to (re)run annotation and "
                                 "formatting steps for all genomes "
-                                "even if their result folder (for prokka step) or files (for "
-                                "format step) already exist: override "
-                                "existing results.\n"
+                                "even if their result folder (for annotation step) or files (for "
+                                "format step) already exist: override existing results.\n"
                                 "Without this option, if there already are results in the given "
                                 "result folder, the program stops. If there are no results, but "
-                                "prokka folder already exists, prokka won't run again, and the "
-                                "formating step will use the already existing folder if correct, "
-                                "or skip the genome if there are problems in prokka folder."))
+                                "prokka/prodigal folder already exists, prokka/prodigal won't run "
+                                "again, and the formating step will use the already existing "
+                                "folder if correct, or skip the genome if there are problems in "
+                                "prokka/prodigal folder."))
     optional.add_argument("--threads", dest="threads", type=int, default=1,
                           help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
