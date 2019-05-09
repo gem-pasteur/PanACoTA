@@ -253,7 +253,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
-    utils.init_logger(logfile_base, level, name='', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, name='', details=True, verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
 
     logger.info("Let's start!")

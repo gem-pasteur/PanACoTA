@@ -29,7 +29,7 @@ except:
         import pickle
 
 
-def init_logger(logfile_base, level, name, verbose=0, quiet=False):
+def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -125,9 +125,12 @@ def init_logger(logfile_base, level, name, verbose=0, quiet=False):
     logger.addHandler(errfile_handler)  # add handler to logger
 
     # Create handler 3: detailsfile. Write everything to this file, except debug
-    # Create it only if level is less than INFO. otherwise, it is the
-    # same file as .log
-    if level < logging.INFO or quiet:
+    # Create it only if:
+    # - level is <= info (for modules which have no details, so detailsfile is the same as
+    # logfile)
+    # - details==True force creation of detailsfile
+    # - quiet==True nothing in stdout, put all log files so that user can check
+    if level < logging.INFO or quiet or details:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(logging.DETAIL)
         detfile_handler.setFormatter(formatter_file)  # add formatter
