@@ -102,7 +102,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     # create formatter for log messages: "timestamp :: level :: message"
     # :: %(name)s  to add the logger name
     # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
-    my_format = '[%(asctime)s] %(name)s :: %(levelname)s :: %(message)s'
+    my_format = '[%(asctime)s] :: %(levelname)s :: %(message)s'
     formatter_file = logging.Formatter(my_format,
                                        '%Y-%m-%d %H:%M:%S')
     formatter_stream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
