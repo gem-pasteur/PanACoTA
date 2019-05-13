@@ -231,7 +231,7 @@ def run_prodigal(arguments):
     """
     gpath, prodigal_folder, threads, name, force, nbcont, q = arguments
 
-    # Set logger for this process, given to all subprocess
+    # Set logger for this process, which will be given to all subprocess
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
@@ -252,8 +252,8 @@ def run_prodigal(arguments):
     # If result dir exists but user wants to force, remove this result dir
     if os.path.isdir(prodigal_dir) and force:
         shutil.rmtree(prodigal_dir)
-        logger.warning("Prodigal results folder already exists, but removed because "
-                       "--force option used.")
+        logger.warning("Prodigal results folder already exists, but is removed because "
+                       "--force option was used.")
 
     # If prodigal results dir already exists (meaning user did not want to force,
     # otherwise it would have been deleted just before),
@@ -261,7 +261,7 @@ def run_prodigal(arguments):
     if os.path.isdir(prodigal_dir):
         logger.warning(("Prodigal results folder already exists.").format(prodigal_dir))
         ok = check_prodigal(gpath, name, prodigal_dir, logger)
-        # If everything ok in the result dir, do not rerun prokka,
+        # If everything ok in the result dir, do not rerun prodigal,
         # use those results for next step (formatting)
         if ok:
             logger.log(utils.detail_lvl(), "Prodigal did not run again. "
@@ -270,7 +270,7 @@ def run_prodigal(arguments):
                                            "remove this result folder, or use '-F' or '--force' "
                                            "option.".format(prodigal_dir))
 
-            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+            logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:
@@ -282,76 +282,34 @@ def run_prodigal(arguments):
         # -> return False
         return ok
     else:
-    # We re sure prodigal result dir does not exist yet, because:
-    #     - never existed
-    #     - removed because user asked to force
-    #     - exists but left function -> either if files inside are ok or not
-
+        # We are sure prodigal result dir does not exist yet, because:
+        #     - never existed
+        #     - removed because user asked to force
+        #     - exists but left function -> either if files inside are ok or not
+        # So make prodigal_dir (not automatically created by prodigal)
         os.makedirs(prodigal_dir)
-    # if os.path.isdir(prodigal_dir) and not force:
-    #     logger.warning(("Prodigal results folder already exists.").format(prodigal_dir))
-    #     return True
-    #     # ok = check_annotation(prodigal_dir, prodigal_logfile, name, gpath, nbcont, logger)
-    #     # if ok:
-    #     #     logger.log(utils.detail_lvl(), "Prokka did not run again, "
-    #     #                                    "formatting step used already generated results of "
-    #     #                                    "Prokka in {}. If you want to re-run prokka, first "
-    #     #                                    "remove this result folder, or use '-F' or '--force' "
-    #     #                                    "option if you want to rerun prokka for all genomes.")
-    #     #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    #     # else:
-    #     #     logger.warning("Problems in the files contained in your already existing output dir "
-    #     #                    "({}). Please check it, or remove it to "
-    #     #                    "re-annotate.".format(prok_dir))
-    #     # return ok
-    # elif os.path.isdir(prodigal_dir) and force:
-    #     shutil.rmtree(prodigal_dir)
-    #     logger.warning("Prodigal results folder already exists, but is removed because --force "
-    #                    "option was used.")
+    # Prodigal_directory is empty and ready to get prodigal results
     basic_outname = os.path.join(prodigal_dir, os.path.splitext(name)[0])
-    logger.debug("oooooooo " + basic_outname)
-    logger.debug("ppppppppppp start cmd")
     cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q -p meta").format(gpath, basic_outname + ".ffn",
                                                                 basic_outname + ".faa",
                                                                 basic_outname + ".gff")
-    logger.debug(cmd)
+    logger.details("Prodigal command: " + cmd)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
-    ok = None
-    # Get exit code of prodigal run
+    # Run prodigal, and get exit code of prodigal run
     exit_code = subprocess.call(shlex.split(cmd), stdout=prodigalf, stderr=prodigalferr)
-    logger.debug("+++++++++++++++++++ " + str(exit_code))
+    ok = False
+    # If error running prodigal, return False (default 'ok' variable) + error message
     if exit_code != 0:
         logger.error("Error while trying to run prodigal. See {}".format(prodigal_logfile_err))
+    # If no error, 'ok' is True, message attesting end of annotation
     else:
-        logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    # if ok:
-    #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    # logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    #     return False
-        # # ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+        logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
+        ok = True
+    # Close logfiles and return result (True if annotated, False otherwise)
     prodigalf.close()
     prodigalferr.close()
-    # try:
-    #     logger.info("runnning prodigal")
-    #     # Get exit code of prodigal run
-    #     exit_code = subprocess.call(shlex.split(cmd), stdout=prodigalf, stderr=prodigalf_err)
-    #     logger.info("+++++++++++++++++++" + exit_code)
-    # #     # # ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
-    #     prodigalf.close()
-    #     prodigalferr.close()
-    # #     # if ok:
-    # #     #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    # #     # return ok
-    # except Exception as err:  # pragma: no cover
-    #     logger.info("+++++++++++++++++++" + exit_code)
-    # #     logger.error("Error while trying to run prodigal: {}".format(err))
-    # #     # prodigalf.close()
-    # #     # if ok:
-    # #     #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    # #     logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    #     return False
-    return False
+    return ok
 
 
 def check_prokka(outdir, logf, name, gpath, nbcont, logger):
