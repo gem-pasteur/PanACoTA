@@ -112,13 +112,14 @@ def main_from_parse(arguments):
         result of argparse parsing of all arguments in command line
 
     """
-    main(arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
+    cmd = "PanACoTA " + ' '.join(arguments.argv)
+    main(cmd, arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
          arguments.force, arguments.qc_only, arguments.tmpdir, arguments.annotdir,
          arguments.verbose, arguments.quiet, arguments.prodigal_only)
 
 
-def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, tmp_dir=None, res_annot_dir=None,
          verbose=0, quiet=False, prodigal_only=False):
     """
@@ -256,6 +257,7 @@ def main(list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     utils.init_logger(logfile_base, level, name='', details=True, verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
 
+    logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
     # Read genome names.
     # genomes = {genome: [spegenus.date]}
@@ -481,7 +483,6 @@ def check_args(parser, args):
 
 if __name__ == '__main__':
     import argparse
-
     my_parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
     build_parser(my_parser)
     OPTIONS = parse(my_parser, sys.argv[1:])
