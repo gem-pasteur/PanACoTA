@@ -15,7 +15,7 @@ Functions to:
     * LSTINFO: information on annotation. Columns are: "start end strand type locus\
     gene_name | product | EC_number | inference2" with the same types as prokka file,\
     and strain is C (complement) or D (direct). Locus is:\
-    `<genome_name>.<i or b><contig_num>_<protein_num>`
+    `<genome_name>.<contig_num><i or b>_<protein_num>`
 
 @author gem
 April 2019
