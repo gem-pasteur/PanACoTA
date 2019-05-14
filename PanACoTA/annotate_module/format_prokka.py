@@ -35,6 +35,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     - Genes
     - Replicons
     - LSTINFO
+    - gff
 
     Parameters
     ----------

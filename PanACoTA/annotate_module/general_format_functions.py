@@ -27,9 +27,10 @@ import multiprocessing
 import threading
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.format_prokka as fprokka
+import PanACoTA.annotate_module.format_prodigal as fprodigal
 
 
-def format_genomes(genomes, results, res_path, annot_path, threads=1, quiet=False):
+def format_genomes(genomes, results, res_path, annot_path, prodigal_only, threads=1, quiet=False):
     """
     For all genomes which were annotated (by prokka or prodigal), reformat them
     in order to have, in 'res_path', the following folders:
@@ -51,6 +52,7 @@ def format_genomes(genomes, results, res_path, annot_path, threads=1, quiet=Fals
     annot_path : str
         path to folder named "<genome_name>-[prokka, prodigal]Res" where all prokka/prodigal
         results are saved.
+    prodigal_only: True if it was annotated by prodigal, False if annotated by prokka
     threads : int
         number of threads to use to while formatting genomes
     quiet : bool
@@ -95,7 +97,7 @@ def format_genomes(genomes, results, res_path, annot_path, threads=1, quiet=Fals
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
-               rep_dir, gff_dir, results_ok, q)
+               rep_dir, gff_dir, results_ok, prodigal_only, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
 
     # Create pool and launch parallel formating steps
@@ -149,6 +151,7 @@ def handle_genome(args):
          * rep_dir : path to 'Replicons' folder
          * gff_dir : path to 'gff3' folder
          * results : {genome_name: <True if genome was correctly annotated, False otherwise>}
+         * prodigal_only : True if annotated by prodigal, False if annotated by prokka
          * q : multiprocessing.managers.AutoProxy[Queue] queue to put logs during subprocess
 
     Returns
@@ -159,7 +162,14 @@ def handle_genome(args):
         * genome name (used to get info from the pool.map_async)
     """
     (genome, name, gpath, annot_path, lst_dir, prot_dir,
-     gene_dir, rep_dir, gff_dir, results, q) = args
+     gene_dir, rep_dir, gff_dir, results, prodigal_only, q) = args
+
+    # Define which formatting must be used, given the annotation software
+    if prodigal_only:
+        format_one_genome = fprodigal.format_one_genome
+    else:
+        format_one_genome = fprokka.format_one_genome
+
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -171,7 +181,7 @@ def handle_genome(args):
     # Handle genome, if we have its informations
     if genome not in results:
         return "no_res", genome
-    ok_format = fprokka.format_one_genome(gpath, name, annot_path, lst_dir,
+    ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
                                           prot_dir, gene_dir, rep_dir, gff_dir, logger)
     return ok_format, genome
 
