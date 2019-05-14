@@ -199,7 +199,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     import logging
     from PanACoTA.annotate_module import genome_seq_functions as gfunc
     from PanACoTA.annotate_module import prokka_prodigal_functions as pfunc
-    from PanACoTA.annotate_module import format_functions as ffunc
+    from PanACoTA.annotate_module import general_format_functions as ffunc
     from PanACoTA import utils
 
     prokka = utils.check_installed("prokka")
