@@ -289,10 +289,11 @@ def run_prodigal(arguments):
         # So make prodigal_dir (not automatically created by prodigal)
         os.makedirs(prodigal_dir)
     # Prodigal_directory is empty and ready to get prodigal results
-    basic_outname = os.path.join(prodigal_dir, os.path.splitext(name)[0])
-    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q -p meta").format(gpath, basic_outname + ".ffn",
-                                                                basic_outname + ".faa",
-                                                                basic_outname + ".gff")
+    basic_outname = os.path.join(prodigal_dir, name)
+    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q -p meta").format(gpath,
+                                                                        basic_outname + ".ffn",
+                                                                        basic_outname + ".faa",
+                                                                        basic_outname + ".gff")
     logger.details("Prodigal command: " + cmd)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
