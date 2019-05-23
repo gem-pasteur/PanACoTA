@@ -186,3 +186,85 @@ def handle_genome(args):
     return ok_format, genome
 
 
+def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
+               genome, cont_num, ecnum, inf2, strand, start, end, lstopenfile):
+    """
+    Write given gene to output file
+
+    Parameters
+    ----------
+    gtype : str
+        type of feature (CDS, tRNA, etc.)
+    locus_num : str
+        number of the locus given by prokka
+    gene_name : str
+        gene name found by prokka ("NA" if no gene name)
+    product : str
+        found by prokka, "NA" if no product
+    crispr_num : int
+        current crispr number. In prokka tbl, CRISPRs are not numbered, they all
+        have the same name. We name them by adding a unique number to each CRISPR. If the current
+        gene to add is a CRISPR, this number will be incremented and returned. If not, this same
+        name will be returned.
+    cont_loc : str
+        'i' if the gene is inside a contig, 'b' if its on the border (first or last gene
+        of the contig)
+    genome : str
+        genome name (spegenus.date.strain_num)
+    cont_num : int
+        contig number
+    ecnum : str
+        EC number, found by prokka, or "NA" if no EC number
+    inf2 : str
+        more information found by prokka, or "NA" if no more information
+    strand : str
+        C (complement) or D (direct)
+    start : int
+        start of gene in the contig
+    end : int
+        end of gene in the contig
+    lstopenfile : _io.TextIOWrapper
+        open file where lstinfo must be written
+
+    Returns
+    -------
+    int :
+        Current crispr number
+    """
+    # if last gene was a crispr
+    if gtype == "repeat_region":
+        gtype = "CRISPR"
+        locus_num = "CRISPR" + str(crispr_num)
+        gene_name = "crispr"
+        product = "crispr-array"
+        crispr_num += 1
+    locus_name = "{}.{}{}_{}".format(genome, str(cont_num).zfill(4), cont_loc,
+                                     str(locus_num).zfill(5))
+    # If '|' character found in those fields, replace by '_' to avoid problems while parsing
+    more_info = "| {} | {} | {}".format(product.replace("|", "_"),
+                                        ecnum.replace("|", "_"),
+                                        inf2.replace("|", "_"))
+    lst_line = "\t".join([str(start), str(end), strand, gtype,
+                          locus_name, gene_name, more_info])
+    lstopenfile.write(lst_line + "\n")
+    return crispr_num, lst_line
+
+
+def write_header(lstline, outfile):
+    """
+    write header to output file. Header is generated from the lst line.
+
+    Parameters
+    ----------
+    lstline : str
+        current line of lst file
+    outfile : _io.TextIOWrapper
+        open file where header must be written-
+
+    """
+    name = lstline.split("\t")[4]
+    size = int(lstline.split("\t")[1]) - int(lstline.split("\t")[0]) + 1
+    gene_name = lstline.split("\t")[5]
+    info = lstline.split("\t")[6]
+    towrite = " ".join([name, str(size), gene_name, info])
+    outfile.write(">" + towrite + "\n")
