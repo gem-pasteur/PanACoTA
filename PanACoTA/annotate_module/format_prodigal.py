@@ -9,8 +9,9 @@ Functions to convert prodigal result files to gembase format.
     * Genes: multifasta of all genes in nuc
     * gff3: gff files without sequence
     * LSTINFO: information on annotation. Columns are: "start end strand type locus
-    gene_name | product | EC_number | inference2" and strain is C (complement) or D (direct). Locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
-    For prodigal: "start end strand type locus NA | NA | NA | NA"
+    gene_name | product | EC_number | inference2" and strain is C (complement) or D (direct).
+    Locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
+    For prodigal: "start end strand type locus NA | NA | NA | NA", as no functional annotation.
 
 @author gem
 April 2019
@@ -18,6 +19,7 @@ April 2019
 
 import os
 import PanACoTA.annotate_module.general_format_functions as gfunc
+
 
 def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
                       rep_dir, gff_dir, logger):
@@ -38,6 +40,8 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
         gembase name of the genome
     prod_path : str
         directory where prodigal folders are saved
+    name : str
+        gembase name of the genome
     lst_dir : srt
         path to LSTINFO folder
     prot_dir : str
@@ -69,6 +73,8 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
 
     # First, create gen and lst files
     create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger)
+
+    # utils.rename_genome_contigs(gembase_name, gpath, outfile):\
 
 
 def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
@@ -178,7 +184,3 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
                                               prev_loc, name, prev_cont_num, "NA", "NA", prev_strand, prev_start, prev_end, r_lst)
         gfunc.write_header(lstline, r_gen)
         r_gen.write(seq)
-
-
-
-
