@@ -79,6 +79,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     os.makedirs(rep_dir, exist_ok=True)
     os.makedirs(gff_dir, exist_ok=True)
 
+    # If this function goes until here, it means that there is at least 1 genome to annotate
     nbgen = len(genomes)
     bar = None
     if not quiet:
@@ -92,10 +93,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     m = multiprocessing.Manager()
     q = m.Queue()
 
-    # list of genomes skipped because annotation had problems: no format step run
-    skipped = [genome for (genome, ok) in results.items() if not ok]
-    # List of genomes to format
-    results_ok = [genome for (genome, ok) in results.items() if ok]
+    # if at least 1 genome ok, try to format it
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
                rep_dir, gff_dir, results_ok, prodigal_only, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
@@ -121,9 +119,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     # List of genomes for which format step had problems: will be filled after
     skipped_format = []
     for output in res:
-        if output[0] == "bad_prokka":
-            skipped.append(output[1])
-        elif not output[0]:
+        if not output[0]:
             skipped_format.append(output[1])
     return skipped, skipped_format
 

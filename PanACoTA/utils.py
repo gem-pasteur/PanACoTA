@@ -345,7 +345,7 @@ def plot_distr(values, limit, title, text):
     return fig
 
 
-def write_warning_skipped(skipped, do_format=False):
+def write_warning_skipped(skipped, do_format=False, prodigal_only=False):
     """
     At the end of the script, write a warning to the user with the names of the genomes
     which had problems with prokka.
@@ -357,24 +357,31 @@ def write_warning_skipped(skipped, do_format=False):
     do_format : bool
         if False, genomes were not skipped because of format step, but before that.\
         if True, they were skipped because of format
-
+    prodigal_only : bool
+        if False: used prokka to annotate
+        if True: used prodigal to annotate
     """
+    if not prodigal_only:
+        soft = "Prokka"
+    else:
+        soft = "Prodigal"
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not do_format:
-        logger.warning(("Prokka had problems while annotating some genomes, or did not "
+        logger.warning(("{} had problems while annotating some genomes, or did not "
                         "find any gene. Hence, they are not "
                         "formatted, and absent from your output database. Please look at their "
-                        "Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
-                        "to the current error log (<output_directory>/<input_filename>.log.err)"
+                        "{} logs (<output_directory>/tmp_files/<genome_name>-{}.log and .log.err) "
+                        " and to the current error log "
+                        "<output_directory>/<input_filename>.log.err)"
                         " to get more information, and run again to annotate and format them. "
                         "Here are the genomes (problem with prokka or no "
-                        "gene found): \n{}").format(list_to_write))
+                        "gene found): \n{}").format(soft, soft, soft, list_to_write))
     else:
-        logger.warning(("Some genomes were annotated by prokka, but could not be formatted, "
+        logger.warning(("Some genomes were annotated by {}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at log "
                         "files to get more information about why they could not be "
-                        "formatted.\n{}").format(list_to_write))
+                        "formatted.\n{}").format(soft, list_to_write))
 
 
 def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):

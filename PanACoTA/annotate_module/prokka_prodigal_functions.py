@@ -189,21 +189,31 @@ def run_prokka(arguments):
     # So, outdir does not exist -> run prokka
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
+    error = "Error while trying to run prokka"
     prokf = open(prok_logfile, "w")
-    ok = None
-    try:
-        subprocess.call(shlex.split(cmd), stdout=fnull, stderr=prokf)
-        ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
-        prokf.close()
-        if ok:
-            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-        return ok
-    except Exception as err:  # pragma: no cover
-        logger.error("Error while trying to run prokka: {}".format(err))
-        prokf.close()
-        if ok:
-            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+    ret = run_cmd(cmd, error, eof=False, stderr=prokf)
+    prokf.close()
+    if ret.returncode != 0:
         return False
+    ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+    if ok:
+        logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+    return ok
+
+
+    # try:
+    #     subprocess.call(shlex.split(cmd), stdout=fnull, stderr=prokf)
+    #     ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
+    #     prokf.close()
+    #     if ok:
+    #         logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+    #     return ok
+    # except Exception as err:  # pragma: no cover
+    #     logger.error("Error while trying to run prokka: {}".format(err))
+    #     prokf.close()
+    #     if ok:
+    #         logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+    #     return False
 
 
 def run_prodigal(arguments):
@@ -282,35 +292,32 @@ def run_prodigal(arguments):
         # -> return False
         return ok
     else:
-        # We are sure prodigal result dir does not exist yet, because:
+        # We are sure prodigal result dir does not exist yet, because either:
         #     - never existed
         #     - removed because user asked to force
-        #     - exists but left function -> either if files inside are ok or not
+        #     - exists but left function, so does not go until this line
+        #        -> either if files inside are ok or not
         # So make prodigal_dir (not automatically created by prodigal)
         os.makedirs(prodigal_dir)
+
     # Prodigal_directory is empty and ready to get prodigal results
     basic_outname = os.path.join(prodigal_dir, name)
-    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q -p meta").format(gpath,
-                                                                        basic_outname + ".ffn",
-                                                                        basic_outname + ".faa",
-                                                                        basic_outname + ".gff")
-    logger.details("Prodigal command: " + cmd)
+    # Define cmd, stderr and stdout files, and error to write if problem.
+    error = "Error while trying to run prodigal. See {}".format(prodigal_logfile_err)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
-    # Run prodigal, and get exit code of prodigal run
-    exit_code = subprocess.call(shlex.split(cmd), stdout=prodigalf, stderr=prodigalferr)
-    ok = False
-    # If error running prodigal, return False (default 'ok' variable) + error message
-    if exit_code != 0:
-        logger.error("Error while trying to run prodigal. See {}".format(prodigal_logfile_err))
-    # If no error, 'ok' is True, message attesting end of annotation
-    else:
-        logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
-        ok = True
-    # Close logfiles and return result (True if annotated, False otherwise)
+    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q").format(gpath, basic_outname + ".ffn",
+                                                                basic_outname + ".faa",
+                                                                basic_outname + ".gff")
+    logger.details("Prodigal command: " + cmd)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
     prodigalf.close()
     prodigalferr.close()
-    return ok
+    if ret.returncode == 0:
+        logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
+        return True
+    else:
+        return False
 
 
 def check_prokka(outdir, logf, name, gpath, nbcont, logger):

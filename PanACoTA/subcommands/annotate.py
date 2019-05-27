@@ -290,13 +290,22 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, quiet=quiet)
-    # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped, skipped_format = ffunc.format_genomes(genomes, results, res_dir, res_annot_dir,
-                                                   prodigal_only, threads, quiet=quiet)
+    # list of genomes skipped because annotation had problems: no format step run
+    skipped = [genome for (genome, ok) in results.items() if not ok]
+    # List of genomes to format
+    results_ok = {genome: ok for (genome, ok) in results.items() if ok}
+    # If no genome was ok, no need to format them
+    if not results_ok:
+        logger.warning("No genome was correctly annotated, no need to format them.")
+        skipped_format = []
+    else:
+        # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
+        skipped, skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
+                                                       prodigal_only, threads, quiet=quiet)
     if skipped:
-        utils.write_warning_skipped(skipped)
+        utils.write_warning_skipped(skipped, prodigal_only=prodigal_only)
     if skipped_format:
-        utils.write_warning_skipped(skipped_format, do_format=True)
+        utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only)
     logger.info("Annotation step done.")
     return genomes, kept_genomes, skipped, skipped_format
 
