@@ -178,7 +178,7 @@ def handle_genome(args):
     if genome not in results:
         return "no_res", genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
-                                          prot_dir, gene_dir, rep_dir, gff_dir, logger)
+                                  prot_dir, gene_dir, rep_dir, gff_dir, logger)
     return ok_format, genome
 
 

@@ -229,7 +229,7 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                     crispr_id_lst = int(lstline.split("\t")[4].split("_CRISPR")[-1])
                     print(lstline, crispr_id_lst)
                     if crispr_id == crispr_id_lst:
-                        write_header(lstline, gen)
+                        general.write_header(lstline, gen)
                         crispr_id += 1
                     else:
                         logger.error(("Problem with CRISPR numbers in {}. CRISPR {} in ffn is "
@@ -268,7 +268,7 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                         gen_id_lst = int(id_lst)
                 # If it found the same gene ID, write info in gene file
                 if gen_id == gen_id_lst:
-                    write_header(lstline.strip(), gen)
+                    general.write_header(lstline.strip(), gen)
                 # If gene ID of ffn not found, write error message and stop
                 else:
                     logger.error("Missing info for gene {} in {}. If it is actually present "
@@ -335,7 +335,7 @@ def create_prt(faaseq, lstfile, prtseq, logger):
                         gen_id_lst = int(id_lst)
                 # check that gen_id is the same as the lst line
                 if gen_id == gen_id_lst:
-                    write_header(lstline, prt)
+                    general.write_header(lstline, prt)
                 else:
                     logger.error(("Missing info for protein {} in {}. If it is actually present "
                                   "in the lst file, check that proteins are ordered by increasing "

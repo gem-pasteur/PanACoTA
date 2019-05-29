@@ -192,7 +192,7 @@ def run_prokka(arguments):
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
     error = "Error while trying to run prokka"
     prokf = open(prok_logfile, "w")
-    ret = run_cmd(cmd, error, eof=False, stderr=prokf)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf)
     prokf.close()
     if ret.returncode != 0:
         return False
