@@ -45,8 +45,8 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     ----------
     genomes : dict
         {genome: [name, gpath, size, nbcont, l90]}
-    results : dict
-        {genome: bool} True if prokka ran well, False otherwise
+    results : list
+        List of genome annotated by prokka/prodigal, that must be formatted
     res_path : str
         path to folder where the 4 directories must be created
     annot_path : str
@@ -95,7 +95,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
 
     # if at least 1 genome ok, try to format it
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
-               rep_dir, gff_dir, results_ok, prodigal_only, q)
+               rep_dir, gff_dir, results, prodigal_only, q)
               for genome, (name, gpath, _, _, _) in genomes.items()]
 
     # Create pool and launch parallel formating steps
@@ -121,7 +121,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     for output in res:
         if not output[0]:
             skipped_format.append(output[1])
-    return skipped, skipped_format
+    return skipped_format
 
 
 def handle_genome(args):

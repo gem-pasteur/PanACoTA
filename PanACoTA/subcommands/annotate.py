@@ -116,12 +116,12 @@ def main_from_parse(arguments):
     main(cmd, arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
          arguments.force, arguments.qc_only, arguments.tmpdir, arguments.annotdir,
-         arguments.verbose, arguments.quiet, arguments.prodigal_only)
+         arguments.verbose, arguments.quiet, arguments.prodigal_only, arguments.small)
 
 
 def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, tmp_dir=None, res_annot_dir=None,
-         verbose=0, quiet=False, prodigal_only=False):
+         verbose=0, quiet=False, prodigal_only=False, small=False):
     """
     Main method, doing all steps:
 
@@ -289,19 +289,19 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
-                                       prodigal_only, quiet=quiet)
+                                       prodigal_only, small, quiet=quiet)
     # list of genomes skipped because annotation had problems: no format step run
     skipped = [genome for (genome, ok) in results.items() if not ok]
     # List of genomes to format
-    results_ok = {genome: ok for (genome, ok) in results.items() if ok}
+    results_ok = [genome for (genome, ok) in results.items() if ok]
     # If no genome was ok, no need to format them
     if not results_ok:
         logger.warning("No genome was correctly annotated, no need to format them.")
         skipped_format = []
     else:
         # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-        skipped, skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
-                                                       prodigal_only, threads, quiet=quiet)
+        skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
+                                              prodigal_only, threads, quiet=quiet)
     if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only)
     if skipped_format:
@@ -427,6 +427,10 @@ def build_parser(parser):
                                 "again, and the formating step will use the already existing "
                                 "folder if correct, or skip the genome if there are problems in "
                                 "prokka/prodigal folder."))
+    optional.add_argument("--small", dest="small", action="store_true", default=False,
+                          help=("If you use Prodigal to annotate genomes, if you sequences are "
+                                "too small (less than 20000 characters), it cannot annotate them "
+                                "with the default options. Add this to use 'meta' procedure."))
     optional.add_argument("--threads", dest="threads", type=int, default=1,
                           help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
@@ -487,6 +491,9 @@ def check_args(parser, args):
     if args.verbose >= 15 and args.quiet:
         parser.error("Choose between a debug output (at least 15 'v') or quiet output (-q)."
                      " You cannot have both...")
+    if not args.prodigal_only and args.small:
+        parser.error("You cannot use --small option with prokka. Either use prodigal, "
+                     "or remove this option.")
     return args
 
 

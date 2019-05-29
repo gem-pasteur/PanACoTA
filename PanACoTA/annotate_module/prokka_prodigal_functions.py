@@ -23,7 +23,8 @@ import threading
 import PanACoTA.utils as utils
 
 
-def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=False, quiet=False):
+def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=False, small=False,
+                       quiet=False):
     """
     For each genome in genomes, run prokka (or only prodigal) to annotate the genome.
 
@@ -68,7 +69,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
         widgets = ['Annotation: ', progressbar.Bar(marker='█', left='', right=''),
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
-                   ]
+                  ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
                                       term_width=100).start()
     if threads <= 3:
@@ -90,7 +91,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
     # {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
     # arguments : (gpath, annot_folder, threads, name, force, nbcont, q) for each genome
     arguments = [(genomes[g][1], annot_folder, cores_annot, genomes[g][0],
-                  force, genomes[g][3], q)
+                  force, genomes[g][3], small, q)
                  for g in sorted(genomes)]
     try:
         final = pool.map_async(run_annot, arguments, chunksize=1)
@@ -141,7 +142,7 @@ def run_prokka(arguments):
         True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prok_folder, threads, name, force, nbcont, q = arguments
+    gpath, prok_folder, threads, name, force, nbcont, _, q = arguments
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -201,21 +202,6 @@ def run_prokka(arguments):
     return ok
 
 
-    # try:
-    #     subprocess.call(shlex.split(cmd), stdout=fnull, stderr=prokf)
-    #     ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
-    #     prokf.close()
-    #     if ok:
-    #         logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    #     return ok
-    # except Exception as err:  # pragma: no cover
-    #     logger.error("Error while trying to run prokka: {}".format(err))
-    #     prokf.close()
-    #     if ok:
-    #         logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
-    #     return False
-
-
 def run_prodigal(arguments):
     """
     Run prodigal for the given genome.
@@ -231,6 +217,7 @@ def run_prodigal(arguments):
         * name: output name of annotated genome
         * force: True if force run (override existing files), False otherwise
         * nbcont: number of contigs in the input genome, to check prodigal results
+        * small: ifcontigs are too small (<20000bp), use -p meta option
         * q : queue where logs are put
 
     Returns
@@ -239,7 +226,7 @@ def run_prodigal(arguments):
         True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prodigal_folder, threads, name, force, nbcont, q = arguments
+    gpath, prodigal_folder, threads, name, force, nbcont, small, q = arguments
 
     # Set logger for this process, which will be given to all subprocess
     qh = logging.handlers.QueueHandler(q)
@@ -300,15 +287,21 @@ def run_prodigal(arguments):
         # So make prodigal_dir (not automatically created by prodigal)
         os.makedirs(prodigal_dir)
 
+    # If small contigs, add -p meta option
+    if small:
+        meta = "-p meta"
+    else:
+        meta = ""
     # Prodigal_directory is empty and ready to get prodigal results
     basic_outname = os.path.join(prodigal_dir, name)
     # Define cmd, stderr and stdout files, and error to write if problem.
     error = "Error while trying to run prodigal. See {}".format(prodigal_logfile_err)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
-    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q").format(gpath, basic_outname + ".ffn",
-                                                                basic_outname + ".faa",
-                                                                basic_outname + ".gff")
+    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q {}").format(gpath, basic_outname + ".ffn",
+                                                                   basic_outname + ".faa",
+                                                                   basic_outname + ".gff", meta
+                                                                  )
     logger.details("Prodigal command: " + cmd)
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
     prodigalf.close()

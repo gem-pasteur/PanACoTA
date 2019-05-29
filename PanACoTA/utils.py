@@ -368,15 +368,16 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False):
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not do_format:
-        logger.warning(("{} had problems while annotating some genomes, or did not "
+        logger.warning(("{0} had problems while annotating some genomes, or did not "
                         "find any gene. Hence, they are not "
                         "formatted, and absent from your output database. Please look at their "
-                        "{} logs (<output_directory>/tmp_files/<genome_name>-{}.log and .log.err) "
+                        "{0} logs (<output_directory>/tmp_files/<genome_name>-{0}.log and "
+                        ".log.err) "
                         " and to the current error log "
                         "<output_directory>/<input_filename>.log.err)"
                         " to get more information, and run again to annotate and format them. "
-                        "Here are the genomes (problem with prokka or no "
-                        "gene found): \n{}").format(soft, soft, soft, list_to_write))
+                        "Here are the genomes (problem with {1} or no "
+                        "gene found): \n{0}").format(soft, list_to_write))
     else:
         logger.warning(("Some genomes were annotated by {}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at log "
