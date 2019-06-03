@@ -303,9 +303,11 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
                                               prodigal_only, threads, quiet=quiet)
     if skipped:
-        utils.write_warning_skipped(skipped, prodigal_only=prodigal_only)
+        utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
+                                   logfile=logfile_base + ".log")
     if skipped_format:
-        utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only)
+        utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
+                                    logfile = logfile_base + ".log")
     logger.info("Annotation step done.")
     return genomes, kept_genomes, skipped, skipped_format
 

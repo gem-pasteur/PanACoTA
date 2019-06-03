@@ -345,7 +345,7 @@ def plot_distr(values, limit, title, text):
     return fig
 
 
-def write_warning_skipped(skipped, do_format=False, prodigal_only=False):
+def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile=""):
     """
     At the end of the script, write a warning to the user with the names of the genomes
     which had problems with prokka.
@@ -379,9 +379,10 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False):
                         "Here are the genomes (problem with {1} or no "
                         "gene found): \n{0}").format(soft, list_to_write))
     else:
+        logger.info("WARNING: Some genomes could not be formatted. See {}".format(logfile))
         logger.warning(("Some genomes were annotated by {}, but could not be formatted, "
-                        "and are hence absent from your output database. Please look at log "
-                        "files to get more information about why they could not be "
+                        "and are hence absent from your output database. Please look at "
+                        "log.details files to get more information about why they could not be "
                         "formatted.\n{}").format(soft, list_to_write))
 
 

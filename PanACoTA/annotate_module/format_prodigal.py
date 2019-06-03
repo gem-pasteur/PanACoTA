@@ -118,6 +118,7 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
     prev_start = ""
     prev_end = ""
     prev_strand = ""
+    prev_annot = ""
     # Update loc when contig changes
     prev_loc = "b"
     loc = "b"
@@ -125,6 +126,7 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
     # Open files: ffn prodigal to read, .gen and .lst gembase to create
     with open(gen_file, "r") as ffn, open(res_gene_file, "w") as r_gen,\
          open(res_lst_file, "w") as r_lst:
+        # Read all lines in ffn file (sequences in nuc. for each gene)
         for lineffn in ffn:
             # If it is a sequence, save it and go to next line
             if not lineffn.startswith(">"):
@@ -156,6 +158,7 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
                     prev_start = start
                     prev_end = end
                     prev_cont_num = contig_num
+                    prev_annot = annot
                     if int(strand) == 1:
                         strand = "D"
                     else:
@@ -165,7 +168,8 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
 
                 # Write line in lstinfo, + header and sequence to the gene file
                 _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                                  prev_loc, name, prev_cont_num, "NA", "NA", prev_strand, prev_start, prev_end, r_lst)
+                                              prev_loc, name, prev_cont_num, "NA", prev_annot,
+                                              prev_strand, prev_start, prev_end, r_lst)
                 gfunc.write_header(lstline, r_gen)
                 r_gen.write(seq)
 
@@ -183,10 +187,12 @@ def create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger):
                 prev_end = end
                 prev_strand = strand
                 prev_loc = loc
+                prev_annot = annot
         # Write last sequence (-> loc = 'b')
         prev_loc = "b"
         _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                              prev_loc, name, prev_cont_num, "NA", "NA", prev_strand, prev_start, prev_end, r_lst)
+                                      prev_loc, name, prev_cont_num, "NA", prev_annot, prev_strand,
+                                      prev_start, prev_end, r_lst)
         gfunc.write_header(lstline, r_gen)
         r_gen.write(seq)
         return True
@@ -213,10 +219,11 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
         True if conversion went well, False otherwise
     """
 
-    # Open
-    # + prot file to read gene sequences from prodigal results
-    # + res_prot file to write sequences with with gembase headers
-    # + res_lst_file to get genes gembase names
+    # Open:
+    # - prot file to read gene sequences from prodigal results
+    # - res_prot file to write sequences with gembase headers
+    # - res_lst_file to get genes gembase names and other infos (strand, size...)
+
     with open(prot_file, "r") as faa, open(res_prot_file, "w") as r_prt,\
          open(res_lst_file, "r") as r_lst:
          for lineprot in faa:
@@ -227,10 +234,12 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
             # If header, replace by gembase header
             linelst = r_lst.readline()
             # gembase name is in the fifth column of lst file
-            start, end, _, _, gem_name, product, info = linelst.split("\t")[4]
+            start, end, _, _, gem_name, product, info = linelst.strip().split("\t")
+
             # Write this gembase name as a new header
-            prt_header = "\t".join([gem_name, str(int(end) - int(start)), product, info])
-            r_prt.write(">" + prt_header + "\n")
+            size = int(end) - int(start) + 1
+            towrite = "\t".join([gem_name, str(size), product, info])
+            r_prt.write(">" + towrite + "\n")
 
 
 
