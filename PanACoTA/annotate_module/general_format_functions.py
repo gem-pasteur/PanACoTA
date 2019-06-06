@@ -264,3 +264,12 @@ def write_header(lstline, outfile):
     info = lstline.split("\t")[6]
     towrite = " ".join([name, str(size), gene_name, info])
     outfile.write(">" + towrite + "\n")
+
+
+def get_contig_name(genome, cont_num):
+    """
+    From a genome name and a contig number, write the header corresponding to this contig
+    (for 'Replicons' files)
+    """
+    return ">{}.{}".format(genome, str(cont_num).zfill(4))
+
