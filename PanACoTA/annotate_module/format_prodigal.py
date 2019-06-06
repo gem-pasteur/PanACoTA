@@ -18,6 +18,9 @@ April 2019
 """
 
 import os
+import shutil
+
+import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as gfunc
 
 
@@ -71,7 +74,10 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     res_rep_file = os.path.join(rep_dir, name + ".fna")
     res_gff_file = os.path.join(gff_dir, name + ".gff")
 
-    # First, create gen and lst files
+    # Create replicon file. Same as input sequence but with gembase formatted headers
+    create_replicons(gpath, res_rep_file, name)
+
+    # First, create gen and lst files, and get genome contig names
     ok = create_gene_lst(gen_file, res_gene_file, res_lst_file, name, logger)
     if not ok:
         os.remove(res_gene_file)
@@ -240,6 +246,29 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
             size = int(end) - int(start) + 1
             towrite = "\t".join([gem_name, str(size), product, info])
             r_prt.write(">" + towrite + "\n")
+
+
+def create_replicons(gpath, res_rep_file, name):
+    """
+    Create Replicons file:
+
+    Read input sequence, and replace headers with the new contig headers (found while creating
+    lst and gen files)
+
+    Parameters
+        ----------
+        gpath : str
+            path to the genome sequence
+        name : str
+            genome name to use (species.date.strain)
+        res_rep_file : str
+            path to the new file, containing 'gpath' sequence, but with 'gembase_name' in headers
+    """
+    # Copy original sequence to Replicons directory
+    shutil.copyfile(gpath, res_rep_file)
+    # Change headers to put into gembase format
+    utils.rename_genome_contigs(name, gpath, res_rep_file)
+
 
 
 
