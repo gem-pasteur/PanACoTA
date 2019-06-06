@@ -23,6 +23,7 @@ April 2019
 
 import os
 import glob
+import shutil
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as general
 
