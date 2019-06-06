@@ -209,7 +209,16 @@ This folder contains 1 file per genome, called ``<genome_name>.fna``. It corresp
 gff3 folder
 ^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_
+This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following headers format.
+
+.. code-block:: text
+
+    ##gff-version 3
+    ##sequence-region <contig_name> <begin> <end>
+    <lines for each gene of contig1>
+    ##sequence-region <contig_name> <begin> <end>
+    <lines for each gene of contig2>
+
 
 .. _qco:
 
