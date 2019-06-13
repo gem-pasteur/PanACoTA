@@ -847,7 +847,7 @@ def check_out_dirs(resdir):
         sys.exit(1)
 
 
-def rename_genome_contigs(gembase_name, gpath, outfile):
+def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name', and save the output sequence in outfile
@@ -863,14 +863,25 @@ def rename_genome_contigs(gembase_name, gpath, outfile):
 
     """
     contig_num = 1
+    cont_size = 0
+    contigs = []
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
         for line in gpf:
-            if line.startswith(">"):
+            # When we find a new header line, convert its name to gembase format, and write it
+            # to the list of contigs, as well as its size (calculated before)
+            if line.startswith(">") :
                 new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                contig_num += 1
                 grf.write(new_cont + "\n")
+                # If first contig, just convert its name, but no size yet
+                if cont_size != 0:
+                    contigs.append("{};{}".format(new_cont, cont_size))
+                contig_num += 1
+                cont_size = 0
             else:
                 grf.write(line)
+                cont_size += len(line.strip())
+        contigs.append("{};{}".format(new_cont, cont_size))
+    return contigs
 
 
 def logger_thread(q):
