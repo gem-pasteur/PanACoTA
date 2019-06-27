@@ -850,7 +850,10 @@ def check_out_dirs(resdir):
 def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     """
     For the given genome (sequence in gpath), rename all its contigs
-    with the new name: 'gembase_name', and save the output sequence in outfile
+    with the new name: 'gembase_name', and save the output sequence in outfile.
+
+    For each contig renamed, save its new name as well as its size. This will be used to generate
+    gff files
 
     Parameters
     ----------
@@ -861,22 +864,30 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     outfile : str
         path to the new file, containing 'gpath' sequence, but with 'gembase_name' in headers
 
+    Returns
+    -------
+    list
+        List of all contigs with their size ["contig1;size1", "contig2;size2" ...]
     """
+    # Initialize variables
     contig_num = 1
     cont_size = 0
     contigs = []
+    # Read input sequence given to prodigal, and open file where sequences with new
+    # headers must be written.
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
         for line in gpf:
             # When we find a new header line, convert its name to gembase format, and write it
-            # to the list of contigs, as well as its size (calculated before)
+            # to output replicon file
             if line.startswith(">") :
                 new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 grf.write(new_cont + "\n")
-                # If first contig, just convert its name, but no size yet
+                # If not first contig (size != 0), add its name as well as its size to contigs list
                 if cont_size != 0:
                     contigs.append("{};{}".format(new_cont, cont_size))
                 contig_num += 1
                 cont_size = 0
+            # Sequence line: write it as is in replicon file, and add its size to cont_size.
             else:
                 grf.write(line)
                 cont_size += len(line.strip())
