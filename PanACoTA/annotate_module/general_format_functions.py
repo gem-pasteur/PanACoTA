@@ -192,11 +192,11 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     gtype : str
         type of feature (CDS, tRNA, etc.)
     locus_num : str
-        number of the locus given by prokka
+        number of the locus given by prokka/prodigal
     gene_name : str
-        gene name found by prokka ("NA" if no gene name)
+        gene name found by prokka/prodigal ("NA" if no gene name)
     product : str
-        found by prokka, "NA" if no product
+        found by prokka/Prodigal, "NA" if no product (always the case for prodigal)
     crispr_num : int
         current crispr number. In prokka tbl, CRISPRs are not numbered, they all
         have the same name. We name them by adding a unique number to each CRISPR. If the current
@@ -258,10 +258,8 @@ def write_header(lstline, outfile):
         open file where header must be written-
 
     """
-    name = lstline.split("\t")[4]
-    size = int(lstline.split("\t")[1]) - int(lstline.split("\t")[0]) + 1
-    gene_name = lstline.split("\t")[5]
-    info = lstline.split("\t")[6]
+    start, end, _, _, name, gene_name, info = lstline.split("\t")
+    size = int(end) - int(start) + 1
     towrite = " ".join([name, str(size), gene_name, info])
     outfile.write(">" + towrite + "\n")
 
