@@ -41,9 +41,9 @@ def test_install_panacota():
     # check installed softs before installing panacota
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from base"
+    assert not utils.check_installed("barrnap")
     assert utils.check_installed("prodigal")
     assert not utils.check_installed("PanACoTA")
-    assert not utils.check_installed("barrnap")
     # install panacota and check installation
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
