@@ -867,12 +867,22 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     Returns
     -------
     list
-        List of all contigs with their size ["contig1;size1", "contig2;size2" ...]
+        List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
     """
     # Initialize variables
+
+    # Contig number
     contig_num = 1
+    # contig size
     cont_size = 0
+    # List of contigs [<name>\t<size>]
     contigs = []
+    # Name of previous contig (to put to contigs, as we need to wait for the next
+    # contig to know the size of the previous one)
+    prev_cont = ""
+    # sequence of previous contig
+    seq = ""
+
     # Read input sequence given to prodigal, and open file where sequences with new
     # headers must be written.
     with open(gpath, "r") as gpf, open(outfile, "w") as grf:
@@ -880,18 +890,27 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
             # When we find a new header line, convert its name to gembase format, and write it
             # to output replicon file
             if line.startswith(">") :
-                new_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                grf.write(new_cont + "\n")
-                # If not first contig (size != 0), add its name as well as its size to contigs list
-                if cont_size != 0:
-                    contigs.append("{};{}".format(new_cont, cont_size))
+                # If not first contig (contigs not empty):
+                # - add its name as well as its size to contigs list
+                # - write header ("<contig name> <size>") to replicon file
+                if prev_cont:
+                    cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
+                    contigs.append(cont)
+                    grf.write("\t".join([prev_cont, str(cont_size)]) + "\n")
+                    grf.write(seq)
+                prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 contig_num += 1
                 cont_size = 0
+                seq = ""
             # Sequence line: write it as is in replicon file, and add its size to cont_size.
             else:
-                grf.write(line)
+                seq += line
                 cont_size += len(line.strip())
-        contigs.append("{};{}".format(new_cont, cont_size))
+        # Write last contig
+        cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
+        contigs.append(cont)
+        grf.write("\t".join([prev_cont, str(cont_size)]) + "\n")
+        grf.write(seq)
     return contigs
 
 

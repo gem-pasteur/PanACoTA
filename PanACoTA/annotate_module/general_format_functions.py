@@ -194,14 +194,14 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     locus_num : str
         number of the locus given by prokka/prodigal
     gene_name : str
-        gene name found by prokka/prodigal ("NA" if no gene name)
+        gene name found by prokka/prodigal ("NA" if no gene name -> Always the case with Prodigal)
     product : str
         found by prokka/Prodigal, "NA" if no product (always the case for prodigal)
     crispr_num : int
         current crispr number. In prokka tbl, CRISPRs are not numbered, they all
         have the same name. We name them by adding a unique number to each CRISPR. If the current
         gene to add is a CRISPR, this number will be incremented and returned. If not, this same
-        name will be returned.
+        number will be returned.
     cont_loc : str
         'i' if the gene is inside a contig, 'b' if its on the border (first or last gene
         of the contig)
@@ -210,14 +210,14 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     cont_num : int
         contig number
     ecnum : str
-        EC number, found by prokka, or "NA" if no EC number
+        EC number, found by prokka, or "NA" if no EC number (-> always for prodigal)
     inf2 : str
-        more information found by prokka, or "NA" if no more information
+        more information found by prokka/prodigal, or "NA" if no more information
     strand : str
         C (complement) or D (direct)
-    start : int
+    start : str
         start of gene in the contig
-    end : int
+    end : str
         end of gene in the contig
     lstopenfile : _io.TextIOWrapper
         open file where lstinfo must be written
@@ -240,8 +240,7 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     more_info = "| {} | {} | {}".format(product.replace("|", "_"),
                                         ecnum.replace("|", "_"),
                                         inf2.replace("|", "_"))
-    lst_line = "\t".join([str(start), str(end), strand, gtype,
-                          locus_name, gene_name, more_info])
+    lst_line = "\t".join([start, end, strand, gtype, locus_name, gene_name, more_info])
     lstopenfile.write(lst_line + "\n")
     return crispr_num, lst_line
 
@@ -255,8 +254,7 @@ def write_header(lstline, outfile):
     lstline : str
         current line of lst file
     outfile : _io.TextIOWrapper
-        open file where header must be written-
-
+        open file where header must be written
     """
     start, end, _, _, name, gene_name, info = lstline.split("\t")
     size = int(end) - int(start) + 1
