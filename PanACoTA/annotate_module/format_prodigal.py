@@ -269,9 +269,9 @@ def create_rep_gff(gpath, res_rep_file, res_gff_file, res_lst_file, gff_file, na
 
     """
     contigs = create_replicons(gpath, res_rep_file, name)
-    # if contigs:
-    #     return create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logger)
-    return contigs
+    if contigs:
+        return create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logger)
+    return False
 
 
 def create_replicons(gpath, res_rep_file, name):
@@ -348,19 +348,27 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logge
     # open file to write new gff file
     # open lst file to read all information saved from prodigal results
     with open(gff_file, 'r') as gf, open(res_gff_file, "w") as rgf, open(res_lst_file, "r") as rlf:
-        # Write header of gff3 file
+        # Write headers of gff3 file
         rgf.write("##gff-version  3\n")
         for contig in contigs:
             # Write the list of contigs, with their size
             cont_name, end = contig.split("\t")
             rgf.write("##sequence-region\t{}\t{}\t{}".format(cont_name[1:], "1", end))
+
+        # Create an iterator of contig names, that will be used to get contig name
+        # corresponding to a given gene name (in lst, we only have gene name,
+        # but in gff we need corresponding contig name)
+        iter_contig = iter(contigs)
+        contig = next(iter_contig)
+        cname = contig.split("\t")[0][1:]
+
+        # Now, convert each line of prodigal gff to gembase formatted gff line
         for linegff in gf:
-            iter_contig = iter(contigs)
-            contig = next(iter_contig)
             # Ignore gff lines starting by #. For the new gff, these are already all written at the
             # beginning of the file.
             if linegff.startswith("#"):
                 continue
+
             # Get all information from prodigal gff line. Strip each of them as trailing whitespace
             # can be hidden (leading to information from gff considered as different from
             # information from lst)
@@ -375,8 +383,16 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logge
             fields_l = linelst.strip().split("\t")
             fields_l = [info.strip() for info in fields_l]
             start_l, end_l, strand_l, type_l, locus_l, _, _ = fields_l
-            cname = contig.split("\t")[0][1:]
 
+            # Get contig name 'cname'.
+            # -> if same contig as contig of previous gene -> cname does not change
+            # -> if not same contig, cname not in contig, so get next contig name
+            # (iterator of contigs created while writing replicon file)
+            # We use while, instead of just taking the next contig, because
+            # there could be a contig existing in replicon but not having any gene.
+            while cname not in locus_l:
+                contig = next(iter_contig)
+                cname = contig.split("\t")[0][1:]
 
             # Get gff and ffn filenames to give information to user if error message
             gff = os.path.basename(gff_file)
@@ -394,18 +410,20 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logge
                 # If 1 element is different (start or end position, or type), print error
                 # message and return False: this genome could not be converted to gff
                 if elemg != eleml:
-                    logger.error("Files {} and {} (in prodigal tmp_files: {}) do not have the same {} value for gene {}"
-                                 " ({} in gff, {} in ffn))".format(ffn, gff, tmp, label,
-                                                                   gname, elemg, eleml))
+                    logger.error("Files {} and {} (in prodigal tmp_files: {}) do not have "
+                                 "the same {} value for gene {} ({} in gff, {} in "
+                                 "ffn))".format(ffn, gff, tmp, label, gname, elemg, eleml))
                     return False
-                # Replace prodigal ID with the new gene name (in gembase format), found in the
-                # corresponding lst line
-                at_split = attributes.split(";")
-                new = [atr if "ID" not in atr else 'ID={}'.format(locus_l) for atr in at_split]
-                # Get information to put to the new gff line
-                # Get contig name without '>'
-                info = "\t".join([cname, source, type_g, start_g, end_g, score, strand_g, phase, ";".join(new)])
-                rgf.write(info + "\n")
+
+            # Replace prodigal ID with the new gene name (in gembase format), found in the
+            # corresponding lst line
+            at_split = attributes.split(";")
+            new = [atr if "ID" not in atr else 'ID={}'.format(locus_l) for atr in at_split]
+
+            # Write new line of gff file
+            info = "\t".join([cname, source, type_g, start_g, end_g, score, strand_g,
+                              phase, ";".join(new)])
+            rgf.write(info + "\n")
     return True
 
 

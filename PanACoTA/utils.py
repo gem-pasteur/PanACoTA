@@ -896,7 +896,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
                     contigs.append(cont)
-                    grf.write("\t".join([prev_cont, str(cont_size)]) + "\n")
+                    grf.write(cont)
                     grf.write(seq)
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 contig_num += 1
@@ -909,7 +909,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
         contigs.append(cont)
-        grf.write("\t".join([prev_cont, str(cont_size)]) + "\n")
+        grf.write(cont)
         grf.write(seq)
     return contigs
 
