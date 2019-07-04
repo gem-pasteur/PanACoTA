@@ -1,6 +1,6 @@
-=========================
+======================
 Starting with PanACoTA
-=========================
+======================
 
 
 ``PanACoTA`` is a Python package, developed in Python 3.

@@ -1,12 +1,12 @@
-========================
+=====================
 Work on PanACoTA code
-========================
+=====================
 
 This part is for people who want to work on developing `PanACoTA` package: adding new features, correcting bugs etc.
 
 
 Installing ``PanACoTA`` in development mode
-==============================================
+===========================================
 
 If you want to install ``PanACoTA`` while still working on modifying the scripts, type:
 

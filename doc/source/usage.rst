@@ -1,6 +1,6 @@
-=============================
+==========================
 Running PanACoTA: tutorial
-=============================
+==========================
 
 ``PanACoTA`` contains 5 subcommands, for the different steps:
     - ``annotate`` (annotate all genomes of the dataset, after a quality control)
