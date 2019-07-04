@@ -94,12 +94,26 @@ This will create a folder ``my_results``, containing:
 
 In the ``QC_L90-list_genomes.png``, we can see that all genomes have a L90 lower or equal to 4. Similarly, in ``QC_nb-contigs-list_genomes.png``, we can see that all genomes have less or equal to 4 contigs. This is consistent with the ``info-genomes-list_genomes.lst`` file.
 
-Annotation
-----------
+Annotation: functional (default) or only syntactic
+--------------------------------------------------
 
-Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits with::
+Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits with:
+
+Functional annotation with Prokka (default)::
 
     PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10
+
+Only syntactic annotation with Prodigal::
+
+    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal
+
+Yes, you should get an error message! Check indicated log files to get more information. Here is what happened:
+
+Prodigal does not accept, by default, sequences smaller than 20000 nucleotides, which is the case in this example. So, to run prodigal on such small sequences, we need to add the ``--small`` option::
+
+    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal --small
+
+.. note:: Only use --small option if you need to (if you have really small sequences). But keep in mind that, with so small sequences, annotation will be limited!
 
 Here, we put the L90 limit to 3, which should lead to the removal of 1 genome (genome2, according to the ``info-genomes-list_genomes.lst``). We also put the nbcont limit to 10. However, this should not remove any genome, as all have less than 10 contigs. We put these limits just to show how the program works with your own limits, but they do not have any significance here, as a genome with L90 = 4 is not a bad quality genome!
 
@@ -121,8 +135,9 @@ In your ``my_results`` directory, you should now have:
     - genome4 was named using 'GEN4' (specified in list file) and the date specified in list file (1111)
     - genome2 does not appear as it was discarded because its L90 is higher than the given limit, 3.
 - log files as previously. Check in the ``.log.err`` file that no error occurred. Note that if you used the same output directory as for the previous step, and did not remove the log files, the new ones do not erase the existing ones: they now have a timestamp corresponding to the time/date when you launched this annotation step. In the ``.log.details`` file, you now have more details, such as the start and end times of annotation of all genomes.
-- in ``tmp_files``, you still have the 'split5N' genomic sequence files, as well as prokka result folders.
+- in ``tmp_files``, you still have the 'split5N' genomic sequence files, as well as prokka/prodigal result folders.
 - You have 5 new folders: ``Replicons``, ``LSTINFO``, ``gff3``, ``Genes``, ``Proteins`` each one containing 3 files (1 per genome) with your results.
+
 
 PanGenome step
 ==============
