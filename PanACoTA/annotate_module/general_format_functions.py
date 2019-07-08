@@ -183,7 +183,7 @@ def handle_genome(args):
 
 
 def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
-               genome, cont_num, ecnum, inf2, strand, start, end, lstopenfile):
+               genome, cont_num, ecnum, inf2, db_xref, strand, start, end, lstopenfile):
     """
     Write given gene to output file
 
@@ -213,6 +213,8 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
         EC number, found by prokka, or "NA" if no EC number (-> always for prodigal)
     inf2 : str
         more information found by prokka/prodigal, or "NA" if no more information
+    db_xref : str
+        db_xref given by Prokka ("NA" for prodigal)
     strand : str
         C (complement) or D (direct)
     start : str
@@ -237,9 +239,10 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
     locus_name = "{}.{}{}_{}".format(genome, str(cont_num).zfill(4), cont_loc,
                                      str(locus_num).zfill(5))
     # If '|' character found in those fields, replace by '_' to avoid problems while parsing
-    more_info = "| {} | {} | {}".format(product.replace("|", "_"),
+    more_info = "| {} | {} | {} | {}".format(product.replace("|", "_"),
                                         ecnum.replace("|", "_"),
-                                        inf2.replace("|", "_"))
+                                        inf2.replace("|", "_"),
+                                        db_xref.replace("|", "_"))
     lst_line = "\t".join([start, end, strand, gtype, locus_name, gene_name, more_info])
     lstopenfile.write(lst_line + "\n")
     return crispr_num, lst_line

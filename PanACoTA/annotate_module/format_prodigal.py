@@ -225,7 +225,7 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
                 # Write line in LSTINFO file, + header and sequence to the gene file
                 _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
                                               prev_loc, name, prev_cont_num, "NA", prev_info,
-                                              prev_strand, prev_start, prev_end, r_lst)
+                                              "NA", prev_strand, prev_start, prev_end, r_lst)
                 gfunc.write_header(lstline, r_gen)
                 r_gen.write(seq)
 
@@ -247,8 +247,8 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
         # Write last gene of the genome (-> loc = 'b')
         prev_loc = "b"
         _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                      prev_loc, name, prev_cont_num, "NA", prev_info, prev_strand,
-                                      prev_start, prev_end, r_lst)
+                                      prev_loc, name, prev_cont_num, "NA", prev_info, "NA",
+                                      prev_strand, prev_start, prev_end, r_lst)
         gfunc.write_header(lstline, r_gen)
         r_gen.write(seq)
         return True
