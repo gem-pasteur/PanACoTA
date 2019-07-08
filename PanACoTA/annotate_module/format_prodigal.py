@@ -95,7 +95,8 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     # gembase formatted headers
     # From Replicon file, get contig names, and use them to generate gff file
     ok = create_rep_gff(gpath, res_rep_file, res_gff_file, res_lst_file, gff_file, name, logger)
-    # If problem while formatting the genome (rep or gff file), remove all already created files, and return False (genome not formatted) with error message.
+    # If problem while formatting the genome (rep or gff file), remove all
+    # already created files, and return False (genome not formatted) with error message.
     if not ok:
         try:
             os.remove(res_gene_file)
@@ -124,6 +125,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
         logger.error("Problems while generating .prt files (Proteins folder) "
                      "for {}".format(name))
         return False
+    return ok
 
 
 def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
