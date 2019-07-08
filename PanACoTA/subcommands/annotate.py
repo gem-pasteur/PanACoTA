@@ -294,6 +294,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     skipped = [genome for (genome, ok) in results.items() if not ok]
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
+
     # If no genome was ok, no need to format them
     if not results_ok:
         logger.warning("No genome was correctly annotated, no need to format them.")
@@ -412,7 +413,7 @@ def build_parser(parser):
                                 "of 'N', sequence with new contig names etc.) must be saved. "
                                 "By default, it will be saved in your "
                                 "result_directory/tmp_files."))
-    optional.add_argument("--annot", dest="annotdir",
+    optional.add_argument("--annot_dir", dest="annotdir",
                           help=("Specify in which directory the prokka/prodigal output files "
                                 "(1 folder per genome, called "
                                 "<genome_name>-[prokka, Prodigal]Res) must be "
