@@ -271,22 +271,24 @@ Annotation
 
 When you know the limits you want to use for the L90 and number of contigs, you can run the full annotation step, and not only the quality control. Use::
 
-    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num>]
+    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num> --prodigal --small]
 
 with:
     - same arguments as before
     - ``-n <name>`` the default species name to use, for lines of the list_file which do not contain this information. This name must contain 4 alpha-numeric characters.
     - ``--l90 <num>``: *optional*. If the default value (max L90 = 100) does not fit your data, choose your own maximum limit.
     - ``--nbcont <num>``: *optional*. If the default value (max nb_contigs = 999) does not fit your data, choose your own maximum limit.
+    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
+    - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
 
 This command will run the same steps as described in quality control only, with additional steps:
 
     - Keeping only genomes with L90 lower than the limit and number of contigs lower than the limit
     - For each species, ordering the genomes by increasing L90 and number of contigs, and assigning them a strain number
-    - annotating each genome with prokka
-    - formatting prokka results to the 4 output folders (see :ref:`output formats <outform>`)
+    - annotating each genome with prokka/prodigal
+    - formatting prokka/prodigal results to the 5 output folders (see :ref:`output formats <outform>`)
 
-This will also create a folder ``<res_path>``, with the following files inside:
+This will create a folder ``<res_path>``, with the following files inside:
 
     - same files as quality control only, except ``info-genomes-<list_file>.lst``.
     - ``LSTINFO_<list_file>.lst``: information on annotated genomes, as described :ref:`here<lstinfof>`
@@ -298,19 +300,20 @@ This will also create a folder ``<res_path>``, with the following files inside:
 Options
 -------
 
-Here is the list of options available when running ``PanACoTA annotate``:
+Here is the complete list of options available when running ``PanACoTA annotate``. You can get them by running ``PanACoTA annotate -h``:
 
     - ``-n <name>``: required when not running quality control only (see :ref:`annotation<annot>`)
     - ``-Q``: run quality control only (see :ref:`QC only<qco>`)
-    - ``--l90 <l90>``: to specify the maximum L90 value accepted to keep a genome. Default is 100
-    - ``--nbcont <number>``: to specify the maximum number of contigs allowed to keep a genome. Default is 999
-    - ``--cutN <number>``: by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
-    - ``--date <date>``: date used to name the genome (in gembase_format, see :ref:`first column of LSTINFO_file<lstinfof>`). If not given, and no information is given on a line in the list_file, the current date will be used.
-    - ``--tmp <tmpdir>``: to specify where the temporary files must be saved. By default, they are saved in ``<res_path>/tmp_files``.
-    - ``--prok <prok_dir>``: to specify where the prokka output folders must be saved. By default, they are saved in the same directory as ``<tmpdir>``. This can be useful if you want to run this step on a dataset for which some genomes are already annotated. For those genomes, it will use the already annotated results found in ``<prok_dir>`` to run the formatting steps, and it will only annotate the genomes not found.
-    - ``-F`` or ``--force``: Force run: Add this option if you want to run prokka and formatting steps for all genomes even if their result folder (for prokka step) or files (for format step) already exist: override existing results. Without this option, if there already are results in the given result folder, the program stops. If there are no results, but prokka folder already exists, prokka won't run again, and the formating step will use the already existing folder if correct, or skip the genome if there are problems in prokka folder.
-    - ``--threads <number>``: if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
-
+    - ``--l90 <l90>``: *optional*. to specify the maximum L90 value accepted to keep a genome. Default is 100
+    - ``--nbcont <number>``: *optional*. to specify the maximum number of contigs allowed to keep a genome. Default is 999
+    - ``--cutN <number>``: *optional*. by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
+    - ``--date <date>``: *optional*. date used to name the genome (in gembase_format, see :ref:`first column of LSTINFO_file<lstinfof>`). If not given, and no information is given on a line in the list_file, the current date will be used.
+    - ``--tmp <tmpdir>``: *optional*. to specify where the temporary files must be saved. By default, they are saved in ``<res_path>/tmp_files``.
+    - ``--annot_dir <annot_dir>``: *optional*. to specify where the prokka/prodigal output folders must be saved. By default, they are saved in the same directory as ``<tmpdir>``. This can be useful if you want to run this step on a dataset for which some genomes are already annotated. For those genomes, it will use the already annotated results found in ``<annot_dir>`` to run the formatting steps, and it will only annotate the genomes not found.
+    - ``-F`` or ``--force``: *optional*. Force run: Add this option if you want to run prokka/prodigal and formatting steps for all genomes even if their result folder (for prokka/prodigal step) or files (for format step) already exist: override existing results. Without this option, if there already are results in the given result folder, the program stops. If there are no results, but prokka/prodigal folder already exists, prokka/prodigal won't run again, and the formating step will use the already existing folder if correct, or skip the genome if there are problems in prokka folder.
+    - ``--threads <number>``: *optional*. if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
+    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
+    - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
 
 ``pangenome`` subcommand
 ========================
