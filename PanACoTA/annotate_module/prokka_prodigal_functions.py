@@ -423,17 +423,21 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
     faafile = glob.glob(os.path.join(prodigal_dir, "*.faa"))
     ffnfile = glob.glob(os.path.join(prodigal_dir, "*.ffn"))
     gfffile = glob.glob(os.path.join(prodigal_dir, "*.gff"))
+    missing_file = False
 
     if len(faafile) == 0:
         logger.error("{} {}: no .faa file".format(name, oriname))
+        logger.info("no faa")
         missing_file = True
     if len(ffnfile) == 0:
         logger.error("{} {}: no .ffn file".format(name, oriname))
         missing_file = True
+        logger.info("no ffn")
     if len(gfffile) == 0:
         logger.error("{} {}: no .gff file".format(name, oriname))
         missing_file = True
-    return missing_file
+        logger.info("no gff")
+    return not missing_file
 
 
 def count_tbl(tblfile):
