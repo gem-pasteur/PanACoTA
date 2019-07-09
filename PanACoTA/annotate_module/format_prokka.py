@@ -66,18 +66,27 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         True if genome was correctly formatted, False otherwise
     """
     prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
-    # Get .tbl file
+    # Get needed Prokka result files
     tblgenome = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
+    prokka_gff = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
+    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
+    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
+
+    #  Define names for generated gembase files
     lstgenome = os.path.join(lst_dir, name + ".lst")
+    gffgenome = os.path.join(gff_dir, name + ".gff")
+    gengenome = os.path.join(gene_dir, name + ".gen")
+    prtgenome = os.path.join(prot_dir, name + ".prt")
+    rep_file = os.path.join(rep_dir, name + ".fna")
+
     # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
     # If the user ran prokka, and then changed the genome names (for example, by changing
     # L90 threshold), and wants to format again its genomes with the new names, but without
     # running prokka again, we must change here the contig names (containing genome name).
-    same_name = tbl2lst(tblgenome, lstgenome, name)
+    same_name = tbl2lst(tblgenome, lstgenome, name, logger)
+    return False
 
     # Create gff3 file for annotations
-    prokka_gff = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
-    gffgenome = os.path.join(gff_dir, name + ".gff")
     ok_gff = generate_gff(prokka_gff, gffgenome, lstgenome, logger)
     if not ok_gff:
         os.remove(gffgenome)
@@ -85,8 +94,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # create Genes file (and check no problem occurred with return code)
-    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
-    gengenome = os.path.join(gene_dir, name + ".gen")
     ok_gene = create_gen(ffngenome, lstgenome, gengenome, logger)
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
@@ -95,8 +102,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         os.remove(lstgenome)
         return False
     # If gene file was created, create Proteins file
-    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
-    prtgenome = os.path.join(prot_dir, name + ".prt")
     ok_prt = create_prt(faagenome, lstgenome, prtgenome, logger)
 
     # If protein file not created, return False: format did not run for this genome
@@ -106,7 +111,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         os.remove(gengenome)
         return False
     # Create Replicons file
-    rep_file = os.path.join(rep_dir, name + ".fna")
     # If the genome name did not change after prokka run, copy genome sequence
     # given to prokka to Replicons folder.
     if same_name:
@@ -352,7 +356,7 @@ def create_prt(faaseq, lstfile, prtseq, logger):
     return not problem
 
 
-def tbl2lst(tblfile, lstfile, genome):
+def tbl2lst(tblfile, lstfile, genome, logger):
     """
     Read prokka tbl file, and convert it to the lst file.
 
@@ -375,7 +379,7 @@ def tbl2lst(tblfile, lstfile, genome):
         start end strand type locus gene_name | product | EC_number | inference 2
 
     with the same types as prokka file, and strain is C (complement) or D (direct)
-    locus is: `<genome_name>.<i or b><contig_num>_<protein_num>`
+    locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
 
     Parameters
     ----------
@@ -385,76 +389,132 @@ def tbl2lst(tblfile, lstfile, genome):
         name of lst file to generate
     genome : str
         genome name (gembase format)
+    logger : logging.Logger
+        log object to add information
 
     Returns
     -------
     bool :
         True if genome name used in lstfile and prokka tblfile are the same, False otherwise
     """
-    same_name = True
-    crispr_num, cont_num = 1, 0
-    start, end = -1, -1
-    strand, gtype, locus_num = [""] * 3
-    gene_name, product, ecnum, inf2 = ["NA"] * 4
+    # Number CRISPRs. By default, 0 CRISPR
+    crispr_num = 0
+    # Protein localisation in contig (b = border ; i = inside)
     cont_loc = "b"
-    strain = ""
+    prev_cont_loc = "b"
+    # Current contig number. Used to compare with new one, to know if protein is
+    # inside or at the boder of a contig
+    cont_num = "-1"
+    prev_cont_num = "-1"
+    # Information on current feature. At the beginning, everything empty, no information
+    gene_name = ""
+    product = ""
+    ecnum = ""
+    inf2 = ""
+    db_xref = ""
+    start = -1
+    end = -1
+    strand = "D"
+    # Feature type (CDS, tRNA...)
+    feature_type = ""
+
+    logger.info('\nGENOME = ' + genome)
+
+    # Open files to convert tbl to lst
     with open(tblfile) as tblf, open(lstfile, "w") as lstf:
         for line in tblf:
             elems = line.strip().split("\t")
-            # New feature (= new contig)
+            # If new feature, write the previous one, and get information for this new one
+            # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
-                # if there was something in the previous contig, print last gene of
-                # previous contig (with contigLoc=b), and reinitiate for new contig/genes
-                if start != -1 and end != -1:
-                    cont_loc = "b"
-                    crispr_num = general.write_gene(gtype, locus_num, gene_name, product,
-                                                    crispr_num, cont_loc, genome, cont_num,
-                                                    ecnum, inf2, strain, start, end, lstf)
-                    # init for next feature
-                    start, end = -1, -1
-                    strand, gtype, locus_num = [""] * 3
-                    gene_name, product, ecnum, inf2 = ["NA"] * 4
-                # Read new feature
-                if same_name:
-                    contig = line.strip().split()[-1]
-                    c_genome = ".".join(contig.split(".")[:-1])
-                    if c_genome != genome:
-                        same_name = False
-                    else:
-                        cont_num = int(contig.split(".")[-1])
-                if not same_name:
-                    cont_num += 1
-            # Line indicating position of gene
-            if len(elems) == 3:
-                # if not first gene of the contig, write previous gene
-                if start != -1 and end != -1:
-                    crispr_num = general.write_gene(gtype, locus_num, gene_name, product,
-                                                    crispr_num, cont_loc, genome, cont_num,
-                                                    ecnum, inf2, strain, start, end, lstf)
-                    gtype, strand, locus_num = [""] * 3
-                    gene_name, product, ecnum, inf2 = ["NA"] * 4
-                    cont_loc = "i"
-                start, end, gtype = int(elems[0]), int(elems[1]), elems[2]
-                # Get strain of gene
-                if end < start:
-                    start, end = end, start
-                    strain = "C"
+                logger.info(line)
+                contig = line.strip().split()[-1]
+                cont_num = contig.split("_")[-1]  # -> 0010
+            else:
+                # Get line type, and retrieve info according to it
+                # If it is not the line with start, end, type, there are only 2 elements
+                #  in the line:
+                #  - information_type information_value
+                if len(elems) == 2:
+                    if "locus_tag" in elems[0]:
+                        locus_num = elems[-1].split("_")[-1]
+                    if "gene" in elems[0]:
+                        gene_name = elems[1]
+                    if "product" in elems[0]:
+                        product = elems[1]
+                    if "EC_number" in elems[0]:
+                        ecnum = elems[1]
+                    if "inference" in elems[0] and "ab initio prediction:Prodigal" not in line:
+                        inf2 = elems[1]
+                    if "db_xref" in elems[0]:
+                        db_xref = elems[1]
+                # 3 elements = start end and type of the feature
                 else:
-                    strain = "D"
-            if "locus_tag" in elems[0] and len(elems) == 2:
-                locus_num = elems[-1].split("_")[-1]
-            if "gene" in elems[0] and len(elems) == 2:
-                gene_name = elems[1]
-            if "product" in elems[0] and len(elems) == 2:
-                product = elems[1]
-            if "EC_number" in elems[0] and len(elems) == 2:
-                ecnum = elems[1]
-            if "inference" in elems[0] and "ab initio prediction:Prodigal" not in line and\
-               len(elems) == 2:
-                inf2 = elems[1]
-        # Write last gene:
+                    #  Check contig: new or same as previous?
+                    # New contig
+                    if int(cont_num) != int(prev_cont_num):
+                        logger.info("new contig " + prev_cont_num + " " + cont_num)
+                        # Check if it is the contig just following the previous one,
+                        # or if there are contigs without any feature between them.
+                        if int(prev_cont_num) != -1 and int(cont_num) != int(prev_cont_num) + 1:
+                            logger.info("empty contig(s)")
+                            logger.details("No feature found in contigs between contig {} and "
+                                           "contig {}.".format(prev_cont_num, cont_num))
+                        # Previous loc was 'i' (because we were in the same contig).
+                        # But we now change contig, so this previous feature was the last
+                        # of its contigs -> prev_loc = "b"
+                        prev_cont_loc = "b"
+                        cont_loc = "b"
+                    # Same contig as previously
+                    else:
+                        logger.info("same contig " + prev_cont_num + " " + cont_num)
+                        # Same contig but prev_loc = "b" (previous feature was the first of this
+                        # contig) -> loc is now i for this current feature
+                        if prev_cont_loc == "b":
+                            logger.info("first of contig contig")
+                            cont_loc = "i"
+                    # If we are in the first contig, prev = current
+                    if prev_cont_num == "-1":
+                        logger.info("First contig")
+                        prev_cont_num = cont_num
+                        prev_cont_loc = cont_loc
+                    logger.info("prev, current loc = {} {})".format(prev_cont_loc, cont_loc))
+                    logger.info("prev, current num = {} {})".format(prev_cont_num, cont_num))
+
+                    # If not first feature, write the previous feature to .lst file
+                    # (The first feature will be written once 2nd feature as been read)
+                    if start != -1 and end != -1:
+                        crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
+                                                           product, crispr_num, prev_cont_loc,
+                                                           genome, prev_cont_num,
+                                                           ecnum, inf2, db_xref,
+                                                           strand, start, end, lstf)
+                    logger.info("write feature {} {}".format(prev_cont_loc, prev_cont_num))
+
+                    # Get new values for start, end, strand and feature type
+                    start, end, feature_type = elems
+                    # Get strain of gene
+                    if int(end) < int(start):
+                        start, end = end, start
+                        strand = "C"
+                    else:
+                        strand = "D"
+                    # Initialize variables for next feature (except start, end, strand
+                    # and feature type which are just calculated)
+                    prev_cont_num = cont_num
+                    prev_cont_loc = cont_loc
+                    locus_num = ""
+                    gene_name = ""
+                    product = ""
+                    ecnum = ""
+                    inf2 = ""
+                    db_xref = ""
+        # Write last feature
         if start != -1 and end != -1:
-            cont_loc = "b"
-            general.write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
-                               genome, cont_num, ecnum, inf2, strain, start, end, lstf)
-    return same_name
+            prev_cont_loc = "b"
+            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
+                                               product, crispr_num, prev_cont_loc,
+                                               genome, prev_cont_num,
+                                               ecnum, inf2, db_xref,
+                                               strand, start, end, lstf)
+    return True
