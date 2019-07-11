@@ -476,7 +476,7 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
             # If header, replace by gembase header
             # For that, get next lst line (corresponding to next protein,
             # as there is 1 protein per line in .lst -> 1 protein per header in .prt)
-            linelst = r_lst.readline()
+            linelst = r_lst.readline().strip()
             # Try to get info from lstline.
             # If lstline empty, it means that the current protein
             # is missing from lst file. We already read the last protein of lst file.
@@ -486,7 +486,7 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
                     # If ok, gembase name is in the fifth column of lst file
                     start, end, _, _, gem_name, product, info = linelst.strip().split("\t")
                 except ValueError:
-                    logger.error("Problem in format of lstline {})".format(lstline))
+                    logger.error("Problem in format of lstline {})".format(linelst))
                     return False
             else:
                 logger.error("No more protein in lst file. We cannot get information on this "
@@ -509,8 +509,9 @@ def create_prt(prot_file, res_prot_file, res_lst_file, logger):
                 logger.error("Gene {} has a number of nucleotides ({}) that is not divisible "
                              "by 3.".format(gem_name, size_gen))
                 return False
-            new_header = "\t".join([gem_name, str(int(size_prot)), product, info])
-            r_prt.write(">" + new_header + "\n")
+            gfunc.write_header(linelst, r_prt)
+            # new_header = "\t".join([gem_name, str(int(size_prot)), product, info])
+            # r_prt.write(">" + new_header + "\n")
         # Check that there are no more proteins in lst than in this prt file
         linelst = r_lst.readline()
         if linelst != '':

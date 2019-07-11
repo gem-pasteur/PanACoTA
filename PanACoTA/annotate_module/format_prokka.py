@@ -67,132 +67,216 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     """
     prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
     # Get needed Prokka result files
-    tblgenome = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
-    prokka_gff = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
-    ffngenome = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
-    faagenome = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
+    prokka_tbl_file = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
+    prokka_gff_file = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
+    prokka_ffn_file = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
+    prokka_faa_file = glob.glob(os.path.join(prokka_dir, "*.faa"))[0]
 
     #  Define names for generated gembase files
-    lstgenome = os.path.join(lst_dir, name + ".lst")
-    gffgenome = os.path.join(gff_dir, name + ".gff")
-    gengenome = os.path.join(gene_dir, name + ".gen")
-    prtgenome = os.path.join(prot_dir, name + ".prt")
-    rep_file = os.path.join(rep_dir, name + ".fna")
+    res_lst_file = os.path.join(lst_dir, name + ".lst")
+    res_gff_file = os.path.join(gff_dir, name + ".gff")
+    res_gene_file = os.path.join(gene_dir, name + ".gen")
+    res_prt_file = os.path.join(prot_dir, name + ".prt")
+    res_rep_file = os.path.join(rep_dir, name + ".fna")
 
-    # convert tbl to lst, and check that genome name in tbl is the same as the given genome name
-    # If the user ran prokka, and then changed the genome names (for example, by changing
-    # L90 threshold), and wants to format again its genomes with the new names, but without
-    # running prokka again, we must change here the contig names (containing genome name).
-    same_name = tbl2lst(tblgenome, lstgenome, name, logger)
-    return False
+    # Convert prokka tbl file to gembase .lst file format
+    tbl2lst(prokka_tbl_file, res_lst_file, name, logger)
+
+    # Generate replicon file (same as input sequence but with gembase formatted headers). From
+    # this file, get contig names, to be used to generate gff file
+    contigs = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
+    if not contigs:
+        try:
+            os.remove(res_lst_file)
+            os.remove(res_gff_file)
+            os.remove(res_gene_file)
+            os.remove(res_prt_file)
+            os.remove(res_rep_file)
+        except OSError:
+            pass
+        logger.error("Problems while generating Replicon file for {}".format(name))
+        return False
 
     # Create gff3 file for annotations
-    ok_gff = generate_gff(prokka_gff, gffgenome, lstgenome, logger)
+    ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, logger)
     if not ok_gff:
-        os.remove(gffgenome)
-        os.remove(lstgenome)
+        try:
+            os.remove(res_lst_file)
+            os.remove(res_gff_file)
+            os.remove(res_gene_file)
+            os.remove(res_prt_file)
+            os.remove(res_rep_file)
+        except OSError:
+            pass
+        logger.error("Problems while generating .gff file for {}".format(name))
         return False
 
     # create Genes file (and check no problem occurred with return code)
-    ok_gene = create_gen(ffngenome, lstgenome, gengenome, logger)
+    ok_gene = create_gen(prokka_ffn_file, res_lst_file, res_gene_file, logger)
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
     if not ok_gene:
-        os.remove(gffgenome)
-        os.remove(lstgenome)
+        try:
+            os.remove(res_lst_file)
+            os.remove(res_gff_file)
+            os.remove(res_gene_file)
+            os.remove(res_prt_file)
+            os.remove(res_rep_file)
+        except OSError:
+            pass
+        logger.error("Problems while generating .gen file for {}".format(name))
         return False
-    # If gene file was created, create Proteins file
-    ok_prt = create_prt(faagenome, lstgenome, prtgenome, logger)
 
+
+    # If gene file was created, create Proteins file
+    ok_prt = create_prt(prokka_faa_file, res_lst_file, res_prt_file, logger)
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
-        os.remove(gffgenome)
-        os.remove(lstgenome)
-        os.remove(gengenome)
+        try:
+            os.remove(res_lst_file)
+            os.remove(res_gff_file)
+            os.remove(res_gene_file)
+            os.remove(res_prt_file)
+            os.remove(res_rep_file)
+        except OSError:
+            pass
+        logger.error("Problems while generating .prt file for {}".format(name))
         return False
-    # Create Replicons file
-    # If the genome name did not change after prokka run, copy genome sequence
-    # given to prokka to Replicons folder.
-    if same_name:
-        shutil.copyfile(gpath, rep_file)
-    # otherwise, change headers in the file.
-    else:
-        utils.rename_genome_contigs(name, gpath, rep_file)
     return True
 
 
-def generate_gff(prokka_gff, gffgenome, lstgenome, logger):
+def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, logger):
     """
-    From the lstinfo file, generate a gff file.
+    From the lstinfo file and contig names (retrieved from generation of Replicons files),
+    generate a gff file.
+
+    Format:
+
+    ##gff-version 3
+    ##sequence-region contig1 start end
+    ##sequence-region contig2 start end
+    ...
+    seqid(=contig) source   type start   end score  strand phase attributes
+
+    All fields tab separated.
+    Empty fields contain '.'
+
+    For example:
+    ESCO.1017.00200.00001    Prodigal:2.6    CDS start  end .   +   .   ID=ESCO.1017.00200.b0001_00001;locus_tag=ESCO.1017.00200.b0001_00001;product=hypothetical protein
+
+
+    genome1_1   Prodigal_v2.6.3 CDS 213 1880    260.0   +   0   ID=1_1;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.534;conf=99.99;score=259.99;cscore=268.89;sscore=-8.89;rscore=-8.50;uscore=-4.34;tscore=3.95;
+
 
     Parameters
     ----------
-    prokka_gff : str
-        prokka output gff file
-    gffgenome : str
-        name of the gff file which will be created as output
-    lstgenome : str
-        name of lst file already created for this genome
+    gpath : str
+        path to the genome sequence given to prokka
+    res-gff_file : str
+        path to the gff file that must be created in result database
+    res-lst_file : str
+        path to the lst file that was created in result database in the previous step
+    contigs : list
+        list of contig names with their size. ["contig1"\t"size1", "contig2"\t"size2" ...]
     logger : logging.Logger
-        logger object to add log information
+        logger object to put information
 
     Returns
     -------
     bool :
         True if conversion worked well, False otherwise
     """
-    with open(prokka_gff) as prokf, open(lstgenome) as lstf, \
-            open(gffgenome, "w") as gfff:
-        # write header line
-        line_gff = prokf.readline()
-        gfff.write(line_gff)
-        while line_gff.startswith("#"):
-            line_gff = prokf.readline()
-        line_lst = lstf.readline()
-        handle_line_gff(line_lst, line_gff, gfff)
-        for line_lst, line_gff in zip(lstf, prokf):
-            try:
-                handle_line_gff(line_lst, line_gff, gfff)
-            except IndexError:
-                logger.error("Problem with your gff file. '{}' is not a gff entry "
-                             "line, whereas it should correspond "
-                             "to '{}'".format(line_gff.strip(), line_lst.strip()))
-                return False
-    return True
+    # open gff generated by prokka to read it
+    # open file to write new gff file (in gff3 folder)
+    # open lst file (from LSTINFO folder) to read all annotation information saved
+    # from prokka results
+    with open(prokka_gff_file, "r") as prokf, open(res_lst_file, "r") as lstf, \
+            open(res_gff_file, "w") as gfff:
+        # Write headers of gff3 file
+        gfff.write("##gff-version  3\n")
+        # Write all sequences with their size
+        for contig in contigs:
+            # Write the list of contigs, with their size
+            cont_name, end = contig.split("\t")
+            gfff.write("##sequence-region\t{}\t{}\t{}".format(cont_name[1:], "1", end))
 
+        # Create an iterator of contig names, that will be used to get contig name
+        # corresponding to a given gene name (in lst, we only have gene name,
+        # but in gff we need corresponding contig name)
+        iter_contig = iter(contigs)
+        contig = next(iter_contig)
+        cname = contig.split("\t")[0][1:]
 
-def handle_line_gff(line_lst, line_gff, gfff):
-    """
-    Read a line from prokka gff output and a line from lstinfo, and get needed information
+        # Now, convert each line of prokka gff to gembase formatted gff line
+        for linegff in prokf:
+            # Ignore gff lines starting by #. For the new gff, these are already all written at the
+            # beginning of the file.
+            if linegff.startswith("#"):
+                continue
+            # Get all information from prokka gff line. Strip each of them as trailing whitespace
+            # can be hidden (leading to information from gff considered as different from
+            # information from lst)
+            fields_g = linegff.strip().split("\t")
+            fields_g = [info.strip() for info in fields_g]
 
-    Parameters
-    ----------
-    line_lst : str
-        a string with a line of generated lst file
-    line_gff : str
-        a string with a line of the prokka gff file
-    gfff : _io.TextIOWrapper
-        new gff file open
+            # Ignore lines with sequence
+            if len(fields_g) != 9:
+                continue
+            (contig_name, source, type_g, start_g, end_g,
+             score, strand_g, phase, attributes) = fields_g
 
-    """
-    start, end, strand, tp, name, gene, other = line_lst.strip().split("\t")
-    _, product, ecnum, pred = other.split("|")
-    soft = line_gff.strip().split("\t")[1]
-    cont_num = name.split(".")[-1].split("_")[0][1:]
-    contig_name = ".".join(name.split(".")[:3]) + "." + cont_num
-    strands = {"D": "+", "C": "-"}
-    att = "ID={}".format(name)
-    if ecnum.strip() != "NA":
-        att += ";eC_number={}".format(ecnum.strip())
-    if gene != "NA":
-        att += ";Name={0};gene={0}".format(gene)
-    if pred.strip() != "NA":
-        att += ";inference={}".format(pred.strip())
-    att += ";locus_tag={}".format(name)
-    if product.strip() != "NA":
-        att += ";product={}".format(product.strip())
-    infos = [contig_name, soft, tp, start, end, ".", strands[strand], ".", att]
-    gfff.write("\t".join(infos) + "\n")
+            # Get information given to this same sequence from the lst file
+            # (next lst line corresponds to next gff line without #), as, for each format,
+            # there is 1 line per gene)
+            linelst = lstf.readline()
+            fields_l = linelst.strip().split("\t")
+            fields_l = [info.strip() for info in fields_l]
+            start_l, end_l, strand_l, type_l, locus_l, l_gene, l_info = fields_l
+
+            # Get contig name 'cname'.
+            # -> if same contig as contig of previous gene -> cname does not change
+            # -> if not same contig, cname not in contig, so get next contig name
+            # (iterator of contigs created here-above)
+            # We use while, instead of just taking the next contig, because
+            # there could be a contig existing in replicon but not having any gene.
+            while cname not in locus_l:
+                contig = next(iter_contig)
+                cname = contig.split("\t")[0][1:]
+
+            # Get gff filename to give information to user if error message
+            gff = os.path.basename(res_gff_file)
+            lstf_name =  os.path.basename(res_lst_file)
+            # Path where gff generated by prokka is
+            tmp = gpath + "-prokkaRes"
+            # Get gene name given by prodigal to current feature
+            gname = attributes.split("ID=")[1].split(";")[0]
+            # Get locus_tag given by prokka to current feature (should be the same as ID)
+            loc_name = attributes.split("locus_tag=")[1].split(";")[0]
+
+            # Compare information from lst and information from prokka gff (start,
+            # end and type of feature). They should correspond
+            for (elemg, eleml, label) in zip([start_g, end_g, type_g],
+                                             [start_l, end_l, type_l],
+                                             ["start", "end", "type"]):
+                # If 1 element is different (start or end position, or type), print error
+                # message and return False: this genome could not be converted to gff
+                if elemg != eleml:
+                    logger.error("Files {} and {} (in prokka tmp_files: {}) do not have "
+                                 "the same {} value for gene {} ({} in gff, {} in "
+                                 "ffn))".format(gff, lstf_name, tmp, label, gname, elemg, eleml))
+                    return False
+
+            # Replace prokka ID and locus_tag with the new gene name (in gembase format),
+            # found in the corresponding lst line
+            at_split = attributes.split(";")
+            newID = [atr if "ID" not in atr else 'ID={}'.format(locus_l) for atr in at_split]
+            new = [atr if "locus_tag" not in atr else 'locus_tag={}'.format(locus_l) for atr in newID]
+
+            # Write new line of gff file
+            info = "\t".join([cname, source, type_g, start_g, end_g, score, strand_g,
+                              phase, ";".join(new)])
+            gfff.write(info + "\n")
+        return True
 
 
 def create_gen(ffnseq, lstfile, genseq, logger):
@@ -232,7 +316,6 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                 # then ffn contains the CRISPR sequence
                 if lstline.strip().split()[3] == "CRISPR":
                     crispr_id_lst = int(lstline.split("\t")[4].split("_CRISPR")[-1])
-                    print(lstline, crispr_id_lst)
                     if crispr_id == crispr_id_lst:
                         general.write_header(lstline, gen)
                         crispr_id += 1
@@ -263,8 +346,11 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                     gen_id_lst = int(id_lst)
                 else:
                     gen_id_lst = 0
-                # in lst, find the same gene ID as in ffn
-                # as they are ordered by increasing number, stop if ffn ID is higher than lst ID
+                # in lst, find the same gene ID as in ffn (some gene IDs in lst can be absent
+                # from ffn, if prokka do not give their sequence).
+                # As they are ordered by increasing number, go to next lstline until
+                # corresponding gene ID is found. However, if ffn ID > lst ID: ID does not
+                # exist in .lst -> problem.
                 while gen_id > gen_id_lst:
                     lstline = lst.readline().strip()
                     id_lst = lstline.split("\t")[4].split("_")[-1]
@@ -376,7 +462,7 @@ def tbl2lst(tblfile, lstfile, genome, logger):
 
     * lst file format::
 
-        start end strand type locus gene_name | product | EC_number | inference 2
+        start end strand type locus gene_name | product | EC_number | inference 2 | db_xref
 
     with the same types as prokka file, and strain is C (complement) or D (direct)
     locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
@@ -418,8 +504,6 @@ def tbl2lst(tblfile, lstfile, genome, logger):
     # Feature type (CDS, tRNA...)
     feature_type = ""
 
-    logger.info('\nGENOME = ' + genome)
-
     # Open files to convert tbl to lst
     with open(tblfile) as tblf, open(lstfile, "w") as lstf:
         for line in tblf:
@@ -427,7 +511,6 @@ def tbl2lst(tblfile, lstfile, genome, logger):
             # If new feature, write the previous one, and get information for this new one
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
-                logger.info(line)
                 contig = line.strip().split()[-1]
                 cont_num = contig.split("_")[-1]  # -> 0010
             else:
@@ -453,11 +536,9 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                     #  Check contig: new or same as previous?
                     # New contig
                     if int(cont_num) != int(prev_cont_num):
-                        logger.info("new contig " + prev_cont_num + " " + cont_num)
                         # Check if it is the contig just following the previous one,
                         # or if there are contigs without any feature between them.
                         if int(prev_cont_num) != -1 and int(cont_num) != int(prev_cont_num) + 1:
-                            logger.info("empty contig(s)")
                             logger.details("No feature found in contigs between contig {} and "
                                            "contig {}.".format(prev_cont_num, cont_num))
                         # Previous loc was 'i' (because we were in the same contig).
@@ -467,19 +548,14 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                         cont_loc = "b"
                     # Same contig as previously
                     else:
-                        logger.info("same contig " + prev_cont_num + " " + cont_num)
                         # Same contig but prev_loc = "b" (previous feature was the first of this
                         # contig) -> loc is now i for this current feature
                         if prev_cont_loc == "b":
-                            logger.info("first of contig contig")
                             cont_loc = "i"
                     # If we are in the first contig, prev = current
                     if prev_cont_num == "-1":
-                        logger.info("First contig")
                         prev_cont_num = cont_num
                         prev_cont_loc = cont_loc
-                    logger.info("prev, current loc = {} {})".format(prev_cont_loc, cont_loc))
-                    logger.info("prev, current num = {} {})".format(prev_cont_num, cont_num))
 
                     # If not first feature, write the previous feature to .lst file
                     # (The first feature will be written once 2nd feature as been read)
@@ -489,7 +565,6 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                                                            genome, prev_cont_num,
                                                            ecnum, inf2, db_xref,
                                                            strand, start, end, lstf)
-                    logger.info("write feature {} {}".format(prev_cont_loc, prev_cont_num))
 
                     # Get new values for start, end, strand and feature type
                     start, end, feature_type = elems
