@@ -168,12 +168,12 @@ This folder contains 1 file per genome, called ``<genome_name>.lst``, containing
     - end position of sequence in the replicon
     - strand (D for direct, C for complement)
     - type of sequence (CDS, rRNA, CRISPR, etc.)
-    - name of the sequence annotated. The name is ``<genome_name>.<place><contig>_<num>`` where:
+    - name of the sequence annotated. The name is ``<genome_name>.<contig><place>_<num>`` where:
 
         + ``<place>`` is ``i`` when the sequence is inside its replicon, or ``b`` when it is at the border of its replicon (first and last sequence of each replicon)
         + ``<contig>`` is the contig number, with 4 digits
         + ``<num>`` is the unique sequence number.
-        + For example: ``ESCO.0217.00002.i0001_00005`` is a gene from the 2nd strain of E. coli, in contig 1 (not the first or last gene of this contig), and is the 5th sequence annotated in this genome.
+        + For example: ``ESCO.0217.00002.0001i_00005`` is a gene from the 2nd strain of *E. coli*, in contig 1 (not the first or last gene of this contig), and is the 5th sequence annotated in this genome.
     - gene name when applicable
     - more information on the sequence annotated (product, similar sequences in PFAM, etc.)
 
@@ -181,43 +181,60 @@ Example of a file which would be called ``ESCO.0417.00002.lst``:
 
 .. code-block:: text
 
-    34685   35866   C       CDS     ESCO.0417.00002.b0001_00001     thlA                | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359
-    37546   40215   D       tRNA    ESCO.0417.00002.i0001_00002     NA                  | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2
-    45121   47569   D       CDS     ESCO.0417.00002.i0001_00003     NA                  | Prophage CP4-57 regulatory protein (AlpA) | NA | protein motif:Pfam:PF05930.6
-    50124   52465   D       CDS     ESCO.0417.00002.b0001_00004     P22 coat protein 5  | P22 coat protein - gene protein 5 | NA | protein motif:Pfam:PF11651.2
-    1       2600    C       tRNA    ESCO.0417.00002.b0004_00005     NA                  | tRNA-Gly(ccc) | NA | COORDINATES:profile:Aragorn:1.2
-    3500    5000    D       CDS     ESCO.0417.00002.i0004_00006     NA                  | hypothetical protein | NA | NA
-    10000   10215   C       CRISPR  ESCO.0417.00002.b0004_CRISPR1   crispr              | crispr-array | NA | NA
-    4568    5896    D       CDS     ESCO.0417.00002.b0006_00007     NA                  | hypothetical protein | NA | NA
-    126     456     D       CDS     ESCO.0417.00002.b0007_00008     NA                  | hypothetical protein | NA | NA
+    34685   35866   C       CDS     ESCO.0417.00002.0001b_00001     thlA                | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359 | COG:COG4598
+    37546   40215   D       tRNA    ESCO.0417.00002.0001i_00002     NA                  | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+    45121   47569   D       CDS     ESCO.0417.00002.0001i_00003     NA                  | Prophage CP4-57 regulatory protein (AlpA) | NA | protein motif:Pfam:PF05930.6 | NA
+    50124   52465   D       CDS     ESCO.0417.00002.0001b_00004     P22 coat protein 5  | P22 coat protein - gene protein 5 | NA | protein motif:Pfam:PF11651.2 | NA
+    1       2600    C       tRNA    ESCO.0417.00002.0004b_00005     NA                  | tRNA-Gly(ccc) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+    3500    5000    D       CDS     ESCO.0417.00002.0004i_00006     NA                  | hypothetical protein | NA | NA | NA
+    10000   10215   C       CRISPR  ESCO.0417.00002.0004b_CRISPR1   crispr              | crispr-array | NA | NA | NA
+    4568    5896    D       CDS     ESCO.0417.00002.0006b_00007     NA                  | hypothetical protein | NA | NA | NA
+    126     456     D       CDS     ESCO.0417.00002.0007b_00008     NA                  | hypothetical protein | NA | NA | NA
 
 Proteins folder
 ^^^^^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.prt``. This file is a multi-fasta file, and contains amino-acid sequences, corresponding to all CDS annotated.
+This folder contains 1 file per genome, called ``<genome_name>.prt``. This file is a multi-fasta file, which contains amino-acid sequences, corresponding to all CDS annotated (only 'CDS' features found in the corresponding file in LSTINFO folder).
+
+Headers are ``<genome_name>.<contig><place>_<num> size gene_name other_information`` with:
+
+- ``<genome_name>.<contig><place>_<num>`` as previously described (LSTINFO folder)
+- ``size`` is the protein size in nucleotides
+- gene name when applicable (for example hisP)
+- other information on the sequence annotated (product, similar sequences in PFAM, etc.)
+
+Example, corresponding to first gene of LSTINFO example file:
+
+.. code-block:: text
+
+    >ESCO.0417.00002.0001b_00001 1182   thlA    | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359 | COG:COG4598
 
 Genes folder
 ^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.gen``. This file, in multi-fasta format, contains nucleic sequences, corresponding to all sequences annotated (found in corresponding file in LSTINFO folder).
 
+Headers are the same as for the Protein folder files.
+
 Replicons folder
 ^^^^^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.fna``. It corresponds to the input file, containing all replicons of the genome, but with contigs renamed.
 
+Headers are ``<replicon_name> <size>``, with size corresponding to the number of nucleotides in the sequence.
+
 gff3 folder
 ^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following headers format.
+This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, with fields as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following header format.
 
 .. code-block:: text
 
     ##gff-version 3
     ##sequence-region <contig_name> <begin> <end>
-    <lines for each gene of contig1>
     ##sequence-region <contig_name> <begin> <end>
-    <lines for each gene of contig2>
+    <lines for each feature of contig1>
+    <lines for each feature of contig2>
 
 
 .. _qco:
