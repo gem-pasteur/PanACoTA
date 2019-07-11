@@ -286,7 +286,7 @@ def create_rep_gff(gpath, res_rep_file, res_gff_file, res_lst_file, gff_file, na
     """
     contigs = create_replicons(gpath, res_rep_file, name)
     if contigs:
-        return create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logger)
+        return create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, logger)
     return False
 
 
@@ -318,7 +318,7 @@ def create_replicons(gpath, res_rep_file, name):
     return contigs
 
 
-def create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logger):
+def create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, logger):
     """
     Create .gff3 file.
 
@@ -347,8 +347,6 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, name, contigs, logge
             path to the gff file that must be created in result database
         res-lst_file : str
             path to the lst file that was created in result database in the previous step
-        name : str
-            genome name to use (species.date.strain)
         contigs : list
             list of contig names with their size. ["contig1"\t"size1", "contig2"\t"size2" ...]
         logger : logging.Logger
