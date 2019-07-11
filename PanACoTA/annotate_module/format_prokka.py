@@ -407,11 +407,11 @@ def tbl2lst(tblfile, lstfile, genome, logger):
     cont_num = "-1"
     prev_cont_num = "-1"
     # Information on current feature. At the beginning, everything empty, no information
-    gene_name = ""
-    product = ""
-    ecnum = ""
-    inf2 = ""
-    db_xref = ""
+    gene_name = "NA"
+    product = "NA"
+    ecnum = "NA"
+    inf2 = "NA"
+    db_xref = "NA"
     start = -1
     end = -1
     strand = "D"
@@ -503,12 +503,12 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                     # and feature type which are just calculated)
                     prev_cont_num = cont_num
                     prev_cont_loc = cont_loc
-                    locus_num = ""
-                    gene_name = ""
-                    product = ""
-                    ecnum = ""
-                    inf2 = ""
-                    db_xref = ""
+                    locus_num = "NA"
+                    gene_name = "NA"
+                    product = "NA"
+                    ecnum = "NA"
+                    inf2 = "NA"
+                    db_xref = "NA"
         # Write last feature
         if start != -1 and end != -1:
             prev_cont_loc = "b"
