@@ -550,10 +550,12 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     logger = logging.getLogger("utils")
     logger.info("Reading genomes")
     genomes = {}
+    # Check that given list file exists
     if not os.path.isfile(list_file):
         logger.error(("ERROR: Your list file '{}' does not exist. "
                       "Please provide a list file.\n Ending program.").format(list_file))
         sys.exit(1)
+    # List file exists: open it and read it
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
@@ -562,9 +564,12 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                 continue
             # If separator ::, look for species and/or date
             if "::" in line:
+                # genomes_inf = genome filename(s) separated by space
+                # name_inf = <name>.<date>
                 genomes_inf, name_inf = line.split("::")
                 genomes_inf = genomes_inf.strip()
                 cur_name, cur_date = read_info(name_inf, name, date, genomes_inf)
+            # If no separator '::', no information on name and date of genome: use default ones
             else:
                 genomes_inf = line.strip()
                 cur_name = name
@@ -584,22 +589,93 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
+                    # Put all genomes listed in 'to_concat' into a same file named 'concat_file'
                     cat(to_concat, concat_file)
                 else:
+                    # No genome file listed exists. No sequence = genome ignored
                     logger.warning(("None of the genome files in {} exist. "
                                     "This genome will be ignored.").format(genomes_inf))
                     genome_name = ""
             # If only 1 sequence file, check that it exists, and take its name
             else:
+                # Genome file given does not exist
                 if not os.path.isfile(os.path.join(dbpath, genomes_inf[0])):
                     logger.warning(("{} genome file does not exist. "
                                     "It will be ignored.").format(genomes_inf[0]))
                     genome_name = ""
+                # Genome file exists: get genome_name (from information in first field)
                 else:
                     genome_name = genomes_inf[0]
+            # If there is a genome file (concatenated from several, or already existing), get the full name (with date)
             if genome_name != "":
                 genomes[genome_name] = [cur_name + "." + cur_date]
     return genomes
+
+
+def read_genomes_info(list_file, name, date, dbpath, tmp_path):
+    """
+    Read a lstinfo file containing the list of genomes with information (L90, genome size etc.)
+
+    Check that the given genome file exists in dbpath. Otherwise, put an error message,
+    and ignore this file.
+
+    Parameters
+    ----------
+    list_file : str
+        input file containing the list of genomes (filename, genome_name, size, L90, nb_contigs)
+    name : str
+        Default species name
+    date : str
+        Default date
+    dbpath : str
+        path to folder containing original genome files
+    tmp_path : str
+        path to folder which will contain the genome files to use before annotation, if\
+        needed to change them from original file (for example, merging several contig files\
+        in one file, split at each stretch of 5 'N', etc.).
+
+    Returns
+    -------
+    dict
+        genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+    """
+    logger = logging.getLogger("utils")
+    logger.info("Reading information on your genomes")
+    genomes = {}
+    if not os.path.isfile(list_file):
+        logger.error(("ERROR: Your genome information file '{}' does not exist. "
+                      "Please provide a listinfo file.\n Ending program.").format(list_file))
+        sys.exit(1)
+    with open(list_file, "r") as lff:
+        for line in lff:
+            line = line.strip()
+            # Skip header line
+            if "orig_name\tgsize\tnb_conts\tL90" in line:
+                print("header " + line)
+                continue
+            # Get all information on the given genome
+            genome, size, nb_cont, l90 = line.strip().split()
+            print(" ".join([genome, size, nb_cont, l90]))
+            # if genome.split()["."]>= 2:
+            #     name, date = genome.split(".")[:2]
+            #     if check_format(name):
+            # genomes[toto] = [".".join(name, date)]
+
+
+def gen_name(param):
+        if not utils.check_format(param):
+            msg = ("The genome name must contain 4 characters. For example, this name can "
+                   "correspond to the 2 first letters of genus, and 2 first letters of "
+                   "species, e.g. ESCO for Escherichia Coli.")
+            raise argparse.ArgumentTypeError(msg)
+        return param
+
+def date_name(param):
+    if not utils.check_format(param):
+        msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
+               "corresponding to the month (2 digits) and year (2 digits).")
+        raise argparse.ArgumentTypeError(msg)
+    return param
 
 
 def read_info(name_inf, name, date, genomes_inf):
@@ -630,20 +706,33 @@ def read_info(name_inf, name, date, genomes_inf):
         - curdate: date to use for this genome (default or read from 'name_inf')
     """
     logger = logging.getLogger("utils")
+    # information on current genome, which could contain a species name and a date: split to get
+    # name and date
     name_inf = name_inf.strip().split(".")
-    # if only species provided
+    # if only 1 field provided (means only name is provided).
+    # (Otherwise, if only date is provided, it is with '.DATE', so
+    # len(name_inf) = 2 with name_inf[0] = "")
     if len(name_inf) == 1:
+        # No genome name: use default one
         if name_inf[0] == "":
             cur_name = name
+        # Genome name, and in right format: use it
         elif check_format(name_inf[0]):
             cur_name = name_inf[0]
+        # Genome name but wrong format: warning message and use default one
         else:
             logger.warning(("Invalid name {} given for genome {}. Only put "
                             "4 alphanumeric characters in your date and name. "
                             "For this genome, the default name ({}) will be "
                             "used.").format(name_inf[0], genomes_inf, name))
             cur_name = name
+        # In any case, no given date: use default date
         cur_date = date
+
+    # More than 2 informations (more than 2 fields separated by a '.'):
+    #  - either user put more information
+    #  - either user put a '.' inside the name or date field: wrong format
+    # -> warning message and use default date and name.
     elif len(name_inf) > 2:
         logger.warning(("Invalid name/date given for genome {}. Only put "
                         "4 alphanumeric characters in your date and name. For "
@@ -651,18 +740,23 @@ def read_info(name_inf, name, date, genomes_inf):
                         "be used.").format(genomes_inf, name, date))
         cur_name = name
         cur_date = date
+    # information on name and date given (can be empty)
     else:
         cur_name, cur_date = name_inf
+        # name given empty -> use default name
         if cur_name == "":
             cur_name = name
+        # date given empty -> use default date
         if cur_date == "":
             cur_date = date
+        # name given not empty but wrong format -> warning message and default name
         if not check_format(cur_name):
             logger.warning(("Invalid name {} given for genome {}. Only put "
                             "4 alphanumeric characters in your date and name. "
                             "For this genome, the default name ({}) "
                             "will be used.").format(cur_name, genomes_inf, name))
             cur_name = name
+        # date given not empty but wrong format -> warning message and default date
         if not check_format(cur_date):
             logger.warning(("Invalid date {} given for genome {}. Only put "
                             "4 alphanumeric characters in your date and name. "
