@@ -115,21 +115,25 @@ def main_from_parse(arguments):
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
-         arguments.force, arguments.qc_only, arguments.tmpdir, arguments.annotdir,
-         arguments.verbose, arguments.quiet, arguments.prodigal_only, arguments.small)
+         arguments.force, arguments.qc_only, arguments.from_info, arguments.tmpdir,
+         arguments.annotdir, arguments.verbose, arguments.quiet, arguments.prodigal_only,
+         arguments.small)
 
 
 def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
-         threads=1, force=False, qc_only=False, tmp_dir=None, res_annot_dir=None,
+         threads=1, force=False, qc_only=False, from_info=False, tmp_dir=None, res_annot_dir=None,
          verbose=0, quiet=False, prodigal_only=False, small=False):
     """
     Main method, doing all steps:
 
-    - analyze genomes (nb contigs, L90, stretches of N...)
-    - keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
-    - rename genomes with strain number in decreasing quality
-    - annotate genome with prokka or only prodigal
-    - format annotated genomes
+    1. analyze genomes (nb contigs, L90, stretches of N...)
+    2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
+    3. rename genomes with strain number in decreasing quality
+    4. annotate genome with prokka or only prodigal
+    5. format annotated genomes
+
+    If option '-Q': ends at step 2.
+    If option '--info <genome_info file name>' option: starts at step 2
 
     verbosity:
 
@@ -202,9 +206,9 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     from PanACoTA.annotate_module import general_format_functions as ffunc
     from PanACoTA import utils
 
+    # Check that needed softs are installed
     prokka = utils.check_installed("prokka")
     prodigal = utils.check_installed("prodigal")
-
     if not qc_only:
         # If user using prokka: check prokka is installed and in the path
             if not prodigal_only and not prokka:
@@ -218,7 +222,6 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
                       "annotation, check that prokka is installed, and remove '--prodigal' "
                       "option.")
                 sys.exit(1)
-
 
     # By default, all tmp files (split sequences, renamed sequences, prokka/prodigal results) will
     # be saved in the given <res_dir>/tmp_files.
@@ -387,6 +390,15 @@ def build_parser(parser):
                                "genomes would be annotated with the given parameters, and to "
                                "modify those parameters if you want, before you launch the "
                                "annotation and formatting steps.")
+    optional.add_argument("--info", dest="from_info",
+                          help="If you already ran the 'prepare' data module, or already "
+                               "calculated yourself the L90 and number of contigs for each "
+                               "genome, you can give the file containing this information, "
+                               "so that you skip this step in 'annotate' and  go directly to "
+                               "annotation and formatting steps. "
+                               "This file contains 4 columns, tab separated: genome_name "
+                               "(corresponding with file name), genome_size, number "
+                               "of contigs and L90")
     optional.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
                           help="Add this option if you only want syntactical annotation, given "
                                "by prodigal, and not functional annotation requiring prokka and "
@@ -497,6 +509,8 @@ def check_args(parser, args):
     if not args.prodigal_only and args.small:
         parser.error("You cannot use --small option with prokka. Either use prodigal, "
                      "or remove this option.")
+    if args.from_info:
+        print("/!\ Be sure all your genomes contain at most 999 contigs!\n")
     return args
 
 
