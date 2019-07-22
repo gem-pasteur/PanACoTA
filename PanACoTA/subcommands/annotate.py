@@ -100,6 +100,7 @@ April 2017
 
 import os
 import sys
+from termcolor import colored
 
 
 def main_from_parse(arguments):
@@ -121,7 +122,7 @@ def main_from_parse(arguments):
 
 
 def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
-         threads=1, force=False, qc_only=False, from_info=False, tmp_dir=None, res_annot_dir=None,
+         threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
          verbose=0, quiet=False, prodigal_only=False, small=False):
     """
     Main method, doing all steps:
@@ -233,20 +234,22 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     os.makedirs(res_dir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
     os.makedirs(res_annot_dir, exist_ok=True)
-    # If force was set, remove result folders (Proteins, Replicons, Genes, LSTINFO)
+
+    # If force was set, remove result folders (Proteins, Replicons, Genes, LSTINFO, gff)
     if force:
         shutil.rmtree(os.path.join(res_dir, "LSTINFO"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Proteins"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Genes"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "Replicons"), ignore_errors=True)
         shutil.rmtree(os.path.join(res_dir, "gff3"), ignore_errors=True)
+    # If not --force, check that result folders do not already contain results
     else:
-        # Check that resultdir is not already used
         utils.check_out_dirs(res_dir)
 
     # get only filename of list_file, without extension
     listfile_base = os.path.basename(os.path.splitext(list_file)[0])
 
+    # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
     if verbose <= 1:
         level = logging.INFO
@@ -257,21 +260,33 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
-    utils.init_logger(logfile_base, level, name='', details=True, verbose=verbose, quiet=quiet)
+    logfile_base = utils.init_logger(logfile_base, level, name='', details=True,
+                                verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
-
     logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
-    # Read genome names.
-    # genomes = {genome: [spegenus.date]}
-    genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
-    if not genomes:
-        logger.error(("We did not find any genome listed in {} in the folder {}. "
-                      "Please check your list to give valid genome "
-                      "names.").format(list_file, db_path))
-        sys.exit(-1)
-    # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
+
+    # STEP 1. analyze genomes (nb contigs, L90, stretches of N...)
+    # If already info on genome (--info <file> option), skip this step
+    # If no info on genomes, read them and get needed information
+    if not from_info:
+        # Read genome names.
+        # genomes = {genome: [spegenus.date]}
+        genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
+        if not genomes:
+            logger.error(("We did not find any genome listed in {} in the folder {}. "
+                          "Please check your list to give valid genome "
+                          "names.").format(list_file, db_path))
+            sys.exit(-1)
+        # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
+        # -> genome: [spegenus.date, path, size, nbcont, l90]
+        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
+    # --info <filename> option given: read information (L90, nb contigs...) from this file.
+    else:
+        # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+        genomes = utils.read_genomes_info(from_info, name, date, db_path, tmp_dir)
+
+    # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     # Plot L90 and nb_contigs distributions
     gfunc.plot_distributions(genomes, res_dir, listfile_base, l90, nbcont)
@@ -285,12 +300,12 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
         return genomes, kept_genomes
-    # Rename genomes kept, ordered by decreasing quality
+    # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
     # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
-    # Annotate all kept genomes
+    # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
     # list of genomes skipped because annotation had problems: no format step run
@@ -298,20 +313,25 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
 
-    # If no genome was ok, no need to format them
+    # Initialize list of genomes skipped because something went wrong while formatting.
+    skipped_format = []
+    # If no genome was ok, no need to format them. Just print that no genome was annotated
     if not results_ok:
-        logger.warning("No genome was correctly annotated, no need to format them.")
-        skipped_format = []
+        logger.error("Error: No genome was correctly annotated, no need to format them.")
+    # at least 1 genome was annotated, but not all of them: write message to
+    # precise which genomes are not annotated
+    elif skipped:
+        utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
+                                   logfile=logfile_base)
+    # STEP 5. All genomes were annotate -> format them
     else:
         # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
         skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
                                               prodigal_only, threads, quiet=quiet)
-    if skipped:
-        utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
-                                   logfile=logfile_base + ".log")
+    # At least one genome could not be formatted
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
-                                    logfile = logfile_base + ".log")
+                                    logfile = logfile_base)
     logger.info("Annotation step done.")
     return genomes, kept_genomes, skipped, skipped_format
 
@@ -393,12 +413,11 @@ def build_parser(parser):
     optional.add_argument("--info", dest="from_info",
                           help="If you already ran the 'prepare' data module, or already "
                                "calculated yourself the L90 and number of contigs for each "
-                               "genome, you can give the file containing this information, "
-                               "so that you skip this step in 'annotate' and  go directly to "
-                               "annotation and formatting steps. "
-                               "This file contains 4 columns, tab separated: genome_name "
-                               "(corresponding with file name), genome_size, number "
-                               "of contigs and L90")
+                               "genome, you can give this information, to go directly to "
+                               "annotation and formatting steps. This file contains at "
+                               "least 4 columns, tab separated, with the following headers: "
+                               "'orig_name', 'gsize', 'nb_conts', 'L90'. Any other column "
+                               "will be ignored.")
     optional.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
                           help="Add this option if you only want syntactical annotation, given "
                                "by prodigal, and not functional annotation requiring prokka and "
@@ -496,6 +515,34 @@ def check_args(parser, args):
         with error message if error occurs with arguments given.
 
     """
+    # Always print panacota 'logo'
+    header = '''
+___                 _____  ___         _____  _____
+(  _`\              (  _  )(  _`\      (_   _)(  _  )
+| |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
+| ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
+| |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
+(_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
+
+
+   Large scale comparative genomics tools
+
+ -------------------------------------------
+ '''
+    print(header)
+    # Message if user kept default thresholds for L90 and nbcont. Just to warn him, to be sure
+    # it was on purpose
+    def thresholds_message(l90, nbcont):
+        return ("  !! Your genomes will be filtered, and only the ones with 'L90' <= {} "
+                "and 'number of contigs' < {} will be kept. If you want to change those "
+                "thresholds, use '--l90' and '--nbcont' "
+                "options.".format(args.l90, args.nbcont))
+    # Message if user is giving a file with already calculated information
+    def nosplit_message():
+        split = ("  !! -> Your sequences will be used as is by PanACoTA. Be sure you already "
+                 "split your sequences at each stretch of X 'N' if needed.\n")
+        trust = ("     -> PanACoTA will use the values (L90, nbcont) given in your info file. It can stop if those values are incorrect\n")
+        return split + trust
     if not args.qc_only and not args.name:
         parser.error("You must specify your genomes dataset name in 4 characters with "
                      "'-n name' option (type -h for more information). Or, if you do not want "
@@ -509,14 +556,20 @@ def check_args(parser, args):
     if not args.prodigal_only and args.small:
         parser.error("You cannot use --small option with prokka. Either use prodigal, "
                      "or remove this option.")
-    if args.from_info:
-        print("/!\ Be sure all your genomes contain at most 999 contigs!\n")
+    if args.l90 == 100 or args.nbcont == 999:
+        print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
+        if args.from_info:
+            print(colored(nosplit_message(), "yellow"))
+        else:
+            print()
     return args
 
 
 if __name__ == '__main__':
     import argparse
-    my_parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
+
+    my_parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
+                                        description=dedent(header), add_help=False)
     build_parser(my_parser)
     OPTIONS = parse(my_parser, sys.argv[1:])
     main_from_parse(OPTIONS)
