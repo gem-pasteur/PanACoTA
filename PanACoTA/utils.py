@@ -64,7 +64,10 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         True if nothing must be sent to stdout/stderr, False otherwise
     """
     import time
+
+    # time when soft is launched
     time_start = time.strftime("_%y-%m-%d_%H-%m-%S")
+
     # create logger
     logger = logging.getLogger(name)
 
@@ -85,16 +88,14 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     # Create a new logging level: details (between info and debug)
     # Used to add details to the log file, but not to stdout, while still having
     # the possibility to put debug messages, used only for development.
-    logging.addLevelName(detail_lvl(), "DETAIL")
-    logging.DETAIL = detail_lvl()
-
     def details(self, message, *args, **kws):
         """
         Define a new log level: details
         """
         if self.isEnabledFor(logging.DETAIL):
             self._log(logging.DETAIL, message, args, **kws)
-
+    logging.addLevelName(detail_lvl(), "DETAIL")
+    logging.DETAIL = detail_lvl()
     logging.Logger.details = details
 
     # set level of logger
@@ -104,8 +105,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     # :: %(name)s  to add the logger name
     # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
     my_format = '[%(asctime)s] :: %(levelname)s :: %(message)s'
-    formatter_file = logging.Formatter(my_format,
-                                       '%Y-%m-%d %H:%M:%S')
+    formatter_file = logging.Formatter(my_format, '%Y-%m-%d %H:%M:%S')
     formatter_stream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
@@ -171,6 +171,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
             err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
         err_handler.setFormatter(formatter_stream)
         logger.addHandler(err_handler)  # add handler to logger
+    return logfile
 
 
 class LessThanFilter(logging.Filter):
@@ -363,28 +364,27 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
         if True: used prodigal to annotate
     """
     if not prodigal_only:
-        soft = "Prokka"
+        soft = "prokka"
     else:
-        soft = "Prodigal"
+        soft = "prodigal"
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
+    # print(list_to_write)
     if not do_format:
-        logger.warning(("{0} had problems while annotating some genomes, or did not "
-                        "find any gene. Hence, they are not "
-                        "formatted, and absent from your output database. Please look at their "
-                        "{0} logs (<output_directory>/tmp_files/<genome_name>-{0}.log and "
-                        ".log.err) "
-                        " and to the current error log "
-                        "<output_directory>/<input_filename>.log.err)"
-                        " to get more information, and run again to annotate and format them. "
-                        "Here are the genomes (problem with {1} or no "
-                        "gene found): \n{0}").format(soft, list_to_write))
+        logger.warning("{0} had problems while annotating some genomes, or "
+                    "did not find any gene. Hence, they are not formatted, and absent "
+                    "from your output database. Please look at the "
+                    "current error log "
+                    "(<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err) to get more "
+                    "information on the problems. Here are those "
+                    "genomes:\n {1}".format(soft, list_to_write))
     else:
-        logger.info("WARNING: Some genomes could not be formatted. See {}".format(logfile))
-        logger.warning(("Some genomes were annotated by {}, but could not be formatted, "
+        logger.info("WARNING: Some genomes could not be formatted. See {0}".format(logfile))
+        logger.warning(("Some genomes were annotated by {0}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at "
-                        "log.details files to get more information about why they could not be "
-                        "formatted.\n{}").format(soft, list_to_write))
+                        "'<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err' and "
+                        ".details files to get more information about why they could not be "
+                        "formatted.\n{1}").format(soft, list_to_write))
 
 
 def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
@@ -615,7 +615,9 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
 
 def read_genomes_info(list_file, name, date, dbpath, tmp_path):
     """
-    Read a lstinfo file containing the list of genomes with information (L90, genome size etc.)
+    Read a lstinfo file containing the list of genomes with information (L90, genome size etc.).
+    1 line per genome, 4 or 5 columns:
+    [gembase_name] orig_name gsize nb_conts L90
 
     Check that the given genome file exists in dbpath. Otherwise, put an error message,
     and ignore this file.
@@ -641,26 +643,55 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
         genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
     """
     logger = logging.getLogger("utils")
-    logger.info("Reading information on your genomes")
+    logger.info("Reading given information on your genomes")
     genomes = {}
+    spegenus = "{}.{}".format(name, date)
+    column_order = {} # Put the number of column corresponding to each field
     if not os.path.isfile(list_file):
-        logger.error(("ERROR: Your genome information file '{}' does not exist. "
+        logger.error(("ERROR: You used the '--info <filename>' option, meaning that <filename> "
+                      "contains information on each sequence provided (L90, nb contigs etc.). "
+                      "However, the provided genome information file '{}' does not exist. "
                       "Please provide a listinfo file.\n Ending program.").format(list_file))
         sys.exit(1)
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
-            # Skip header line
-            if "orig_name\tgsize\tnb_conts\tL90" in line:
-                print("header " + line)
+            # Skip header line.
+            # Just get column number corresponding to each field
+            if "orig_name" in line:
+                column_headers = line.split("\t")
+                column_order = {header:num for num,header in enumerate(column_headers)}
+                found = [head for head in ["orig_name", "gsize", "nb_conts", "L90"]
+                         if head in column_order]
+                if len(found) != 4:
+                    logger.error("ERROR: Your information file does not have the required "
+                                 "columns: orig_name, gsize nb_conts and L90 (in any order) "
+                                 "\n Ending program.")
+                    sys.exit(1)
                 continue
+            if not column_order:
+                logger.error("ERROR: It seems that your info file does not have a header, or "
+                             "this header does not have the required columns: orig_name, gsize "
+                             " nb_conts and L90 (in any order).\n Ending program.")
+                sys.exit(1)
             # Get all information on the given genome
-            genome, size, nb_cont, l90 = line.strip().split()
-            print(" ".join([genome, size, nb_cont, l90]))
-            # if genome.split()["."]>= 2:
-            #     name, date = genome.split(".")[:2]
-            #     if check_format(name):
-            # genomes[toto] = [".".join(name, date)]
+            # genome, size, nb_cont, l90 = line.strip().split()
+            infos = line.strip().split()
+            gname = infos[column_order["orig_name"]]
+            gpath = os.path.join(dbpath, gname)
+            try:
+                gsize = int(infos[column_order["gsize"]])
+                gl90 = int(infos[column_order["L90"]])
+                gcont = int(infos[column_order["nb_conts"]])
+            except ValueError:
+                logger.warning("For genome {}, at least one of your columns 'gsize', 'nb_conts' or 'L90' contains a non numeric character. This genome will be ignored.".format(gname))
+                continue
+            if not os.path.isfile(gpath):
+                logger.warning(("{} genome file does not exist in the given database. "
+                                "It will be ignored.".format(gpath)))
+                continue
+            genomes[gname] = [spegenus, gpath, gsize, gcont, gl90]
+    return genomes
 
 
 def gen_name(param):
