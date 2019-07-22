@@ -198,7 +198,9 @@ def run_prokka(arguments):
         return False
     ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
     if ok:
-        logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+        logger.log(utils.detail_lvl(), "End annotating {} from {}.".format(name, gpath))
+    else:
+        logger.warning("Could not annotate {} from {}.".format(name, gpath))
     return ok
 
 
@@ -295,7 +297,9 @@ def run_prodigal(arguments):
     # Prodigal_directory is empty and ready to get prodigal results
     basic_outname = os.path.join(prodigal_dir, name)
     # Define cmd, stderr and stdout files, and error to write if problem.
-    error = "Error while trying to run prodigal. See {}".format(prodigal_logfile_err)
+    error = ("Error while trying to run prodigal. See {}. If it mentions that "
+             "your genome sequences are too small, add '--small' option to "
+             "your PanACoTA command.").format(prodigal_logfile_err)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
     cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q {}").format(gpath, basic_outname + ".ffn",
@@ -419,24 +423,32 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
     bool
         True if everything went well, False otherwise
     """
-    oriname = os.path.basename(gpath)
     faafile = glob.glob(os.path.join(prodigal_dir, "*.faa"))
     ffnfile = glob.glob(os.path.join(prodigal_dir, "*.ffn"))
     gfffile = glob.glob(os.path.join(prodigal_dir, "*.gff"))
     missing_file = False
 
-    if len(faafile) == 0:
-        logger.error("{} {}: no .faa file".format(name, oriname))
+    if len(faafile) != 1:
+        logger.error("{} {}: no or several .faa file".format(name, oriname))
         logger.info("no faa")
         missing_file = True
-    if len(ffnfile) == 0:
-        logger.error("{} {}: no .ffn file".format(name, oriname))
+    if len(ffnfile) !=  1:
+        logger.error("{} {}: no or several .ffn file".format(name, oriname))
         missing_file = True
         logger.info("no ffn")
-    if len(gfffile) == 0:
-        logger.error("{} {}: no .gff file".format(name, oriname))
+    if len(gfffile) != 1:
+        logger.error("{} {}: no or several .gff file".format(name, oriname))
         missing_file = True
         logger.info("no gff")
+
+    # If we have all result files, check they are not empty
+    if not missing_file:
+        if (os.path.getsize(faafile[0]) == 0 or os.path.getsize(ffnfile[0]) == 0
+            or os.path.getsize(gfffile[0]) == 0):
+            origname = os.path.basename(gpath)
+            logger.error("Genome {} (from {}): At least one of your prodigal result file "
+                         "is empty.".format(name, origname))
+            return False
     return not missing_file
 
 
