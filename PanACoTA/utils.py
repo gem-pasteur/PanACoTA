@@ -19,6 +19,7 @@ import subprocess
 import shutil
 import shlex
 import progressbar
+from termcolor import colored
 
 try:
     import cPickle as pickle
