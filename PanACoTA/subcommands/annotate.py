@@ -280,7 +280,8 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
             sys.exit(-1)
         # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
         # -> genome: [spegenus.date, path, size, nbcont, l90]
-        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, quiet=quiet)
+        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, prodigal_only,
+                                  logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
     else:
         # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
@@ -308,32 +309,33 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
-    # list of genomes skipped because annotation had problems: no format step run
-    skipped = [genome for (genome, ok) in results.items() if not ok]
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
-
-    # Initialize list of genomes skipped because something went wrong while formatting.
-    skipped_format = []
-    # If no genome was ok, no need to format them. Just print that no genome was annotated
+    # If no genome was ok, no need to format them. Just print that no genome was annotated,
+    # end program.
     if not results_ok:
         logger.error("Error: No genome was correctly annotated, no need to format them.")
-    # at least 1 genome was annotated, but not all of them: write message to
-    # precise which genomes are not annotated
-    elif skipped:
+        return
+    # list of genomes skipped because annotation had problems: no format step run
+    skipped = [genome for (genome, ok) in results.items() if not ok]
+    # At least 1 genome was not annotated: write a message to warn on it
+    if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
-                                   logfile=logfile_base)
-    # STEP 5. All genomes were annotate -> format them
-    else:
-        # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-        skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
-                                              prodigal_only, threads, quiet=quiet)
-    # At least one genome could not be formatted
+                                    logfile=logfile_base)
+    # Initialize list of genomes skipped because something went wrong while formatting.
+    skipped_format = []
+
+    # STEP 5. Format genomes annotated
+    # Here, we have at least 1 genome annotated (otherwise,
+    # it would already have stopped because results_ok is empty)
+    # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
+    skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
+                                                  prodigal_only, threads, quiet=quiet)
+    # At least one genome could not be formatted -> warn user
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
                                     logfile = logfile_base)
     logger.info("Annotation step done.")
-    return genomes, kept_genomes, skipped, skipped_format
 
 
 def build_parser(parser):
@@ -428,8 +430,9 @@ def build_parser(parser):
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
     optional.add_argument("--cutN", dest="cutn", type=int, default=5,
-                          help=("By default, each genome will be cut into new contigs at each "
-                                "stretch of at least 5 'N' in its sequence. If you don't want to "
+                          help=("By default, each genome will be cut into new contigs when "
+                                "at least 5 'N' at a stretch are found in its sequence. "
+                                "If you don't want to "
                                 "cut genomes into new contigs when there are stretches of 'N', "
                                 "put 0 to this option. If you want to cut from a different number "
                                 "of 'N' stretches, put this value to this option."))
@@ -541,7 +544,9 @@ ___                 _____  ___         _____  _____
     def nosplit_message():
         split = ("  !! -> Your sequences will be used as is by PanACoTA. Be sure you already "
                  "split your sequences at each stretch of X 'N' if needed.\n")
-        trust = ("     -> PanACoTA will use the values (L90, nbcont) given in your info file. It can stop if those values are incorrect\n")
+        trust = ("     -> PanACoTA will use the values (L90, nbcont) given in your info file. "
+                 "It will ignore the genomes for which those values are incorrect. "
+                 "It will also ignore genomes with more than 999 contigs.")
         return split + trust
     if not args.qc_only and not args.name:
         parser.error("You must specify your genomes dataset name in 4 characters with "
@@ -556,12 +561,15 @@ ___                 _____  ___         _____  _____
     if not args.prodigal_only and args.small:
         parser.error("You cannot use --small option with prokka. Either use prodigal, "
                      "or remove this option.")
+    if args.cutn != 0 and not args.from_info:
+        message = ("  !! Your genomes will be split when sequence contains at "
+                   "least {}'N' at a stretch.").format(args.cutn)
+        print(colored(message, "yellow"))
     if args.l90 == 100 or args.nbcont == 999:
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
         if args.from_info:
             print(colored(nosplit_message(), "yellow"))
-        else:
-            print()
+    print()
     return args
 
 
