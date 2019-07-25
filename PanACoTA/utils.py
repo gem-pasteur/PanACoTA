@@ -369,8 +369,8 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
         soft = "prodigal"
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
-    # print(list_to_write)
     if not do_format:
+        logger.info("WARNING: Some genomes could not be annotated. See {0}".format(logfile))
         logger.warning("{0} had problems while annotating some genomes, or "
                     "did not find any gene. Hence, they are not formatted, and absent "
                     "from your output database. Please look at the "
