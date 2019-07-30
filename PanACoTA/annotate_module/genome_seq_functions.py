@@ -86,8 +86,6 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, q
             del genomes[gen]
     if not quiet:
         bar.finish()
-    import sys
-    sys.exit(0)
 
 
 def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, logger):
@@ -126,8 +124,6 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
     bool
         True if genome analysis went well, False otherwise
     """
-    print("***** GENOME genome analyzed:" + genome)
-
     gpath, grespath = get_output_dir(prodigal_only, dbpath, tmp_path, genome, cut, pat)
 
     # Open original sequence file
@@ -145,7 +141,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
         # Read each line of original sequence
         for line in genf:
             #### NEW CONTIG
-            # If line corresponding to a new contig
+            # Line corresponding to a new contig
             if line.startswith(">"):
                 # If not first contig, write info to  output file (of needed)
                 if cur_seq != "":
@@ -161,11 +157,13 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
                 # If prokka, contig name is 1st word, 1st 15 characters
                 else:
                     cur_contig_name = line.split()[0][:15]
+                # Initialize for next contig
                 cur_seq = ""
             # #### SEQUENCE LINE
             # If sequence line, keep it, all in upper case
             else:
-                cur_seq += line.strip().upper() + "\n"
+                # Add this line without \n to sequence (1 sequence per line)
+                cur_seq += line.strip().upper()
 
         # LAST CONTIG
         if cur_contig_name != "":
@@ -189,7 +187,6 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
     # If we wrote a new sequence file, close it
     if grespath:
         gresf.close()
-    print(genomes)
     return True
 
 
@@ -277,16 +274,18 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     bool
         True if contig has been written without problem, False if any problem
     """
-
     # "CUT" if cut: need to cut at each 'pat' -> write new header + seq in new file
     if cut:
         # Cut sequence and write header + sequence to res file
         num = split_contig(pat, cur_seq, cur_contig_name, contig_sizes, gresf, num)
-    # PROKKA User does not want to cut, but will annotate with prokka
+    # PROKKA User does not want to cut, but will annotate with prokka, so we still
+    # have to create a new sequence file
     elif gresf:
-        gresf.write("{}_{}\n".format(cur_contig_name, num))
-        gresf.write(cur_seq)
-        contig_sizes[cur_contig_name] = len(cur_seq)
+        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
+        gresf.write(new_contig_name)
+        gresf.write(cur_seq + "\n")
+        contig_sizes[new_contig_name] = len(cur_seq)
+        num += 1
     # PRODIGAL No cut, and prodigal used -> no new file created, but check
     # contig unique names
     else:
@@ -333,9 +332,9 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        cur_name = cur_contig_name + "_" + str(num)
+        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
         contig_sizes[cur_name] = len(seq)
-        gresf.write(cur_name + "\n")
+        gresf.write(new_contig_name)
         gresf.write(seq + "\n")
         num += 1
     return num
