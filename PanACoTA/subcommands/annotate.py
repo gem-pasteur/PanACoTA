@@ -309,6 +309,8 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
+    import sys
+    sys.exit(1)
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
     # If no genome was ok, no need to format them. Just print that no genome was annotated,
@@ -518,21 +520,7 @@ def check_args(parser, args):
         with error message if error occurs with arguments given.
 
     """
-    # Always print panacota 'logo'
-    header = '''
-___                 _____  ___         _____  _____
-(  _`\              (  _  )(  _`\      (_   _)(  _  )
-| |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
-| ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
-| |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
-(_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
 
-
-   Large scale comparative genomics tools
-
- -------------------------------------------
- '''
-    print(header)
     # Message if user kept default thresholds for L90 and nbcont. Just to warn him, to be sure
     # it was on purpose
     def thresholds_message(l90, nbcont):
@@ -540,6 +528,7 @@ ___                 _____  ___         _____  _____
                 "and 'number of contigs' < {} will be kept. If you want to change those "
                 "thresholds, use '--l90' and '--nbcont' "
                 "options.".format(args.l90, args.nbcont))
+
     # Message if user is giving a file with already calculated information
     def nosplit_message():
         split = ("  !! -> Your sequences will be used as is by PanACoTA. Be sure you already "
@@ -548,23 +537,39 @@ ___                 _____  ___         _____  _____
                  "It will ignore the genomes for which those values are incorrect. "
                  "It will also ignore genomes with more than 999 contigs.")
         return split + trust
+
+    #  ERRORS
+    # User wants to run all annotation step: needs a genome dataset name
     if not args.qc_only and not args.name:
         parser.error("You must specify your genomes dataset name in 4 characters with "
                      "'-n name' option (type -h for more information). Or, if you do not want "
                      "to annotate and format your genomes but just to run quality control, use "
                      "option '-Q")
+    # If QC only, we do not need name -> name is NONE
     if args.qc_only and not args.name:
         args.name = "NONE"
-    if args.verbose >= 15 and args.quiet:
-        parser.error("Choose between a debug output (at least 15 'v') or quiet output (-q)."
-                     " You cannot have both...")
+    # Cannot be verbose and quiet at the same time
+    if args.verbose > 0 and args.quiet:
+        parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
+                     " You cannot have both.")
+    # option --small used only with prodigal
     if not args.prodigal_only and args.small:
         parser.error("You cannot use --small option with prokka. Either use prodigal, "
                      "or remove this option.")
+    # If user specifies a cutN value (different than default one which is 5), and give
+    # an info file, it is not compatible: info file will use sequences as is, and won't cut them
+    if args.cutn != 5 and args.from_info:
+        parser.error("If you provide a list of genomes with their calculated L90 and number of "
+                     "contigs, PanACoTA will use the given sequences as is. It will not cut "
+                     "them. So, you cannot use both --cutN and --info")
+
+    # WARNINGS
+    # If user wants to cur genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn != 0 and not args.from_info:
         message = ("  !! Your genomes will be split when sequence contains at "
                    "least {}'N' at a stretch.").format(args.cutn)
         print(colored(message, "yellow"))
+    # Warn user about selection of genomes thresholds
     if args.l90 == 100 or args.nbcont == 999:
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
         if args.from_info:
@@ -575,7 +580,20 @@ ___                 _____  ___         _____  _____
 
 if __name__ == '__main__':
     import argparse
+    from textwrap import dedent
+    header = '''
+     ___                 _____  ___         _____  _____
+    (  _`\              (  _  )(  _`\      (_   _)(  _  )
+    | |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
+    | ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
+    | |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
+    (_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
 
+
+       Large scale comparative genomics tools
+
+     -------------------------------------------
+     '''
     my_parser = argparse.ArgumentParser(formatter_class=argparse.RawDescriptionHelpFormatter,
                                         description=dedent(header), add_help=False)
     build_parser(my_parser)
