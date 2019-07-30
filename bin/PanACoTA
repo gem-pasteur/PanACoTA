@@ -46,6 +46,8 @@ def parse_arguments(argv):
     footer = "For more details, see PanACoTA documentation."
 
     # Create main parser
+    # TITLE with ascii art PanACoTA
+    # footer for doc
     parser = argparse.ArgumentParser(epilog=footer,
                                      formatter_class=argparse.RawDescriptionHelpFormatter,
                                      description=dedent(header))
@@ -61,29 +63,29 @@ def parse_arguments(argv):
     actions = {}  # to add the action to do according to the subparser called
     checks = {}  # to add the function to call to check the subparser arguments
 
-    # QC and annotation part
+    # QC and annotation part. Start with ASCII art title, + small description of subcommand
     parser_annotate = subparsers.add_parser('annotate',
-                                          formatter_class=argparse.RawDescriptionHelpFormatter,
-                                          description=(dedent(header) +
-                                          "\n=> Quality control and annotation of genomes"),
-                                          epilog=footer,
-                                          help="Quality control and annotation of genomes",
-                                          add_help=False)
+                                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                                            description=(dedent(header) +
+                                            "\n=> Quality control and annotation of genomes"),
+                                            epilog=footer,
+                                            help="Quality control and annotation of genomes",
+                                            add_help=False)
     annotate.build_parser(parser_annotate)
     actions["annotate"] = annotate.main_from_parse
     checks["annotate"] = annotate.check_args
 
-    # Pan genome part
+    # Pan genome part. Start with ASCII art title, + small description of subcommand
     parser_pan = subparsers.add_parser('pangenome',
                                        formatter_class=argparse.RawDescriptionHelpFormatter,
                                        description=(dedent(header) +
                                        "\n=> Generate a pan-genome of your dataset"),
-                                       epilog=footer,help="Generate a pan-genome of your dataset",
+                                       epilog=footer, help="Generate a pan-genome of your dataset",
                                        add_help=False)
     pangenome.build_parser(parser_pan)
     actions["pangenome"] = pangenome.main_from_parse
 
-    # Persistent genome part
+    # Persistent genome part. Start with ASCII art title, + small description of subcommand
     parser_corepers = subparsers.add_parser('corepers',
                                             formatter_class=argparse.RawDescriptionHelpFormatter,
                                             description=(dedent(header) +
@@ -97,7 +99,7 @@ def parse_arguments(argv):
     actions["corepers"] = corepers.main_from_parse
     checks["corepers"] = corepers.check_args
 
-    # Alignment part
+    # Alignment part. Start with ASCII art title, + small description of subcommand
     parser_align = subparsers.add_parser('align',
                                          formatter_class=argparse.RawDescriptionHelpFormatter,
                                          description=(dedent(header) +
@@ -108,7 +110,7 @@ def parse_arguments(argv):
     align.build_parser(parser_align)
     actions["align"] = align.main_from_parse
 
-    # tree part
+    # tree part. Start with ASCII art title, + small description of subcommand
     parser_tree = subparsers.add_parser('tree',
                                         formatter_class=argparse.RawDescriptionHelpFormatter,
                                         description=(dedent(header) +
