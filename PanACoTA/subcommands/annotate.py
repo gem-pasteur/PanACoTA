@@ -101,6 +101,7 @@ April 2017
 import os
 import sys
 from termcolor import colored
+import sys
 
 
 def main_from_parse(arguments):
@@ -279,16 +280,19 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
                           "names.").format(list_file, db_path))
             sys.exit(-1)
         # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-        # -> genome: [spegenus.date, path, size, nbcont, l90]
+        # -> genome: [spegenus.date, to_annotate_path, size, nbcont, l90]
         gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, prodigal_only,
                                   logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
     else:
-        # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+        # genomes = genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
+        # orig_path is the path to the original sequence
+        # and to_annotate_path the path to the sequence to annotate (once split etc.)
+        # Here, both are the same, as we take given sequences as is.
         genomes = utils.read_genomes_info(from_info, name, date, db_path, tmp_dir)
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
-    # genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+    # genomes = {genome: [spegenus.date, orig_seq, path_to_splitSequence, size, nbcont, l90]}
     # Plot L90 and nb_contigs distributions
     gfunc.plot_distributions(genomes, res_dir, listfile_base, l90, nbcont)
     # Get list of genomes kept (according to L90 and nbcont thresholds)
@@ -300,16 +304,18 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if qc_only:
         utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
-        return genomes, kept_genomes
+        return
     # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
-    # kept_genomes = {genome: [gembase_name, path_split_gembase, gsize, nbcont, L90]}
+    # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
+    #                 gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
+    logger.info("-> Original sequences folder: {}".format(db_path))
+    logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
-    import sys
     sys.exit(1)
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
@@ -324,12 +330,13 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
                                     logfile=logfile_base)
-    # Initialize list of genomes skipped because something went wrong while formatting.
-    skipped_format = []
 
     # STEP 5. Format genomes annotated
     # Here, we have at least 1 genome annotated (otherwise,
     # it would already have stopped because results_ok is empty)
+
+    # Initialize list of genomes skipped because something went wrong while formatting.
+    skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
                                                   prodigal_only, threads, quiet=quiet)
@@ -350,8 +357,23 @@ def build_parser(parser):
         The parser to configure
 
     """
-    import argparse
     from PanACoTA import utils
+    from textwrap import dedent
+
+    header = '''
+ ___                 _____  ___         _____  _____
+(  _`\              (  _  )(  _`\      (_   _)(  _  )
+| |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
+| ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
+| |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
+(_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
+
+
+       Large scale comparative genomics tools
+
+     -------------------------------------------
+     '''
+    print(dedent(header))
 
     def gen_name(param):
         if not utils.check_format(param):
@@ -498,6 +520,8 @@ def parse(parser, argu):
     argparse.Namespace
         Parsed arguments
     """
+    import argparse
+
     args = parser.parse_args(argu)
     return check_args(parser, args)
 
