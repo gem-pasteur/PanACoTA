@@ -395,11 +395,12 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     Parameters
     ----------
     genomes : dict
-        {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+        {genome: [gembase_start_name, orig_seq_file, to_annotate_seq_file,
+                  genome_size, nb_contigs, L90]}
     kept_genomes : list
         list of genomes kept
     list_file : str
-        input file containing the list of genomes
+        path to input file containing the list of genomes
     res_path : str
         folder where results must be saved
     qc : bool
@@ -408,40 +409,46 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
 
     """
     logger = logging.getLogger("utils")
+    # number of genomes discarded
     nb_disc = len(genomes) - len(kept_genomes)
+    # Log number of genomes discarded.
     if not qc and nb_disc < 2:
         logger.info("{} genome was discarded.".format(nb_disc))
     elif not qc:
         logger.info("{} genomes were discarded.".format(nb_disc))
+    # Get input list file name (without path)
     _, name_lst = os.path.split(list_file)
+
+    # if not QC, write discarded genomes to a file "discarded-[list_file].lst"
     if not qc:
         outdisc = os.path.join(res_path,
                                "discarded-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
         logger.info("Writing discarded genomes to {}".format(outdisc))
+    # if QC, there is no 'discarded genome', just write information on all analyzed genomes
     else:
         outdisc = os.path.join(res_path,
                                "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
-        logger.info("Writting information on genomes in {}".format(outdisc))
+        logger.info("Writing information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in genomes.items():
             if genome in kept_genomes:
                 continue
-            _, _, gsize, nbcont, l90 = [str(x) for x in values]
+            _, _, _, gsize, nbcont, l90 = [str(x) for x in values]
             outdf.write("\t".join([genome, gsize, nbcont, l90]) + "\n")
 
 
 def write_lstinfo(list_file, genomes, outdir):
     """
     Write lstinfo file, with following columns:
-    gembase_name, orig_name, size, nbcontigs, l90
+    gembase_name, orig_name, to_annotate_name, size, nbcontigs, l90
 
     Parameters
     ----------
     list_file : str
         input file containing the list of genomes
     genomes : dict
-        {genome: [gembase_start_name, seq_file, genome_size, nb_contigs, L90]}
+        {genome: [gembase_start_name, seq_file, seq_to_annotate, genome_size, nb_contigs, L90]}
     outdir : str
         folder where results must be saved
 
@@ -450,10 +457,12 @@ def write_lstinfo(list_file, genomes, outdir):
 
     outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
     with open(outlst, "w") as outf:
-        outf.write("\t".join(["gembase_name", "orig_name", "gsize", "nb_conts", "L90"]) + "\n")
+        outf.write("\t".join(["gembase_name", "orig_name", "to_annotate", "gsize",
+                              "nb_conts", "L90"]) + "\n")
         for genome, values in sorted(genomes.items(), key=sort_genomes):
-            gembase, _, gsize, nbcont, l90 = [str(x) for x in values]
-            outf.write("\t".join([gembase, genome, gsize, nbcont, l90]) + "\n")
+            gembase, _, to_annote, gsize, nbcont, l90 = [str(x) for x in values]
+            to_annote_file = os.path.basename(to_annote)
+            outf.write("\t".join([gembase, genome, to_annote_file, gsize, nbcont, l90]) + "\n")
 
 
 def sort_genomes(x):
@@ -571,6 +580,7 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                 genomes_inf = genomes_inf.strip()
                 cur_name, cur_date = read_info(name_inf, name, date, genomes_inf)
             # If no separator '::', no information on name and date of genome: use default ones
+            # Line only contains genome name (filename in given db_path)
             else:
                 genomes_inf = line.strip()
                 cur_name = name
@@ -640,7 +650,9 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
     Returns
     -------
     dict
-        genomes = {genome: [spegenus.date, path_to_splitSequence, size, nbcont, l90]}
+        genomes = {genome:
+                   [spegenus.date, path_orig_seq, path_to_splitSequence, size, nbcont, l90]
+                  }
     """
     logger = logging.getLogger("utils")
     logger.info("Reading given information on your genomes")
@@ -690,7 +702,9 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
                 logger.warning(("{} genome file does not exist in the given database. "
                                 "It will be ignored.".format(gpath)))
                 continue
-            genomes[gname] = [spegenus, gpath, gsize, gcont, gl90]
+            # cur genome information to save:
+            # [spegenus.date, path_orig_seq, path_to_splitSequence, size, nbcont, l90]
+            genomes[gname] = [spegenus, gpath, gpath, gsize, gcont, gl90]
     return genomes
 
 

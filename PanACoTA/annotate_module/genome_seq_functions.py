@@ -46,7 +46,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, q
     Returns
     -------
     dict
-        {genome: [spegenus.date, path, size, nbcont, l90]}
+        {genome: [spegenus.date, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
 
     """
     cut = nbn > 0
@@ -113,7 +113,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
         pattern on which contigs must be cut. ex: "NNNNN"
     genomes : dict
         {genome: [spegenus.date]} as input, and will be changed to\
-         -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
+         -> {genome: [spegenus.date, path, path_annotate, gsize, nbcont, L90]}
     prodigal_only : bool
         True if we annotate with prodigal, False if we annotate with prokka
     logger : logging.Logger
@@ -143,7 +143,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
             #### NEW CONTIG
             # Line corresponding to a new contig
             if line.startswith(">"):
-                # If not first contig, write info to  output file (of needed)
+                # If not first contig, write info to  output file (if needed)
                 if cur_seq != "":
                     num = format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes,
                                         gresf, num, logger)
@@ -179,11 +179,13 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
     if not l90:
         logger.error("Problem with genome {}. Not possible to get L90".format(genome))
         return False
+    # Everything ok for this genome -> complete its list of information in genomes dict
+    # [spegenus.date] -> [spegenus.date, gpath, gpath_to_annotate, gsize, nbcont, L90]}
     else:
         if grespath:
-            genomes[genome] += [grespath, gsize, nbcont, l90]
+            genomes[genome] += [gpath, grespath, gsize, nbcont, l90]
         else:
-            genomes[genome] += [gpath, gsize, nbcont, l90]
+            genomes[genome] += [gpath, gpath, gsize, nbcont, l90]
     # If we wrote a new sequence file, close it
     if grespath:
         gresf.close()
@@ -333,7 +335,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         if len(seq) == 0:
             continue
         new_contig_name = "{}_{}\n".format(cur_contig_name, num)
-        contig_sizes[cur_name] = len(seq)
+        contig_sizes[new_contig_name] = len(seq)
         gresf.write(new_contig_name)
         gresf.write(seq + "\n")
         num += 1
@@ -371,20 +373,32 @@ def rename_all_genomes(genomes):
     Parameters
     ----------
     genomes : dict
-        {genome: [name, path, gsize, nbcont, L90]} as input, and will become\
-        {genome: [gembase_name, path, gsize, nbcont, L90]} at the end
+        {genome: [name, path, path_to_seq, gsize, nbcont, L90]} as input, and will become\
+        {genome: [gembase_name, path, path_to_seq, gsize, nbcont, L90]} at the end
+
+    Return
+    ------
+        change 1st field of genomes dict. name -> gembase_name (with strain number)
 
     """
     logger.info("Renaming kept genomes according to their quality.")
+    # Keep previous genome name (ESCO.0109 -> ESCO)
     last_name = ""
+    # Keep last strain number
     last_strain = 0
     # "SAEN.1015.{}".format(str(last_strain).zfill(5))
-    for genome, [name, _, _, _, _] in sorted(genomes.items(), key=sort_genomes):
+    # Sort genomes by species, L90 and nb_contigs
+    for genome, [name, _, _, _, _, _] in sorted(genomes.items(), key=sort_genomes):
+        # first genome, or new strain name (ex: ESCO vs EXPL)
+        # -> keep this new name, and add 1 to next strain number
         if last_name != name.split(".")[0]:
             last_strain = 1
             last_name = name.split(".")[0]
+        # same strain name
+        # -> write this new sequence, and go to next one (strain += 1)
         else:
             last_strain += 1
+        # Write information to "genomes" dict.
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
 
@@ -417,7 +431,7 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     Parameters
     ----------
     genomes : dict
-        {genome: [name, path, size, nbcont, l90]}
+        {genome: [name, orig_path, to_annotate_path, size, nbcont, l90]}
     res_path : str
         path to put all output files
     listfile_base : str
@@ -437,17 +451,10 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     - dist2 : matplotlib figure of distribution of nb contigs values
 
     """
-    """
-    genomes:
-    res_path:
-    listfile_base:
-    l90: max value of l90 allowed
-    nbconts: max value of nb contigs allowed
-    """
     logger.info("Generating distribution of L90 and #contigs graphs.")
-    l90_vals = [val for _, (_, _, _, _, val) in genomes.items()]
+    l90_vals = [val for _, (_, _, _, _, _, val) in genomes.items()]
     outl90 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
-    nbcont_vals = [val for _, (_, _, _, val, _) in genomes.items()]
+    nbcont_vals = [val for _, (_, _, _, _, val, _) in genomes.items()]
     outnbcont = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
     dist1 = utils.plot_distr(l90_vals, l90, "L90 distribution for all genomes",
                              "max L90 =")
