@@ -31,7 +31,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
     Parameters
     ----------
     genomes : dict
-        {genome: [name, gpath_cut_gembase, size, nbcont, l90]}
+        {genome: [gembase_name, path_to_origfile, path_split_gembase, gsize, nbcont, L90]}
     threads : int
         max number of threads that can be used
     force : bool
@@ -126,7 +126,7 @@ def run_prokka(arguments):
     Parameters
     ----------
     arguments : tuple
-        (gpath, prok_folder, cores_annot, name, force, nbcont, q) with:
+        (gpath, prok_folder, cores_annot, name, force, nbcont, small, q) with:
 
         * gpath: path and filename of genome to annotate
         * prok_folder: path to folder where all prokka folders for all genomes are saved
@@ -134,6 +134,7 @@ def run_prokka(arguments):
         * name: output name of annotated genome
         * force: True if force run (override existing files), False otherwise
         * nbcont: number of contigs in the input genome, to check prokka results
+        * small: used for prodigal, if sequences to annotate are small. Not used here
         * q : queue where logs are put
 
     Returns
