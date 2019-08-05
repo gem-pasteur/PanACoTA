@@ -387,10 +387,15 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
                         "formatted.\n{1}").format(soft, list_to_write))
 
 
-def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
+def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
     """
-    Write the list of genomes discarded to a file, so that users can keep a trace of them,
-    with their information (nb contigs, L90 etc.)
+    Write the list of genomes discarded to a file (qc=False), so that users can
+    keep a trace of them, with their information (nb contigs, L90 etc.)
+
+    If qc=True, we stop after QC.
+    -> Write the list of genomes that would be kept for annotation with all
+    their information (L90, size, #contig)
+
 
     Parameters
     ----------
@@ -404,9 +409,11 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
     res_path : str
         folder where results must be saved
     qc : bool
-        if it is the file written after qc only (True), call it info-genomes-<list_file>.txt\
-        otherwise (False), call it discarded-<list_file>.txt
-
+        * True: called only if QC only. Name this file info-genomes-<list_file>.txt to put
+        information on genomes that would be annotated if not QC only
+        * otherwise (False), called in any case. Name this file discarded-<list_file>.txt
+        and write all discarded genomes, whether sequences kept are next annotated or not
+        => columns: orig_name, to_annotate, gsize, nb_conts, L90
     """
     logger = logging.getLogger("utils")
     # number of genomes discarded
@@ -430,12 +437,13 @@ def write_discarded(genomes, kept_genomes, list_file, res_path, qc=False):
                                "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
         logger.info("Writing information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
-        outdf.write("\t".join(["orig_name", "gsize", "nb_conts", "L90"]) + "\n")
+        outdf.write("\t".join(["orig_name", "to_annotate", "gsize", "nb_conts", "L90"]) + "\n")
         for genome, values in genomes.items():
             if genome in kept_genomes:
                 continue
-            _, _, _, gsize, nbcont, l90 = [str(x) for x in values]
-            outdf.write("\t".join([genome, gsize, nbcont, l90]) + "\n")
+            _, _, to_annotate, gsize, nbcont, l90 = [str(x) for x in values]
+            to_annotate_file = os.path.basename(to_annotate)
+            outdf.write("\t".join([genome, to_annotate_file, gsize, nbcont, l90]) + "\n")
 
 
 def write_lstinfo(list_file, genomes, outdir):
@@ -626,11 +634,10 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
 def read_genomes_info(list_file, name, date, dbpath, tmp_path):
     """
     Read a lstinfo file containing the list of genomes with information (L90, genome size etc.).
-    1 line per genome, 4 or 5 columns:
-    [gembase_name] orig_name gsize nb_conts L90
+    1 line per genome, 4 required columns (Others will just be ignored):
+    to_annotate gsize nb_conts L90
 
-    Check that the given genome file exists in dbpath. Otherwise, put an error message,
-    and ignore this file.
+    Check that the given genome file (to_annotate column) exists in dbpath. If not, check if it is in tmp_path. If in none of those 2 folders, put a warning message and ignore this file.
 
     Parameters
     ----------
@@ -670,40 +677,52 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
             line = line.strip()
             # Skip header line.
             # Just get column number corresponding to each field
-            if "orig_name" in line:
+            if "to_annotate" in line:
                 column_headers = line.split("\t")
                 column_order = {header:num for num,header in enumerate(column_headers)}
-                found = [head for head in ["orig_name", "gsize", "nb_conts", "L90"]
+                found = [head for head in ["to_annotate", "gsize", "nb_conts", "L90"]
                          if head in column_order]
                 if len(found) != 4:
                     logger.error("ERROR: Your information file does not have the required "
-                                 "columns: orig_name, gsize nb_conts and L90 (in any order) "
+                                 "columns: to_annotate, gsize nb_conts and L90 (in any order) "
                                  "\n Ending program.")
                     sys.exit(1)
                 continue
+            # If no header found, error message and exit
             if not column_order:
                 logger.error("ERROR: It seems that your info file does not have a header, or "
-                             "this header does not have the required columns: orig_name, gsize "
-                             " nb_conts and L90 (in any order).\n Ending program.")
+                             "this header does not have, at least, the required columns: "
+                             "to_annotate, gsize nb_conts and L90 (in any order).\n "
+                             "Ending program.")
                 sys.exit(1)
             # Get all information on the given genome
             # genome, size, nb_cont, l90 = line.strip().split()
             infos = line.strip().split()
-            gname = infos[column_order["orig_name"]]
+            # Get genome name with its path to db_dir
+            gname = infos[column_order["to_annotate"]]
             gpath = os.path.join(dbpath, gname)
+            # Get numeric information
             try:
                 gsize = int(infos[column_order["gsize"]])
                 gl90 = int(infos[column_order["L90"]])
                 gcont = int(infos[column_order["nb_conts"]])
+            # If invalid values, warnng message and ignore genome
             except ValueError:
                 logger.warning("For genome {}, at least one of your columns 'gsize', 'nb_conts' or 'L90' contains a non numeric character. This genome will be ignored.".format(gname))
                 continue
+            # Check if genome file exists
             if not os.path.isfile(gpath):
-                logger.warning(("{} genome file does not exist in the given database. "
-                                "It will be ignored.".format(gpath)))
-                continue
+                # If it does not exist, look at it in tmp_file (can come from a concatenation
+                # of several files in db_path)
+                gpath = os.path.join(tmp_path, gname)
+                # If still not in tmp_dir, warning message and ignore genome
+                if not os.path.isfile(gpath):
+                    logger.warning(("{} genome file does not exist in the given "
+                                    "database nor in your given tmp directory. "
+                                    "It will be ignored.".format(gpath)))
+                    continue
             # cur genome information to save:
-            # [spegenus.date, path_orig_seq, path_to_splitSequence, size, nbcont, l90]
+            # [spegenus.date, path_orig_seq, path_to_sequence_to_annotate, size, nbcont, l90]
             genomes[gname] = [spegenus, gpath, gpath, gsize, gcont, gl90]
     return genomes
 
