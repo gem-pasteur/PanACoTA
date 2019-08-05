@@ -298,11 +298,18 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
-    # Write discarded genomes to a file
-    utils.write_discarded(genomes, list(kept_genomes.keys()), list_file, res_dir)
+    # Write discarded genomes to a file -> orig_name, gsize, nb_conts, L90
+    utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
+    logger.info("-> Original sequences folder: {}".format(db_path))
+    logger.info("-> If original sequence not found in {}, look for it in {}, as it must "
+                "be a concatenation of several given sequence files.".format(db_path, tmp_dir))
+    logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
     # If only QC, stop here.
     if qc_only:
-        utils.write_discarded(genomes, [], list_file, res_dir, qc=True)
+        # Write information on genomes that would be annotated with the current
+        # parameters if not QC_only:
+        # orig_name, to_annnote, gsize, nb_conts, L90
+        utils.write_genomes_info(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
         return
     # STEP 3. Rename genomes kept, ordered by decreasing quality
@@ -310,12 +317,12 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
     #                 gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
-    logger.info("-> Original sequences folder: {}".format(db_path))
-    logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
+
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
+    print(results)
     sys.exit(1)
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
@@ -330,7 +337,6 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
                                     logfile=logfile_base)
-
     # STEP 5. Format genomes annotated
     # Here, we have at least 1 genome annotated (otherwise,
     # it would already have stopped because results_ok is empty)
