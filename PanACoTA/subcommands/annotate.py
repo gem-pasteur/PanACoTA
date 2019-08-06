@@ -115,14 +115,15 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.list_file, arguments.db_path, arguments.res_path, arguments.name,
+    main(cmd, arguments.list_file, arguments.db_path, arguments.db_path2, arguments.res_path,
+         arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
          arguments.force, arguments.qc_only, arguments.from_info, arguments.tmpdir,
          arguments.annotdir, arguments.verbose, arguments.quiet, arguments.prodigal_only,
          arguments.small)
 
 
-def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
          verbose=0, quiet=False, prodigal_only=False, small=False):
     """
@@ -280,7 +281,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
                           "names.").format(list_file, db_path))
             sys.exit(-1)
         # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
-        # -> genome: [spegenus.date, to_annotate_path, size, nbcont, l90]
+        # -> genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
         gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, prodigal_only,
                                   logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
@@ -289,7 +290,17 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         # orig_path is the path to the original sequence
         # and to_annotate_path the path to the sequence to annotate (once split etc.)
         # Here, both are the same, as we take given sequences as is.
-        genomes = utils.read_genomes_info(from_info, name, date, db_path, tmp_dir)
+        genomes = utils.read_genomes_info(from_info, name, date, db_path, db_path2)
+        if not genomes:
+            if db_path2:
+                logger.error(("We did not find any genome listed in {} in {} nor in {}. "
+                              "Please check your list to give valid genome "
+                              "names.").format(from_info, db_path, db_path2))
+            else:
+                logger.error(("We did not find any genome listed in {} in the folder {}. "
+                          "Please check your list to give valid genome "
+                          "names.").format(from_info, db_path))
+            sys.exit(-1)
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     # genomes = {genome: [spegenus.date, orig_seq, path_to_splitSequence, size, nbcont, l90]}
@@ -298,12 +309,19 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
-    # Write discarded genomes to a file -> orig_name, gsize, nb_conts, L90
+    # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
-    logger.info("-> Original sequences folder: {}".format(db_path))
-    logger.info("-> If original sequence not found in {}, look for it in {}, as it must "
-                "be a concatenation of several given sequence files.".format(db_path, tmp_dir))
-    logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
+    if cutn == 0 and prodigal_only:
+        logger.info("-> Folder with original sequence files and sequences to annotate: {}".format(db_path))
+        logger.info("\t-> If original sequence or to annotate sequence not found in {}, "
+                    "look for it in {}, as it must be a concatenation of several input sequence "
+                    "files.".format(db_path, tmp_dir))
+    else:
+        logger.info("-> Original sequences folder: {}".format(db_path))
+        logger.info("\t-> If original sequence not found in {}, look for it in {}, as it must "
+                    "be a concatenation of several input sequence files.".format(db_path, tmp_dir))
+        logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
+
     # If only QC, stop here.
     if qc_only:
         # Write information on genomes that would be annotated with the current
@@ -318,12 +336,11 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     #                 gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
+    sys.exit(1)
 
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
-    print(results)
-    sys.exit(1)
     # List of genomes to format
     results_ok = [genome for (genome, ok) in results.items() if ok]
     # If no genome was ok, no need to format them. Just print that no genome was annotated,
@@ -364,22 +381,6 @@ def build_parser(parser):
 
     """
     from PanACoTA import utils
-    from textwrap import dedent
-
-    header = '''
- ___                 _____  ___         _____  _____
-(  _`\              (  _  )(  _`\      (_   _)(  _  )
-| |_) )  _ _   ___  | (_) || ( (_)   _   | |  | (_) |
-| ,__/'/'_` )/' _ `\|  _  || |  _  /'_`\ | |  |  _  |
-| |   ( (_| || ( ) || | | || (_( )( (_) )| |  | | | |
-(_)   `\__,_)(_) (_)(_) (_)(____/'`\___/'(_)  (_) (_)
-
-
-       Large scale comparative genomics tools
-
-     -------------------------------------------
-     '''
-    print(dedent(header))
 
     def gen_name(param):
         if not utils.check_format(param):
@@ -450,6 +451,14 @@ def build_parser(parser):
                                "least 4 columns, tab separated, with the following headers: "
                                "'orig_name', 'gsize', 'nb_conts', 'L90'. Any other column "
                                "will be ignored.")
+    optional.add_argument("-d2", dest="db_path2",
+                          help="Path to 2nd folder containing all multifasta genome files. "
+                               "Used if you run annotation of sequences found in 2 different "
+                               "folders. For example, if you ran this module, and now want to "
+                               "rerun it with different parameters, but using the already "
+                               "generated sequences to annotate, some of them are in db_path "
+                               "whereas others are in the previous tmp_path (sequences cut, "
+                               "prokka with small headers...")
     optional.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
                           help="Add this option if you only want syntactical annotation, given "
                                "by prodigal, and not functional annotation requiring prokka and "
@@ -561,9 +570,10 @@ def check_args(parser, args):
 
     # Message if user is giving a file with already calculated information
     def nosplit_message():
-        split = ("  !! -> Your sequences will be used as is by PanACoTA. Be sure you already "
-                 "split your sequences at each stretch of X 'N' if needed.\n")
-        trust = ("     -> PanACoTA will use the values (L90, nbcont) given in your info file. "
+        split = ("  !! Your sequences will be used as is by PanACoTA. Be sure you "
+                 "already split your sequences at each stretch "
+                 "of X 'N' if needed.\n")
+        trust = ("\t-> PanACoTA will use the values (L90, nbcont) given in your info file. "
                  "It will ignore the genomes for which those values are incorrect. "
                  "It will also ignore genomes with more than 999 contigs.")
         return split + trust
@@ -594,7 +604,7 @@ def check_args(parser, args):
                      "them. So, you cannot use both --cutN and --info")
 
     # WARNINGS
-    # If user wants to cur genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
+    # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn != 0 and not args.from_info:
         message = ("  !! Your genomes will be split when sequence contains at "
                    "least {}'N' at a stretch.").format(args.cutn)
@@ -604,8 +614,19 @@ def check_args(parser, args):
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
         if args.from_info:
             print(colored(nosplit_message(), "yellow"))
+            if not args.prodigal_only:
+                print(colored("\t-> Check that your genomes have unique headers, where headers "
+                              "are the 20 first characters of first word of current "
+                              "header", "yellow"))
     print()
     return args
+
+    # If db_path2 is used only with infofile
+    if args.db_path2 and not args.info:
+        parser.error("Using '-d2 <path>' means that you are running from an info file, whose "
+                     "sequences come from 2 different folders (db_path and tmp_path if from a "
+                     "previous run of this module). Use --info <info-file> or "
+                     "remove '-d2 <path>' ")
 
 
 if __name__ == '__main__':

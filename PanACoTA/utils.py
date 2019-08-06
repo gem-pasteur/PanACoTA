@@ -631,13 +631,15 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     return genomes
 
 
-def read_genomes_info(list_file, name, date, dbpath, tmp_path):
+def read_genomes_info(list_file, name, date, dbpath, dbpath2):
     """
     Read a lstinfo file containing the list of genomes with information (L90, genome size etc.).
     1 line per genome, 4 required columns (Others will just be ignored):
     to_annotate gsize nb_conts L90
 
-    Check that the given genome file (to_annotate column) exists in dbpath. If not, check if it is in tmp_path. If in none of those 2 folders, put a warning message and ignore this file.
+    Check that the given genome file (to_annotate column) exists in dbpath or in dbpath2
+    (files can be split into 2 different folders). If in none of those 2 folders, put a
+    warning message and ignore this file.
 
     Parameters
     ----------
@@ -648,11 +650,12 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
     date : str
         Default date
     dbpath : str
-        path to folder containing original genome files
-    tmp_path : str
-        path to folder which will contain the genome files to use before annotation, if\
-        needed to change them from original file (for example, merging several contig files\
-        in one file, split at each stretch of 5 'N', etc.).
+        path to folder containing genome files to annotate
+    dbpath2 : str
+        path to other folder which can contain the genome files to annotate. For example,
+        if it comes from a previous run of 'PanACoTA annotate' where sequences needed to be
+        modified to be ready for annotation (for example, merging several contig files in one
+        file, split at each stretch of 5 'N', etc.).
 
     Returns
     -------
@@ -675,8 +678,7 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
-            # Skip header line.
-            # Just get column number corresponding to each field
+            # Header line: Just get column number corresponding to each field
             if "to_annotate" in line:
                 column_headers = line.split("\t")
                 column_order = {header:num for num,header in enumerate(column_headers)}
@@ -684,42 +686,55 @@ def read_genomes_info(list_file, name, date, dbpath, tmp_path):
                          if head in column_order]
                 if len(found) != 4:
                     logger.error("ERROR: Your information file does not have the required "
-                                 "columns: to_annotate, gsize nb_conts and L90 (in any order) "
-                                 "\n Ending program.")
+                                 "columns, tab separated: to_annotate, gsize, nb_conts and L90 "
+                                 "(in any order) \n Ending program.")
                     sys.exit(1)
                 continue
             # If no header found, error message and exit
             if not column_order:
                 logger.error("ERROR: It seems that your info file does not have a header, or "
-                             "this header does not have, at least, the required columns: "
-                             "to_annotate, gsize nb_conts and L90 (in any order).\n "
-                             "Ending program.")
+                             "this header does not have, at least, the required columns"
+                             "separated: to_annotate, gsize nb_conts and L90 (in any order).\n")
                 sys.exit(1)
             # Get all information on the given genome
-            # genome, size, nb_cont, l90 = line.strip().split()
-            infos = line.strip().split()
-            # Get genome name with its path to db_dir
-            gname = infos[column_order["to_annotate"]]
-            gpath = os.path.join(dbpath, gname)
+            # line.strip().split() -> all given information.
+            # So, at least to_annotate, gsize, nbcont, L90
             # Get numeric information
             try:
+                infos = line.strip().split()
+                # Get genome name with its path to db_dir
+                gname = infos[column_order["to_annotate"]]
+                gpath = os.path.join(dbpath, gname)
                 gsize = int(infos[column_order["gsize"]])
                 gl90 = int(infos[column_order["L90"]])
                 gcont = int(infos[column_order["nb_conts"]])
-            # If invalid values, warnng message and ignore genome
+            # If invalid values, warning message and ignore genome
             except ValueError:
-                logger.warning("For genome {}, at least one of your columns 'gsize', 'nb_conts' or 'L90' contains a non numeric character. This genome will be ignored.".format(gname))
+                logger.warning("For genome {}, at least one of your columns 'gsize', 'nb_conts' "
+                               "or 'L90' contains a non numeric character. This genome will be "
+                               "ignored.".format(gname))
                 continue
-            # Check if genome file exists
+            # If no value for at least 1 field, warning message and ignore genome
+            except IndexError:
+                logger.error("ERROR: Check that all fields of {} are filled in each "
+                               "line (can be 'NA')".format(list_file))
+                sys.exit(-1)
+
+            # Could we find genome file?
+            # Check if genome file exists in db_path.
             if not os.path.isfile(gpath):
-                # If it does not exist, look at it in tmp_file (can come from a concatenation
-                # of several files in db_path)
-                gpath = os.path.join(tmp_path, gname)
-                # If still not in tmp_dir, warning message and ignore genome
-                if not os.path.isfile(gpath):
-                    logger.warning(("{} genome file does not exist in the given "
-                                    "database nor in your given tmp directory. "
-                                    "It will be ignored.".format(gpath)))
+                if dbpath2:
+                    # If it does not exist, and there is a 2nd db_path, check if it exists there
+                    gpath = os.path.join(dbpath2, gname)
+                    # If still not in db_path2, warning message and ignore genome
+                    if not os.path.isfile(gpath):
+                        logger.warning("{} genome file does not exist in the given "
+                                       "database {} nor in the other directory ({}). "
+                                       "It will be ignored.".format(gname, dbpath, dbpath2))
+                        continue
+                else:
+                    logger.warning("{} genome file does not exist in the given "
+                                   "database {}. It will be ignored.".format(gname, dbpath))
                     continue
             # cur genome information to save:
             # [spegenus.date, path_orig_seq, path_to_sequence_to_annotate, size, nbcont, l90]
