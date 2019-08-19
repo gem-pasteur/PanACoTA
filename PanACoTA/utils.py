@@ -644,7 +644,7 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
     Parameters
     ----------
     list_file : str
-        input file containing the list of genomes (filename, genome_name, size, L90, nb_contigs)
+        input file containing information on genomes (to_annotate, size, L90, nb_contigs)
     name : str
         Default species name
     date : str
@@ -665,7 +665,7 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
                   }
     """
     logger = logging.getLogger("utils")
-    logger.info("Reading given information on your genomes")
+    logger.info(f"Reading given information on your genomes in {list_file}")
     genomes = {}
     spegenus = "{}.{}".format(name, date)
     column_order = {} # Put the number of column corresponding to each field

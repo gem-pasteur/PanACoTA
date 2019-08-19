@@ -79,8 +79,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     res_prt_file = os.path.join(prot_dir, name + ".prt")
     res_rep_file = os.path.join(rep_dir, name + ".fna")
 
-    # Convert prokka tbl file to gembase .lst file format
-    tbl2lst(prokka_tbl_file, res_lst_file, name, logger)
 
     # Generate replicon file (same as input sequence but with gembase formatted headers). From
     # this file, get contig names, to be used to generate gff file
@@ -96,6 +94,12 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             pass
         logger.error("Problems while generating Replicon file for {}".format(name))
         return False
+
+    # Convert prokka tbl file to gembase .lst file format
+    tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, logger)
+
+    import sys
+    sys.exit(1)
 
     # Create gff3 file for annotations
     ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, logger)
@@ -442,7 +446,7 @@ def create_prt(faaseq, lstfile, prtseq, logger):
     return not problem
 
 
-def tbl2lst(tblfile, lstfile, genome, logger):
+def tbl2lst(tblfile, lstfile, contigs, genome, logger):
     """
     Read prokka tbl file, and convert it to the lst file.
 
@@ -473,6 +477,8 @@ def tbl2lst(tblfile, lstfile, genome, logger):
         name of prokka output tbl file to read
     lstfile : str
         name of lst file to generate
+    contigs : list
+        List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
     genome : str
         genome name (gembase format)
     logger : logging.Logger
@@ -489,9 +495,9 @@ def tbl2lst(tblfile, lstfile, genome, logger):
     cont_loc = "b"
     prev_cont_loc = "b"
     # Current contig number. Used to compare with new one, to know if protein is
-    # inside or at the boder of a contig
-    cont_num = "-1"
-    prev_cont_num = "-1"
+    # inside or at the border of a contig
+    cont_num = 0
+    prev_cont_num = -1
     # Information on current feature. At the beginning, everything empty, no information
     gene_name = "NA"
     product = "NA"
@@ -512,7 +518,7 @@ def tbl2lst(tblfile, lstfile, genome, logger):
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
                 contig = line.strip().split()[-1]
-                cont_num = contig.split("_")[-1]  # -> 0010
+                cont_num += 1
             else:
                 # Get line type, and retrieve info according to it
                 # If it is not the line with start, end, type, there are only 2 elements
@@ -531,16 +537,25 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                         inf2 = elems[1]
                     if "db_xref" in elems[0]:
                         db_xref = elems[1]
-                # 3 elements = start end and type of the feature
+                # new gene:
+                #  3 elements = start end and type of the feature
                 else:
-                    #  Check contig: new or same as previous?
+                    # Check contig: new or same as previous?
                     # New contig
-                    if int(cont_num) != int(prev_cont_num):
-                        # Check if it is the contig just following the previous one,
-                        # or if there are contigs without any feature between them.
-                        if int(prev_cont_num) != -1 and int(cont_num) != int(prev_cont_num) + 1:
+                    if cont_num != prev_cont_num:
+                        # Check if
+                        # - it is not the first gene of the genome
+                        # - contig just following the previous one, or there are contigs
+                        # without any feature between them?
+                        # - this new contig is as expected (next contig of the list of
+                        # contigs generated during Replicons file generation)
+                        if prev_cont_num != -1 and cont_num != prev_cont_num + 1:
                             logger.details("No feature found in contigs between contig {} and "
                                            "contig {}.".format(prev_cont_num, cont_num))
+                        cont_name_found = f"{genome}.{str(cont_num).zfill(4)}"
+                        cont_name_exp = contigs[prev_cont_num - 1]
+                        if cont_name_found != cont_name_exp:
+
                         # Previous loc was 'i' (because we were in the same contig).
                         # But we now change contig, so this previous feature was the last
                         # of its contigs -> prev_loc = "b"
@@ -560,12 +575,15 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                     # If not first feature, write the previous feature to .lst file
                     # (The first feature will be written once 2nd feature as been read)
                     if start != -1 and end != -1:
-                        crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
-                                                           product, crispr_num, prev_cont_loc,
-                                                           genome, prev_cont_num,
-                                                           ecnum, inf2, db_xref,
-                                                           strand, start, end, lstf)
-
+                        crispr_num, lstline = general.write_gene(feature_type, locus_num,
+                                                                 gene_name, product, crispr_num,
+                                                                 prev_cont_loc, genome,
+                                                                 prev_cont_num, ecnum, inf2,
+                                                                 db_xref, strand, start, end, lstf)
+                        print(cont_name)
+                        print(f"contig name from rep file {}")
+                        import sys
+                        sys.exit(1)
                     # Get new values for start, end, strand and feature type
                     start, end, feature_type = elems
                     # Get strain of gene
@@ -575,7 +593,7 @@ def tbl2lst(tblfile, lstfile, genome, logger):
                     else:
                         strand = "D"
                     # Initialize variables for next feature (except start, end, strand
-                    # and feature type which are just calculated)
+                    # and feature type which just calculated)
                     prev_cont_num = cont_num
                     prev_cont_loc = cont_loc
                     locus_num = "NA"

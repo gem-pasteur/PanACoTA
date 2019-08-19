@@ -212,6 +212,11 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # Check that needed softs are installed
     prokka = utils.check_installed("prokka")
     prodigal = utils.check_installed("prodigal")
+    if prodigal_only:
+        soft = "prodigal"
+    else:
+        soft = "prokka"
+
     if not qc_only:
         # If user using prokka: check prokka is installed and in the path
             if not prodigal_only and not prokka:
@@ -269,7 +274,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     logger.info("Let's start!")
 
     # STEP 1. analyze genomes (nb contigs, L90, stretches of N...)
-    # If already info on genome (--info <file> option), skip this step
+    # If already info on genome ('--info <file>' option), skip this step
     # If no info on genomes, read them and get needed information
     if not from_info:
         # Read genome names.
@@ -286,20 +291,20 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
                                   logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
     else:
-        # genomes = genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
+        # genomes = {genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]}
         # orig_path is the path to the original sequence
         # and to_annotate_path the path to the sequence to annotate (once split etc.)
         # Here, both are the same, as we take given sequences as is.
         genomes = utils.read_genomes_info(from_info, name, date, db_path, db_path2)
         if not genomes:
             if db_path2:
-                logger.error(("We did not find any genome listed in {} in {} nor in {}. "
+                logger.error(("We did not find any genome listed in {} in {} folder nor in {}. "
                               "Please check your list to give valid genome "
                               "names.").format(from_info, db_path, db_path2))
             else:
                 logger.error(("We did not find any genome listed in {} in the folder {}. "
-                          "Please check your list to give valid genome "
-                          "names.").format(from_info, db_path))
+                              "Please check your list to give valid genome "
+                              "names.").format(from_info, db_path))
             sys.exit(-1)
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
@@ -311,16 +316,19 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
-    if cutn == 0 and prodigal_only:
-        logger.info("-> Folder with original sequence files and sequences to annotate: {}".format(db_path))
-        logger.info("\t-> If original sequence or to annotate sequence not found in {}, "
+    # Info on folder containing original sequences
+    if not from_info:
+        logger.info("-> Original sequences folder (corresponding to 'orig-name' column in "
+                    "'{}/LSTINFO-<input_file>.lst'): {} ".format(res_dir, db_path))
+        logger.info("\t-> If original sequence not found in {}, "
                     "look for it in {}, as it must be a concatenation of several input sequence "
                     "files.".format(db_path, tmp_dir))
-    else:
-        logger.info("-> Original sequences folder: {}".format(db_path))
-        logger.info("\t-> If original sequence not found in {}, look for it in {}, as it must "
-                    "be a concatenation of several input sequence files.".format(db_path, tmp_dir))
-        logger.info("-> Folder with sequences to annotate: {}".format(tmp_dir))
+        if prodigal_only and cutn == 0:
+            logger.info("-> Sequences used for annotation ('to_annotate' column) are the "
+                        "same as the previous ones (original sequences).")
+        else:
+            logger.info("-> Folder with sequence file used for annotation ('to_annotate' column): "
+                        "{}".format(tmp_dir))
 
     # If only QC, stop here.
     if qc_only:
@@ -336,13 +344,14 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     #                 gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     utils.write_lstinfo(list_file, kept_genomes, res_dir)
-    sys.exit(1)
 
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
                                        prodigal_only, small, quiet=quiet)
-    # List of genomes to format
-    results_ok = [genome for (genome, ok) in results.items() if ok]
+    # Information on genomes to format
+    # results_ok = {genome: [gembase_name, path_to_origfile, path_split_gembase,
+    #               gsize, nbcont, L90]}
+    results_ok = {genome:info for (genome,info) in genomes.items() if results[genome]}
     # If no genome was ok, no need to format them. Just print that no genome was annotated,
     # end program.
     if not results_ok:
@@ -361,8 +370,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # Initialize list of genomes skipped because something went wrong while formatting.
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
-    skipped_format = ffunc.format_genomes(genomes, results_ok, res_dir, res_annot_dir,
-                                                  prodigal_only, threads, quiet=quiet)
+    skipped_format = ffunc.format_genomes(results_ok, res_dir, res_annot_dir,
+                                          prodigal_only, threads, quiet=quiet)
     # At least one genome could not be formatted -> warn user
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
@@ -449,10 +458,10 @@ def build_parser(parser):
                                "genome, you can give this information, to go directly to "
                                "annotation and formatting steps. This file contains at "
                                "least 4 columns, tab separated, with the following headers: "
-                               "'orig_name', 'gsize', 'nb_conts', 'L90'. Any other column "
+                               "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
                                "will be ignored.")
     optional.add_argument("-d2", dest="db_path2",
-                          help="Path to 2nd folder containing all multifasta genome files. "
+                          help="Path to 2nd folder containing multifasta genome files. "
                                "Used if you run annotation of sequences found in 2 different "
                                "folders. For example, if you ran this module, and now want to "
                                "rerun it with different parameters, but using the already "

@@ -152,14 +152,16 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
     bool :
         True if conversion went well, False otherwise
     """
-
     # Variable which will contain the current gene sequence
     seq = ""
     # number of the current gene (first gene is 1, 2nd is 2 etc. each number is unique: do not
     # re-start at 1 for each new contig)
     locus_num = 1
-    # contig number of the last gene. To check if we are now in a new contig (-> loc = b) or not
+    # contig name of the last gene. To check if we are now in a new contig (-> loc = b) or not
+    prev_cont_name = ""
+    # Previous ontig number: contig number to use in gembase format
     prev_cont_num = 0
+    contig_num = 0
     # Keep start, end, strand and informations (prodigal gives information on start_type,
     # gc_cont etc.) from the previous gene, before overwriting it with information
     # on the new one
@@ -190,20 +192,21 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
                 # Get information given for the new gene (by .ffn file from prodigal)
                 (gname, start, end, strand, info) = lineffn.strip().split(">")[-1].split("#")
                 # Get contig number from prodigal gene header: prodigal first part of header is:
-                #  <original genome name>_<contig number>_<protein number>
-                contig_num = int(gname.strip().split("_")[-2])
-
+                #  <original genome name contig name>_<protein number>
+                contig_name = "_".join(gname.strip().split("_")[:-1])
                 # If new contig:
                 # - previous gene was the last of its contig -> prev_loc = "b" ;
                 # - the current gene is the first of its contig (loc = "b")
-                if contig_num != prev_cont_num:
+                # - we must increment the contig number
+                if contig_name != prev_cont_name:
+                    contig_num += 1
                     prev_loc = 'b'
                     loc = 'b'
                 # If not new contig. If prev_loc == 'b', previous gene is the first protein
                 # of this contig.
                 # Current gene will be inside the contig (except if new contig for the next gene,
                 # meaning only 1 gene in the contig)
-                if contig_num == prev_cont_num and prev_loc == "b":
+                if contig_name == prev_cont_name and prev_loc == "b":
                     loc = 'i'
 
                 # If it is the first gene of the genome, we do not have any "previous gene"
@@ -212,6 +215,7 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
                 if prev_start == "":
                     prev_start = start
                     prev_end = end
+                    prev_cont_name = contig_name
                     prev_cont_num = contig_num
                     prev_info = info
                     # Convert strand 1/-1 to D/C
@@ -239,6 +243,7 @@ def create_gene_lst(gen_file, res_gen_file, res_lst_file, name, logger):
                 locus_num += 1
                 seq = ""
                 prev_cont_num = contig_num
+                prev_cont_name = contig_name
                 prev_start = start
                 prev_end = end
                 prev_strand = strand

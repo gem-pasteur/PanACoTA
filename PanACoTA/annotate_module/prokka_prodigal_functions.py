@@ -185,7 +185,7 @@ def run_prokka(arguments):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('run_prokka')
-    logger.log(utils.detail_lvl(), "Start annotating {} {} with Prokka".format(name, gpath))
+    logger.log(utils.detail_lvl(), f"Start annotating {name} from {gpath} with Prokka")
 
     # Define prokka directory and logfile, and check their existence
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
@@ -227,7 +227,7 @@ def run_prokka(arguments):
     # So, outdir does not exist -> run prokka
     cmd = ("prokka --outdir {} --cpus {} "
            "--prefix {} {}").format(prok_dir, threads, name, gpath)
-    error = "Error while trying to run prokka"
+    error = (f"Error while trying to run prokka on {name} from {gpath}")
     logger.details("Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf)
@@ -276,8 +276,8 @@ def run_prodigal(arguments):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('run_prodigal')
-    logger.log(utils.detail_lvl(), "Start annotating {} (from {} sequence) "
-                                   "with Prodigal".format(name, gpath))
+    logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
+                                     "with Prodigal")
 
     # Define prodigal directory and logfile, and check their existence
     # By default, prodigal is in tmp_folder -> resdir/tmp_files/genome-prodigalRes

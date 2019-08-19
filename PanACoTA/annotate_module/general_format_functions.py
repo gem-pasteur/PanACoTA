@@ -30,7 +30,7 @@ import PanACoTA.annotate_module.format_prokka as fprokka
 import PanACoTA.annotate_module.format_prodigal as fprodigal
 
 
-def format_genomes(genomes, results, res_path, annot_path, prodigal_only, threads=1, quiet=False):
+def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False):
     """
     For all genomes which were annotated (by prokka or prodigal), reformat them
     in order to have, in 'res_path', the following folders:
@@ -43,10 +43,8 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
 
     Parameters
     ----------
-    genomes : dict
-        {genome: [name, gpath, size, nbcont, l90]}
-    results : list
-        List of genome annotated by prokka/prodigal, that must be formatted
+    genomes_ok : dict
+        genomes to format (annotation was OK) -> {genome: [name, gpath, size, nbcont, l90]}
     res_path : str
         path to folder where the 4 directories must be created
     annot_path : str
@@ -80,7 +78,7 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     os.makedirs(gff_dir, exist_ok=True)
 
     # If this function goes until here, it means that there is at least 1 genome to annotate
-    nbgen = len(genomes)
+    nbgen = len(genomes_ok)
     bar = None
     if not quiet:
         # Create progressbar
@@ -94,9 +92,12 @@ def format_genomes(genomes, results, res_path, annot_path, prodigal_only, thread
     q = m.Queue()
 
     # if at least 1 genome ok, try to format it
+    # arguments for 'handle_genome' function:
+    # (genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir, rep_dir,
+    # gff_dir, results, prodigal_only, q)
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
-               rep_dir, gff_dir, results, prodigal_only, q)
-              for genome, (name, gpath, _, _, _) in genomes.items()]
+               rep_dir, gff_dir, prodigal_only, q)
+              for genome, (name, _, gpath, _, _, _) in genomes_ok.items()]
 
     # Create pool and launch parallel formating steps
     pool = multiprocessing.Pool(threads)
@@ -146,7 +147,6 @@ def handle_genome(args):
          * gene_dit : path to 'Genes' folder
          * rep_dir : path to 'Replicons' folder
          * gff_dir : path to 'gff3' folder
-         * results : {genome_name: <True if genome was correctly annotated, False otherwise>}
          * prodigal_only : True if annotated by prodigal, False if annotated by prokka
          * q : multiprocessing.managers.AutoProxy[Queue] queue to put logs during subprocess
 
@@ -158,7 +158,7 @@ def handle_genome(args):
         * genome name (used to get info from the pool.map_async)
     """
     (genome, name, gpath, annot_path, lst_dir, prot_dir,
-     gene_dir, rep_dir, gff_dir, results, prodigal_only, q) = args
+     gene_dir, rep_dir, gff_dir, prodigal_only, q) = args
 
     # Define which formatting must be used, given the annotation software
     if prodigal_only:
@@ -174,9 +174,7 @@ def handle_genome(args):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('format.handle_genome')
-    # Handle genome, if we have its informations
-    if genome not in results:
-        return "no_res", genome
+    # Handle genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
                                   prot_dir, gene_dir, rep_dir, gff_dir, logger)
     return ok_format, genome
@@ -226,8 +224,8 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
 
     Returns
     -------
-    int :
-        Current crispr number
+    tuple :
+        Current crispr number, lstline
     """
     # if last gene was a crispr
     if gtype == "repeat_region":
