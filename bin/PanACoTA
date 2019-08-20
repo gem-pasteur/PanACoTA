@@ -6,6 +6,7 @@ from textwrap import dedent
 
 from PanACoTA import __version__ as version
 
+from PanACoTA.subcommands import prepare
 from PanACoTA.subcommands import annotate
 from PanACoTA.subcommands import pangenome
 from PanACoTA.subcommands import corepers
@@ -62,6 +63,18 @@ def parse_arguments(argv):
     # dest: to be able to get the subparser called with args.subparser_called
     actions = {}  # to add the action to do according to the subparser called
     checks = {}  # to add the function to call to check the subparser arguments
+
+    # QC and annotation part. Start with ASCII art title, + small description of subcommand
+    parser_prepare = subparsers.add_parser('prepare',
+                                            formatter_class=argparse.RawDescriptionHelpFormatter,
+                                            description=(dedent(header) +
+                                            "\n=> Prepare draft dataset"),
+                                            epilog=footer,
+                                            help="Prepare draft dataset",
+                                            add_help=False)
+    prepare.build_parser(parser_prepare)
+    actions["prepare"] = prepare.main_from_parse
+    checks["prepare"] = prepare.check_args
 
     # QC and annotation part. Start with ASCII art title, + small description of subcommand
     parser_annotate = subparsers.add_parser('annotate',
