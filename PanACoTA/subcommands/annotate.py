@@ -390,6 +390,8 @@ def build_parser(parser):
 
     """
     from PanACoTA import utils
+    import multiprocessing
+    import argparse
 
     def gen_name(param):
         if not utils.check_format(param):
@@ -422,6 +424,25 @@ def build_parser(parser):
         if param >= 10000:
             msg = "We do not support genomes with more than 9999 contigs."
             raise argparse.ArgumentTypeError(msg)
+        return param
+
+    def thread_num(param):
+        try:
+            param = int(param)
+        except Exception:
+            msg = "argument --threads threads: invalid int value: {}".format(param)
+            raise argparse.ArgumentTypeError(msg)
+        nb_cpu = multiprocessing.cpu_count()
+        if param > nb_cpu:
+            msg = ("You have {} threads on your computer, you cannot ask for more: "
+                   "invalid value: {}").format(nb_cpu, param)
+            raise argparse.ArgumentTypeError(msg)
+        elif param < 0:
+            msg = ("Please provide a positive number of threads (or 0 for all threads): "
+                   "Invalid value: {}").format(param)
+            raise argparse.ArgumentTypeError(msg)
+        elif param == 0:
+            return nb_cpu
         return param
 
     # Create command-line parser for all options and arguments to give
@@ -516,7 +537,7 @@ def build_parser(parser):
                           help=("If you use Prodigal to annotate genomes, if you sequences are "
                                 "too small (less than 20000 characters), it cannot annotate them "
                                 "with the default options. Add this to use 'meta' procedure."))
-    optional.add_argument("--threads", dest="threads", type=int, default=1,
+    optional.add_argument("--threads", dest="threads", type=thread_num, default=1,
                           help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
