@@ -147,6 +147,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
 
     Parameters
     ----------
+    cmd : str
+        command line used to launch this program
     list_file : str
         file containing the list of genome files, 1 genome per line, separated by a
         space if a genome is split in several fasta files. This file can also
@@ -390,60 +392,9 @@ def build_parser(parser):
 
     """
     from PanACoTA import utils
+    from PanACoTA import utils_argparse
     import multiprocessing
     import argparse
-
-    def gen_name(param):
-        if not utils.check_format(param):
-            msg = ("The genome name must contain 4 characters. For example, this name can "
-                   "correspond to the 2 first letters of genus, and 2 first letters of "
-                   "species, e.g. ESCO for Escherichia Coli.")
-            raise argparse.ArgumentTypeError(msg)
-        return param
-
-    def date_name(param):
-        if not utils.check_format(param):
-            msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
-                   "corresponding to the month (2 digits) and year (2 digits).")
-            raise argparse.ArgumentTypeError(msg)
-        return param
-
-    def get_date():
-        import time
-        return time.strftime("%m%y")
-
-    def cont_num(param):
-        try:
-            param = int(param)
-        except Exception:
-            msg = "argument --nbcont: invalid int value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        if param < 0:
-            msg = "The maximum number of contigs allowed must be a positive number."
-            raise argparse.ArgumentTypeError(msg)
-        if param >= 10000:
-            msg = "We do not support genomes with more than 9999 contigs."
-            raise argparse.ArgumentTypeError(msg)
-        return param
-
-    def thread_num(param):
-        try:
-            param = int(param)
-        except Exception:
-            msg = "argument --threads threads: invalid int value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        nb_cpu = multiprocessing.cpu_count()
-        if param > nb_cpu:
-            msg = ("You have {} threads on your computer, you cannot ask for more: "
-                   "invalid value: {}").format(nb_cpu, param)
-            raise argparse.ArgumentTypeError(msg)
-        elif param < 0:
-            msg = ("Please provide a positive number of threads (or 0 for all threads): "
-                   "Invalid value: {}").format(param)
-            raise argparse.ArgumentTypeError(msg)
-        elif param == 0:
-            return nb_cpu
-        return param
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
@@ -461,7 +412,7 @@ def build_parser(parser):
     required.add_argument("-r", dest="res_path", required=True,
                           help="Path to folder where output annotated genomes must be saved")
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-n", dest="name", type=gen_name,
+    optional.add_argument("-n", dest="name", type=utils_argparse.gen_name,
                           help=("Choose a name for your annotated genomes. This name should "
                                 "contain 4 alphanumeric characters. Generally, they correspond "
                                 "to the 2 first letters of genus, and 2 first letters of "
@@ -495,7 +446,7 @@ def build_parser(parser):
                                "is slower.")
     optional.add_argument("--l90", dest="l90", type=int, default=100,
                           help="Maximum value of L90 allowed to keep a genome. Default is 100.")
-    optional.add_argument("--nbcont", dest="nbcont", type=cont_num, default=999,
+    optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
     optional.add_argument("--cutN", dest="cutn", type=int, default=5,
@@ -505,7 +456,8 @@ def build_parser(parser):
                                 "cut genomes into new contigs when there are stretches of 'N', "
                                 "put 0 to this option. If you want to cut from a different number "
                                 "of 'N' stretches, put this value to this option."))
-    optional.add_argument("--date", dest="date", default=get_date(), type=date_name,
+    optional.add_argument("--date", dest="date", default=utils_argparse.get_date(),
+                          type=utils_argparse.date_name,
                           help=("Specify the date (MMYY) to give to your annotated genomes. "
                                 "By default, will give today's date. The only requirement on the"
                                 " given date is that it is 4 characters long. You can use letters"
@@ -537,7 +489,7 @@ def build_parser(parser):
                           help=("If you use Prodigal to annotate genomes, if you sequences are "
                                 "too small (less than 20000 characters), it cannot annotate them "
                                 "with the default options. Add this to use 'meta' procedure."))
-    optional.add_argument("--threads", dest="threads", type=thread_num, default=1,
+    optional.add_argument("--threads", dest="threads", type=utils_argparse.thread_num, default=1,
                           help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
