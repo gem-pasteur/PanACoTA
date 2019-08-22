@@ -449,7 +449,7 @@ def build_parser(parser):
     optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    optional.add_argument("--cutN", dest="cutn", type=int, default=5,
+    optional.add_argument("--cutn", dest="cutn", type=int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' at a stretch are found in its sequence. "
                                 "If you don't want to "
@@ -541,7 +541,6 @@ def check_args(parser, args):
         with error message if error occurs with arguments given.
 
     """
-
     # Message if user kept default thresholds for L90 and nbcont. Just to warn him, to be sure
     # it was on purpose
     def thresholds_message(l90, nbcont):
@@ -601,7 +600,6 @@ def check_args(parser, args):
                               "are the 20 first characters of first word of current "
                               "header", "yellow"))
     print()
-    return args
 
     # If db_path2 is used only with infofile
     if args.db_path2 and not args.info:
@@ -609,6 +607,7 @@ def check_args(parser, args):
                      "sequences come from 2 different folders (db_path and tmp_path if from a "
                      "previous run of this module). Use --info <info-file> or "
                      "remove '-d2 <path>' ")
+    return args
 
 
 if __name__ == '__main__':
