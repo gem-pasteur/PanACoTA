@@ -64,7 +64,7 @@ def parse_arguments(argv):
     actions = {}  # to add the action to do according to the subparser called
     checks = {}  # to add the function to call to check the subparser arguments
 
-    # QC and annotation part. Start with ASCII art title, + small description of subcommand
+    # Preparation part. Start with ASCII art title, + small description of subcommand
     parser_prepare = subparsers.add_parser('prepare',
                                             formatter_class=argparse.RawDescriptionHelpFormatter,
                                             description=(dedent(header) +
