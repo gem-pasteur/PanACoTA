@@ -49,6 +49,7 @@ def cont_num(param):
 
 
 def thread_num(param):
+    import multiprocessing
     try:
         param = int(param)
     except Exception:
