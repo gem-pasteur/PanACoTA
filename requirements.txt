@@ -1,5 +1,6 @@
 argparse
 termcolor
+colorlog
 progressbar2 >= 3.18.0
 ncbi_genome_download
 numpy>=1.11

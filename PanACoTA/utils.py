@@ -13,13 +13,15 @@ import os
 import sys
 import re
 import glob
-import logging
-from logging.handlers import RotatingFileHandler
 import subprocess
 import shutil
 import shlex
 import progressbar
-from termcolor import colored
+
+# Logging
+import logging
+from logging.handlers import RotatingFileHandler
+from colorlog import ColoredFormatter
 
 try:
     import cPickle as pickle
@@ -107,7 +109,17 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
     my_format = '[%(asctime)s] :: %(levelname)s :: %(message)s'
     formatter_file = logging.Formatter(my_format, '%Y-%m-%d %H:%M:%S')
-    formatter_stream = logging.Formatter('  * [%(asctime)s] %(message)s', '%Y-%m-%d %H:%M:%S')
+    my_format_stream = '%(log_color)s  * [%(asctime)s] : %(levelname)s %(reset)s %(message)s'
+    formatter_stream = ColoredFormatter(my_format_stream, datefmt='%Y-%m-%d %H:%M:%S',
+                                        log_colors={'DEBUG' : 'cyan',
+                                                    'INFO' : 'green',
+                                                    'DETAIL' : 'cyan',
+                                                    'WARNING' : 'yellow',
+                                                    'ERROR' : 'red',
+                                                    'CRITICAL' : 'red',
+                                                    })
+
+
 
     # Create handler 1: writing to 'logfile'. mode 'write', max size = 1Mo.
     # If logfile is 1Mo, it is renamed to logfile.1, and next logs are still
