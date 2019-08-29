@@ -43,10 +43,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, threads, no_refseq, only_mash, l
     Main method, constructing the draft dataset for the given species
 
     verbosity:
-    - defaut 0 : stdout contains INFO, stderr contains ERROR.
-    - 1: stdout contains INFO, stderr contains WARNING and ERROR
-    - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
-    - >=15: Add DEBUG in stdout
+    - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more, .log.err contains warning and more
+    - 1: same as 0 + WARNING in stderr
+    - 2: same as 1 + DETAILS in stdout + DETAILS in .log.details
+    - >=15: same as 2 + Add DEBUG in stdout + create .log.debug with everything from info to debug
+
 
     Parameters
     ----------
@@ -74,10 +75,10 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, threads, no_refseq, only_mash, l
         lower limit of distance between 2 genomes to keep them
     verbose : int
         verbosity:
-        default (0): info in stdout, error and more in stderr
-        1 = add warnings in stderr
-        2 = like 1 + add DETAIL to stdout (by default only INFO)
-        >15: add debug to stdout
+        - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more, .log.err contains warning and more
+        - 1: same as 0 + WARNING in stderr
+        - 2: same as 1 + DETAILS in stdout + DETAILS in .log.details
+        - >=15: same as 2 + Add DEBUG in stdout + create .log.debug with everything from info to debug
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
 
@@ -113,10 +114,8 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, threads, no_refseq, only_mash, l
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(outdir, "PanACoTA_prepare_{}").format(species_linked)
-    logfile_base = utils.init_logger(logfile_base, level, name='', details=True,
-                                     verbose=verbose, quiet=quiet)
-    logger = logging.getLogger('')
-    keyargs = {'section': 'refseq', 'file_format': 'fasta', 'output': '/Users/aperrin/Softwares/gem-hub_src/PanACoTA/104099-out', 'parallel': 1, 'group': 'bacteria', 'species_taxid': '104099'}
+    logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', details=True,
+                                             verbose=verbose, quiet=quiet)
 
     logger.info("Command used\n \t > " + cmd)
     message = f"'PanACoTA prepare' will run on {threads} "
@@ -235,7 +234,7 @@ def build_parser(parser):
                                 "of 'N' stretches, put this value to this option."))
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
-                        help="Increase verbosity in stdout/stderr.")
+                        help="Increase verbosity in stdout/stderr and log files.")
     helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
                         help=("Do not display anything to stdout/stderr. log files will "
                               "still be created."))
@@ -310,7 +309,7 @@ def check_args(parser, args):
     if args.cutn == 0 or args.cutn == 5:
         message = ("  !! Your genomes will be split when sequence contains at "
                    "least {}'N' at a stretch. If you want to change this threshold, use "
-                   "'--cutn' option (0 if you do not want to cut)").format(args.cutn)
+                   "'--cutn n' option (n=0 if you do not want to cut)").format(args.cutn)
         print(colored(message, "yellow"))
 
     # Warn user about selection of genomes thresholds

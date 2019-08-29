@@ -56,10 +56,11 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         if we need to name the logger (used for tests)
     verbose : int
         be more verbose:
-        default (0): info in stdout, error and more in stderr
+        default (0): info in stdout, error and more in stderr ;
+        info and more in *.log ; warning and more in *.log.err
         1 = add warnings in stderr
-        2 = like 1 + add DETAIL to stdout (by default only INFO)
-        >15: add debug to stdout
+        2 = like 1 + add details to stdout (by default only INFO) + add details to *.log.details
+        >15: add debug to stdout and create *.log.debug with all levels
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
@@ -171,7 +172,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
             err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
         err_handler.setFormatter(formatter_stream)
         logger.addHandler(err_handler)  # add handler to logger
-    return logfile
+    return logfile, logger
 
 
 class LessThanFilter(logging.Filter):
