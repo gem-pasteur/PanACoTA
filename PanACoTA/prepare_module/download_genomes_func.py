@@ -99,39 +99,6 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
     return db_dir
 
 
-def download_summary(species_linked, outdir):
-    """
-    Get assembly_summary file for the given species if it exists. To be able to download it,
-    the given NCBI species name must be exalctly as the name given on NCBI website.
-
-    Parameters
-    ----------
-    species_linked : str
-        given NCBI species with '_' instead of spaces, or NCBI taxID if species
-        name not given (then, assembly file won't be found
-    outdir : str
-        Directory where summary file must be saved
-    logger : logging.Logger
-        log object to add information
-
-    Returns
-    -------
-    str :
-        Output filename of downloaded summary
-    """
-    logger.info("Retrieving assembly_summary file for {}".format(species_linked))
-    url = ("ftp://ftp.ncbi.nih.gov/genomes/refseq/"
-           "bacteria/{}/assembly_summary.txt").format(species_linked)
-    outfile = os.path.join(outdir, "assembly_summary-{}.txt".format(species_linked))
-    try:
-        urllib.request.urlretrieve(url, outfile)
-    except:
-        logger.warning(f"assembly_summary file for {species_linked} cannot be downloaded. "
-                        "Please check that you provided the exact species name, as given in NCBI")
-        return ""
-    return outfile
-
-
 def to_database(outdir):
     """
     Move .fna.gz files to 'database_init' folder, and uncompress them.

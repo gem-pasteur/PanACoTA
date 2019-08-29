@@ -117,24 +117,20 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, threads, no_refseq, only_mash, l
     logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', details=True,
                                              verbose=verbose, quiet=quiet)
 
+    # Message on what will be done (cmd, cores used)
     logger.info("Command used\n \t > " + cmd)
     message = f"'PanACoTA prepare' will run on {threads} "
     message += f"cores" if threads>1 else "core"
     logger.info(message)
 
     # Start prepare step
-    # Run more than only mash filter :
+    # Run more than only mash filter (!only_mash):
     # - start from QC and mash (norefseq)
     # - start from genome download (!norefseq))
     if not only_mash:
         if no_refseq:   # Do not download genomes, just do QC and mash filter on given genomes
             logger.info('You asked to skip refseq downloads.')
-
         else:  # Do all steps: download, QC, mash filter
-            sum_file = ""
-            # If user specified a species name, try to download the corresponding summary file
-            if NCBI_species:
-                sum_file = dgf.download_summary(species_linked, outdir)
             # Download all genomes of the given taxID
             db_dir = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
                                               outdir, threads)
