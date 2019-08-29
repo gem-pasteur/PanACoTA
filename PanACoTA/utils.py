@@ -172,6 +172,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
             err_handler.setLevel(logging.ERROR)  # write all messages >= ERROR
         err_handler.setFormatter(formatter_stream)
         logger.addHandler(err_handler)  # add handler to logger
+    logger.propagate = False
     return logfile, logger
 
 
