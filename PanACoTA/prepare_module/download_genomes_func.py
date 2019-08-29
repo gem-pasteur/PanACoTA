@@ -18,7 +18,7 @@ import ncbi_genome_download as ngd
 from PanACoTA import utils
 
 
-logger = logging.getLogger("ddg.log_dds")
+logger = logging.getLogger("prepare.dds")
 
 
 def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threads):
@@ -93,7 +93,6 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         # Error message
         logger.error(error_message)
         sys.exit(1)
-    sys.exit(1)
     nb_gen, db_dir = to_database(outdir)
     logger.info("Downloaded {} genomes.".format(nb_gen))
     return db_dir
@@ -103,9 +102,13 @@ def to_database(outdir):
     """
     Move .fna.gz files to 'database_init' folder, and uncompress them.
 
-    outdir : directory where all results are (for now, refseq folders, assembly summary and log
+    Parameters
+    ----------
+    outdir : str
+        directory where all results are (for now, refseq folders, assembly summary and log
 
-    Return:
+    Returns
+    -------
         nb_gen : number of genomes downloaded
         db_dir : directory where are all fna files downloaded from refseq
     """
