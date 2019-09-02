@@ -269,7 +269,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
-    logfile_base = utils.init_logger(logfile_base, level, name='', details=True,
+    logfile_base = utils.init_logger(logfile_base, level, name='annotate', details=True,
                                 verbose=verbose, quiet=quiet)
     logger = logging.getLogger('')
     logger.info("Command used\n \t > " + cmd)
