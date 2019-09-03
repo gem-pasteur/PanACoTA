@@ -13,6 +13,7 @@ import shutil
 import sys
 import glob
 import urllib.request
+import progressbar
 import ncbi_genome_download as ngd
 
 from PanACoTA import utils
@@ -75,19 +76,31 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
     error_message = ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
                      "NCBI species name. If you gave both, check that given taxID and name really "
                      "correspond to the same species.")
+    # widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+    #            "  -  ", progressbar.Timer()]
+    # bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
     try:
         # Download genomes
+        # ret = None
+        # while True:
+        #     if ret:
+        #         break
+        #     bar.update()
         ret = ngd.download(**keyargs)
+
     except:
         # Error message if crash during execution of ncbi_genome_download
         logger.error(error_message)
+        # bar.finish()
         sys.exit(1)
     attempts = 0
     while ret == 75 and attempts < max_retries:
+        # bar.update()
         attempts += 1
         logging.error(('Downloading from NCBI failed due to a connection error, '
                        'retrying. Already retried so far: %s'), attempts)
         ret = ngd.download(**keyargs)
+    # bar.finish()
     # Message if NGD did not manage to download the genomes (wrong species name/taxid)
     if ret != 0:
         # Error message
@@ -136,20 +149,20 @@ def to_database(outdir):
     return nb_gen, db_dir
 
 
-def get_by_genome(all_list):
-    """
-    Given the list of replicons to download, sort them by genome, in order to directly
-    concatenate all replicons from a same genome in the same file.
-    """
-    to_download = {}
-    for file in all_list:
-        filename = os.path.basename(file)
-        strain = ".".join(filename.split(".")[:3])
-        if strain in to_download:
-            to_download[strain].append(file)
-        else:
-            to_download[strain] = [file]
-    return to_download
+# def get_by_genome(all_list):
+#     """
+#     Given the list of replicons to download, sort them by genome, in order to directly
+#     concatenate all replicons from a same genome in the same file.
+#     """
+#     to_download = {}
+#     for file in all_list:
+#         filename = os.path.basename(file)
+#         strain = ".".join(filename.split(".")[:3])
+#         if strain in to_download:
+#             to_download[strain].append(file)
+#         else:
+#             to_download[strain] = [file]
+#     return to_download
 
 
 
