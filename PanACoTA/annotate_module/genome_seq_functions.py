@@ -23,7 +23,7 @@ from PanACoTA import utils
 logger = logging.getLogger("qc_annotate.gseq")
 
 
-def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, quiet=False):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, quiet=False):
     """
 
     Parameters
@@ -36,10 +36,11 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, q
         path to put out files
     nbn : int
         minimum number of 'N' required to cut into a new contig
-    prodigal_only : bool
-        True if we annotate with prodigal, False if we annotate with prokka
+    soft : str
+        soft used (prokka, prodigal, or None if called by prepare module)
     logger : logging.Logger
-        logger object to write log information
+        logger object to write log information. Because this function can be called from
+        prepare module, where sub logger name is different
     quiet : bool
         True if nothing must be written to stdout/stderr, False otherwise
 
@@ -76,7 +77,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, q
             bar.update(curnum)
             curnum += 1
         # analyse genome, and check everything went well
-        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, logger)
+        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft)
         # Problem while analysing genome -> genome ignored
         if not res:
             toremove.append(genome)
@@ -86,9 +87,10 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, prodigal_only, logger, q
             del genomes[gen]
     if not quiet:
         bar.finish()
+    return 0
 
 
-def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, logger):
+def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
     """
     Analyse given genome:
 
@@ -112,22 +114,19 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
     pat : str
         pattern on which contigs must be cut. ex: "NNNNN"
     genomes : dict
-        {genome: [spegenus.date]} as input, and will be changed to\
-         -> {genome: [spegenus.date, path, path_annotate, gsize, nbcont, L90]}
-    prodigal_only : bool
-        True if we annotate with prodigal, False if we annotate with prokka
-    logger : logging.Logger
-        logger object to write log information
+        {genome_file: [genome_name]} as input, and will be changed to\
+         -> {genome_file: [genome_name, path, path_annotate, gsize, nbcont, L90]}
+    soft : str
+        soft used (prokka, prodigal, or None if called by prepare module)
 
     Returns
     -------
     bool
         True if genome analysis went well, False otherwise
     """
-    gpath, grespath = get_output_dir(prodigal_only, dbpath, tmp_path, genome, cut, pat)
-
+    gpath, grespath = get_output_dir(soft, dbpath, tmp_path, genome, cut, pat)
     # Open original sequence file
-    with open(gpath) as genf:
+    with open(gpath, "r") as genf:
         # If a new file must be created (sequences cut, and/or annotating with prokka), open it
         gresf = None
         if grespath:
@@ -152,7 +151,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
                         return False
                 # Get contig name for next turn, and reset sequence
                 # If prodigal, contig name is as given by original sequence
-                if prodigal_only:
+                if soft != "prokka":
                     cur_contig_name = line.strip()
                 # If prokka, contig name is 1st word, 1st 15 characters
                 else:
@@ -192,14 +191,14 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, prodigal_only, l
     return True
 
 
-def get_output_dir(prodigal_only, dbpath, tmp_path, genome, cut, pat):
+def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
     """
     Get output file to put sequence cut and/or sequence with shorter contigs (prokka)
 
     Parameters
     ----------
-    prodigal_only : bool
-        True if we annotate with prodigal, False if we annotate with prokka
+    soft : str
+        soft used (prokka, prodigal, or None if called by prepare module)
     dbpath : str
         path to the folder containing the given genome sequence
     tmp_path : str
@@ -217,11 +216,6 @@ def get_output_dir(prodigal_only, dbpath, tmp_path, genome, cut, pat):
     grespath : str
         path to ouput file. None if no need to create new sequence file
     """
-    # Define soft name (to put in new sequence filename)
-    if prodigal_only:
-        soft = "prodigal"
-    else:
-        soft = "prokka"
     # Path to sequence to analyze
     gpath = os.path.join(dbpath, genome)
     # genome file is in dbpath except if it was in several files in dbpath,
@@ -236,7 +230,7 @@ def get_output_dir(prodigal_only, dbpath, tmp_path, genome, cut, pat):
         new_file = genome + "_{}-split{}N.fna".format(soft, len(pat) - 1)
         grespath = os.path.join(tmp_path, new_file)
     # If user does not want to cut, but annotates with prokka, need a new file with headers shorter
-    elif not prodigal_only:
+    elif soft == 'prokka':
         new_file = genome + "_{}-shorter-contigs.fna".format(soft, len(pat) - 1)
         grespath = os.path.join(tmp_path, new_file)
     # If no cut and using prodigal, just keep original sequence, no need to create new file.
@@ -388,7 +382,8 @@ def rename_all_genomes(genomes):
     last_strain = 0
     # "SAEN.1015.{}".format(str(last_strain).zfill(5))
     # Sort genomes by species, L90 and nb_contigs
-    for genome, [name, _, _, _, _, _] in sorted(genomes.items(), key=sort_genomes):
+    for genome, [name, _, _, _, _, _] in sorted(genomes.items(),
+                                                key=utils.sort_genomes_byname_l90_nbcont):
         # first genome, or new strain name (ex: ESCO vs EXPL)
         # -> keep this new name, and add 1 to next strain number
         if last_name != name.split(".")[0]:
@@ -401,27 +396,6 @@ def rename_all_genomes(genomes):
         # Write information to "genomes" dict.
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-
-
-def sort_genomes(x):
-    """
-    Sort all genomes with the following criteria:
-
-    - sort by species (x[1][0] is species.date)
-    - for each species, sort by l90
-    - for same l90, sort by nb contigs
-
-    Parameters
-    ----------
-    x : [[]]
-        [genome_name, [species.date, path, gsize, nbcont, L90]]
-
-    Returns
-    -------
-    tuple
-        information on species, l90 and nb_contigs
-    """
-    return x[1][0].split(".")[0], x[1][-1], x[1][-2]
 
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
