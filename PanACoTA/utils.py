@@ -393,7 +393,7 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
                     "information on the problems. Here are those "
                     "genomes:\n {1}".format(soft, list_to_write))
     else:
-        logger.info("WARNING: Some genomes could not be formatted. See {0}".format(logfile))
+        logger.info(f"WARNING: Some genomes could not be formatted. See {logfile}")
         logger.warning(("Some genomes were annotated by {0}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at "
                         "'<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err' and "
@@ -487,7 +487,7 @@ def write_lstinfo(list_file, genomes, outdir):
             outf.write("\t".join([gembase, genome, to_annote_file, gsize, nbcont, l90]) + "\n")
 
 
-def sort_genomes(x):
+def sort_genomes_by_name(x):
     """
     order by:
 
@@ -513,6 +513,47 @@ def sort_genomes(x):
         return x.split(".")[0], int(x.split(".")[-1])
     # if format is not like this, just return alphabetical order
     return x,
+
+
+def sort_genomes_byname_l90_nbcont(x):
+    """
+    Sort all genomes with the following criteria:
+
+    - sort by species (x[1][0] is species.date)
+    - for each species, sort by l90
+    - for same l90, sort by nb contigs
+
+    Parameters
+    ----------
+    x : [[]]
+        [genome_name, [species.date, path, gsize, nbcont, L90]]
+
+    Returns
+    -------
+    tuple
+        information on species, l90 and nb_contigs
+    """
+    return x[1][0].split(".")[0], x[1][-1], x[1][-2]
+
+
+def sort_genomes_l90_nbcont(x):
+    """
+    Sort all genomes with the following criteria:
+
+    - for each strain, sort by l90
+    - for same l90, sort by nb contigs
+
+    Parameters
+    ----------
+    x : [[]]
+        [genome_name, [species.date, path, gsize, nbcont, L90]]
+
+    Returns
+    -------
+    tuple
+        information on l90 and nb_contigs
+    """
+    return x[1][-1], x[1][-2]
 
 
 def sort_proteins(x):
@@ -1181,16 +1222,25 @@ def load_bin(binfile):
     return objects
 
 
-def write_list(liste):
+def write_list(list_names, fileout):
     """
-    Return a string corresponding to the given liste, with all elements separated
+    Write the given list of strings to a file, 1 per line
+    """
+    with open(fileout, "w") as fo:
+        for genome in list_names:
+            fo.write(genome + "\n")
+
+
+def list_to_str(list):
+    """
+    Return a string corresponding to the given list, with all elements separated
     by a space. Used to write a list into a file. Ex::
 
         [1, 2, "toto"] -> "1 2 toto"
 
     Parameters
     ----------
-    liste : list
+    list : list
         list of elements that we would like to write
 
     Returns
@@ -1198,7 +1248,7 @@ def write_list(liste):
     str
         the string to write
     """
-    list_write = [str(l) for l in liste]
+    list_write = [str(l) for l in list]
     return " ".join(list_write) + "\n"
 
 
