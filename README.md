@@ -174,6 +174,7 @@ or, if you installed the package (final or development mode):
     py.test test/test_unit
     py.test test/test_functional
 
+Add ``-sv`` for more details on each test.
 
 ## Contributing to documentation
 
