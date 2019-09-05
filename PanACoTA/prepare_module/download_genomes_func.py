@@ -147,22 +147,3 @@ def to_database(outdir):
         error = "Error while trying to uncompress {}".format(fasta_out)
         utils.run_cmd(cmd, error)
     return nb_gen, db_dir
-
-
-# def get_by_genome(all_list):
-#     """
-#     Given the list of replicons to download, sort them by genome, in order to directly
-#     concatenate all replicons from a same genome in the same file.
-#     """
-#     to_download = {}
-#     for file in all_list:
-#         filename = os.path.basename(file)
-#         strain = ".".join(filename.split(".")[:3])
-#         if strain in to_download:
-#             to_download[strain].append(file)
-#         else:
-#             to_download[strain] = [file]
-#     return to_download
-
-
-
