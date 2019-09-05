@@ -34,13 +34,13 @@ def main_from_parse(arguments):
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.outdir,
          arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.only_mash,
-         arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
+         arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.verbose, arguments.quiet)
 
 
 
-def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, only_mash, l90,
-         nbcont, cutn, min_dist, verbose, quiet):
+def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, only_mash, info_file,
+         l90, nbcont, cutn, min_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
 
@@ -67,6 +67,9 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         True if user does not want to download again the database
     only_mash : bool
         True if user user already has the database and quality of each genome (L90, #contigs etc.)
+    info_file : str
+        File containing information on QC if it was already ran before (columns to_annotate,
+        gsize, nb_conts and L90).
     l90 : int
         Max L90 allowed to keep a genome
     nbcont : int
@@ -77,10 +80,12 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         lower limit of distance between 2 genomes to keep them
     verbose : int
         verbosity:
-        - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more, .log.err contains warning and more
+        - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more,
+          .log.err contains warning and more
         - 1: same as 0 + WARNING in stderr
         - 2: same as 1 + DETAILS in stdout + DETAILS in .log.details
-        - >=15: same as 2 + Add DEBUG in stdout + create .log.debug with everything from info to debug
+        - >=15: same as 2 + Add DEBUG in stdout + create .log.debug with everything
+          from info to debug
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
 
@@ -138,6 +143,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     # - start from QC and mash (norefseq)
     # - start from genome download (!norefseq))
     if not only_mash:
+        # Not only mash, so a new info file will be created. If the user still gave an info
+        # file (he will be warned that it will be ignored), rename it with '.bak'
+        # to avoid erasing it
+        if info_file:
+            os.rename(info_file, info_file + ".back")
         # 'no_refseq = True" : Do not download genomes, just do QC and mash filter on given genomes
         # (sequences must, at least, be in outdir/refeq/bacteria/<genome_name>.fna.gz)
         # (they can also be in Database_init/<genome_name>.fna)
@@ -180,15 +190,14 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
-        info_file = os.path.join(outdir, "info-genomes-list-{}.lst".format(species_linked))
         if not os.path.exists(info_file):  # info-file missing -> error and exit
-            logger.error(("You do not have the file called {} with all information about "
-                          "genomes. Provide it with the right name, or remove the '--mash' "
-                          "option to rerun quality control.".format(info_file)))
+            logger.error(f"Your info file {info_file} does not exist. Please Provide the  "
+                          "right name/path, or remove the '--mash-only option to rerun "
+                          "quality control.")
             sys.exit(1)
         logger.info(("You want to rerun only mash steps. Getting information "
                      "from {}").format(info_file))
-        genomes = utils.get_info_genomes(info_file, species_linked)
+        genomes = utils.read_genomes_info(info_file, species_linked, )
 
     # Run Mash
     # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size,
@@ -251,6 +260,14 @@ def build_parser(parser):
                                 "number of contigs and L90 values). "
                                 "It will then get information on genomes quality from this "
                                 "file, and run mash steps."))
+    optional.add_argument("--info", dest="from_info",
+                          help="If you already ran the 'prepare' data module, or already "
+                               "calculated yourself the size, L90 and number of contigs for each "
+                               "genome, you can give this information, to go directly to "
+                               "Mash filtering step. This file contains at "
+                               "least 4 columns, tab separated, with the following headers: "
+                               "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
+                               "will be ignored.")
     optional.add_argument("-m", dest="min_dist", default=1e-4, type=float,
                         help="By default, genomes whose distance to the reference is not "
                              "between 1e-4 and 0.06 are discarded. You can specify your own "
@@ -334,6 +351,11 @@ def check_args(parser, args):
     if not args.NCBI_species_taxid and not args.NCBI_species:
         parser.error("Give at least an NCBI species name or taxID.")
 
+    # If user wants only mash steps, check that he gave info file
+    if args.only_mash and not args.from_info:
+        parser.error("If you want to run only Mash filtering steps, please give the "
+                     "info file with the required information (see '--info' option")
+
     # WARNINGS
     # User did not specify a species name
     if not args.NCBI_species:
@@ -351,6 +373,13 @@ def check_args(parser, args):
     if args.l90 == 100 or args.nbcont == 999:
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
 
+    # Warn if user gave info file, but does not ask to run only Mash -> info file will be ignored
+    if args.from_info and not args.only_mash:
+        message = ("You gave an info file (--info option), but did not ask to run only Mash "
+                   "step (-M option). Your info file will be ignored (and renamed with '.back' "
+                   "at the end), and another one will "
+                   "be created with the new calculated values.")
+        print(colored(message))
 
     return args
 
