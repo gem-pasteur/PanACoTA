@@ -127,8 +127,22 @@ def to_database(outdir):
     """
     # Unzip fasta files and put to a same folder
     logger.info("Uncompressing genome files.")
-    db_dir = os.path.join(outdir, "Database_init")
     download_dir = os.path.join(outdir, "refseq", "bacteria")
+    # If no folder output/refseq/bacteria: error, no genome found
+    if not os.path.exists(download_dir):
+        logger.error(f"The folder containing genomes downloaded from NCBI refseq "
+                     f"({download_dir}) does not exist. Check that you really downloaded "
+                     "sequences (fna.gz) and that they are in this folder.")
+        sys.exit(1)
+    # If folder output/refseq/bacteria empty: error, no genome found
+    list_downloads = os.listdir(download_dir)
+    if list_downloads == []:
+        logger.error(f"The folder supposed to contain genomes downloaded from NCBI refseq "
+                     f"({download_dir}) exists but is empty. Check that you really downloaded "
+                     "sequences (fna.gz).")
+        sys.exit(1)
+    # Create directory to put uncompressed genomes
+    db_dir = os.path.join(outdir, "Database_init")
     os.makedirs(db_dir, exist_ok=True)
     nb_gen = 0
     for g_folder in os.listdir(download_dir):
