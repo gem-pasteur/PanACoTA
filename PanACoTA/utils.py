@@ -620,7 +620,7 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     dict
         {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger("utils")
+    logger = logging.getLogger("prepare.utils")
     logger.info("Reading genomes")
     genomes = {}
     # Check that given list file exists
@@ -686,15 +686,13 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     return genomes
 
 
-def read_genomes_info(list_file, name, date, dbpath, dbpath2):
+def read_genomes_info(list_file, name, date=None, logger=None):
     """
     Read a lstinfo file containing the list of genomes with information (L90, genome size etc.).
     1 line per genome, 4 required columns (Others will just be ignored):
     to_annotate gsize nb_conts L90
 
-    Check that the given genome file (to_annotate column) exists in dbpath or in dbpath2
-    (files can be split into 2 different folders). If in none of those 2 folders, put a
-    warning message and ignore this file.
+    Check that the given genome file (to_annotate column) exists.
 
     Parameters
     ----------
@@ -704,13 +702,9 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
         Default species name
     date : str
         Default date
-    dbpath : str
-        path to folder containing genome files to annotate
-    dbpath2 : str
-        path to other folder which can contain the genome files to annotate. For example,
-        if it comes from a previous run of 'PanACoTA annotate' where sequences needed to be
-        modified to be ready for annotation (for example, merging several contig files in one
-        file, split at each stretch of 5 'N', etc.).
+    logger : logging.Logger
+        logger object to write log information
+
 
     Returns
     -------
@@ -719,17 +713,21 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
                    [spegenus.date, path_orig_seq, path_to_splitSequence, size, nbcont, l90]
                   }
     """
-    logger = logging.getLogger("utils")
+    if not logger:
+        logger = logging.getLogger("prepare.utils")
     logger.info(f"Reading given information on your genomes in {list_file}")
     genomes = {}
-    spegenus = "{}.{}".format(name, date)
+    if name and date:
+        spegenus = "{}.{}".format(name, date)
     column_order = {} # Put the number of column corresponding to each field
     if not os.path.isfile(list_file):
-        logger.error(("ERROR: You used the '--info <filename>' option, meaning that <filename> "
-                      "contains information on each sequence provided (L90, nb contigs etc.). "
-                      "However, the provided genome information file '{}' does not exist. "
-                      "Please provide a listinfo file.\n Ending program.").format(list_file))
+        logger.error(f"ERROR: The info file {list_file} that you gave does not exist. "
+                      "Please provide the  right path/name for this file.\nEnding program.")
         sys.exit(1)
+    message_no_header = (f"ERROR: It seems that your info file {list_file} does not have a "
+                          "header, or this header does not have, at least, the required "
+                          "columns tab separated: to_annotate, gsize nb_conts and L90 (in any "
+                          "order).\nEnding program.")
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
@@ -740,16 +738,12 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
                 found = [head for head in ["to_annotate", "gsize", "nb_conts", "L90"]
                          if head in column_order]
                 if len(found) != 4:
-                    logger.error("ERROR: Your information file does not have the required "
-                                 "columns, tab separated: to_annotate, gsize, nb_conts and L90 "
-                                 "(in any order) \n Ending program.")
+                    logger.error(message_no_header)
                     sys.exit(1)
                 continue
             # If no header found, error message and exit
             if not column_order:
-                logger.error("ERROR: It seems that your info file does not have a header, or "
-                             "this header does not have, at least, the required columns"
-                             "separated: to_annotate, gsize nb_conts and L90 (in any order).\n")
+                logger.error(message_no_header)
                 sys.exit(1)
             # Get all information on the given genome
             # line.strip().split() -> all given information.
@@ -758,42 +752,36 @@ def read_genomes_info(list_file, name, date, dbpath, dbpath2):
             try:
                 infos = line.strip().split()
                 # Get genome name with its path to db_dir
-                gname = infos[column_order["to_annotate"]]
-                gpath = os.path.join(dbpath, gname)
+                gpath = infos[column_order["to_annotate"]]
                 gsize = int(infos[column_order["gsize"]])
                 gl90 = int(infos[column_order["L90"]])
                 gcont = int(infos[column_order["nb_conts"]])
             # If invalid values, warning message and ignore genome
             except ValueError:
-                logger.warning("For genome {}, at least one of your columns 'gsize', 'nb_conts' "
-                               "or 'L90' contains a non numeric character. This genome will be "
-                               "ignored.".format(gname))
+                logger.warning(f"For genome {gname}, at least one of your columns 'gsize', "
+                                "'nb_conts' or 'L90' contains a non numeric character. "
+                                "This genome will be ignored.")
                 continue
             # If no value for at least 1 field, warning message and ignore genome
             except IndexError:
-                logger.error("ERROR: Check that all fields of {} are filled in each "
-                               "line (can be 'NA')".format(list_file))
-                sys.exit(-1)
-
+                logger.error("ERROR: Check that all fields of {list_file} are filled in each "
+                             "line (can be 'NA')")
+                sys.exit(1)
             # Could we find genome file?
             # Check if genome file exists in db_path.
             if not os.path.isfile(gpath):
-                if dbpath2:
-                    # If it does not exist, and there is a 2nd db_path, check if it exists there
-                    gpath = os.path.join(dbpath2, gname)
-                    # If still not in db_path2, warning message and ignore genome
-                    if not os.path.isfile(gpath):
-                        logger.warning("{} genome file does not exist in the given "
-                                       "database {} nor in the other directory ({}). "
-                                       "It will be ignored.".format(gname, dbpath, dbpath2))
-                        continue
-                else:
-                    logger.warning("{} genome file does not exist in the given "
-                                   "database {}. It will be ignored.".format(gname, dbpath))
-                    continue
+                logger.warning(f"{gpath} genome file does not exist. This genome will be ignored.")
+                continue
             # cur genome information to save:
             # [spegenus.date, path_orig_seq, path_to_sequence_to_annotate, size, nbcont, l90]
-            genomes[gname] = [spegenus, gpath, gpath, gsize, gcont, gl90]
+            if name and date:
+                genomes[gpath] = [spegenus, gpath, gpath, gsize, gcont, gl90]
+            # If called from prepare, no need to rename genomes
+            else:
+                gfile = os.path.basename(gpath)
+                gname = os.path.splitext(gfile)[0]
+                genomes[gfile] = [gname, gpath, gpath, gsize, gcont, gl90]
+    logger.info(("Found {} genomes in total").format(len(genomes)))
     return genomes
 
 
@@ -1153,6 +1141,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
         grf.write(cont)
         grf.write(seq)
     return contigs, sizes
+
 
 
 def logger_thread(q):

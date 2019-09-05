@@ -190,15 +190,15 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
+        logger.warning('You asked to run only mash steps.')
         if not os.path.exists(info_file):  # info-file missing -> error and exit
             logger.error(f"Your info file {info_file} does not exist. Please Provide the  "
                           "right name/path, or remove the '--mash-only option to rerun "
                           "quality control.")
             sys.exit(1)
-        logger.info(("You want to rerun only mash steps. Getting information "
+        logger.info(("You want to run only mash steps. Getting information "
                      "from {}").format(info_file))
         genomes = utils.read_genomes_info(info_file, species_linked, )
-
     # Run Mash
     # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size,
                              # nbcont, l90]}
@@ -354,7 +354,7 @@ def check_args(parser, args):
     # If user wants only mash steps, check that he gave info file
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
-                     "info file with the required information (see '--info' option")
+                     "info file with the required information (see '--info' option)")
 
     # WARNINGS
     # User did not specify a species name
@@ -375,11 +375,11 @@ def check_args(parser, args):
 
     # Warn if user gave info file, but does not ask to run only Mash -> info file will be ignored
     if args.from_info and not args.only_mash:
-        message = ("You gave an info file (--info option), but did not ask to run only Mash "
+        message = ("  !! You gave an info file (--info option), but did not ask to run only Mash "
                    "step (-M option). Your info file will be ignored (and renamed with '.back' "
                    "at the end), and another one will "
                    "be created with the new calculated values.")
-        print(colored(message))
+        print(colored(message, "yellow"))
 
     return args
 
