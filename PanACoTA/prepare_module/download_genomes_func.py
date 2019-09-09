@@ -124,8 +124,9 @@ def to_database(outdir):
         nb_gen : number of genomes downloaded
         db_dir : directory where are all fna files downloaded from refseq
     """
-    # Unzip fasta files and put to a same folder
+    # Copy .gz files in a new folder, and Unzip them in this new folder
     logger.info("Uncompressing genome files.")
+    # Folder where are .gz files
     download_dir = os.path.join(outdir, "refseq", "bacteria")
     # If no folder output/refseq/bacteria: error, no genome found
     if not os.path.exists(download_dir):
@@ -144,19 +145,31 @@ def to_database(outdir):
     db_dir = os.path.join(outdir, "Database_init")
     os.makedirs(db_dir, exist_ok=True)
     nb_gen = 0
+    # For each subfolder of download dir, move the .gz file it contains (if possible)
+    # to the new database folder
     for g_folder in os.listdir(download_dir):
         fasta = glob.glob(os.path.join(download_dir, g_folder, "*.fna.gz"))
+        # No .gz file in folder
         if len(fasta) == 0:
-            logger.warning("Problem with genome {}: no fasta file downloaded.".format(g_folder))
+            logger.warning("Problem with genome in {}: no compressed fasta file downloaded. "
+                           "This genome will be ignored.".format(g_folder))
             continue
+        # Several gz files in folder
         elif len(fasta) > 1:
-            logger.warning("Problem with genome {}: several fasta files found.".format(g_folder))
+            logger.warning("Problem with genome in {}: several compressed fasta files found. "
+                           "This genome will be ignored.".format(g_folder))
             continue
-        nb_gen += 1
+        # Copy gz file to new folder
         fasta_file = os.path.basename(fasta[0])
         fasta_out = os.path.join(db_dir, fasta_file)
         shutil.copy(fasta[0], fasta_out)
-        cmd = "gunzip {} -f".format(fasta_out)
-        error = "Error while trying to uncompress {}".format(fasta_out)
-        utils.run_cmd(cmd, error)
+        # Uncompress file copied
+        cmd = f"gunzip {fasta_out} -f"
+        error = f"Error while trying to uncompress {fasta_out}. This genome will be ignored."
+        call = utils.run_cmd(cmd, error)
+        # Problem with uncompressing: genome ignored (remove gz file from new folder)
+        if call.returncode != 0:
+            os.remove(fasta_out)
+            continue
+        nb_gen += 1
     return nb_gen, db_dir
