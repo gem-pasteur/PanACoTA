@@ -305,9 +305,9 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     except OSError:
         logger.error(error + ": " + "{} does not exist".format(cmd))
         if eof:
-            sys.exit(-1)
+            sys.exit(1)
         else:
-            return -1
+            return 1
     if retcode != 0:
         logger.error(error)
         if eof:
