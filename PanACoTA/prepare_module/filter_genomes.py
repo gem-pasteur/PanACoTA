@@ -101,7 +101,8 @@ def sort_genomes_minhash(genomes, max_l90, max_cont):
     return sorted_genomes
 
 
-def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, max_dist, threads):
+def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, max_dist,
+                   threads, quiet):
     """
     Run mash all vs all, to get all pairwise distances.
     Then, take the first genome of the list, and remove those for which the distance to it
@@ -124,6 +125,8 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
         max limit of distance between 2 genomes to keep them
     threads :
         max number of threads to use
+    quiet : bool
+        True if nothing must be sent to stdout/stderr, False otherwise
 
     Returns
     -------
@@ -181,19 +184,22 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Iteratively discard genomes too close or too far
     logger.info("Starting iterative discarding steps")
-    widgets = ['Genomes compared: ',
-               progressbar.Bar(marker='█', left='', right='', fill=' '), ' ',
-               progressbar.Counter(), "/{}".format(nbgen), ' ',
-               progressbar.Timer(), ' - '
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=100).start()
-    done = 0
+    if not quiet:
+        widgets = ['Genomes compared: ',
+                   progressbar.Bar(marker='█', left='', right='', fill=' '), ' ',
+                   progressbar.Counter(), "/{}".format(nbgen), ' ',
+                   progressbar.Timer(), ' - '
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=100).start()
+        done = 0
 
     while len(to_try) > 1:
         mash_step(to_try, corresp_file, mat_sp, genomes_removed, min_dist, max_dist)
-        done = nbgen - len(to_try)
-        bar.update(done)
-    bar.finish()
+        if not quiet:
+            done = nbgen - len(to_try)
+            bar.update(done)
+    if not quiet:
+        bar.finish()
     logger.info("Final number of genomes in dataset: {}".format(nbgen - len(genomes_removed)))
     return genomes_removed
 

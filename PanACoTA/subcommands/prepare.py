@@ -204,7 +204,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     # sorted_genome : [genome_file] ordered by L90/nbcont (keys of genomes)
     sorted_genomes = fg.sort_genomes_minhash(genomes, l90, nbcont)
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
-                                min_dist, max_dist, threads)
+                                min_dist, max_dist, threads, quiet)
     # Write list of genomes kept, and list of genomes removed
     fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist)
     logger.info("End")
@@ -354,6 +354,11 @@ def check_args(parser, args):
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
                      "info file with the required information (see '--info' option)")
+
+    # Cannot be verbose and quiet at the same time
+    if args.verbose > 0 and args.quiet:
+        parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
+                     " You cannot have both.")
 
     # WARNINGS
     # User did not specify a species name

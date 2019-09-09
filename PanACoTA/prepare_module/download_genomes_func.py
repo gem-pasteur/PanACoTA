@@ -13,7 +13,6 @@ import shutil
 import sys
 import glob
 import urllib.request
-import progressbar
 import ncbi_genome_download as ngd
 
 from PanACoTA import utils
