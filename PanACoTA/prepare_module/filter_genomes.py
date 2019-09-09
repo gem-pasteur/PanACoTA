@@ -295,7 +295,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     ----------
     to_try : list
         list of genome_file (keys of 'genomes') to compare, ordered by decreasing L90/nbcont
-    corresp_file : dict
+    corresp : dict
         {genome_file : num_of_genome in sorted_genomes}
     mat_sp : scipy.sparse.dok.dok_matrix
         matrix containing pairwise distance comparisons

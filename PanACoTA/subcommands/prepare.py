@@ -21,6 +21,7 @@ from PanACoTA import utils
 from PanACoTA.prepare_module import download_genomes_func as dgf
 from PanACoTA.prepare_module import filter_genomes as fg
 
+
 def main_from_parse(arguments):
     """
     Call main function from the arguments given by parser
@@ -36,7 +37,6 @@ def main_from_parse(arguments):
          arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.verbose, arguments.quiet)
-
 
 
 def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, only_mash, info_file,
@@ -61,6 +61,8 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         species taxid given in NCBI
     outdir : str
         path to output directory (where created database will be saved).
+    tmp_dir : str
+        Path to directory where tmp files are saved (sequences split at each stretch of 'N')
     threads : int
         max number of threads to use
     no_refseq : bool
@@ -88,11 +90,9 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
           from info to debug
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
-
     """
     # Fixed limits. For now, we do not propose to user to give its own limits
     max_dist = 0.06
-
 
     # get species name in NCBI format
     # -> will be used to name output directory
@@ -116,7 +116,6 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     refseqdir = os.path.join(outdir, "refseq", "bacteria")
     os.makedirs(outdir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
-
 
     # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
@@ -296,7 +295,7 @@ def build_parser(parser):
 
 def parse(parser, argu):
     """
-    arse arguments given to parser
+    Parse arguments given to parser
 
     Parameters
     ----------
