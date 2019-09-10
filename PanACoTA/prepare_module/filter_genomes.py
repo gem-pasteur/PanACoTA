@@ -410,6 +410,10 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
     -------
     return code
     """
+    if not os.path.isdir(outdir):
+        logger.error(f"The given output directory ({outdir}) does not exist. We cannot "
+                      "create output files there")
+        sys.exit(1)
     list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}.txt")
     kept_genomes = []
     discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}.txt")
