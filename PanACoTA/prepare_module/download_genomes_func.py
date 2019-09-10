@@ -30,10 +30,10 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
     species_linked : str
         given NCBI species with '_' instead of spaces, or NCBI taxID if species
         name not given
-    NCBI_species : str
-        name of species to download: user given NCBI species with '_' instead of spaces. None if
+    NCBI_species : str or None
+        name of species to download: user given NCBI species. None if
         no species name given
-    NCBI_taxid : int
+    NCBI_taxid : str
         species taxid given in NCBI
     outdir : str
         Directory where downloaded sequences must be saved
@@ -106,7 +106,7 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         logger.error(error_message)
         sys.exit(1)
     nb_gen, db_dir = to_database(outdir)
-    logger.info("Downloaded {} genomes.".format(nb_gen))
+    logger.info(f"Downloaded {nb_gen} genomes.")
     return db_dir
 
 
