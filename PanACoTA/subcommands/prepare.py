@@ -222,12 +222,13 @@ def build_parser(parser):
     import argparse
     from PanACoTA import utils_argparse
 
-
-    optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-t", dest="NCBI_species_taxid",
+    required = parser.add_argument_group('Required arguments')
+    required.add_argument("-t", dest="NCBI_species_taxid", required=True,
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI")
                          )
+
+    optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-s", dest="NCBI_species",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
