@@ -188,3 +188,146 @@ def test_to_database_1genome_wrong_format(caplog):
     # Remove test files/Folders
     shutil.move(os.path.join(out_dir, to_empty_filename), to_empty_path)
     shutil.rmtree(db_dir)
+
+
+def test_download():
+    """
+    Test that, given a taxid, and a species name,
+    it downloads genomes in .gz, and uncompress them in the
+    db folder (which is named as expected)
+
+    We cannot compare log, as it is already catched by NCBI_genome_download
+    """
+    species_linked = "Acetobacter_orleanensis"
+    NCBI_species = "Acetobacter orleanensis"
+    NCBI_taxid = "104099"
+    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq")
+    threads = 1
+
+    db_dir = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                        outdir, threads)
+
+    # Check path to uncompressed files is as expected
+    assert db_dir == os.path.join(outdir, "Database_init")
+    # And that it exists and contains files (cannot say how many because depends on
+    # the download date, refseq is daily updated)
+    assert os.path.isdir(db_dir)
+    assert len(os.listdir(db_dir)) >= 3
+
+    # Check that assembly summary file wwas donwloaded as expected
+    sum_file = os.path.join(outdir, "assembly_summary-Acetobacter_orleanensis.txt" )
+    assert os.path.isfile(sum_file)
+
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir)
+    assert len(os.listdir(ngd_outdir)) >= 3
+
+    # Remove test ouput dir
+    shutil.rmtree(outdir)
+
+
+def test_download_noSpeName():
+    """
+    Test that, given a taxid, it downloads genomes in .gz, and uncompress them in the
+    db folder (which is named as expected)
+
+    We cannot compare log, as it is already catched by NCBI_genome_download
+    """
+    species_linked = "toto"
+    NCBI_species = None
+    NCBI_taxid = "104099"
+    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_noSpe")
+    threads = 1
+
+    db_dir = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                        outdir, threads)
+
+    # Check path to uncompressed files is as expected
+    assert db_dir == os.path.join(outdir, "Database_init")
+    # And that it exists and contains files (cannot say how many because depends on
+    # the download date, refseq is daily updated)
+    assert os.path.isdir(db_dir)
+    assert len(os.listdir(db_dir)) >= 3
+
+    # Check that assembly summary file wwas donwloaded as expected
+    sum_file = os.path.join(outdir, "assembly_summary-toto.txt" )
+    assert os.path.isfile(sum_file)
+
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir)
+    assert len(os.listdir(ngd_outdir)) >= 3
+    # Remove test ouput dir
+    shutil.rmtree(outdir)
+
+
+def test_download_wrongTaxID(caplog):
+    """
+    Test that, when a non existing taxid is given, it exits (with error message)
+
+    We cannot compare log, as it is already catched by NCBI_genome_download
+    """
+    species_linked = "Acetobacter_orleanensis"
+    NCBI_species = None
+    NCBI_taxid = "10409"
+    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
+    threads = 1
+    with pytest.raises(SystemExit):
+        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                   outdir, threads)
+
+    # Check path to uncompressed files does not exist
+    assert not os.path.isdir(os.path.join(outdir, "Database_init"))
+
+    # Check that the NCBI_genome_download output directory was not created
+    ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
+    assert not os.path.isdir(ngd_outdir)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "ERROR" in caplog.text
+    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
+            "NCBI species name. If you gave both, check that given taxID and name really "
+            "correspond to the same species.") in caplog.text
+
+    # Check that output directory was not created
+    assert not os.path.isdir(outdir)
+
+
+def test_download_diffSpeTaxID(caplog):
+    """
+    Test that, when a taxID and a species name are given, but those 2 elements do not
+    match with the same genomes, it exists with error message
+
+    We cannot compare log, as it is already catched by NCBI_genome_download
+    """
+    species_linked = "Acetobacter_orleanensis"
+    NCBI_species = "Acetobacter fabarum"
+    NCBI_taxid = "104099"
+    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
+    threads = 1
+    with pytest.raises(SystemExit):
+        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                   outdir, threads)
+
+    # Check path to uncompressed files does not exist
+    assert not os.path.isdir(os.path.join(outdir, "Database_init"))
+
+    # Check that the NCBI_genome_download output directory was not created
+    ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
+    assert not os.path.isdir(ngd_outdir)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "ERROR" in caplog.text
+    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
+            "NCBI species name. If you gave both, check that given taxID and name really "
+            "correspond to the same species.") in caplog.text
+
+    # Check that output directory was not created
+    assert not os.path.isdir(outdir)
+
+
