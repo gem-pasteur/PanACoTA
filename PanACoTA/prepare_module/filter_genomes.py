@@ -430,14 +430,14 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         # For each genome in kept_genomes, find required information on this it, using 'genomes'
         for g in kept_genomes:
             _, _, analyzed, size, nbcont, l90 = genomes[g]
-            towrite = utils.list_to_str([analyzed, size, nbcont, l90])
+            towrite = utils.list_to_str([analyzed, size, nbcont, l90], sep="\t")
             lf.write(towrite)
 
     # Write list of discarded genomes and why they are discarded
     with open(discard_file, "w") as disf:
         disf.write("genome_name\tproblem_compared_with\tdist\n")
         for genome, info in genomes_removed.items():
-            disf.write(genome + " " + utils.list_to_str(info) + "\n")
+            disf.write(utils.list_to_str([genome] + info))
     logger.info(f"Final list of genomes in the dataset: {list_file}")
     logger.info(f"List of genomes discarded by minhash steps: {discard_file}")
     return 0
