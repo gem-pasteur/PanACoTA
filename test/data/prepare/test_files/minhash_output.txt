@@ -1,0 +1,16 @@
+path_genome1 path_genome1 0
+path_genome2 path_genome1 0.5
+path_genome3 path_genome1 0.06
+path_genome4 path_genome1 0.005
+path_genome1 path_genome2 0.5
+path_genome2 path_genome2 0
+path_genome3 path_genome2 0.09
+path_genome4 path_genome2 0.7
+path_genome1 path_genome3 0.06
+path_genome2 path_genome3 0.09
+path_genome3 path_genome3 0
+path_genome4 path_genome3 0.08
+path_genome1 path_genome4 0.005
+path_genome2 path_genome4 0.7
+path_genome3 path_genome4 0.08
+path_genome4 path_genome4 0

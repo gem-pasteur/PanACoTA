@@ -207,3 +207,49 @@ def test_write_output_no_outdir(caplog):
     caplog.set_level(logging.DEBUG)
     assert ("The given output directory (test/data/prepare/test_filter_write_output_no_outdir) "
             "does not exist. We cannot create output files there") in caplog.text
+
+
+def test_read_matrix():
+    """
+    Test that matrix from minhash is correctly read and converted to python matrix
+    """
+    genomes = {"genome1": ["g1_name", "g1_ori", "path_genome1", 1500, 5, 2],
+               "genome2": ["g2_name", "g2_ori", "path_genome2", 20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", "path_genome3", 25003, 52, 50],
+               "genome4": ["g4_name", "g4_ori", "path_genome4", 22012, 20, 10]
+              }
+    sorted_genomes = ["genome1", "genome2", "genome3", "genome4"]
+    matrix_file = os.path.join(DATA_TEST_DIR, "test_files", "minhash_output.txt")
+
+    mat_sp = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
+
+    # Check content of created matrix
+    assert len(mat_sp) == 6
+    assert mat_sp[0,1] ==0.5
+    assert mat_sp[0,2] == 0.06
+    assert mat_sp[0,3] == 0.005
+    assert mat_sp[1,2] == 0.09
+    assert mat_sp[1,3] == 0.7
+    assert mat_sp[2,3] == 0.08
+
+
+def test_read_matrix_no_genome():
+    """
+    Test that matrix from minhash is correctly read and converted to python matrix
+    """
+    genomes = {}
+    sorted_genomes = []
+    matrix_file = os.path.join(DATA_TEST_DIR, "test_files", "minhash_output_empty.txt")
+    # Create empty matrix file
+    open(matrix_file, "w").close()
+
+    # Read matrix
+    mat_sp = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
+
+    # Check content of created matrix
+    assert len(mat_sp) == 0
+
+    # Remove empty matrix file
+    os.remove(matrix_file)
+
+
