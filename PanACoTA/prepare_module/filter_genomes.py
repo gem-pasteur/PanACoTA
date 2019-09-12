@@ -83,7 +83,8 @@ def sort_genomes_minhash(genomes, max_l90, max_cont):
 
     Returns
     -------
-    sorted_genomes: list of 'genome_file' for all genomes kept (L90 and nbcont ok)
+    sorted_genomes: list of 'genome_file' for all genomes kept (L90 and nbcont ok),
+    ordered by decreasing quality
     """
     logger.info("Sorting all {} genomes by quality".format(len(genomes)))
     sorted_genomes = []
@@ -295,7 +296,7 @@ def compare_all(out_msh, matrix, mash_log, threads):
 
 def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     """
-    Prepare a given mash run, with a given genome as reference, and others to compare to.
+    Prepare a mash run, with a given genome as reference, and others to compare to.
 
     Parameters
     ----------
@@ -317,13 +318,14 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
 
     to_try is updated (reference element and all genomes not compatible with it are removed)
     return code
+    genomes_removed is updated
 
     """
     # Get last element (which is the 'best' genome), and remove it from the list
     ref_name = to_try.pop()
     # Line of genome in mat_sp
     ref_num = corresp[ref_name]
-    # Genomes (ordered by increasing L90/nbcont) to compare to the element selected (ref_name)
+    # Genomes (ordered by increasing L90/nbcont) to compare to the selected element (ref_name)
     others = to_try[::-1]
 
     # For each genome, compare its distance to reference genome 'ref_name'
@@ -336,6 +338,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
         else:
             print("Should never happen as mat_sp is a triangle matrix!")
             dist = mat_sp[other_num, ref_num]
+        print(dist)
         # If distance not in the limits, remove genome from to_try and add to genomes_removed list
         if not min_dist < dist < max_dist:
             to_try.remove(gname)
