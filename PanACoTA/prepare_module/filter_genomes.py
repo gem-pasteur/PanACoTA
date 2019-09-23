@@ -231,8 +231,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     Returns
     -------
 
-    genomes_removed : dict
-        {genome_name: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
+    return value (0 if OK, 1 if error)
 
     """
     # If given outdir does not exist, close it
