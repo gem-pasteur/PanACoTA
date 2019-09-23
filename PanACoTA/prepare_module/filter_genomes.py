@@ -214,11 +214,13 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     genomes : dict
         {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
     sorted_genomes: list
-        list of 'genome_file' for all genomes kept (L90 and nbcont ok)
+        list of 'genome_file' for all genomes kept (L90 and nbcont ok), ordered by
+        decreasing quality
     outdir : str
         path to directory where all results are saved
     list_reps : str
-        file with list of genomes to sketch
+        file with list of genomes to sketch. File will be emptied if it contain something, and
+        filled with the informations from 'genomes'.
     out_msh : str
         output of mash
     mash_log : str
@@ -233,6 +235,10 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
         {genome_name: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
 
     """
+    # If given outdir does not exist, close it
+    if not os.path.isdir(outdir):
+        logger.error(f"Your output directory '{outdir}' does not exist.")
+        sys.exit(1)
     # Empty list_reps file
     open(list_reps, "w").close()
     # Complete paths to genomes to compare: 'path_to_seq_to_annotate' = genome_file[2]
@@ -243,7 +249,8 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     if os.path.isfile(out_msh + ".msh"):
         logger.warning(f"Mash sketch file {out_msh}.msh already exists. PanACoTA will "
                         "use it for next step.")
-        return
+        os.remove(list_reps)
+        return 0
     logger.info("Sketching all genomes...")
 
     cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
@@ -254,6 +261,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     outf = open(mash_log, "w")
     utils.run_cmd(cmd_sketch, error_sketch, eof=True, stdout=outf, stderr=outf, logger=logger)
     outf.close()
+    return 0
 
 
 def compare_all(out_msh, matrix, mash_log, threads):
@@ -338,7 +346,6 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
         else:
             print("Should never happen as mat_sp is a triangle matrix!")
             dist = mat_sp[other_num, ref_num]
-        print(dist)
         # If distance not in the limits, remove genome from to_try and add to genomes_removed list
         if not min_dist < dist < max_dist:
             to_try.remove(gname)
