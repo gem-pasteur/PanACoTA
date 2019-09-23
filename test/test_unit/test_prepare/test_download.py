@@ -15,6 +15,7 @@ import PanACoTA.prepare_module.download_genomes_func as downg
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
 
+
 def test_to_database():
     """
     Test that all fna.gz files are uncompressed and moved to a created Database_init folder
@@ -120,8 +121,8 @@ def test_to_database_several_genomes(caplog):
     gz_genomes_folder = os.path.join(out_dir, "refseq", "bacteria")
 
     # Create a new gz file in one of the genome directories
-    to_create_filename = "ACOR002.0519.bis.fna.gz" # File that must be moved
-    to_fill_dir = "ACOR002" # Directory containing file to move
+    to_create_filename = "ACOR002.0519.bis.fna.gz" # Name of file that must be created
+    to_fill_dir = "ACOR002" # Directory containing file to create
     to_create_path = os.path.join(gz_genomes_folder, to_fill_dir, to_create_filename)
     # Create empty gz file
     open(to_create_path, "w").close()
@@ -329,5 +330,3 @@ def test_download_diffSpeTaxID(caplog):
 
     # Check that output directory was not created
     assert not os.path.isdir(outdir)
-
-
