@@ -12,6 +12,7 @@ import pytest
 import PanACoTA.prepare_module.filter_genomes as filterg
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
+GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "refseq", "bacteria")
 
 def test_write_output():
     """
@@ -132,7 +133,7 @@ def test_write_output_no_discard():
 def test_write_output_no_genome():
     """
     Check that the files with kept genomes and discarded genomes are created, but
-    are empty because tehre is no genome
+    are empty because there is no genome
     """
     corresp_genomes = {"ACOR001": "ACOR001.0519.fna.gz", "ACOR002": "ACOR002.0519.fna.gz",
                        "ACOR003": "ACOR003.0519.fna.gz"}
@@ -215,22 +216,153 @@ def test_sort_genomes_minhash():
     (genomes with too bad quality removed, others sorted by l90 and nbcont)
     """
     genomes = {"genome1": ["g1_name", "g1_ori", "path_genome1", 123567, 200, 101],
-               "genome2": ["g2_name", "g2_ori", "path_genome2", 20000, 3, 1],
+               "genome2": ["g2_name", "g2_ori", "path_genome2", 20000, 3, 3],
                "genome3": ["g3_name", "g3_ori", "path_genome3", 25003, 52, 50],
                "genome4": ["g4_name", "g4_ori", "path_genome4", 123456, 1023, 11],
                "genome5": ["g5_name", "g5_ori", "path_genome5", 22012, 20, 10],
-               "genome6": ["g6_name", "g6_ori", "path_genome6", 1500, 5, 2]
+               "genome6": ["g6_name", "g6_ori", "path_genome6", 1500, 3, 2]
               }
     max_l90 = 100
     max_cont = 1000
     sorted_genomes = filterg.sort_genomes_minhash(genomes, max_l90, max_cont)
-    assert sorted_genomes == ["genome2", "genome6", "genome5", "genome3"]
+    assert sorted_genomes == ["genome6", "genome2", "genome5", "genome3"]
 
 
-def test_sketch_all(caplog):
+def test_sketch_all():
     """
-
+    Test that all genomes are sketch, in the provided order
     """
+    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                           123567, 200, 101],
+               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                           20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
+               }
+    sorted_genomes = ["genome2", "genome3", "genome1"]
+    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all")
+    os.makedirs(outdir)
+    list_reps = os.path.join(outdir, "test_list_reps.txt")
+    out_msh = os.path.join(outdir, "out_mash.msh")
+    mash_log = os.path.join(outdir, "mash_sketch.log")
+    threads = 1
+    filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
+
+    # Check that expected output files were created
+    assert os.path.isfile(list_reps)
+    assert os.path.isfile(mash_log)
+    assert os.path.isfile(out_msh)
+
+    # Check content of list file
+    expected_lines = [os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                      os.path.join(GENOMES_DIR, "ACOR003.0519.fna"),
+                      os.path.join(GENOMES_DIR, "ACOR001.0519.fna")]
+    # 3 files to sketch, with expected paths
+    with open(list_reps, "r") as lr:
+        lines_found = lr.readlines()
+        assert len(lines_found) == 3
+        for line, expect in zip(lines_found, expected_lines):
+            assert line.strip() == expect
+
+    with open(mash_log, "r") as ml:
+        assert ml.readline().strip() == f"Sketching {expected_lines[0]}..."
+        assert ml.readline().strip() == f"Sketching {expected_lines[1]}..."
+        assert ml.readline().strip() == f"Sketching {expected_lines[2]}..."
+        assert ml.readline().strip() == f"Writing to {out_msh}..."
+
+    shutil.rmtree(outdir)
+
+
+def test_sketch_all_noout(caplog):
+    """
+    Test that, when given output directory does not exist, it ends program with error message
+    """
+    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                           123567, 200, 101],
+               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                           20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
+               }
+    sorted_genomes = ["genome2", "genome3", "genome1"]
+    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_noout")
+    list_reps = os.path.join(outdir, "test_list_reps.txt")
+    out_msh = os.path.join(outdir, "out_mash.msh")
+    mash_log = os.path.join(outdir, "mash_sketch.log")
+    threads = 1
+    # Check everything works without error
+    with pytest.raises(SystemExit):
+        filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
+
+    # Check log
+    caplog.set_level(logging.DEBUG)
+    assert ("Your output directory 'test/data/prepare/test_sketch_all_noout' "
+            "does not exist") in caplog.text
+
+
+def test_sketch_all_mash_exists(caplog):
+    """
+    Test that, when mash sketch file already exists, it does nothing: message to say
+    that the file already exists, and returns 0
+    """
+    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                           123567, 200, 101],
+               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                           20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
+               }
+    sorted_genomes = ["genome2", "genome3", "genome1"]
+    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_exists")
+    os.makedirs(outdir)
+    list_reps = os.path.join(outdir, "test_list_reps.txt")
+    out_msh = os.path.join(DATA_TEST_DIR, "test_files", "out_mash")
+    mash_log = os.path.join(outdir, "mash_sketch.log")
+    threads = 1
+    filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
+
+    # Check that expected output files were created
+    assert not os.path.isfile(list_reps)
+    assert not os.path.isfile(mash_log)
+    assert os.path.isfile(out_msh + ".msh")
+
+    # Check log
+    caplog.set_level(logging.DEBUG)
+    assert ("Mash sketch file test/data/prepare/test_files/out_mash.msh already exists. PanACoTA "
+            "will use it for next step.") in caplog.text
+
+    shutil.rmtree(outdir)
+
+
+# def test_sketch_all_error_mash(caplog):
+#     """
+#     Test that, when mash has a problem, PanACoTA exits with an error message
+#     """
+#     genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+#                            123567, 200, 101],
+#                "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+#                            20000, 3, 1],
+#                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
+#                }
+#     sorted_genomes = ["genome2", "genome3", "genome1"]
+#     outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_exists")
+#     os.makedirs(outdir)
+#     list_reps = os.path.join(outdir, "test_list_reps.txt")
+#     # Create an empty mash s
+#     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "mash_sketch")
+#     open(out_msh + ".msh", "w").close()
+#     mash_log = os.path.join(outdir, "mash_sketch.log")
+#     threads = 1
+#     filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
+
+#     # Check that expected output files were created
+#     assert not os.path.isfile(list_reps)
+#     assert not os.path.isfile(mash_log)
+#     assert os.path.isfile(out_msh + ".msh")
+
+#     # Check log
+#     caplog.set_level(logging.DEBUG)
+#     assert ("Mash sketch file test/data/prepare/test_files/out_mash.msh already exists. PanACoTA "
+#             "will use it for next step.") in caplog.text
+
+#     shutil.rmtree(outdir)
 
 
 # def test_read_matrix():
