@@ -335,31 +335,32 @@ def test_sketch_all_error_mash(caplog):
     """
     Test that, when mash has a problem, PanACoTA exits with an error message
     """
-    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
-                           123567, 200, 101],
-               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
-                           20000, 3, 1],
+    genomes = {"genome1": ["g1_name", "g1_ori", "genome1", 123567, 200, 101],
+               "genome2": ["g2_name", "g2_ori", "genome2", 20000, 3, 1],
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
                }
     sorted_genomes = ["genome2", "genome3", "genome1"]
-    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_exists")
+    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_error")
     os.makedirs(outdir)
-    list_reps = os.path.join(outdir, "test_files", "test_list_reps.txt")
-    out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_sketch")
-    open(out_msh + ".msh", "w").close()
+    list_reps = os.path.join(outdir, "test_list_reps.txt")
+    out_msh = os.path.join(outdir, "out_mash.msh")
     mash_log = os.path.join(outdir, "mash_sketch.log")
     threads = 1
-    filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
+
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
 
     # Check that expected output files were created
-    assert not os.path.isfile(list_reps)
-    assert not os.path.isfile(mash_log)
-    assert os.path.isfile(out_msh + ".msh")
+    assert os.path.isfile(list_reps)
+    assert os.path.isfile(mash_log)
+    assert not os.path.isfile(out_msh)
 
     # Check log
     caplog.set_level(logging.DEBUG)
-    assert ("Mash sketch file test/data/prepare/test_files/out_mash.msh already exists. PanACoTA "
-            "will use it for next step.") in caplog.text
+    assert ("Error while trying to sketch 3 genomes to combined archive. Maybe some genome "
+            "sequences in 'tmp_files' are missing! Check logfile: test/data/prepare/"
+            "test_sketch_all_mash_error/mash_sketch.log") in caplog.text
 
     shutil.rmtree(outdir)
 
