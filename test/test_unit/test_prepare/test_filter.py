@@ -12,7 +12,8 @@ import pytest
 import PanACoTA.prepare_module.filter_genomes as filterg
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
-GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "refseq", "bacteria")
+GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
+
 
 def test_write_output():
     """
@@ -232,13 +233,17 @@ def test_sketch_all():
     """
     Test that all genomes are sketch, in the provided order
     """
+    # We give 4 genomes
     genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
                            123567, 200, 101],
+               "genome1bis": ["g1bis_name", "g1bis_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                              1500, 3, 2],
                "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
                            20000, 3, 1],
-               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOC.1019.fna"), 25003, 52, 50]
                }
-    sorted_genomes = ["genome2", "genome3", "genome1"]
+    sorted_genomes = ["genome2", "genome1bis", "genome3", "genome1"]
     outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all")
     os.makedirs(outdir)
     list_reps = os.path.join(outdir, "test_list_reps.txt")
@@ -254,12 +259,13 @@ def test_sketch_all():
 
     # Check content of list file
     expected_lines = [os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
-                      os.path.join(GENOMES_DIR, "ACOR003.0519.fna"),
+                      os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                      os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
                       os.path.join(GENOMES_DIR, "ACOR001.0519.fna")]
-    # 3 files to sketch, with expected paths
+    # 4 files to sketch, with expected paths
     with open(list_reps, "r") as lr:
         lines_found = lr.readlines()
-        assert len(lines_found) == 3
+        assert len(lines_found) == 4
         for line, expect in zip(lines_found, expected_lines):
             assert line.strip() == expect
 
@@ -267,9 +273,10 @@ def test_sketch_all():
         assert ml.readline().strip() == f"Sketching {expected_lines[0]}..."
         assert ml.readline().strip() == f"Sketching {expected_lines[1]}..."
         assert ml.readline().strip() == f"Sketching {expected_lines[2]}..."
+        assert ml.readline().strip() == f"Sketching {expected_lines[3]}..."
         assert ml.readline().strip() == f"Writing to {out_msh}..."
 
-    shutil.rmtree(outdir)
+    # shutil.rmtree(outdir)
 
 
 def test_sketch_all_noout(caplog):
@@ -313,20 +320,24 @@ def test_sketch_all_mash_exists(caplog):
     outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_exists")
     os.makedirs(outdir)
     list_reps = os.path.join(outdir, "test_list_reps.txt")
-    out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_out_mash")
+    out_msh = os.path.join(outdir, "mash_exists")
+    # Create empty msh file
+    open(out_msh + ".msh", "w").close()
     mash_log = os.path.join(outdir, "mash_sketch.log")
     threads = 1
+    # Check that out_msh already exists before running mash sketch
+    assert os.path.isfile(out_msh + ".msh")
     filterg.sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
 
-    # Check that expected output files were created
+    # Check that mash file still exists, but no other outfile was created
     assert not os.path.isfile(list_reps)
     assert not os.path.isfile(mash_log)
     assert os.path.isfile(out_msh + ".msh")
 
     # Check log
     caplog.set_level(logging.DEBUG)
-    assert ("Mash sketch file test/data/prepare/test_files/test_out_mash.msh already exists. PanACoTA "
-            "will use it for next step.") in caplog.text
+    assert ("Mash sketch file test/data/prepare/test_sketch_all_mash_exists/mash_exists.msh "
+            "already exists. PanACoTA will use it for next step.") in caplog.text
 
     shutil.rmtree(outdir)
 
@@ -342,7 +353,7 @@ def test_sketch_all_error_mash(caplog):
     sorted_genomes = ["genome2", "genome3", "genome1"]
     outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_error")
     os.makedirs(outdir)
-    list_reps = os.path.join(outdir, "test_list_reps.txt")
+    list_reps = os.path.join(DATA_TEST_DIR, "test_files", "test_list_to_sketch.txt")
     out_msh = os.path.join(outdir, "out_mash.msh")
     mash_log = os.path.join(outdir, "mash_sketch.log")
     threads = 1
@@ -363,6 +374,33 @@ def test_sketch_all_error_mash(caplog):
             "test_sketch_all_mash_error/mash_sketch.log") in caplog.text
 
     shutil.rmtree(outdir)
+
+
+# def test_compare_all(caplog):
+#     """
+#     Test comparison of all sketched sequences is as expected
+#     """
+#     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
+#     matrix = os.path.join(DATA_TEST_DIR, "matrix_from_test_compare_all.txt")
+#     mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
+#     threads = 1
+#     filterg.compare_all(out_msh, matrix, mash_log, threads)
+
+#     # Check output files are created
+#     assert os.path.isfile(matrix)
+#     assert os.path.isfile(mash_log)
+#     assert os.path.isfile(out_msh + ".msh")
+
+#     # Check content of matrix file
+
+#     # Check log
+#     caplog.set_level(logging.DEBUG)
+#     assert ("Computing pairwise distances between all genomes") in caplog.text
+
+
+#     # Remove outputs
+    # os.remove(matrix)
+    # os.remove(mash_log)
 
 
 # def test_read_matrix():

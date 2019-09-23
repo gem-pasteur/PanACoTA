@@ -1,3 +1,3 @@
 genome2
-test/data/prepare/genomes/refseq/bacteria/ACOR003.0519.fna
+test/data/prepare/genomes/genomes_comparison/ACOR003.0519.fna
 genome1
