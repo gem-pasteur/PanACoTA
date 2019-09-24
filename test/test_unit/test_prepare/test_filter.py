@@ -9,6 +9,7 @@ import logging
 import shutil
 import pytest
 
+import test.test_unit.utilities_for_tests as util
 import PanACoTA.prepare_module.filter_genomes as filterg
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
@@ -71,7 +72,6 @@ def test_write_output():
 
     # Remove test folder
     shutil.rmtree(outdir)
-
 
 
 def test_write_output_no_discard():
@@ -238,12 +238,15 @@ def test_sketch_all():
                            123567, 200, 101],
                "genome1bis": ["g1bis_name", "g1bis_ori",
                               os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                              251500, 200, 101],
+               "genome1diff": ["g1diff_name", "g1diff_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
                               1500, 3, 2],
                "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
                            20000, 3, 1],
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOC.1019.fna"), 25003, 52, 50]
                }
-    sorted_genomes = ["genome2", "genome1bis", "genome3", "genome1"]
+    sorted_genomes = ["genome2", "genome1diff", "genome3", "genome1", "genome1bis"]
     outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all")
     os.makedirs(outdir)
     list_reps = os.path.join(outdir, "test_list_reps.txt")
@@ -259,13 +262,14 @@ def test_sketch_all():
 
     # Check content of list file
     expected_lines = [os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
-                      os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                      os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
                       os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
-                      os.path.join(GENOMES_DIR, "ACOR001.0519.fna")]
+                      os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                      os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna")]
     # 4 files to sketch, with expected paths
     with open(list_reps, "r") as lr:
         lines_found = lr.readlines()
-        assert len(lines_found) == 4
+        assert len(lines_found) == 5
         for line, expect in zip(lines_found, expected_lines):
             assert line.strip() == expect
 
@@ -274,9 +278,10 @@ def test_sketch_all():
         assert ml.readline().strip() == f"Sketching {expected_lines[1]}..."
         assert ml.readline().strip() == f"Sketching {expected_lines[2]}..."
         assert ml.readline().strip() == f"Sketching {expected_lines[3]}..."
+        assert ml.readline().strip() == f"Sketching {expected_lines[4]}..."
         assert ml.readline().strip() == f"Writing to {out_msh}..."
 
-    # shutil.rmtree(outdir)
+    shutil.rmtree(outdir)
 
 
 def test_sketch_all_noout(caplog):
@@ -376,31 +381,31 @@ def test_sketch_all_error_mash(caplog):
     shutil.rmtree(outdir)
 
 
-# def test_compare_all(caplog):
-#     """
-#     Test comparison of all sketched sequences is as expected
-#     """
-#     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
-#     matrix = os.path.join(DATA_TEST_DIR, "matrix_from_test_compare_all.txt")
-#     mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
-#     threads = 1
-#     filterg.compare_all(out_msh, matrix, mash_log, threads)
+def test_compare_all(caplog):
+    """
+    Test comparison of all sketched sequences is as expected
+    """
+    out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
+    matrix = os.path.join(DATA_TEST_DIR, "matrix_from_test_compare_all.txt")
+    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
+    threads = 1
 
-#     # Check output files are created
-#     assert os.path.isfile(matrix)
-#     assert os.path.isfile(mash_log)
-#     assert os.path.isfile(out_msh + ".msh")
+    # Check msh file exists
+    assert os.path.isfile(out_msh + ".msh")
 
-#     # Check content of matrix file
+    filterg.compare_all(out_msh, matrix, mash_log, threads)
 
-#     # Check log
-#     caplog.set_level(logging.DEBUG)
-#     assert ("Computing pairwise distances between all genomes") in caplog.text
+    # Check output files are created
+    assert os.path.isfile(matrix)
+    assert os.path.isfile(mash_log)
 
+    # Check content of matrix file
+    expect_matrix = os.path.join(DATA_TEST_DIR, "test_files", "test_matrix_mash.txt")
+    assert util.compare_file_content(matrix, expect_matrix)
 
-#     # Remove outputs
-    # os.remove(matrix)
-    # os.remove(mash_log)
+    # Remove outputs
+    os.remove(matrix)
+    os.remove(mash_log)
 
 
 # def test_read_matrix():
