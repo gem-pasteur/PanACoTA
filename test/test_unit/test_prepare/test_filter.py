@@ -623,3 +623,114 @@ def test_mash_step_wrong_mat(caplog):
     # Check logs
     caplog.set_level(logging.DEBUG)
     assert "Should never happen as mat_sp is a triangle matrix!" in caplog.text
+
+
+def test_check_quality():
+    """
+    quality control of all genomes in the database
+    """
+    species_linked = "my-test-genomes"
+    db_path = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
+    tmp_dir = os.path.join(DATA_TEST_DIR, "tmp_dir_check_quality")
+    os.mkdir(tmp_dir)
+    max_l90 = 100
+    max_cont = 100
+    cutn = 0
+
+    genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
+
+    exp_genomes = {
+                   "ACOR001.0519.fna": ["ACOR001.0519",
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                                        3013644, 269, 37],
+                   "ACOR001.0519-bis.fna": ["ACOR001.0519-bis",
+                                            os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                                            os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                                            3013644, 269, 37],
+                   "ACOR001.0519-almost-same.fna": ["ACOR001.0519-almost-same",
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                                        3012665, 261, 37],
+                   "ACOR002.0519.fna": ["ACOR002.0519",
+                                        os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                                        os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                                        2997537, 78, 23],
+                   "ACOC.1019.fna": ["ACOC.1019", os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
+                                      os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
+                                      1587120, 1, 1]
+               }
+
+    assert genomes == exp_genomes
+
+    # Remove tmp_dir
+    shutil.rmtree(tmp_dir)
+
+
+def test_check_quality_no_dbdir(caplog):
+    """
+    quality control of all genomes in the database when given db folder does not exist:
+    ends with error message
+    """
+    species_linked = "my-test-genomes"
+    db_path = "dbpath_for_test"
+    tmp_dir = "tmp_dir_check_quality"
+    max_l90 = 100
+    max_cont = 100
+    cutn = 5
+
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "dbpath_for_test does not exist" in caplog.text
+
+
+def test_check_quality_no_tmpdir(caplog):
+    """
+    quality control of all genomes in the database when given tmp folder does not exist:
+    ends with error message
+    """
+    species_linked = "my-test-genomes"
+    db_path = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
+    tmp_dir = "tmp_dir_check_quality"
+    max_l90 = 100
+    max_cont = 100
+    cutn = 5
+
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "tmp_dir_check_quality does not exist" in caplog.text
+
+
+def test_check_quality_no_genome(caplog):
+    """
+    quality control of all genomes in the database where there is no genome to annotate:
+    ends with error message
+    """
+    species_linked = "my-test-genomes"
+    db_path = "dbpath_for_test"
+    os.mkdir(db_path)
+    tmp_dir = os.path.join(DATA_TEST_DIR, "tmp_dir_check_quality")
+    os.mkdir(tmp_dir)
+    max_l90 = 100
+    max_cont = 100
+    cutn = 5
+
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "There is no genome in dbpath_for_test." in caplog.text
+
+    # Remove empty directories created
+    shutil.rmtree(db_path)
+    shutil.rmtree(tmp_dir)

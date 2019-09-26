@@ -22,7 +22,7 @@ from PanACoTA.annotate_module import genome_seq_functions as gfunc
 logger = logging.getLogger("prepare.filter")
 
 
-def check_quality(outdir, species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
+def check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
     """
     Do a quality control of all genomes in db_path
 
@@ -51,15 +51,23 @@ def check_quality(outdir, species_linked, db_path, tmp_dir, max_l90, max_cont, c
         no need for small name, we won't annotate genomes. genome_name is the same as filename
         but without extension
     """
+    # Check database folder exists
+    if not os.path.isdir(db_path):
+        logger.error(f"{db_path} does not exist.")
+        sys.exit(1)
+    if not os.path.isdir(tmp_dir):
+        logger.error(f"{tmp_dir} does not exist.")
+        sys.exit(1)
     # Get all genome filenames
     all_genomes = os.listdir(db_path)
     if len(all_genomes) == 0:
         logger.error(f"There is no genome in {db_path}.")
         sys.exit(1)
+    # Get name of genomes without extension
     genomes = {g:[os.path.splitext(g)[0]] for g in all_genomes}
     logger.info("Total number of genomes for {}: {}".format(species_linked, len(all_genomes)))
 
-    # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes, and
+    # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes
     # -> {genome_file: [genome_g, orig_path, to_annotate_path, size, nbcont, l90]}
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft="prepare", logger=logger,
                               quiet=False)

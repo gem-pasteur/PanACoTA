@@ -185,7 +185,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
                     sys.exit(1)
                 logger.info("{} refseq genome(s) downloaded".format(nb_gen))
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
-        genomes = fg.check_quality(outdir, species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
+        genomes = fg.check_quality(species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
