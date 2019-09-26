@@ -8,6 +8,7 @@ import os
 import logging
 import shutil
 import pytest
+from scipy.sparse import dok_matrix
 
 import test.test_unit.utilities_for_tests as util
 import PanACoTA.prepare_module.filter_genomes as filterg
@@ -233,7 +234,7 @@ def test_sketch_all():
     """
     Test that all genomes are sketch, in the provided order
     """
-    # We give 4 genomes
+    # We give 5 genomes
     genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
                            123567, 200, 101],
                "genome1bis": ["g1bis_name", "g1bis_ori",
@@ -383,7 +384,7 @@ def test_sketch_all_error_mash(caplog):
 
 def test_compare_all(caplog):
     """
-    Test comparison of all sketched sequences is as expected
+    Check that comparison of all sketched sequences is as expected (output matrix is as expected)
     """
     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
     matrix = os.path.join(DATA_TEST_DIR, "matrix_from_test_compare_all.txt")
@@ -408,105 +409,217 @@ def test_compare_all(caplog):
     os.remove(mash_log)
 
 
-# def test_read_matrix():
-#     """
-#     Test that matrix from minhash is correctly read and converted to python matrix
-#     """
-#     genomes = {"genome2": ["g2_name", "g2_ori", "path_genome2", 20000, 3, 1],
-#                "genome6": ["g6_name", "g6_ori", "path_genome6", 1500, 5, 2],
-#                "genome5": ["g5_name", "g5_ori", "path_genome5", 22012, 20, 10],
-#                "genome3": ["g3_name", "g3_ori", "path_genome3", 25003, 52, 50]
-#               }
-#     sorted_genomes = ["genome2", "genome6", "genome5", "genome3"]
-#     matrix_file = os.path.join(DATA_TEST_DIR, "test_files", "minhash_output.txt")
+def test_compare_all_matrix_exists(caplog):
+    """
+    Check that matrix file already exists, it returns 0 with a warning message sayng that the
+    existing file will be used.
+    """
+    out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
+    matrix = os.path.join(DATA_TEST_DIR, "test_files", "test_matrix_mash.txt")
+    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
+    threads = 1
 
-#     mat_sp = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
+    filterg.compare_all(out_msh, matrix, mash_log, threads)
 
-#     # Check content of created matrix
-#     assert len(mat_sp) == 6
-#     assert mat_sp[0,1] == 1e-6
-#     assert mat_sp[0,2] == 0.07
-#     assert mat_sp[0,3] == 1e-3
-#     assert mat_sp[1,2] == 0.08
-#     assert mat_sp[1,3] == 1e-4
-#     assert mat_sp[2,3] == 5e-2
+    # Check log
+    caplog.set_level(logging.DEBUG)
+    assert ("Matrix file test/data/prepare/test_files/test_matrix_mash.txt already exists. "
+            "The program will use this distance matrix to filter all genomes according to "
+            "their distances") in caplog.text
 
 
-# def test_read_matrix_no_genome():
-#     """
-#     Test that matrix from minhash is correctly read and converted to python matrix
-#     """
-#     genomes = {}
-#     sorted_genomes = []
-#     matrix_file = os.path.join(DATA_TEST_DIR, "test_files", "minhash_output_empty.txt")
-#     # Create empty matrix file
-#     open(matrix_file, "w").close()
+def test_compare_all_error_mash(caplog):
+    """
+    Check that when mash has a problem, it gives an error message and closes the program
+    """
+    # mash file does not exist
+    out_msh = os.path.join(DATA_TEST_DIR, "mash.msh")
+    matrix = os.path.join(DATA_TEST_DIR, "matrix.txt")
+    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all-error-mash.log")
+    threads = 1
 
-#     # Read matrix
-#     mat_sp = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        filterg.compare_all(out_msh, matrix, mash_log, threads)
 
-#     # Check content of created matrix
-#     assert len(mat_sp) == 0
+    # Check log
+    caplog.set_level(logging.DEBUG)
+    assert ("Error while trying to estimate pairwise distances between all genomes. "
+            "See test/data/prepare/mashlog_from_test_compare_all-error-mash.log") in caplog.text
 
-#     # Remove empty matrix file
-#     os.remove(matrix_file)
-
-# def test_mash_step():
-#     """
-#     Prepare mash step: for a given genome, keep only genomes at a correct distance
-#     (between min_dist and max_dist). Add others to 'genomes_removed'
-#     """
-#     # CREATE MATRIX
-#     nbgen = 4
-#     mat_sp = dok_matrix((nbgen, nbgen), dtype=float)
-#     mat_sp[0,1] = 1e-6
-#     mat_sp[0,2] = 0.07
-#     mat_sp[0,3] = 1e-3
-#     mat_sp[1,2] = 0.08
-#     mat_sp[1,3] = 1e-4
-#     mat_sp[2,3] = 5e-2
-
-#     # PREPARE MASH STEP
-#     # List of genomes ordered by quality. genome1 is the best genome, genome2 the worst
-#     to_try = ["genome2", "genome4", "genome3", "genome1"]
-#     corresp = {"genome1":0, "genome3":1, "genome4":2, "genome2":3}
-#     genomes_removed = {}
-#     min_dist = 1e-4
-#     max_dit = 0.06
-
-#     # Check everything goes well
-#     assert filterg.mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dit) == 0
-#     assert to_try == ["genome4"]
-#     assert genomes_removed == {"genome3": ["genome1", 0.07], "genome2": ["genome1", 1e-6]}
+    # Remove created files
+    os.remove(matrix)
+    os.remove(mash_log)
 
 
+def test_read_matrix():
+    """
+    Test that the matrix txt file is converted to a scipy matrix as expected
+    """
+    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                           123567, 200, 101],
+               "genome1bis": ["g1bis_name", "g1bis_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                              251500, 200, 101],
+               "genome1diff": ["g1diff_name", "g1diff_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                              1500, 3, 2],
+               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                           20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOC.1019.fna"), 25003, 52, 50]
+               }
+    sorted_genomes = ["genome2", "genome1diff", "genome3", "genome1", "genome1bis"]
+    matrix_file = os.path.join(DATA_TEST_DIR, "test_files", "test_matrix_mash.txt")
 
-# def test_mash_step_wrong_sp():
-#     """
-#     Prepare mash step: for a given genome, keep only genomes at a correct distance
-#     (between min_dist and max_dist). Add others to 'genomes_removed'
-#     """
-#     # CREATE MATRIX
-#     nbgen = 4
-#     mat_sp = dok_matrix((nbgen, nbgen), dtype=float)
-#     mat_sp[0,1] = 1e-6
-#     mat_sp[0,2] = 0.07
-#     mat_sp[0,3] = 1e-3
-#     mat_sp[1,2] = 0.08
-#     mat_sp[3,1] = 1e-4
-#     mat_sp[2,3] = 5e-2
+    # Run matrix reading
+    out_mat = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
 
-#     # PREPARE MASH STEP
-#     # List of genomes ordered by quality. genome1 is the best genome, genome2 the worst
-#     to_try = ["genome2", "genome4", "genome3", "genome1"]
-#     corresp = {"genome1":0, "genome3":1, "genome4":2, "genome2":3}
-#     genomes_removed = {}
-#     min_dist = 1e-4
-#     max_dit = 0.06
+    exp_mat = dok_matrix((5, 5), dtype=float)
+    exp_mat[0, 0] = 0  # genome2 vs genome2
+    exp_mat[0, 1] = 0.000167546  # genome2 vs genome1diff
+    exp_mat[0, 2] = 0.295981  # genome2 vs genome3
+    exp_mat[0, 3] = 0.000143503  # genome2 vs genome1
+    exp_mat[0, 4] = 0.000143503  # genome2 vs genome1bis
+    exp_mat[1, 1] = 0 # genome1diff vs genome1diff
+    exp_mat[1, 2] = 0.295981 # genome1diff vs genome3
+    exp_mat[1, 3] = 2.38274e-05  # genome1diff vs genome1
+    exp_mat[1, 4] = 2.38274e-05  # genome1diff vs genome1bis
+    exp_mat[2, 3] = 0.295981  # genome3 vs genome1
+    exp_mat[2, 4] = 0.295981  # genome3 vs genome1bis
+    exp_mat[3, 4] = 0  # genome1 vs genome1bis
 
-#     # Check everything goes well
-#     assert filterg.mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dit) == 0
-#     assert to_try == ["genome2"]
-#     assert genomes_removed == {"genome3": ["genome1", 0.07], "genome4": ["genome1", 1e-6]}
+    out = out_mat.toarray()
+    exp = exp_mat.toarray()
+    import numpy as np
+    assert  np.array_equal(out, exp)
 
 
+def test_read_matrix_nofile(caplog):
+    """
+    Test that when the given matrix file does not exist, it exits with error message
+    """
+    genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                           123567, 200, 101],
+               "genome1bis": ["g1bis_name", "g1bis_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                              251500, 200, 101],
+               "genome1diff": ["g1diff_name", "g1diff_ori",
+                              os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                              1500, 3, 2],
+               "genome2": ["g2_name", "g2_ori", os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                           20000, 3, 1],
+               "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOC.1019.fna"), 25003, 52, 50]
+               }
+    sorted_genomes = ["genome2", "genome1diff", "genome3", "genome1", "genome1bis"]
+    matrix_file = os.path.join(DATA_TEST_DIR, "mymatrix.txt")
+
+    # Test that it exists with sysExit error
+    with pytest.raises(SystemExit):
+        out_mat = filterg.read_matrix(genomes, sorted_genomes, matrix_file)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert("Matrix file test/data/prepare/mymatrix.txt does not exist. We cannot "
+           "read it and do the next steps. Program ending.") in caplog.text
+
+
+def test_mash_step_2steps():
+    """
+    Test that when comparing a given reference genome to all others kept until now:
+    - it updates 'genomes_removed' (genomes removed as they are not between min_dist
+    and max_dist compared to the given reference genome.
+    - it updates 'to_try' object, removing the given reference genome, as well as discarded
+    genomes
+    """
+    to_try = ["genome1bis", "genome1", "genome3", "genome1diff", "genome2"]
+    corresp = {"genome1":3, "genome1bis":4, "genome1diff":1, "genome2":0, "genome3":2}
+
+    # Create matrix to read
+    exp_mat = dok_matrix((5, 5), dtype=float)
+    exp_mat[0, 0] = 0  # genome2 vs genome2
+    exp_mat[0, 1] = 0.000167546  # genome2 vs genome1diff
+    exp_mat[0, 2] = 0.295981  # genome2 vs genome3
+    exp_mat[0, 3] = 0.000143503  # genome2 vs genome1
+    exp_mat[0, 4] = 0.000143503  # genome2 vs genome1bis
+    exp_mat[1, 1] = 0 # genome1diff vs genome1diff
+    exp_mat[1, 2] = 0.295981 # genome1diff vs genome3
+    exp_mat[1, 3] = 2.38274e-05  # genome1diff vs genome1
+    exp_mat[1, 4] = 2.38274e-05  # genome1diff vs genome1bis
+    exp_mat[2, 3] = 0.295981  # genome3 vs genome1
+    exp_mat[2, 4] = 0.295981  # genome3 vs genome1bis
+    exp_mat[3, 4] = 0  # genome1 vs genome1bis
+
+    genomes_removed = {"toto": ["titi", 0]}
+    min_dist = 1e-4
+    max_dist = 0.06
+
+    # First step: compare genome2 to all other genomes
+    filterg.mash_step(to_try, corresp, exp_mat, genomes_removed, min_dist, max_dist)
+
+    exp_removed = {"toto": ["titi", 0],
+                   "genome3": ["genome2", 0.295981]}
+
+    exp_to_try = ["genome1bis", "genome1", "genome1diff"]
+    assert genomes_removed == exp_removed
+    assert to_try == exp_to_try
+
+    # Second step: compare genome1diff to all other genomes
+    filterg.mash_step(exp_to_try, corresp, exp_mat, exp_removed, min_dist, max_dist)
+
+    out_removed = {"toto": ["titi", 0],
+                   "genome1": ["genome1diff", 2.38274e-05],
+                   "genome1bis": ["genome1diff", 2.38274e-05],
+                   "genome3": ["genome2", 0.295981]
+                   }
+
+    out_to_try = []
+
+    assert exp_removed == out_removed
+    assert exp_to_try == out_to_try
+
+
+def test_mash_step_wrong_mat(caplog):
+    """
+    Test that when comparing a given reference genome to all others kept until now:
+    - it updates 'genomes_removed' (genomes removed as they are not between min_dist
+    and max_dist compared to the given reference genome.
+    - it updates 'to_try' object, removing the given reference genome, as well as discarded
+    genomes
+    BUT, as the matrix is not triangular, prints a warning
+    """
+    to_try = ["genome1bis", "genome1", "genome3", "genome2", "genome1diff", "genome2"]
+    corresp = {"genome1":3, "genome1bis":4, "genome1diff":1, "genome2":0, "genome3":2}
+
+    # Create matrix to read
+    exp_mat = dok_matrix((5, 5), dtype=float)
+    exp_mat[0, 0] = 0  # genome2 vs genome2
+    exp_mat[0, 1] = 0.000167546  # genome2 vs genome1diff
+    exp_mat[0, 2] = 0.295981  # genome2 vs genome3
+    exp_mat[0, 3] = 0.000143503  # genome2 vs genome1
+    exp_mat[0, 4] = 0.000143503  # genome2 vs genome1bis
+    exp_mat[1, 1] = 0 # genome1diff vs genome1diff
+    exp_mat[1, 2] = 0.295981 # genome1diff vs genome3
+    exp_mat[1, 3] = 2.38274e-05  # genome1diff vs genome1
+    exp_mat[1, 4] = 2.38274e-05  # genome1diff vs genome1bis
+    exp_mat[2, 3] = 0.295981  # genome3 vs genome1
+    exp_mat[2, 4] = 0.295981  # genome3 vs genome1bis
+    exp_mat[3, 4] = 0  # genome1 vs genome1bis
+
+    genomes_removed = {"toto": ["titi", 0]}
+    min_dist = 1e-4
+    max_dist = 0.06
+
+    # Compare genome2 to all other genomes
+    filterg.mash_step(to_try, corresp, exp_mat, genomes_removed, min_dist, max_dist)
+
+    exp_removed = {"toto": ["titi", 0],
+                   "genome3": ["genome2", 0.295981],
+                   "genome2": ["genome2", 0]
+                   }
+    exp_to_try = ["genome1bis", "genome1", "genome1diff"]
+    assert genomes_removed == exp_removed
+    assert to_try == exp_to_try
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert "Should never happen as mat_sp is a triangle matrix!" in caplog.text

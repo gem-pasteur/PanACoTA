@@ -157,7 +157,7 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
     compare_all(out_msh, matrix, mash_log, threads)
 
     # Iteratively discard genomes
-    # List of genomes to compare to the next ones until a limit value is reached
+    # List of genomes to compare to the next ones until a limit value is reached.
     # genomes ordered by decreasing L90/nbcont (used to pop elements in comparing step)
     to_try = sorted_genomes[::-1]
     # Put list of genomes removed by mash comparison, and why
@@ -294,7 +294,8 @@ def compare_all(out_msh, matrix, mash_log, threads):
     matfile = open(matrix, "w")
     # Open mash log to add log of 'mash dist' to log of 'mash sketch'
     outf = open(mash_log, "a")
-    error_dist = "Error while trying to estimate pairwise distances between all genomes"
+    error_dist = ("Error while trying to estimate pairwise distances between all genomes. "
+                  f"See {mash_log}.")
     utils.run_cmd(cmd_dist, error_dist, eof=True, stdout=matfile, stderr=outf)
     outf.close()
     matfile.close()
@@ -312,7 +313,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     corresp : dict
         {genome_file : num_of_genome in sorted_genomes}
     mat_sp : scipy.sparse.dok.dok_matrix
-        matrix containing pairwise distance comparisons
+        triangle matrix containing pairwise distance comparisons
     genomes_removed : dict
         {genome_file: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
     min_dist : float
@@ -324,8 +325,8 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     -------
 
     to_try is updated (reference element and all genomes not compatible with it are removed)
-    return code
     genomes_removed is updated
+    return code (0 if no problem)
 
     """
     # Get last element (which is the 'best' genome), and remove it from the list
@@ -343,7 +344,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
         if ref_num < other_num:
             dist = mat_sp[ref_num, other_num]
         else:
-            print("Should never happen as mat_sp is a triangle matrix!")
+            logger.warning("Should never happen as mat_sp is a triangle matrix!")
             dist = mat_sp[other_num, ref_num]
         # If distance not in the limits, remove genome from to_try and add to genomes_removed list
         if not min_dist < dist < max_dist:
@@ -372,6 +373,11 @@ def read_matrix(genomes, sorted_genomes, matrix):
     mat_sp : str
         python dok_matrix object
     """
+    if not os.path.isfile(matrix):
+        logger.error(f"Matrix file {matrix} does not exist. We cannot read it "
+                     "and do the next steps. Program ending.")
+        sys.exit(1)
+
     nbgen = len(sorted_genomes)
     corresp_abs = {genomes[genome][2]: num for num, genome in enumerate(sorted_genomes)}
     # Create square matrix with nbgen cols/lines. dok format is a 'Dictionary Of Keys'

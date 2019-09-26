@@ -43,6 +43,7 @@ def compare_file_content(file1, file2):
     with open(file2, "r") as f2:
         lines_f2 = f2.readlines()
         if len(lines_f1) != len(lines_f2):
+            print(f"not same number of lines in {file1} and {file2}")
             return False
         for line2 in lines_f2:
             if line2 not in lines_f1:
