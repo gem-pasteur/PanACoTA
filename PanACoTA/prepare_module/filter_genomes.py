@@ -252,6 +252,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     file_paths = [genomes[g][2] for g in sorted_genomes]
     # Write list of genomes to compare to a file
     utils.write_list(file_paths, list_reps)
+    print("list written")
     # Sketch all genome sequences if not already done
     if os.path.isfile(out_msh + ".msh"):
         logger.warning(f"Mash sketch file {out_msh}.msh already exists. PanACoTA will "
@@ -259,13 +260,15 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
         os.remove(list_reps)
         return 0
     logger.info("Sketching all genomes...")
-
+    print("sketching all")
     cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
     error_sketch = (f"Error while trying to sketch {len(sorted_genomes)} genomes to combined "
                     "archive. Maybe some genome sequences in "
                     "'tmp_files' are missing! Check logfile: "
                     f"{mash_log}")
+
     outf = open(mash_log, "w")
+    print("outf created")
     utils.run_cmd(cmd_sketch, error_sketch, eof=True, stdout=outf, stderr=outf, logger=logger)
     outf.close()
     return 0
