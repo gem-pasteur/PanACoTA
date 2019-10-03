@@ -323,7 +323,8 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     mat_sp : scipy.sparse.dok.dok_matrix
         triangle matrix containing pairwise distance comparisons
     genomes_removed : dict
-        {genome_file: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
+        {genome_file: [ref_name, dist]} genome against which 'genome_name' is removed, and
+        corresponding distance (justifying removal)
     min_dist : float
         lower limit of distance between 2 genomes to keep them
     max_dist : float
