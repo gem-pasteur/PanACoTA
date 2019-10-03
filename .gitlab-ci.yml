@@ -108,8 +108,8 @@ coverage:
     - docker
     - helpers
   dependencies:
-    - unit-test-ubuntu16.04
-    - func-test-ubuntu16.04
+    - unit-test-ubuntu
+    # - func-test-ubuntu16.04
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
