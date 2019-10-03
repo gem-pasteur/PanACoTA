@@ -78,7 +78,7 @@ unit-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_unit/test_prepare -sv
+    - py.test test/test_unit/test_prepare -sv -x
 # - mv .coverage .coverage-unit
   artifacts:
     paths:
