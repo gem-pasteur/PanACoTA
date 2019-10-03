@@ -15,7 +15,27 @@ import PanACoTA.prepare_module.filter_genomes as filterg
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
 GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
-
+EXP_GENOMES = {
+               "ACOR001.0519.fna": ["ACOR001.0519",
+                                    os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                                    os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
+                                    3013644, 269, 37],
+               "ACOR001.0519-bis.fna": ["ACOR001.0519-bis",
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
+                                        3013644, 269, 37],
+               "ACOR001.0519-almost-same.fna": ["ACOR001.0519-almost-same",
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
+                                        3012665, 261, 37],
+               "ACOR002.0519.fna": ["ACOR002.0519",
+                                    os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                                    os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
+                                    2997537, 78, 23],
+               "ACOC.1019.fna": ["ACOC.1019", os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
+                                  os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
+                                  1587120, 1, 1]
+               }
 
 def test_write_output():
     """
@@ -639,29 +659,7 @@ def test_check_quality():
 
     genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
 
-    exp_genomes = {
-                   "ACOR001.0519.fna": ["ACOR001.0519",
-                                        os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
-                                        os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
-                                        3013644, 269, 37],
-                   "ACOR001.0519-bis.fna": ["ACOR001.0519-bis",
-                                            os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
-                                            os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna"),
-                                            3013644, 269, 37],
-                   "ACOR001.0519-almost-same.fna": ["ACOR001.0519-almost-same",
-                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
-                                        os.path.join(GENOMES_DIR, "ACOR001.0519-almost-same.fna"),
-                                        3012665, 261, 37],
-                   "ACOR002.0519.fna": ["ACOR002.0519",
-                                        os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
-                                        os.path.join(GENOMES_DIR, "ACOR002.0519.fna"),
-                                        2997537, 78, 23],
-                   "ACOC.1019.fna": ["ACOC.1019", os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
-                                      os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
-                                      1587120, 1, 1]
-               }
-
-    assert genomes == exp_genomes
+    assert genomes == EXP_GENOMES
 
     # Remove tmp_dir
     shutil.rmtree(tmp_dir)
@@ -734,3 +732,86 @@ def test_check_quality_no_genome(caplog):
     # Remove empty directories created
     shutil.rmtree(db_path)
     shutil.rmtree(tmp_dir)
+
+
+def test_iterative_mash(caplog):
+    """
+    Test that when we give all genomes, sorted, it processes all mash steps, and returns the
+    list of genomes removed
+    """
+    # Parameters for iterative_mash function
+    sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
+                      "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
+    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
+    species_linked = "my-test-species"
+    min_dist = 1e-4
+    max_dist = 0.06
+    threads = 1
+    quiet = False
+
+    # Expected created files
+    mash_dir = os.path.join(outdir, "mash_files")
+    txt_matrix = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.txt")
+    npz_mat = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.npz")
+
+    removed = filterg.iterative_mash(sorted_genomes, EXP_GENOMES, outdir,
+                                     species_linked, min_dist, max_dist, threads, quiet)
+
+    # Compare output dict
+    exp_removed = {"ACOC.1019.fna": ["ACOR002.0519.fna", 0.295981],
+                   "ACOR001.0519-bis.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05],
+                   "ACOR001.0519.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05]}
+
+    assert removed == exp_removed
+
+    # Check that npz and txt matrix exist
+    assert os.path.isfile(npz_mat)
+    assert os.path.isfile(txt_matrix)
+
+    # Remove created directories
+    shutil.rmtree(outdir)
+
+
+def test_iterative_mash_npz_exists():
+    """
+    Test that when we give all genomes, sorted, and that the mash matrix was already calculated,
+    and is now stored in an npz file, it does not re-calculate it, but returns directly removed
+    genomes.
+    """
+    sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
+                      "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
+    # Create output dir where all mash result files will be stored
+    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
+    mash_dir = os.path.join(outdir, "mash_files")
+    os.makedirs(mash_dir)
+    # Copy existing npz matrix to mash output folder
+    npz_matrix_model = os.path.join(DATA_TEST_DIR, "test_files",
+                                    "test_npz_matrix_mash.npz")
+    npz_matrix_out = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.npz")
+    shutil.copy(npz_matrix_model, npz_matrix_out)
+    txt_matrix_out = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.txt")
+    species_linked = "my-test-species"
+    min_dist = 1e-4
+    max_dist = 0.06
+    threads = 1
+    quiet = False
+
+    # Check npz matrix already exists, and txt matrix does not
+    assert os.path.isfile(npz_matrix_out)
+    assert not os.path.isfile(txt_matrix_out)
+
+    removed = filterg.iterative_mash(sorted_genomes, EXP_GENOMES, outdir,
+                                     species_linked, min_dist, max_dist, threads, quiet)
+
+    exp_removed = {"ACOC.1019.fna": ["ACOR002.0519.fna", 0.295981],
+                   "ACOR001.0519-bis.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05],
+                   "ACOR001.0519.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05]}
+
+    assert removed == exp_removed
+
+    # Check that npz matrix still exists, and txt was not created
+    assert os.path.isfile(npz_matrix_out)
+    assert os.path.isfile(txt_matrix_out)
+
+    # Remove created directories
+    shutil.rmtree(outdir)
