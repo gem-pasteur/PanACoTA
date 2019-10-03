@@ -79,7 +79,7 @@ unit-test-ubuntu:
     - ./make
   script:
     - py.test test/test_unit/test_prepare -sv
-    # - mv .coverage .coverage-unit
+# - mv .coverage .coverage-unit
   artifacts:
     paths:
       - .coverage-unit
@@ -113,7 +113,7 @@ coverage:
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
-    # - coverage combine .coverage-unit .coverage-functional
+# - coverage combine .coverage-unit .coverage-functional
     - coverage report
     - coverage html
   artifacts:
