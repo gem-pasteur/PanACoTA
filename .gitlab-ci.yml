@@ -68,22 +68,22 @@ build-from-test-image:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py
 
-# unit-test-ubuntu:
-#   stage: test
-#   except:
-#     - docker
-#     - helpers
-#   before_script:
-#     - pip3 install --upgrade pip
-#     - pip3 install -r requirements-dev.txt
-#     - ./make
-#   script:
-#     - py.test test/test_unit/test_annotate
-#     - mv .coverage .coverage-unit
-#   artifacts:
-#     paths:
-#       - .coverage-unit
-#     expire_in: 1 hour
+unit-test-ubuntu:
+  stage: test
+  except:
+    - docker
+    - helpers
+  before_script:
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements-dev.txt
+    - ./make
+  script:
+    - py.test test/test_unit/test_prepare -sv
+    # - mv .coverage .coverage-unit
+  artifacts:
+    paths:
+      - .coverage-unit
+    expire_in: 1 hour
 
 
 # func-test-ubuntu16.04:
@@ -102,24 +102,24 @@ build-from-test-image:
 #       - .coverage-functional
 #     expire_in: 1 hour
 
-# coverage:
-#   stage: coverage
-#   except:
-#     - docker
-#     - helpers
-#   dependencies:
-#     - unit-test-ubuntu16.04
-#     - func-test-ubuntu16.04
-#   before_script:
-#     - pip3 install -r requirements-dev.txt
-#   script:
-#     - coverage combine .coverage-unit .coverage-functional
-#     - coverage report
-#     - coverage html
-#   artifacts:
-#     paths:
-#       - htmlcov
-#     expire_in: 1 hour
+coverage:
+  stage: coverage
+  except:
+    - docker
+    - helpers
+  dependencies:
+    - unit-test-ubuntu16.04
+    - func-test-ubuntu16.04
+  before_script:
+    - pip3 install -r requirements-dev.txt
+  script:
+    # - coverage combine .coverage-unit .coverage-functional
+    - coverage report
+    - coverage html
+  artifacts:
+    paths:
+      - htmlcov
+    expire_in: 1 hour
 
 # sphinx-doc:
 #   stage: doc
