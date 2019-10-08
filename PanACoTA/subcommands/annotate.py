@@ -271,7 +271,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
     logfile_base = utils.init_logger(logfile_base, level, name='annotate', details=True,
                                 verbose=verbose, quiet=quiet)
-    logger = logging.getLogger('')
+    logger = logging.getLogger('annotate')
     logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
 
@@ -289,7 +289,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
             sys.exit(-1)
         # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
         # -> genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
-        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, prodigal_only,
+        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft,
                                   logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
     else:
@@ -320,8 +320,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # Info on folder containing original sequences
     if not from_info:
-        logger.info("-> Original sequences folder (corresponding to 'orig-name' column in "
-                    "'{}/LSTINFO-<input_file>.lst'): {} ".format(res_dir, db_path))
+        logger.info(f"-> Original sequences folder ('orig_name' column: {db_path} ")
         logger.info("\t-> If original sequence not found in {}, "
                     "look for it in {}, as it must be a concatenation of several input sequence "
                     "files.".format(db_path, tmp_dir))
@@ -329,8 +328,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
             logger.info("-> Sequences used for annotation ('to_annotate' column) are the "
                         "same as the previous ones (original sequences).")
         else:
-            logger.info("-> Folder with sequence file used for annotation ('to_annotate' column): "
-                        "{}".format(tmp_dir))
+            logger.info(f"-> Folder with sequence files that will be used for annotation "
+                        f"('to_annotate' column): {tmp_dir}")
 
     # If only QC, stop here.
     if qc_only:
