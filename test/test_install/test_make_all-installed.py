@@ -39,14 +39,16 @@ def test_install_panacota():
     """
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from base"
-    assert utils.check_installed("barrnap")
     assert not utils.check_installed("PanACoTA")
+    assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("mash")
     # Install panacota
     utils.run_cmd(cmd, error)
+    assert utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
-    assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("mash")
     # Check that panacota is installed (pip3 module exists)
     assert utils.is_package_installed("PanACoTA")
     # Check that it is installed in "final mode"
@@ -139,6 +141,10 @@ def test_uninstall(install_panacota):
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
+    assert utils.check_installed("barrnap")
+    assert utils.check_installed("prokka")
+    assert utils.check_installed("mash")
+    assert utils.check_installed("quicktree")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
