@@ -62,7 +62,6 @@ build-from-test-image:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py
 
-<<<<<<< HEAD
 
 unit-test-ubuntu18.04:
   stage: test
