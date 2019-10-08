@@ -448,7 +448,7 @@ def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
     # if QC, there is no 'discarded genome', just write information on all analyzed genomes
     else:
         outdisc = os.path.join(res_path,
-                               "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+                               "ALL-GENOMES-info-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
         logger.info("Writing information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "to_annotate", "gsize", "nb_conts", "L90"]) + "\n")
@@ -481,7 +481,7 @@ def write_lstinfo(list_file, genomes, outdir):
     with open(outlst, "w") as outf:
         outf.write("\t".join(["gembase_name", "orig_name", "to_annotate", "gsize",
                               "nb_conts", "L90"]) + "\n")
-        for genome, values in sorted(genomes.items(), key=sort_genomes):
+        for genome, values in sorted(genomes.items(), key=sort_genomes_byname_l90_nbcont):
             gembase, _, to_annote, gsize, nbcont, l90 = [str(x) for x in values]
             to_annote_file = os.path.basename(to_annote)
             outf.write("\t".join([gembase, genome, to_annote_file, gsize, nbcont, l90]) + "\n")
