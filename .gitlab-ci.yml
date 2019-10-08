@@ -138,24 +138,24 @@ sphinx-doc:
     expire_in: 1 hour
 
 
-pages:
-  stage: deploy
-  only:
-    - doc
-    - master
-  dependencies:
-    - coverage
-    - sphinx-doc
-  script:
-    - mkdir -p public/htmlcov
-    - mv htmlcov public
-    - mkdir -p public/html-doc
-    - mv doc/build/html html-doc
-    - mv html-doc public
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 hour
-  only:
-    - master
-    - doc
+# pages:
+#   stage: deploy
+#   only:
+#     - doc
+#     - master
+#   dependencies:
+#     - coverage
+#     - sphinx-doc
+#   script:
+#     - mkdir -p public/htmlcov
+#     - mv htmlcov public
+#     - mkdir -p public/html-doc
+#     - mv doc/build/html html-doc
+#     - mv html-doc public
+#   artifacts:
+#     paths:
+#       - public
+#     expire_in: 1 hour
+#   only:
+#     - master
+#     - doc
