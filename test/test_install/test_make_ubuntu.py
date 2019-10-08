@@ -36,6 +36,7 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("quicktree")
     assert not utils.check_installed("fastme")
     assert not utils.check_installed("FastTreeMP")
+    assert not utils.check_installed("mash")
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
@@ -45,6 +46,7 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("quicktree")
     assert not utils.check_installed("fastme")
     assert not utils.check_installed("FastTreeMP")
+    assert not utils.check_installed("mash")
     assert utils.check_installed("PanACoTA")
     cmd = "pip3 show PanACoTA"
     err = "error pip3"
@@ -68,6 +70,7 @@ def test_install_panacota_base_ubuntu():
                "to use the subcommands hereafter, first install required dependencies:",
                "prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
                "annotation only). If you even need functional annotation, also install prokka",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
@@ -105,11 +108,13 @@ def test_develop():
     assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("mash")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("mash")
     assert not utils.check_installed("prokka")
     cmd = "pip3 show PanACoTA"
     err = "error pip3"

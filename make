@@ -106,6 +106,8 @@ def install_all(install_dir, target, dev=False, user=False):
                "Here is the list of missing dependencies, and for what they are used. If you plan "
                "to use the subcommands hereafter, first install required dependencies:\n")
 
+        if "mash" in to_install_user:
+            msg += ("\t- mash (for prepare subcommand, to filter genomes) ")
         if "prodigal" in to_install_user:
             msg += ("\t- prodigal : for annotate subcommand, you at least need prodigal (for "
                     "syntaxic annotation only). If you even need functional annotation, also "
@@ -144,6 +146,8 @@ def check_dependencies(target):
         if not cmd_exists("pip3"):
             logger.error("You need pip3 to install PanACoTA.")
             sys.exit(1)
+        if not cmd_exists("mash"):
+            to_install_user.append("mash")
         if not cmd_exists("barrnap"):
             to_install_user.append("barrnap")
         if not cmd_exists("prodigal") and not cmd_exists("prokka"):
