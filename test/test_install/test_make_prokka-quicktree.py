@@ -37,6 +37,7 @@ def test_install_prokka_quicktree():
     """
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prodigal")
+    assert utils.check_installed("quicktree")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed('quicktree')
@@ -65,6 +66,7 @@ def test_install_prokka_quicktree():
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
                "- mmseqs (for pangenome subcommand)",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
                "See more information on how to download/install those softwares in README or in "
@@ -113,6 +115,7 @@ def test_uninstall_withdep(install_panacota):
     """
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("quicktree")
     assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
@@ -160,6 +163,7 @@ def test_develop():
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "See more information on how to download/install those softwares in README or in "
                "documentation."]
@@ -184,13 +188,17 @@ def test_install_user():
     PanACoTA in /Users and returns list of dependencies
     """
     assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("mash")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("quicktree")
     assert not utils.check_installed("PanACoTA")
     cmd = "python3 make --user"
     error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("mash")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("quicktree")
     assert utils.check_installed("PanACoTA")
     # Check logfile content
     logfile = "install.log"
@@ -202,6 +210,7 @@ def test_install_user():
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
+               "- mash (for prepare subcommand, to filter genomes)",
                "See more information on how to download/install those softwares in README or in "
                "documentation."]
     with open(logfile, "r") as logf:
