@@ -762,7 +762,10 @@ def test_iterative_mash(caplog):
                    "ACOR001.0519-bis.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05],
                    "ACOR001.0519.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05]}
 
-    assert removed == exp_removed
+    assert exp_removed["ACOC.1019.fna"] == removed["ACOC.1019.fna"]
+    assert exp_removed["ACOR001.0519-bis.fna"] == removed["ACOR001.0519-bis.fna"]
+    assert exp_removed["ACOR001.0519.fna"] == removed["ACOR001.0519.fna"]
+    assert exp_removed == removed
 
     # Check that npz and txt matrix exist
     assert os.path.isfile(npz_mat)
