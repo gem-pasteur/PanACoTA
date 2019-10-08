@@ -31,17 +31,6 @@ build-from-barrnap:
     - py.test test/test_install/test_make_barrnap.py
 
 
-build-from-prokka:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
-  stage: build
-  only:
-    - install
-  script:
-    - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prokka.py
-
-
 build-from-prokka-quicktree:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-annote-quicktree
   stage: build
