@@ -43,10 +43,12 @@ def test_install_panacota():
     error = "Error trying to install PanACoTA from base"
     assert not utils.check_installed("barrnap")
     assert utils.check_installed("prodigal")
+    assert not utils.check_installed("mash")
     assert not utils.check_installed("PanACoTA")
     # install panacota and check installation
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
+    assert not utils.check_installed("mash")
     assert utils.check_installed("prodigal")
     assert utils.check_installed("PanACoTA")
     # Check that dist-info file exists (pip3 has panacota module)
@@ -70,6 +72,7 @@ def test_install_panacota():
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
@@ -117,6 +120,7 @@ def test_uninstall(install_panacota):
     Test uninstalling PanACoTA
     """
     assert utils.check_installed("prodigal")
+    assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     cmd = "python3 make uninstall"
@@ -124,6 +128,7 @@ def test_uninstall(install_panacota):
     utils.run_cmd(cmd, error)
     assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("barrnap")
     assert not utils.check_installed("PanACoTA")
     logfile = "install.log"
     with open(logfile, "r") as logf:
@@ -139,12 +144,14 @@ def test_develop():
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("barrnap")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("prodigal")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("barrnap")
     cmd = "pip3 show PanACoTA"
     err = "error pip3"
     stdout = "stdout_pip3show.out"
@@ -158,6 +165,7 @@ def test_develop():
     os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for PanACoTA",
+               "- mash (for prepare subcommand, to filter genomes)",
                "Some dependencies needed for some subcommands of PanACoTA are "
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
@@ -192,6 +200,7 @@ def test_install_user():
     PanACoTA in user mode
     """
     assert utils.check_installed("prodigal")
+    assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     cmd = "python3 make --user"
@@ -208,6 +217,7 @@ def test_install_user():
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- mmseqs (for pangenome subcommand)",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
