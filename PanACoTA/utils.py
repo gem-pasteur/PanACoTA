@@ -305,9 +305,9 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     except OSError:
         logger.error(error + ": " + "{} does not exist".format(cmd))
         if eof:
-            sys.exit(-1)
+            sys.exit(1)
         else:
-            return -1
+            return 1
     if retcode != 0:
         logger.error(error)
         if eof:
@@ -1220,7 +1220,7 @@ def write_list(list_names, fileout):
             fo.write(genome + "\n")
 
 
-def list_to_str(list):
+def list_to_str(list, sep='\t'):
     """
     Return a string corresponding to the given list, with all elements separated
     by a space. Used to write a list into a file. Ex::
@@ -1231,6 +1231,8 @@ def list_to_str(list):
     ----------
     list : list
         list of elements that we would like to write
+    sep : str
+        Separator to use between the different elements
 
     Returns
     -------
@@ -1238,7 +1240,7 @@ def list_to_str(list):
         the string to write
     """
     list_write = [str(l) for l in list]
-    return " ".join(list_write) + "\n"
+    return sep.join(list_write) + "\n"
 
 
 def remove(infile):

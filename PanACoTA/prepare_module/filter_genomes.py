@@ -22,7 +22,7 @@ from PanACoTA.annotate_module import genome_seq_functions as gfunc
 logger = logging.getLogger("prepare.filter")
 
 
-def check_quality(outdir, species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
+def check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
     """
     Do a quality control of all genomes in db_path
 
@@ -51,15 +51,23 @@ def check_quality(outdir, species_linked, db_path, tmp_dir, max_l90, max_cont, c
         no need for small name, we won't annotate genomes. genome_name is the same as filename
         but without extension
     """
+    # Check database folder exists
+    if not os.path.isdir(db_path):
+        logger.error(f"{db_path} does not exist.")
+        sys.exit(1)
+    if not os.path.isdir(tmp_dir):
+        logger.error(f"{tmp_dir} does not exist.")
+        sys.exit(1)
     # Get all genome filenames
     all_genomes = os.listdir(db_path)
     if len(all_genomes) == 0:
         logger.error(f"There is no genome in {db_path}.")
         sys.exit(1)
+    # Get name of genomes without extension
     genomes = {g:[os.path.splitext(g)[0]] for g in all_genomes}
     logger.info("Total number of genomes for {}: {}".format(species_linked, len(all_genomes)))
 
-    # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes, and
+    # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes
     # -> {genome_file: [genome_g, orig_path, to_annotate_path, size, nbcont, l90]}
     gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft="prepare", logger=logger,
                               quiet=False)
@@ -83,7 +91,8 @@ def sort_genomes_minhash(genomes, max_l90, max_cont):
 
     Returns
     -------
-    sorted_genomes: list of 'genome_file' for all genomes kept (L90 and nbcont ok)
+    sorted_genomes: list of 'genome_file' for all genomes kept (L90 and nbcont ok),
+    ordered by decreasing quality
     """
     logger.info("Sorting all {} genomes by quality".format(len(genomes)))
     sorted_genomes = []
@@ -101,7 +110,8 @@ def sort_genomes_minhash(genomes, max_l90, max_cont):
     return sorted_genomes
 
 
-def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, max_dist, threads):
+def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, max_dist,
+                   threads, quiet):
     """
     Run mash all vs all, to get all pairwise distances.
     Then, take the first genome of the list, and remove those for which the distance to it
@@ -124,6 +134,8 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
         max limit of distance between 2 genomes to keep them
     threads :
         max number of threads to use
+    quiet : bool
+        True if nothing must be sent to stdout/stderr, False otherwise
 
     Returns
     -------
@@ -153,7 +165,7 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
     compare_all(out_msh, matrix, mash_log, threads)
 
     # Iteratively discard genomes
-    # List of genomes to compare to the next ones until a limit value is reached
+    # List of genomes to compare to the next ones until a limit value is reached.
     # genomes ordered by decreasing L90/nbcont (used to pop elements in comparing step)
     to_try = sorted_genomes[::-1]
     # Put list of genomes removed by mash comparison, and why
@@ -181,19 +193,22 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Iteratively discard genomes too close or too far
     logger.info("Starting iterative discarding steps")
-    widgets = ['Genomes compared: ',
-               progressbar.Bar(marker='█', left='', right='', fill=' '), ' ',
-               progressbar.Counter(), "/{}".format(nbgen), ' ',
-               progressbar.Timer(), ' - '
-              ]
-    bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=100).start()
-    done = 0
+    if not quiet:
+        widgets = ['Genomes compared: ',
+                   progressbar.Bar(marker='█', left='', right='', fill=' '), ' ',
+                   progressbar.Counter(), "/{}".format(nbgen), ' ',
+                   progressbar.Timer(), ' - '
+                  ]
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=100).start()
+        done = 0
 
     while len(to_try) > 1:
         mash_step(to_try, corresp_file, mat_sp, genomes_removed, min_dist, max_dist)
-        done = nbgen - len(to_try)
-        bar.update(done)
-    bar.finish()
+        if not quiet:
+            done = nbgen - len(to_try)
+            bar.update(done)
+    if not quiet:
+        bar.finish()
     logger.info("Final number of genomes in dataset: {}".format(nbgen - len(genomes_removed)))
     return genomes_removed
 
@@ -207,11 +222,13 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     genomes : dict
         {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
     sorted_genomes: list
-        list of 'genome_file' for all genomes kept (L90 and nbcont ok)
+        list of 'genome_file' for all genomes kept (L90 and nbcont ok), ordered by
+        decreasing quality
     outdir : str
         path to directory where all results are saved
     list_reps : str
-        file with list of genomes to sketch
+        file with list of genomes to sketch. File will be emptied if it contain something, and
+        filled with the informations from 'genomes'.
     out_msh : str
         output of mash
     mash_log : str
@@ -222,10 +239,13 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     Returns
     -------
 
-    genomes_removed : dict
-        {genome_name: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
+    return value (0 if OK, 1 if error)
 
     """
+    # If given outdir does not exist, close it
+    if not os.path.isdir(outdir):
+        logger.error(f"Your output directory '{outdir}' does not exist.")
+        sys.exit(1)
     # Empty list_reps file
     open(list_reps, "w").close()
     # Complete paths to genomes to compare: 'path_to_seq_to_annotate' = genome_file[2]
@@ -236,17 +256,22 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     if os.path.isfile(out_msh + ".msh"):
         logger.warning(f"Mash sketch file {out_msh}.msh already exists. PanACoTA will "
                         "use it for next step.")
-        return
+        os.remove(list_reps)
+        return 0
     logger.info("Sketching all genomes...")
-
     cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
     error_sketch = (f"Error while trying to sketch {len(sorted_genomes)} genomes to combined "
                     "archive. Maybe some genome sequences in "
                     "'tmp_files' are missing! Check logfile: "
                     f"{mash_log}")
+
     outf = open(mash_log, "w")
+    print("outf created")
+    print(utils.check_installed("mash"))
+    print(cmd_sketch)
     utils.run_cmd(cmd_sketch, error_sketch, eof=True, stdout=outf, stderr=outf, logger=logger)
     outf.close()
+    return 0
 
 
 def compare_all(out_msh, matrix, mash_log, threads):
@@ -280,7 +305,8 @@ def compare_all(out_msh, matrix, mash_log, threads):
     matfile = open(matrix, "w")
     # Open mash log to add log of 'mash dist' to log of 'mash sketch'
     outf = open(mash_log, "a")
-    error_dist = "Error while trying to estimate pairwise distances between all genomes"
+    error_dist = ("Error while trying to estimate pairwise distances between all genomes. "
+                  f"See {mash_log}.")
     utils.run_cmd(cmd_dist, error_dist, eof=True, stdout=matfile, stderr=outf)
     outf.close()
     matfile.close()
@@ -289,7 +315,7 @@ def compare_all(out_msh, matrix, mash_log, threads):
 
 def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     """
-    Prepare a given mash run, with a given genome as reference, and others to compare to.
+    Prepare a mash run, with a given genome as reference, and others to compare to.
 
     Parameters
     ----------
@@ -298,9 +324,10 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     corresp : dict
         {genome_file : num_of_genome in sorted_genomes}
     mat_sp : scipy.sparse.dok.dok_matrix
-        matrix containing pairwise distance comparisons
+        triangle matrix containing pairwise distance comparisons
     genomes_removed : dict
-        {genome_file: [ref_name, dist]} genome against which 'genome_name' is removed, and corresponding distance (justifying removal)
+        {genome_file: [ref_name, dist]} genome against which 'genome_name' is removed, and
+        corresponding distance (justifying removal)
     min_dist : float
         lower limit of distance between 2 genomes to keep them
     max_dist : float
@@ -310,14 +337,15 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
     -------
 
     to_try is updated (reference element and all genomes not compatible with it are removed)
-    return code
+    genomes_removed is updated
+    return code (0 if no problem)
 
     """
     # Get last element (which is the 'best' genome), and remove it from the list
     ref_name = to_try.pop()
     # Line of genome in mat_sp
     ref_num = corresp[ref_name]
-    # Genomes (ordered by increasing L90/nbcont) to compare to the element selected (ref_name)
+    # Genomes (ordered by increasing L90/nbcont) to compare to the selected element (ref_name)
     others = to_try[::-1]
 
     # For each genome, compare its distance to reference genome 'ref_name'
@@ -328,7 +356,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
         if ref_num < other_num:
             dist = mat_sp[ref_num, other_num]
         else:
-            print("Should never happen as mat_sp is a triangle matrix!")
+            logger.warning("Should never happen as mat_sp is a triangle matrix!")
             dist = mat_sp[other_num, ref_num]
         # If distance not in the limits, remove genome from to_try and add to genomes_removed list
         if not min_dist < dist < max_dist:
@@ -357,6 +385,11 @@ def read_matrix(genomes, sorted_genomes, matrix):
     mat_sp : str
         python dok_matrix object
     """
+    if not os.path.isfile(matrix):
+        logger.error(f"Matrix file {matrix} does not exist. We cannot read it "
+                     "and do the next steps. Program ending.")
+        sys.exit(1)
+
     nbgen = len(sorted_genomes)
     corresp_abs = {genomes[genome][2]: num for num, genome in enumerate(sorted_genomes)}
     # Create square matrix with nbgen cols/lines. dok format is a 'Dictionary Of Keys'
@@ -404,6 +437,10 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
     -------
     return code
     """
+    if not os.path.isdir(outdir):
+        logger.error(f"The given output directory ({outdir}) does not exist. We cannot "
+                      "create output files there")
+        sys.exit(1)
     list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}.txt")
     kept_genomes = []
     discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}.txt")
@@ -420,14 +457,14 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         # For each genome in kept_genomes, find required information on this it, using 'genomes'
         for g in kept_genomes:
             _, _, analyzed, size, nbcont, l90 = genomes[g]
-            towrite = utils.list_to_str([analyzed, size, nbcont, l90])
+            towrite = utils.list_to_str([analyzed, size, nbcont, l90], sep="\t")
             lf.write(towrite)
 
     # Write list of discarded genomes and why they are discarded
     with open(discard_file, "w") as disf:
         disf.write("genome_name\tproblem_compared_with\tdist\n")
         for genome, info in genomes_removed.items():
-            disf.write(genome + " " + utils.list_to_str(info) + "\n")
+            disf.write(utils.list_to_str([genome] + info))
     logger.info(f"Final list of genomes in the dataset: {list_file}")
     logger.info(f"List of genomes discarded by minhash steps: {discard_file}")
     return 0

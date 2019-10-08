@@ -185,7 +185,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
                     sys.exit(1)
                 logger.info("{} refseq genome(s) downloaded".format(nb_gen))
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
-        genomes = fg.check_quality(outdir, species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
+        genomes = fg.check_quality(species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
@@ -204,7 +204,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     # sorted_genome : [genome_file] ordered by L90/nbcont (keys of genomes)
     sorted_genomes = fg.sort_genomes_minhash(genomes, l90, nbcont)
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
-                                min_dist, max_dist, threads)
+                                min_dist, max_dist, threads, quiet)
     # Write list of genomes kept, and list of genomes removed
     fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist)
     logger.info("End")
@@ -222,12 +222,13 @@ def build_parser(parser):
     import argparse
     from PanACoTA import utils_argparse
 
-
-    optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-t", dest="NCBI_species_taxid",
+    required = parser.add_argument_group('Required arguments')
+    required.add_argument("-t", dest="NCBI_species_taxid", required=True,
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI")
                          )
+
+    optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-s", dest="NCBI_species",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
@@ -354,6 +355,11 @@ def check_args(parser, args):
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
                      "info file with the required information (see '--info' option)")
+
+    # Cannot be verbose and quiet at the same time
+    if args.verbose > 0 and args.quiet:
+        parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
+                     " You cannot have both.")
 
     # WARNINGS
     # User did not specify a species name

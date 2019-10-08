@@ -31,3 +31,22 @@ def compare_files_bin(file1, file2):
     sig_file1 = get_file_hash(file1)
     sig_file2 = get_file_hash(file2)
     return sig_file1 == sig_file2
+
+
+def compare_file_content(file1, file2):
+    """
+    Check that the 2 files have the same content, but no necessarily in the same order
+    """
+    with open(file1, "r") as f1:
+        lines_f1 = f1.readlines()
+
+    with open(file2, "r") as f2:
+        lines_f2 = f2.readlines()
+        if len(lines_f1) != len(lines_f2):
+            print(f"not same number of lines in {file1} and {file2}")
+            return False
+        for line2 in lines_f2:
+            if line2 not in lines_f1:
+                print(f"'{line2}' not found")
+                return False
+    return True
