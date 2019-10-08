@@ -40,9 +40,12 @@ def test_install():
     error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
+    assert not utils.check_installed("mash")
+    assert not utils.check_installed("PanACoTA")
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("prokka")
     assert utils.check_installed("barrnap")
+    assert not utils.check_installed("mash")
     assert utils.check_installed("PanACoTA")
     cmd = "pip3 show PanACoTA"
     err = "error pip3"
@@ -61,6 +64,7 @@ def test_install():
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
@@ -154,6 +158,7 @@ def test_develop():
                "not installed. Here is the list of missing dependencies, and for what they are "
                "used. If you plan to use the subcommands hereafter, first install required "
                "dependencies:",
+               "- mash (for prepare subcommand, to filter genomes)",
                "- mmseqs (for pangenome subcommand)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                "after)",
