@@ -74,7 +74,7 @@ build-from-test-image:
     - py.test test/test_install/test_make_all-installed.py
 
 
-unit-test-ubuntu:
+unit-test-ubuntu18.04:
   stage: test
   except:
     - docker
@@ -118,8 +118,8 @@ coverage:
     - helpers
     - install
   dependencies:
-    - unit-test-ubuntu16.04
-    - func-test-ubuntu16.04
+    - unit-test-ubuntu18.04
+    - func-test-ubuntu18.04
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
