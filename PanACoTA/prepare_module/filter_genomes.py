@@ -163,6 +163,9 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Compute pairwise distances
     compare_all(out_msh, matrix, mash_log, threads)
+    with open(matrix, "r") as mat:
+        for line in mat:
+            print(line)
 
     # Iteratively discard genomes
     # List of genomes to compare to the next ones until a limit value is reached.
@@ -266,9 +269,6 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
                     f"{mash_log}")
 
     outf = open(mash_log, "w")
-    print("outf created")
-    print(utils.check_installed("mash"))
-    print(cmd_sketch)
     utils.run_cmd(cmd_sketch, error_sketch, eof=True, stdout=outf, stderr=outf, logger=logger)
     outf.close()
     return 0
