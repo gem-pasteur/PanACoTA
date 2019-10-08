@@ -87,13 +87,13 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         #     bar.update()
         ret = ngd.download(**keyargs)
 
-    except:
+    except: # pragma: no cover
         # Error message if crash during execution of ncbi_genome_download
         logger.error(error_message)
         # bar.finish()
         sys.exit(1)
     attempts = 0
-    while ret == 75 and attempts < max_retries:
+    while ret == 75 and attempts < max_retries: # pragma: no cover
         # bar.update()
         attempts += 1
         logging.error(('Downloading from NCBI failed due to a connection error, '

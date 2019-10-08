@@ -74,7 +74,7 @@ unit-test-ubuntu18.04:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_unit/test_prepare/test_filter.py::test_sketch_all -sv -x
+    - py.test test/test_unit/test_prepare/test_filter.py -v -x
     - mv .coverage .coverage-unit
   artifacts:
     paths:
@@ -100,25 +100,25 @@ unit-test-ubuntu18.04:
 #     expire_in: 1 hour
 
 
-coverage:
-  stage: coverage
-  except:
-    - docker
-    - helpers
-    - install
-  dependencies:
-    - unit-test-ubuntu18.04
-    # - func-test-ubuntu18.04
-  before_script:
-    - pip3 install -r requirements-dev.txt
-  script:
-    # - coverage combine .coverage-unit .coverage-functional
-    - coverage report
-    - coverage html
-  artifacts:
-    paths:
-      - htmlcov
-    expire_in: 1 hour
+# coverage:
+#   stage: coverage
+#   except:
+#     - docker
+#     - helpers
+#     - install
+#   dependencies:
+#     - unit-test-ubuntu18.04
+#     # - func-test-ubuntu18.04
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#   script:
+#     # - coverage combine .coverage-unit .coverage-functional
+#     - coverage report
+#     - coverage html
+#   artifacts:
+#     paths:
+#       - htmlcov
+#     expire_in: 1 hour
 
 
 sphinx-doc:
