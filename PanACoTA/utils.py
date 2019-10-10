@@ -1084,9 +1084,9 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     Returns
     -------
     tuple
-        - List of all contigs with their original and new name:
+        - List of all contigs with their original and new name: (list of str)
         ["contig1'\t'orig_name1", "contig2'\t'orig_name2" ...]
-        - List of all contigs with their size:
+        - List of all contigs with their size: (list of str)
         ["contig1'\t'size1", "contig2'\t'size2" ...]
     """
     # Initialize variables
@@ -1095,9 +1095,9 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     contig_num = 1
     # contig size
     cont_size = 0
-    # List of contigs [<name>\t<orig_name>]
+    # List of contigs (str) [<name>\t<orig_name>]
     contigs = []
-    # List of contigs with their sizes [<name>\t<size>]
+    # List of contigs (str) with their sizes [<name>\t<size>]
     sizes = []
     # Name of previous contig (to put to contigs, as we need to wait for the next
     # contig to know the size of the previous one)
@@ -1124,6 +1124,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                     contigs.append(cor)
                     grf.write(cont)
                     grf.write(seq)
+
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 prev_orig_name = line
                 contig_num += 1
