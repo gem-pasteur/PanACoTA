@@ -75,6 +75,7 @@ unit-test-ubuntu18.04:
     - ./make
   script:
     - py.test test/test_unit/test_prepare -v -x
+    - py.test test/test_unit/test_annotate/test_format_func.py -v -x
     - mv .coverage .coverage-unit
   artifacts:
     paths:
