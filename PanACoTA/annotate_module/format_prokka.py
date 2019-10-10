@@ -527,8 +527,8 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger):
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
                 cont_num += 1
-                cont_name = ">" + line.split()[-1] + "\n"
-                exp_cont_name = contigs[cont_num -1].split("\t")[1]
+                cont_name = ">" + line.split()[-1] + "\n" # contig name in tbl
+                exp_cont_name = contigs[cont_num -1].split("\t")[0] # contig name 'contigs' (previous step)
             else:
                 # Get line type, and retrieve info according to it
                 # If it is not the line with start, end, type, there are only 2 elements
@@ -555,11 +555,11 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger):
                     if cont_num != prev_cont_num:
                         # Check if
                         # - it is not the first gene of the genome (prev_cont_num =! -1)
-                        # - current contig (name after 'feature') and contig corresponding
-                        # to cont_num in contigs are the same? If not -> contigs without any gene
-                        # without any feature between them
+                        # - current contig 'cont_name' (name after 'feature') and
+                        # contig corresponding to cont_num 'exp_cont_name' in contigs are the
+                        # same? If not -> contigs without any gene without any feature between them
                         # - this new contig is as expected (next contig of the list of
-                        # contigs generated during Replicons file generation)
+                        # contigs generated while reading the prokka output genome)
 
                         # not first contig and cont_name not corresponding
                         if prev_cont_num != -1 and cont_name != exp_cont_name:
@@ -570,15 +570,17 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger):
                             try:
                                 while cont_name != exp_cont_name:
                                     prev_cont_num += 1
-                                    exp_cont_name = contigs[prev_cont_num -1].split("\t")[1]
+                                    exp_cont_name = contigs[prev_cont_num -1].split("\t")[0]
                             except IndexError:
-                                logger.error(f"{cont_name} found in {tblfile} does not exist in genome {genome}.")
+                                logger.error(f"{cont_name} found in {tblfile} does not exist "
+                                             f"in genome {genome}.")
                                 sys.exit(1)
                             logger.details("No feature found in contigs between contig {} and "
                                            "contig {}.".format(save_prev_cont_num, prev_cont_num))
-                        # Previous loc was 'i' (because we were in the same contig).
-                        # But we now change contig, so this previous feature was the last
-                        # of its contigs -> prev_loc = "b"
+                        # Previous loc was 'i' (because we were in the same contig as
+                        # the previous one).
+                        # But now, we know the it was the last gene of its contig: we change
+                        # loc to 'b'
                         prev_cont_loc = "b"
                         cont_loc = "b"
                     # Same contig as previously
@@ -589,7 +591,6 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger):
                             cont_loc = "i"
                     # If we are in the first contig, prev = current
                     if prev_cont_num == -1:
-
                         prev_cont_num = cont_num
                         prev_cont_loc = cont_loc
 

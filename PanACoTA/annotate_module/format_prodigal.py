@@ -318,7 +318,7 @@ def create_replicons(gpath, res_rep_file, name):
 
     """
     # Change headers of replicon file to put into gembase format, and save it in res_rep_file
-    contigs = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
+    contigs, _ = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
     # Return each contig name with its size.
     return contigs
 
@@ -352,7 +352,7 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, logger):
             path to the gff file that must be created in result database
         res-lst_file : str
             path to the lst file that was created in result database in the previous step
-        contigs : list
+        contigs : list of str
             list of contig names with their size. ["contig1"\t"size1", "contig2"\t"size2" ...]
         logger : logging.Logger
             logger object to put information
