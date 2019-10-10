@@ -339,6 +339,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         utils.write_genomes_info(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
         return
+
     # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
     # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
