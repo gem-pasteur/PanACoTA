@@ -73,6 +73,14 @@ def test_rename_genomes():
                            os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
     assert genomes == exp_genomes
 
+# tests
+# -> get_output dir
+# -> format_contig
+# -> split contig
+# -> analyse genome
+# -> analyse all genomes
+# -> plot_distributions
+
 
 # def test_analyse1genome_nocut():
 #     """
