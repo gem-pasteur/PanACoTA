@@ -526,7 +526,7 @@ def sort_genomes_byname_l90_nbcont(x):
     Parameters
     ----------
     x : [[]]
-        [genome_name, [species.date, path, gsize, nbcont, L90]]
+        [genome_name, [species.date, path, path_to_seq, gsize, nbcont, L90]]
 
     Returns
     -------

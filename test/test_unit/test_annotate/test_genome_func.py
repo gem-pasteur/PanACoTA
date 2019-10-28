@@ -27,44 +27,51 @@ def test_calc_l90_exact():
     assert l90 == 2
 
 
-# def test_calc_l90_more():
-#     """
-#     Calculate L90 according to the given genome size and contig sizes
-#     3 contigs get exactly more than 90%, but 2 contigs get less -> l90 = 3
-#     """
-#     cont_size = {1: 3, 2: 800, 3: 90, 4: 90, 5: 17}
-#     l90 = gfunc.calc_l90(cont_size)
-#     assert l90 == 3
+def test_calc_l90_more():
+    """
+    Calculate L90 according to the given genome size and contig sizes
+    3 contigs get exactly more than 90%, but 2 contigs get less -> l90 = 3
+    """
+    cont_size = {1: 3, 2: 800, 3: 90, 4: 90, 5: 17}
+    l90 = gfunc.calc_l90(cont_size)
+    assert l90 == 3
 
 
-# def test_rename_genomes():
-#     """
-#     From a list of genomes ({genome: [name.date, path, gsize, nbcont, L90]}),
-#     order them by species, and by decreasing quality (L90, nb_cont), and rename them,
-#     as well as their contigs.
-#     """
-#     genomes_dir = os.path.join("test", "data", "annotate", "genomes")
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
-#           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
+def test_rename_genomes():
+    """
+    From a list of genomes ({genome: [name.date, path, gsize, nbcont, L90]}),
+    order them by species, and by decreasing quality (L90, nb_cont), and rename them,
+    as well as their contigs.
+    """
+    genomes_dir = os.path.join("test", "data", "annotate", "genomes")
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
+          "genome5.fasta", "genome6.fasta", "genome7.fasta"]
 
-#     genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
-#                gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
-#                gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
-#                gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
-#                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
-#                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
-#                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
-#     gfunc.rename_all_genomes(genomes)
-#     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
-#     # so take into account both choices
-#     exp_genomes = {gs[0]: ["SAEN.1113.00003", os.path.join(genomes_dir, gs[0]), 51, 4, 2],
-#                    gs[1]: ["SAEN.1114.00004", os.path.join(genomes_dir, gs[1]), 67, 3, 3],
-#                    gs[2]: ["ESCO.0416.00001", os.path.join(genomes_dir, gs[2]), 70, 4, 1],
-#                    gs[3]: ["ESCO.0216.00003", os.path.join(genomes_dir, gs[3]), 114, 5, 2],
-#                    gs[4]: ["SAEN.1115.00001", os.path.join(genomes_dir, gs[4]), 106, 3, 1],
-#                    gs[5]: ["ESCO.0216.00002", os.path.join(genomes_dir, gs[5]), 116, 4, 2],
-#                    gs[6]: ["SAEN.1115.00002", os.path.join(genomes_dir, gs[6]), 137, 3, 2]}
-#     assert genomes == exp_genomes
+    genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), "pathtoseq1", 51, 4, 2],
+               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), "pathToSeq2", 67, 3, 3],
+               gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), "pathToSeq3", 70, 4, 1],
+               gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), "pathToSeq4", 114, 5, 2],
+               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), "path_to_seq5", 106, 3, 1],
+               gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), "pathtoseq6", 116, 4, 2],
+               gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
+    gfunc.rename_all_genomes(genomes)
+    # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
+    # so take into account both choices
+    exp_genomes = {gs[0]: ["SAEN.1113.00003",
+                           os.path.join(genomes_dir, gs[0]), "pathtoseq1", 51, 4, 2],
+                   gs[1]: ["SAEN.1114.00004",
+                           os.path.join(genomes_dir, gs[1]), "pathToSeq2", 67, 3, 3],
+                   gs[2]: ["ESCO.0416.00001",
+                           os.path.join(genomes_dir, gs[2]), "pathToSeq3", 70, 4, 1],
+                   gs[3]: ["ESCO.0216.00003",
+                           os.path.join(genomes_dir, gs[3]), "pathToSeq4", 114, 5, 2],
+                   gs[4]: ["SAEN.1115.00001",
+                           os.path.join(genomes_dir, gs[4]), "path_to_seq5", 106, 3, 1],
+                   gs[5]: ["ESCO.0216.00002",
+                           os.path.join(genomes_dir, gs[5]), "pathtoseq6", 116, 4, 2],
+                   gs[6]: ["SAEN.1115.00002",
+                           os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
+    assert genomes == exp_genomes
 
 
 # def test_analyse1genome_nocut():
