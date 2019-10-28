@@ -233,7 +233,7 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
         gene_name = "crispr"
         product = "crispr-array"
         crispr_num += 1
-    locus_name = "{}.{}{}_{}".format(genome, cont_loc, str(cont_num).zfill(4),
+    locus_name = "{}.{}{}_{}".format(genome, str(cont_num).zfill(4), cont_loc,
                                      str(locus_num).zfill(5))
     # If '|' character found in those fields, replace by '_' to avoid problems while parsing
     more_info = "| {} | {} | {} | {}".format(product.replace("|", "_"),
@@ -266,6 +266,13 @@ def get_contig_name(genome, cont_num):
     """
     From a genome name and a contig number, write the header corresponding to this contig
     (for 'Replicons' files)
+
+    Parameters
+    ----------
+    genome : str
+        genome name
+    cont_num : int
+        contig number
     """
     return ">{}.{}".format(genome, str(cont_num).zfill(4))
 

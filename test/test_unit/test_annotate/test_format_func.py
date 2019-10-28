@@ -9,8 +9,9 @@ import os
 import logging
 import shutil
 from io import StringIO
-import PanACoTA.annotate_module.general_format_functions as ffunc
+
 import PanACoTA.utils as utils
+import PanACoTA.annotate_module.general_format_functions as ffunc
 
 
 # Define variables and functions used by several tests
@@ -61,7 +62,7 @@ def test_write_gene():
     with open(exp_file, "r") as expf, open(lstfile, "r") as lstf:
         for line_exp, line_out in zip(expf, lstf):
             assert line_exp == line_out
-    assert lst_line == ("154\t656\tC\tCDS\tESCO.0216.00005.i0015_5621221\tabc\t| new product "
+    assert lst_line == ("154\t656\tC\tCDS\tESCO.0216.00005.0015i_5621221\tabc\t| new product "
                         "| 454.12.5 | more information... dfd _ with _ pipe_characters... | "
                         "mydb_pipe")
     os.remove(lstfile)
@@ -99,12 +100,21 @@ def test_write_crispr():
         for line_exp, line_out in zip(expf, lstf):
             print(f"\n{line_out}\n{line_exp}")
             assert line_exp == line_out
-    assert lstline == ("154\t656\tD\tCRISPR\tESCO.0216.00005.b0015_CRISPR1\tcrispr\t| "
+    assert lstline == ("154\t656\tD\tCRISPR\tESCO.0216.00005.0015b_CRISPR1\tcrispr\t| "
                        "crispr-array | NA | more information... dfd _ with _ pipe_characters... | "
                        "mydb_pipe")
     os.remove(lstfile)
 
 
+def test_contig_name():
+    """
+    test that when we give a genome name and a contig number, it returns the expected fasta header
+    for Replicon files (no gene number)
+    """
+    genome = "ESCO.1218.00005"
+    cont_num = 30
+    head_line = ffunc.get_contig_name(genome, cont_num)
+    assert head_line == ">ESCO.1218.00005.0030"
 
 # def test_tbl_to_lst_new_name():
 #     """
