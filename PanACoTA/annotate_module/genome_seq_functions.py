@@ -361,7 +361,7 @@ def calc_l90(contig_sizes):
 
 def rename_all_genomes(genomes):
     """
-    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE
+    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE (step 3)
     Sort kept genomes by L90 and then nb contigs.
     For each genome, assign a strain number, and rename all its contigs.
 
@@ -401,6 +401,7 @@ def rename_all_genomes(genomes):
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     """
+    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE (step2)
     Plot distributions of L90 and nbcontig values.
 
     Parameters
