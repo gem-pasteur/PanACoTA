@@ -78,7 +78,7 @@ unit-test-ubuntu18.04:
   script:
     # - py.test test/test_unit/test_prepare -v -x
     # - py.test test/test_unit/test_annotate/test_format_func.py::test_contig_name -v -x
-    - py.test test/test_unit/test_gene.py -v -x
+    - py.test test/test_unit/test_gene.py -v -x -s
     - mv .coverage .coverage-unit
   artifacts:
     paths:
