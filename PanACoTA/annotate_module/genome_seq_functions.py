@@ -361,6 +361,7 @@ def calc_l90(contig_sizes):
 
 def rename_all_genomes(genomes):
     """
+    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE
     Sort kept genomes by L90 and then nb contigs.
     For each genome, assign a strain number, and rename all its contigs.
 
