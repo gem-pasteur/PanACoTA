@@ -73,6 +73,7 @@ unit-test-ubuntu18.04:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
+    - mash --version
   script:
     - py.test test/test_unit/test_prepare -v -x
     # - py.test test/test_unit/test_annotate/test_format_func.py -v -x
