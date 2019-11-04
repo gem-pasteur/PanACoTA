@@ -51,7 +51,9 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
 
     """
     cut = nbn > 0
-    pat = 'N' * nbn + "+"
+    pat = None  ## To put pattern with which sequence must be cut
+    if cut:
+        pat = 'N' * nbn + "+"
     nbgen = len(genomes)
     bar = None
     curnum = None
@@ -203,9 +205,8 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
         path to the folder containing the given genome sequence
     tmp_path : str
         path to folder where output files must be saved.
-    genomes : dict
-        {genome: [spegenus.date]} as input, and will be changed to
-        -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
+    genome : str
+        genome name
     cut : bool
         True if contigs must be cut, False otherwise
     pat : str
@@ -231,7 +232,7 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
         grespath = os.path.join(tmp_path, new_file)
     # If user does not want to cut, but annotates with prokka, need a new file with headers shorter
     elif soft == 'prokka':
-        new_file = genome + "_{}-shorter-contigs.fna".format(soft, len(pat) - 1)
+        new_file = genome + f"_{soft}-shorter-contigs.fna".format(soft)
         grespath = os.path.join(tmp_path, new_file)
     # If no cut and using prodigal, just keep original sequence, no need to create new file.
     # Just check that contigs have different names
@@ -303,7 +304,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
     Parameters
     ----------
     pat : str
-        pattern to split a contig
+        pattern to split a contig. None if we do not want to split
     whole_seq : str
         sequence of current contig, to save once split according to pat
     cur_contig_name : str
@@ -321,14 +322,18 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         new contig number, after giving number(s) to the current contig
     """
     # split contig each time a stretch of at least nbn 'N' is found (pattern pat)
-    cont_parts = re.split(pat, whole_seq)
+    if not pat:
+        cont_parts = [whole_seq]
+    else:
+        cont_parts = re.split(pat, whole_seq)
+
     # save contig parts
     for seq in cont_parts:
         # Only save non empty contigs (with some patterns, it could arrive that
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
+        new_contig_name = ">{}_{}\n".format(cur_contig_name, num)
         contig_sizes[new_contig_name] = len(seq)
         gresf.write(new_contig_name)
         gresf.write(seq + "\n")
