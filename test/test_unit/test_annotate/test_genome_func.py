@@ -7,6 +7,7 @@ Unit tests for utils.py
 
 import pytest
 import os
+import test.test_unit.utilities_for_tests as util
 import PanACoTA.annotate_module.genome_seq_functions as gfunc
 import matplotlib
 matplotlib.use('AGG')
@@ -15,7 +16,8 @@ matplotlib.use('AGG')
 # Define variables used by several tests
 DBPATH = os.path.join("test", "data", "annotate", "genomes")
 TMP_PATH = os.path.join('test', 'data', 'annotate', "tmp_files")
-BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
+EXP_DIR = os.path.join('test', 'data', 'annotate', 'exp_files')
+# BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
 
 
 def test_calc_l90_exact():
@@ -84,7 +86,7 @@ def test_get_outdir_prodigal_nocut():
   soft = "prodigal"
   genome = "genome1.fasta"
   cut = False
-  pat = "+"
+  pat = None
   gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
   assert not grespath
   assert gpath == os.path.join(DBPATH, "genome1.fasta")
@@ -113,7 +115,7 @@ def test_get_outdir_prokka_nocut():
   soft = "prokka"
   genome = "genome1.fasta"
   cut = False
-  pat = "+"
+  pat = None
   gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
   assert gpath == os.path.join(DBPATH, "genome1.fasta")
   assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prokka-shorter-contigs.fna")
@@ -135,32 +137,100 @@ def test_get_outdir_prokka_cut():
 
 
 def test_get_outdir_no_input_seq():
-  """
-  Test that when the given genome name does not exist in the dbpath, it exists in tmp path.
-  It means that it is a concatenation of 2 files of dbpath, which was saved in tmppath
-  """
-  soft = "prodigal"
-  genome = "prokka_out_for_test-supHeader.faa"
-  tmp_path = os.path.join("test", "data", "annotate", "test_files")
-  cut = True
-  pat = "NNNNNNN+"
-  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, tmp_path, genome, cut, pat)
-  assert gpath == os.path.join(tmp_path, "prokka_out_for_test-supHeader.faa")
-  assert grespath == os.path.join(tmp_path,
+    """
+    Test that when the given genome name does not exist in the dbpath, it exists in tmp path.
+    It means that it is a concatenation of 2 files of dbpath, which was saved in tmppath
+    """
+    soft = "prodigal"
+    genome = "prokka_out_for_test-supHeader.faa"
+    tmp_path = os.path.join("test", "data", "annotate", "test_files")
+    cut = True
+    pat = "NNNNNNN+"
+    gpath, grespath = gfunc.get_output_dir(soft, DBPATH, tmp_path, genome, cut, pat)
+    assert gpath == os.path.join(tmp_path, "prokka_out_for_test-supHeader.faa")
+    assert grespath == os.path.join(tmp_path,
                                   "prokka_out_for_test-supHeader.faa_prodigal-split7N.fna")
 
-  # """
-  # Get output filename where the modified sequence (cut at 5N and/or shorter contig
-  # headers for prokka). Check that it is as expected
-  # """
-  # soft = "prodigal"
-  # genome = "g2"
-  # cut = 0
-  # pat = None
 
+def test_split_contig_nocut():
+    """
+    Test that when a contig must not be cut, it returns the current number of contigs + 1
+    (we just add this contig, which is not split), and writes
+    this new contig to the new file
+    """
+    pat = None
+    whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_contig_name = "my_contig_name_for_my_sequence"
+    contig_sizes = {"contig_1": 10}
+    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    gresf = open(resfile, "w")
+    num = 2
+
+    num = gfunc.split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num)
+    gresf.close()
+
+    exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
+    assert num == 3
+    assert os.path.exists(resfile)
+    assert util.compare_order_content(resfile, exp_file)
+
+    # Remove created file
+    os.remove(resfile)
+
+
+def test_split_contig_cut():
+    """
+    Test that when a contig must not be cut at each stretch of 3 'N', and the sequence
+    contains 1 stretch of 5 'N', it cuts the sequence into 2 contigs, ignoring all 'N' of the
+    stretch (even if there are more than 3 'N'). Then, it returns the current number of contigs + 2
+    and writes those new contigs to the new file
+    """
+    pat = "NNN+"
+    whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_contig_name = "my_contig_name_for_my_sequence"
+    contig_sizes = {"contig_1": 10}
+    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    gresf = open(resfile, "w")
+    num = 2
+
+    num = gfunc.split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num)
+    gresf.close()
+
+    exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
+    assert num == 4
+    assert os.path.exists(resfile)
+    assert util.compare_order_content(resfile, exp_file)
+
+    # Remove created file
+    os.remove(resfile)
+
+
+def test_split_empty_contig():
+    """
+    Test that when we want to split an empty contig (for exemple, if the sequence starts with
+    'NNNN', it returns 2 contigs: 1 empty and 1 with the rest of the sequence), this contig is
+    just ignored (not written nor taken into account in contig num).
+    """
+    pat = "NNN+"
+    whole_seq = "NNNNNAACTGCTTTTTAAGCGCGCTCCTGCGNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_contig_name = "my_contig_name_for_my_sequence"
+    contig_sizes = {"contig_1": 10}
+    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    gresf = open(resfile, "w")
+    num = 2
+
+    num = gfunc.split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num)
+    gresf.close()
+
+    exp_file = os.path.join(EXP_DIR, "exp_split_empty_contig.fna")
+    assert num == 3
+    assert os.path.exists(resfile)
+    assert util.compare_order_content(resfile, exp_file)
+
+    # Remove created file
+    os.remove(resfile)
 
 # tests
-# -> get_output dir
 # -> format_contig
 # -> split contig
 # -> analyse genome
