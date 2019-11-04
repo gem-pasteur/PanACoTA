@@ -7,16 +7,19 @@ Unit tests for utils.py
 
 import pytest
 import os
+import logging
+
 import test.test_unit.utilities_for_tests as util
 import PanACoTA.annotate_module.genome_seq_functions as gfunc
+
 import matplotlib
 matplotlib.use('AGG')
-
 
 # Define variables used by several tests
 DBPATH = os.path.join("test", "data", "annotate", "genomes")
 TMP_PATH = os.path.join('test', 'data', 'annotate', "tmp_files")
 EXP_DIR = os.path.join('test', 'data', 'annotate', 'exp_files')
+logger = logging.getLogger('test_genome_func')
 # BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
 
 
@@ -160,7 +163,7 @@ def test_split_contig_nocut():
     """
     pat = None
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = "my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {"contig_1": 10}
     resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
@@ -187,8 +190,8 @@ def test_split_contig_cut():
     """
     pat = "NNN+"
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = "my_contig_name_for_my_sequence"
-    contig_sizes = {"contig_1": 10}
+    cur_contig_name = ">my_contig_name_for_my_sequence"
+    contig_sizes = {">contig_1": 10}
     resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
     num = 2
@@ -213,7 +216,7 @@ def test_split_empty_contig():
     """
     pat = "NNN+"
     whole_seq = "NNNNNAACTGCTTTTTAAGCGCGCTCCTGCGNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = "my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {"contig_1": 10}
     resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
@@ -230,9 +233,121 @@ def test_split_empty_contig():
     # Remove created file
     os.remove(resfile)
 
+
+def test_format_contig_cut():
+    """
+    For a given contig, if we want to annotate it with prodigal, and cut at each stretch of 5 'N'
+    check that it writes this contig, split, in the expected file
+    """
+    cut = True
+    pat = 'NNNNN+'
+    cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_contig_name = ">my_contig_name_for_my_sequence"
+    contig_sizes = {}
+    resfile = os.path.join("test", "data", "annotate", "test_format_cont_cut5N.fna")
+    gresf = open(resfile, "w")
+    num = 2
+
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
+                               num, logger=None) == 4
+    gresf.close()
+
+    exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
+    assert os.path.exists(resfile)
+    assert util.compare_order_content(resfile, exp_file)
+    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 26,
+                            ">my_contig_name_for_my_sequence_3\n": 25}
+
+    # Remove created file
+    os.remove(resfile)
+
+
+def test_format_contig_nocut_prokka():
+    """
+    For a given contig, if we want to annotate it with prodigal, and cut at each stretch of 5 'N'
+    check that it writes this contig, split, in the expected file
+    """
+    cut = False
+    pat = None
+    cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_contig_name = ">my_contig_name_for_my_sequence"
+    contig_sizes = {}
+    resfile = os.path.join("test", "data", "annotate", "test_format_cont_nocut_prokka.fna")
+    gresf = open(resfile, "w")
+    num = 2
+
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
+                               num, logger=None) == 3
+    gresf.close()
+
+    exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
+    assert os.path.exists(resfile)
+    assert util.compare_order_content(resfile, exp_file)
+    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 56}
+
+    # Remove created file
+    os.remove(resfile)
+
+
+def test_format_contig_nocut_prodigal_notSameName():
+    """
+    For a given contig, if we want to annotate it with prodigal, and do not cut, then we keep the same file. However, we must check that contig names are all different.
+    Add 2 contigs, to be sure the 'num' parameter is not increased.
+    """
+    cut = False
+    pat = None
+    cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_seq2 = 'AACGTGGTCAGAGCGTG'
+    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name2 = ">mycontigname"
+    contig_sizes = {">mycontig": 155}
+    num = 1
+
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, None,
+                               num, logger=None) == 1
+    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, contig_sizes, None,
+                               num, logger=None) == 1
+
+    assert contig_sizes == {">my_contig_name_for_my_sequence": 56,
+                            ">mycontigname": 17,
+                            ">mycontig": 155}
+
+
+def test_format_contig_nocut_prodigal_SameName(caplog):
+    """
+    For a given contig, if we want to annotate it with prodigal, and do not cut, then we keep the same file. However, we must check that contig names are all different.
+    Try to add a contig which name is already used, check that it prints the expected error,
+    and returns -1
+    """
+    cut = False
+    pat = None
+    cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
+    cur_seq2 = 'AACGTGGTCAGAGCGTG'
+    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name2 = ">my_contig2"
+    contig_sizes = {">mycontig": 155, ">my_contig_name_for_my_sequence":45}
+    num = 1
+
+    # Try to add a contig already existing -> error log
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, None,
+                               num, logger) == -1
+    assert contig_sizes == {">my_contig_name_for_my_sequence": 45,
+                            ">mycontig": 155}
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert (">my_contig_name_for_my_sequence contig name is used for several contigs. "
+            "Please put different names for each contig. This genome will be "
+            "ignored.") in caplog.text
+
+    # Add a contig with new name. contig_sizes is completed
+    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, contig_sizes, None,
+                               num, logger) == 1
+    assert contig_sizes == {">my_contig_name_for_my_sequence": 45,
+                            ">my_contig2": 17,
+                            ">mycontig": 155}
+
+
 # tests
-# -> format_contig
-# -> split contig
 # -> analyse genome
 # -> analyse all genomes
 # -> plot_distributions
