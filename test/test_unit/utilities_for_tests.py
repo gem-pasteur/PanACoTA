@@ -50,3 +50,22 @@ def compare_file_content(file1, file2):
                 print(f"'{line2}' not found")
                 return False
     return True
+
+
+def compare_order_content(file1, file2):
+    """
+    Check that the 2 files have exactly the same content, in the same order
+    """
+    with open(file1, "r") as f1:
+        lines_f1 = f1.readlines()
+
+    with open(file2, "r") as f2:
+        lines_f2 = f2.readlines()
+        if len(lines_f1) != len(lines_f2):
+            print(f"not same number of lines in {file1} and {file2}")
+            return False
+        for line1, line2 in zip(lines_f1, lines_f2):
+            if line1 != line2:
+                print(f"'{line1}' vs {line2} do not correspond.")
+                return False
+    return True
