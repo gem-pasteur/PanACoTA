@@ -14,6 +14,7 @@ matplotlib.use('AGG')
 
 # Define variables used by several tests
 DBPATH = os.path.join("test", "data", "annotate", "genomes")
+TMP_PATH = os.path.join('test', 'data', 'annotate', "tmp_files")
 BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
 
 
@@ -72,6 +73,91 @@ def test_rename_genomes():
                    gs[6]: ["SAEN.1115.00002",
                            os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
     assert genomes == exp_genomes
+
+
+def test_get_outdir_prodigal_nocut():
+  """
+  When we use prodigal, and do not cut at each stretch of 5N, no need to create a modified
+  sequence. So, check that get_output_dir returns an empty res_path (as we will not create
+  any new sequence)
+  """
+  soft = "prodigal"
+  genome = "genome1.fasta"
+  cut = False
+  pat = "+"
+  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
+  assert not grespath
+  assert gpath == os.path.join(DBPATH, "genome1.fasta")
+
+
+def test_get_outdir_prodigal_cut():
+  """
+  When using prodigal, and cut at each stretch of 4 'N', check that the output
+  dir where modified sequence must be store is as expected (in tmp_dir, and adding "-split4N").
+  """
+  soft = "prodigal"
+  genome = "genome1.fasta"
+  cut = True
+  pat = "NNNN+"
+  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
+  assert gpath == os.path.join(DBPATH, "genome1.fasta")
+  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prodigal-split4N.fna")
+
+
+def test_get_outdir_prokka_nocut():
+  """
+  When using prokka, and don't cut sequence, check that the output
+  dir where modified sequence must be store is as expected (in tmp dir, indicating
+  "shorter_contigs" because we need to shorten the contig headers for prokka)
+  """
+  soft = "prokka"
+  genome = "genome1.fasta"
+  cut = False
+  pat = "+"
+  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
+  assert gpath == os.path.join(DBPATH, "genome1.fasta")
+  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prokka-shorter-contigs.fna")
+
+
+def test_get_outdir_prokka_cut():
+  """
+  When using prokka, and cut at each stretch of 3 'N', check that the output
+  dir where modified sequence must be store is as expected (in tmp_di, indicating "-split3N"
+  because sequence will be cut)
+  """
+  soft = "prokka"
+  genome = "genome1.fasta"
+  cut = True
+  pat = "NNN+"
+  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
+  assert gpath == os.path.join(DBPATH, "genome1.fasta")
+  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prokka-split3N.fna")
+
+
+def test_get_outdir_no_input_seq():
+  """
+  Test that when the given genome name does not exist in the dbpath, it exists in tmp path.
+  It means that it is a concatenation of 2 files of dbpath, which was saved in tmppath
+  """
+  soft = "prodigal"
+  genome = "prokka_out_for_test-supHeader.faa"
+  tmp_path = os.path.join("test", "data", "annotate", "test_files")
+  cut = True
+  pat = "NNNNNNN+"
+  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, tmp_path, genome, cut, pat)
+  assert gpath == os.path.join(tmp_path, "prokka_out_for_test-supHeader.faa")
+  assert grespath == os.path.join(tmp_path,
+                                  "prokka_out_for_test-supHeader.faa_prodigal-split7N.fna")
+
+  # """
+  # Get output filename where the modified sequence (cut at 5N and/or shorter contig
+  # headers for prokka). Check that it is as expected
+  # """
+  # soft = "prodigal"
+  # genome = "g2"
+  # cut = 0
+  # pat = None
+
 
 # tests
 # -> get_output dir
