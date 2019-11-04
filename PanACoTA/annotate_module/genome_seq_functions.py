@@ -260,7 +260,8 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     cont_sizes : dict
         {contig_name : sequence length}
     gresf : io.TextIOWrappe
-        open file to write new sequence
+        open file to write new sequence. If we are annotating with prodigal and not cutting,
+        there is no new sequence -> gref is None
     num : int
         current contig number
     logger : logging.Logger
@@ -333,7 +334,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        new_contig_name = ">{}_{}\n".format(cur_contig_name, num)
+        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
         contig_sizes[new_contig_name] = len(seq)
         gresf.write(new_contig_name)
         gresf.write(seq + "\n")
