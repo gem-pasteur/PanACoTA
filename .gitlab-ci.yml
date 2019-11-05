@@ -76,9 +76,9 @@ unit-test-ubuntu18.04:
     - mash --version
     - ls PanACoTA/annotate_module
   script:
-    # - py.test test/test_unit/test_prepare -v -x
-    # - py.test test/test_unit/test_annotate/test_format_func.py::test_contig_name -v -x
-    - py.test test/test_unit/test_annotate/test_genome_func.py -v -x -s
+    - py.test test/test_unit/test_prepare -v -x
+    - py.test test/test_unit/test_annotate/test_genome_func.py -v -x
+    - py.test test/test_unit/test_annotate/test_format_func.py -v -x
     - mv .coverage .coverage-unit
   artifacts:
     paths:
