@@ -347,45 +347,57 @@ def test_format_contig_nocut_prodigal_SameName(caplog):
                             ">mycontig": 155}
 
 
+def test_analyse1genome_nocut_prodigal():
+    """
+    Analyse the given genome, without cutting at stretches of N, will be annotated by prodigal:
+    -> no new file created.
+    Calculate its genome size, nb contigs and L90, and add it to the genomes dict, as well as
+    the path to the genome file.
+    """
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    genome = gs[1]
+    cut = False
+    pat = None
+    soft = "prodigal"
+    assert gfunc.analyse_genome(genome, DBPATH, TMP_PATH, cut, pat, genomes, soft)
+
+    # Check that information on analyzed genome are correct. And path to 'genome to annotate'
+    # is the same as the path to the genome itself
+    outf = os.path.join(DBPATH, "genome2.fasta")
+    exp_genomes = {gs[0]: ["SAEN.1113"],
+                   gs[1]: ["SAEN.1114", outf, outf, 67, 3, 3],
+                   gs[2]: ["ESCO.0416"]}
+    assert genomes == exp_genomes
+
+
+# def test_analyse1genome_cut_prodigal():
+#     # New file created in tmp path, with same contig names, but contigs seqs cut at each stretch
+#     # -> check 'genomes' + output file
+#     assert False
+
+
+# def test_analyse1genome_nocut_prokka():
+#     # New file created in tmp with shortened contig names, but same content (not split)
+#     # -> check 'genomes' + output file
+#     assert False
+
+
+# def test_analyse1genome_cut_prokka():
+#     # New file created in tmp with shortened contig names, and contigs cut at each stretch
+#     # -> check 'genomes' + output file
+#     assert False
+
+# def test_analyse1genome_empty():
+#     assert False
+
+
 # tests
 # -> analyse genome
 # -> analyse all genomes
 # -> plot_distributions
-
-
-# def test_analyse1genome_nocut():
-#     """
-#     Analyse the given genome: without cutting at stretches of N, calculate
-#     its genome size, nb contigs and L90, and add it to the genomes dict, as well as
-#     the path to the genome file.
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"]}
-#     genome = gs[1]
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     # Put genome file in tmppath instead of dbpath, as if it was
-#     # the result of concatenation of several files for the same genome,
-#     # done in the first step.
-#     orig_file = os.path.join(DBPATH, genome)
-#     out_file = os.path.join(tmp_path, genome)
-#     os.rename(orig_file, out_file)
-#     cut = False
-#     pat = "NNNNN+"
-#     assert gfunc.analyse_genome(genome, DBPATH, tmp_path, cut, pat, genomes)
-#     outf = os.path.join(tmp_path, gs[1] + "-short-contig.fna")
-#     exp_genomes = {gs[0]: ["SAEN.1113"],
-#                    gs[1]: ["SAEN.1114", outf, 67, 3, 3],
-#                    gs[2]: ["ESCO.0416"]}
-#     assert genomes == exp_genomes
-#     exp_file = os.path.join(tmp_path, "exp_files", "res_test_analyse-genome2.fna")
-#     with open(exp_file, "r") as expf, open(outf, "r") as of:
-#         for linee, lineo in zip(expf, of):
-#             assert linee == lineo
-#     os.remove(outf)
-#     os.rename(out_file, orig_file)
-
 
 # def test_analyse1genome_nocut_empty():
 #     """
