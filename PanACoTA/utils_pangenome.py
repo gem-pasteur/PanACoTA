@@ -9,7 +9,7 @@ April 2017
 """
 import logging
 import os
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("utils.pan")
 
