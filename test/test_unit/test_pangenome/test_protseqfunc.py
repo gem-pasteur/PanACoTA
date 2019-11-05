@@ -7,7 +7,8 @@ Unit tests for the protein_seq_functions in pangenome module
 
 import os
 import shutil
-import genomeAPCAT.pangenome_module.protein_seq_functions as psf
+import PanACoTA.pangenome_module.protein_seq_functions as psf
+import test.test_unit.utilities_for_tests as utiltest
 import logging
 
 
@@ -31,10 +32,13 @@ def test_build_bank():
     outfile = psf.build_prt_bank(lstinfo, dbpath, name, spedir, quiet)
     exp_file = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     exp_out = os.path.join(dbpath, name + ".All.prt")
+
+    # Check prt bank filename
     assert outfile == exp_out
-    with open(outfile, "r") as of, open(exp_file, "r") as ef:
-        for l1, l2 in zip(of, ef):
-            assert l1 == l2
+    # Check content of bank created
+    assert utiltest.compare_order_content(exp_file, exp_out)
+
+    # Remove tmp files
     os.remove(outfile)
 
 
@@ -51,10 +55,7 @@ def test_build_bank_spedir():
     exp_file = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     exp_out = os.path.join(spedir, name + ".All.prt")
     assert outfile == exp_out
-    with open(outfile, "r") as of, open(exp_file, "r") as ef:
-        for l1, l2 in zip(of, ef):
-            assert l1 == l2
-    shutil.rmtree(spedir)
+    assert utiltest.compare_order_content(exp_file, exp_out)
     shutil.rmtree("test_build_prt")
 
 
@@ -94,9 +95,8 @@ def test_build_bank_noquiet(caplog):
     exp_file = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     exp_out = os.path.join(dbpath, name + ".All.prt")
     assert outfile == exp_out
-    with open(outfile, "r") as of, open(exp_file, "r") as ef:
-        for l1, l2 in zip(of, ef):
-            assert l1 == l2
-    assert "Building bank with all proteins to EXEM.All.prt" in caplog.text
+    assert utiltest.compare_order_content(exp_file, outfile)
     assert caplog.records[0].levelname == "INFO"
+    assert ("Building bank with all proteins to "
+            "test/data/pangenome/test_files/example_db/Proteins/EXEM.All.prt") in caplog.text
     os.remove(outfile)
