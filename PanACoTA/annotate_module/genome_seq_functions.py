@@ -117,7 +117,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
         pattern on which contigs must be cut. ex: "NNNNN"
     genomes : dict
         {genome_file: [genome_name]} as input, and will be changed to\
-         -> {genome_file: [genome_name, path, path_annotate, gsize, nbcont, L90]}
+        {genome_file: [genome_name, path, path_annotate, gsize, nbcont, L90]}
     soft : str
         soft used (prokka, prodigal, or None if called by prepare module)
 
@@ -125,6 +125,8 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
     -------
     bool
         True if genome analysis went well, False otherwise
+        Modifies 'genomes' for the analysed genome: -> {genome_file: [genome_name, path,
+        path_annotate, gsize, nbcont, L90]}
     """
     gpath, grespath = get_output_dir(soft, dbpath, tmp_path, genome, cut, pat)
     # Open original sequence file
