@@ -211,7 +211,7 @@ def run_mmseqs_clust(args):
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
            "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
-    msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
+    msg = "Problem while clustering proteins with mmseqs. See log in {logmmseq}"
     with open(logmmseq, "a") as logm:
         utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
 
@@ -243,14 +243,10 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
         - families : {fam_num: [all members]}
         - outfile : pangenome filename
     """
-    cmd = "mmseqs createtsv {0} {0} {1} {1}.tsv".format(mmseqdb, mmseqclust)
+    cmd = f"mmseqs createtsv {mmseqdb} {mmseqdb} {mmseqclust} {mmseqclust}.tsv"
     msg = "Problem while trying to convert mmseq result file to tsv file"
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-    print("log file create tsv mmseqs:")
-    with open(logmmseq, "r") as logf:
-        for line in logf:
-            print(line)
     # Convert the tsv file to a 'pangenome' file: one line per family
     families, outfile = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
     return families, outfile
@@ -288,8 +284,8 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
     families = clusters_to_file(clusters, outfile)
     end = time.strftime('%Y-%m-%d_%H-%M-%S')
     with open(logmmseq, "a") as logm:
-        logm.write("\n------------\n\nStart: {}".format(start) + "\n")
-        logm.write("End: {}".format(end) + "\n")
+        logm.write(f"\n------------\n\nStart: {start} \n")
+        logm.write(f"End: {end}")
     return families, outfile
 
 
@@ -370,22 +366,22 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
                 break
             files_existing.append(file)
         if len(files_existing) != len(outext):
-            logger.warning(("mmseq database {} already exists, but at least 1 associated "
+            logger.warning(f"mmseq database {mmseqdb} already exists, but at least 1 associated "
                             "file (.dbtype, .index etc). is missing. The program will "
-                            "remove existing files and recreate the database.").format(mmseqdb))
+                            "remove existing files and recreate the database.")
             for file in files_existing:
                 os.remove(file)
                 logger.details("Removing {}".format(file))
         else:
-            logger.warning(("mmseq database {} already exists. The program will "
-                            "use it.").format(mmseqdb))
-            return
+            logger.warning("mmseq database {mmseqdb} already exists. The program will "
+                           "use it.")
+            return 0
     if len(files_existing) != len(outext):
         logger.info("Creating database")
-        logger.info("exiting files: {}".format(len(files_existing)))
-        logger.info("Expected extentions: {}".format(len(outext)))
-        cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
-        msg = ("Problem while trying to convert database {} to mmseqs "
-               "database format.").format(prt_path)
+        logger.details("Exiting files: {}".format(len(files_existing)))
+        logger.details("Expected extentions: {}".format(len(outext)))
+        cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
+        msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
+               "database format.")
         with open(logmmseq, "w") as logf:
             utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
