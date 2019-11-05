@@ -893,7 +893,7 @@ def cat(list_files, output, title=None):
     """
     Equivalent of 'cat' unix command.
 
-    Concatenate all files in 'list_files' and save result in 'output'
+    Concatenate all files in 'list_files' and save result in 'output' folder.
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
 
@@ -904,7 +904,7 @@ def cat(list_files, output, title=None):
     output : str
         output filename, where all concatenated files will be written
     title : str or None
-        if you want to show a progressbar while concatenating files, add a title for this\
+        if you want to show a progressbar while concatenating files, add a title for this
         progressbar here. If no title, nothing will be shown during concatenation.
 
     """
@@ -913,7 +913,7 @@ def cat(list_files, output, title=None):
     if title:
         nbfiles = len(list_files)
         widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-                   ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
+                   ' ', progressbar.Counter(), f"/{nbfiles}" ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
         curnum = 1
