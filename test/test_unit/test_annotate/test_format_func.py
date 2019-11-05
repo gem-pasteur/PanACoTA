@@ -116,6 +116,11 @@ def test_contig_name():
     head_line = ffunc.get_contig_name(genome, cont_num)
     assert head_line == ">ESCO.1218.00005.0030"
 
+# def test_to_complete():
+#     # To show that those tests are not complete
+#     assert False
+#
+#
 # def test_tbl_to_lst_new_name():
 #     """
 #     Check that generated lstinfo file is as expected, when the genome name has changed between
