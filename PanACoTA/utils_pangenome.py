@@ -79,7 +79,7 @@ def get_fams_info(families):
         fams_by_strain[num] = {}
         for gene in fam:
             read_gene(gene, num, fams_by_strain, all_strains)
-    sort_all_strains = sorted(all_strains, key=utils.sort_genomes)
+    sort_all_strains = sorted(all_strains, key=utils.sort_genomes_by_name)
     return fams_by_strain, sort_all_strains
 
 
