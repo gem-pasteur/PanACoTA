@@ -19,7 +19,7 @@ import multiprocessing
 import progressbar
 import threading
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 
 def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):

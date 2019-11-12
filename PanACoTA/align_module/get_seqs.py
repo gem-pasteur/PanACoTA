@@ -6,7 +6,7 @@ import os
 import logging
 import progressbar
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("align.extract")
 

@@ -14,7 +14,7 @@ import sys
 import logging
 import progressbar
 import multiprocessing
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("align.post")
 
