@@ -12,6 +12,8 @@ import os
 import time
 import multiprocessing
 import progressbar
+import copy
+
 from PanACoTA import utils
 
 logger = logging.getLogger("pangnome.mmseqs")
@@ -363,22 +365,25 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     if os.path.isfile(mmseqdb):
         for file in [mmseqdb + ext for ext in outext]:
             if not os.path.isfile(file):
-                break
+                continue
             files_existing.append(file)
         if len(files_existing) != len(outext):
-            logger.warning(f"mmseq database {mmseqdb} already exists, but at least 1 associated "
+            logger.warning(f"mmseqs database {mmseqdb} already exists, but at least 1 associated "
                             "file (.dbtype, .index etc). is missing. The program will "
                             "remove existing files and recreate the database.")
+            files_remaining = copy.deepcopy(files_existing)
             for file in files_existing:
-                os.remove(file)
-                logger.details("Removing {}".format(file))
+                os.remove(file)  # Delete file
+                files_remaining.remove(file)  # Remove file from list of existing files
+                logger.details(f"Removing '{file}'.")
+            files_existing = copy.deepcopy(files_remaining)
         else:
-            logger.warning("mmseq database {mmseqdb} already exists. The program will "
+            logger.warning(f"mmseqs database {mmseqdb} already exists. The program will "
                            "use it.")
             return 0
     if len(files_existing) != len(outext):
         logger.info("Creating database")
-        logger.details("Exiting files: {}".format(len(files_existing)))
+        logger.details("Existing files: {}".format(len(files_existing)))
         logger.details("Expected extentions: {}".format(len(outext)))
         cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
         msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
