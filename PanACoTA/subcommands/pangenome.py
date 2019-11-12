@@ -176,7 +176,7 @@ def build_parser(parser):
                                 "(including tmp folder)"))
 
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-i", dest="min_id", type=perc_id,
+    optional.add_argument("-i", dest="min_id", type=perc_id, default=0.8,
                           help=("Minimum sequence identity to be considered in the same "
                                 "cluster (float between 0 and 1). Default is 0.8."))
     optional.add_argument("-f", dest="outfile",
