@@ -68,9 +68,9 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     from PanACoTA import utils_pangenome as utilsp
     import PanACoTA.corepers_module.persistent_functions as pers
 
-    logfile_base = os.path.join(path_pan, "PanACoTA-corepers")
     # name logfile, add timestamp if already existing
     path_pan, base_pan = os.path.split(pangenome)
+    logfile_base = os.path.join(path_pan, "PanACoTA-corepers")
     # level is the minimum level that will be considered.
     # for verbose = 0 or 1, ignore details and debug, start from info
     if verbose <= 1:
@@ -81,7 +81,7 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     # for verbose >= 15, write everything
     if verbose >= 15:
         level = logging.DEBUG
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, 'corepers', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
     # Define output filename
@@ -104,6 +104,7 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome)
     # Generate persistent genome
     fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed, floor)
+    # Write persistent genome to file
     pers.write_persistent(fams, outputfile)
 
 
