@@ -320,7 +320,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # Info on folder containing original sequences
     if not from_info:
-        logger.info(f"-> Original sequences folder ('orig_name' column: {db_path} ")
+        logger.info(f"-> Original sequences folder ('orig_name' column): {db_path} ")
         logger.info("\t-> If original sequence not found in {}, "
                     "look for it in {}, as it must be a concatenation of several input sequence "
                     "files.".format(db_path, tmp_dir))
