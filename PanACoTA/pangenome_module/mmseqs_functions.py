@@ -57,8 +57,8 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     information = ("Will run MMseqs2 with:\n"
-                   "\t- minimum sequence identity = {}\n"
-                   "\t- cluster mode {}").format(min_id, clust_mode)
+                   f"\t- minimum sequence identity = {min_id}%\n"
+                   f"\t- cluster mode {clust_mode}")
     if threads > 1:
         information += "\n\t- {} threads".format(threads)
     logger.info(information)
