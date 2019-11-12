@@ -56,6 +56,10 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         minimum level that must be considered.
     name : str or None
         if we need to name the logger (used for tests)
+    details : bool
+        if True, force creation of .log.details file. Otherwise, just create
+        it if needed according to level
+
     verbose : int
         be more verbose:
         default (0): info in stdout, error and more in stderr ;
@@ -505,6 +509,7 @@ def sort_genomes_by_name(x):
         variable to take into account for sorting. If format is ESCO.1512.00001 return\
         ESCO and 00001. Otherwise, just return x itself (sort by alphabetical order)
     """
+    # get gembase name
     if isinstance(x, tuple):
         x = x[1][0]
 
