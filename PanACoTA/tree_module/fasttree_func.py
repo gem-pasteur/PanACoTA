@@ -11,7 +11,7 @@ June 2017
 import os
 import logging
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("tree.fasttree")
 

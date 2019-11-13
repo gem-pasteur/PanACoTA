@@ -12,7 +12,7 @@ from Bio import AlignIO
 import os
 import logging
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("tree.fastme")
 
@@ -113,6 +113,7 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
     cmd = ("fastme -i {align} -d{model} -nB -s {th} {bs} -o {out} -I {log} "
            "{wb}").format(align=alignfile, bs=bootinfo, th=threadinfo, model=model,
                           out=treefile, log=logfile, wb=outboot)
+    logger.details(cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:

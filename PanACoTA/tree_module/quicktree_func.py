@@ -12,7 +12,7 @@ from Bio import AlignIO
 import os
 import logging
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("tree.quicktree")
 
