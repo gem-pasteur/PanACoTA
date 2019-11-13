@@ -89,7 +89,7 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     if verbose >= 15:
         level = logging.DEBUG
 
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, 'tree', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
 
     tree.run_tree(align, boot, outfile, quiet, threads, model, write_boot)
