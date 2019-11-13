@@ -21,6 +21,8 @@ import threading
 
 from PanACoTA import utils
 
+main_logger = logging.getLogger("align.alignment")
+
 
 def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     """
@@ -51,7 +53,6 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     bool
         True if everything went well, False if there was a problem in at least 1 family.
     """
-    main_logger = logging.getLogger("align.alignment")
     main_logger.info(("Starting alignment of all families: protein alignment, "
                       "back-translation to nucleotides, and add missing genomes in the family"))
     nbfam = len(all_fams)
@@ -423,7 +424,6 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     stdout.close()
     if not isinstance(ret, int):
         ret = ret.returncode
-        print("ret = ", ret)
     if ret != 0:
         os.remove(mafft_file)
         return False
