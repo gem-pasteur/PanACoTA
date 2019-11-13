@@ -88,7 +88,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-align_" + dname)
     level = logging.DEBUG
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, 'align', verbose=verbose, quiet=quiet)
     logger = logging.getLogger()
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
