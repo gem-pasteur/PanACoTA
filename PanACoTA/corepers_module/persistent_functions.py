@@ -35,7 +35,7 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
         persistent. If it contains 7 genomes, it can be persistent (depends on multi and
         mixed parameters)
     multi : bool
-        True if multiple genes from the same genome/strain in a family are tolerated,
+        True if multiple genes from the same genome/strain in a family are tolerated. -> a family is considered as multi-persistent if it has members from at least 'tol%' genomes
         False otherwise
     mixed : bool
         True if mixed families are allowed (mixed family = exactly 1 member per genome
@@ -69,8 +69,26 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
             if len(family) >= min_members and (multi or uniq_members(family)):
                 pers[fam_num] = family
                 fams[fam_num] = fam_all_members[fam_num]
-    logger.info(f"The persistent genome contains {len(pers)} families having at least "
-                f"{min_members} genomes.")
+    # coregenome computed
+    if tol == 1 and not multi and not mixed:
+        logger.info(f"The core genome contains {len(pers)} families, each one having "
+                    f"exactly {min_members} members, among the {nb_strains} different genomes.")
+    # multi persistent genome with multigenic families allowed
+    elif multi:
+        logger.info(f"The persistent genome contains {len(pers)} families with members present "
+                    f"in at least {min_members} genomes ({tol*100}% of the total number of "
+                    "genomes).")
+    # mixed persistent genome, tol% families with exactly 1 member from each genome,
+    # multigenic families allowed for the '1-tol'% remaining families
+    elif mixed:
+        logger.info(f"The persistent genome contains {len(pers)} families with members present "
+                    f"in at least {min_members} genomes ({tol*100}% of the total number of "
+                    "genomes).")
+    # Strict persistent genome. tol% families with exactly one member in each genome
+    else:
+        logger.info(f"The persistent genome contains {len(pers)} families, each one having "
+                    f"exactly {min_members} members, from at least {tol*100}% of the {nb_strains} "
+                    f"different genomes (that is {min_members} genomes.")
     return fams
 
 
