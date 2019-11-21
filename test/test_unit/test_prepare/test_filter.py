@@ -414,7 +414,7 @@ def test_compare_all(caplog):
     # Check msh file exists
     assert os.path.isfile(out_msh + ".msh")
 
-    filterg.compare_all(out_msh, matrix, mash_log, threads)
+    filterg.compare_all(out_msh, matrix, "matrix", mash_log, threads)
 
     # Check output files are created
     assert os.path.isfile(matrix)
@@ -439,7 +439,7 @@ def test_compare_all_matrix_exists(caplog):
     mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
     threads = 1
 
-    filterg.compare_all(out_msh, matrix, mash_log, threads)
+    filterg.compare_all(out_msh, matrix, "matrix", mash_log, threads)
 
     # Check log
     caplog.set_level(logging.DEBUG)
@@ -460,7 +460,7 @@ def test_compare_all_error_mash(caplog):
 
     # Test that it exists with sysExit error
     with pytest.raises(SystemExit):
-        filterg.compare_all(out_msh, matrix, mash_log, threads)
+        filterg.compare_all(out_msh, matrix, "matrix", mash_log, threads)
 
     # Check log
     caplog.set_level(logging.DEBUG)
@@ -734,42 +734,43 @@ def test_check_quality_no_genome(caplog):
     shutil.rmtree(tmp_dir)
 
 
-# def test_iterative_mash(caplog):
-#     """
-#     Test that when we give all genomes, sorted, it processes all mash steps, and returns the
-#     list of genomes removed
-#     """
-#     # Parameters for iterative_mash function
-#     sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
-#                       "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
-#     outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
-#     species_linked = "my-test-species"
-#     min_dist = 1e-4
-#     max_dist = 0.06
-#     threads = 1
-#     quiet = False
+def test_iterative_mash(caplog):
+    """
+    Test that when we give all genomes, sorted, it compares them, and it saves the comparison
+    matrix in a npz file, and return genomes removed
+    """
+    # Parameters for iterative_mash function
+    sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
+                      "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
+    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
+    species_linked = "my-test-species"
+    min_dist = 1e-4
+    max_dist = 0.06
+    threads = 1
+    quiet = False
 
-#     # Expected created files
-#     mash_dir = os.path.join(outdir, "mash_files")
-#     txt_matrix = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.txt")
-#     npz_mat = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.npz")
+    # Expected created files
+    mash_dir = os.path.join(outdir, "mash_files")
+    txt_matrix = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.txt")
+    npz_mat = os.path.join(mash_dir, "matrix-all-genomes-my-test-species.npz")
 
-#     removed = filterg.iterative_mash(sorted_genomes, EXP_GENOMES, outdir,
-#                                      species_linked, min_dist, max_dist, threads, quiet)
+    removed = filterg.iterative_mash(sorted_genomes, EXP_GENOMES, outdir,
+                                     species_linked, min_dist, max_dist, threads, quiet)
 
-#     # Compare output dict
-#     exp_removed = {"ACOC.1019.fna": ["ACOR002.0519.fna", 0.295981],
-#                    "ACOR001.0519-bis.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05],
-#                    "ACOR001.0519.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05]}
+    # At least, ACOC.1019.fna should be remove by ACOR002.0519.fna, as we made them
+    # completely different. For the others, depends on mash version...
+    # mash1.1 get correct difference between ACOR002 and ACOR001
+    # but mash2.2 considers them as too close
+    assert "ACOC.1019.fna" in removed.keys()
+    assert removed["ACOC.1019.fna"][0] == "ACOR002.0519.fna"
 
-#     assert removed == exp_removed
+    # Check that txt and npz matrix were created
+    # We cannot check their content as distances depend on mash version...
+    assert os.path.isfile(npz_mat)
+    assert os.path.isfile(txt_matrix)
 
-#     # Check that npz and txt matrix exist
-#     assert os.path.isfile(npz_mat)
-#     assert os.path.isfile(txt_matrix)
-
-#     # Remove created directories
-#     shutil.rmtree(outdir)
+    # Remove created directories
+    shutil.rmtree(outdir)
 
 
 def test_iterative_mash_npz_exists():
@@ -781,7 +782,7 @@ def test_iterative_mash_npz_exists():
     sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
                       "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
     # Create output dir where all mash result files will be stored
-    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
+    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash_npz_exists")
     mash_dir = os.path.join(outdir, "mash_files")
     os.makedirs(mash_dir)
     # Copy existing npz matrix to mash output folder
@@ -803,15 +804,18 @@ def test_iterative_mash_npz_exists():
     removed = filterg.iterative_mash(sorted_genomes, EXP_GENOMES, outdir,
                                      species_linked, min_dist, max_dist, threads, quiet)
 
+    # Compare output dict
     exp_removed = {"ACOC.1019.fna": ["ACOR002.0519.fna", 0.295981],
                    "ACOR001.0519-bis.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05],
                    "ACOR001.0519.fna": ["ACOR001.0519-almost-same.fna", 2.38274e-05]}
 
     assert removed == exp_removed
 
-    # Check that npz matrix still exists, and txt was not created
+    # Check npz matrix exists (and is the same as the given file), and txt matrix was not created,
+    # as we used the npz file
     assert os.path.isfile(npz_matrix_out)
-    assert os.path.isfile(txt_matrix_out)
+    assert util.compare_files_bin(npz_matrix_out, npz_matrix_model)
+    assert not os.path.isfile(txt_matrix_out)
 
     # Remove created directories
     shutil.rmtree(outdir)
