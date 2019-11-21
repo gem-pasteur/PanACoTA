@@ -210,6 +210,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     from PanACoTA.annotate_module import prokka_prodigal_functions as pfunc
     from PanACoTA.annotate_module import general_format_functions as ffunc
     from PanACoTA import utils
+    from PanACoTA import __version__ as version
 
     # Check that needed softs are installed
     prokka = utils.check_installed("prokka")
@@ -272,6 +273,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     logfile_base = utils.init_logger(logfile_base, level, name='annotate', details=True,
                                 verbose=verbose, quiet=quiet)
     logger = logging.getLogger('annotate')
+    logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
 
