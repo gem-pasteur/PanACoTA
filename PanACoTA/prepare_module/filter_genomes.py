@@ -162,10 +162,7 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
     sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
 
     # Compute pairwise distances
-    compare_all(out_msh, matrix, mash_log, threads)
-    with open(matrix, "r") as mat:
-        for line in mat:
-            print(line)
+    compare_all(out_msh, matrix, sparse_mat, mash_log, threads)
 
     # Iteratively discard genomes
     # List of genomes to compare to the next ones until a limit value is reached.
@@ -274,7 +271,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
     return 0
 
 
-def compare_all(out_msh, matrix, mash_log, threads):
+def compare_all(out_msh, matrix, npz_matrix, mash_log, threads):
     """
     Comparing all pairwise genomes that are already been sketched in the given file.
 
@@ -284,6 +281,8 @@ def compare_all(out_msh, matrix, mash_log, threads):
         output of mash
     matrix : str
         File to put generated matrix of pairwise distances between all genomes
+    npz_matrix : str
+        matrix of pairwise distances saved in a binary file
     mash_log : str
         mash logfile
     threads :
@@ -294,11 +293,16 @@ def compare_all(out_msh, matrix, mash_log, threads):
 
     return code
     """
+    # txt matrix already exists
     if os.path.isfile(matrix):
         logger.warning("Matrix file {} already exists. The program will use this distance matrix "
                        "to filter all genomes according to their distances.".format(matrix))
         return 0
-
+    # npz matrix already exists
+    if os.path.isfile(npz_matrix):
+        logger.warning("Matrix file {} already exists. The program will use this distance matrix "
+                       "to filter all genomes according to their distances.".format(matrix))
+        return 0
     logger.info("Computing pairwise distances between all genomes")
     cmd_dist = f"mash dist -p {threads} {out_msh}.msh {out_msh}.msh"
     # Open matfile to write matrix inside
