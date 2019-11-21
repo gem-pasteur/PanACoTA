@@ -17,6 +17,7 @@ import sys
 import logging
 from termcolor import colored
 
+from PanACoTA import __version__ as version
 from PanACoTA import utils
 from PanACoTA.prepare_module import download_genomes_func as dgf
 from PanACoTA.prepare_module import filter_genomes as fg
@@ -132,6 +133,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
                                              verbose=verbose, quiet=quiet)
 
     # Message on what will be done (cmd, cores used)
+    logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
     message = f"'PanACoTA prepare' will run on {threads} "
     message += f"cores" if threads>1 else "core"
@@ -313,9 +315,6 @@ def parse(parser, argu):
     import argparse
 
     args = parser.parse_args(argu)
-    # print(f"before check: {args}")
-    # toto = check_args(parser, args)
-    # print(f"res: {toto}")
     return check_args(parser, args)
 
 
