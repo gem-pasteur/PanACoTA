@@ -35,13 +35,14 @@ def main_from_parse(arguments):
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.outdir,
-         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.only_mash,
+         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.db_dir,
+         arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.verbose, arguments.quiet)
 
 
-def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, only_mash, info_file,
-         l90, nbcont, cutn, min_dist, verbose, quiet):
+def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_dir,
+         only_mash, info_file, l90, nbcont, cutn, min_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
 
@@ -63,11 +64,13 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     outdir : str
         path to output directory (where created database will be saved).
     tmp_dir : str
-        Path to directory where tmp files are saved (sequences split at each stretch of 'N')
+        Path to directory where tmp files are saved (sequences split at each row of 5 'N')
     threads : int
         max number of threads to use
     no_refseq : bool
         True if user does not want to download again the database
+    db_dir : str
+        Name of the folder where already downloaded fasta files are saved.
     only_mash : bool
         True if user user already has the database and quality of each genome (L90, #contigs etc.)
     info_file : str
@@ -78,7 +81,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     nbcont : int
         Max number of contigs allowed to keep a genome
     cutn : int
-        cut at each stretch of this number of 'N'. Don't cut if equal to 0
+        cut at each when there are 'cutn' N in a row. Don't cut if equal to 0
     min_dist : int
         lower limit of distance between 2 genomes to keep them
     verbose : int
@@ -224,68 +227,76 @@ def build_parser(parser):
     import argparse
     from PanACoTA import utils_argparse
 
-    required = parser.add_argument_group('Required arguments')
-    required.add_argument("-t", dest="NCBI_species_taxid", required=True,
+    general = parser.add_argument_group('General arguments')
+    general.add_argument("-t", dest="NCBI_species_taxid", default="",
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI")
                          )
-
-    optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-s", dest="NCBI_species",
+    general.add_argument("-s", dest="NCBI_species", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
                         )
-    optional.add_argument("-o", dest="outdir",
+    general.add_argument("-o", dest="outdir",
                           help=("Give the path to the directory where you want to save the "
-                               "database. In the given directory, it will create a folder with "
-                               "the gembase species name. Inside this folder, you will find a "
-                               "folder 'Database_init' containing all fasta files, as well as a "
-                               "folder 'refseq' with files downloaded from refseq."))
-    optional.add_argument("--tmp", dest="tmp_dir",
-                          help=("Specify where the temporary files (sequence split by stretches "
+                               "downloaded database. In the given directory, it will create "
+                               "a folder 'Database_init' containing all fasta "
+                               "files that will be sent to the control procedure, as well as "
+                               "a folder 'refseq' with all original compressed files "
+                               "downloaded from refseq. By default, this output dir name is the "
+                               "NCBI_species name if given, or NCBI_species_taxid otherwise.")
+                          )
+    general.add_argument("--tmp", dest="tmp_dir",
+                          help=("Specify where the temporary files (sequence split by rows "
                                 "of 'N', sequence with new contig names etc.) must be saved. "
                                 "By default, it will be saved in your "
-                                "result_directory/tmp_files."))
-    optional.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
+                                "out_dir/tmp_files.")
+                          )
+    general.add_argument("--cutn", dest="cutn", type=int, default=5,
+                          help=("By default, each genome will be cut into new contigs when "
+                                "at least 5 'N' in a row are found in its sequence. "
+                                "If you don't want to "
+                                "cut genomes into new contigs when there are rows of 'N', "
+                                "put 0 to this option. If you want to cut from a different number "
+                                "of 'N' in a row, put this value to this option.")
+                          )
+    general.add_argument("--l90", dest="l90", type=int, default=100,
+                          help="Maximum value of L90 allowed to keep a genome. Default is 100.")
+    general.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
+                          help=("Maximum number of contigs allowed to keep a genome. "
+                                "Default is 999."))
+    general.add_argument("-m", dest="min_dist", default=1e-4, type=float,
+                        help="By default, genomes whose distance to the reference is not "
+                             "between 1e-4 and 0.06 are discarded. You can specify your own "
+                             "lower limit (instead of 1e-4) with this option.")
+    general.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
                           help=("Run 'N' downloads in parallel (default=1). Put 0 if "
                                 "you want to use all cores of your computer."))
+
+    optional = parser.add_argument_group('Alternatives')
     optional.add_argument("--norefseq", dest="no_refseq", action="store_true",
                           help=("If you already downloaded refseq genomes and do not want to "
                                 "check them, add this option to directly go to the next steps:"
                                 "quality control (L90, number of contigs...) and mash filter."))
+    optional.add_argument("-d", dest="db_dir",
+                          help=("If your already downloaded sequences are not in the default "
+                                "directory (outdir/Database_init), you can specify here the "
+                                "path to those fasta files."))
     optional.add_argument('-M', '--only-mash', dest="only_mash", action="store_true",
                           help=("Add this option if you already downloaded complete and refseq "
-                                "genomes, and ran quality control (you have, in your result "
-                                "folder, a file called 'info-genomes-list-<gembase_species>.lst', "
-                                "contaning all genome names, as well as their genome size, "
+                                "genomes, and ran quality control (you have, a file "
+                                "containing all genome names, as well as their genome size, "
                                 "number of contigs and L90 values). "
                                 "It will then get information on genomes quality from this "
                                 "file, and run mash steps."))
     optional.add_argument("--info", dest="from_info",
-                          help="If you already ran the 'prepare' data module, or already "
-                               "calculated yourself the size, L90 and number of contigs for each "
-                               "genome, you can give this information, to go directly to "
-                               "Mash filtering step. This file contains at "
-                               "least 4 columns, tab separated, with the following headers: "
-                               "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
-                               "will be ignored.")
-    optional.add_argument("-m", dest="min_dist", default=1e-4, type=float,
-                        help="By default, genomes whose distance to the reference is not "
-                             "between 1e-4 and 0.06 are discarded. You can specify your own "
-                             "lower limit (instead of 1e-4) with this option.")
-    optional.add_argument("--l90", dest="l90", type=int, default=100,
-                          help="Maximum value of L90 allowed to keep a genome. Default is 100.")
-    optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
-                          help=("Maximum number of contigs allowed to keep a genome. "
-                                "Default is 999."))
-    optional.add_argument("--cutn", dest="cutn", type=int, default=5,
-                          help=("By default, each genome will be cut into new contigs when "
-                                "at least 5 'N' at a stretch are found in its sequence. "
-                                "If you don't want to "
-                                "cut genomes into new contigs when there are stretches of 'N', "
-                                "put 0 to this option. If you want to cut from a different number "
-                                "of 'N' stretches, put this value to this option."))
+                          help=("If you already ran the quality control, specify from which "
+                                "file PanACoTA can read this information, in order to proceed "
+                                "to the mash step. This file must contain at "
+                                "least 4 columns, tab separated, with the following headers: "
+                                "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
+                                "will be ignored."))
+
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
                         help="Increase verbosity in stdout/stderr and log files.")
@@ -369,7 +380,7 @@ def check_args(parser, args):
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn == 5:
         message = ("  !! Your genomes will be split when sequence contains at "
-                   "least {}'N' at a stretch. If you want to change this threshold, use "
+                   "least {}'N' in a row. If you want to change this threshold, use "
                    "'--cutn n' option (n=0 if you do not want to cut)").format(args.cutn)
         print(colored(message, "yellow"))
 
