@@ -54,7 +54,7 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
     abs_outdir = os.path.abspath(outdir)
     keyargs = {"section": "refseq", "file_format": "fasta", "output": abs_outdir,
                "parallel": threads, "group": "bacteria",
-               "species_taxid": NCBI_taxid, "metadata_table":abs_sumfile}
+               "metadata_table":abs_sumfile}
     message = "Downloading all genomes for "
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
     if NCBI_species:
