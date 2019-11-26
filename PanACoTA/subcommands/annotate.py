@@ -6,8 +6,8 @@ annotate is a subcommand of PanACoTA
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
 
-- optional: find stretches of at least 'n' N (default n=5), and cut into a new contig at this stretch
-- for each genome, calc L90 and number of contigs (after cut at N stretches if used)
+- optional: find rows of at least 'n' N (default n=5), and cut into a new contig at this point
+- for each genome, calc L90 and number of contigs (after cut at n 'N' occurrences if used)
 - keep only genomes with:
 
     - L90 <= x (default x = 100)
@@ -129,7 +129,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     """
     Main method, doing all steps:
 
-    1. analyze genomes (nb contigs, L90, stretches of N...)
+    1. analyze genomes (nb contigs, L90, rows of N...)
     2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     3. rename genomes with strain number in decreasing quality
     4. annotate genome with prokka or only prodigal
@@ -169,7 +169,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     nbcont : int
         Max number of contigs allowed to keep a genome
     cutn : int
-        cut at each stretch of this number of 'N'. Don't cut if equal to 0
+        cut each time there are at least cutn 'N' in a row. Don't cut if equal to 0
     threads : int
         max number of threads to use
     force : bool
@@ -277,7 +277,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
 
-    # STEP 1. analyze genomes (nb contigs, L90, stretches of N...)
+    # STEP 1. analyze genomes (nb contigs, L90, rows of N...)
     # If already info on genome ('--info <file>' option), skip this step
     # If no info on genomes, read them and get needed information
     if not from_info:
@@ -289,7 +289,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
                           "Please check your list to give valid genome "
                           "names.").format(list_file, db_path))
             sys.exit(-1)
-        # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
+        # Get L90, nbcontig, size for all genomes, and cut at row of cutn 'N' if asked
         # -> genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
         gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft,
                                   logger, quiet=quiet)
@@ -453,11 +453,11 @@ def build_parser(parser):
                                 "Default is 999."))
     optional.add_argument("--cutn", dest="cutn", type=int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
-                                "at least 5 'N' at a stretch are found in its sequence. "
+                                "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "
-                                "cut genomes into new contigs when there are stretches of 'N', "
+                                "cut genomes into new contigs when there are rows of 'N', "
                                 "put 0 to this option. If you want to cut from a different number "
-                                "of 'N' stretches, put this value to this option."))
+                                "of 'N' occurrences, put this value to this option."))
     optional.add_argument("--date", dest="date", default=utils_argparse.get_date(),
                           type=utils_argparse.date_name,
                           help=("Specify the date (MMYY) to give to your annotated genomes. "
@@ -466,7 +466,7 @@ def build_parser(parser):
                                 " if you want. But the common way is to use 4 digits, "
                                 "corresponding to MMYY."))
     optional.add_argument("--tmp", dest="tmpdir",
-                          help=("Specify where the temporary files (sequence split by stretches "
+                          help=("Specify where the temporary files (sequence split by rows "
                                 "of 'N', sequence with new contig names etc.) must be saved. "
                                 "By default, it will be saved in your "
                                 "result_directory/tmp_files."))
@@ -554,7 +554,7 @@ def check_args(parser, args):
     # Message if user is giving a file with already calculated information
     def nosplit_message():
         split = ("  !! Your sequences will be used as is by PanACoTA. Be sure you "
-                 "already split your sequences at each stretch "
+                 "already split your sequences at each row "
                  "of X 'N' if needed.\n")
         trust = ("\t-> PanACoTA will use the values (L90, nbcont) given in your info file. "
                  "It will ignore the genomes for which those values are incorrect. "
@@ -590,7 +590,7 @@ def check_args(parser, args):
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn != 0 and not args.from_info:
         message = ("  !! Your genomes will be split when sequence contains at "
-                   "least {}'N' at a stretch.").format(args.cutn)
+                   "least {}'N' in a row.").format(args.cutn)
         print(colored(message, "yellow"))
     # Warn user about selection of genomes thresholds
     if args.l90 == 100 or args.nbcont == 999:
