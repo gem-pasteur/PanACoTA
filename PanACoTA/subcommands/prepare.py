@@ -357,9 +357,16 @@ def check_args(parser, args):
                 "options.".format(args.l90, args.nbcont))
 
     #  ERRORS
-    # Check that at least taxid or species name was given
-    if not args.NCBI_species_taxid and not args.NCBI_species:
-        parser.error("Give at least an NCBI species name or taxID.")
+
+    # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
+    # -> Give at least 1!
+    if (not args.only_mash and not args.no_refseq and
+        not args.NCBI_species_taxid and not args.NCBI_species):
+        parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
+                     "you want to download refseq genomes. But you did not provide any "
+                     "information, so PanACoTA cannot guess which species you want to download. "
+                     "Specify NCBI_taxid and/or NCBI_species to download, or add one of "
+                     "the 2 options (--norefseq or -M) if you want to skip the 'download step'.")
 
     # If user wants only mash steps, check that he gave info file
     if args.only_mash and not args.from_info:
