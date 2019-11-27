@@ -115,7 +115,6 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     # Default tmp_dir is outdir/tmp_files
     if not tmp_dir:
         tmp_dir = os.path.join(outdir, "tmp_files")
-    db_dir = None
     # directory that will be created by ncbi_genome_download
     refseqdir = os.path.join(outdir, "refseq", "bacteria")
     os.makedirs(outdir, exist_ok=True)
@@ -152,45 +151,53 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
         # to avoid erasing it
         if info_file:
             os.rename(info_file, info_file + ".back")
+
         # 'no_refseq = True" : Do not download genomes, just do QC and mash filter on given genomes
-        # (sequences must, at least, be in outdir/refeq/bacteria/<genome_name>.fna.gz)
-        # (they can also be in Database_init/<genome_name>.fna)
+        # -> if not, error and exit
         if no_refseq:
             logger.warning('You asked to skip refseq downloads.')
-            # Check that db_dir exists (folder with uncompressed fna files)
-            db_dir = os.path.join(outdir, "Database_init")
-            # If it does not exist, check that original dir exists
-            if not os.path.exists(db_dir):
-                logger.warning(f"Database folder {db_dir} containing fna sequences does not "
-                               "exist. We will check that refseq donwload directory exists, "
-                               "to be able to do next steps (genomes filter)")
-                db_dir = None
 
-                if not os.path.exists(refseqdir):
-                    logger.error(f"{refseqdir} does not exist. You do not have any "
-                                 "genome to analyse")
+            # -> if db_dir given, watch for sequences there. If does not exist, error and exit
+            # (user gave a directory (even if it does not exist), so we won't look for
+            # the sequences in other folders)
+            if db_dir:
+                if not os.path.exists(db_dir):
+                    logger.error(f"Database folder {db_dir} containing fna sequences does not "
+                                 "exist. Please give a valid folder, or leave the default "
+                                 "directory (no '-d' option).")
                     sys.exit(1)
+            # -> If user did not give db_dir, genomes could be in
+            # outdir/Database_init/<genome_name>.fna
+            else:
+                db_dir = os.path.join(outdir, "Database_init")
+                # If it does not exist, check if default compressed files folder exists.
+                if not os.path.exists(db_dir):
+                    logger.warning(f"Database folder {db_dir} containing fna sequences does not "
+                                   "exist. We will check if the download folder (with compressed "
+                                   "sequences) exists.")
+                    # -> if not in database_init, genomes must be in
+                    # outdir/refeq/bacteria/<genome_name>.fna.gz. In that case,
+                    # uncompress and add them to Database_init
+                    if not os.path.exists(refseqdir):
+                        logger.error(f"{refseqdir} does not exist. You do not have any "
+                                     "genome to analyse")
+                        sys.exit(1)
+                    # add genomes from refseq/bacteria folder to Database_init
+                    nb_gen, _ = dgf.to_database(outdir)
+                    # If no genome found, error -> nothing to analyse
+                    if nb_gen == 0:
+                        logger.error(f"There is no genome in {refseqdir}.")
+                        sys.exit(1)
         # No sequence: Do all steps -> download, QC, mash filter
         else:
             # Download all genomes of the given taxID
-            db_dir = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                              outdir, threads)
-        # if norefseq: refseq/bacteria must exist, but Database_init can be absent (if
-        # genomes were downloaded but not uncompressed)
-        # -> create and fill it
-        if not db_dir:
-            db_dir = os.path.join(outdir, "Database_init")
-            # If db_dir does not exist: create and fill it
-            if no_refseq and not os.path.exists(db_dir):
-                # add genomes from refseq/bacteria folder to Database_init
-                nb_gen, _ = dgf.to_database(outdir)
-                # If no genome found, error -> nothing to analyse
-                if nb_gen == 0:
-                    logger.error(f"There is no genome in {refseqdir}.")
-                    sys.exit(1)
-                logger.info("{} refseq genome(s) downloaded".format(nb_gen))
+            db_dir, nb_gen = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                                      outdir, threads)
+            logger.info("{} refseq genome(s) downloaded".format(nb_gen))
+
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
         genomes = fg.check_quality(species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
+
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
@@ -203,9 +210,9 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
         logger.info(("You want to run only mash steps. Getting information "
                      "from {}").format(info_file))
         genomes = utils.read_genomes_info(info_file, species_linked, )
+
     # Run Mash
-    # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size,
-                             # nbcont, l90]}
+    # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
     # sorted_genome : [genome_file] ordered by L90/nbcont (keys of genomes)
     sorted_genomes = fg.sort_genomes_minhash(genomes, l90, nbcont)
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
