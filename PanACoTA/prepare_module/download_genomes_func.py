@@ -107,7 +107,7 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         sys.exit(1)
     nb_gen, db_dir = to_database(outdir)
     logger.info(f"Downloaded {nb_gen} genomes.")
-    return db_dir
+    return db_dir, nb_gen
 
 
 def to_database(outdir):
