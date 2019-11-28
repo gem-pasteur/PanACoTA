@@ -400,20 +400,21 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
-    required.add_argument(dest="list_file",
-                          help=("File containing the list of genome filenames to annotate (1 genome"
-                                " per line). Each genome is in multi-fasta format. You can "
-                                "specify the species name (4 characters) you want to give to each "
-                                "genome by adding it after the genome filename(s), separated "
-                                "by '::'. If not given, the species name will be the one given in "
-                                "'species' argument. You can also specify the date (4 digits) "
-                                "by adding '.' + your date choice after the genome "
-                                "filename(s), '::' and, if given, the species name."))
     required.add_argument("-d", dest="db_path", required=True,
                           help="Path to folder containing all multifasta genome files")
     required.add_argument("-r", dest="res_path", required=True,
                           help="Path to folder where output annotated genomes must be saved")
     optional = parser.add_argument_group('Optional arguments')
+    optional.add_argument('-l', dest="list_file",
+                          help=("File containing the list of genome filenames to annotate "
+                                "(1 genome per line). Each genome must be in multi-fasta format. "
+                                "You can specify the species name (4 characters) you want to "
+                                "give to some genome, as well as the download (or any other "
+                                "reason) date of your choice. Format 'genome_name :: name.date'. "
+                                "name and date are optional. See doc for more information on "
+                                "this file format. "
+                                "If you want to run this module from 'prepare_module' results, "
+                                "use '--info' instead."))
     optional.add_argument("-n", dest="name", type=utils_argparse.gen_name,
                           help=("Choose a name for your annotated genomes. This name should "
                                 "contain 4 alphanumeric characters. Generally, they correspond "
