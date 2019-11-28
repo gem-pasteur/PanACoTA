@@ -21,6 +21,7 @@ import progressbar
 
 from PanACoTA import utils
 
+logger = logging.getLogger("annotate.gseq_functions")
 
 def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=False):
     """
@@ -454,10 +455,10 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     nbcont_vals = [val for _, (_, _, _, _, val, _) in genomes.items()]
     outnbcont = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
     dist1 = utils.plot_distr(l90_vals, l90, "L90 distribution for all genomes",
-                             "max L90 =")
+                             "max L90 =", logger)
     dist2 = utils.plot_distr(nbcont_vals, nbconts,
                              "Distribution of number of contigs among all genomes",
-                             "max #contigs =")
+                             "max #contigs =", logger)
     dist1.savefig(outl90)
     dist2.savefig(outnbcont)
     return l90_vals, nbcont_vals, dist1, dist2

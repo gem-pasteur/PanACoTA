@@ -319,7 +319,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     return call
 
 
-def plot_distr(values, limit, title, text):
+def plot_distr(values, limit, title, text, logger):
     """
     Plot histogram of given 'values', and add a vertical line corresponding to the chosen
     'limit' and return the mpl figure
@@ -334,6 +334,8 @@ def plot_distr(values, limit, title, text):
         Title to give to plot
     text : str
         text to write near the vertical line representing the limit
+    logger : logging.Logger
+        logger object to write log information
 
     Returns
     -------
@@ -764,7 +766,7 @@ def read_genomes_info(list_file, name, date=None, logger=None):
             # If invalid values, warning message and ignore genome
             except ValueError:
                 logger.warning(f"For genome {gname}, at least one of your columns 'gsize', "
-                                "'nb_conts' or 'L90' contains a non numeric character. "
+                                "'nb_conts' or 'L90' contains a non numeric value. "
                                 "This genome will be ignored.")
                 continue
             # If no value for at least 1 field, warning message and ignore genome
@@ -786,7 +788,11 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 gfile = os.path.basename(gpath)
                 gname = os.path.splitext(gfile)[0]
                 genomes[gfile] = [gname, gpath, gpath, gsize, gcont, gl90]
-    logger.info(("Found {} genomes in total").format(len(genomes)))
+    if len(genomes) > 0:
+        logger.info(("Found {} genomes in total").format(len(genomes)))
+    else:
+        logger.error(f"no genome listed in {list_file} were found.")
+        sys.exit(1)
     return genomes
 
 
