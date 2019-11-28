@@ -162,7 +162,8 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
             # the sequences in other folders)
             if db_dir:
                 if not os.path.exists(db_dir):
-                    logger.error(f"Database folder {db_dir} containing fna sequences does not "
+                    logger.error(f"Database folder {db_dir} supposed to contain fasta "
+                                 "sequences does not "
                                  "exist. Please give a valid folder, or leave the default "
                                  "directory (no '-d' option).")
                     sys.exit(1)
@@ -172,7 +173,8 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
                 db_dir = os.path.join(outdir, "Database_init")
                 # If it does not exist, check if default compressed files folder exists.
                 if not os.path.exists(db_dir):
-                    logger.warning(f"Database folder {db_dir} containing fna sequences does not "
+                    logger.warning(f"Database folder {db_dir} supposed to contain fasta "
+                                   "sequences does not "
                                    "exist. We will check if the download folder (with compressed "
                                    "sequences) exists.")
                     # -> if not in database_init, genomes must be in
@@ -180,10 +182,17 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
                     # uncompress and add them to Database_init
                     if not os.path.exists(refseqdir):
                         logger.error(f"Folder {refseqdir} does not exist. You do not have any "
-                                     "genome to analyse. Did you give the same output folder "
-                                     "('-o outdir' option) as the one where your sequences "
-                                     "are already downloaded? Here, the output folder "
-                                     f"is {outdir}.")
+                                     "genome to analyse. Possible reasons:\n"
+                                     "- if you want to rerun analysis in the same folder as "
+                                     "sequences were downloaded (my_outdir/Database_init or "
+                                     "my_outdir/refseq), make sure you have '-o my_outdir' "
+                                     "option\n"
+                                     "- if you want to rerun analysis and save them in a new "
+                                     "output folder called 'new_outdir', make sure you have "
+                                     "'-o new_outdir' option, "
+                                     "and you specified where the uncompressed sequences to "
+                                     "use are ('-d sequence_database_path' -> "
+                                     "my_outdir/Database_init). ")
                         sys.exit(1)
                     # add genomes from refseq/bacteria folder to Database_init
                     nb_gen, _ = dgf.to_database(outdir)
