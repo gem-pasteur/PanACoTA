@@ -176,6 +176,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         If True, overwrite previous results, if False keep what is already calculated
     qc_only : bool
         If True, do only quality control, if False, also do annotation
+    from_info : str
+        File containing information on genomes and their quality information (from prepare step)
     tmp_dir : str or None
         Path to folder where tmp files must be saved. None to use the default tmp folder
     res_annot_dir : str or None
@@ -257,7 +259,10 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         utils.check_out_dirs(res_dir)
 
     # get only filename of list_file, without extension
-    listfile_base = os.path.basename(os.path.splitext(list_file)[0])
+    if list_file:
+        listfile_base = os.path.basename(os.path.splitext(list_file)[0])
+    else:
+        listfile_base = os.path.basename(os.path.splitext(from_info)[0])
 
     # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
@@ -299,17 +304,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         # orig_path is the path to the original sequence
         # and to_annotate_path the path to the sequence to annotate (once split etc.)
         # Here, both are the same, as we take given sequences as is.
-        genomes = utils.read_genomes_info(from_info, name, date, db_path, db_path2)
-        if not genomes:
-            if db_path2:
-                logger.error(("We did not find any genome listed in {} in {} folder nor in {}. "
-                              "Please check your list to give valid genome "
-                              "names.").format(from_info, db_path, db_path2))
-            else:
-                logger.error(("We did not find any genome listed in {} in the folder {}. "
-                              "Please check your list to give valid genome "
-                              "names.").format(from_info, db_path))
-            sys.exit(-1)
+        genomes = utils.read_genomes_info(from_info, name, date, logger=logger)
+
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     # genomes = {genome: [spegenus.date, orig_seq, path_to_splitSequence, size, nbcont, l90]}
@@ -318,6 +314,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
+    print(genomes.keys())
+    sys.exit(1)
     # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # Info on folder containing original sequences
@@ -586,6 +584,10 @@ def check_args(parser, args):
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use the given sequences as is. It will not cut "
                      "them. So, you cannot use both --cutN and --info")
+    # Give a lst_file or an info file, not nothing
+    if not args.from_info and not args.list_file:
+        parser.error("You must provide a list of genomes to annotate. Either raw genomes "
+                     "(see -l option), or genomes with quality information (see --info option).")
 
     # WARNINGS
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
