@@ -179,8 +179,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
                     # outdir/refeq/bacteria/<genome_name>.fna.gz. In that case,
                     # uncompress and add them to Database_init
                     if not os.path.exists(refseqdir):
-                        logger.error(f"{refseqdir} does not exist. You do not have any "
-                                     "genome to analyse")
+                        logger.error(f"Folder {refseqdir} does not exist. You do not have any "
+                                     "genome to analyse. Did you give the same output folder "
+                                     "('-o outdir' option) as the one where your sequences "
+                                     "are already downloaded? Here, the output folder "
+                                     f"is {outdir}.")
                         sys.exit(1)
                     # add genomes from refseq/bacteria folder to Database_init
                     nb_gen, _ = dgf.to_database(outdir)
@@ -284,7 +287,9 @@ def build_parser(parser):
     optional.add_argument("--norefseq", dest="no_refseq", action="store_true",
                           help=("If you already downloaded refseq genomes and do not want to "
                                 "check them, add this option to directly go to the next steps:"
-                                "quality control (L90, number of contigs...) and mash filter."))
+                                "quality control (L90, number of contigs...) and mash filter. "
+                                "Don't forget to specify the outdir (-o option) where you "
+                                "already downloaded those genomes."))
     optional.add_argument("-d", dest="db_dir",
                           help=("If your already downloaded sequences are not in the default "
                                 "directory (outdir/Database_init), you can specify here the "
