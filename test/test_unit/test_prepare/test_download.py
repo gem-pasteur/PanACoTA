@@ -205,15 +205,15 @@ def test_download():
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq")
     threads = 1
 
-    db_dir = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
                                         outdir, threads)
-
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # And that it exists and contains files (cannot say how many because depends on
-    # the download date, refseq is daily updated)
+    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    assert nb_gen >= 4
+    # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
-    assert len(os.listdir(db_dir)) >= 3
+    assert len(os.listdir(db_dir)) == nb_gen
 
     # Check that assembly summary file wwas donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-Acetobacter_orleanensis.txt" )
@@ -242,17 +242,18 @@ def test_download_noSpeName():
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_noSpe")
     threads = 1
 
-    db_dir = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                        outdir, threads)
+    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                                outdir, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # And that it exists and contains files (cannot say how many because depends on
-    # the download date, refseq is daily updated)
+    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    assert nb_gen >= 4
+    # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
-    assert len(os.listdir(db_dir)) >= 3
+    assert len(os.listdir(db_dir)) == nb_gen
 
-    # Check that assembly summary file wwas donwloaded as expected
+    # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-toto.txt" )
     assert os.path.isfile(sum_file)
 
