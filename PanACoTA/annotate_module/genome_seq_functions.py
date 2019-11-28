@@ -14,16 +14,15 @@ April 2017
 """
 import os
 import re
+import sys
 import numpy as np
 import logging
 import progressbar
 
 from PanACoTA import utils
 
-logger = logging.getLogger("qc_annotate.gseq")
 
-
-def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, quiet=False):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=False):
     """
 
     Parameters
@@ -79,7 +78,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
             bar.update(curnum)
             curnum += 1
         # analyse genome, and check everything went well
-        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft)
+        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger=logger)
         # Problem while analysing genome -> genome ignored
         if not res:
             toremove.append(genome)
@@ -87,12 +86,16 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
     if toremove:
         for gen in toremove:
             del genomes[gen]
+    if not genomes:
+        logger.error(f"No genome was found in the database folder {dbpath}. See logfile "
+                     "for more information.")
+        sys.exit(1)
     if not quiet:
         bar.finish()
     return 0
 
 
-def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
+def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
     """
     Analyse given genome:
 
@@ -129,12 +132,16 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
         path_annotate, gsize, nbcont, L90]}
     """
     gpath, grespath = get_output_dir(soft, dbpath, tmp_path, genome, cut, pat)
+    if not os.path.exists(gpath):
+        logger.error(f"The file {gpath} does not exist")
+        return False
     # Open original sequence file
     with open(gpath, "r") as genf:
         # If a new file must be created (sequences cut, and/or annotating with prokka), open it
         gresf = None
         if grespath:
             gresf = open(grespath, "w")
+
         # Initialize variables
         cur_contig_name = "" # header text (less than 20 characters if prokka used)
         contig_sizes = {}  # {header text: size}
@@ -174,10 +181,16 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
                                 num, logger)
             if num == -1:
                 return False
-
     # GLOBAL INFORMATION
     nbcont = len(contig_sizes)
     gsize = sum(contig_sizes.values())
+    if nbcont == 0 or gsize == 0:
+        logger.warning(f"Your file {gpath} does not contain any gene. Please check that you "
+                       "really gave a fasta sequence file")
+        if grespath:
+            gresf.close()
+            os.remove(grespath)
+        return False
     l90 = calc_l90(contig_sizes)
     if not l90:
         logger.error("Problem with genome {}. Not possible to get L90".format(genome))

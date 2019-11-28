@@ -69,10 +69,8 @@ def check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
 
     # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes
     # -> {genome_file: [genome_g, orig_path, to_annotate_path, size, nbcont, l90]}
-    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft="prepare", logger=logger,
-                              quiet=False)
+    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, "prepare", logger, quiet=False)
     return genomes
-
 
 def sort_genomes_minhash(genomes, max_l90, max_cont):
     """
