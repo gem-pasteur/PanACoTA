@@ -389,6 +389,12 @@ def check_args(parser, args):
                      "Specify NCBI_taxid and/or NCBI_species to download, or add one of "
                      "the 2 options (--norefseq or -M) if you want to skip the 'download step'.")
 
+    # If norefseq, give output directory
+    #  - folder containing Database_init, with all sequences
+    #  - or new folder where you want to put the new results
+    if args.no_refseq and not args.outdir:
+        parser.error("You must provide an output directory, where your results will be saved.")
+
     # If user wants only mash steps, check that he gave info file
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
