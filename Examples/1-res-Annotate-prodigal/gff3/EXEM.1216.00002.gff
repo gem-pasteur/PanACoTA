@@ -1,0 +1,16 @@
+##gff-version  3
+##sequence-region	EXEM.1216.00002.0001	1	>header_genome3_chromo_1
+##sequence-region	EXEM.1216.00002.0002	1	>genome3_plasmid_2
+##sequence-region	EXEM.1216.00002.0003	1	>genome3_plasmid_3
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	1	831	104.1	+	0	ID=EXEM.1216.00002.0001b_00001;partial=10;start_type=Edge;rbs_motif=None;rbs_spacer=None;gc_cont=0.578;conf=100.00;score=104.13;cscore=100.92;sscore=3.22;rscore=0.00;uscore=0.00;tscore=3.22;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	880	1710	106.5	+	0	ID=EXEM.1216.00002.0001i_00002;partial=00;start_type=ATG;rbs_motif=AGGAG/GGAGG;rbs_spacer=11-12bp;gc_cont=0.578;conf=100.00;score=107.29;cscore=100.92;sscore=6.38;rscore=7.06;uscore=-5.38;tscore=3.95;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	1655	2128	40.8	+	0	ID=EXEM.1216.00002.0001i_00003;partial=00;start_type=ATG;rbs_motif=GGA/GAG/AGG;rbs_spacer=11-12bp;gc_cont=0.544;conf=99.99;score=40.80;cscore=40.20;sscore=0.60;rscore=-1.74;uscore=-1.61;tscore=3.95;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	2172	2396	19.5	+	0	ID=EXEM.1216.00002.0001i_00004;partial=00;start_type=ATG;rbs_motif=GGA/GAG/AGG;rbs_spacer=11-12bp;gc_cont=0.542;conf=99.08;score=20.33;cscore=21.30;sscore=-0.97;rscore=-1.96;uscore=-3.32;tscore=3.51;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	2425	3828	146.8	+	0	ID=EXEM.1216.00002.0001i_00005;partial=00;start_type=ATG;rbs_motif=AGGAG/GGAGG;rbs_spacer=11-12bp;gc_cont=0.513;conf=100.00;score=147.74;cscore=139.37;sscore=8.37;rscore=7.06;uscore=-3.60;tscore=3.95;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	3863	4636	118.2	+	0	ID=EXEM.1216.00002.0001i_00006;partial=00;start_type=ATG;rbs_motif=GGAG/GAGG;rbs_spacer=5-10bp;gc_cont=0.527;conf=100.00;score=119.07;cscore=106.36;sscore=12.71;rscore=11.19;uscore=-3.33;tscore=3.95;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	4641	5432	48.3	+	0	ID=EXEM.1216.00002.0001i_00007;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.537;conf=100.00;score=49.55;cscore=55.53;sscore=-5.99;rscore=-8.50;uscore=-2.67;tscore=3.95;
+EXEM.1216.00002.0001	Prodigal_v2.6.3	CDS	5460	5747	35.4	+	0	ID=EXEM.1216.00002.0001b_00008;partial=00;start_type=ATG;rbs_motif=AGGAG;rbs_spacer=5-10bp;gc_cont=0.469;conf=99.98;score=36.42;cscore=19.87;sscore=16.55;rscore=14.84;uscore=-3.22;tscore=3.95;
+EXEM.1216.00002.0002	Prodigal_v2.6.3	CDS	1	582	63.1	+	0	ID=EXEM.1216.00002.0002b_00009;partial=10;start_type=Edge;rbs_motif=None;rbs_spacer=None;gc_cont=0.546;conf=100.00;score=63.13;cscore=59.91;sscore=3.22;rscore=0.00;uscore=0.00;tscore=3.22;
+EXEM.1216.00002.0002	Prodigal_v2.6.3	CDS	629	1936	156.9	+	0	ID=EXEM.1216.00002.0002b_00010;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.520;conf=100.00;score=157.65;cscore=165.52;sscore=-7.87;rscore=-8.50;uscore=-4.09;tscore=3.95;
+EXEM.1216.00002.0003	Prodigal_v2.6.3	CDS	2	280	8.3	+	0	ID=EXEM.1216.00002.0003b_00011;partial=10;start_type=Edge;rbs_motif=None;rbs_spacer=None;gc_cont=0.355;conf=87.21;score=8.35;cscore=5.13;sscore=3.22;rscore=0.00;uscore=0.00;tscore=3.22;
+EXEM.1216.00002.0003	Prodigal_v2.6.3	CDS	323	1102	58.2	+	0	ID=EXEM.1216.00002.0003b_00012;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.559;conf=100.00;score=59.02;cscore=60.68;sscore=-1.66;rscore=-0.28;uscore=-5.50;tscore=3.30;
