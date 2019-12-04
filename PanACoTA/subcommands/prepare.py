@@ -395,10 +395,13 @@ def check_args(parser, args):
     if args.no_refseq and not args.outdir:
         parser.error("You must provide an output directory, where your results will be saved.")
 
-    # If user wants only mash steps, check that he gave info file
+    # If user wants only mash steps, check that he gave info file, and outdir
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
                      "info file with the required information (see '--info' option)")
+    if args.only_mash and not args.outdir:
+        parser.error("If you want to run only Mash filtering steps, please give the "
+                     "output directory where you want to save your results (see '-o' option)")
 
     # Cannot be verbose and quiet at the same time
     if args.verbose > 0 and args.quiet:
