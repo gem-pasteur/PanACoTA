@@ -32,7 +32,7 @@ except:
         import pickle
 
 
-def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False):
+def init_logger(logfile_base, level, name, log_details=False, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -56,7 +56,7 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         minimum level that must be considered.
     name : str or None
         if we need to name the logger (used for tests)
-    details : bool
+    log_details : bool
         if True, force creation of .log.details file. Otherwise, just create
         it if needed according to level
 
@@ -106,11 +106,11 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     logging.Logger.details = details
 
     # set level of logger
-    logger.setLevel(level)
+    logger.setLevel(logging.DEBUG)
 
-    # create formatter for log messages: "timestamp :: level :: message"
-    # :: %(name)s  to add the logger name
-    # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
+    # create formatter for log messages:
+    # "timestamp :: level :: message"
+    # (add :: %(name)s  to add the logger name)
     my_format = '[%(asctime)s] :: %(levelname)s :: %(message)s'
     formatter_file = logging.Formatter(my_format, '%Y-%m-%d %H:%M:%S')
     my_format_stream = '%(log_color)s  * [%(asctime)s] : %(levelname)s %(reset)s %(message)s'
@@ -142,23 +142,27 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     errfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
+    # Formats for detailed log files
+    my_format_detail = '[%(asctime)s] :: %(levelname)s (from %(name)s logger) :: %(message)s'
+    formatter_file_detail = logging.Formatter(my_format_detail, '%Y-%m-%d %H:%M:%S')
+
     # Create handler 3: detailsfile. Write everything to this file, except debug
     # Create it only if:
     # - level is <= info (for modules which have no details, so detailsfile is the same as
     # logfile)
     # - details==True force creation of detailsfile
     # - quiet==True nothing in stdout, put all log files so that user can check
-    if level < logging.INFO or quiet or details:
+    if level < logging.INFO or quiet or log_details:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(logging.DETAIL)
-        detfile_handler.setFormatter(formatter_file)  # add formatter
+        detfile_handler.setFormatter(formatter_file_detail)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
 
-    # Create handler 3: debug file. Write everything
+    # Create handler 4: debug file. Write everything
     if level < logging.DETAIL:
         debugfile_handler = RotatingFileHandler(debugfile, 'w', 10000000, 5)
         debugfile_handler.setLevel(logging.DEBUG)
-        debugfile_handler.setFormatter(formatter_file)  # add formatter
+        debugfile_handler.setFormatter(formatter_file_detail)  # add formatter
         logger.addHandler(debugfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
@@ -172,9 +176,6 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         # if not verbose (level 0 or 1): only put info in stdout (remove details and debug)
         if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DETAIL))
-            stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
-        # if verbose (level 2): put info and details in stdout: only remove debug
-        if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
         stream_handler.setFormatter(formatter_stream)
         logger.addHandler(stream_handler)  # add handler to logger
