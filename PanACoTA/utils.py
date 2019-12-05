@@ -484,16 +484,13 @@ def write_lstinfo(list_file, genomes, outdir):
 
     """
     _, name_lst = os.path.split(list_file)
-
     outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
     with open(outlst, "w") as outf:
         outf.write("\t".join(["gembase_name", "orig_name", "to_annotate", "gsize",
                               "nb_conts", "L90"]) + "\n")
         for genome, values in sorted(genomes.items(), key=sort_genomes_byname_l90_nbcont):
             gembase, _, to_annote, gsize, nbcont, l90 = [str(x) for x in values]
-            to_annote_file = os.path.basename(to_annote)
-            outf.write("\t".join([gembase, genome, to_annote_file, gsize, nbcont, l90]) + "\n")
-
+            outf.write("\t".join([gembase, genome, to_annote, gsize, nbcont, l90]) + "\n")
 
 def sort_genomes_by_name(x):
     """
