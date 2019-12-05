@@ -131,7 +131,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(outdir, "PanACoTA_prepare_{}").format(species_linked)
-    logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', details=True,
+    logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', log_details=True,
                                              verbose=verbose, quiet=quiet)
 
     # Message on what will be done (cmd, cores used)
