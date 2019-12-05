@@ -593,7 +593,8 @@ def check_args(parser, args):
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn != 0 and not args.from_info:
         message = ("  !! Your genomes will be split when sequence contains at "
-                   "least {}'N' in a row.").format(args.cutn)
+                   "least {}'N' in a row. If you want to change this threshold, "
+                   "see --cutn option.").format(args.cutn)
         print(colored(message, "yellow"))
     # Warn user about selection of genomes thresholds
     if args.l90 == 100 or args.nbcont == 999:
