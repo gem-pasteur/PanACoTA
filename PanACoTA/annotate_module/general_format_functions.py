@@ -175,7 +175,7 @@ def handle_genome(args):
     logger = logging.getLogger('format.handle_genome')
     # Handle genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
-                                  prot_dir, gene_dir, rep_dir, gff_dir, logger)
+                                  prot_dir, gene_dir, rep_dir, gff_dir)
     return ok_format, genome
 
 
