@@ -142,9 +142,6 @@ def init_logger(logfile_base, level, name, log_details=False, verbose=0, quiet=F
     errfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
-    # Formats for detailed log files
-    my_format_detail = '[%(asctime)s] :: %(levelname)s (from %(name)s logger) :: %(message)s'
-    formatter_file_detail = logging.Formatter(my_format_detail, '%Y-%m-%d %H:%M:%S')
 
     # Create handler 3: detailsfile. Write everything to this file, except debug
     # Create it only if:
@@ -155,14 +152,18 @@ def init_logger(logfile_base, level, name, log_details=False, verbose=0, quiet=F
     if level < logging.INFO or quiet or log_details:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(logging.DETAIL)
-        detfile_handler.setFormatter(formatter_file_detail)  # add formatter
+        detfile_handler.setFormatter(formatter_file)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
+
+    # Formats for detailed log files
+    my_format_debug = '[%(asctime)s] :: %(levelname)s (from %(name)s logger) :: %(message)s'
+    formatter_file_debug = logging.Formatter(my_format_debug, '%Y-%m-%d %H:%M:%S')
 
     # Create handler 4: debug file. Write everything
     if level < logging.DETAIL:
         debugfile_handler = RotatingFileHandler(debugfile, 'w', 10000000, 5)
         debugfile_handler.setLevel(logging.DEBUG)
-        debugfile_handler.setFormatter(formatter_file_detail)  # add formatter
+        debugfile_handler.setFormatter(formatter_file_debug)  # add formatter
         logger.addHandler(debugfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
