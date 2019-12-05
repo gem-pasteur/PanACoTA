@@ -1,0 +1,1182 @@
+Seq-entry ::= set {
+  class genbank ,
+  seq-set {
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 12 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 5 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2019 } } } ,
+        create-date
+          std {
+            year 2019 ,
+            month 12 ,
+            day 5 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "header_genome3_1" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 5747 ,
+            seq-data
+              iupacna "ATGAGAGCGCTACTGTGGCTGGTGGGTCTTGCGTTGCTGTTAACAGGCTGCGCGA
+GCGAAAAAGGAATTATCGATGAAGAGGGATATCAGCTTGATACCCGACATCGGGCGCAGGCGGCCTATCCGCGCATTA
+AAGTCCTGGTGATTCACTATACGGCGGAAAACTTTGACGTTTCGCTGGCGACGTTAACGGGCCGCAACGTCAGTTCGC
+ATTACCTGATTCCCGCAACCCCGCCATTATATGGCGGTAAACCGCGCATCTGGCAACTGGTGCCGGAACAGGATCAGG
+CCTGGCATGCGGGCGTCAGTTTCTGGCGAGGCGCCACGCGTCTCAATGATACGTCTATTGGCATTGAGCTGGAAAATC
+GCGGCTGGCGAATGTCCGGCGGGGTGAAATCTTTCGCGCCGTTTGAATCCGCGCAAATTCAGGCATTGATTCCGTTAG
+CGAAGGACATTATCGCGCGCTATGACATCAAACCGCAGAATGTGGTGGCCCATGCGGATATCGCGCCGCAGCGTAAAG
+ACGATCCCGGCCCGCGCTTCCCGTGGCGCGAGCTGGCGGCACAGGGGATTGGCGCCTGGCCTGACGCCCAGCGTGTGG
+CGTTTTATCTGGCTGGACGCGCGCCGTATACGCCAGTCGATACCGCAACGGTGCTTGCGTTACTCTCGCGCTATGGCT
+ATGAAGTCAAAGCCGATATGACGGCGCGCGAGCAACAGCGGGTGATTATGGCGTTCCAGATGCACTTCCGTCCGGCGC
+AATGGAACGGTATCGCAGATGCCGAAACGCAGGCGATTGCCGAAGCATTACTGGAGAAGTACGGCCAGGATTAACGAG
+TCCGGGAGCGGCGAGATTCCGGGCAGAGGAGGCGGCTATAGCGGATGAGAGCGCTACTGTGGCTGGTGGGTCTTGCGT
+TGCTGTTAACAGGCTGCGCGAGCGAAAAAGGAATTATCGATGAAGAGGGATATCAGCTTGATACCCGACATCGGGCGC
+AGGCGGCCTATCCGCGCATTAAAGTCCTGGTGATTCACTATACGGCGGAAAACTTTGACGTTTCGCTGGCGACGTTAA
+CGGGCCGCAACGTCAGTTCGCATTACCTGATTCCCGCAACCCCGCCATTATATGGCGGTAAACCGCGCATCTGGCAAC
+TGGTGCCGGAACAGGATCAGGCCTGGCATGCGGGCGTCAGTTTCTGGCGAGGCGCCACGCGTCTCAATGATACGTCTA
+TTGGCATTGAGCTGGAAAATCGCGGCTGGCGAATGTCCGGCGGGGTGAAATCTTTCGCGCCGTTTGAATCCGCGCAAA
+TTCAGGCATTGATTCCGTTAGCGAAGGACATTATCGCGCGCTATGACATCAAACCGCAGAATGTGGTGGCCCATGCGG
+ATATCGCGCCGCAGCGTAAAGACGATCCCGGCCCGCGCTTCCCGTGGCGCGAGCTGGCGGCACAGGGGATTGGCGCCT
+GGCCTGACGCCCAGCGTGTGGCGTTTTATCTGGCTGGACGCGCGCCGTATACGCCAGTCGATACCGCAACGGTGCTTG
+CGTTACTCTCGCGCTATGGCTATGAAGTCAAAGCCGATATGACGGCGCGCGAGCAACAGCGGGTGATTATGGCGTTCC
+AGATGCACTTCCGTCCGGCGCAATGGAACGGTATCGCAGATGCCGAAACGCAGGCGATTGCCGAAGCATTACTGGAGA
+AGTACGGCCAGGATTAACAGGGCGCGGTATCGCGAGGACTCTCTCTTCGAGGACATGCCGCACTTTATTGCTGAATGT
+ACTGAAAATATTCGCGAGCAGGCTGATTTACCCGGCCTGTTCAGCAAGGTAAACGAGGCGCTGGCCGCCAGCGGGATT
+TTCCCCATCGGCGGTATCCGCAGTCGCGCCCACTGGCTGGATACCTGGCAGATGGCTGACGGTAAGCATGATTACGCG
+TTTGTGCATATGACGCTGAAAATCGGCGCCGGGCGCAGCCTGGAGAGCCGTCAGGAAGTCGGCGAAATGCTGTTCGGG
+CTGATTAAAGCCCACTTCGCCGACCTGATGGAGAACCGCTATCTGGCGCTGTCGTTTGAGATTGCCGAGTTACATCCA
+ACGCTCAATTACAAACAAAACAACGTACACGCGTTATTTAAATAGCCCGAGTATTAGCGCGCGGCGGCGCTATAGGCG
+CGCTATAGGCATGAGCGCGCTATTTCTGGCCATCCCGTTAACCATTTTTGTGTTGTTTGTGTTACCGATTTGGCTGTG
+GCTGCATTACAGCAACCGCGCCGGTCGGGGAGAACTGTCGCAAAGCGAGCAGCAACGCTTACTGCAACTCACAGACGA
+CGCGCAACGTATGCGCGAGCGCATTCAGGCGCTGGAAGACATTCTTGATGCAGAGCATCCGAACTGGAGAGAGCGCTA
+ACGAGAGTCTCGGAGGAGCGGCGCTCTGGATGCCCGCGACTAAATTCTCCCGACGTACCCTCCTGACGGCAGGTTCTG
+CGCTTGCTGTTCTTCCTTTCCTGCGCGCCTTGCCGGTACAGGCGCGTGAACCTCGCGAGACCGTCGATATTAAGGATT
+ATCCGGCGGATGACGGTATCGCCTCGTTCAAACAGGCCTTCGCCGACGGACAGACCGTGGTCGTACCGCCAGGATGGG
+TGTGTGAAAATATCAATGCGGCGATAACGATTCCGGCGGGAAAAACGCTGCGGGTACAGGGCGCGGTGCGTGGGAATG
+GCCGGGGACGGTTTATTTTGCAGGACGGGTGTCAGGTGGTGGGGGAGCAGGGCGGCAGTCTGCACAATGTGACGCTGG
+ATGTTCGCGGGTCGGACTGTGTGATTAAAGGCGTGGCGATGAGCGGCTTTGGCCCCGTCGCGCAAATTTTCATCGGTG
+GTAAGGAACCGCAGGTGATGCGTAATCTCATTATCGATGACATCACCGTTACCCACGCCAACTACGCCATTCTCCGCC
+AGGGATTTCATAACCAAATGGACGGCGCGAGGATTACGCATAGCCGCTTTAGCGATTTACAGGGGGACGCCATTGAGT
+GGAATGTCGCGATTCACGACCGCGATATCCTGATTTCCGATCATGTCATCGAACGCATTGATTGTACCAATGGCAAAA
+TCAACTGGGGGATCGGCATCGGGCTGGCGGGTAGCACCTATGACAACAGTTATCCTGAAGACCAGGCAGTAAAAAACT
+TTGTGGTGGCCAATATTACCGGATCTGATTGCCGACAGCTTGTGCACGTAGAAAATGGCAAACATTTCGTCATTCGCA
+ATGTCAAAGCCAAAAACATCACGCCCGATTTCAGTAAAAATGCGGGTATTGATAACGCAACGATCGCAATTTATGGCT
+GTGATAATTTCGTCATTGATAATATTGATATGACGAATAGTGCCGGGATGCTCATCGGCTATGGCGTCGTTAAAGGAA
+AATACCTGTCAATTCCGCAAAACTTTAAATTAAACGCTATTCGGTTGGATAATCGCCAGGTTGCTTATAAATTACGCG
+GCATTCAAATTTCCTCCGGCAACACCCCCTCTTTTGTCGCCATCACCAATGTACGGATGACGCGTGCTACGCTGGAAC
+TGCATAATCAACCGCAGCACCTCTTCCTGCGTAATATCAACGTGATGCAAACTTCAGCGATTGGCCCGGCGTTAAAAA
+TGCATTTCGATTTGCGTAAAGATGTCCGTGGTCAATTTATGGCCCGCCAGGACACGCTGCTTTCCCTCGCTAATGTTC
+ATGCCATCAATGAAAACGGGCAGAGTTCCGTGGATATCGACAGGATTAATCACCAAACCGTGAATGTCGAAGCAGTGA
+ATTTTTCGCTGCCGAAGCGGGGAGGGTAACGCGTCTGCGCGCGCGGAGAGAGGCTCTCAGGACATGTCAGAAAATAAA
+TTACACGTTATCGATTTGCACAAACGCTACGGCGGTCATGAAGTGCTGAAAGGGGTATCGCTGCAGGCCCGCGCCGGA
+GATGTGATTAGCATCATCGGCTCGTCCGGCTCCGGTAAAAGCACTTTTTTGCGCTGTATTAACTTCCTCGAAAAACCG
+AGCGAAGACGCGATTATCGTGAACGGTCAGAACATTAATCTGGTGCGCGACAAAGACGGGCAGCTCAAAGTGGCGGAT
+AAAAATCAGCTACGCTTGTTGCGTACCCGCCTGACGATGGTGTTTCAGCACTTTAACCTCTGGAGCCACATGACGGTG
+CTGGAAAATGTGATGGAAGCGCCGATTCAGGTACTGGGATTAAGCAAGCACGACGCGCGCGAGCGGGCGTTGAAATAT
+CTGGCGAAGGTGGGGATTGATGAGCGCGCTCAGGGCAAATATCCCGTTCATCTCTCCGGTGGCCAACAGCAGCGCGTT
+TCTATTGCGCGCGCGCTGGCGATGGAACCTGACGTTTTACTGTTCGATGAACCCACTTCGGCGCTCGATCCTGAACTG
+GTCGGCGAAGTGTTGCGCATCATGCAACAACTGGCGGAAGAAGGCAAAACGATGGTGGTGGTCACGCATGAAATGGGC
+TTCGTTCGCCATGTCTCTTCGCACGTTATTTTTCTGCATCAGGGGAAAATTGAAGAAGAGGGCGATCCGGAGCAGGTG
+TTCGGCAATCCGCAAAGCCCGCGTTTACAGCAATTCCTGAAAGGCTCGCTGAAATAACCGGATGCGCGCGATATATCG
+GCGATGCGTGTTTATTGGCATCGTTAGCCTGTTTCCTGAAATGTTCCGCGCAATTACCGATTACGGGGTAACTGGCCG
+GGCAGTAAAAAATGGCCTGCTGAACATCCAAAGCTGGAGTCCTCGCGACTTCACGCATGACCGGCACCGTACCGTGGA
+CGATCGTCCTTACGGCGGCGGACCAGGGATGTTAATGATGGTGCAACCCTTGCGGGACGCCATTCACGCAGCAAAAGC
+CGCGGCAGGTGAAGGCGCTAAAGTGATTTATCTGTCGCCTCAGGGACGCAAGCTTGATCAAGCGGGCGTTAGCGAGCT
+GGCCACGAATCAGAAGCTTATTCTGGTGTGTGGTCGCTACGAAGGCGTAGATGAGCGCGTAATTCAGACCGAAATTGA
+CGAAGAATGGTCAATTGGCGATTACGTTCTCAGCGGTGGCGAACTACCGGCAATGACGCTGATTGACTCCGTCGCCCG
+GTTTATACCGGGAGTTCTGGGGCATGAAGCATCAGCAATCGAAGATTCGTTTGCTGATGGGTTGCTGGATTGTCCGCA
+CTATACGCGCCCTGAAGTGTTAGAGGGGATGGAAGTACCGCCAGTATTGCTGTCGGGAAACCATGCTGAGATACGTCG
+CTGGCGTTTGAAACAGTCGCTGGGCCGAACCTGGCTTAGAAGACCTGAACTTCTGGAAAACCTGGCTCTGACTGAAGA
+GCAAGCAAGGTTGCTGGCGGAGTTCAAAACAGAACACGCACAACAGCAGCATAAACATGATGGGATGGCATAGCCGGC
+TCTGCGAGAGAGGAGCGCTCGCATGAATAATCATTTTGGGAAAGGGTTAATGGCCGGGTTGCACGCGCCATATGCATA
+TAGCGCGCATCATGCGGTGAATTTCTGTTCTGAGTATAAACGTGGCTTTGTATTGGGTTTTACACACCGTATGTTCGA
+AAAGACCGGCGATCGTCAACTTAGCGCGTGGGAGGCTGGAATTCTGACGCGTCGCTATGGTCTGGATAAAGAAATGGT
+GATGGATTTCTTTAAAGAGAATCATTCCGGGATGGCGGTTCGCTTCTTTATGGCCGGTTATCGACTCGAAGGTTGA" } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_1" } ,
+          descr {
+            title "N-acetylmuramoyl-L-alanine amidase AmiD [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 276 ,
+            seq-data
+              ncbieaa "MRALLWLVGLALLLTGCASEKGIIDEEGYQLDTRHRAQAAYPRIKVLVIHYTAEN
+FDVSLATLTGRNVSSHYLIPATPPLYGGKPRIWQLVPEQDQAWHAGVSFWRGATRLNDTSIGIELENRGWRMSGGVKS
+FAPFESAQIQALIPLAKDIIARYDIKPQNVVAHADIAPQRKDDPGPRFPWRELAAQGIGAWPDAQRVAFYLAGRAPYT
+PVDTATVLALLSRYGYEVKADMTAREQQRVIMAFQMHFRPAQWNGIADAETQAIAEALLEKYGQD" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 9 ,
+                    data
+                      prot {
+                        name {
+                          "N-acetylmuramoyl-L-alanine amidase AmiD" } ,
+                        ec {
+                          "3.5.1.28" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 275 ,
+                        id
+                          local
+                            str "header_genome3_1_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_2" } ,
+          descr {
+            title "N-acetylmuramoyl-L-alanine amidase AmiD [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 276 ,
+            seq-data
+              ncbieaa "MRALLWLVGLALLLTGCASEKGIIDEEGYQLDTRHRAQAAYPRIKVLVIHYTAEN
+FDVSLATLTGRNVSSHYLIPATPPLYGGKPRIWQLVPEQDQAWHAGVSFWRGATRLNDTSIGIELENRGWRMSGGVKS
+FAPFESAQIQALIPLAKDIIARYDIKPQNVVAHADIAPQRKDDPGPRFPWRELAAQGIGAWPDAQRVAFYLAGRAPYT
+PVDTATVLALLSRYGYEVKADMTAREQQRVIMAFQMHFRPAQWNGIADAETQAIAEALLEKYGQD" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 10 ,
+                    data
+                      prot {
+                        name {
+                          "N-acetylmuramoyl-L-alanine amidase AmiD" } ,
+                        ec {
+                          "3.5.1.28" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 275 ,
+                        id
+                          local
+                            str "header_genome3_1_2" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_3" } ,
+          descr {
+            title "5-carboxymethyl-2-hydroxymuconate Delta-isomerase [Genus
+ species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 157 ,
+            seq-data
+              ncbieaa "MPKRRRLPKHYWRSTARINRARYREDSLFEDMPHFIAECTENIREQADLPGLFSK
+VNEALAASGIFPIGGIRSRAHWLDTWQMADGKHDYAFVHMTLKIGAGRSLESRQEVGEMLFGLIKAHFADLMENRYLA
+LSFEIAELHPTLNYKQNNVHALFK" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 11 ,
+                    data
+                      prot {
+                        name {
+                          "5-carboxymethyl-2-hydroxymuconate Delta-isomerase" } ,
+                        ec {
+                          "5.3.3.10" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 156 ,
+                        id
+                          local
+                            str "header_genome3_1_3" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_4" } ,
+          descr {
+            title "Phage shock protein B [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 74 ,
+            seq-data
+              ncbieaa "MSALFLAIPLTIFVLFVLPIWLWLHYSNRAGRGELSQSEQQRLLQLTDDAQRMRE
+RIQALEDILDAEHPNWRER" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 12 ,
+                    data
+                      prot {
+                        name {
+                          "Phage shock protein B" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 73 ,
+                        id
+                          local
+                            str "header_genome3_1_4" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_5" } ,
+          descr {
+            title "hypothetical protein PFKCIMHH_00005 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 467 ,
+            seq-data
+              ncbieaa "MPATKFSRRTLLTAGSALAVLPFLRALPVQAREPRETVDIKDYPADDGIASFKQA
+FADGQTVVVPPGWVCENINAAITIPAGKTLRVQGAVRGNGRGRFILQDGCQVVGEQGGSLHNVTLDVRGSDCVIKGVA
+MSGFGPVAQIFIGGKEPQVMRNLIIDDITVTHANYAILRQGFHNQMDGARITHSRFSDLQGDAIEWNVAIHDRDILIS
+DHVIERIDCTNGKINWGIGIGLAGSTYDNSYPEDQAVKNFVVANITGSDCRQLVHVENGKHFVIRNVKAKNITPDFSK
+NAGIDNATIAIYGCDNFVIDNIDMTNSAGMLIGYGVVKGKYLSIPQNFKLNAIRLDNRQVAYKLRGIQISSGNTPSFV
+AITNVRMTRATLELHNQPQHLFLRNINVMQTSAIGPALKMHFDLRKDVRGQFMARQDTLLSLANVHAINENGQSSVDI
+DRINHQTVNVEAVNFSLPKRGG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 13 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 466 ,
+                        id
+                          local
+                            str "header_genome3_1_5" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_6" } ,
+          descr {
+            title "Histidine transport ATP-binding protein HisP [Genus
+ species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 257 ,
+            seq-data
+              ncbieaa "MSENKLHVIDLHKRYGGHEVLKGVSLQARAGDVISIIGSSGSGKSTFLRCINFLE
+KPSEDAIIVNGQNINLVRDKDGQLKVADKNQLRLLRTRLTMVFQHFNLWSHMTVLENVMEAPIQVLGLSKHDARERAL
+KYLAKVGIDERAQGKYPVHLSGGQQQRVSIARALAMEPDVLLFDEPTSALDPELVGEVLRIMQQLAEEGKTMVVVTHE
+MGFVRHVSSHVIFLHQGKIEEEGDPEQVFGNPQSPRLQQFLKGSLK" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 14 ,
+                    data
+                      prot {
+                        name {
+                          "Histidine transport ATP-binding protein HisP" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 256 ,
+                        id
+                          local
+                            str "header_genome3_1_6" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_7" } ,
+          descr {
+            title "tRNA (guanine-N(1)-)-methyltransferase [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 263 ,
+            seq-data
+              ncbieaa "MRAIYRRCVFIGIVSLFPEMFRAITDYGVTGRAVKNGLLNIQSWSPRDFTHDRHR
+TVDDRPYGGGPGMLMMVQPLRDAIHAAKAAAGEGAKVIYLSPQGRKLDQAGVSELATNQKLILVCGRYEGVDERVIQT
+EIDEEWSIGDYVLSGGELPAMTLIDSVARFIPGVLGHEASAIEDSFADGLLDCPHYTRPEVLEGMEVPPVLLSGNHAE
+IRRWRLKQSLGRTWLRRPELLENLALTEEQARLLAEFKTEHAQQQHKHDGMA" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 15 ,
+                    data
+                      prot {
+                        name {
+                          "tRNA (guanine-N(1)-)-methyltransferase" } ,
+                        ec {
+                          "2.1.1.228" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 262 ,
+                        id
+                          local
+                            str "header_genome3_1_7" } } } } } } ,
+        seq {
+          id {
+            local
+              str "header_genome3_1_8" } ,
+          descr {
+            title "hypothetical protein PFKCIMHH_00008 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 95 ,
+            seq-data
+              ncbieaa "MNNHFGKGLMAGLHAPYAYSAHHAVNFCSEYKRGFVLGFTHRMFEKTGDRQLSAW
+EAGILTRRYGLDKEMVMDFFKENHSGMAVRFFMAGYRLEG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 16 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 94 ,
+                        id
+                          local
+                            str "header_genome3_1_8" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 1 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_1" ,
+                location
+                  int {
+                    from 0 ,
+                    to 830 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P75820" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "amiD_1" ,
+                        locus-tag "PFKCIMHH_00001" } } } ,
+                dbxref {
+                  {
+                    db "COG" ,
+                    tag
+                      str "COG3023" } } } ,
+              {
+                id
+                  local
+                    id 2 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_2" ,
+                location
+                  int {
+                    from 879 ,
+                    to 1709 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P75820" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "amiD_2" ,
+                        locus-tag "PFKCIMHH_00002" } } } ,
+                dbxref {
+                  {
+                    db "COG" ,
+                    tag
+                      str "COG3023" } } } ,
+              {
+                id
+                  local
+                    id 3 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_3" ,
+                location
+                  int {
+                    from 1654 ,
+                    to 2127 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:Q05354" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "hpcD" ,
+                        locus-tag "PFKCIMHH_00003" } } } } ,
+              {
+                id
+                  local
+                    id 4 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_4" ,
+                location
+                  int {
+                    from 2171 ,
+                    to 2395 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P0AFM9" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "pspB" ,
+                        locus-tag "PFKCIMHH_00004" } } } } ,
+              {
+                id
+                  local
+                    id 5 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_5" ,
+                location
+                  int {
+                    from 2424 ,
+                    to 3827 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "PFKCIMHH_00005" } } } } ,
+              {
+                id
+                  local
+                    id 6 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_6" ,
+                location
+                  int {
+                    from 3862 ,
+                    to 4635 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P02915" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "hisP" ,
+                        locus-tag "PFKCIMHH_00006" } } } ,
+                dbxref {
+                  {
+                    db "COG" ,
+                    tag
+                      str "COG4598" } } } ,
+              {
+                id
+                  local
+                    id 7 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_7" ,
+                location
+                  int {
+                    from 4640 ,
+                    to 5431 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:P0A873" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "trmD" ,
+                        locus-tag "PFKCIMHH_00007" } } } ,
+                dbxref {
+                  {
+                    db "COG" ,
+                    tag
+                      str "COG0336" } } } ,
+              {
+                id
+                  local
+                    id 8 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "header_genome3_1_8" ,
+                location
+                  int {
+                    from 5459 ,
+                    to 5746 ,
+                    strand plus ,
+                    id
+                      local
+                        str "header_genome3_1" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "PFKCIMHH_00008" } } } } } } } } ,
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 12 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 5 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2019 } } } ,
+        create-date
+          std {
+            year 2019 ,
+            month 12 ,
+            day 5 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "genome3_plasmi_2" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 1968 ,
+            seq-data
+              iupacna "ATGTCTACGCTTCTCTATTTGCACGGATTCAACAGTTCCCCTCGCTCGGCAAAAG
+CGTGCCAGCTAAAAAACTGGCTGGCGGAGCGTCATCCGCATGTTGAGATGATCGTCCCTCAACTACCGCCGTATCCTG
+CCGATGCGGCGGAGTTGCTGGAGTCTCTCGTGCTTGAGCATGGCGGTGCGCCATTAGGGCTGGTAGGATCGTCGCTGG
+GTGGTTATTACGCCACCTGGCTGTCGCAATGTTTTATGCTGCCGGCTGTGGTGGTGAATCCCGCCGTGCGGCCCTTTG
+AATTACTGACCGACTATCTCGGTCAGAACGAGAACCCCTACACCGGGCAGCAATATGTGCTAGAGTCTCGCCATATTT
+ATGATCTTAAAGTCATGCAGATTGACCCGCTGGAAGCGCCGGACCTGATCTGGCTACTGCAACAGACGGGCGATGAAG
+TGCTGGATTACCGCCAGGCGGTGGCATATTACGCCTCCTGCCGTCAGACAGTGACCGAGGGTGGTAATCACGCATTCA
+CGGGCTTCGAAGATTATTTCAACCAGATTGTCGATTTTCTTGGACTGCACAGTTGCTGACGCGTAGCGGCCGGAATCT
+TCTCGGAGAGGCGCTTCTCTCTCGGAGATGATTGACCCTATTTTTGCGTCCTGTACGCTAATTGCCGTCTTTGTTGTT
+TTACTGGCCATGGGCGCGCCTATCGGGATCTGCATCGTTATCGCCTCTTTCAGCACCATGATGCTGGTACTGCCTTTC
+GATATTTCGATGTTCGCCACCGCGCAAAAAATGTTCTCCAGCCTGGACAGTTTTGCCTTGCTGGCCGTGCCGTTCTTC
+GTTTTGTCCGGGGTGATCATGAATAGCGGGGGAATTGCCGCCCGGCTGATCAATTTTGCCAAACTGTTTACTGGCAAA
+CTGCCCGGTTCGCTCTCTTATACCAACATCGTCGGCAATATGATGTTCGGTGCAATTTCCGGATCGGCAATTGCCGCC
+TCAACCTCCATCGGCGGCGTGATGGTGCCGATGAGCGCGCGCGAAGGTTACGATCGCGGCTTTGCGGCCGCGGTGAAT
+ATCGCCTCCGCGCCGACGGGAATGTTAATTCCGCCCACCACGGCTTTTATCCTTTATGCGCTGGCAAGCGGGGGAACA
+TCGATTGCCGCTCTGTTCGCCGGCGGTCTGGTCGCGGGAGTGCTGTGGGGCGTTGGCTGTATGCTGGTCACGCTGGTA
+GTCGCTAAGCGTCGAAATTATCGGGTTTTCTTCACCGTCCAAAAAGGCATGGCGCTAAAAGTTGCCGTTGAGGCCATT
+CCCAGCCTGTTACTGATCGTGATTATCGTCGGCGGCATTGTGCAGGGGATTTTCACCGCCATTGAAGCCTCCGCGATT
+GCCGTGGTGTATACGTTATTGCTGACGATGGTGTTTTACCGCACGCTGAAAATTAAGGATTTGCCTTCGATTTTGCTC
+CAGACAGTGGTAATGACCGGGGTCATCATGTTCCTGCTGGCAACCTCTTCGGCGATGTCCTTCTCAATGTCGATCACC
+AATATTCCTGCGGCGCTGAGCGATATGATCCTCGGTATTTCCGCCAATAAACTGGTTATCCTGTTAGTCATTACCGTC
+TTTTTGTTGATTATCGGCGCATTTATGGATATCGGTCCGGCCATTCTGATTTTTACCCCGATTCTGCTGCCGATCATG
+GCTAAACTGGGCGTCGATCCGGTGCATTTGGGCATTATCATGATCTATAACCTGGCGATTGGCACCATTACGCCGCCA
+GTTGGCAGTGGTTTATATGTCGGGGCGAGCGTCGGTAAGGTCAAAGTTGAGGAAGTGATTAAACCGTTGCTGCCTTTT
+TACGGCGCGATTATCGGCGTTCTGTTATTAATTACCTACATTCCGGAAATCATACTGTTCTTACCCCGTCTACTGGGC
+ATCATGTAAACCCGATGGCGCGCAGAGGCGCGAGTTCTGGA" } } ,
+        seq {
+          id {
+            local
+              str "genome3_plasmi_2_1" } ,
+          descr {
+            title "hypothetical protein PFKCIMHH_00009 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 193 ,
+            seq-data
+              ncbieaa "MSTLLYLHGFNSSPRSAKACQLKNWLAERHPHVEMIVPQLPPYPADAAELLESLV
+LEHGGAPLGLVGSSLGGYYATWLSQCFMLPAVVVNPAVRPFELLTDYLGQNENPYTGQQYVLESRHIYDLKVMQIDPL
+EAPDLIWLLQQTGDEVLDYRQAVAYYASCRQTVTEGGNHAFTGFEDYFNQIVDFLGLHSC" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 19 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 192 ,
+                        id
+                          local
+                            str "genome3_plasmi_2_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "genome3_plasmi_2_2" } ,
+          descr {
+            title "C4-dicarboxylate TRAP transporter large permease protein
+ DctM [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 435 ,
+            seq-data
+              ncbieaa "MIDPIFASCTLIAVFVVLLAMGAPIGICIVIASFSTMMLVLPFDISMFATAQKMF
+SSLDSFALLAVPFFVLSGVIMNSGGIAARLINFAKLFTGKLPGSLSYTNIVGNMMFGAISGSAIAASTSIGGVMVPMS
+AREGYDRGFAAAVNIASAPTGMLIPPTTAFILYALASGGTSIAALFAGGLVAGVLWGVGCMLVTLVVAKRRNYRVFFT
+VQKGMALKVAVEAIPSLLLIVIIVGGIVQGIFTAIEASAIAVVYTLLLTMVFYRTLKIKDLPSILLQTVVMTGVIMFL
+LATSSAMSFSMSITNIPAALSDMILGISANKLVILLVITVFLLIIGAFMDIGPAILIFTPILLPIMAKLGVDPVHLGI
+IMIYNLAIGTITPPVGSGLYVGASVGKVKVEEVIKPLLPFYGAIIGVLLLITYIPEIILFLPRLLGIM" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 20 ,
+                    data
+                      prot {
+                        name {
+                          "C4-dicarboxylate TRAP transporter large permease
+ protein DctM" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 434 ,
+                        id
+                          local
+                            str "genome3_plasmi_2_2" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 17 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "genome3_plasmi_2_1" ,
+                location
+                  int {
+                    from 0 ,
+                    to 581 ,
+                    strand plus ,
+                    id
+                      local
+                        str "genome3_plasmi_2" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "PFKCIMHH_00009" } } } } ,
+              {
+                id
+                  local
+                    id 18 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "genome3_plasmi_2_2" ,
+                location
+                  int {
+                    from 628 ,
+                    to 1935 ,
+                    strand plus ,
+                    id
+                      local
+                        str "genome3_plasmi_2" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:UniProtKB:O07838" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus "dctM" ,
+                        locus-tag "PFKCIMHH_00010" } } } ,
+                dbxref {
+                  {
+                    db "COG" ,
+                    tag
+                      str "COG1593" } } } } } } } ,
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 12 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 5 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2019 } } } ,
+        create-date
+          std {
+            year 2019 ,
+            month 12 ,
+            day 5 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "genome3_plasmi_3" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 1102 ,
+            seq-data
+              iupacna "CACAGGGCTTAGAGGCGCTATGGCAATGATAATTAATGGGAAATTAATTAAAGCA
+AAAGACTTAGCTAAGGCTGCAGGTGTATCTCGTTCAACAGTGATTAAATATTACGGCATTAGCCGTGAGAATTACGAA
+AGGGTAGCAACTGAAAGAAGGAAGCTTGCTTTTGAACTAAGAGCATCAGGTTTAAAATGGAAAGAAGTTGCTGAAAAA
+ATGAACACGACAAAATATAGCGCAATTGCATATTATAGACGATATTTAGCATTAGAGAAAAACAAATAACAGGCGCTA
+AGGCGGCGATCCTAGCGCGCGATCGCGCATGCGATGGTCGAACTGCAACATCAACGGCTGATGGTGCTTGCCGAACAG
+CTCCAGCTGGACAGTCTTATCGGCGCAGCGCCGGCGCTGTCGCAACAGGCGGTGGATCAGGAATGGAGCTACATGGAC
+TTCCTGGAGCACCTGTTACATGAGGAGAAACTGGCCCGGCATCAGCGTAAACAGGCGATGTACACGCGGATGGCAGCC
+TTCCCGGCGGTAAAGACGTTCGAGGAGTACGACTTCACCTTCGCCACCGGCGCTCCTCAGAAGCAAATCCAGTCGCTG
+CGATCCCTGAGCTTCATAGAGCGTAACGAAAACATCGTGTTGCTGGGGCCATCGGGCGTGGGAAAAACGCATCTGGCG
+ATAGCCATGGGCTACGAAGCAGTACGGGCGGGCATCAAGGTTCGCTTCACAACAGCAGCGGACCTGCTGCTACAGCTG
+TCCACTTCACAGCGTCAGGGCCGTTACAAAACGACTCTCAATCGTGGTGTCATGGCCCCGAAGCTGCTTATCATCGAT
+GAAATAGGTTATCTGCCGTTCAGTCAGGAGGAAGCCAAGCTGTTCTTCCAGGTCATCGCCAAACGTTACGAGAAGAGC
+GCGATGATCCTGACCTCCAACCTGCCGTTCGGGCAGTGGGATCAGACGTTCGCCGGTGATGCAGCGCTGACATCGGCG
+ATGCTGGACCGGATCTTACATCACTCACACGTCGTGCAAATAAAAGGGGAAAGCTATCGACTGAAGCAGAAACGAAAG
+GCCGGGGTTATAGCTGAAGCTAATCCTGAGTAA" } } ,
+        seq {
+          id {
+            local
+              str "genome3_plasmi_3_1" } ,
+          descr {
+            title "hypothetical protein PFKCIMHH_00011 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 84 ,
+            seq-data
+              ncbieaa "MIINGKLIKAKDLAKAAGVSRSTVIKYYGISRENYERVATERRKLAFELRASGLK
+WKEVAEKMNTTKYSAIAYYRRYLALEKNK" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 23 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 83 ,
+                        id
+                          local
+                            str "genome3_plasmi_3_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "genome3_plasmi_3_2" } ,
+          descr {
+            title "IS21 family transposase ISSen3 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 259 ,
+            seq-data
+              ncbieaa "MVELQHQRLMVLAEQLQLDSLIGAAPALSQQAVDQEWSYMDFLEHLLHEEKLARH
+QRKQAMYTRMAAFPAVKTFEEYDFTFATGAPQKQIQSLRSLSFIERNENIVLLGPSGVGKTHLAIAMGYEAVRAGIKV
+RFTTAADLLLQLSTSQRQGRYKTTLNRGVMAPKLLIIDEIGYLPFSQEEAKLFFQVIAKRYEKSAMILTSNLPFGQWD
+QTFAGDAALTSAMLDRILHHSHVVQIKGESYRLKQKRKAGVIAEANPE" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 24 ,
+                    data
+                      prot {
+                        name {
+                          "IS21 family transposase ISSen3" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 258 ,
+                        id
+                          local
+                            str "genome3_plasmi_3_2" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 21 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "genome3_plasmi_3_1" ,
+                location
+                  int {
+                    from 25 ,
+                    to 279 ,
+                    strand plus ,
+                    id
+                      local
+                        str "genome3_plasmi_3" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "PFKCIMHH_00011" } } } } ,
+              {
+                id
+                  local
+                    id 22 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "genome3_plasmi_3_2" ,
+                location
+                  int {
+                    from 322 ,
+                    to 1101 ,
+                    strand plus ,
+                    id
+                      local
+                        str "genome3_plasmi_3" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } ,
+                  {
+                    qual "inference" ,
+                    val "similar to AA sequence:ISfinder:ISSen3" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "PFKCIMHH_00012" } } } } } } } } } }

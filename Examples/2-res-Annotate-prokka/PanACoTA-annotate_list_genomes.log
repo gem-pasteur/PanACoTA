@@ -1,0 +1,12 @@
+[2019-12-05 11:26:33] :: INFO :: PanACoTA version 20190425
+[2019-12-05 11:26:33] :: INFO :: Command used
+ 	 > PanACoTA annotate -d Examples/genomes_init -r annotate-prokka-scratch-prokka -l Examples/input_files/list_genomes.lst -n EXAM --threads 8
+[2019-12-05 11:26:33] :: INFO :: Let's start!
+[2019-12-05 11:26:33] :: INFO :: Cutting genomes at each stretch of at least 5 'N', and then, calculating genome size, number of contigs and L90.
+[2019-12-05 11:26:33] :: INFO :: Generating distribution of L90 and #contigs graphs.
+[2019-12-05 11:26:34] :: INFO :: -> Original sequences folder ('orig_name' column): Examples/genomes_init 
+[2019-12-05 11:26:34] :: INFO :: 	-> If original sequence not found in Examples/genomes_init, look for it in annotate-prokka-scratch-prokka/tmp_files, as it must be a concatenation of several input sequence files.
+[2019-12-05 11:26:34] :: INFO :: -> Folder with sequence files that will be used for annotation ('to_annotate' column): annotate-prokka-scratch-prokka/tmp_files
+[2019-12-05 11:26:34] :: INFO :: Renaming kept genomes according to their quality.
+[2019-12-05 11:26:34] :: INFO :: Annotating all genomes with prokka
+[2019-12-05 11:26:39] :: INFO :: Annotation step done.

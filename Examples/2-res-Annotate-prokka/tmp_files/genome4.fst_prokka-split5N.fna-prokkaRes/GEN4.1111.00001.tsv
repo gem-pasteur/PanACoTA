@@ -1,0 +1,10 @@
+locus_tag	ftype	length_bp	gene	EC_number	COG	product
+LIKMDGFN_00001	CDS	831	amiD	3.5.1.28	COG3023	N-acetylmuramoyl-L-alanine amidase AmiD
+LIKMDGFN_00002	CDS	381	hpcD	5.3.3.10		5-carboxymethyl-2-hydroxymuconate Delta-isomerase
+LIKMDGFN_00003	CDS	804	hpcG	4.2.1.163		2-oxo-hept-4-ene-1,7-dioate hydratase
+LIKMDGFN_00004	CDS	1404				hypothetical protein
+LIKMDGFN_00005	CDS	774	hisP		COG4598	Histidine transport ATP-binding protein HisP
+LIKMDGFN_00006	CDS	768	trmD	2.1.1.228	COG0336	tRNA (guanine-N(1)-)-methyltransferase
+LIKMDGFN_00007	CDS	261				hypothetical protein
+LIKMDGFN_00008	CDS	582				hypothetical protein
+LIKMDGFN_00009	CDS	1083	dctM		COG1593	C4-dicarboxylate TRAP transporter large permease protein DctM
