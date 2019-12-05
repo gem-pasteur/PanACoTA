@@ -262,7 +262,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     if list_file:
         listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     else:
-        listfile_base = os.path.basename(os.path.splitext(from_info)[0])
+        list_file = os.path.basename(os.path.splitext(from_info)[0])
+        listfile_base = list_file
 
     # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
@@ -607,7 +608,7 @@ def check_args(parser, args):
     print()
 
     # If db_path2 is used only with infofile
-    if args.db_path2 and not args.info:
+    if args.db_path2 and not args.from_info:
         parser.error("Using '-d2 <path>' means that you are running from an info file, whose "
                      "sequences come from 2 different folders (db_path and tmp_path if from a "
                      "previous run of this module). Use --info <info-file> or "
