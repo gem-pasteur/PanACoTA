@@ -275,12 +275,14 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
-    logfile_base = utils.init_logger(logfile_base, level, name='annotate', details=True,
-                                verbose=verbose, quiet=quiet)
+    logfile_base = utils.init_logger(logfile_base, level, name='annotate', log_details=True,
+                                     verbose=verbose, quiet=quiet)
     logger = logging.getLogger('annotate')
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
     logger.info("Let's start!")
+
+    logger.debug("debug!!!")
 
     # STEP 1. analyze genomes (nb contigs, L90, rows of N...)
     # If already info on genome ('--info <file>' option), skip this step
@@ -314,8 +316,6 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # Get list of genomes kept (according to L90 and nbcont thresholds)
     kept_genomes = {genome: info for genome, info in genomes.items()
                     if info[-2] <= nbcont and info[-1] <= l90}
-    print(genomes.keys())
-    sys.exit(1)
     # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # Info on folder containing original sequences
@@ -330,7 +330,6 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         else:
             logger.info(f"-> Folder with sequence files that will be used for annotation "
                         f"('to_annotate' column): {tmp_dir}")
-
     # If only QC, stop here.
     if qc_only:
         # Write information on genomes that would be annotated with the current
@@ -358,17 +357,17 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # end program.
     if not results_ok:
         logger.error("Error: No genome was correctly annotated, no need to format them.")
-        return
+        return 1
     # list of genomes skipped because annotation had problems: no format step run
     skipped = [genome for (genome, ok) in results.items() if not ok]
     # At least 1 genome was not annotated: write a message to warn on it
     if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
                                     logfile=logfile_base)
+
     # STEP 5. Format genomes annotated
     # Here, we have at least 1 genome annotated (otherwise,
     # it would already have stopped because results_ok is empty)
-
     # Initialize list of genomes skipped because something went wrong while formatting.
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
