@@ -1,11 +1,12 @@
-[2019-12-03 13:05:15] :: INFO :: PanACoTA version 20190425
-[2019-12-03 13:05:15] :: INFO :: Command used
- 	 > PanACoTA annotate -d Examples/genomes_init -l Examples/input_files/list_genomes.lst -n EXEM -r Examples/1-res-Annotate-prodigal --prodigal --small
-[2019-12-03 13:05:15] :: INFO :: Let's start!
-[2019-12-03 13:05:15] :: INFO :: Cutting genomes at each stretch of at least 5 'N', and then, calculating genome size, number of contigs and L90.
-[2019-12-03 13:05:15] :: INFO :: Generating distribution of L90 and #contigs graphs.
-[2019-12-03 13:05:16] :: INFO :: -> Original sequences folder ('orig_name' column): Examples/genomes_init 
-[2019-12-03 13:05:16] :: INFO :: 	-> If original sequence not found in Examples/genomes_init, look for it in Examples/1-res-Annotate-prodigal/tmp_files, as it must be a concatenation of several input sequence files.
-[2019-12-03 13:05:16] :: INFO :: -> Folder with sequence files that will be used for annotation ('to_annotate' column): Examples/1-res-Annotate-prodigal/tmp_files
-[2019-12-03 13:05:16] :: INFO :: Renaming kept genomes according to their quality.
-[2019-12-03 13:05:16] :: INFO :: Annotation step done.
+[2019-12-05 10:00:47] :: INFO :: PanACoTA version 20190425
+[2019-12-05 10:00:47] :: INFO :: Command used
+ 	 > PanACoTA annotate -d Examples/genomes_init -l Examples/input_files/list_genomes.lst -n EXAM -r Examples/1-res-Annotate-prodigal2 --prodigal --small
+[2019-12-05 10:00:47] :: INFO :: Let's start!
+[2019-12-05 10:00:47] :: INFO :: Cutting genomes at each stretch of at least 5 'N', and then, calculating genome size, number of contigs and L90.
+[2019-12-05 10:00:47] :: INFO :: Generating distribution of L90 and #contigs graphs.
+[2019-12-05 10:00:48] :: INFO :: -> Original sequences folder ('orig_name' column): Examples/genomes_init 
+[2019-12-05 10:00:48] :: INFO :: 	-> If original sequence not found in Examples/genomes_init, look for it in Examples/1-res-Annotate-prodigal2/tmp_files, as it must be a concatenation of several input sequence files.
+[2019-12-05 10:00:48] :: INFO :: -> Folder with sequence files that will be used for annotation ('to_annotate' column): Examples/1-res-Annotate-prodigal2/tmp_files
+[2019-12-05 10:00:48] :: INFO :: Renaming kept genomes according to their quality.
+[2019-12-05 10:00:48] :: INFO :: Annotating all genomes with prodigal
+[2019-12-05 10:00:49] :: INFO :: Annotation step done.
