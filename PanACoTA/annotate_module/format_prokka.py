@@ -25,12 +25,15 @@ import os
 import glob
 import sys
 import shutil
+import logging
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as general
 
+logger = logging.getLogger("annotate.prokka_format")
+
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir, logger):
+                      rep_dir, gff_dir):
     """
      Format the given genome, and create its corresponding files in the following folders:
 
@@ -97,7 +100,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, logger)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name)
     if not ok_tbl:
         try:
             os.remove(res_lst_file)
@@ -123,7 +126,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             pass
         logger.error("Problems while generating .gff file for {}".format(name))
         return False
-
     # create Genes file (and check no problem occurred with return code)
     ok_gene = create_gen(prokka_ffn_file, res_lst_file, res_gene_file, logger)
     # If gene file not created because a problem occurred, return False:
@@ -155,6 +157,183 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             pass
         logger.error("Problems while generating .prt file for {}".format(name))
         return False
+    return True
+
+
+def tbl2lst(tblfile, lstfile, contigs, genome):
+    """
+    Read prokka tbl file, and convert it to the lst file.
+
+    * prokka tbl file format::
+
+        >Feature contig_name
+        start end type
+                [EC_number text]
+                [gene text]
+                inference ab initio prediction:Prodigal:2.6
+                [inference text]
+                locus_tag test
+                product text
+
+    where `type` can be CDS, tRNA, rRNA, etc ...
+    lines between [] are not always present
+
+    * lst file format::
+
+        start end strand type locus gene_name | product | EC_number | inference 2 | db_xref
+
+    with the same types as prokka file, and strain is C (complement) or D (direct)
+    locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
+
+    Parameters
+    ----------
+    tblfile : str
+        name of prokka output tbl file to read
+    lstfile : str
+        name of lst file to generate
+    contigs : list
+        List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
+    genome : str
+        genome name (gembase format)
+
+    Returns
+    -------
+    bool :
+        True if genome name used in lstfile and prokka tblfile are the same, False otherwise
+    """
+    # Number CRISPRs. By default, 0 CRISPR
+    crispr_num = 0
+    # Protein localisation in contig (b = border ; i = inside)
+    cont_loc = "b"
+    prev_cont_loc = "b"
+    # Current contig number. Used to compare with new one, to know if protein is
+    # inside or at the border of a contig
+    cont_num = 0
+    prev_cont_num = -1
+    # Information on current feature. At the beginning, everything empty, no information
+    gene_name = "NA"
+    product = "NA"
+    ecnum = "NA"
+    inf2 = "NA"
+    db_xref = "NA"
+    start = -1
+    end = -1
+    strand = "D"
+    # Feature type (CDS, tRNA...)
+    feature_type = ""
+
+    # Open files to convert tbl to lst
+    with open(tblfile) as tblf, open(lstfile, "w") as lstf:
+        for line in tblf:
+            elems = line.strip().split("\t")
+            # If new contig, write the previous one, and get information for this new one
+            # 2 elements: ">Feature" feature_name
+            if line.startswith(">Feature"):
+                cont_num += 1  # new contig
+                cont_name = ">" + line.split()[-1] + "\n" # contig name in tbl
+                exp_cont_name = contigs[cont_num -1].split("\t")[1] # contig name in
+                # 'contigs' (at the previous step)
+            else:
+                # Get line type, and retrieve info according to it
+                # If it is not the line with start, end, type, there are only 2 elements
+                #  in the line:
+                #  - information_type information_value
+                if len(elems) == 2:
+                    if "locus_tag" in elems[0]:
+                        locus_num = elems[-1].split("_")[-1]
+                    if "gene" in elems[0]:
+                        gene_name = elems[1]
+                    if "product" in elems[0]:
+                        product = elems[1]
+                    if "EC_number" in elems[0]:
+                        ecnum = elems[1]
+                    if "inference" in elems[0] and "ab initio prediction:Prodigal" not in line:
+                        inf2 = elems[1]
+                    if "db_xref" in elems[0]:
+                        db_xref = elems[1]
+                # new gene:
+                #  3 elements = start end and type of the feature
+                else:
+                    # Check contig: new or same as previous?
+                    # New contig
+                    if cont_num != prev_cont_num:
+                        # Check if
+                        # - it is not the first gene of the genome (prev_cont_num =! -1)
+                        # - current contig 'cont_name' (name after 'feature') and
+                        # contig corresponding to cont_num 'exp_cont_name' in contigs are the
+                        # same? If not -> contigs without any gene without any feature between them
+                        # - this new contig is as expected (next contig of the list of
+                        # contigs generated while reading the prokka output genome)
+
+                        # not first contig and cont_name not corresponding
+                        if prev_cont_num != -1 and cont_name != exp_cont_name:
+                            # Save current prev_cont_num to know from which contig there
+                            # are no genes
+                            save_prev_cont_num = prev_cont_num
+                            # Find which cont_num corresponds to this cont_name
+                            try:
+                                while cont_name != exp_cont_name:
+                                    prev_cont_num += 1
+                                    exp_cont_name = contigs[prev_cont_num -1].split("\t")[0]
+                            except IndexError:
+                                logger.error(f"{cont_name} found in {tblfile} does not exist "
+                                             f"in genome {genome}.")
+                                return False
+                            logger.details("No feature found in contigs between contig {} and "
+                                           "contig {}.".format(save_prev_cont_num, prev_cont_num))
+                        # Previous loc was 'i' (because we were in the same contig as
+                        # the previous one).
+                        # But now, we know the it was the last gene of its contig: we change
+                        # loc to 'b'
+                        prev_cont_loc = "b"
+                        cont_loc = "b"
+                    # Same contig as previously
+                    else:
+                        # Same contig but prev_loc = "b" (previous feature was the first of this
+                        # contig) -> loc is now i for this current feature
+                        if prev_cont_loc == "b":
+                            cont_loc = "i"
+                    # If we are in the first contig, prev = current
+                    if prev_cont_num == -1:
+                        prev_cont_num = cont_num
+                        prev_cont_loc = cont_loc
+
+                    # If not first feature of the contig, write the previous feature to .lst file
+                    # (The first feature will be written once 2nd feature as been read)
+                    if start != -1 and end != -1:
+                        crispr_num, lstline = general.write_gene(feature_type, locus_num,
+                                                                 gene_name, product, crispr_num,
+                                                                 prev_cont_loc, genome,
+                                                                 prev_cont_num, ecnum, inf2,
+                                                                 db_xref, strand, start, end, lstf)
+
+                    # Get new values for start, end, strand and feature type
+                    start, end, feature_type = elems
+                    # Get strain of gene
+                    if int(end) < int(start):
+                        start, end = end, start
+                        strand = "C"
+                    else:
+                        strand = "D"
+                    # Initialize variables for next feature (except start, end, strand
+                    # and feature type which just calculated)
+                    prev_cont_num = cont_num
+                    prev_cont_loc = cont_loc
+                    cont_name = exp_cont_name
+                    locus_num = "NA"
+                    gene_name = "NA"
+                    product = "NA"
+                    ecnum = "NA"
+                    inf2 = "NA"
+                    db_xref = "NA"
+        # Write last feature
+        if start != -1 and end != -1:
+            prev_cont_loc = "b"
+            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
+                                               product, crispr_num, prev_cont_loc,
+                                               genome, prev_cont_num,
+                                               ecnum, inf2, db_xref,
+                                               strand, start, end, lstf)
     return True
 
 
@@ -455,179 +634,3 @@ def create_prt(faaseq, lstfile, prtseq, logger):
     return not problem
 
 
-def tbl2lst(tblfile, lstfile, contigs, genome, logger):
-    """
-    Read prokka tbl file, and convert it to the lst file.
-
-    * prokka tbl file format::
-
-        >Feature contig_name
-        start end type
-                [EC_number text]
-                [gene text]
-                inference ab initio prediction:Prodigal:2.6
-                [inference text]
-                locus_tag test
-                product text
-
-    where `type` can be CDS, tRNA, rRNA, etc ...
-    lines between [] are not always present
-
-    * lst file format::
-
-        start end strand type locus gene_name | product | EC_number | inference 2 | db_xref
-
-    with the same types as prokka file, and strain is C (complement) or D (direct)
-    locus is: `<genome_name>.<contig_num><i or b>_<protein_num>`
-
-    Parameters
-    ----------
-    tblfile : str
-        name of prokka output tbl file to read
-    lstfile : str
-        name of lst file to generate
-    contigs : list
-        List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
-    genome : str
-        genome name (gembase format)
-    logger : logging.Logger
-        log object to add information
-
-    Returns
-    -------
-    bool :
-        True if genome name used in lstfile and prokka tblfile are the same, False otherwise
-    """
-    # Number CRISPRs. By default, 0 CRISPR
-    crispr_num = 0
-    # Protein localisation in contig (b = border ; i = inside)
-    cont_loc = "b"
-    prev_cont_loc = "b"
-    # Current contig number. Used to compare with new one, to know if protein is
-    # inside or at the border of a contig
-    cont_num = 0
-    prev_cont_num = -1
-    # Information on current feature. At the beginning, everything empty, no information
-    gene_name = "NA"
-    product = "NA"
-    ecnum = "NA"
-    inf2 = "NA"
-    db_xref = "NA"
-    start = -1
-    end = -1
-    strand = "D"
-    # Feature type (CDS, tRNA...)
-    feature_type = ""
-
-    # Open files to convert tbl to lst
-    with open(tblfile) as tblf, open(lstfile, "w") as lstf:
-        for line in tblf:
-            elems = line.strip().split("\t")
-            # If new contig, write the previous one, and get information for this new one
-            # 2 elements: ">Feature" feature_name
-            if line.startswith(">Feature"):
-                cont_num += 1
-                cont_name = ">" + line.split()[-1] + "\n" # contig name in tbl
-                exp_cont_name = contigs[cont_num -1].split("\t")[0] # contig name 'contigs' (previous step)
-            else:
-                # Get line type, and retrieve info according to it
-                # If it is not the line with start, end, type, there are only 2 elements
-                #  in the line:
-                #  - information_type information_value
-                if len(elems) == 2:
-                    if "locus_tag" in elems[0]:
-                        locus_num = elems[-1].split("_")[-1]
-                    if "gene" in elems[0]:
-                        gene_name = elems[1]
-                    if "product" in elems[0]:
-                        product = elems[1]
-                    if "EC_number" in elems[0]:
-                        ecnum = elems[1]
-                    if "inference" in elems[0] and "ab initio prediction:Prodigal" not in line:
-                        inf2 = elems[1]
-                    if "db_xref" in elems[0]:
-                        db_xref = elems[1]
-                # new gene:
-                #  3 elements = start end and type of the feature
-                else:
-                    # Check contig: new or same as previous?
-                    # New contig
-                    if cont_num != prev_cont_num:
-                        # Check if
-                        # - it is not the first gene of the genome (prev_cont_num =! -1)
-                        # - current contig 'cont_name' (name after 'feature') and
-                        # contig corresponding to cont_num 'exp_cont_name' in contigs are the
-                        # same? If not -> contigs without any gene without any feature between them
-                        # - this new contig is as expected (next contig of the list of
-                        # contigs generated while reading the prokka output genome)
-
-                        # not first contig and cont_name not corresponding
-                        if prev_cont_num != -1 and cont_name != exp_cont_name:
-                            # Save current prev_cont_num to know from which contig there
-                            # are no genes
-                            save_prev_cont_num = prev_cont_num
-                            # Find which cont_num corresponds to this cont_name
-                            try:
-                                while cont_name != exp_cont_name:
-                                    prev_cont_num += 1
-                                    exp_cont_name = contigs[prev_cont_num -1].split("\t")[0]
-                            except IndexError:
-                                logger.error(f"{cont_name} found in {tblfile} does not exist "
-                                             f"in genome {genome}.")
-                                sys.exit(1)
-                            logger.details("No feature found in contigs between contig {} and "
-                                           "contig {}.".format(save_prev_cont_num, prev_cont_num))
-                        # Previous loc was 'i' (because we were in the same contig as
-                        # the previous one).
-                        # But now, we know the it was the last gene of its contig: we change
-                        # loc to 'b'
-                        prev_cont_loc = "b"
-                        cont_loc = "b"
-                    # Same contig as previously
-                    else:
-                        # Same contig but prev_loc = "b" (previous feature was the first of this
-                        # contig) -> loc is now i for this current feature
-                        if prev_cont_loc == "b":
-                            cont_loc = "i"
-                    # If we are in the first contig, prev = current
-                    if prev_cont_num == -1:
-                        prev_cont_num = cont_num
-                        prev_cont_loc = cont_loc
-
-                    # If not first feature of the contig, write the previous feature to .lst file
-                    # (The first feature will be written once 2nd feature as been read)
-                    if start != -1 and end != -1:
-                        crispr_num, lstline = general.write_gene(feature_type, locus_num,
-                                                                 gene_name, product, crispr_num,
-                                                                 prev_cont_loc, genome,
-                                                                 prev_cont_num, ecnum, inf2,
-                                                                 db_xref, strand, start, end, lstf)
-
-                    # Get new values for start, end, strand and feature type
-                    start, end, feature_type = elems
-                    # Get strain of gene
-                    if int(end) < int(start):
-                        start, end = end, start
-                        strand = "C"
-                    else:
-                        strand = "D"
-                    # Initialize variables for next feature (except start, end, strand
-                    # and feature type which just calculated)
-                    prev_cont_num = cont_num
-                    prev_cont_loc = cont_loc
-                    cont_name = exp_cont_name
-                    locus_num = "NA"
-                    gene_name = "NA"
-                    product = "NA"
-                    ecnum = "NA"
-                    inf2 = "NA"
-                    db_xref = "NA"
-        # Write last feature
-        if start != -1 and end != -1:
-            prev_cont_loc = "b"
-            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
-                                               product, crispr_num, prev_cont_loc,
-                                               genome, prev_cont_num,
-                                               ecnum, inf2, db_xref,
-                                               strand, start, end, lstf)
-    return True
