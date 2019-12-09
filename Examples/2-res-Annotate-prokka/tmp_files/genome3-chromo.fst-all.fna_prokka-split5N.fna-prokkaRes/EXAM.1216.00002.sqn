@@ -38,7 +38,7 @@ Seq-entry ::= set {
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -48,7 +48,7 @@ Seq-entry ::= set {
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -765,7 +765,7 @@ EAGILTRRYGLDKEMVMDFFKENHSGMAVRFFMAGYRLEG" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -775,7 +775,7 @@ EAGILTRRYGLDKEMVMDFFKENHSGMAVRFFMAGYRLEG" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -1002,7 +1002,7 @@ IMIYNLAIGTITPPVGSGLYVGASVGKVKVEEVIKPLLPFYGAIIGVLLLITYIPEIILFLPRLLGIM" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -1012,7 +1012,7 @@ IMIYNLAIGTITPPVGSGLYVGASVGKVKVEEVIKPLLPFYGAIIGVLLLITYIPEIILFLPRLLGIM" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {

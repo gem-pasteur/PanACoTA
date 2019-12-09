@@ -1,4 +1,4 @@
-LOCUS       header_genome3_1        5747 bp    DNA     linear       05-DEC-2019
+LOCUS       header_genome3_1        5747 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -218,7 +218,7 @@ ORIGIN
      5641 cgcgtcgcta tggtctggat aaagaaatgg tgatggattt ctttaaagag aatcattccg
      5701 ggatggcggt tcgcttcttt atggccggtt atcgactcga aggttga
 //
-LOCUS       genome3_plasmi_2        1968 bp    DNA     linear       05-DEC-2019
+LOCUS       genome3_plasmi_2        1968 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -296,7 +296,7 @@ ORIGIN
      1861 tatcggcgtt ctgttattaa ttacctacat tccggaaatc atactgttct taccccgtct
      1921 actgggcatc atgtaaaccc gatggcgcgc agaggcgcga gttctgga
 //
-LOCUS       genome3_plasmi_3        1102 bp    DNA     linear       05-DEC-2019
+LOCUS       genome3_plasmi_3        1102 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION

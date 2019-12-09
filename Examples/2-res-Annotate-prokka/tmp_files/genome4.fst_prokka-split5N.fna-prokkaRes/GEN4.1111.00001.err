@@ -20,15 +20,15 @@ DISC_INCONSISTENT_MOLINFO_TECH:Molinfo Technique Report (some missing, all same)
 Detailed Report
 
 FATAL: DiscRep_ALL:MISSING_PROTEIN_ID::9 proteins halid Ivalid IDs.
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_1 (length 276)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_2 (length 126)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_3 (length 267)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_4 (length 467)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_5 (length 257)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_6 (length 255)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_7 (length 86)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_8 (length 193)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_9 (length 360)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_1 (length 276)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_2 (length 126)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_3 (length 267)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_4 (length 467)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_5 (length 257)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_6 (length 255)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_7 (length 86)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_8 (length 193)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_9 (length 360)
 
 DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::strain (all present, all unique)
 DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::1 sources have unique values for strain
@@ -36,67 +36,67 @@ DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::taxname (all present, all unique)
 DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::1 sources have unique values for taxname
 DiscRep_ALL:DISC_FEATURE_COUNT::CDS: 9 present
 DiscRep_ALL:DISC_COUNT_NUCLEOTIDES::1 nucleotide Bioseqs are present
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 
 DiscRep_ALL:FEATURE_LOCATION_CONFLICT::9 features have inconsistent gene locations.
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	N-acetylmuramoyl-L-alanine amidase AmiD	g4_1:1-831	LIKMDGFN_00001
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	N-acetylmuramoyl-L-alanine amidase AmiD	g4_1:1-831	LIKMDGFN_00001
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	5-carboxymethyl-2-hydroxymuconate Delta-isomerase	g4_1:861-1241	LIKMDGFN_00002
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	5-carboxymethyl-2-hydroxymuconate Delta-isomerase	g4_1:861-1241	LIKMDGFN_00002
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	2-oxo-hept-4-ene-1,7-dioate hydratase	g4_1:1271-2074	LIKMDGFN_00003
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	2-oxo-hept-4-ene-1,7-dioate hydratase	g4_1:1271-2074	LIKMDGFN_00003
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:2111-3514	LIKMDGFN_00004
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:2111-3514	LIKMDGFN_00004
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	Histidine transport ATP-binding protein HisP	g4_1:3535-4308	LIKMDGFN_00005
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	Histidine transport ATP-binding protein HisP	g4_1:3535-4308	LIKMDGFN_00005
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	tRNA (guanine-N(1)-)-methyltransferase	g4_1:4327-5094	LIKMDGFN_00006
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	tRNA (guanine-N(1)-)-methyltransferase	g4_1:4327-5094	LIKMDGFN_00006
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:5138-5398	LIKMDGFN_00007
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:5138-5398	LIKMDGFN_00007
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:5413-5994	LIKMDGFN_00008
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	hypothetical protein	g4_1:5413-5994	LIKMDGFN_00008
 
 DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	C4-dicarboxylate TRAP transporter large permease protein DctM	g4_1:6052-7134	LIKMDGFN_00009
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:CDS	C4-dicarboxylate TRAP transporter large permease protein DctM	g4_1:6052-7134	LIKMDGFN_00009
 
 DiscRep_ALL:DISC_QUALITY_SCORES::Quality scores are missing on all sequences.
 
 DiscRep_ALL:ONCALLER_COMMENT_PRESENT::1 comment descriptors were found (all same)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
 
 DiscRep_ALL:MISSING_GENOMEASSEMBLY_COMMENTS::1 bioseqs are missing GenomeAssembly structured comments
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 
 DiscRep_ALL:MOLTYPE_NOT_MRNA::1 molecule types are not set as mRNA.
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 
 DiscRep_ALL:TECHNIQUE_NOT_TSA::1 technique are not set as TSA
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 
 DiscRep_ALL:MISSING_STRUCTURED_COMMENT::1 sequences do not include structured comments.
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 
 DiscRep_ALL:MISSING_PROJECT::10 sequences do not include project.
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_1 (length 276)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_2 (length 126)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_3 (length 267)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_4 (length 467)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_5 (length 257)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_6 (length 255)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_7 (length 86)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_8 (length 193)
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_9 (length 360)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_1 (length 276)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_2 (length 126)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_3 (length 267)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_4 (length 467)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_5 (length 257)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_6 (length 255)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_7 (length 86)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_8 (length 193)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1_9 (length 360)
 
 DiscRep_ALL:DISC_INCONSISTENT_MOLINFO_TECH::Molinfo Technique Report (some missing, all same)
 DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::technique (all missing)
 DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::1 Molinfos are missing field technique
-annotate-prokka-scratch-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
+Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes/GEN4.1111.00001:g4_1 (length 7134)
 

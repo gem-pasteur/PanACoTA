@@ -1,128 +1,128 @@
-[11:26:34] This is prokka 1.14.5
-[11:26:34] Written by Torsten Seemann <torsten.seemann@gmail.com>
-[11:26:34] Homepage is https://github.com/tseemann/prokka
-[11:26:34] Local time is Thu Dec  5 11:26:34 2019
-[11:26:34] You are aperrin
-[11:26:34] Operating system is darwin
-[11:26:34] You have BioPerl 1.007002
-[11:26:34] System has 8 cores.
-[11:26:34] Will use maximum of 2 cores.
-[11:26:34] Annotating as >>> Bacteria <<<
-[11:26:34] Generating locus_tag from 'annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna' contents.
-[11:26:34] Setting --locustag AMHDIIJN from MD5 a61d2237f76cf8056ab8e698ba010fa3
-[11:26:34] Creating new output folder: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes
-[11:26:34] Running: mkdir -p annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes
-[11:26:34] Using filename prefix: GEN2.1219.00001.XXX
-[11:26:34] Setting HMMER_NCPU=1
-[11:26:34] Writing log to: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.log
-[11:26:34] Command: /usr/local/bin/prokka --outdir annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes --cpus 2 --prefix GEN2.1219.00001 annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna
-[11:26:34] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin
-[11:26:34] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/../common
-[11:26:34] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin
-[11:26:34] Looking for 'aragorn' - found /usr/local/bin/aragorn
-[11:26:34] Determined aragorn version is 001002 from 'ARAGORN v1.2.38 Dean Laslett'
-[11:26:34] Looking for 'barrnap' - found /usr/local/bin/barrnap
-[11:26:34] Determined barrnap version is 000008 from 'barrnap 0.8'
-[11:26:34] Looking for 'blastp' - found /Users/aperrin/Softwares/bin/blastp
-[11:26:34] Determined blastp version is 002009 from 'blastp: 2.9.0+'
-[11:26:34] Looking for 'cmpress' - found /usr/local/bin/cmpress
-[11:26:34] Determined cmpress version is 001001 from '# INFERNAL 1.1.2 (July 2016)'
-[11:26:34] Looking for 'cmscan' - found /usr/local/bin/cmscan
-[11:26:34] Determined cmscan version is 001001 from '# INFERNAL 1.1.2 (July 2016)'
-[11:26:34] Looking for 'egrep' - found /usr/bin/egrep
-[11:26:34] Looking for 'find' - found /usr/bin/find
-[11:26:34] Looking for 'grep' - found /usr/bin/grep
-[11:26:34] Looking for 'hmmpress' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/hmmpress
-[11:26:34] Determined hmmpress version is 003001 from '# HMMER 3.1b1 (May 2013); http://hmmer.org/'
-[11:26:34] Looking for 'hmmscan' - found /usr/local/bin/hmmscan
-[11:26:34] Determined hmmscan version is 003001 from '# HMMER 3.1b2 (February 2015); http://hmmer.org/'
-[11:26:34] Looking for 'java' - found /usr/bin/java
-[11:26:34] Looking for 'makeblastdb' - found /Users/aperrin/Softwares/bin/makeblastdb
-[11:26:34] Determined makeblastdb version is 002009 from 'makeblastdb: 2.9.0+'
-[11:26:34] Looking for 'minced' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/../common/minced
-[11:26:35] Determined minced version is 002000 from 'minced 0.2.0'
-[11:26:35] Looking for 'parallel' - found /usr/local/bin/parallel
-[11:26:35] Determined parallel version is 20181022 from 'GNU parallel 20181022'
-[11:26:35] Looking for 'prodigal' - found /usr/local/bin/prodigal
-[11:26:35] Determined prodigal version is 002006 from 'Prodigal V2.6.3: February, 2016'
-[11:26:35] Looking for 'prokka-genbank_to_fasta_db' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/prokka-genbank_to_fasta_db
-[11:26:35] Looking for 'sed' - found /usr/bin/sed
-[11:26:35] Looking for 'tbl2asn' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/tbl2asn
-[11:26:35] Determined tbl2asn version is 025007 from 'tbl2asn 25.7   arguments:'
-[11:26:35] Using genetic code table 11.
-[11:26:35] Loading and checking input file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna
-[11:26:35] Wrote 5 contigs totalling 10717 bp.
-[11:26:35] Predicting tRNAs and tmRNAs
-[11:26:35] Running: aragorn -l -gc11  -w annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fna
-[11:26:35] Found 0 tRNAs
-[11:26:35] Predicting Ribosomal RNAs
-[11:26:35] Running Barrnap with 2 threads
-[11:26:35] Found 0 rRNAs
-[11:26:35] Skipping ncRNA search, enable with --rfam if desired.
-[11:26:35] Total of 0 tRNA + rRNA features
-[11:26:35] Searching for CRISPR repeats
-[11:26:35] Found 0 CRISPRs
-[11:26:35] Predicting coding sequences
-[11:26:35] Contigs total 10717 bp, so using meta mode
-[11:26:35] Running: prodigal -i annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fna -c -m -g 11 -p meta -f sco -q
-[11:26:35] Found 13 CDS
-[11:26:35] Connecting features back to sequences
-[11:26:35] Not using genus-specific database. Try --usegenus to enable it.
-[11:26:35] Annotating CDS, please be patient.
-[11:26:35] Will use 2 CPUs for similarity searching.
-[11:26:35] There are still 13 unannotated CDS left (started with 13)
-[11:26:35] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/IS with 2 CPUs
-[11:26:35] Running: cat annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.IS\.tmp\.62450\.faa | parallel --gnu --plain -j 2 --block 848 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/IS -evalue 1e-30 -qcov_hsp_perc 90 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.IS\.tmp\.62450\.blast 2> /dev/null
-[11:26:36] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.IS.tmp.62450.faa
-[11:26:36] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.IS.tmp.62450.blast
-[11:26:36] There are still 13 unannotated CDS left (started with 13)
-[11:26:36] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/AMR with 2 CPUs
-[11:26:36] Running: cat annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.AMR\.tmp\.62450\.faa | parallel --gnu --plain -j 2 --block 848 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/AMR -evalue 1e-300 -qcov_hsp_perc 90 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.AMR\.tmp\.62450\.blast 2> /dev/null
-[11:26:36] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.AMR.tmp.62450.faa
-[11:26:36] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.AMR.tmp.62450.blast
-[11:26:36] There are still 13 unannotated CDS left (started with 13)
-[11:26:36] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/sprot with 2 CPUs
-[11:26:36] Running: cat annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.sprot\.tmp\.62450\.faa | parallel --gnu --plain -j 2 --block 848 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/sprot -evalue 1e-09 -qcov_hsp_perc 80 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.sprot\.tmp\.62450\.blast 2> /dev/null
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sprot.tmp.62450.faa
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sprot.tmp.62450.blast
-[11:26:38] There are still 6 unannotated CDS left (started with 13)
-[11:26:38] Will use hmmer3 to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/hmm/HAMAP.hmm with 2 CPUs
-[11:26:38] Running: cat annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.HAMAP\.hmm\.tmp\.62450\.faa | parallel --gnu --plain -j 2 --block 345 --recstart '>' --pipe hmmscan --noali --notextw --acc -E 1e-09 --cpu 1 /Users/aperrin/Softwares/src/prokka-dec.19/db/hmm/HAMAP.hmm /dev/stdin > annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.HAMAP\.hmm\.tmp\.62450\.hmmer3 2> /dev/null
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.HAMAP.hmm.tmp.62450.faa
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.HAMAP.hmm.tmp.62450.hmmer3
-[11:26:38] Labelling remaining 5 proteins as 'hypothetical protein'
-[11:26:38] Found 8 unique /gene codes.
-[11:26:38] Fixed 0 colliding /gene names.
-[11:26:38] Adding /locus_tag identifiers
-[11:26:38] Assigned 13 locus_tags to CDS and RNA features.
-[11:26:38] Writing outputs to annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/
-[11:26:38] Generating annotation statistics file
-[11:26:38] Generating Genbank and Sequin files
-[11:26:38] Running: tbl2asn -V b -a r10k -l paired-ends -M n -N 1 -y 'Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka' -Z annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.err -i annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fsa 2> /dev/null
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/errorsummary.val
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.dr
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fixedproducts
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.ecn
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.val
-[11:26:38] Repairing broken .GBK output that tbl2asn produces...
-[11:26:38] Running: sed 's/COORDINATES: profile/COORDINATES:profile/' < annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.gbf > annotate\-prokka\-scratch\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.gbk
-[11:26:38] Deleting unwanted file: annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gbf
-[11:26:38] Output files:
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.tsv
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fna
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.err
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gff
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sqn
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.tbl
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.txt
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.faa
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fsa
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gbk
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.log
-[11:26:38] annotate-prokka-scratch-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.ffn
-[11:26:38] Annotation finished successfully.
-[11:26:38] Walltime used: 0.07 minutes
-[11:26:38] If you use this result please cite the Prokka paper:
-[11:26:38] Seemann T (2014) Prokka: rapid prokaryotic genome annotation. Bioinformatics. 30(14):2068-9.
-[11:26:38] Type 'prokka --citation' for more details.
-[11:26:38] Thank you, come again.
+[13:15:26] This is prokka 1.14.5
+[13:15:26] Written by Torsten Seemann <torsten.seemann@gmail.com>
+[13:15:26] Homepage is https://github.com/tseemann/prokka
+[13:15:26] Local time is Mon Dec  9 13:15:26 2019
+[13:15:26] You are aperrin
+[13:15:26] Operating system is darwin
+[13:15:26] You have BioPerl 1.007002
+[13:15:26] System has 8 cores.
+[13:15:26] Will use maximum of 1 cores.
+[13:15:26] Annotating as >>> Bacteria <<<
+[13:15:26] Generating locus_tag from 'Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna' contents.
+[13:15:26] Setting --locustag AMHDIIJN from MD5 a61d2237f76cf8056ab8e698ba010fa3
+[13:15:26] Creating new output folder: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes
+[13:15:26] Running: mkdir -p Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes
+[13:15:26] Using filename prefix: GEN2.1219.00001.XXX
+[13:15:26] Setting HMMER_NCPU=1
+[13:15:26] Writing log to: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.log
+[13:15:26] Command: /usr/local/bin/prokka --outdir Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes --cpus 1 --prefix GEN2.1219.00001 Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna
+[13:15:26] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin
+[13:15:26] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/../common
+[13:15:26] Appending to PATH: /Users/aperrin/Softwares/src/prokka-dec.19/bin
+[13:15:26] Looking for 'aragorn' - found /usr/local/bin/aragorn
+[13:15:26] Determined aragorn version is 001002 from 'ARAGORN v1.2.38 Dean Laslett'
+[13:15:26] Looking for 'barrnap' - found /usr/local/bin/barrnap
+[13:15:26] Determined barrnap version is 000008 from 'barrnap 0.8'
+[13:15:26] Looking for 'blastp' - found /Users/aperrin/Softwares/bin/blastp
+[13:15:26] Determined blastp version is 002009 from 'blastp: 2.9.0+'
+[13:15:26] Looking for 'cmpress' - found /usr/local/bin/cmpress
+[13:15:26] Determined cmpress version is 001001 from '# INFERNAL 1.1.2 (July 2016)'
+[13:15:26] Looking for 'cmscan' - found /usr/local/bin/cmscan
+[13:15:26] Determined cmscan version is 001001 from '# INFERNAL 1.1.2 (July 2016)'
+[13:15:26] Looking for 'egrep' - found /usr/bin/egrep
+[13:15:26] Looking for 'find' - found /usr/bin/find
+[13:15:26] Looking for 'grep' - found /usr/bin/grep
+[13:15:26] Looking for 'hmmpress' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/hmmpress
+[13:15:26] Determined hmmpress version is 003001 from '# HMMER 3.1b1 (May 2013); http://hmmer.org/'
+[13:15:26] Looking for 'hmmscan' - found /usr/local/bin/hmmscan
+[13:15:26] Determined hmmscan version is 003001 from '# HMMER 3.1b2 (February 2015); http://hmmer.org/'
+[13:15:26] Looking for 'java' - found /usr/bin/java
+[13:15:26] Looking for 'makeblastdb' - found /Users/aperrin/Softwares/bin/makeblastdb
+[13:15:26] Determined makeblastdb version is 002009 from 'makeblastdb: 2.9.0+'
+[13:15:26] Looking for 'minced' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/../common/minced
+[13:15:26] Determined minced version is 002000 from 'minced 0.2.0'
+[13:15:26] Looking for 'parallel' - found /usr/local/bin/parallel
+[13:15:26] Determined parallel version is 20181022 from 'GNU parallel 20181022'
+[13:15:26] Looking for 'prodigal' - found /usr/local/bin/prodigal
+[13:15:26] Determined prodigal version is 002006 from 'Prodigal V2.6.3: February, 2016'
+[13:15:26] Looking for 'prokka-genbank_to_fasta_db' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/prokka-genbank_to_fasta_db
+[13:15:26] Looking for 'sed' - found /usr/bin/sed
+[13:15:26] Looking for 'tbl2asn' - found /Users/aperrin/Softwares/src/prokka-dec.19/bin/../binaries/darwin/tbl2asn
+[13:15:26] Determined tbl2asn version is 025007 from 'tbl2asn 25.7   arguments:'
+[13:15:26] Using genetic code table 11.
+[13:15:26] Loading and checking input file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna
+[13:15:26] Wrote 5 contigs totalling 10717 bp.
+[13:15:26] Predicting tRNAs and tmRNAs
+[13:15:26] Running: aragorn -l -gc11  -w Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fna
+[13:15:26] Found 0 tRNAs
+[13:15:26] Predicting Ribosomal RNAs
+[13:15:26] Running Barrnap with 1 threads
+[13:15:26] Found 0 rRNAs
+[13:15:26] Skipping ncRNA search, enable with --rfam if desired.
+[13:15:26] Total of 0 tRNA + rRNA features
+[13:15:26] Searching for CRISPR repeats
+[13:15:27] Found 0 CRISPRs
+[13:15:27] Predicting coding sequences
+[13:15:27] Contigs total 10717 bp, so using meta mode
+[13:15:27] Running: prodigal -i Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fna -c -m -g 11 -p meta -f sco -q
+[13:15:27] Found 13 CDS
+[13:15:27] Connecting features back to sequences
+[13:15:27] Not using genus-specific database. Try --usegenus to enable it.
+[13:15:27] Annotating CDS, please be patient.
+[13:15:27] Will use 1 CPUs for similarity searching.
+[13:15:27] There are still 13 unannotated CDS left (started with 13)
+[13:15:27] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/IS with 1 CPUs
+[13:15:27] Running: cat Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.IS\.tmp\.95071\.faa | parallel --gnu --plain -j 1 --block 1697 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/IS -evalue 1e-30 -qcov_hsp_perc 90 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.IS\.tmp\.95071\.blast 2> /dev/null
+[13:15:27] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.IS.tmp.95071.faa
+[13:15:27] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.IS.tmp.95071.blast
+[13:15:27] There are still 13 unannotated CDS left (started with 13)
+[13:15:27] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/AMR with 1 CPUs
+[13:15:27] Running: cat Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.AMR\.tmp\.95071\.faa | parallel --gnu --plain -j 1 --block 1697 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/AMR -evalue 1e-300 -qcov_hsp_perc 90 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.AMR\.tmp\.95071\.blast 2> /dev/null
+[13:15:28] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.AMR.tmp.95071.faa
+[13:15:28] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.AMR.tmp.95071.blast
+[13:15:28] There are still 13 unannotated CDS left (started with 13)
+[13:15:28] Will use blast to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/sprot with 1 CPUs
+[13:15:28] Running: cat Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.sprot\.tmp\.95071\.faa | parallel --gnu --plain -j 1 --block 1697 --recstart '>' --pipe blastp -query - -db /Users/aperrin/Softwares/src/prokka-dec.19/db/kingdom/Bacteria/sprot -evalue 1e-09 -qcov_hsp_perc 80 -num_threads 1 -num_descriptions 1 -num_alignments 1 -seg no > Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.sprot\.tmp\.95071\.blast 2> /dev/null
+[13:15:29] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sprot.tmp.95071.faa
+[13:15:29] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sprot.tmp.95071.blast
+[13:15:29] There are still 6 unannotated CDS left (started with 13)
+[13:15:29] Will use hmmer3 to search against /Users/aperrin/Softwares/src/prokka-dec.19/db/hmm/HAMAP.hmm with 1 CPUs
+[13:15:29] Running: cat Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.HAMAP\.hmm\.tmp\.95071\.faa | parallel --gnu --plain -j 1 --block 691 --recstart '>' --pipe hmmscan --noali --notextw --acc -E 1e-09 --cpu 1 /Users/aperrin/Softwares/src/prokka-dec.19/db/hmm/HAMAP.hmm /dev/stdin > Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.HAMAP\.hmm\.tmp\.95071\.hmmer3 2> /dev/null
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.HAMAP.hmm.tmp.95071.faa
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.HAMAP.hmm.tmp.95071.hmmer3
+[13:15:30] Labelling remaining 5 proteins as 'hypothetical protein'
+[13:15:30] Found 8 unique /gene codes.
+[13:15:30] Fixed 0 colliding /gene names.
+[13:15:30] Adding /locus_tag identifiers
+[13:15:30] Assigned 13 locus_tags to CDS and RNA features.
+[13:15:30] Writing outputs to Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/
+[13:15:30] Generating annotation statistics file
+[13:15:30] Generating Genbank and Sequin files
+[13:15:30] Running: tbl2asn -V b -a r10k -l paired-ends -M n -N 1 -y 'Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka' -Z Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.err -i Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.fsa 2> /dev/null
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/errorsummary.val
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.dr
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fixedproducts
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.ecn
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.val
+[13:15:30] Repairing broken .GBK output that tbl2asn produces...
+[13:15:30] Running: sed 's/COORDINATES: profile/COORDINATES:profile/' < Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.gbf > Examples\/2\-res\-Annotate\-prokka\/tmp_files\/genome2\.fst_prokka\-split5N\.fna\-prokkaRes\/GEN2\.1219\.00001\.gbk
+[13:15:30] Deleting unwanted file: Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gbf
+[13:15:30] Output files:
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.tsv
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fna
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.err
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gff
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.sqn
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.tbl
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.txt
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.faa
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.fsa
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.gbk
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.log
+[13:15:30] Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001.ffn
+[13:15:30] Annotation finished successfully.
+[13:15:30] Walltime used: 0.07 minutes
+[13:15:30] If you use this result please cite the Prokka paper:
+[13:15:30] Seemann T (2014) Prokka: rapid prokaryotic genome annotation. Bioinformatics. 30(14):2068-9.
+[13:15:30] Type 'prokka --citation' for more details.
+[13:15:30] Thank you, come again.

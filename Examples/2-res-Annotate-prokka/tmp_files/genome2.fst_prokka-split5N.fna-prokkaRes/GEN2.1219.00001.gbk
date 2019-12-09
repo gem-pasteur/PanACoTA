@@ -1,4 +1,4 @@
-LOCUS       this_is_genome_1        2308 bp    DNA     linear       05-DEC-2019
+LOCUS       this_is_genome_1        2308 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -83,7 +83,7 @@ ORIGIN
      2221 cgaagcagtg aatttttcgc tgccgaagcg gggagggtaa cactcgcgca tagagagctc
      2281 tcagaggagc gcgcgcgcta tagcgcgc
 //
-LOCUS       this_is_genome_2        3295 bp    DNA     linear       05-DEC-2019
+LOCUS       this_is_genome_2        3295 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -214,7 +214,7 @@ ORIGIN
      3181 ccagtttgaa cgtgaaggtt acttctgcct tgacagccgc tatgcaacgg ccgataagct
      3241 ggtctttaac cgcaccgtgg gcctgcgtga tacctgggcg aaagcgggcg aataa
 //
-LOCUS       this_is_genome_3        2263 bp    DNA     linear       05-DEC-2019
+LOCUS       this_is_genome_3        2263 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -311,7 +311,7 @@ ORIGIN
      2161 gggcgaagaa ctggcagaag ccagcggtga tttgtggcgt gacgcccgct gggccatcag
      2221 ccgggtgcag gatgcgccgc actgcacagt ggagcttatc tga
 //
-LOCUS       this_is_genome_4        2845 bp    DNA     linear       05-DEC-2019
+LOCUS       this_is_genome_4        2845 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -418,7 +418,7 @@ ORIGIN
      2761 ggggagggct ctggaagcgc agtttatgca gattaaggca gcacatgccc gaagcattta
      2821 cagtgggttg acaaagaata gataa
 //
-LOCUS       genome2_small_5            6 bp    DNA     linear       05-DEC-2019
+LOCUS       genome2_small_5            6 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION

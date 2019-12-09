@@ -1,4 +1,4 @@
-LOCUS       genome1_1               2784 bp    DNA     linear       05-DEC-2019
+LOCUS       genome1_1               2784 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION
@@ -98,7 +98,7 @@ ORIGIN
      2701 gcaggcgatt gccgaagcat tactggagaa gtacggccag gattaacgcg ataggcgcgc
      2761 gagattacgc gcgcagtatc gcgc
 //
-LOCUS       genome1_2               7024 bp    DNA     linear       05-DEC-2019
+LOCUS       genome1_2               7024 bp    DNA     linear       09-DEC-2019
 DEFINITION  Genus species strain strain.
 ACCESSION   
 VERSION

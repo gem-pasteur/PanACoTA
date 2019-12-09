@@ -38,7 +38,7 @@ Seq-entry ::= set {
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -48,7 +48,7 @@ Seq-entry ::= set {
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -280,7 +280,7 @@ DRINHQTVNVEAVNFSLPKRGG" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -290,7 +290,7 @@ DRINHQTVNVEAVNFSLPKRGG" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -689,7 +689,7 @@ GYFCLDSRYATADKLVFNRTVGLRDTWAKAGE" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -699,7 +699,7 @@ GYFCLDSRYATADKLVFNRTVGLRDTWAKAGE" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -1058,7 +1058,7 @@ ERIQHYFNAVYCWARAMLNERYQDYDATASGVKRGEELAEASGDLWRDARWAISRVQDAPHCTVELI" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -1068,7 +1068,7 @@ ERIQHYFNAVYCWARAMLNERYQDYDATASGVKRGEELAEASGDLWRDARWAISRVQDAPHCTVELI" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       seq-set {
         seq {
           id {
@@ -1382,7 +1382,7 @@ VLGHSNMKSTLEYVENDIAVMGRALEAQFMQIKAAHARSIYSGLTKNR" } ,
               label
                 str "day" ,
               data
-                int 5 } ,
+                int 9 } ,
             {
               label
                 str "year" ,
@@ -1392,7 +1392,7 @@ VLGHSNMKSTLEYVENDIAVMGRALEAQFMQIKAAHARSIYSGLTKNR" } ,
           std {
             year 2019 ,
             month 12 ,
-            day 5 } } ,
+            day 9 } } ,
       inst {
         repr raw ,
         mol dna ,
