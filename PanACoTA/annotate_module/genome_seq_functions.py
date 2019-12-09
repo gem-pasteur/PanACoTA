@@ -58,7 +58,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=Fals
     bar = None
     curnum = None
     if cut:
-        logger.info(("Cutting genomes at each stretch of at least {} 'N', "
+        logger.info(("Cutting genomes at each time there are at least {} 'N' in a row, "
                      "and then, calculating genome size, number of contigs and L90.").format(nbn))
     else:
         logger.info("Calculating genome size, number of contigs, L90")
