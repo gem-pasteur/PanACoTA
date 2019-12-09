@@ -258,6 +258,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
         return 0
     logger.info("Sketching all genomes...")
     cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
+    logger.details(cmd_sketch)
     error_sketch = (f"Error while trying to sketch {len(sorted_genomes)} genomes to combined "
                     "archive. Maybe some genome sequences in "
                     "'tmp_files' are missing! Check logfile: "
