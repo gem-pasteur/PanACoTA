@@ -227,9 +227,15 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
     # sorted_genome : [genome_file] ordered by L90/nbcont (keys of genomes)
     sorted_genomes = fg.sort_genomes_minhash(genomes, l90, nbcont)
+
+    # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
+    discQC = f"by-L90_nbcont-{species_linked}.txt"
+    utils.write_genomes_info(genomes, sorted_genomes, discQC, outdir)
+
+    # Remove genomes not corresponding to mash filters
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
                                 min_dist, max_dist, threads, quiet)
-    # Write list of genomes kept, and list of genomes removed
+    # Write list of genomes kept, and list of genomes discarded by mash step
     fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist)
     logger.info("End")
 
