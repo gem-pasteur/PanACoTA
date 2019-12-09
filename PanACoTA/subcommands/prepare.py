@@ -107,8 +107,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
         species_linked = "_".join(species_linked.split("/"))
 
     # if species name not given by user, use taxID instead to name output directory
-    else:
+    elif NCBI_taxid:
         species_linked = str(NCBI_taxid)
+    # if neither speID nor taxID given (--norefseq, mashonly), name is NA
+    else:
+        species_linked = "NA"
     # Default outdir is species name if given, or species taxID
     if not outdir:
         outdir = species_linked
