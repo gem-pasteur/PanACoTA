@@ -136,9 +136,9 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
         max_multi = max(quanti)
         summ = [len(families[fam_num]), sum(quanti), sum(quali),
                 nb_0, nb_mono, nb_multi, nb_0 + nb_mono + nb_multi, max_multi]
-        pqlf.write(str(fam_num) + " " + utils.list_to_str(quali))
-        pqtf.write(str(fam_num) + " " + utils.list_to_str(quanti))
-        psf.write(str(fam_num) + " " + utils.list_to_str(summ))
+        pqlf.write(str(fam_num) + " " + utils.list_to_str(quali, sep=" "))
+        pqtf.write(str(fam_num) + " " + utils.list_to_str(quanti, sep=" "))
+        psf.write(str(fam_num) + " " + utils.list_to_str(summ, sep=" "))
         qualis[fam_num] = quali
         quantis[fam_num] = quanti
         summaries[fam_num] = summ
