@@ -141,11 +141,12 @@ EXP_SUMF = os.path.join("test", "data", "pangenome", "exp_files",
                         "exp_pangenome-4genomes.lst.summary.txt")
 
 
-def test_write_outputs():
+def test_write_outputs(caplog):
     """
     Check that given some families, the qualitative and quantitative matrices,
     as well as the summary file are as expected.
     """
+    caplog.set_level(logging.DEBUG)
     base = "test_write_out"
     pqlf = io.StringIO(base + ".quali.txt")
     pqtf = io.StringIO(base + ".quanti.txt")
@@ -157,19 +158,23 @@ def test_write_outputs():
     assert sums == EXP_SUMS
     # check content of matrix quali file
     with open(EXP_QUALIF, "r") as eq:
-        eq.readline()  # skip header
+        next(eq)  # skip header
         for line_out, line_exp in zip(pqlf.getvalue().split("\n"), eq):
             assert line_out == line_exp.strip()
     # Check content of matrix quanti file
     with open(EXP_QUANTIF, "r") as eq:
-        eq.readline()  # skip header
+        next(eq)  # skip header
         for line_out, line_exp in zip(pqtf.getvalue().split("\n"), eq):
             assert line_out == line_exp.strip()
     # Check content of summary file
     with open(EXP_SUMF, "r") as eq:
-        eq.readline()  # skip header
+        next(eq)  # skip header
         for line_out, line_exp in zip(psf.getvalue().split("\n"), eq):
             assert line_out == line_exp.strip()
+
+    # Check logs
+    assert "Generating qualitative and quantitative matrix, and summary file" in caplog.text
+    assert caplog.records[0].levelname == "INFO"
     # Close io objects and discard memory buffers
     pqlf.close()
     pqtf.close()
@@ -192,21 +197,21 @@ def test_open_out():
     assert os.path.isfile(pangenome + ".quali.txt")
     with open(pangenome + ".quali.txt", "r") as panf, open(EXP_QUALIF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".quali.txt")
 
     # Check presence and content of quanti matrix file
     assert os.path.isfile(pangenome + ".quanti.txt")
     with open(pangenome + ".quanti.txt", "r") as panf, open(EXP_QUANTIF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".quanti.txt")
 
     # Check presence and content of summary file
     assert os.path.isfile(pangenome + ".summary.txt")
     with open(pangenome + ".summary.txt", "r") as panf, open(EXP_SUMF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".summary.txt")
 
 
@@ -224,21 +229,21 @@ def test_all_post():
     assert os.path.isfile(pangenome + ".quali.txt")
     with open(pangenome + ".quali.txt", "r") as panf, open(EXP_QUALIF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".quali.txt")
 
     # Check presence and content of quanti matrix file
     assert os.path.isfile(pangenome + ".quanti.txt")
     with open(pangenome + ".quanti.txt", "r") as panf, open(EXP_QUANTIF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".quanti.txt")
 
     # Check presence and content of summary file
     assert os.path.isfile(pangenome + ".summary.txt")
     with open(pangenome + ".summary.txt", "r") as panf, open(EXP_SUMF, "r") as eq:
         for line_out, line_exp in zip(panf, eq):
-            assert line_out == line_exp
+            assert line_out.split() == line_exp.split()
     os.remove(pangenome + ".summary.txt")
 
     # Check that bin pangenome file was created (as it did not exist before)
