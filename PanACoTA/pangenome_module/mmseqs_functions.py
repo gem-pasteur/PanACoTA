@@ -57,7 +57,7 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     information = ("Will run MMseqs2 with:\n"
-                   f"\t- minimum sequence identity = {min_id}%\n"
+                   f"\t- minimum sequence identity = {min_id*100}%\n"
                    f"\t- cluster mode {clust_mode}")
     if threads > 1:
         information += "\n\t- {} threads".format(threads)
@@ -384,7 +384,7 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     if len(files_existing) != len(outext):
         logger.info("Creating database")
         logger.details("Existing files: {}".format(len(files_existing)))
-        logger.details("Expected extentions: {}".format(len(outext)))
+        logger.details("Expected extensions: {}".format(len(outext)))
         cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
         msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
                "database format.")
