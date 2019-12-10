@@ -9,8 +9,8 @@ import os
 import io
 import logging
 
-import genomeAPCAT.pangenome_module.post_treatment as post
-import genomeAPCAT.utils as utils
+import PanACoTA.pangenome_module.post_treatment as post
+import PanACoTA.utils as utils
 
 
 # Define functions and variables shared by several tests
