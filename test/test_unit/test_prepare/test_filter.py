@@ -12,7 +12,9 @@ from scipy.sparse import dok_matrix
 
 import test.test_unit.utilities_for_tests as util
 import PanACoTA.prepare_module.filter_genomes as filterg
+import PanACoTA.utils as utils
 
+# Define variables and functions used by several tests
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
 GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
 EXP_GENOMES = {
@@ -36,6 +38,27 @@ EXP_GENOMES = {
                                   os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
                                   1587120, 1, 1]
                }
+
+LOGFILE_BASE = "logfile_test.txt"
+LEVEL = logging.DEBUG
+LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
+
+def setup_module():
+    """
+    create logger at start of this test module
+    """
+    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_mmseq', verbose=1)
+    print("setup")
+
+
+def teardown_module():
+    """
+    Remove log files at the end of this test module
+    """
+    print("teardown")
+    for file in LOGFILES:
+        os.remove(file)
+
 
 def test_write_output():
     """
@@ -250,10 +273,11 @@ def test_sort_genomes_minhash():
     assert sorted_genomes == ["genome6", "genome2", "genome5", "genome3"]
 
 
-def test_sketch_all():
+def test_sketch_all(caplog):
     """
     Test that all genomes are sketch, in the provided order
     """
+    caplog.set_level(logging.DEBUG)
     # We give 5 genomes
     genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
                            123567, 200, 101],
@@ -302,6 +326,11 @@ def test_sketch_all():
         assert ml.readline().strip() == f"Sketching {expected_lines[4]}..."
         assert ml.readline().strip() == f"Writing to {out_msh}..."
 
+    assert "Sketching all genomes..." in caplog.text
+    assert ("mash sketch -o test/data/prepare/test_sketch_all/out_mash.msh -p 1 -l "
+            "test/data/prepare/test_sketch_all/test_list_reps.txt") in caplog.text
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[1].levelname == "DETAIL"
     shutil.rmtree(outdir)
 
 
