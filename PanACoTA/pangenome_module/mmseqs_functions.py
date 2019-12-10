@@ -16,7 +16,7 @@ import copy
 
 from PanACoTA import utils
 
-logger = logging.getLogger("pangnome.mmseqs")
+logger = logging.getLogger("pangenome.mmseqs")
 
 
 def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None, quiet=False):
