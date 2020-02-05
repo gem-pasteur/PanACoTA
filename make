@@ -107,13 +107,14 @@ def install_all(install_dir, target, dev=False, user=False):
                "to use the subcommands hereafter, first install required dependencies:\n")
 
         if "mash" in to_install_user:
-            msg += ("\t- mash (for prepare subcommand, to filter genomes) ")
+            msg += ("\t- mash (for prepare subcommand, to filter genomes) \n")
         if "prodigal" in to_install_user:
             msg += ("\t- prodigal : for annotate subcommand, you at least need prodigal (for "
                     "syntaxic annotation only). If you even need functional annotation, also "
                     "install prokka\n")
         if "prokka" in to_install_user:
-            msg += ("\t- prokka (for annotate subcommand, with syntaxic + functional annotation). "    "If you only need syntaxic annotation, prodigal is enough.\n")
+            msg += ("\t- prokka (for annotate subcommand, with syntaxic + functional annotation). "   
+                    "If you only need syntaxic annotation, prodigal is enough.\n")
         if "barrnap" in to_install_user:
             msg += ("\t- barrnap. If you use Prokka for functional annotation, it will not predict"
                     " RNA.\n")
