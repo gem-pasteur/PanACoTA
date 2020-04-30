@@ -101,7 +101,7 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     logger.info(get_info(tol, multi, mixed, floor))
 
     # Read pangenome
-    fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome)
+    fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome, logger)
     # Generate persistent genome
     fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed, floor)
     # Write persistent genome to file

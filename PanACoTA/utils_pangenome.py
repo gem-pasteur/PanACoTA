@@ -14,7 +14,7 @@ from PanACoTA import utils
 logger = logging.getLogger("utils.pan")
 
 
-def read_pangenome(pangenome, families=None):
+def read_pangenome(pangenome, logger, families=None):
     """
     Read pangenome information
 
@@ -47,13 +47,13 @@ def read_pangenome(pangenome, families=None):
         logger.info("Retrieving info from binary file")
         fams_by_strain, families, all_strains = utils.load_bin(pangenome + ".bin")
     else:
-        fams_by_strain, families, all_strains = read_pan_file(pangenome)
+        fams_by_strain, families, all_strains = read_pan_file(pangenome, logger)
         logger.info("Saving all information to a binary file for later use")
         utils.save_bin([fams_by_strain, families, all_strains], pangenome + ".bin")
     return fams_by_strain, families, all_strains
 
 
-def get_fams_info(families):
+def get_fams_info(families, logger):
     """
     From all families as list of members, get more information:
 
@@ -83,7 +83,7 @@ def get_fams_info(families):
     return fams_by_strain, sort_all_strains
 
 
-def read_pan_file(filein):
+def read_pan_file(filein, logger):
     """
     Read PanGenome file in 'filein', and put it into Python objects
 
