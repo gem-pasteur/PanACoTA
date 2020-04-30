@@ -19,11 +19,12 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.alignment, args.boot, args.outfile, args.soft, args.model,
+    cmd = "PanACoTA " + ' '.join(args.argv)
+    main(cmd, args.alignment, args.boot, args.outfile, args.soft, args.model,
          args.write_boot, args.threads, args.verbose, args.quiet)
 
 
-def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet):
+def main(cmd, align, boot, outfile, soft, model, write_boot, threads, verbose, quiet):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
 
@@ -56,6 +57,7 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     import logging
     import os
     from PanACoTA import utils
+    from PanACoTA import __version__ as version
     tree = None
     if soft == "fasttree":
         # test if fasttree is installed and in the path
@@ -90,7 +92,9 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         level = logging.DEBUG
 
     utils.init_logger(logfile_base, level, 'tree', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
+    logger = logging.getLogger("tree")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
 
     tree.run_tree(align, boot, outfile, quiet, threads, model, write_boot)
 

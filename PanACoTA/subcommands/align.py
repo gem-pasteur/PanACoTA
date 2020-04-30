@@ -22,11 +22,12 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
-         args.threads, args.force, args.verbose, args.quiet)
+    cmd = "PanACoTA " + ' '.join(arguments.argv)
+    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath, 
+         args.outdir, args.threads, args.force, args.verbose, args.quiet)
 
 
-def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
+def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
     """
     Align given core genome families
 
@@ -65,6 +66,7 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     from PanACoTA.align_module import get_seqs as gseqs
     from PanACoTA.align_module import alignment as ali
     from PanACoTA.align_module import post_align as post
+    from PanACoTA import __version__ as version
 
     # test if prokka is installed and in the path
     if not utils.check_installed("mafft"):  # pragma: no cover
@@ -89,7 +91,9 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     logfile_base = os.path.join(outdir, "PanACoTA-align_" + dname)
     level = logging.DEBUG
     utils.init_logger(logfile_base, level, 'align', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
+    logger = logging.getLogger("align")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
