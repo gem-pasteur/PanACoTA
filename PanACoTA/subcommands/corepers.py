@@ -31,11 +31,12 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile,
+    cmd = "PanACoTA " + ' '.join(args.argv)
+    main(cmd, args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile,
          floor=args.floor, verbose=args.verbose, quiet=args.quiet)
 
 
-def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, quiet=False):
+def main(cmd, pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, quiet=False):
     """
     Read pangenome and deduce Persistent genome according to the user criteria
 
@@ -67,6 +68,7 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     from PanACoTA import utils
     from PanACoTA import utils_pangenome as utilsp
     import PanACoTA.corepers_module.persistent_functions as pers
+    from PanACoTA import __version__ as version
 
     # name logfile, add timestamp if already existing
     path_pan, base_pan = os.path.split(pangenome)
@@ -82,8 +84,9 @@ def main(pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, 
     if verbose >= 15:
         level = logging.DEBUG
     utils.init_logger(logfile_base, level, 'corepers', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
-
+    logger = logging.getLogger("corepers")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
     # Define output filename
     if not outputfile:
         outputfile = os.path.join(path_pan, "PersGenome_" + base_pan + "_")

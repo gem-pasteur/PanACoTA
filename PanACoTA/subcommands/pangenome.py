@@ -77,6 +77,7 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
     from PanACoTA.pangenome_module import protein_seq_functions as protf
     from PanACoTA.pangenome_module import mmseqs_functions as mmf
     from PanACoTA.pangenome_module import post_treatment as pt
+    from PanACoTA import __version__ as version
 
     # test if mmseqs is installed and in the path
     if not utils.check_installed("mmseqs"):  # pragma: no cover
@@ -98,6 +99,7 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
     logfile_base = os.path.join(outdir, "PanACoTA-pangenome_" + name)
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
     logger = logging.getLogger("pangenome")
+    logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
 
     # Build bank with all proteins to include in the pangenome
