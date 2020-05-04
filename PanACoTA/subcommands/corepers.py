@@ -109,6 +109,7 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir=None, floor=False, verbose
     fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed, floor)
     # Write persistent genome to file
     pers.write_persistent(fams, outputfile)
+    logger.info("END")
 
 
 def get_info(tol, multi, mixed, floor):
@@ -138,21 +139,20 @@ def get_info(tol, multi, mixed, floor):
             floorstr = "floor"
         else:
             floorstr = "ceil"
-        toprint = ("Will generate a Persistent genome with member(s) in at least {}"
-                   "% of all genomes (meaning at least {}({}*nb_strains) genomes) in each "
-                   "family.\n").format(100*tol, floorstr, tol)
+        toprint = (f"Will generate a Persistent genome with member(s) in at least {100*tol}"
+                   f"% of all genomes in each family.\n")
         if multi:
             toprint += ("Multigenic families are allowed (several members in "
                         "any genome of a family).")
         elif mixed:
             toprint += ("Mixed families are allowed. To be considered as persistent, "
-                        "a family must have exactly 1 member in {}% of the genomes, "
-                        "but in the remaining {}% genomes, there can be 0, 1 or "
-                        "several members.".format(tol*100, round((1-tol)*100), 3))
+                        f"a family must have exactly 1 member in {tol*100}% of the genomes, "
+                        f"but in the remaining {round((1-tol)*100,3)}% genomes, there can be 0, 1 or "
+                        "several members.")
         else:
             toprint += ("To be considered as persistent, a family must contain exactly 1 member "
-                        "in at least {}% of all genomes. The other genomes are absent from the"
-                        "family.").format(tol*100)
+                        f"in at least {tol*100}% of all genomes. The other genomes are absent from the "
+                        "family.")
         return toprint
 
 

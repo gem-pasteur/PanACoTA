@@ -72,23 +72,25 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
     # coregenome computed
     if tol == 1 and not multi and not mixed:
         logger.info(f"The core genome contains {len(pers)} families, each one having "
-                    f"exactly {min_members} members, among the {nb_strains} different genomes.")
+                    f"exactly {int(min_members)} members, from the {nb_strains} different genomes.")
     # multi persistent genome with multigenic families allowed
     elif multi:
         logger.info(f"The persistent genome contains {len(pers)} families with members present "
-                    f"in at least {min_members} genomes ({tol*100}% of the total number of "
+                    f"in at least {min_members} different genomes ({tol*100}% of the total number of "
                     "genomes).")
     # mixed persistent genome, tol% families with exactly 1 member from each genome,
     # multigenic families allowed for the '1-tol'% remaining families
     elif mixed:
-        logger.info(f"The persistent genome contains {len(pers)} families with members present "
-                    f"in at least {min_members} genomes ({tol*100}% of the total number of "
-                    "genomes).")
+        logger.info(f"The persistent genome contains {len(pers)} families, "
+                    f"each one having exactly 1 member from least {tol*100}% of the genomes ({min_members} "
+                    f"genomes). In the remaining {round((1-tol)*100,3)}% genomes, there can be 0, 1 or "
+                    "several members.")
     # Strict persistent genome. tol% families with exactly one member in each genome
     else:
         logger.info(f"The persistent genome contains {len(pers)} families, each one having "
-                    f"exactly {min_members} members, from at least {tol*100}% of the {nb_strains} "
-                    f"different genomes (that is {min_members} genomes.")
+                    f"exactly 1 member from at least {tol*100}% of the {nb_strains} "
+                    f"different genomes (that is {min_members} genomes). The other genomes are absent from "
+                    "the family.")
     return fams
 
 
