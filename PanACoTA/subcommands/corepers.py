@@ -32,11 +32,11 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.pangenome, args.tol, args.multi, args.mixed, outputfile=args.outfile,
+    main(cmd, args.pangenome, args.tol, args.multi, args.mixed, outputdir=args.outputdir,
          floor=args.floor, verbose=args.verbose, quiet=args.quiet)
 
 
-def main(cmd, pangenome, tol, multi, mixed, outputfile=None, floor=False, verbose=0, quiet=False):
+def main(cmd, pangenome, tol, multi, mixed, outputdir=None, floor=False, verbose=0, quiet=False):
     """
     Read pangenome and deduce Persistent genome according to the user criteria
 
@@ -50,8 +50,8 @@ def main(cmd, pangenome, tol, multi, mixed, outputfile=None, floor=False, verbos
         True if multigenic families are allowed, False otherwise
     mixed : bool
         True if mixed families are allowed, False otherwise
-    outputfile : str or None
-        Specific name for the generated persistent genome. If not given, default name is used.
+    outputdir : str or None
+        Specific directory for the generated persistent genome. If not given, pangenome directory is used.
     floor : bool
         Require at least floor(nb_genomes*tol) genomes if True, ceil(nb_genomes*tol) if False
     verbose : int
@@ -70,9 +70,22 @@ def main(cmd, pangenome, tol, multi, mixed, outputfile=None, floor=False, verbos
     import PanACoTA.corepers_module.persistent_functions as pers
     from PanACoTA import __version__ as version
 
-    # name logfile, add timestamp if already existing
-    path_pan, base_pan = os.path.split(pangenome)
-    logfile_base = os.path.join(path_pan, "PanACoTA-corepers")
+    # get pangenome name info
+    _, base_pan = os.path.split(pangenome)
+    # Define output filename
+    output_name = "PersGenome_" + base_pan + "_"
+    if floor:
+        output_name += "F"
+    output_name += str(tol)
+    if multi:
+        output_name += "-multi.lst"
+    elif mixed:
+        output_name += "-mixed.lst"
+    else:
+        output_name += ".lst"
+    # Define output directory and filename path
+    outputfile = os.path.join(outputdir, output_name)
+    logfile_base = os.path.join(outputdir, "PanACoTA-corepers")
     # level is the minimum level that will be considered.
     # for verbose = 0 or 1, ignore details and debug, start from info
     if verbose <= 1:
@@ -87,20 +100,7 @@ def main(cmd, pangenome, tol, multi, mixed, outputfile=None, floor=False, verbos
     logger = logging.getLogger("corepers")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
-    # Define output filename
-    if not outputfile:
-        outputfile = os.path.join(path_pan, "PersGenome_" + base_pan + "_")
-        if floor:
-            outputfile += "F"
-        outputfile += str(tol)
-        if multi:
-            outputfile += "-multi.lst"
-        elif mixed:
-            outputfile += "-mixed.lst"
-        else:
-            outputfile += ".lst"
-    else:
-        outputfile = os.path.join(path_pan, outputfile)
+
     logger.info(get_info(tol, multi, mixed, floor))
 
     # Read pangenome
@@ -205,11 +205,12 @@ def build_parser(parser):
                                "only 1 member exactly is allowed. This option is not compatible "
                                "with -M (which is allowing multigenic families: having several "
                                "members in any number of genomes).")
-    optional.add_argument("-o", dest="outfile",
-                          help=("You can specify an output filename (without path)"
-                                " for the Persistent genome "
-                                "deduced from Pan. If not given, it will be saved as "
-                                "PersGenome_<pangenome>_tol[-multi][-mixed].lst"))
+    optional.add_argument("-o", dest="outputdir",
+                          help=("You can specify an output directory for your core/persistent genome. "
+                                "By default, it will be saved in the current directory. "
+                                "Your output file will be named: "
+                                "PersGenome_<pangenome_filename>_tol[-multi][-mixed].lst"),
+                          default=".")
     optional.add_argument("-F", dest="floor", action="store_true",
                           help="When you specify the '-tol' option, with a number lower "
                                "than 1, you can add this option to use floor('tol'*N) "
