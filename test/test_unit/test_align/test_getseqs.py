@@ -9,8 +9,8 @@ import shutil
 
 import pytest
 
-import genomeAPCAT.align_module.get_seqs as gseq
-from genomeAPCAT import utils
+import PanACoTA.align_module.get_seqs as gseq
+from PanACoTA import utils
 
 # Define common variables
 FASTA = os.path.join("test", "data", "pangenome", "test_files", "example_db", "Proteins",
@@ -22,21 +22,18 @@ DBPATH = os.path.join("test", "data", "pangenome", "test_files", "example_db")
 LOGFILE_BASE = "test_getseqs-logs"
 
 
-# Setup and teardown: create logger
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
-
-
-def teardown_module():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
     """
+    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
+    print("setup")
+    yield
     os.remove(LOGFILE_BASE + ".log")
     os.remove(LOGFILE_BASE + ".log.details")
     os.remove(LOGFILE_BASE + ".log.err")
+    print("teardown")
 
 
 # Start tests

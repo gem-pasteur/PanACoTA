@@ -10,7 +10,7 @@ import logging
 
 import pytest
 
-import genomeAPCAT.align_module.pan_to_pergenome as p2p
+import PanACoTA.align_module.pan_to_pergenome as p2p
 
 
 ALPATH = os.path.join("test", "data", "align")

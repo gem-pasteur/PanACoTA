@@ -12,7 +12,7 @@ import shutil
 
 import multiprocessing
 
-import genomeAPCAT.align_module.alignment as al
+import PanACoTA.align_module.alignment as al
 
 
 # Define common variables
@@ -520,36 +520,36 @@ def test_family_align_mafftok_btrok(caplog):
     os.remove(btr_file)
 
 
-def test_family_align_nomafft_btrempty_errormafft(caplog):
-    """
-    Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
-    and total nb genomes = 4, no alignment file, and an empty btr file, and make changes in
-    path so that mafft crashes -> should return False, and remove btr and mafft files.
-    """
-    caplog.set_level(logging.DEBUG)
-    orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
-    temp_mafft = orig_mafft + "-orig"
-    shutil.move(orig_mafft, temp_mafft)
-    prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
-    gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
-    miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
-    mafft_file = "test_fam_align.8.aln"
-    # Create empty btr file
-    btr_file = "test_fam_align_btr.8.aln"
-    open(btr_file, "w").close()
-    num_fam = 8
-    ngenomes = 4
-    logger = logging.getLogger("test_fam_align")
-    assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
-                               ngenomes, logger) is False
-    assert "Checking extractions for family 8" in caplog.text
-    assert "Aligning family 8" in caplog.text
-    assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 "
-            "test/data/align/exp_files/exp_aldir-pers/current.8.prt does not exist") in caplog.text
-    # Check content of mafft and btr files
-    assert not os.path.isfile(mafft_file)
-    assert not os.path.isfile(btr_file)
-    shutil.move(temp_mafft, orig_mafft)
+# def test_family_align_nomafft_btrempty_errormafft(caplog):
+#     """
+#     Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
+#     and total nb genomes = 4, no alignment file, and an empty btr file, and make changes in
+#     path so that mafft crashes -> should return False, and remove btr and mafft files.
+#     """
+#     caplog.set_level(logging.DEBUG)
+#     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
+#     temp_mafft = orig_mafft + "-orig"
+#     shutil.move(orig_mafft, temp_mafft)
+#     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+#     gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+#     miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+#     mafft_file = "test_fam_align.8.aln"
+#     # Create empty btr file
+#     btr_file = "test_fam_align_btr.8.aln"
+#     open(btr_file, "w").close()
+#     num_fam = 8
+#     ngenomes = 4
+#     logger = logging.getLogger("test_fam_align")
+#     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
+#                                ngenomes, logger) is False
+#     assert "Checking extractions for family 8" in caplog.text
+#     assert "Aligning family 8" in caplog.text
+#     assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 "
+#             "test/data/align/exp_files/exp_aldir-pers/current.8.prt does not exist") in caplog.text
+#     # Check content of mafft and btr files
+#     assert not os.path.isfile(mafft_file)
+#     assert not os.path.isfile(btr_file)
+#     shutil.move(temp_mafft, orig_mafft)
 
 
 def test_check_addmissing_ok():
@@ -949,45 +949,45 @@ def test_handle_family_wrongextract():
     assert not q.get()
 
 
-def test_handle_family_erroralign():
-    """
-    Giving an aldir with correct prt, gen, miss files, and problem while running mafft. Returns
-    False, with error message for alignment part
-    """
-    orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
-    temp_mafft = orig_mafft + "-orig"
-    shutil.move(orig_mafft, temp_mafft)
-    prefix = "aldir/TESThandlefam"
-    num_fam = 8
-    ngenomes = 4
-    q = multiprocessing.Manager().Queue()
-    # Create aldir, and put prt, gen, miss, mafft and btr files in it
-    aldir = "aldir"
-    ref_prt = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
-    ref_gen = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
-    ref_miss = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
-    cur_prt = os.path.join(aldir, "TESThandlefam-current.8.prt")
-    cur_gen = os.path.join(aldir, "TESThandlefam-current.8.gen")
-    cur_miss = os.path.join(aldir, "TESThandlefam-current.8.miss.lst")
-    os.makedirs(aldir)
-    shutil.copyfile(ref_prt, cur_prt)
-    shutil.copyfile(ref_gen, cur_gen)
-    shutil.copyfile(ref_miss, cur_miss)
-    args = (prefix, num_fam, ngenomes, q)
-    assert al.handle_family(args) is False
-    outmafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
-    outbtr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    assert not os.path.isfile(outmafft)
-    assert not os.path.isfile(outbtr)
-    shutil.rmtree(aldir)
-    shutil.move(temp_mafft, orig_mafft)
-    q.put(None)
-    q.put(None)
-    assert "Checking extractions for family 8" in q.get().message
-    assert "Aligning family 8" in q.get().message
-    assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 aldir/TESThandlefam-current.8.prt "
-            "does not exist") in q.get().message
-    assert not q.get()
+# def test_handle_family_erroralign():
+#     """
+#     Giving an aldir with correct prt, gen, miss files, and problem while running mafft. Returns
+#     False, with error message for alignment part
+#     """
+#     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
+#     temp_mafft = orig_mafft + "-orig"
+#     shutil.move(orig_mafft, temp_mafft)
+#     prefix = "aldir/TESThandlefam"
+#     num_fam = 8
+#     ngenomes = 4
+#     q = multiprocessing.Manager().Queue()
+#     # Create aldir, and put prt, gen, miss, mafft and btr files in it
+#     aldir = "aldir"
+#     ref_prt = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+#     ref_gen = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+#     ref_miss = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+#     cur_prt = os.path.join(aldir, "TESThandlefam-current.8.prt")
+#     cur_gen = os.path.join(aldir, "TESThandlefam-current.8.gen")
+#     cur_miss = os.path.join(aldir, "TESThandlefam-current.8.miss.lst")
+#     os.makedirs(aldir)
+#     shutil.copyfile(ref_prt, cur_prt)
+#     shutil.copyfile(ref_gen, cur_gen)
+#     shutil.copyfile(ref_miss, cur_miss)
+#     args = (prefix, num_fam, ngenomes, q)
+#     assert al.handle_family(args) is False
+#     outmafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
+#     outbtr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
+#     assert not os.path.isfile(outmafft)
+#     assert not os.path.isfile(outbtr)
+#     shutil.rmtree(aldir)
+#     shutil.move(temp_mafft, orig_mafft)
+#     q.put(None)
+#     q.put(None)
+#     assert "Checking extractions for family 8" in q.get().message
+#     assert "Aligning family 8" in q.get().message
+#     assert ("Problem while trying to align fam 8: mafft --quiet --retree 2 --maxiterate 0 aldir/TESThandlefam-current.8.prt "
+#             "does not exist") in q.get().message
+#     assert not q.get()
 
 
 def test_align_all_true(caplog):
