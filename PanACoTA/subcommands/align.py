@@ -89,7 +89,6 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
         level = logging.DEBUG
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-align_" + dname)
-    level = logging.DEBUG
     utils.init_logger(logfile_base, level, 'align', verbose=verbose, quiet=quiet)
     logger = logging.getLogger("align")
     logger.info(f'PanACoTA version {version}')
