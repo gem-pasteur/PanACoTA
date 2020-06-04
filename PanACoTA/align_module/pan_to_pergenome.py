@@ -73,6 +73,7 @@ def get_per_genome(persgen, list_gen, dname, outdir):
 
     # Get list of all genomes
     all_genomes = get_all_genomes(list_gen)
+    logger.info(f"Found {len(all_genomes)} genomes.")
     # Sort proteins by strain
     all_prots, fam_genomes, several = proteins_per_strain(persgen)
     # Write output files
