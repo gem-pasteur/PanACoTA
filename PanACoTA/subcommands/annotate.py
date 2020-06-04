@@ -281,7 +281,6 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     logger = logging.getLogger('annotate')
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
-    logger.info("Let's start!")
 
     # STEP 1. analyze genomes (nb contigs, L90, rows of N...)
     # If already info on genome ('--info <file>' option), skip this step

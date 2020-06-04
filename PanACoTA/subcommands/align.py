@@ -22,7 +22,7 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    cmd = "PanACoTA " + ' '.join(arguments.argv)
+    cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath, 
          args.outdir, args.threads, args.force, args.verbose, args.quiet)
 
@@ -94,6 +94,7 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
     logger = logging.getLogger("align")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
+
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
