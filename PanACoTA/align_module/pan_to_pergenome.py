@@ -64,7 +64,6 @@ def get_per_genome(persgen, list_gen, dname, outdir):
         * listdir : str, path to List directory
         * families : str, list of family numbers
     """
-    logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     # Define output directories
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
@@ -74,7 +73,9 @@ def get_per_genome(persgen, list_gen, dname, outdir):
     # Get list of all genomes
     all_genomes = get_all_genomes(list_gen)
     logger.info(f"Found {len(all_genomes)} genomes.")
+
     # Sort proteins by strain
+    logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     all_prots, fam_genomes, several = proteins_per_strain(persgen)
     # Write output files
     write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
@@ -124,6 +125,7 @@ def proteins_per_strain(persgen):
         * fam_genomes: dict, {fam_num: [genomes having a member in fam]}
         * several: dict, {fam_num: [genomes having several members in fam]}
     """
+    logger.info("Getting all persistent proteins and classify by strain.")
     all_prots = {}  # {strain: {member: fam_num}}
     fam_genomes = {}  # {fam_num: [genomes having a member in fam]}
     several = {}  # {fam_num: [genomes having several members in fam]}
