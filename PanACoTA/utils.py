@@ -309,7 +309,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         call.wait()
         retcode = call.returncode
     except OSError:
-        logger.error(error + ": " + "{} does not exist".format(cmd))
+        logger.error("error : {cmd} does not exist")
         if eof:
             sys.exit(1)
         else:
@@ -392,14 +392,14 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not do_format:
-        logger.info("WARNING: Some genomes could not be annotated. See {0}".format(logfile))
-        logger.warning("{0} had problems while annotating some genomes, or "
+        logger.info(f"WARNING: Some genomes could not be annotated. See {soft}")
+        logger.warning(f"{soft} had problems while annotating some genomes, or "
                     "did not find any gene. Hence, they are not formatted, and absent "
                     "from your output database. Please look at the "
                     "current error log "
                     "(<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err) to get more "
                     "information on the problems. Here are those "
-                    "genomes:\n {1}".format(soft, list_to_write))
+                    "genomes:\n{list_to_write}")
     else:
         logger.info(f"WARNING: Some genomes could not be formatted. See {logfile}")
         logger.warning(("Some genomes were annotated by {0}, but could not be formatted, "
@@ -447,7 +447,6 @@ def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
         logger.info("{} genomes were discarded.".format(nb_disc))
     # Get input list file name (without path)
     _, name_lst = os.path.split(list_file)
-
     # if not QC, write discarded genomes to a file "discarded-[list_file].lst"
     if not qc:
         outdisc = os.path.join(res_path,
