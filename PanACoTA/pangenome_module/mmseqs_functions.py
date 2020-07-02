@@ -247,6 +247,7 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     """
     cmd = f"mmseqs createtsv {mmseqdb} {mmseqdb} {mmseqclust} {mmseqclust}.tsv"
     msg = "Problem while trying to convert mmseq result file to tsv file"
+    logger.info(f"MMseqs command: {cmd}")
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
     # Convert the tsv file to a 'pangenome' file: one line per family
@@ -388,5 +389,6 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
         cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
         msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
                "database format.")
+        logger.details(f"MMseqs command: {cmd}")
         with open(logmmseq, "w") as logf:
             utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
