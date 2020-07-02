@@ -35,9 +35,7 @@ Its external dependencies are:
     - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
     - [**Quicktree**](https://github.com/tseemann/quicktree/releases)
 
-You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
-
-To be able to install the dependencies (by yourself, or with the installation script), make sure you already have:
+To be able to install the dependencies, make sure you already have:
 
 - `tar`
 - `git`
