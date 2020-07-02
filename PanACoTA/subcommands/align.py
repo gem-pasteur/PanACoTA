@@ -70,7 +70,7 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
 
     # test if prokka is installed and in the path
     if not utils.check_installed("mafft"):  # pragma: no cover
-        print("fftns (from mafft) is not installed. 'PanACoTA align' cannot run.")
+        print("mafft is not installed. 'PanACoTA align' cannot run.")
         sys.exit(1)
 
     if force and os.path.isdir(outdir):
