@@ -26,8 +26,7 @@ PanACoTA is a software providing tools for large scale comparative genomics:
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- [**prokka**](https://github.com/tseemann/prokka) (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `PanACoTA` (see [Install section](#install)
-)
+- [**prokka**](https://github.com/tseemann/prokka) (to annotate the genomes)
 - [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
 - [**mafft**](http://mafft.cbrc.jp/alignment/software/) (to align persistent genome)
 - At least one of those softwares, to infer a phylogenetic tree:
