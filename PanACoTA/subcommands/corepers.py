@@ -84,6 +84,8 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir=None, floor=False, verbose
     else:
         output_name += ".lst"
     # Define output directory and filename path
+    if not os.path.isdir(outputdir):
+        os.makedirs(outputdir)
     outputfile = os.path.join(outputdir, output_name)
     logfile_base = os.path.join(outputdir, "PanACoTA-corepers")
     # level is the minimum level that will be considered.
