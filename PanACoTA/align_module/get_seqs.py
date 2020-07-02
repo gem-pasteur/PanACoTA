@@ -205,7 +205,7 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     ----------
     to_extract : dict or []
         {sequence_to_extract: file_to_which_it_will_be_extracted} or list of sequences to
-        extract (if an output filename is also given in 'outf')
+        extract, all in a same outfile (name must be given in 'outf')
     fasf : _io.TextIO
         open file containing sequences in multi-fasta format
     files_todo : list or None
