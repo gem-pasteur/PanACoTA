@@ -82,6 +82,7 @@ def run_fasttree(alignfile, boot, treefile, model, quiet):
         treefile = alignfile + ".fasttree_tree.nwk"
     cmd = "FastTreeMP -nt {} -noml -nocat {} -log {} {}".format(model, bootinfo,
                                                                 logfile, alignfile)
+    logger.info("Fasttree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:
