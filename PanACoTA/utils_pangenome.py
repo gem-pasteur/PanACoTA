@@ -62,7 +62,10 @@ def get_fams_info(families, logger):
 
     Parameters
     ----------
-    families : {num: [members]}
+    families : dict
+        {num: [members]}
+    logger : logging.Logger
+        logger object to write log information
 
     Returns
     -------
@@ -91,6 +94,7 @@ def read_pan_file(filein, logger):
     ----------
     filein : str
         path to pangenome file
+    logger : 
 
     Returns
     -------
