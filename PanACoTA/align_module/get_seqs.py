@@ -43,7 +43,6 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
                        "family, remove its prt and gen extraction files. If you want to "
                        "re-extract all families, use option -F (or --force).")
         return
-
     logger.info("Extracting proteins and genes from all genomes")
     nbgen = len(all_genomes)
     bar = None
@@ -145,7 +144,6 @@ def get_genome_seqs(fasta, tabfile, files_todo, outfile=None):
     """
     with open(tabfile, "r") as tabf:
         to_extract = get_names_to_extract(tabf, outfile)
-
     if outfile:
         if os.path.isfile(outfile):
             logger.warning("Sequences are already extracted in {}. This will "
