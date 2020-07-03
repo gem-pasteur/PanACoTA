@@ -68,9 +68,12 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     final = []
     if threads == 1:
         main_logger.info("single")
+        update_bar = 1
         for num_fam in all_fams:
             f = handle_family_1thread((prefix, num_fam, ngenomes))
             final.append(f)
+            bar.update(update_bar)
+            update_bar+=1
 
     else:
         main_logger.info("pool")
