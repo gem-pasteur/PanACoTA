@@ -67,11 +67,13 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
                                       term_width=100).start()
     final = []
     if threads == 1:
+        main_logger.info("single")
         for num_fam in all_fams:
             f = handle_family_1thread((prefix, num_fam, ngenomes))
             final.append(f)
 
     else:
+        main_logger.info("pool")
         pool = multiprocessing.Pool(threads)
 
         # Create a Queue to put logs from processes, and handle them after from a single thread
