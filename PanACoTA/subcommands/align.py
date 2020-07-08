@@ -96,14 +96,19 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
 
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
+    # generate required files
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
     prefix = os.path.join(aldir, dname)
+    
+    # Align all families
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), dname, quiet, threads)
     if not status:
         logger.error(("At least one alignment did not run well. See detailed log file for "
                       "more information. Program will stop here, alignments won't be "
                       "grouped by genome."))
         sys.exit(1)
+
+    # post-process alignment files
     post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
     logger.info("END")
 
