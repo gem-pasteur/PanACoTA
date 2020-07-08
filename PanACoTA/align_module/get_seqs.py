@@ -304,8 +304,12 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     out_given = (outf is not None)
     extract = False
     for line in fasf:
-        if line[0] == ">":
-            seq = line.split()[0][1:]
+        if line[0] == '>':
+            # Extract sequence name
+            last_char = line.find(' ')
+            if last_char == -1:
+                last_char = len(line)
+            seq = line[1:last_char].strip()
             # Seq is part of sequences to extract
             if seq in to_extract:
                 # if out_given, outf is already open. Otherwise, open it only if must be written
