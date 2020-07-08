@@ -194,85 +194,6 @@ def get_names_to_extract(tabf, outfile):
     return to_extract
 
 
-
-# def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
-#     """
-#     Extract sequences from an open fasta file 'fasf', and a list of sequences to
-#     extract
-
-#     Parameters
-#     ----------
-#     to_extract : dict or []
-#         {sequence_to_extract: file_to_which_it_will_be_extracted} or list of sequences to
-#         extract, all in a same outfile (name must be given in 'outf')
-#     fasf : _io.TextIO
-#         open file containing sequences in multi-fasta format
-#     files_todo : list or None
-#         list of files which must be generated (prt and gen files). Others
-#         already exist, so ignore them.
-#     outf : _io.TextIO or None
-#         If an outfile is given (not None), and 'to_extract' is a dict, only its keys will be
-#         considered, and all these sequences will be extracted to 'outfile' (if 'to_extract' is a
-#         list, will extract all sequences of this list). Otherwise, if None,
-#         each sequence will be extracted to its corresponding value in 'to_extract'.
-#     """
-
-#     # Create a frozenset to optimize the in operation
-#     files_todo_set = frozenset(files_todo) if files_todo is not None else frozenset()
-#     if outf is not None:
-#         # Optimize the extract names requests
-#         to_extract = frozenset(to_extract)
-#     outfilepointer_index = {}
-#     opened_filnames = []
-
-#     # Determine the out filepointer regarding the sequence name.
-#     # This function is used in two different places, so it's factorized into a closure here.
-#     def get_filepointer(sequence_name):
-#         max_queue_len = 1000
-#         fp = outf
-#         if fp is None:
-#             file_to_extract = to_extract[current_sequence_name]
-#             if file_to_extract not in outfilepointer_index:
-#                 # Close oldest file opened
-#                 if len(opened_filnames) == max_queue_len:
-#                     oldest_opened_file = opened_filnames.pop(0)
-#                     outfilepointer_index[oldest_opened_file].close()
-#                     del outfilepointer_index[oldest_opened_file]
-#                 # Open the needed file
-#                 outfilepointer_index[file_to_extract] = open(file_to_extract, 'a')
-#                 opened_filnames.append(file_to_extract)
-#             # Update the file pointer
-#             fp = outfilepointer_index[file_to_extract]
-#         return fp
-
-#     current_sequence_name = None
-#     # Check fasta line per line
-#     for line in fasf:
-#         # If header, extract name
-#         if line[0] == '>':
-#             # Retrieve the end of the sequence name
-#             last_char = line.find(' ')
-#             if last_char == -1:
-#                 last_char = len(line)
-#             # Extract the sequence name
-#             current_sequence_name = line[1:last_char]
-
-#             if current_sequence_name in to_extract:
-#                 fp = get_filepointer(current_sequence_name)
-#                 fp.write(line)
-
-#         # Extract the sequence
-#         elif current_sequence_name in to_extract:
-#             # Write the sequence in the outfile
-#             fp = get_filepointer(current_sequence_name)
-#             fp.write(line)
-
-#     # Close all the opened files
-#     for fp in outfilepointer_index.values():
-#         fp.close()
-
-
-
 def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     """
     Extract sequences from an open fasta file 'fasf', and a list of sequences to
@@ -294,41 +215,44 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
         list, will extract all sequences of this list). Otherwise, if None,
         each sequence will be extracted to its corresponding value in 'to_extract'.
     """
-    outfile_pointers = {}
+
+    # Create optimized index for requests
+    if files_todo is None:
+        files_todo = []
     files_todo = frozenset(files_todo)
     if type(to_extract) == list:
         to_extract = frozenset(to_extract)
 
-    if files_todo is None:
-        files_todo = []
-    out_given = (outf is not None)
-    extract = False
+    # State machine variables
+    previous_fp = None
+    
     for line in fasf:
         if line[0] == '>':
+            # Close previous file if needed
+            if outf is None and previous_fp is not None:
+                previous_fp.close()
+            previous_fp = None
+
             # Extract sequence name
             last_char = line.find(' ')
             if last_char == -1:
                 last_char = len(line)
             seq = line[1:last_char].strip()
+
             # Seq is part of sequences to extract
             if seq in to_extract:
-                # if out_given, outf is already open. Otherwise, open it only if must be written
-                if not out_given:
-                    # get corresponding outfile
+                # Open the right file
+                previous_fp = outf
+                if previous_fp is None:
                     out = to_extract[seq]
                     if out in files_todo:
-                        outf = open(out, "a")
+                        previous_fp = open(out, "a")
                     else:
-                        outf = None
-                if outf:
-                    outf.write(line)
-                    extract = True
-                else:
-                    extract = False
-            else:
-                if not out_given and outf:
-                    outf.close()
-                extract = False
-        else:
-            if extract:
-                outf.write(line)
+                        print(f"Sequence {seq} not written because no output file specified", file=sys.stderr)
+
+        # Write the line content if the file pointer is opened
+        if previous_fp is not None:
+            previous_fp.write(line)
+
+    if outf is None and previous_fp is not None:
+        previous_fp.close()
