@@ -304,8 +304,8 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     out_given = (outf is not None)
     extract = False
     for line in fasf:
-        if line.startswith(">"):
-            seq = line.split(">")[1].split()[0]
+        if line[0] == ">":
+            seq = line.split()[0][1:]
             # Seq is part of sequences to extract
             if seq in to_extract:
                 # if out_given, outf is already open. Otherwise, open it only if must be written
