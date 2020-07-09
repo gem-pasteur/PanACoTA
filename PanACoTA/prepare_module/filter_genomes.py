@@ -257,7 +257,7 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
         os.remove(list_reps)
         return 0
     logger.info("Sketching all genomes...")
-    cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
+    cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps} -s 1e4"
     logger.details(cmd_sketch)
     error_sketch = (f"Error while trying to sketch {len(sorted_genomes)} genomes to combined "
                     "archive. Maybe some genome sequences in "
@@ -304,6 +304,7 @@ def compare_all(out_msh, matrix, npz_matrix, mash_log, threads):
         return 0
     logger.info("Computing pairwise distances between all genomes")
     cmd_dist = f"mash dist -p {threads} {out_msh}.msh {out_msh}.msh"
+    logger.details(cmd_dist)
     # Open matfile to write matrix inside
     matfile = open(matrix, "w")
     # Open mash log to add log of 'mash dist' to log of 'mash sketch'
