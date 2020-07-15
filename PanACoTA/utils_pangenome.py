@@ -39,7 +39,7 @@ def read_pangenome(pangenome, logger, families=None):
         - all_strains: list of all genome names
     """
     if families:
-        fams_by_strain, all_strains = get_fams_info(families)
+        fams_by_strain, all_strains = get_fams_info(families, logger)
         if not os.path.isfile(pangenome + ".bin"):
             logger.details("Saving all information to a binary file for later use")
             utils.save_bin([fams_by_strain, families, all_strains], pangenome + ".bin")
