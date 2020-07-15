@@ -77,7 +77,6 @@ unit-test-ubuntu18.04:
     - mash --version
     - ls PanACoTA/annotate_module
   script:
-    - more test/data/align/exp_files/exp_extracted.prt
     # - py.test test/test_unit/test_prepare -v -x
     # - py.test test/test_unit/test_annotate/test_genome_func.py -v -x
     # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
