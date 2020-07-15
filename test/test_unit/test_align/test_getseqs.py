@@ -77,6 +77,14 @@ def test_extract_seq_out_given():
     with open(FASTA, "r") as fasf, open(outfile, "w") as outf:
         gseq.extract_sequences(to_extract, fasf, outf=outf)
     exp_extracted = os.path.join(EXPPATH, "exp_extracted.prt")
+    print("expected file")
+    with open(exp_extracted, "r") as exp:
+        for line in exp:
+            print(line)
+    print("generated file")
+    with open(outfile, "r") as out:
+        for line in out:
+            print(line)
     assert tutil.compare_file_content(outfile, exp_extracted)
 
 
