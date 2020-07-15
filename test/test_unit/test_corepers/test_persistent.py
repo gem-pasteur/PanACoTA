@@ -227,8 +227,8 @@ def test_get_core_multi(caplog):
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, multi=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5', '1', '12']}
     assert exp_fams == fams
-    assert ("The persistent genome contains 4 families, each one containing members present in "
-            "at least 4 different genomes (100\% of the total number of genomes") in caplog.text
+    assert ("The persistent genome contains 4 families with members present in "
+            "at least 4 different genomes (100% of the total number of genomes)") in caplog.text
 
 
 def test_get_99pers_floor_strict(caplog):
@@ -240,8 +240,9 @@ def test_get_99pers_floor_strict(caplog):
     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, floor=True)
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5', '8', '10', '11']}
     assert exp_fams == fams
-    assert ("The persistent genome contains 5 families "
-            "having exactly 3 genomes among the 4 different genomes.") in caplog.text
+    assert ("The persistent genome contains 5 families, each one "
+            "having exactly 1 member from at least 99.0% of the 4 different genomes "
+            "(that is 3 genomes). The other genomes are absent from the family.") in caplog.text
 
 
 def test_get_99pers_floor_mixed(caplog):
@@ -254,8 +255,9 @@ def test_get_99pers_floor_mixed(caplog):
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '8', '10',
                                                                        '11', '12']}
     assert exp_fams == fams
-    assert ("The persistent genome contains 7 families "
-            "having at least 3 genomes.") in caplog.text
+    assert ("The persistent genome contains 7 families, each one having exactly 1 member from at least "
+            "99.0% of the genomes (3 genomes). In the remaining "
+            "1.0% genomes, there can be 0, 1 or several members.") in caplog.text
 
 
 def test_get_99pers_floor_multi(caplog):
@@ -267,42 +269,44 @@ def test_get_99pers_floor_multi(caplog):
     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '6', '8',
                                                                        '10', '11', '12']}
     assert exp_fams == fams
-    assert ("The persistent genome contains 8 families "
-            "having at least 3 genomes.") in caplog.text
+    assert ("The persistent genome contains 8 families with members present in "
+            "at least 3 different genomes (99.0% of the total number of genomes).") in caplog.text
 
 
-# def test_get_99pers_strict(caplog):
-#     """
-#     Getting a persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99)
-#     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
-#     assert exp_fams == fams
-#     assert ("The persistent genome contains 2 families "
-#             "having at least 4 genomes in each family.") in caplog.text
+def test_get_99pers_strict(caplog):
+    """
+    Getting a persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
+    """
+    caplog.set_level(logging.DEBUG)
+    fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99)
+    exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
+    assert exp_fams == fams
+    assert ("The persistent genome contains 2 families, each one "
+            "having exactly 1 member from at least 99.0% of the 4 different genomes "
+            "(that is 4 genomes). The other genomes are absent from the family.") in caplog.text
 
 
-# def test_get_99pers_mixed(caplog):
-#     """
-#     Getting a mixed persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, mixed=True)
-#     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
-#     assert exp_fams == fams
-#     assert ("The persistent genome contains 2 families "
-#             "having at least 4 genomes in each family.") in caplog.text
+def test_get_99pers_mixed(caplog):
+    """
+    Getting a mixed persistent genome at 99% (ceil) -> 4 genomes with exactly 1member
+    """
+    caplog.set_level(logging.DEBUG)
+    fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, mixed=True)
+    exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['3', '5']}
+    assert exp_fams == fams
+    assert ("The persistent genome contains 2 families, each one having exactly 1 member from at least "
+            "99.0% of the genomes (4 genomes). In the remaining "
+            "1.0% genomes, there can be 0, 1 or several members.") in caplog.text
 
 
-# def test_get_99pers_multi(caplog):
-#     """
-#     Getting a multi persistent genome at 99% (ceil) -> 3 genomes with exactly 1member,
-#     other with anything
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, multi=True)
-#     exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '12']}
-#     assert exp_fams == fams
-#     assert ("The persistent genome contains 4 families "
-#             "having at least 4 genomes in each family.") in caplog.text
+def test_get_99pers_multi(caplog):
+    """
+    Getting a multi persistent genome at 99% (ceil) -> 3 genomes with exactly 1member,
+    other with anything
+    """
+    caplog.set_level(logging.DEBUG)
+    fams = persf.get_pers(FAMS_BY_STRAIN, FAMILIES, 4, tol=0.99, multi=True)
+    exp_fams = {num: mems for num, mems in FAMILIES.items() if num in ['1', '3', '5', '12']}
+    assert exp_fams == fams
+    assert ("The persistent genome contains 4 families with members present in "
+            "at least 4 different genomes (99.0% of the total number of genomes).") in caplog.text

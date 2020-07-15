@@ -82,7 +82,7 @@ def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mix
     # multigenic families allowed for the '1-tol'% remaining families
     elif mixed:
         logger.info(f"The persistent genome contains {len(pers)} families, "
-                    f"each one having exactly 1 member from least {tol*100}% of the genomes ({min_members} "
+                    f"each one having exactly 1 member from at least {tol*100}% of the genomes ({min_members} "
                     f"genomes). In the remaining {round((1-tol)*100,3)}% genomes, there can be 0, 1 or "
                     "several members.")
     # Strict persistent genome. tol% families with exactly one member in each genome
