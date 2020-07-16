@@ -226,8 +226,7 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
                        "option -F (or --force).".format(strain, geprtfile, gegenfile))
         return
 
-    # If one of the 2 files already exists, overwrite both files (same behaviour
-    # as if no file exists)
+    # If at least one of the 2 files already exists, overwrite both files
     with open(gegenfile, "w") as gegf, open(geprtfile, "w") as gepf:
         for mem, fam in member.items():
             if strain not in several[fam]:
@@ -256,8 +255,12 @@ def write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname):
         name of dataset
     """
     for fam, genomes in fam_genomes.items():
-        missfile = os.path.join(aldir, dname + "-current." + fam + ".miss.lst")
+        # File where missing genomes will be written
+        missfile = os.path.join(aldir, f"{dname}-current.{fam}.miss.lst")
         with open(missfile, "w") as mff:
+            # missing = missing or several members:
+            # miss: all genomes - genomes in the family
+            # several: add to 'miss' genomes with several members in the family
             missing = (set(all_genomes) - set(genomes)).union(set(several[fam]))
             if missing:
                 mff.write("\n".join(missing) + "\n")

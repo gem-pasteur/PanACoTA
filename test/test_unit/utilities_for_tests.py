@@ -71,3 +71,20 @@ def compare_order_content(file1, file2):
                 print(f"'{line1}' vs {line2} do not correspond.")
                 return False
     return True
+
+
+def compare_file_to_list(file1, exp):
+    """
+    Check that the file contains the same lines as the list 'exp', in any order
+    """
+    missing = []
+    with open(file1, "r") as outf:
+        for line in outf:
+            missing.append(line.strip())
+    if len(missing) != len(exp):
+        print(f"{len(missing)} lines in {file1}, {len(exp)} lines expected")
+        return False
+    if set(missing) != set(exp):
+        print("Not same lines")
+        return False
+    return True
