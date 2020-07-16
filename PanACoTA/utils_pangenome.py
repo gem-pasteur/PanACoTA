@@ -136,8 +136,8 @@ def read_gene(gene, num, fams_by_strain, all_strains):
         num of family from which the given gene is
     fams_by_strain : dict
         {fam_num: {strain: [members]}}
-    all_strains : list
-        list of all strains
+    all_strains : set
+        set of all strains
 
     """
     # if format is ESCO.1512.00001.i001_12313 genome name is ESCO.1512.00001
