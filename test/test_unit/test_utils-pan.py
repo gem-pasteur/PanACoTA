@@ -156,9 +156,9 @@ def test_read_gene():
     gene = "ESCO.1016.00012.i012_00015"
     num = "1"
     fams_by_strain = {"1": {}}
-    all_strains = []
+    all_strains = set()
     upan.read_gene(gene, num, fams_by_strain, all_strains)
-    assert all_strains == ["ESCO.1016.00012"]
+    assert all_strains == {"ESCO.1016.00012"}
     assert fams_by_strain == {"1": {"ESCO.1016.00012": [gene]}}
 
 
@@ -170,9 +170,9 @@ def test_read_gene_other_format():
     gene = "my_gene-name_other_0001"
     num = "1"
     fams_by_strain = {"1": {}}
-    all_strains = []
+    all_strains = set()
     upan.read_gene(gene, num, fams_by_strain, all_strains)
-    assert all_strains == ["my_gene-name_other"]
+    assert all_strains == {"my_gene-name_other"}
     assert fams_by_strain == {"1": {"my_gene-name_other": [gene]}}
 
 
@@ -185,9 +185,9 @@ def test_read_gene_strain_known():
     gene = "ESCO.1016.00012.i012_00015"
     num = "1"
     fams_by_strain = {"1": {"ESCO.1016.00012": ["ESCO.1016.00012.i001_01"]}}
-    all_strains = ["ESCO.1016.00012"]
+    all_strains = {"ESCO.1016.00012"}
     upan.read_gene(gene, num, fams_by_strain, all_strains)
-    assert all_strains == ["ESCO.1016.00012"]
+    assert all_strains == {"ESCO.1016.00012"}
     assert fams_by_strain == {"1": {"ESCO.1016.00012": ["ESCO.1016.00012.i001_01",
                                                         gene]}}
 

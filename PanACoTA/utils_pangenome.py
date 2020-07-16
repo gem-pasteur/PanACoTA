@@ -77,12 +77,12 @@ def get_fams_info(families, logger):
     """
     logger.info("Retrieving information from pan families")
     fams_by_strain = {}
-    all_strains = []
+    all_strains = set()
     for num, fam in families.items():
         fams_by_strain[num] = {}
         for gene in fam:
             read_gene(gene, num, fams_by_strain, all_strains)
-    sort_all_strains = sorted(all_strains, key=utils.sort_genomes_by_name)
+    sort_all_strains = sorted(list(all_strains), key=utils.sort_genomes_by_name)
     return fams_by_strain, sort_all_strains
 
 
