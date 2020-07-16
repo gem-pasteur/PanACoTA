@@ -108,7 +108,7 @@ def read_pan_file(filein, logger):
     logger.info("Reading and getting information from pangenome file")
     fams_by_strain = {}
     families = {}
-    all_strains = []
+    all_strains = set()
     nfam = 0
     with open(filein, 'r') as coref:
         for line in coref:
@@ -120,7 +120,7 @@ def read_pan_file(filein, logger):
                 read_gene(gene, fam_num, fams_by_strain, all_strains)
             families[fam_num] = genes_ok
             nfam += 1
-    sort_all_strains = sorted(all_strains, key=utils.sort_genomes_by_name)
+    sort_all_strains = sorted(list(all_strains), key=utils.sort_genomes_by_name)
     return fams_by_strain, families, sort_all_strains
 
 
@@ -151,4 +151,4 @@ def read_gene(gene, num, fams_by_strain, all_strains):
     else:
         fams_by_strain[num][strain] = [gene]
     if strain not in all_strains:
-        all_strains.append(strain)
+        all_strains.add(strain)
