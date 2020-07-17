@@ -83,6 +83,7 @@ unit-test-ubuntu18.04:
     # - py.test test/test_unit/test_pangenome -vx
     # - py.test test/test_unit/test_pangenome/test_protseqfunc.py -vx
     # - py.test test/test_unit/test_pangenome/test_mmseq_func.py -vx
+    - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test_corepers -vx
     - py.test test/test_unit/test_align/test_getseqs.py -vx

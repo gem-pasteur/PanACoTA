@@ -309,7 +309,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         call.wait()
         retcode = call.returncode
     except OSError:
-        logger.error("error : {cmd} does not exist")
+        logger.error(f"error: {cmd} does not exist")
         if eof:
             sys.exit(1)
         else:
@@ -399,14 +399,14 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
                     "current error log "
                     "(<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err) to get more "
                     "information on the problems. Here are those "
-                    "genomes:\n{list_to_write}")
+                    f"genomes:\n{list_to_write}")
     else:
         logger.info(f"WARNING: Some genomes could not be formatted. See {logfile}")
-        logger.warning(("Some genomes were annotated by {0}, but could not be formatted, "
+        logger.warning((f"Some genomes were annotated by {soft}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at "
                         "'<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err' and "
                         ".details files to get more information about why they could not be "
-                        "formatted.\n{1}").format(soft, list_to_write))
+                        f"formatted.\n{list_to_write}"))
 
 
 def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
@@ -442,9 +442,9 @@ def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
     nb_disc = len(genomes) - len(kept_genomes)
     # Log number of genomes discarded.
     if not qc and nb_disc < 2:
-        logger.info("{} genome was discarded.".format(nb_disc))
+        logger.info(f"{nb_disc} genome was discarded.")
     elif not qc:
-        logger.info("{} genomes were discarded.".format(nb_disc))
+        logger.info(f"{nb_disc} genomes were discarded.")
     # Get input list file name (without path)
     _, name_lst = os.path.split(list_file)
     # if not QC, write discarded genomes to a file "discarded-[list_file].lst"
@@ -665,6 +665,7 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                                         "ignored when concatenating {}").format(file, genomes_inf))
                 # If there are files to concatenate, concatenate them
                 if to_concat:
+                    print(to_concat)
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
@@ -723,11 +724,11 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     logger.info(f"Reading given information on your genomes in {list_file}")
     genomes = {}
     if name and date:
-        spegenus = "{}.{}".format(name, date)
+        spegenus = f"{name}.{date}"
     column_order = {} # Put the number of column corresponding to each field
     if not os.path.isfile(list_file):
         logger.error(f"ERROR: The info file {list_file} that you gave does not exist. "
-                      "Please provide the  right path/name for this file.\nEnding program.")
+                      "Please provide the right path/name for this file.\nEnding program.")
         sys.exit(1)
     message_no_header = (f"ERROR: It seems that your info file {list_file} does not have a "
                           "header, or this header does not have, at least, the required "
@@ -736,6 +737,9 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
+            # Ignore empty lines
+            if line == "":
+                continue
             # Header line: Just get column number corresponding to each field
             if "to_annotate" in line:
                 column_headers = line.split("\t")
@@ -745,7 +749,6 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 if len(found) != 4:
                     logger.error(message_no_header)
                     sys.exit(1)
-                continue
             # If no header found, error message and exit
             if not column_order:
                 logger.error(message_no_header)
@@ -758,6 +761,8 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 infos = line.strip().split()
                 # Get genome name with its path to db_dir
                 gpath = infos[column_order["to_annotate"]]
+                gfile = os.path.basename(gpath)
+                gname = os.path.splitext(gfile)[0]
                 gsize = int(infos[column_order["gsize"]])
                 gl90 = int(infos[column_order["L90"]])
                 gcont = int(infos[column_order["nb_conts"]])
@@ -769,7 +774,7 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 continue
             # If no value for at least 1 field, warning message and ignore genome
             except IndexError:
-                logger.error("ERROR: Check that all fields of {list_file} are filled in each "
+                logger.error(f"ERROR: Check that all fields of {list_file} are filled in each "
                              "line (can be 'NA')")
                 sys.exit(1)
             # Could we find genome file?
@@ -1128,14 +1133,14 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-                    sizes.append(cont)
+                    sizes.append(cont.strip())
                     cor = "\t".join([prev_cont, prev_orig_name])
                     contigs.append(cor)
                     grf.write(cont)
                     grf.write(seq)
 
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                prev_orig_name = line
+                prev_orig_name = line.strip()
                 contig_num += 1
                 cont_size = 0
                 seq = ""
@@ -1145,7 +1150,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 cont_size += len(line.strip())
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-        sizes.append(cont)
+        sizes.append(cont.strip())
         cor = "\t".join([prev_cont, prev_orig_name])
         contigs.append(cor)
         grf.write(cont)
@@ -1227,7 +1232,7 @@ def write_list(list_names, fileout):
     """
     with open(fileout, "w") as fo:
         for genome in list_names:
-            fo.write(genome + "\n")
+            fo.write(str(genome) + "\n")
 
 
 def list_to_str(list, sep='\t'):
