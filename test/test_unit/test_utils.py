@@ -918,17 +918,17 @@ def test_rename_contigs():
 
 
 
-def test_cat_nobar(capsys):
-    """
-    Check that when cat is called on a list of several files, the output file
-    contains what is expected (concatenation of content of all input files)
-    """
-    genomes = ["genome1.fasta", "genome_long_header.fst", "genome6.fasta"]
-    list_files = [os.path.join(DATA_DIR, "genomes", gen) for gen in genomes]
-    outfile = os.path.join(GENEPATH, "test_catfile.txt")
-    utils.cat(list_files, outfile)
-    exp_file = os.path.join(DATA_DIR, "exp_files", "res_test_cat_genomes_fasta.fst")
-    assert utilities.compare_file_content(outfile, exp_file)
+# def test_cat_nobar(capsys):
+#     """
+#     Check that when cat is called on a list of several files, the output file
+#     contains what is expected (concatenation of content of all input files)
+#     """
+#     genomes = ["genome1.fasta", "genome_long_header.fst", "genome6.fasta"]
+#     list_files = [os.path.join(DATA_DIR, "genomes", gen) for gen in genomes]
+#     outfile = os.path.join(GENEPATH, "test_catfile.txt")
+#     utils.cat(list_files, outfile)
+#     exp_file = os.path.join(DATA_DIR, "exp_files", "res_test_cat_genomes_fasta.fst")
+#     assert utilities.compare_file_content(outfile, exp_file)
 
 
 def test_cat_bar(caplog):
