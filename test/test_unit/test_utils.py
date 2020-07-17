@@ -12,7 +12,6 @@ import os
 import logging
 import shutil
 import matplotlib
-import argparse
 
 matplotlib.use('AGG')
 
@@ -915,7 +914,6 @@ def test_rename_contigs():
                      ">ESCO.0216.00005.0002\t7080",
                      ">ESCO.0216.00005.0003\t2583"]
     assert utilities.compare_order_content(outfile, exp_file)
-
 
 
 def test_cat_nobar():
