@@ -37,7 +37,7 @@ def setup_teardown_module():
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
-    shutil.rmtree(GENEPATH)
+    # shutil.rmtree(GENEPATH)
     print("teardown")
 
 
@@ -923,8 +923,8 @@ def test_cat_nobar(capsys):
     Check that when cat is called on a list of several files, the output file
     contains what is expected (concatenation of content of all input files)
     """
-    import glob
-    list_files = glob.glob(os.path.join(DATA_DIR, "genomes", "*.fasta"))
+    genomes = ["genome1.fasta", "genome_long_header.fst", "genome6.fasta"]
+    list_files = [os.path.join(DATA_DIR, "genomes", gen) for gen in genomes]
     outfile = os.path.join(GENEPATH, "test_catfile.txt")
     utils.cat(list_files, outfile)
     exp_file = os.path.join(DATA_DIR, "exp_files", "res_test_cat_genomes_fasta.fst")
