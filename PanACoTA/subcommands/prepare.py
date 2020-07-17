@@ -38,11 +38,11 @@ def main_from_parse(arguments):
          arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.db_dir,
          arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
-         arguments.verbose, arguments.quiet)
+         arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
 def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_dir,
-         only_mash, info_file, l90, nbcont, cutn, min_dist, verbose, quiet):
+         only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
 
@@ -84,6 +84,8 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
         cut at each when there are 'cutn' N in a row. Don't cut if equal to 0
     min_dist : int
         lower limit of distance between 2 genomes to keep them
+    max_dist : int
+        upper limit of distance between 2 genomes to keep them (default is 0.06)
     verbose : int
         verbosity:
         - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more,
@@ -95,8 +97,6 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
-    # Fixed limits. For now, we do not propose to user to give its own limits
-    max_dist = 0.06
 
     # get species name in NCBI format
     # -> will be used to name output directory
@@ -239,7 +239,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
                                 min_dist, max_dist, threads, quiet)
     # Write list of genomes kept, and list of genomes discarded by mash step
-    fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist)
+    fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist, max_dist)
     logger.info("End")
 
 
@@ -293,10 +293,14 @@ def build_parser(parser):
     general.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    general.add_argument("-m", dest="min_dist", default=1e-4, type=float,
+    general.add_argument("--min", dest="min_dist", default=1e-4, type=float,
                         help="By default, genomes whose distance to the reference is not "
                              "between 1e-4 and 0.06 are discarded. You can specify your own "
                              "lower limit (instead of 1e-4) with this option.")
+    general.add_argument("--max_dist", dest="max_dist", default=0.06, type=float,
+                        help="By default, genomes whose distance to the reference is not "
+                             "between 1e-4 and 0.06 are discarded. You can specify your own "
+                             "lower limit (instead of 0.06) with this option.")
     general.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
                           help=("Run 'N' downloads in parallel (default=1). Put 0 if "
                                 "you want to use all cores of your computer."))

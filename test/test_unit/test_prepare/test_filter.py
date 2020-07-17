@@ -10,13 +10,14 @@ import shutil
 import pytest
 from scipy.sparse import dok_matrix
 
-import test.test_unit.utilities_for_tests as util
+import test.test_unit.utilities_for_tests as tutil
 import PanACoTA.prepare_module.filter_genomes as filterg
 import PanACoTA.utils as utils
 
 # Define variables and functions used by several tests
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
 GENOMES_DIR = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
+GENEPATH = os.path.join(DATA_TEST_DIR, "generated_by_unit-tests")
 EXP_GENOMES = {
                "ACOR001.0519.fna": ["ACOR001.0519",
                                     os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
@@ -43,21 +44,62 @@ LOGFILE_BASE = "logfile_test.txt"
 LEVEL = logging.DEBUG
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
 
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_mmseq', verbose=1)
-    print("setup")
 
-
-def teardown_module():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
     """
+    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_filter', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    for f in LOGFILES:
+        if os.path.exists(f):
+            os.remove(f)
+    shutil.rmtree(GENEPATH)
     print("teardown")
-    for file in LOGFILES:
-        os.remove(file)
+
+
+def test_write_output_no_outdir(caplog):
+    """
+    Check that when outdir does not exist, program ends with error message
+    """
+    corresp_genomes = {"ACOR001": "ACOR001.0519.fna.gz", "ACOR002": "ACOR002.0519.fna.gz",
+                       "ACOR003": "ACOR003.0519.fna.gz"}
+    sorted_genomes = []
+    genomes_removed = {}
+
+    # Define output directory for generated files
+    outdir = os.path.join(GENEPATH, "test_filter_write_output_no_outdir")
+    gspecies = "Acetobacter_fabarum"
+
+    # Check everything works without error
+    with pytest.raises(SystemExit):
+        filterg.write_outputfiles({}, sorted_genomes, genomes_removed, outdir, gspecies, 1e-4, 0.06)
+
+    # Check outfiles do not exist
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.06.txt")
+    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.06.txt")
+    assert not os.path.isfile(list_file)
+    assert not os.path.isfile(discard_file)
+
+    # Check output
+    assert not os.path.isdir(outdir)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    assert ("The given output directory (test/data/prepare/generated_by_unit-tests/test_filter_write_output_no_outdir) "
+            "does not exist. We cannot create output files there") in caplog.text
 
 
 def test_write_output():
@@ -74,20 +116,20 @@ def test_write_output():
     genomes[toto_path] = ['totoname', 'ori toto', 'path_toto', 13, 5, 6]
     genomes_removed = {"genome": ["ref", 10]}
     sorted_genomes.append(toto_path)
-
     # Define output directory for generated files
-    outdir = os.path.join(DATA_TEST_DIR, "test_filter_write_output")
-    os.makedirs(outdir)
+    outdir = os.path.join(GENEPATH, "test_filter_write_output")
+    os.mkdir(outdir)
     gspecies = "Acetobacter_fabarum"
-    min_dist = 0.06
+    min_dist = 1e-4
+    max_dist = 0.06
 
     # Check everything works without error
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist) == 0
+                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.06.txt")
-    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.06.txt")
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
+    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)
 
@@ -114,9 +156,6 @@ def test_write_output():
         assert df.readline() == ''
         assert df.readline() == ''
 
-    # Remove test folder
-    shutil.rmtree(outdir)
-
 
 def test_write_output_no_discard():
     """
@@ -135,18 +174,19 @@ def test_write_output_no_discard():
     sorted_genomes.append(toto_path)
 
     # Define output directory for generated files
-    outdir = os.path.join(DATA_TEST_DIR, "test_filter_write_output_no_discard")
+    outdir = os.path.join(GENEPATH, "test_filter_write_output_no_discard")
     os.makedirs(outdir)
     gspecies = "Acetobacter_fabarum"
-    min_dist = 0.06
+    min_dist = 1e-4
+    max_dist = 0.06
 
     # Check everything works without error
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist) == 0
+                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.06.txt")
-    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.06.txt")
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
+    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)
 
@@ -171,9 +211,6 @@ def test_write_output_no_discard():
         assert df.readline() == ''
         assert df.readline() == ''
 
-    # Remove test folder
-    shutil.rmtree(outdir)
-
 
 def test_write_output_no_genome():
     """
@@ -187,18 +224,19 @@ def test_write_output_no_genome():
     genomes_removed = {}
 
     # Define output directory for generated files
-    outdir = os.path.join(DATA_TEST_DIR, "test_filter_write_output_no_genome")
+    outdir = os.path.join(GENEPATH, "test_filter_write_output_no_genome")
     os.makedirs(outdir)
     gspecies = "Acetobacter_fabarum"
-    min_dist = 0.06
+    min_dist = 1e-4
+    max_dist = 0.06
 
     # Check everything works without error
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist) == 0
+                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.06.txt")
-    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.06.txt")
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
+    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)
 
@@ -218,41 +256,6 @@ def test_write_output_no_genome():
         # Check no genome
         assert df.readline() == ''
         assert df.readline() == ''
-
-    # Remove test folder
-    shutil.rmtree(outdir)
-
-
-def test_write_output_no_outdir(caplog):
-    """
-    Check that when outdir does not exist, program ends with error message
-    """
-    corresp_genomes = {"ACOR001": "ACOR001.0519.fna.gz", "ACOR002": "ACOR002.0519.fna.gz",
-                       "ACOR003": "ACOR003.0519.fna.gz"}
-    sorted_genomes = []
-    genomes_removed = {}
-
-    # Define output directory for generated files
-    outdir = os.path.join(DATA_TEST_DIR, "test_filter_write_output_no_outdir")
-    gspecies = "Acetobacter_fabarum"
-
-    # Check everything works without error
-    with pytest.raises(SystemExit):
-        filterg.write_outputfiles({}, sorted_genomes, genomes_removed, outdir, gspecies, 0.06)
-
-    # Check outfiles do not exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.06.txt")
-    discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.06.txt")
-    assert not os.path.isfile(list_file)
-    assert not os.path.isfile(discard_file)
-
-    # Check output
-    assert not os.path.isdir(outdir)
-
-    # Check logs
-    caplog.set_level(logging.DEBUG)
-    assert ("The given output directory (test/data/prepare/test_filter_write_output_no_outdir) "
-            "does not exist. We cannot create output files there") in caplog.text
 
 
 def test_sort_genomes_minhash():
@@ -292,7 +295,7 @@ def test_sketch_all(caplog):
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOC.1019.fna"), 25003, 52, 50]
                }
     sorted_genomes = ["genome2", "genome1diff", "genome3", "genome1", "genome1bis"]
-    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all")
+    outdir = os.path.join(GENEPATH, "test_sketch_all")
     os.makedirs(outdir)
     list_reps = os.path.join(outdir, "test_list_reps.txt")
     out_msh = os.path.join(outdir, "out_mash.msh")
@@ -311,12 +314,7 @@ def test_sketch_all(caplog):
                       os.path.join(GENOMES_DIR, "ACOC.1019.fna"),
                       os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
                       os.path.join(GENOMES_DIR, "ACOR001.0519-bis.fna")]
-    # 4 files to sketch, with expected paths
-    with open(list_reps, "r") as lr:
-        lines_found = lr.readlines()
-        assert len(lines_found) == 5
-        for line, expect in zip(lines_found, expected_lines):
-            assert line.strip() == expect
+    assert tutil.compare_file_to_list(list_reps, expected_lines)
 
     with open(mash_log, "r") as ml:
         assert ml.readline().strip() == f"Sketching {expected_lines[0]}..."
@@ -327,11 +325,10 @@ def test_sketch_all(caplog):
         assert ml.readline().strip() == f"Writing to {out_msh}..."
 
     assert "Sketching all genomes..." in caplog.text
-    assert ("mash sketch -o test/data/prepare/test_sketch_all/out_mash.msh -p 1 -l "
-            "test/data/prepare/test_sketch_all/test_list_reps.txt") in caplog.text
+    assert ("mash sketch -o test/data/prepare/generated_by_unit-tests/test_sketch_all/out_mash.msh -p 1 -l "
+            "test/data/prepare/generated_by_unit-tests/test_sketch_all/test_list_reps.txt -s 1e4") in caplog.text
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[1].levelname == "DETAIL"
-    shutil.rmtree(outdir)
 
 
 def test_sketch_all_noout(caplog):
@@ -345,7 +342,7 @@ def test_sketch_all_noout(caplog):
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
                }
     sorted_genomes = ["genome2", "genome3", "genome1"]
-    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_noout")
+    outdir = os.path.join(GENEPATH, "test_sketch_all_noout")
     list_reps = os.path.join(outdir, "test_list_reps.txt")
     out_msh = os.path.join(outdir, "out_mash.msh")
     mash_log = os.path.join(outdir, "mash_sketch.log")
@@ -356,7 +353,7 @@ def test_sketch_all_noout(caplog):
 
     # Check log
     caplog.set_level(logging.DEBUG)
-    assert ("Your output directory 'test/data/prepare/test_sketch_all_noout' "
+    assert ("Your output directory 'test/data/prepare/generated_by_unit-tests/test_sketch_all_noout' "
             "does not exist") in caplog.text
 
 
@@ -372,7 +369,7 @@ def test_sketch_all_mash_exists(caplog):
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
                }
     sorted_genomes = ["genome2", "genome3", "genome1"]
-    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_exists")
+    outdir = os.path.join(GENEPATH, "test_sketch_all_mash_exists")
     os.makedirs(outdir)
     list_reps = os.path.join(outdir, "test_list_reps.txt")
     out_msh = os.path.join(outdir, "mash_exists")
@@ -391,10 +388,8 @@ def test_sketch_all_mash_exists(caplog):
 
     # Check log
     caplog.set_level(logging.DEBUG)
-    assert ("Mash sketch file test/data/prepare/test_sketch_all_mash_exists/mash_exists.msh "
+    assert ("Mash sketch file test/data/prepare/generated_by_unit-tests/test_sketch_all_mash_exists/mash_exists.msh "
             "already exists. PanACoTA will use it for next step.") in caplog.text
-
-    shutil.rmtree(outdir)
 
 
 def test_sketch_all_error_mash(caplog):
@@ -406,7 +401,7 @@ def test_sketch_all_error_mash(caplog):
                "genome3": ["g3_name", "g3_ori", os.path.join(GENOMES_DIR, "ACOR003.0519.fna"), 25003, 52, 50]
                }
     sorted_genomes = ["genome2", "genome3", "genome1"]
-    outdir = os.path.join(DATA_TEST_DIR, "test_sketch_all_mash_error")
+    outdir = os.path.join(GENEPATH, "test_sketch_all_mash_error")
     os.makedirs(outdir)
     list_reps = os.path.join(DATA_TEST_DIR, "test_files", "test_list_to_sketch.txt")
     out_msh = os.path.join(outdir, "out_mash.msh")
@@ -425,10 +420,8 @@ def test_sketch_all_error_mash(caplog):
     # Check log
     caplog.set_level(logging.DEBUG)
     assert ("Error while trying to sketch 3 genomes to combined archive. Maybe some genome "
-            "sequences in 'tmp_files' are missing! Check logfile: test/data/prepare/"
+            "sequences in 'tmp_files' are missing! Check logfile: test/data/prepare/generated_by_unit-tests/"
             "test_sketch_all_mash_error/mash_sketch.log") in caplog.text
-
-    shutil.rmtree(outdir)
 
 
 def test_compare_all(caplog):
@@ -436,8 +429,8 @@ def test_compare_all(caplog):
     Check that comparison of all sketched sequences is as expected (output matrix is as expected)
     """
     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
-    matrix = os.path.join(DATA_TEST_DIR, "matrix_from_test_compare_all.txt")
-    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
+    matrix = os.path.join(GENEPATH, "matrix_from_test_compare_all.txt")
+    mash_log = os.path.join(GENEPATH, "mashlog_from_test_compare_all.log")
     threads = 1
 
     # Check msh file exists
@@ -451,11 +444,7 @@ def test_compare_all(caplog):
 
     # Check content of matrix file
     expect_matrix = os.path.join(DATA_TEST_DIR, "test_files", "test_matrix_mash.txt")
-    assert util.compare_file_content(matrix, expect_matrix)
-
-    # Remove outputs
-    os.remove(matrix)
-    os.remove(mash_log)
+    assert tutil.compare_file_content(matrix, expect_matrix)
 
 
 def test_compare_all_matrix_exists(caplog):
@@ -465,7 +454,7 @@ def test_compare_all_matrix_exists(caplog):
     """
     out_msh = os.path.join(DATA_TEST_DIR, "test_files", "test_mash_output")
     matrix = os.path.join(DATA_TEST_DIR, "test_files", "test_matrix_mash.txt")
-    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all.log")
+    mash_log = os.path.join(GENEPATH, "mashlog_from_test_compare_all.log")
     threads = 1
 
     filterg.compare_all(out_msh, matrix, "matrix", mash_log, threads)
@@ -482,9 +471,9 @@ def test_compare_all_error_mash(caplog):
     Check that when mash has a problem, it gives an error message and closes the program
     """
     # mash file does not exist
-    out_msh = os.path.join(DATA_TEST_DIR, "mash.msh")
-    matrix = os.path.join(DATA_TEST_DIR, "matrix.txt")
-    mash_log = os.path.join(DATA_TEST_DIR, "mashlog_from_test_compare_all-error-mash.log")
+    out_msh = os.path.join(GENEPATH, "mash.msh")
+    matrix = os.path.join(GENEPATH, "matrix.txt")
+    mash_log = os.path.join(GENEPATH, "mashlog_from_test_compare_all-error-mash.log")
     threads = 1
 
     # Test that it exists with sysExit error
@@ -494,11 +483,7 @@ def test_compare_all_error_mash(caplog):
     # Check log
     caplog.set_level(logging.DEBUG)
     assert ("Error while trying to estimate pairwise distances between all genomes. "
-            "See test/data/prepare/mashlog_from_test_compare_all-error-mash.log") in caplog.text
-
-    # Remove created files
-    os.remove(matrix)
-    os.remove(mash_log)
+            "See test/data/prepare/generated_by_unit-tests/mashlog_from_test_compare_all-error-mash.log") in caplog.text
 
 
 def test_read_matrix():
@@ -680,7 +665,7 @@ def test_check_quality():
     """
     species_linked = "my-test-genomes"
     db_path = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
-    tmp_dir = os.path.join(DATA_TEST_DIR, "tmp_dir_check_quality")
+    tmp_dir = os.path.join(GENEPATH, "tmp_dir_check_quality")
     os.mkdir(tmp_dir)
     max_l90 = 100
     max_cont = 100
@@ -689,9 +674,6 @@ def test_check_quality():
     genomes = filterg.check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn)
 
     assert genomes == EXP_GENOMES
-
-    # Remove tmp_dir
-    shutil.rmtree(tmp_dir)
 
 
 def test_check_quality_no_dbdir(caplog):
@@ -742,9 +724,9 @@ def test_check_quality_no_genome(caplog):
     ends with error message
     """
     species_linked = "my-test-genomes"
-    db_path = "dbpath_for_test"
+    db_path = os.path.join(GENEPATH, "dbpath_for_test")
     os.mkdir(db_path)
-    tmp_dir = os.path.join(DATA_TEST_DIR, "tmp_dir_check_quality")
+    tmp_dir = os.path.join(GENEPATH, "tmp_dir_check_quality")
     os.mkdir(tmp_dir)
     max_l90 = 100
     max_cont = 100
@@ -756,11 +738,7 @@ def test_check_quality_no_genome(caplog):
 
     # Check logs
     caplog.set_level(logging.DEBUG)
-    assert "There is no genome in dbpath_for_test." in caplog.text
-
-    # Remove empty directories created
-    shutil.rmtree(db_path)
-    shutil.rmtree(tmp_dir)
+    assert "There is no genome in test/data/prepare/generated_by_unit-tests/dbpath_for_test." in caplog.text
 
 
 def test_iterative_mash(caplog):
@@ -771,7 +749,7 @@ def test_iterative_mash(caplog):
     # Parameters for iterative_mash function
     sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
                       "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
-    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash")
+    outdir = os.path.join(GENEPATH, "res_test_iterative_mash")
     species_linked = "my-test-species"
     min_dist = 1e-4
     max_dist = 0.06
@@ -798,9 +776,6 @@ def test_iterative_mash(caplog):
     assert os.path.isfile(npz_mat)
     assert os.path.isfile(txt_matrix)
 
-    # Remove created directories
-    shutil.rmtree(outdir)
-
 
 def test_iterative_mash_npz_exists():
     """
@@ -811,7 +786,7 @@ def test_iterative_mash_npz_exists():
     sorted_genomes = ["ACOR002.0519.fna", "ACOR001.0519-almost-same.fna",
                       "ACOC.1019.fna", "ACOR001.0519.fna", "ACOR001.0519-bis.fna"]
     # Create output dir where all mash result files will be stored
-    outdir = os.path.join(DATA_TEST_DIR, "res_test_iterative_mash_npz_exists")
+    outdir = os.path.join(GENEPATH, "res_test_iterative_mash_npz_exists")
     mash_dir = os.path.join(outdir, "mash_files")
     os.makedirs(mash_dir)
     # Copy existing npz matrix to mash output folder
@@ -843,8 +818,5 @@ def test_iterative_mash_npz_exists():
     # Check npz matrix exists (and is the same as the given file), and txt matrix was not created,
     # as we used the npz file
     assert os.path.isfile(npz_matrix_out)
-    assert util.compare_files_bin(npz_matrix_out, npz_matrix_model)
+    assert tutil.compare_files_bin(npz_matrix_out, npz_matrix_model)
     assert not os.path.isfile(txt_matrix_out)
-
-    # Remove created directories
-    shutil.rmtree(outdir)

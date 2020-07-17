@@ -158,10 +158,9 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Sketch genomes
     sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
-
+    
     # Compute pairwise distances
     compare_all(out_msh, matrix, sparse_mat, mash_log, threads)
-
     # Iteratively discard genomes
     # List of genomes to compare to the next ones until a limit value is reached.
     # genomes ordered by decreasing L90/nbcont (used to pop elements in comparing step)
@@ -173,7 +172,6 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Get link between genome_file (genomes key) and place in sorted_genomes
     corresp_file = {genome: num for num, genome in enumerate(sorted_genomes)}
-
     # Read matrix (from npz file if existing, otherwise from txt file)
     if os.path.exists(sparse_mat):
         logger.info(f"Loading matrix contained in {sparse_mat}")
@@ -396,6 +394,7 @@ def read_matrix(genomes, sorted_genomes, matrix):
 
     nbgen = len(sorted_genomes)
     corresp_abs = {genomes[genome][2]: num for num, genome in enumerate(sorted_genomes)}
+    print(len(corresp_abs))
     # Create square matrix with nbgen cols/lines. dok format is a 'Dictionary Of Keys'
     # -> writes (0, 1) value
     mat_sp = dok_matrix((nbgen, nbgen), dtype=float)
@@ -413,7 +412,7 @@ def read_matrix(genomes, sorted_genomes, matrix):
     return mat_sp
 
 
-def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies, min_dist):
+def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies, min_dist, max_dist):
     """
     Write the list of genomes kept in a file, 1 genome per line -> will be the input file for
     annotation and next steps
@@ -436,6 +435,8 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         species name if given, otherwise species taxID
     min_dist : float
         lower limit of distance between 2 genomes to keep them
+    max_dist : float
+        upper limit of distance between 2 genomes to keep them
 
     Returns
     -------
@@ -445,9 +446,9 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         logger.error(f"The given output directory ({outdir}) does not exist. We cannot "
                       "create output files there")
         sys.exit(1)
-    list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}.txt")
+    list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}_{max_dist}.txt")
     kept_genomes = []
-    discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}.txt")
+    discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}_{max_dist}.txt")
 
     # Get list of kept genomes and write them in list_file
     for genome in sorted_genomes:
