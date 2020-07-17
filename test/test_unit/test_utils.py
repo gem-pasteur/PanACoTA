@@ -37,7 +37,7 @@ def setup_teardown_module():
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
-    # shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH)
     print("teardown")
 
 

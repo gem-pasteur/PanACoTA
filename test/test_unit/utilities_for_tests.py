@@ -45,10 +45,8 @@ def compare_file_content(file1, file2):
         lines_f2 = f2.readlines()
         lines_f2 = [l.strip() for l in lines_f2]
         if len(lines_f1) != len(lines_f2):
-            print(len(lines_f1))
-            print(len(lines_f2))
-            print(lines_f1[0], lines_f1[-1])
-            print(lines_f2[0], lines_f2[-1])
+            print(lines_f1)
+            print(lines_f2)
             print(f"not same number of lines in {file1} and {file2}")
             return False
         for line2 in lines_f2:
