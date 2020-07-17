@@ -936,8 +936,8 @@ def test_cat_bar(caplog):
     Check that when cat is called on a list of several files, the output file
     contains what is expected (concatenation of content of all input files)
     """
-    import glob
-    list_files = glob.glob(os.path.join(DATA_DIR, "genomes", "*.fasta"))
+    genomes = ["genome1.fasta", "genome_long_header.fst", "genome6.fasta"]
+    list_files = [os.path.join(DATA_DIR, "genomes", gen) for gen in genomes]
     outfile = os.path.join(GENEPATH, "test_catfile.txt")
     title = "test cat progressbar"
     utils.cat(list_files, outfile, title=title)
