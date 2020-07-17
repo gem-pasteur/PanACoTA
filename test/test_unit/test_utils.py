@@ -941,7 +941,7 @@ def test_cat_bar(caplog):
     outfile = os.path.join(GENEPATH, "test_catfile.txt")
     title = "test cat progressbar"
     utils.cat(list_files, outfile, title=title)
-    exp_file = os.path.join(DATA_DIR, "exp_files", "res_test_cat_genomes_fasta.fst")
+    exp_file = os.path.join(DATA_DIR, "exp_files", "res_test_cat-genomes.fst")
     assert utilities.compare_file_content(outfile, exp_file)
 
 
