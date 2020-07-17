@@ -625,4 +625,3 @@ CGATTCTCGCGGATATctcggcttaggct
 >contig3
 aatcgggcttcgcgaggcgcttagagagctctcgcgcgatatatagcgctc
 cgctatagcgctac
-
