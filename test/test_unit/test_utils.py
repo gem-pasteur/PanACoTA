@@ -931,7 +931,7 @@ def test_rename_contigs():
 #     assert utilities.compare_file_content(outfile, exp_file)
 
 
-def test_cat_bar(caplog):
+def test_cat_bar():
     """
     Check that when cat is called on a list of several files, the output file
     contains what is expected (concatenation of content of all input files)
