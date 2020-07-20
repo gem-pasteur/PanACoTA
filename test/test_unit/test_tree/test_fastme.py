@@ -264,6 +264,3 @@ def test_run_tree(caplog):
     assert os.path.isfile(logs)
     phylip = align + ".phylip"
     assert os.path.isfile(phylip)
-    # os.remove(treefile)
-    # os.remove(logs)
-    # os.remove(phylip)
