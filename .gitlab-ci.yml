@@ -87,6 +87,7 @@ unit-test-ubuntu18.04:
     # - py.test test/test_unit/test_pangenome/test_mmseq_func.py -vx
     - py.test test/test_unit/test_corepers -vx
     - py.test test/test_unit/test_align/test_getseqs.py -vx
+    - py.test test/test_unit/test_align/test_alignment.py -xv
     - py.test test/test_unit/test_tree/test_fastme.py -xv
     - mv .coverage .coverage-unit
   artifacts:
