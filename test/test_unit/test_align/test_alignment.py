@@ -740,7 +740,7 @@ def test_handle_family_true():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --retree 2 --maxiterate 0 "
+    assert ("mafft --quiet --auto "
             "test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
@@ -780,7 +780,7 @@ def test_handle_family_true_nomiss():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --retree 2 --maxiterate 0 "
+    assert ("mafft --quiet --auto "
             "test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
@@ -827,7 +827,7 @@ def test_handle_family_emptyaln_true():
             "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-align.8.aln "
             "(0)") in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --retree 2 --maxiterate 0 "
+    assert ("mafft --quiet --auto "
             "test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
