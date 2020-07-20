@@ -543,7 +543,7 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
                                    ngenomes, logger)
     assert "Checking extractions for family 8" in caplog.text
     assert "Aligning family 8" in caplog.text
-    assert ("mafft --auto "
+    assert ("mafft --quiet --auto "
             "test/data/align/exp_files/exp_aldir-pers/current.8.prt does not exist") in caplog.text
     # Check content of mafft and btr files
     assert not os.path.isfile(mafft_file)
