@@ -462,7 +462,8 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     cmd = "mafft --quiet --auto {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    stderr = open(mafft_file + ".log", "w")
+    ret = utils.run_cmd(cmd, error, stdout=stdout, stderr=stderr, logger=logger)
     logger.log(utils.detail_lvl(), cmd)
     stdout.close()
     if not isinstance(ret, int):
