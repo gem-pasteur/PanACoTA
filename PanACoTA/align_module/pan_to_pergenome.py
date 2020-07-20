@@ -221,9 +221,10 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
     gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
     geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
     if os.path.isfile(gegenfile) and os.path.isfile(geprtfile):
-        logger.warning("For genome {}, {} and {} already exist. The program will use them "
+        logger.warning(f"For genome {strain}, {geprtfile} and {gegenfile} already exist. "
+                       "The program will use them "
                        "to extract proteins and genes. If you prefer to rewrite them, use "
-                       "option -F (or --force).".format(strain, geprtfile, gegenfile))
+                       "option -F (or --force).")
         return
 
     # If at least one of the 2 files already exists, overwrite both files

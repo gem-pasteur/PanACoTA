@@ -18,6 +18,7 @@ EXPPATH = os.path.join(ALPATH, "exp_files")
 TESTPATH = os.path.join(ALPATH, "test_files")
 GENEPATH = os.path.join(ALPATH, "generated_by_unit-tests")
 
+
 @pytest.fixture(autouse=True)
 def setup_teardown_module():
     """
@@ -41,6 +42,7 @@ def setup_teardown_module():
             # os.remove(f)
     shutil.rmtree(GENEPATH)
     print("teardown")
+
 
 ALL_PROTS = {"ESCO1": {"ESCO1_00001": '1',
                        "ESCO1_00002": '4'},
@@ -77,30 +79,30 @@ SEVERAL = {'1': [],
 ALL_GENOMES = ["ESCO1", "ESCO2", "ESCO3", "ESCO4", "ESCO5", "ESCO6"]
 
 
-def test_get_per_genome(caplog):
-    """
-    Test that when giving a persistent genome file and a list of genomes,
-    it creates all expected files in output/Listdir
-    """
-    caplog.set_level(logging.DEBUG)
-    pers = os.path.join("test", "data", "persgenome", "exp_files", "exp_pers-floor-mixed.txt")
-    list_gen = os.path.join(TESTPATH, "listfile.txt")
-    dname = "TEST-all-gembase"
-    outdir = "test_get_per_genome"
-    all_genomes, aldir, listdir, fams = p2p.get_per_genome(pers, list_gen, dname, outdir)
-    assert ("Reading PersGenome and constructing lists of missing genomes "
-            "in each family") in caplog.text
-    exp_al = os.path.join(outdir, "Align-TEST-all-gembase")
-    exp_list = os.path.join(outdir, "List-TEST-all-gembase")
-    assert exp_al == aldir
-    assert os.path.isdir(aldir)
-    assert exp_list == listdir
-    assert os.path.isdir(listdir)
-    exp_genomes = ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]
-    assert all_genomes == exp_genomes
-    exp_fams = ['1', '3', '5', '8', '10', '11', '12']
-    assert set(fams) == set(exp_fams)
-    shutil.rmtree(outdir)
+# def test_get_per_genome(caplog):
+#     """
+#     Test that when giving a persistent genome file and a list of genomes,
+#     it creates all expected files in output/Listdir
+#     """
+#     caplog.set_level(logging.DEBUG)
+#     pers = os.path.join("test", "data", "persgenome", "exp_files", "exp_pers-floor-mixed.txt")
+#     list_gen = os.path.join(TESTPATH, "listfile.txt")
+#     dname = "TEST-all-gembase"
+#     outdir = "test_get_per_genome"
+#     all_genomes, aldir, listdir, fams = p2p.get_per_genome(pers, list_gen, dname, outdir)
+#     assert ("Reading PersGenome and constructing lists of missing genomes "
+#             "in each family") in caplog.text
+#     exp_al = os.path.join(outdir, "Align-TEST-all-gembase")
+#     exp_list = os.path.join(outdir, "List-TEST-all-gembase")
+#     assert exp_al == aldir
+#     assert os.path.isdir(aldir)
+#     assert exp_list == listdir
+#     assert os.path.isdir(listdir)
+#     exp_genomes = ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]
+#     assert all_genomes == exp_genomes
+#     exp_fams = ['1', '3', '5', '8', '10', '11', '12']
+#     assert set(fams) == set(exp_fams)
+#     shutil.rmtree(outdir)
 
 
 # def test_prot_per_strain():
@@ -268,119 +270,6 @@ def test_get_per_genome(caplog):
 #     shutil.rmtree(listdir)
 
 
-def test_write_genome():
-    """
-    Test that given a genome, it writes the list of its proteins
-    and genes in expected files.
-    """
-    listdir = os.path.join(GENEPATH, "Listdir")
-    aldir = os.path.join(GENEPATH, "Aldir")
-    # Create align folder
-    os.makedirs(listdir)
-    dname = "test_write_genome"
-    strain = "ESCO4"
-    members = ALL_PROTS[strain]
-    p2p.write_genome_file(listdir, aldir, dname, strain, members, SEVERAL)
-
-    # Check creation of files and content
-    fileprt = os.path.join(listdir, f"{dname}-getEntry_prt_ESCO4.txt")
-    expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
-    assert tutil.compare_file_content(fileprt, expprt)
-    filegen = os.path.join(listdir, f"{dname}-getEntry_gen_ESCO4.txt")
-    expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
-    assert tutil.compare_file_content(filegen, expgen)
-
-
-# def test_write_genome_prt_exists():
-#     """
-#     Test that when only prt file exists, it overwrites it and generates
-#     expected prt and gen files
-#     """
-#     listdir = os.path.join(GENEPATH, "Listdir")
-#     aldir = os.path.join(GENEPATH, "Aldir")
-#     # Create align folder
-#     os.makedirs(listdir)
-#     dname = "test_write_genome_prt_exists"
-#     strain = "ESCO4"
-#     members = ALL_PROTS[strain]
-
-#     # Create prt file
-#     fileprt = os.path.join(listdir, "{dname}-getEntry_prt_ESCO4.txt")
-#     with open(fileprt, "w") as prtf:
-#         prtf.write("Wrong prt file\n")
-#     p2p.write_genome_file(listdir, aldir, dname, strain, members, SEVERAL)
-
-#     # Check creation of files and content
-#     expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
-#     assert tutil.compare_file_content(fileprt, expprt)
-#     filegen = os.path.join(listdir, "{dname}-getEntry_gen_ESCO4.txt")
-#     expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
-#     assert tutil.compare_file_content(expgen, filegen)
-
-
-# def test_write_genome_gen_exists():
-#     """
-#     Test that when only gen file exists, it overwrites it and generates
-#     expected prt and gen files
-#     """
-#     listdir = os.path.join(GENEPATH, "Listdir")
-#     aldir = os.path.join(GENEPATH, "Aldir")
-#     # Create align folder
-#     os.makedirs(listdir)
-#     dname = "test_write_genome_gen_exists"
-#     strain = "ESCO4"
-#     member4 = ALL_PROTS[strain]
-#     # Create prt file
-#     filegen = os.path.join(listdir, f"{dname}-getEntry_gen_ESCO4.txt")
-#     with open(filegen, "w") as genf:
-#         genf.write("Wrong gen file\n")
-#     p2p.write_genome_file(listdir, aldir, dname, strain, member4, SEVERAL)
-
-#     # Check creation of files and content
-#     fileprt = os.path.join(listdir, f"{dname}-getEntry_prt_ESCO4.txt")
-#     expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
-#     assert tutil.compare_file_content(fileprt, expprt)
-#     expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
-#     assert tutil.compare_file_content(filegen, expgen)
-
-
-# def test_write_genome_gen_prt_exist(caplog):
-#     """
-#     Test that when gen and prt files already exist, it does not do anything.
-#     Those files will be used for next steps.
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     listdir = "Listdir"
-#     aldir = "Aldir"
-#     # Create align folder
-#     os.makedirs(listdir)
-#     dname = "TEST6"
-#     strain = "ESCO4"
-#     member4 = ALL_PROTS[strain]
-#     # Create gen and prt files
-#     filegen = os.path.join(listdir, "{}-getEntry_gen_ESCO4.txt".format(dname))
-#     with open(filegen, "w") as genf:
-#         genf.write("Wrong gen file\n")
-#     fileprt = os.path.join(listdir, "{}-getEntry_prt_ESCO4.txt".format(dname))
-#     with open(fileprt, "w") as prtf:
-#         prtf.write("Wrong prt file\n")
-#     p2p.write_genome_file(listdir, aldir, dname, strain, member4, SEVERAL)
-
-#     # Check log
-#     assert ("For genome ESCO4, {} and {} already exist. The program will use them to extract "
-#             "proteins and genes. If you prefer to rewrite them, use option "
-#             "-F (or --force).".format(fileprt, filegen)) in caplog.text
-
-#     # Check content of prt and gen has not changed
-#     with open(fileprt, "r") as prtf:
-#         lines = prtf.readlines()
-#         assert lines == ["Wrong prt file\n"]
-#     with open(filegen, "r") as prtf:
-#         lines = prtf.readlines()
-#         assert lines == ["Wrong gen file\n"]
-
-#     # Remove output directory
-#     shutil.rmtree(listdir)
 
 
 # def check_list(expfile, outfile):
@@ -404,6 +293,122 @@ def test_write_genome():
 #             lines_out.append(lineout.strip())
 #     assert len(lines_out) == len(lines_exp)
 #     assert set(lines_out) == set(lines_exp)
+#
+
+
+def test_write_genome_prt_exists():
+    """
+    Test that when only prt file exists, it overwrites it and generates
+    expected prt and gen files
+    """
+    listdir = os.path.join(GENEPATH, "Listdir")
+    aldir = os.path.join(GENEPATH, "Aldir")
+    # Create align folder
+    os.makedirs(listdir)
+    dname = "test_write_genome"
+    strain = "ESCO4"
+    members = ALL_PROTS[strain]
+
+    # Create prt file
+    fileprt = os.path.join(listdir, f"{dname}-getEntry_prt_ESCO4.txt")
+    with open(fileprt, "w") as prtf:
+        prtf.write("Wrong prt file\n")
+    p2p.write_genome_file(listdir, aldir, dname, strain, members, SEVERAL)
+
+    # Check creation of files and content
+    expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
+    assert tutil.compare_file_content(fileprt, expprt)
+    filegen = os.path.join(listdir, f"{dname}-getEntry_gen_ESCO4.txt")
+    expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
+    assert tutil.compare_file_content(expgen, filegen)
+
+
+def test_write_genome_gen_exists():
+    """
+    Test that when only gen file exists, it overwrites it and generates
+    expected prt and gen files
+    """
+    listdir = os.path.join(GENEPATH, "Listdir")
+    aldir = os.path.join(GENEPATH, "Aldir")
+    # Create align folder
+    os.makedirs(listdir)
+    dname = "test_write_genome"
+    strain = "ESCO4"
+    member4 = ALL_PROTS[strain]
+    # Create prt file
+    filegen = os.path.join(listdir, f"{dname}-getEntry_gen_ESCO4.txt")
+    with open(filegen, "w") as genf:
+        genf.write("Wrong gen file\n")
+    p2p.write_genome_file(listdir, aldir, dname, strain, member4, SEVERAL)
+
+    # Check creation of files and content
+    fileprt = os.path.join(listdir, f"{dname}-getEntry_prt_ESCO4.txt")
+    expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
+    assert tutil.compare_file_content(fileprt, expprt)
+    expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
+    assert tutil.compare_file_content(filegen, expgen)
+
+
+def test_write_genome_gen_prt_exist(caplog):
+    """
+    Test that when gen and prt files already exist, it does not do anything.
+    Those files will be used for next steps.
+    """
+    caplog.set_level(logging.DEBUG)
+    listdir = os.path.join(GENEPATH, "Listdir")
+    aldir = os.path.join(GENEPATH, "Aldir")
+    # Create align folder
+    os.makedirs(listdir)
+    dname = "TEST6"
+    strain = "ESCO4"
+    member4 = ALL_PROTS[strain]
+    # Create gen and prt files
+    filegen = os.path.join(listdir, "{}-getEntry_gen_ESCO4.txt".format(dname))
+    with open(filegen, "w") as genf:
+        genf.write("Wrong gen file\n")
+    fileprt = os.path.join(listdir, "{}-getEntry_prt_ESCO4.txt".format(dname))
+    with open(fileprt, "w") as prtf:
+        prtf.write("Wrong prt file\n")
+    p2p.write_genome_file(listdir, aldir, dname, strain, member4, SEVERAL)
+
+    # Check log
+    assert ("For genome ESCO4, "
+            "test/data/align/generated_by_unit-tests/Listdir/TEST6-getEntry_prt_ESCO4.txt and "
+            "test/data/align/generated_by_unit-tests/Listdir/TEST6-getEntry_gen_ESCO4.txt "
+            "already exist. The program will use them to extract "
+            "proteins and genes. If you prefer to rewrite them, use option "
+            "-F (or --force).".format(fileprt, filegen)) in caplog.text
+
+    # Check content of prt and gen has not changed
+    with open(fileprt, "r") as prtf:
+        lines = prtf.readlines()
+        assert lines == ["Wrong prt file\n"]
+    with open(filegen, "r") as prtf:
+        lines = prtf.readlines()
+        assert lines == ["Wrong gen file\n"]
+
+
+def test_write_genome():
+    """
+    Test that given a genome, it writes the list of its proteins
+    and genes in expected files.
+    """
+    listdir = os.path.join(GENEPATH, "Listdir")
+    aldir = os.path.join(GENEPATH, "Aldir")
+    # Create align folder
+    os.makedirs(listdir)
+    dname = "test_write_genome"
+    strain = "ESCO4"
+    members = ALL_PROTS[strain]
+    p2p.write_genome_file(listdir, aldir, dname, strain, members, SEVERAL)
+
+    # Check creation of files and content
+    fileprt = os.path.join(listdir, f"{dname}-getEntry_prt_ESCO4.txt")
+    expprt = os.path.join(EXPPATH, "exp_getentry-prt-ESCO4.txt")
+    assert tutil.compare_file_content(fileprt, expprt)
+    filegen = os.path.join(listdir, f"{dname}-getEntry_gen_ESCO4.txt")
+    expgen = os.path.join(EXPPATH, "exp_getentry-gen-ESCO4.txt")
+    assert tutil.compare_file_content(filegen, expgen)
 
 
 def test_write_missing():
