@@ -67,7 +67,6 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
                                       term_width=100).start()
     final = []
     if threads == 1:
-        main_logger.info("single")
         update_bar = 1
         for num_fam in all_fams:
             f = handle_family_1thread((prefix, num_fam, ngenomes))
@@ -76,7 +75,6 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
             update_bar+=1
 
     else:
-        main_logger.info("pool")
         pool = multiprocessing.Pool(threads)
 
         # Create a Queue to put logs from processes, and handle them after from a single thread
@@ -197,18 +195,7 @@ def handle_family(args):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('align.align_family')
-    # Get file names
-    prt_file = "{}-current.{}.prt".format(prefix, num_fam)
-    gen_file = "{}-current.{}.gen".format(prefix, num_fam)
-    miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
-    mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
-    btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
-    status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
-                               num_fam, ngenomes, logger)
-    # If it returned true, Add missing genomes
-    if status1:
-        return add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
-    return False
+    return handle_family_1thread((prefix, num_fam, ngenomes))
 
 
 def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger):
