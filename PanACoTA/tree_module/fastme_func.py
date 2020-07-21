@@ -16,8 +16,7 @@ from PanACoTA import utils
 
 logger = logging.getLogger("tree.fastme")
 
-
-def run_tree(alignfile, boot, treefile, quiet, threads, model, write_boot):
+def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     """
     Run fastme for the given alignment file and options
 
@@ -33,11 +32,13 @@ def run_tree(alignfile, boot, treefile, quiet, threads, model, write_boot):
         True if nothing must be printed to stderr/stdout, False otherwise
     threads: int
         Maximum number of threads to use
-    model: str
+    kwargs["model"]: str
         DNA substitution model chosen by user
-    write_boot: bool
+    kwargs["wb"]: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     """
+    model = kwargs["model"]
+    write_boot = kwargs["wb"]
     align_phylip = alignfile + ".phylip"
     convert2phylip(alignfile, align_phylip)
     run_fastme(align_phylip, boot, write_boot, threads, model, treefile, quiet)

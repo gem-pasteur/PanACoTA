@@ -192,7 +192,7 @@ def test_run_tree(caplog):
     os.makedirs(aldir)
     cur_al = os.path.join(aldir, "alignment.grp.aln")
     shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_tree(cur_al, boot, treefile, quiet, threads, model)
+    ft.run_tree(cur_al, boot, treefile, quiet, threads, model=model)
     # Check it used 15 threads
     res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = res.communicate()
@@ -214,7 +214,7 @@ def test_run_tree(caplog):
     quiet = True
     cur_al2 = os.path.join(aldir, "alignment-boot.grp.aln")
     shutil.copyfile(ALIGNMENT, cur_al2)
-    ft.run_tree(cur_al2, boot, treefile, quiet, 1, model)
+    ft.run_tree(cur_al2, boot, treefile, quiet, 1, model=model)
     res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = res.communicate()
     assert "OpenMP (1 threads)" in stdout.decode()
