@@ -101,7 +101,7 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
         fnull = open(os.devnull, 'w')
     else:
         fnull = None
-    error = (f"Problem while running Fasttree. See log file ({logfile}) for "
+    error = (f"Problem while running IQtree. See log file ({logfile}) for "
              "more information.")
     logger.details(cmd)
     utils.run_cmd(cmd, error, eof=True, logger=logger, stderr=fnull)
