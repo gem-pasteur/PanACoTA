@@ -38,7 +38,7 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    utils.init_logger(LOGFILE_BASE, 0, 'test_fastme', verbose=1)
+    utils.init_logger(LOGFILE_BASE, 0, 'test_fasttree', verbose=1)
     os.mkdir(GENEPATH)
     print("setup")
 
@@ -48,7 +48,6 @@ def setup_teardown_module():
             os.remove(f)
     shutil.rmtree(GENEPATH)
     print("teardown")
-
 
 
 def test_def_nb_threads():
