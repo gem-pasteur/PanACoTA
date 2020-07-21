@@ -205,23 +205,27 @@ def test_run_tree(caplog):
     assert os.path.isfile(out_log)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
-            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
+            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
+            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln") in caplog.text
     assert tutil.is_tree_lengths(out_tree)
     assert not tutil.is_tree_bootstrap(out_tree)
 
     # with bootstrap
     boot = 127
     quiet = True
-    ft.run_tree(ALIGN, boot, treefile, quiet, 1, model)
+    cur_al2 = os.path.join(aldir, "alignment-boot.grp.aln")
+    shutil.copyfile(ALIGNMENT, cur_al2)
+    ft.run_tree(cur_al2, boot, treefile, quiet, 1, model)
     res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = res.communicate()
     assert "OpenMP (1 threads)" in stdout.decode()
+    out_tree = cur_al2 + ".fasttree_tree.nwk"
     assert os.path.isfile(out_tree)
+    out_log = cur_al2 + ".fasttree.log"
     assert os.path.isfile(out_log)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -boot 127 "
-            "-log {0}.fasttree.log {0}").format(ALIGN) in caplog.text
-    assert not utilities.is_tree_lengths(out_tree)
-    assert utilities.is_tree_bootstrap(out_tree)
-    os.remove(out_tree)
-    os.remove(out_log)
+            "-log test/data/tree/generated_by_unit-tests/aldir/alignment-boot.grp.aln.fasttree.log "
+            "test/data/tree/generated_by_unit-tests/aldir/alignment-boot.grp.aln") in caplog.text
+    assert not tutil.is_tree_lengths(out_tree)
+    assert tutil.is_tree_bootstrap(out_tree)
