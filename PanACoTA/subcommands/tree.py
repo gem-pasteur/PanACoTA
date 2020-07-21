@@ -21,10 +21,10 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.alignment, args.boot, args.outfile, args.soft, args.model,
-         args.write_boot, args.memory, args.threads, args.verbose, args.quiet)
+         args.write_boot, args.memory, args.fast, args.threads, args.verbose, args.quiet)
 
 
-def main(cmd, align, boot, outfile, soft, model, write_boot, memory, threads, verbose, quiet):
+def main(cmd, align, boot, outfile, soft, model, write_boot, memory, fast, threads, verbose, quiet):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
 
@@ -44,6 +44,8 @@ def main(cmd, align, boot, outfile, soft, model, write_boot, memory, threads, ve
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     memory: str
         Maximal RAM usage in GB | MB | % - Only for iqtree
+    fast: boolean
+        use -fast option with IQtree
     threads: int
         Maximum number of threads to use
     verbose : int
@@ -112,9 +114,8 @@ def main(cmd, align, boot, outfile, soft, model, write_boot, memory, threads, ve
     logger = logging.getLogger("tree")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
-
     tree.run_tree(align, boot, outfile, quiet, threads, model=model, wb=write_boot,
-                  mem=memory, s=soft)
+                  mem=memory, s=soft, f=fast)
 
     logger.info("END")
 
@@ -193,6 +194,8 @@ def build_parser(parser):
                                 "pseudo-trees. Only available with FastME and IQtree."))
     optional.add_argument("--mem", dest="memory",
                           help=("Maximal RAM usage in GB | MB. Only available with iqtree."))
+    optional.add_argument("-fast", dest="fast", action="store_true",
+                          help=("Use -fast option with iqtree."))
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
@@ -253,13 +256,21 @@ def check_args(parser, args):
         parser.error(msg)
 
     # If bootstraps are asked with iqtree, check the number is >= 1000
-    if args.soft == "iqtree" and args.boot and int(args.boot) < 1000:
+    if (args.soft == "iqtree" or args.soft == "iqtree2") and args.boot and int(args.boot) < 1000:
         msg = "With IQtree, number of replicates for bootstraps must be >= 1000."
         parser.error(msg)
 
     # Write bootstrap option only available for fastme and iqtree
-    if args.soft != "iqtree" and args.soft != "fastme" and args.write_boot:
+    if (args.soft != "iqtree" and args.soft != "iqtree2" and args.soft != "fastme" 
+        and args.write_boot):
         msg = "'-B' option is only available with FastME and IQtree."
+        parser.error(msg)
+
+    # Fast option only available for iqtree
+    if (args.fast and ((args.soft != "iqtree" and args.soft != "iqtree2")
+        or (args.boot or args.write_boot))):
+        msg = ("-fast option is available only for IQtree, and not compatible "
+               "with '-B' and '-b' options (bootstraps).")
         parser.error(msg)
 
     # Check model name is valid for the chosen soft

@@ -45,6 +45,11 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     write_boot = kwargs["wb"]
     memory = kwargs["mem"]
     soft = kwargs["s"]
+    fast = kwargs["f"]
+    if not fast:
+        fast = ""
+    else:
+        fast = "-fast"
 
     logger.info("Running IQtree...")
 
@@ -55,9 +60,13 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     threadinfo = ""
 
     # Get info on all options
-    if boot:
-        bootinfo = f"--B {boot}"
-    if write_boot:
+    if boot and soft=="iqtree":
+        bootinfo = f"-bb {boot}"
+    elif boot:
+        bootinfo = f"-B {boot}"
+    if write_boot and soft == "iqtree":
+        wb_info = "-wbt"
+    elif write_boot:
     	wb_info = "--boot-trees"
     if memory:
     	mem_info = f"-mem {memory}"
@@ -74,18 +83,19 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     else:
         seqtype = "--seqtype DNA"
 
+    # Define treefile name if not given.
+    if not treefile:
+        treefile = alignfile + ".iqtree_tree"
+    logfile = treefile + ".log"
     # get prefix cmd:
     if soft == "iqtree":
         prefix = f"-pre {treefile}"
     else:
         prefix = f"--prefix {treefile}"
 
-    if not treefile:
-        treefile = alignfile + ".iqtree_tree"
-    logfile = alignfile + ".iqtree.log"
 
-    cmd = (f"{soft} -s {alignfile} {threadinfo} -m {model} {mem_info} {bootinfo} {wb_info}"
-    	   f"{seqtype} {prefix} -fast")
+    cmd = (f"{soft} -s {alignfile} {threadinfo} -m {model} {mem_info} {bootinfo} {wb_info} "
+    	   f"{seqtype} {prefix} -quiet {fast}")
     logger.info("IQtree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
