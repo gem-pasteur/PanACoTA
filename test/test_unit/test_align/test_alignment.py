@@ -543,8 +543,8 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
                                    ngenomes, logger)
     assert "Checking extractions for family 8" in caplog.text
     assert "Aligning family 8" in caplog.text
-    assert ("mafft --quiet --auto "
-            "test/data/align/exp_files/exp_aldir-pers/current.8.prt does not exist") in caplog.text
+    assert ("mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt "
+            "does not exist") in caplog.text
     # Check content of mafft and btr files
     assert not os.path.isfile(mafft_file)
     assert not os.path.isfile(btr_file)
@@ -740,8 +740,7 @@ def test_handle_family_true():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --auto "
-            "test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     assert "Adding missing genomes for family 8" in q.get().message
@@ -780,8 +779,7 @@ def test_handle_family_true_nomiss():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --auto "
-            "test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     assert not q.get()
@@ -827,8 +825,7 @@ def test_handle_family_emptyaln_true():
             "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-align.8.aln "
             "(0)") in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --quiet --auto "
-            "test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     assert "Adding missing genomes for family 8" in q.get().message
