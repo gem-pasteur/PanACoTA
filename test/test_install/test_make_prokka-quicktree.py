@@ -38,6 +38,7 @@ def test_install_prokka_quicktree():
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prodigal")
     assert utils.check_installed("quicktree")
+    assert not utils.check_installed("iqtree")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed('quicktree')

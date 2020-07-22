@@ -145,6 +145,7 @@ def test_uninstall(install_panacota):
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
     assert utils.check_installed("quicktree")
+    assert utils.check_installed("iqtree") or utils.check_installed("iqtree2")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()

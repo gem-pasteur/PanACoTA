@@ -124,11 +124,12 @@ def install_all(install_dir, target, dev=False, user=False):
             msg += ("\t- mafft (to align persistent genomes in order to infer a phylogenetic tree "
                     "after)\n")
         if "trees" in to_install_user:
-            msg += ("\t- One of the 3 following softwares, used to infer a phylogenetic tree:\n"
+            msg += ("\t- One of the 4 following softwares, used to infer a phylogenetic tree:\n"
                     "\t\t* FastTree (see README or documentation for more information on how to "
                     "install it)\n"
                     "\t\t* FastME\n"
-                    "\t\t* Quicktree\n")
+                    "\t\t* Quicktree\n"
+                    "\t\t* IQtree (or IQtree2)")
         msg += ("See more information on how to download/install those softwares in README or in "
                 "documentation.")
         logger.warning(msg)
@@ -160,7 +161,7 @@ def check_dependencies(target):
         if not cmd_exists("mafft"):
             to_install_user.append("mafft")
         if not cmd_exists("FastTreeMP") and not cmd_exists("fastme") and not cmd_exists(
-                "quicktree"):
+                "quicktree") and not cmd_exists("iqtree") and not cmd_exists("iqtree2"):
             to_install_user.append("trees")
     return to_install_user
 

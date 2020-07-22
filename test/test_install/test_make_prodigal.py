@@ -76,9 +76,9 @@ def test_install_panacota():
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
@@ -176,9 +176,9 @@ def test_develop():
                "after)",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree", "DONE"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)", "DONE"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
@@ -224,9 +224,9 @@ def test_install_user():
                "after)",
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree", "DONE"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)", "DONE"]
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
         for linec in content:

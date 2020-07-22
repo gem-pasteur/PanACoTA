@@ -71,9 +71,9 @@ def test_install():
                "- prokka (for annotate subcommand, with syntaxic + functional annotation)",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic "
                "annotation only). If you even need functional annotation, also install prokka",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
@@ -165,9 +165,9 @@ def test_develop():
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree", "DONE"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)", "DONE"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())

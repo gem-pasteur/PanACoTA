@@ -36,6 +36,8 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("quicktree")
     assert not utils.check_installed("fastme")
     assert not utils.check_installed("FastTreeMP")
+    assert not utils.check_installed("iqtree")
+    assert not utils.check_installed("iqtree2")
     assert not utils.check_installed("mash")
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
@@ -46,6 +48,8 @@ def test_install_panacota_base_ubuntu():
     assert not utils.check_installed("quicktree")
     assert not utils.check_installed("fastme")
     assert not utils.check_installed("FastTreeMP")
+    assert not utils.check_installed("iqtree")
+    assert not utils.check_installed("iqtree2")
     assert not utils.check_installed("mash")
     assert utils.check_installed("PanACoTA")
     cmd = "pip3 show PanACoTA"
@@ -75,10 +79,10 @@ def test_install_panacota_base_ubuntu():
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
                "- barrnap. If you use Prokka for functional annotation, it will not predict RNA.",
-               "- mmseqs (for pangenome subcommand)",  "* Quicktree",
+               "- mmseqs (for pangenome subcommand)",  "* Quicktree", "* IQtree (or IQtree2)",
                "- mafft (to align persistent genomes in order to infer a phylogenetic "
                "tree after)",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
                "install it)", "* FastME", "See more information on how to "
                "download/install those softwares in README or in documentation."]
@@ -140,9 +144,9 @@ def test_develop():
                "- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                "If you only need syntaxic annotation, prodigal is enough.",
                "- prodigal : for annotate subcommand, you at least need prodigal (for syntaxic ",
-               "- One of the 3 following softwares, used to infer a phylogenetic tree:",
+               "- One of the 4 following softwares, used to infer a phylogenetic tree:",
                "* FastTree (see README or documentation for more information on how to "
-               "install it)", "* FastME", "* Quicktree"]
+               "install it)", "* FastME", "* Quicktree", "* IQtree (or IQtree2)"]
     # Check output logfile content. Check that all content is present, in any order.
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
