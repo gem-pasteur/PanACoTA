@@ -49,7 +49,7 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
         logger.warning((f"Protein bank {outfile} already exists. "
                         "It will be used by mmseqs."))
         return outfile
-    logger.info("Building bank with all proteins to {}".format(outfile + ".All.prt"))
+    logger.info(f"Building bank with all proteins to {outfile}")
     genomes = []
     with open(lstinfo) as lstf:
         for line in lstf:
