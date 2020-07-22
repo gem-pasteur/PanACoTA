@@ -67,7 +67,7 @@ def compare_order_content(file1, file2):
             print(f"not same number of lines in {file1} and {file2}")
             return False
         for line1, line2 in zip(lines_f1, lines_f2):
-            if line1 != line2:
+            if line1.split() != line2.split():
                 print(f"'{line1}' vs {line2} do not correspond.")
                 return False
     return True

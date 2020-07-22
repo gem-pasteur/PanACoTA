@@ -42,7 +42,7 @@ def post_treat(families, pangenome):
     pangenome : str
         file containing pangenome
     """
-    fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome, families)
+    fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome, logger, families)
     open_outputs_to_write(fams_by_strain, families, all_strains, pangenome)
     # result of open_outputs_to_write = (qualis, quantis, summaries)
 

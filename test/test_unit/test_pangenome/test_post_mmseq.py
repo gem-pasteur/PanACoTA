@@ -8,28 +8,46 @@ Unit tests for the mmseqs_functions submodule in pangenome module
 import os
 import io
 import logging
+import pytest
+import shutil
 
 import PanACoTA.pangenome_module.post_treatment as post
 import PanACoTA.utils as utils
+import test.test_unit.utilities_for_tests as tutil
 
+# Define variables shared by several tests
+PANDIR = os.path.join("test", "data", "pangenome")
+PATH_TEST_FILES = os.path.join(PANDIR, "test_files")
+PATH_EXP_FILES = os.path.join(PANDIR, "exp_files")
+GENEPATH = os.path.join(PANDIR, "generated_by_unit-tests")
+# log files
+LOGFILE_BASE = "logfile_test.txt"
+LEVEL = logging.DEBUG
+LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
 
-# Define functions and variables shared by several tests
-def my_logger():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
-    logger given to function called by a subprocess
+    Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
     """
+    utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_post_mmseq', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
 
-    def make_logger(name="test_post_mmseq"):
-        """
-        Create logger according to name given
-        """
-        logfile_base = "log_" + name
-        level = logging.DEBUG
-        utils.init_logger(logfile_base, level, name, verbose=0, quiet=False)
-        return logfile_base
-
-    return make_logger
-
+    yield
+    shutil.rmtree(GENEPATH)
+    for f in LOGFILES:
+        if os.path.exists(f):
+            os.remove(f)
+    print("teardown")
 
 # Define common variables
 FAMS_BY_STRAIN = \
@@ -151,7 +169,8 @@ def test_write_outputs(caplog):
     pqlf = io.StringIO(base + ".quali.txt")
     pqtf = io.StringIO(base + ".quanti.txt")
     psf = io.StringIO(base + ".sum.txt")
-    res = post.generate_and_write_outputs(FAMS_BY_STRAIN, FAMILIES, ALL_STRAINS, pqlf, pqtf, psf)
+    res = post.generate_and_write_outputs(FAMS_BY_STRAIN, FAMILIES, 
+                                          ALL_STRAINS, pqlf, pqtf, psf)
     (qualis, quantis, sums) = res
     assert qualis == EXP_QUALIS
     assert quantis == EXP_QUANTIS
@@ -186,7 +205,7 @@ def test_open_out():
     Check that given some families and a pagenome file, it creates 3 output files,
     with the expected content (quanti, quali, summary)
     """
-    pangenome = "test_open_out_pangenome.txt"
+    pangenome = os.path.join(GENEPATH, "test_open_out_pangenome.txt")
     res = post.open_outputs_to_write(FAMS_BY_STRAIN, FAMILIES, ALL_STRAINS, pangenome)
     qualis, quantis, sums = res
     assert qualis == EXP_QUALIS
@@ -195,24 +214,15 @@ def test_open_out():
 
     # Check presence and content of quali matrix file
     assert os.path.isfile(pangenome + ".quali.txt")
-    with open(pangenome + ".quali.txt", "r") as panf, open(EXP_QUALIF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".quali.txt")
+    assert tutil.compare_order_content(pangenome + ".quali.txt", EXP_QUALIF)   
 
     # Check presence and content of quanti matrix file
     assert os.path.isfile(pangenome + ".quanti.txt")
-    with open(pangenome + ".quanti.txt", "r") as panf, open(EXP_QUANTIF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".quanti.txt")
+    assert tutil.compare_order_content(pangenome + ".quanti.txt", EXP_QUANTIF) 
 
     # Check presence and content of summary file
     assert os.path.isfile(pangenome + ".summary.txt")
-    with open(pangenome + ".summary.txt", "r") as panf, open(EXP_SUMF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".summary.txt")
+    assert tutil.compare_order_content(pangenome + ".summary.txt", EXP_SUMF) 
 
 
 def test_all_post():
@@ -220,36 +230,21 @@ def test_all_post():
     Check that when running main method of post-treatment, it creates the 3 output files
     expected, with the expected content.
     """
-    logger = my_logger()
-    logname = logger(name="test_all_post")
-    pangenome = "test_all_post"
+    pangenome = os.path.join(GENEPATH, "test_all_post")
     post.post_treat(FAMILIES, pangenome)
 
     # Check presence and content of quali matrix file
     assert os.path.isfile(pangenome + ".quali.txt")
-    with open(pangenome + ".quali.txt", "r") as panf, open(EXP_QUALIF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".quali.txt")
+    assert tutil.compare_order_content(pangenome + ".quali.txt", EXP_QUALIF)   
 
     # Check presence and content of quanti matrix file
     assert os.path.isfile(pangenome + ".quanti.txt")
-    with open(pangenome + ".quanti.txt", "r") as panf, open(EXP_QUANTIF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".quanti.txt")
+    assert tutil.compare_order_content(pangenome + ".quanti.txt", EXP_QUANTIF) 
 
     # Check presence and content of summary file
     assert os.path.isfile(pangenome + ".summary.txt")
-    with open(pangenome + ".summary.txt", "r") as panf, open(EXP_SUMF, "r") as eq:
-        for line_out, line_exp in zip(panf, eq):
-            assert line_out.split() == line_exp.split()
-    os.remove(pangenome + ".summary.txt")
+    assert tutil.compare_order_content(pangenome + ".summary.txt", EXP_SUMF) 
 
     # Check that bin pangenome file was created (as it did not exist before)
     assert os.path.isfile(pangenome + ".bin")
-    os.remove(pangenome + ".bin")
-
-    os.remove(logname + ".log")
-    os.remove(logname + ".log.err")
-    os.remove(logname + ".log.details")
+    
