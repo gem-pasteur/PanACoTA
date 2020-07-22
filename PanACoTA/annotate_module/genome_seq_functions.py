@@ -14,16 +14,16 @@ April 2017
 """
 import os
 import re
+import sys
 import numpy as np
 import logging
 import progressbar
 
 from PanACoTA import utils
 
-logger = logging.getLogger("qc_annotate.gseq")
+logger = logging.getLogger("annotate.gseq_functions")
 
-
-def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, quiet=False):
+def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=False):
     """
 
     Parameters
@@ -51,12 +51,14 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
 
     """
     cut = nbn > 0
-    pat = 'N' * nbn + "+"
+    pat = None  ## To put pattern with which sequence must be cut
+    if cut:
+        pat = 'N' * nbn + "+"
     nbgen = len(genomes)
     bar = None
     curnum = None
     if cut:
-        logger.info(("Cutting genomes at each stretch of at least {} 'N', "
+        logger.info(("Cutting genomes at each time there are at least {} 'N' in a row, "
                      "and then, calculating genome size, number of contigs and L90.").format(nbn))
     else:
         logger.info("Calculating genome size, number of contigs, L90")
@@ -77,7 +79,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
             bar.update(curnum)
             curnum += 1
         # analyse genome, and check everything went well
-        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft)
+        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger=logger)
         # Problem while analysing genome -> genome ignored
         if not res:
             toremove.append(genome)
@@ -85,12 +87,16 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger=logger, qui
     if toremove:
         for gen in toremove:
             del genomes[gen]
+    if not genomes:
+        logger.error(f"No genome was found in the database folder {dbpath}. See logfile "
+                     "for more information.")
+        sys.exit(1)
     if not quiet:
         bar.finish()
     return 0
 
 
-def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
+def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
     """
     Analyse given genome:
 
@@ -115,7 +121,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
         pattern on which contigs must be cut. ex: "NNNNN"
     genomes : dict
         {genome_file: [genome_name]} as input, and will be changed to\
-         -> {genome_file: [genome_name, path, path_annotate, gsize, nbcont, L90]}
+        {genome_file: [genome_name, path, path_annotate, gsize, nbcont, L90]}
     soft : str
         soft used (prokka, prodigal, or None if called by prepare module)
 
@@ -123,14 +129,20 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
     -------
     bool
         True if genome analysis went well, False otherwise
+        Modifies 'genomes' for the analysed genome: -> {genome_file: [genome_name, path,
+        path_annotate, gsize, nbcont, L90]}
     """
     gpath, grespath = get_output_dir(soft, dbpath, tmp_path, genome, cut, pat)
+    if not os.path.exists(gpath):
+        logger.error(f"The file {gpath} does not exist")
+        return False
     # Open original sequence file
     with open(gpath, "r") as genf:
         # If a new file must be created (sequences cut, and/or annotating with prokka), open it
         gresf = None
         if grespath:
             gresf = open(grespath, "w")
+
         # Initialize variables
         cur_contig_name = "" # header text (less than 20 characters if prokka used)
         contig_sizes = {}  # {header text: size}
@@ -170,10 +182,16 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft):
                                 num, logger)
             if num == -1:
                 return False
-
     # GLOBAL INFORMATION
     nbcont = len(contig_sizes)
     gsize = sum(contig_sizes.values())
+    if nbcont == 0 or gsize == 0:
+        logger.warning(f"Your file {gpath} does not contain any gene. Please check that you "
+                       "really gave a fasta sequence file")
+        if grespath:
+            gresf.close()
+            os.remove(grespath)
+        return False
     l90 = calc_l90(contig_sizes)
     if not l90:
         logger.error("Problem with genome {}. Not possible to get L90".format(genome))
@@ -203,9 +221,8 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
         path to the folder containing the given genome sequence
     tmp_path : str
         path to folder where output files must be saved.
-    genomes : dict
-        {genome: [spegenus.date]} as input, and will be changed to
-        -> {genome: [spegenus.date, path, gsize, nbcont, L90]}
+    genome : str
+        genome name
     cut : bool
         True if contigs must be cut, False otherwise
     pat : str
@@ -231,7 +248,7 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
         grespath = os.path.join(tmp_path, new_file)
     # If user does not want to cut, but annotates with prokka, need a new file with headers shorter
     elif soft == 'prokka':
-        new_file = genome + "_{}-shorter-contigs.fna".format(soft, len(pat) - 1)
+        new_file = genome + f"_{soft}-shorter-contigs.fna".format(soft)
         grespath = os.path.join(tmp_path, new_file)
     # If no cut and using prodigal, just keep original sequence, no need to create new file.
     # Just check that contigs have different names
@@ -259,7 +276,8 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     cont_sizes : dict
         {contig_name : sequence length}
     gresf : io.TextIOWrappe
-        open file to write new sequence
+        open file to write new sequence. If we are annotating with prodigal and not cutting,
+        there is no new sequence -> gref is None
     num : int
         current contig number
     logger : logging.Logger
@@ -303,7 +321,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
     Parameters
     ----------
     pat : str
-        pattern to split a contig
+        pattern to split a contig. None if we do not want to split
     whole_seq : str
         sequence of current contig, to save once split according to pat
     cur_contig_name : str
@@ -321,7 +339,11 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         new contig number, after giving number(s) to the current contig
     """
     # split contig each time a stretch of at least nbn 'N' is found (pattern pat)
-    cont_parts = re.split(pat, whole_seq)
+    if not pat:
+        cont_parts = [whole_seq]
+    else:
+        cont_parts = re.split(pat, whole_seq)
+
     # save contig parts
     for seq in cont_parts:
         # Only save non empty contigs (with some patterns, it could arrive that
@@ -361,6 +383,7 @@ def calc_l90(contig_sizes):
 
 def rename_all_genomes(genomes):
     """
+    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE (step 3)
     Sort kept genomes by L90 and then nb contigs.
     For each genome, assign a strain number, and rename all its contigs.
 
@@ -400,6 +423,7 @@ def rename_all_genomes(genomes):
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     """
+    FUNCTION DIRECTLY CALLED FROM MAIN ANNOTATE MODULE (step2)
     Plot distributions of L90 and nbcontig values.
 
     Parameters
@@ -431,10 +455,10 @@ def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
     nbcont_vals = [val for _, (_, _, _, _, val, _) in genomes.items()]
     outnbcont = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
     dist1 = utils.plot_distr(l90_vals, l90, "L90 distribution for all genomes",
-                             "max L90 =")
+                             "max L90 =", logger)
     dist2 = utils.plot_distr(nbcont_vals, nbconts,
                              "Distribution of number of contigs among all genomes",
-                             "max #contigs =")
+                             "max #contigs =", logger)
     dist1.savefig(outl90)
     dist2.savefig(outnbcont)
     return l90_vals, nbcont_vals, dist1, dist2

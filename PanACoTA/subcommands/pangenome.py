@@ -22,12 +22,13 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
+    cmd = "PanACoTA " + ' '.join(args.argv)
+    main(cmd, args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
          args.clust_mode, args.spedir, args.threads, args.outfile, args.verbose,
          args.quiet)
 
 
-def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
+def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
          verbose=0, quiet=False):
     """
     Main method, doing all steps:
@@ -41,8 +42,8 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     Parameters
     ----------
     lstinfo : str
-        file with name of genomes to consider for pan in the first column, without extention.
-        Other columns are ignored
+        file with name of genomes to consider for pan in the first column, without extension.
+        Other columns are ignored. The first column header must be 'gembase_name'
     name : str
         name given to the dataset. For example, ESCO44 for 44 *Escherichia coli* genomes.
     dbpath : str
@@ -76,6 +77,7 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
     from PanACoTA.pangenome_module import protein_seq_functions as protf
     from PanACoTA.pangenome_module import mmseqs_functions as mmf
     from PanACoTA.pangenome_module import post_treatment as pt
+    from PanACoTA import __version__ as version
 
     # test if mmseqs is installed and in the path
     if not utils.check_installed("mmseqs"):  # pragma: no cover
@@ -89,16 +91,19 @@ def main(lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, ou
         level = logging.INFO
     # for verbose = 2, ignore only debug
     if verbose >= 2 and verbose < 15:
-        level = 15 # int corresponding to detail level
+        level = utils.detail_lvl() # int corresponding to detail level
     # for verbose >= 15, write everything
     if verbose >= 15:
         level = logging.DEBUG
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-pangenome_" + name)
     utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
+    logger = logging.getLogger("pangenome")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
 
     # Build bank with all proteins to include in the pangenome
+    logger.info("build prt bank")
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
     # Do pangenome
     families, panfile = mmf.run_all_pangenome(min_id, clust_mode, outdir,
@@ -157,7 +162,8 @@ def build_parser(parser):
                                 "LSTINFO-<list_file>.lst file of 'PanACoTA annotate' module."
                                 "Here, only the first column (genome name without extension) "
                                 "will be used. All proteins of all these genomes will be "
-                                "concatenated in a file called <dataset_name>.All.prt."))
+                                "concatenated in a file called <dataset_name>.All.prt. The "
+                                "column header must be 'gembase_name'."))
     required.add_argument("-n", dest="dataset_name", required=True,
                           help=("Name of the dataset which will be clustered (for example, "
                                 "SAEN1234 for 1234 Salmonella enterica genomes). This name will "
@@ -167,14 +173,14 @@ def build_parser(parser):
                           help=("Path to the folder containing all protein files corresponding "
                                 "to the genomes of the dataset (output directory 'Proteins' "
                                 "of 'PanACoTA annotate' module)."))
-    required.add_argument("-i", dest="min_id", required=True, type=perc_id,
-                          help=("Minimum sequence identity to be considered in the same "
-                                "cluster (number between 0 and 1)"))
     required.add_argument("-o", dest="outdir", required=True,
                           help=("Output directory, where all results must be saved "
                                 "(including tmp folder)"))
 
     optional = parser.add_argument_group('Optional arguments')
+    optional.add_argument("-i", dest="min_id", type=perc_id, default=0.8,
+                          help=("Minimum sequence identity to be considered in the same "
+                                "cluster (float between 0 and 1). Default is 0.8."))
     optional.add_argument("-f", dest="outfile",
                           help=("Use this option if you want to give the name of the pangenome "
                                 "output file (without path). Otherwise, by default, it is called "

@@ -6,8 +6,8 @@ annotate is a subcommand of PanACoTA
 
 It is a pipeline to do quality control and annotate genomes. Steps are:
 
-- optional: find stretches of at least 'n' N (default n=5), and cut into a new contig at this stretch
-- for each genome, calc L90 and number of contigs (after cut at N stretches if used)
+- optional: find rows of at least 'n' N (default n=5), and cut into a new contig at this point
+- for each genome, calc L90 and number of contigs (after cut at n 'N' occurrences if used)
 - keep only genomes with:
 
     - L90 <= x (default x = 100)
@@ -129,7 +129,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     """
     Main method, doing all steps:
 
-    1. analyze genomes (nb contigs, L90, stretches of N...)
+    1. analyze genomes (nb contigs, L90, rows of N...)
     2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     3. rename genomes with strain number in decreasing quality
     4. annotate genome with prokka or only prodigal
@@ -169,13 +169,15 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     nbcont : int
         Max number of contigs allowed to keep a genome
     cutn : int
-        cut at each stretch of this number of 'N'. Don't cut if equal to 0
+        cut each time there are at least cutn 'N' in a row. Don't cut if equal to 0
     threads : int
         max number of threads to use
     force : bool
         If True, overwrite previous results, if False keep what is already calculated
     qc_only : bool
         If True, do only quality control, if False, also do annotation
+    from_info : str
+        File containing information on genomes and their quality information (from prepare step)
     tmp_dir : str or None
         Path to folder where tmp files must be saved. None to use the default tmp folder
     res_annot_dir : str or None
@@ -210,6 +212,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     from PanACoTA.annotate_module import prokka_prodigal_functions as pfunc
     from PanACoTA.annotate_module import general_format_functions as ffunc
     from PanACoTA import utils
+    from PanACoTA import __version__ as version
 
     # Check that needed softs are installed
     prokka = utils.check_installed("prokka")
@@ -256,7 +259,11 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         utils.check_out_dirs(res_dir)
 
     # get only filename of list_file, without extension
-    listfile_base = os.path.basename(os.path.splitext(list_file)[0])
+    if list_file:
+        listfile_base = os.path.basename(os.path.splitext(list_file)[0])
+    else:
+        list_file = os.path.basename(os.path.splitext(from_info)[0])
+        listfile_base = list_file
 
     # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
@@ -269,13 +276,13 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(res_dir, "PanACoTA-annotate_" + listfile_base)
-    logfile_base = utils.init_logger(logfile_base, level, name='annotate', details=True,
-                                verbose=verbose, quiet=quiet)
-    logger = logging.getLogger('')
+    logfile_base = utils.init_logger(logfile_base, level, name='annotate', log_details=True,
+                                     verbose=verbose, quiet=quiet)
+    logger = logging.getLogger('annotate')
+    logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
-    logger.info("Let's start!")
 
-    # STEP 1. analyze genomes (nb contigs, L90, stretches of N...)
+    # STEP 1. analyze genomes (nb contigs, L90, rows of N...)
     # If already info on genome ('--info <file>' option), skip this step
     # If no info on genomes, read them and get needed information
     if not from_info:
@@ -287,9 +294,9 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
                           "Please check your list to give valid genome "
                           "names.").format(list_file, db_path))
             sys.exit(-1)
-        # Get L90, nbcontig, size for all genomes, and cut at stretches of 'N' if asked
+        # Get L90, nbcontig, size for all genomes, and cut at row of cutn 'N' if asked
         # -> genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
-        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, prodigal_only,
+        gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft,
                                   logger, quiet=quiet)
     # --info <filename> option given: read information (L90, nb contigs...) from this file.
     else:
@@ -297,17 +304,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         # orig_path is the path to the original sequence
         # and to_annotate_path the path to the sequence to annotate (once split etc.)
         # Here, both are the same, as we take given sequences as is.
-        genomes = utils.read_genomes_info(from_info, name, date, db_path, db_path2)
-        if not genomes:
-            if db_path2:
-                logger.error(("We did not find any genome listed in {} in {} folder nor in {}. "
-                              "Please check your list to give valid genome "
-                              "names.").format(from_info, db_path, db_path2))
-            else:
-                logger.error(("We did not find any genome listed in {} in the folder {}. "
-                              "Please check your list to give valid genome "
-                              "names.").format(from_info, db_path))
-            sys.exit(-1)
+        genomes = utils.read_genomes_info(from_info, name, date, logger=logger)
+
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     # genomes = {genome: [spegenus.date, orig_seq, path_to_splitSequence, size, nbcont, l90]}
@@ -320,8 +318,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
     # Info on folder containing original sequences
     if not from_info:
-        logger.info("-> Original sequences folder (corresponding to 'orig-name' column in "
-                    "'{}/LSTINFO-<input_file>.lst'): {} ".format(res_dir, db_path))
+        logger.info(f"-> Original sequences folder ('orig_name' column): {db_path} ")
         logger.info("\t-> If original sequence not found in {}, "
                     "look for it in {}, as it must be a concatenation of several input sequence "
                     "files.".format(db_path, tmp_dir))
@@ -329,9 +326,8 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
             logger.info("-> Sequences used for annotation ('to_annotate' column) are the "
                         "same as the previous ones (original sequences).")
         else:
-            logger.info("-> Folder with sequence file used for annotation ('to_annotate' column): "
-                        "{}".format(tmp_dir))
-
+            logger.info(f"-> Folder with sequence files that will be used for annotation "
+                        f"('to_annotate' column): {tmp_dir}")
     # If only QC, stop here.
     if qc_only:
         # Write information on genomes that would be annotated with the current
@@ -340,6 +336,7 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
         utils.write_genomes_info(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
         return
+
     # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
     # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
@@ -358,17 +355,17 @@ def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont
     # end program.
     if not results_ok:
         logger.error("Error: No genome was correctly annotated, no need to format them.")
-        return
+        return 1
     # list of genomes skipped because annotation had problems: no format step run
     skipped = [genome for (genome, ok) in results.items() if not ok]
     # At least 1 genome was not annotated: write a message to warn on it
     if skipped:
         utils.write_warning_skipped(skipped, prodigal_only=prodigal_only,
                                     logfile=logfile_base)
+
     # STEP 5. Format genomes annotated
     # Here, we have at least 1 genome annotated (otherwise,
     # it would already have stopped because results_ok is empty)
-
     # Initialize list of genomes skipped because something went wrong while formatting.
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
@@ -398,20 +395,21 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
-    required.add_argument(dest="list_file",
-                          help=("File containing the list of genome filenames to annotate (1 genome"
-                                " per line). Each genome is in multi-fasta format. You can "
-                                "specify the species name (4 characters) you want to give to each "
-                                "genome by adding it after the genome filename(s), separated "
-                                "by '::'. If not given, the species name will be the one given in "
-                                "'species' argument. You can also specify the date (4 digits) "
-                                "by adding '.' + your date choice after the genome "
-                                "filename(s), '::' and, if given, the species name."))
     required.add_argument("-d", dest="db_path", required=True,
                           help="Path to folder containing all multifasta genome files")
     required.add_argument("-r", dest="res_path", required=True,
                           help="Path to folder where output annotated genomes must be saved")
     optional = parser.add_argument_group('Optional arguments')
+    optional.add_argument('-l', dest="list_file",
+                          help=("File containing the list of genome filenames to annotate "
+                                "(1 genome per line). Each genome must be in multi-fasta format. "
+                                "You can specify the species name (4 characters) you want to "
+                                "give to some genome, as well as the download (or any other "
+                                "reason) date of your choice. Format 'genome_name :: name.date'. "
+                                "name and date are optional. See doc for more information on "
+                                "this file format. "
+                                "If you want to run this module from 'prepare_module' results, "
+                                "use '--info' instead."))
     optional.add_argument("-n", dest="name", type=utils_argparse.gen_name,
                           help=("Choose a name for your annotated genomes. This name should "
                                 "contain 4 alphanumeric characters. Generally, they correspond "
@@ -451,11 +449,11 @@ def build_parser(parser):
                                 "Default is 999."))
     optional.add_argument("--cutn", dest="cutn", type=int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
-                                "at least 5 'N' at a stretch are found in its sequence. "
+                                "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "
-                                "cut genomes into new contigs when there are stretches of 'N', "
+                                "cut genomes into new contigs when there are rows of 'N', "
                                 "put 0 to this option. If you want to cut from a different number "
-                                "of 'N' stretches, put this value to this option."))
+                                "of 'N' occurrences, put this value to this option."))
     optional.add_argument("--date", dest="date", default=utils_argparse.get_date(),
                           type=utils_argparse.date_name,
                           help=("Specify the date (MMYY) to give to your annotated genomes. "
@@ -464,7 +462,7 @@ def build_parser(parser):
                                 " if you want. But the common way is to use 4 digits, "
                                 "corresponding to MMYY."))
     optional.add_argument("--tmp", dest="tmpdir",
-                          help=("Specify where the temporary files (sequence split by stretches "
+                          help=("Specify where the temporary files (sequence split by rows "
                                 "of 'N', sequence with new contig names etc.) must be saved. "
                                 "By default, it will be saved in your "
                                 "result_directory/tmp_files."))
@@ -552,7 +550,7 @@ def check_args(parser, args):
     # Message if user is giving a file with already calculated information
     def nosplit_message():
         split = ("  !! Your sequences will be used as is by PanACoTA. Be sure you "
-                 "already split your sequences at each stretch "
+                 "already split your sequences at each row "
                  "of X 'N' if needed.\n")
         trust = ("\t-> PanACoTA will use the values (L90, nbcont) given in your info file. "
                  "It will ignore the genomes for which those values are incorrect. "
@@ -583,12 +581,17 @@ def check_args(parser, args):
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use the given sequences as is. It will not cut "
                      "them. So, you cannot use both --cutN and --info")
+    # Give a lst_file or an info file, not nothing
+    if not args.from_info and not args.list_file:
+        parser.error("You must provide a list of genomes to annotate. Either raw genomes "
+                     "(see -l option), or genomes with quality information (see --info option).")
 
     # WARNINGS
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn != 0 and not args.from_info:
         message = ("  !! Your genomes will be split when sequence contains at "
-                   "least {}'N' at a stretch.").format(args.cutn)
+                   "least {}'N' in a row. If you want to change this threshold, "
+                   "see --cutn option.").format(args.cutn)
         print(colored(message, "yellow"))
     # Warn user about selection of genomes thresholds
     if args.l90 == 100 or args.nbcont == 999:
@@ -602,7 +605,7 @@ def check_args(parser, args):
     print()
 
     # If db_path2 is used only with infofile
-    if args.db_path2 and not args.info:
+    if args.db_path2 and not args.from_info:
         parser.error("Using '-d2 <path>' means that you are running from an info file, whose "
                      "sequences come from 2 different folders (db_path and tmp_path if from a "
                      "previous run of this module). Use --info <info-file> or "

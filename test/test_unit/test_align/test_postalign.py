@@ -8,8 +8,8 @@ import os
 import pytest
 import shutil
 
-import genomeAPCAT.align_module.post_align as pal
-from genomeAPCAT import utils
+import PanACoTA.align_module.post_align as pal
+from PanACoTA import utils
 
 # Define common variables
 ALDIR = os.path.join("test", "data", "align")
@@ -18,20 +18,19 @@ TESTPATH = os.path.join(ALDIR, "test_files")
 LOGFILE_BASE = "logs_test_postalign"
 
 
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
-
-
-def teardown_module():
+# todo before and after each test
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
     """
+    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
+    print("setup")
+    yield
     os.remove(LOGFILE_BASE + ".log")
     os.remove(LOGFILE_BASE + ".log.details")
     os.remove(LOGFILE_BASE + ".log.err")
+    print("teardown")
 
 
 def test_get_genome():

@@ -1,0 +1,24 @@
+[2019-12-09 13:15:20] :: INFO :: PanACoTA version 20190425
+[2019-12-09 13:15:20] :: INFO :: Command used
+ 	 > PanACoTA annotate -r Examples/2-res-Annotate-prokka -n EXAM -d Examples/genomes_init -l Examples/input_files/list_genomes.lst
+[2019-12-09 13:15:20] :: INFO :: Let's start!
+[2019-12-09 13:15:20] :: INFO :: Cutting genomes at each time there are at least 5 'N' in a row, and then, calculating genome size, number of contigs and L90.
+[2019-12-09 13:15:20] :: INFO :: Generating distribution of L90 and #contigs graphs.
+[2019-12-09 13:15:21] :: INFO :: -> Original sequences folder ('orig_name' column): Examples/genomes_init 
+[2019-12-09 13:15:21] :: INFO :: 	-> If original sequence not found in Examples/genomes_init, look for it in Examples/2-res-Annotate-prokka/tmp_files, as it must be a concatenation of several input sequence files.
+[2019-12-09 13:15:21] :: INFO :: -> Folder with sequence files that will be used for annotation ('to_annotate' column): Examples/2-res-Annotate-prokka/tmp_files
+[2019-12-09 13:15:21] :: INFO :: Renaming kept genomes according to their quality.
+[2019-12-09 13:15:21] :: INFO :: Annotating all genomes with prokka
+[2019-12-09 13:15:21] :: DETAIL :: Start annotating EXAM.1219.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome1.fst_prokka-split5N.fna with Prokka
+[2019-12-09 13:15:21] :: DETAIL :: Prokka command: prokka --outdir Examples/2-res-Annotate-prokka/tmp_files/genome1.fst_prokka-split5N.fna-prokkaRes --cpus 1 --prefix EXAM.1219.00001 Examples/2-res-Annotate-prokka/tmp_files/genome1.fst_prokka-split5N.fna
+[2019-12-09 13:15:25] :: DETAIL :: End annotating EXAM.1219.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome1.fst_prokka-split5N.fna.
+[2019-12-09 13:15:25] :: DETAIL :: Start annotating GEN2.1219.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna with Prokka
+[2019-12-09 13:15:25] :: DETAIL :: Prokka command: prokka --outdir Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes --cpus 1 --prefix GEN2.1219.00001 Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna
+[2019-12-09 13:15:30] :: DETAIL :: End annotating GEN2.1219.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna.
+[2019-12-09 13:15:30] :: DETAIL :: Start annotating EXAM.1216.00002 from Examples/2-res-Annotate-prokka/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna with Prokka
+[2019-12-09 13:15:30] :: DETAIL :: Prokka command: prokka --outdir Examples/2-res-Annotate-prokka/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna-prokkaRes --cpus 1 --prefix EXAM.1216.00002 Examples/2-res-Annotate-prokka/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna
+[2019-12-09 13:15:34] :: DETAIL :: End annotating EXAM.1216.00002 from Examples/2-res-Annotate-prokka/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna.
+[2019-12-09 13:15:34] :: DETAIL :: Start annotating GEN4.1111.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna with Prokka
+[2019-12-09 13:15:34] :: DETAIL :: Prokka command: prokka --outdir Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna-prokkaRes --cpus 1 --prefix GEN4.1111.00001 Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna
+[2019-12-09 13:15:38] :: DETAIL :: End annotating GEN4.1111.00001 from Examples/2-res-Annotate-prokka/tmp_files/genome4.fst_prokka-split5N.fna.
+[2019-12-09 13:15:38] :: INFO :: Annotation step done.

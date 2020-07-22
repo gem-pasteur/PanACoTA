@@ -19,11 +19,12 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.alignment, args.boot, args.outfile, args.soft, args.model,
-         args.write_boot, args.threads, args.verbose, args.quiet)
+    cmd = "PanACoTA " + ' '.join(args.argv)
+    main(cmd, args.alignment, args.boot, args.outfile, args.soft, args.model,
+         args.write_boot, args.memory, args.fast, args.threads, args.verbose, args.quiet)
 
 
-def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet):
+def main(cmd, align, boot, outfile, soft, model, write_boot, memory, fast, threads, verbose, quiet):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
 
@@ -41,6 +42,10 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
         DNA substitution model chosen by user, None if quicktree used
     write_boot: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
+    memory: str
+        Maximal RAM usage in GB | MB | % - Only for iqtree
+    fast: boolean
+        use -fast option with IQtree
     threads: int
         Maximum number of threads to use
     verbose : int
@@ -56,6 +61,7 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     import logging
     import os
     from PanACoTA import utils
+    from PanACoTA import __version__ as version
     tree = None
     if soft == "fasttree":
         # test if fasttree is installed and in the path
@@ -75,6 +81,21 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
             print("quicktree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import quicktree_func as tree
+    elif soft == "iqtree":
+        if not utils.check_installed("iqtree"):
+            if not utils.check_installed("iqtree2"):
+                print("IQtree is not installed. 'PanACoTA tree' cannot run.")
+                sys.exit(1)
+            else:
+                soft == "iqtree2"
+        from PanACoTA.tree_module import iqtree_func as tree
+    elif soft == "iqtree2":
+        # test if iqtree2 is installed and in the path
+        if not utils.check_installed("iqtree2"):
+            print("iqtree2 is not installed. 'PanACoTA tree' cannot run.")
+            sys.exit(1)
+        from PanACoTA.tree_module import iqtree_func as tree
+
     outdir = os.path.dirname(align)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-tree-" + soft)
@@ -89,10 +110,12 @@ def main(align, boot, outfile, soft, model, write_boot, threads, verbose, quiet)
     if verbose >= 15:
         level = logging.DEBUG
 
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
-
-    tree.run_tree(align, boot, outfile, quiet, threads, model, write_boot)
+    utils.init_logger(logfile_base, level, 'tree', verbose=verbose, quiet=quiet)
+    logger = logging.getLogger("tree")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
+    tree.run_tree(align, boot, outfile, quiet, threads, model=model, wb=write_boot,
+                  mem=memory, s=soft, f=fast)
 
     logger.info("END")
 
@@ -136,16 +159,17 @@ def build_parser(parser):
                                 "leaf of the inferred tree."))
 
     # Choose with which soft inferring phylogenetic tree
-    softparse = parser.add_argument_group('Choose soft to use (default is fasttree)')
-    softs = ["fasttree", "fastme", "quicktree"]
-    softparse.add_argument("-s", "--soft", dest="soft", choices=softs, default="fasttree",
+    softparse = parser.add_argument_group('Choose soft to use (default is IQtree)')
+    softs = ["fasttree", "fastme", "quicktree", "iqtree", "iqtree2"]
+    softparse.add_argument("-s", "--soft", dest="soft", choices=softs, default="iqtree",
                            help=("Choose with which software you want to infer the "
-                                 "phylogenetic tree. Default is FastTree"))
+                                 "phylogenetic tree. Default is IQtree."))
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-b", "--boot", dest="boot", type=int,
                           help=("Indicate how many bootstraps you want to compute. By "
-                                "default, no bootstrap is calculated."))
+                                "default, no bootstrap is calculated. For IQtree, it "
+                                "will use ultrafast bootstrap (>=1000)."))
     optional.add_argument("-o", dest="outfile",
                           help=("By default, the output tree file will be called "
                                 "'<input_alignment_filename>.<software_used>_tree.nwk'. You "
@@ -156,16 +180,22 @@ def build_parser(parser):
                                 "By default, it uses 1 thread. Put 0 if you want to use "
                                 "all threads of your computer. Not available with quicktree."))
     optional.add_argument("-m", "--model", dest="model",
-                          help=("Choose your DNA substitution model. "
-                                "Default for FastTree: GTR. Default for FastME: TN93. "
-                                "For FastTree, the choices are 'GTR' and 'JC'. "
+                          help=("Choose your DNA substitution model.\n"
+                                "Default for FastTree and IQtree: GTR. Default for FastME: TN93.\n"
+                                "For FastTree, the choices are 'GTR' and 'JC'.\n"
                                 "For FastME, choices are: 'p-distance' "
                                 "(or 'p'), 'RY symmetric' (or 'Y'), 'RY' (or 'R'), "
                                 "'JC69' (or 'J'), 'K2P' (or 'K'), 'F81' (or '1'), "
-                                "'F84' (or '4'), 'TN93' (or 'T'), 'LogDet' (or 'L')."))
+                                "'F84' (or '4'), 'TN93' (or 'T'), 'LogDet' (or 'L').\n"
+                                "For IQtree, choices are HKY, JC, F81, K2P, K3P, K81uf,"
+                                " TN/TrN, TNef, TIM, TIMef, TVM, TVMef, SYM, GTR."))
     optional.add_argument("-B", dest="write_boot", action="store_true",
                           help=("Add this option if you want to write all bootstrap "
-                                "pseudo-trees. Only available with FastME."))
+                                "pseudo-trees. Only available with FastME and IQtree."))
+    optional.add_argument("--mem", dest="memory",
+                          help=("Maximal RAM usage in GB | MB. Only available with iqtree."))
+    optional.add_argument("-fast", dest="fast", action="store_true",
+                          help=("Use -fast option with iqtree."))
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
@@ -198,7 +228,9 @@ def check_args(parser, args):
                      "JC69": "J", "K2P": "K", "F81": "1", "F84": "4",
                      "TN93": "T", "LogDet": "L"}
     models_fasttree = {"GTR": "-gtr", "JC": ""}
-
+    models_iqtree = set(["HKY", "JC", "F81", "K2P", "K3P", "K81uf", "TN/TrN",
+                         "TNef", "TIM", "TIMef", "TVM", "TVMef", "SYM", "GTR"])
+    models_iqtree = {mod: mod for mod in models_iqtree}
 
     def check_model(models, choice):
         if choice in models.keys():
@@ -209,7 +241,6 @@ def check_args(parser, args):
                 "(see -h for more details)").format(choice, args.soft)
         parser.error(mmsg)
 
-
     if args.soft == "quicktree" and args.threads != 1:
         msg = ("You cannot run quicktree with multiple threads. Choose another software, "
                "or remove the --threads option.")
@@ -219,10 +250,30 @@ def check_args(parser, args):
         msg = "Quicktree only runs the NJ algorithm. You cannot choose a DNA substitution model."
         parser.error(msg)
 
-    if args.soft == "quicktree" and args.write_boot:
-        msg = "'-B' option is only available with FastME, not with quicktree"
+    # Memory option only available with iqtree
+    if args.soft != "iqtree" and args.soft != "iqtree2" and args.memory:
+        msg = "'--mem' option is only available for IQtree."
         parser.error(msg)
 
+    # If bootstraps are asked with iqtree, check the number is >= 1000
+    if (args.soft == "iqtree" or args.soft == "iqtree2") and args.boot and int(args.boot) < 1000:
+        msg = "With IQtree, number of replicates for bootstraps must be >= 1000."
+        parser.error(msg)
+
+    # Write bootstrap option only available for fastme and iqtree
+    if (args.soft != "iqtree" and args.soft != "iqtree2" and args.soft != "fastme" 
+        and args.write_boot):
+        msg = "'-B' option is only available with FastME and IQtree."
+        parser.error(msg)
+
+    # Fast option only available for iqtree
+    if (args.fast and ((args.soft != "iqtree" and args.soft != "iqtree2")
+        or (args.boot or args.write_boot))):
+        msg = ("-fast option is available only for IQtree, and not compatible "
+               "with '-B' and '-b' options (bootstraps).")
+        parser.error(msg)
+
+    # Check model name is valid for the chosen soft
     if args.soft == "fastme":
         if args.model:
             args.model = check_model(models_fastme, args.model)
@@ -236,7 +287,11 @@ def check_args(parser, args):
             args.model = check_model(models_fasttree, args.model)
         else:
             args.model = "-gtr"
-
+    elif args.soft == "iqtree":
+        if args.model:
+            args.model = check_model(models_iqtree, args.model)
+        else:
+            args.model = "GTR"
     return args
 
 

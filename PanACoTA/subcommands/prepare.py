@@ -17,6 +17,7 @@ import sys
 import logging
 from termcolor import colored
 
+from PanACoTA import __version__ as version
 from PanACoTA import utils
 from PanACoTA.prepare_module import download_genomes_func as dgf
 from PanACoTA.prepare_module import filter_genomes as fg
@@ -34,13 +35,14 @@ def main_from_parse(arguments):
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.outdir,
-         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.only_mash,
+         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.db_dir,
+         arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
-         arguments.verbose, arguments.quiet)
+         arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, only_mash, info_file,
-         l90, nbcont, cutn, min_dist, verbose, quiet):
+def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_dir,
+         only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
 
@@ -62,11 +64,13 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     outdir : str
         path to output directory (where created database will be saved).
     tmp_dir : str
-        Path to directory where tmp files are saved (sequences split at each stretch of 'N')
+        Path to directory where tmp files are saved (sequences split at each row of 5 'N')
     threads : int
         max number of threads to use
     no_refseq : bool
         True if user does not want to download again the database
+    db_dir : str
+        Name of the folder where already downloaded fasta files are saved.
     only_mash : bool
         True if user user already has the database and quality of each genome (L90, #contigs etc.)
     info_file : str
@@ -77,9 +81,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     nbcont : int
         Max number of contigs allowed to keep a genome
     cutn : int
-        cut at each stretch of this number of 'N'. Don't cut if equal to 0
+        cut at each when there are 'cutn' N in a row. Don't cut if equal to 0
     min_dist : int
         lower limit of distance between 2 genomes to keep them
+    max_dist : int
+        upper limit of distance between 2 genomes to keep them (default is 0.06)
     verbose : int
         verbosity:
         - defaut 0 : stdout contains INFO, stderr contains ERROR, .log contains INFO and more,
@@ -91,8 +97,6 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     quiet : bool
         True if nothing must be sent to stdout/stderr, False otherwise
     """
-    # Fixed limits. For now, we do not propose to user to give its own limits
-    max_dist = 0.06
 
     # get species name in NCBI format
     # -> will be used to name output directory
@@ -103,15 +107,17 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         species_linked = "_".join(species_linked.split("/"))
 
     # if species name not given by user, use taxID instead to name output directory
-    else:
+    elif NCBI_taxid:
         species_linked = str(NCBI_taxid)
+    # if neither speID nor taxID given (--norefseq, mashonly), name is NA
+    else:
+        species_linked = "NA"
     # Default outdir is species name if given, or species taxID
     if not outdir:
         outdir = species_linked
     # Default tmp_dir is outdir/tmp_files
     if not tmp_dir:
         tmp_dir = os.path.join(outdir, "tmp_files")
-    db_dir = None
     # directory that will be created by ncbi_genome_download
     refseqdir = os.path.join(outdir, "refseq", "bacteria")
     os.makedirs(outdir, exist_ok=True)
@@ -128,10 +134,11 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(outdir, "PanACoTA_prepare_{}").format(species_linked)
-    logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', details=True,
+    logfile_base, logger = utils.init_logger(logfile_base, level, 'prepare', log_details=True,
                                              verbose=verbose, quiet=quiet)
 
     # Message on what will be done (cmd, cores used)
+    logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
     message = f"'PanACoTA prepare' will run on {threads} "
     message += f"cores" if threads>1 else "core"
@@ -147,45 +154,65 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         # to avoid erasing it
         if info_file:
             os.rename(info_file, info_file + ".back")
+
         # 'no_refseq = True" : Do not download genomes, just do QC and mash filter on given genomes
-        # (sequences must, at least, be in outdir/refeq/bacteria/<genome_name>.fna.gz)
-        # (they can also be in Database_init/<genome_name>.fna)
+        # -> if not, error and exit
         if no_refseq:
             logger.warning('You asked to skip refseq downloads.')
-            # Check that db_dir exists (folder with uncompressed fna files)
-            db_dir = os.path.join(outdir, "Database_init")
-            # If it does not exist, check that original dir exists
-            if not os.path.exists(db_dir):
-                logger.warning(f"Database folder {db_dir} containing fna sequences does not "
-                               "exist. We will check that refseq donwload directory exists, "
-                               "to be able to do next steps (genomes filter)")
-                db_dir = None
 
-                if not os.path.exists(refseqdir):
-                    logger.error(f"{refseqdir} does not exist. You do not have any "
-                                 "genome to analyse")
+            # -> if db_dir given, watch for sequences there. If does not exist, error and exit
+            # (user gave a directory (even if it does not exist), so we won't look for
+            # the sequences in other folders)
+            if db_dir:
+                if not os.path.exists(db_dir):
+                    logger.error(f"Database folder {db_dir} supposed to contain fasta "
+                                 "sequences does not "
+                                 "exist. Please give a valid folder, or leave the default "
+                                 "directory (no '-d' option).")
                     sys.exit(1)
+            # -> If user did not give db_dir, genomes could be in
+            # outdir/Database_init/<genome_name>.fna
+            else:
+                db_dir = os.path.join(outdir, "Database_init")
+                # If it does not exist, check if default compressed files folder exists.
+                if not os.path.exists(db_dir):
+                    logger.warning(f"Database folder {db_dir} supposed to contain fasta "
+                                   "sequences does not "
+                                   "exist. We will check if the download folder (with compressed "
+                                   "sequences) exists.")
+                    # -> if not in database_init, genomes must be in
+                    # outdir/refeq/bacteria/<genome_name>.fna.gz. In that case,
+                    # uncompress and add them to Database_init
+                    if not os.path.exists(refseqdir):
+                        logger.error(f"Folder {refseqdir} does not exist. You do not have any "
+                                     "genome to analyse. Possible reasons:\n"
+                                     "- if you want to rerun analysis in the same folder as "
+                                     "sequences were downloaded (my_outdir/Database_init or "
+                                     "my_outdir/refseq), make sure you have '-o my_outdir' "
+                                     "option\n"
+                                     "- if you want to rerun analysis and save them in a new "
+                                     "output folder called 'new_outdir', make sure you have "
+                                     "'-o new_outdir' option, "
+                                     "and you specified where the uncompressed sequences to "
+                                     "use are ('-d sequence_database_path' -> "
+                                     "my_outdir/Database_init). ")
+                        sys.exit(1)
+                    # add genomes from refseq/bacteria folder to Database_init
+                    nb_gen, _ = dgf.to_database(outdir)
+                    # If no genome found, error -> nothing to analyse
+                    if nb_gen == 0:
+                        logger.error(f"There is no genome in {refseqdir}.")
+                        sys.exit(1)
         # No sequence: Do all steps -> download, QC, mash filter
         else:
             # Download all genomes of the given taxID
-            db_dir = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                              outdir, threads)
-        # if norefseq: refseq/bacteria must exist, but Database_init can be absent (if
-        # genomes were downloaded but not uncompressed)
-        # -> create and fill it
-        if not db_dir:
-            db_dir = os.path.join(outdir, "Database_init")
-            # If db_dir does not exist: create and fill it
-            if no_refseq and not os.path.exists(db_dir):
-                # add genomes from refseq/bacteria folder to Database_init
-                nb_gen, _ = dgf.to_database(outdir)
-                # If no genome found, error -> nothing to analyse
-                if nb_gen == 0:
-                    logger.error(f"There is no genome in {refseqdir}.")
-                    sys.exit(1)
-                logger.info("{} refseq genome(s) downloaded".format(nb_gen))
+            db_dir, nb_gen = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                                      outdir, threads)
+            logger.info("{} refseq genome(s) downloaded".format(nb_gen))
+
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
         genomes = fg.check_quality(species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
+
     # Do only mash filter. Genomes must be already downloaded, and there must be a file with
     # all information on these genomes (L90 etc.)
     else:
@@ -198,15 +225,21 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, onl
         logger.info(("You want to run only mash steps. Getting information "
                      "from {}").format(info_file))
         genomes = utils.read_genomes_info(info_file, species_linked, )
+
     # Run Mash
-    # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size,
-                             # nbcont, l90]}
+    # genomes : {genome_file: [genome_name, orig_name, path_to_seq_to_annotate, size, nbcont, l90]}
     # sorted_genome : [genome_file] ordered by L90/nbcont (keys of genomes)
     sorted_genomes = fg.sort_genomes_minhash(genomes, l90, nbcont)
+
+    # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
+    discQC = f"by-L90_nbcont-{species_linked}.txt"
+    utils.write_genomes_info(genomes, sorted_genomes, discQC, outdir)
+
+    # Remove genomes not corresponding to mash filters
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
                                 min_dist, max_dist, threads, quiet)
-    # Write list of genomes kept, and list of genomes removed
-    fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist)
+    # Write list of genomes kept, and list of genomes discarded by mash step
+    fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist, max_dist)
     logger.info("End")
 
 
@@ -222,68 +255,82 @@ def build_parser(parser):
     import argparse
     from PanACoTA import utils_argparse
 
-    required = parser.add_argument_group('Required arguments')
-    required.add_argument("-t", dest="NCBI_species_taxid", required=True,
+    general = parser.add_argument_group('General arguments')
+    general.add_argument("-t", dest="NCBI_species_taxid", default="",
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI")
                          )
-
-    optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-s", dest="NCBI_species",
+    general.add_argument("-s", dest="NCBI_species", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
                         )
-    optional.add_argument("-o", dest="outdir",
+    general.add_argument("-o", dest="outdir",
                           help=("Give the path to the directory where you want to save the "
-                               "database. In the given directory, it will create a folder with "
-                               "the gembase species name. Inside this folder, you will find a "
-                               "folder 'Database_init' containing all fasta files, as well as a "
-                               "folder 'refseq' with files downloaded from refseq."))
-    optional.add_argument("--tmp", dest="tmp_dir",
-                          help=("Specify where the temporary files (sequence split by stretches "
+                               "downloaded database. In the given directory, it will create "
+                               "a folder 'Database_init' containing all fasta "
+                               "files that will be sent to the control procedure, as well as "
+                               "a folder 'refseq' with all original compressed files "
+                               "downloaded from refseq. By default, this output dir name is the "
+                               "NCBI_species name if given, or NCBI_species_taxid otherwise.")
+                          )
+    general.add_argument("--tmp", dest="tmp_dir",
+                          help=("Specify where the temporary files (sequence split by rows "
                                 "of 'N', sequence with new contig names etc.) must be saved. "
                                 "By default, it will be saved in your "
-                                "result_directory/tmp_files."))
-    optional.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
+                                "out_dir/tmp_files.")
+                          )
+    general.add_argument("--cutn", dest="cutn", type=int, default=5,
+                          help=("By default, each genome will be cut into new contigs when "
+                                "at least 5 'N' in a row are found in its sequence. "
+                                "If you don't want to "
+                                "cut genomes into new contigs when there are rows of 'N', "
+                                "put 0 to this option. If you want to cut from a different number "
+                                "of 'N' in a row, put this value to this option.")
+                          )
+    general.add_argument("--l90", dest="l90", type=int, default=100,
+                          help="Maximum value of L90 allowed to keep a genome. Default is 100.")
+    general.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
+                          help=("Maximum number of contigs allowed to keep a genome. "
+                                "Default is 999."))
+    general.add_argument("--min", dest="min_dist", default=1e-4, type=float,
+                        help="By default, genomes whose distance to the reference is not "
+                             "between 1e-4 and 0.06 are discarded. You can specify your own "
+                             "lower limit (instead of 1e-4) with this option.")
+    general.add_argument("--max_dist", dest="max_dist", default=0.06, type=float,
+                        help="By default, genomes whose distance to the reference is not "
+                             "between 1e-4 and 0.06 are discarded. You can specify your own "
+                             "lower limit (instead of 0.06) with this option.")
+    general.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
                           help=("Run 'N' downloads in parallel (default=1). Put 0 if "
                                 "you want to use all cores of your computer."))
+
+    optional = parser.add_argument_group('Alternatives')
     optional.add_argument("--norefseq", dest="no_refseq", action="store_true",
                           help=("If you already downloaded refseq genomes and do not want to "
                                 "check them, add this option to directly go to the next steps:"
-                                "quality control (L90, number of contigs...) and mash filter."))
+                                "quality control (L90, number of contigs...) and mash filter. "
+                                "Don't forget to specify the outdir (-o option) where you "
+                                "already downloaded those genomes."))
+    optional.add_argument("-d", dest="db_dir",
+                          help=("If your already downloaded sequences are not in the default "
+                                "directory (outdir/Database_init), you can specify here the "
+                                "path to those fasta files."))
     optional.add_argument('-M', '--only-mash', dest="only_mash", action="store_true",
                           help=("Add this option if you already downloaded complete and refseq "
-                                "genomes, and ran quality control (you have, in your result "
-                                "folder, a file called 'info-genomes-list-<gembase_species>.lst', "
-                                "contaning all genome names, as well as their genome size, "
+                                "genomes, and ran quality control (you have, a file "
+                                "containing all genome names, as well as their genome size, "
                                 "number of contigs and L90 values). "
                                 "It will then get information on genomes quality from this "
                                 "file, and run mash steps."))
     optional.add_argument("--info", dest="from_info",
-                          help="If you already ran the 'prepare' data module, or already "
-                               "calculated yourself the size, L90 and number of contigs for each "
-                               "genome, you can give this information, to go directly to "
-                               "Mash filtering step. This file contains at "
-                               "least 4 columns, tab separated, with the following headers: "
-                               "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
-                               "will be ignored.")
-    optional.add_argument("-m", dest="min_dist", default=1e-4, type=float,
-                        help="By default, genomes whose distance to the reference is not "
-                             "between 1e-4 and 0.06 are discarded. You can specify your own "
-                             "lower limit (instead of 1e-4) with this option.")
-    optional.add_argument("--l90", dest="l90", type=int, default=100,
-                          help="Maximum value of L90 allowed to keep a genome. Default is 100.")
-    optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
-                          help=("Maximum number of contigs allowed to keep a genome. "
-                                "Default is 999."))
-    optional.add_argument("--cutn", dest="cutn", type=int, default=5,
-                          help=("By default, each genome will be cut into new contigs when "
-                                "at least 5 'N' at a stretch are found in its sequence. "
-                                "If you don't want to "
-                                "cut genomes into new contigs when there are stretches of 'N', "
-                                "put 0 to this option. If you want to cut from a different number "
-                                "of 'N' stretches, put this value to this option."))
+                          help=("If you already ran the quality control, specify from which "
+                                "file PanACoTA can read this information, in order to proceed "
+                                "to the mash step. This file must contain at "
+                                "least 4 columns, tab separated, with the following headers: "
+                                "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
+                                "will be ignored."))
+
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
                         help="Increase verbosity in stdout/stderr and log files.")
@@ -313,9 +360,6 @@ def parse(parser, argu):
     import argparse
 
     args = parser.parse_args(argu)
-    # print(f"before check: {args}")
-    # toto = check_args(parser, args)
-    # print(f"res: {toto}")
     return check_args(parser, args)
 
 
@@ -347,14 +391,30 @@ def check_args(parser, args):
                 "options.".format(args.l90, args.nbcont))
 
     #  ERRORS
-    # Check that at least taxid or species name was given
-    if not args.NCBI_species_taxid and not args.NCBI_species:
-        parser.error("Give at least an NCBI species name or taxID.")
 
-    # If user wants only mash steps, check that he gave info file
+    # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
+    # -> Give at least 1!
+    if (not args.only_mash and not args.no_refseq and
+        not args.NCBI_species_taxid and not args.NCBI_species):
+        parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
+                     "you want to download refseq genomes. But you did not provide any "
+                     "information, so PanACoTA cannot guess which species you want to download. "
+                     "Specify NCBI_taxid and/or NCBI_species to download, or add one of "
+                     "the 2 options (--norefseq or -M) if you want to skip the 'download step'.")
+
+    # If norefseq, give output directory
+    #  - folder containing Database_init, with all sequences
+    #  - or new folder where you want to put the new results
+    if args.no_refseq and not args.outdir:
+        parser.error("You must provide an output directory, where your results will be saved.")
+
+    # If user wants only mash steps, check that he gave info file, and outdir
     if args.only_mash and not args.from_info:
         parser.error("If you want to run only Mash filtering steps, please give the "
                      "info file with the required information (see '--info' option)")
+    if args.only_mash and not args.outdir:
+        parser.error("If you want to run only Mash filtering steps, please give the "
+                     "output directory where you want to save your results (see '-o' option)")
 
     # Cannot be verbose and quiet at the same time
     if args.verbose > 0 and args.quiet:
@@ -370,7 +430,7 @@ def check_args(parser, args):
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn == 5:
         message = ("  !! Your genomes will be split when sequence contains at "
-                   "least {}'N' at a stretch. If you want to change this threshold, use "
+                   "least {}'N' in a row. If you want to change this threshold, use "
                    "'--cutn n' option (n=0 if you do not want to cut)").format(args.cutn)
         print(colored(message, "yellow"))
 

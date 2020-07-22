@@ -80,8 +80,8 @@ def open_outputs_to_write(fams_by_strain, families, all_strains, pangenome):
     panquanti = pangenome + ".quanti.txt"
     pansum = pangenome + ".summary.txt"
     with open(panquali, "w") as pqlf, open(panquanti, "w") as pqtf, open(pansum, "w") as psf:
-        pqlf.write("fam_num " + utils.write_list(all_strains))
-        pqtf.write("fam_num " + utils.write_list(all_strains))
+        pqlf.write("fam_num " + utils.list_to_str(all_strains))
+        pqtf.write("fam_num " + utils.list_to_str(all_strains))
         psf.write("num_fam nb_members sum_quanti sum_quali "
                   "nb_0 nb_mono nb_multi sum_0_mono_multi max_multi\n")
         res = generate_and_write_outputs(fams_by_strain, families,
@@ -136,9 +136,9 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
         max_multi = max(quanti)
         summ = [len(families[fam_num]), sum(quanti), sum(quali),
                 nb_0, nb_mono, nb_multi, nb_0 + nb_mono + nb_multi, max_multi]
-        pqlf.write(str(fam_num) + " " + utils.write_list(quali))
-        pqtf.write(str(fam_num) + " " + utils.write_list(quanti))
-        psf.write(str(fam_num) + " " + utils.write_list(summ))
+        pqlf.write(str(fam_num) + " " + utils.list_to_str(quali, sep=" "))
+        pqtf.write(str(fam_num) + " " + utils.list_to_str(quanti, sep=" "))
+        psf.write(str(fam_num) + " " + utils.list_to_str(summ, sep=" "))
         qualis[fam_num] = quali
         quantis[fam_num] = quanti
         summaries[fam_num] = summ

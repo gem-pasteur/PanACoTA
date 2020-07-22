@@ -69,10 +69,8 @@ def check_quality(species_linked, db_path, tmp_dir, max_l90, max_cont, cutn):
 
     # cut at stretches of 'N' if asked, and get L90, nbcontig, size for all genomes
     # -> {genome_file: [genome_g, orig_path, to_annotate_path, size, nbcont, l90]}
-    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft="prepare", logger=logger,
-                              quiet=False)
+    gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, "prepare", logger, quiet=False)
     return genomes
-
 
 def sort_genomes_minhash(genomes, max_l90, max_cont):
     """
@@ -160,10 +158,9 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Sketch genomes
     sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
-
+    
     # Compute pairwise distances
-    compare_all(out_msh, matrix, mash_log, threads)
-
+    compare_all(out_msh, matrix, sparse_mat, mash_log, threads)
     # Iteratively discard genomes
     # List of genomes to compare to the next ones until a limit value is reached.
     # genomes ordered by decreasing L90/nbcont (used to pop elements in comparing step)
@@ -175,7 +172,6 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Get link between genome_file (genomes key) and place in sorted_genomes
     corresp_file = {genome: num for num, genome in enumerate(sorted_genomes)}
-
     # Read matrix (from npz file if existing, otherwise from txt file)
     if os.path.exists(sparse_mat):
         logger.info(f"Loading matrix contained in {sparse_mat}")
@@ -259,22 +255,20 @@ def sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, th
         os.remove(list_reps)
         return 0
     logger.info("Sketching all genomes...")
-    cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps}"
+    cmd_sketch = f"mash sketch -o {out_msh} -p {threads} -l {list_reps} -s 1e4"
+    logger.details(cmd_sketch)
     error_sketch = (f"Error while trying to sketch {len(sorted_genomes)} genomes to combined "
                     "archive. Maybe some genome sequences in "
                     "'tmp_files' are missing! Check logfile: "
                     f"{mash_log}")
 
     outf = open(mash_log, "w")
-    print("outf created")
-    print(utils.check_installed("mash"))
-    print(cmd_sketch)
     utils.run_cmd(cmd_sketch, error_sketch, eof=True, stdout=outf, stderr=outf, logger=logger)
     outf.close()
     return 0
 
 
-def compare_all(out_msh, matrix, mash_log, threads):
+def compare_all(out_msh, matrix, npz_matrix, mash_log, threads):
     """
     Comparing all pairwise genomes that are already been sketched in the given file.
 
@@ -284,6 +278,8 @@ def compare_all(out_msh, matrix, mash_log, threads):
         output of mash
     matrix : str
         File to put generated matrix of pairwise distances between all genomes
+    npz_matrix : str
+        matrix of pairwise distances saved in a binary file
     mash_log : str
         mash logfile
     threads :
@@ -294,13 +290,19 @@ def compare_all(out_msh, matrix, mash_log, threads):
 
     return code
     """
+    # txt matrix already exists
     if os.path.isfile(matrix):
         logger.warning("Matrix file {} already exists. The program will use this distance matrix "
                        "to filter all genomes according to their distances.".format(matrix))
         return 0
-
+    # npz matrix already exists
+    if os.path.isfile(npz_matrix):
+        logger.warning("Matrix file {} already exists. The program will use this distance matrix "
+                       "to filter all genomes according to their distances.".format(matrix))
+        return 0
     logger.info("Computing pairwise distances between all genomes")
     cmd_dist = f"mash dist -p {threads} {out_msh}.msh {out_msh}.msh"
+    logger.details(cmd_dist)
     # Open matfile to write matrix inside
     matfile = open(matrix, "w")
     # Open mash log to add log of 'mash dist' to log of 'mash sketch'
@@ -392,6 +394,7 @@ def read_matrix(genomes, sorted_genomes, matrix):
 
     nbgen = len(sorted_genomes)
     corresp_abs = {genomes[genome][2]: num for num, genome in enumerate(sorted_genomes)}
+    print(len(corresp_abs))
     # Create square matrix with nbgen cols/lines. dok format is a 'Dictionary Of Keys'
     # -> writes (0, 1) value
     mat_sp = dok_matrix((nbgen, nbgen), dtype=float)
@@ -409,7 +412,7 @@ def read_matrix(genomes, sorted_genomes, matrix):
     return mat_sp
 
 
-def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies, min_dist):
+def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies, min_dist, max_dist):
     """
     Write the list of genomes kept in a file, 1 genome per line -> will be the input file for
     annotation and next steps
@@ -432,6 +435,8 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         species name if given, otherwise species taxID
     min_dist : float
         lower limit of distance between 2 genomes to keep them
+    max_dist : float
+        upper limit of distance between 2 genomes to keep them
 
     Returns
     -------
@@ -441,9 +446,9 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
         logger.error(f"The given output directory ({outdir}) does not exist. We cannot "
                       "create output files there")
         sys.exit(1)
-    list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}.txt")
+    list_file = os.path.join(outdir, f"LSTINFO-{gspecies}-filtered-{min_dist}_{max_dist}.txt")
     kept_genomes = []
-    discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}.txt")
+    discard_file = os.path.join(outdir, f"discarded-by-minhash-{gspecies}-{min_dist}_{max_dist}.txt")
 
     # Get list of kept genomes and write them in list_file
     for genome in sorted_genomes:

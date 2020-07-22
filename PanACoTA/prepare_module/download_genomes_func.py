@@ -52,17 +52,17 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
 
     # arguments needed to download all genomes of the given species
     abs_outdir = os.path.abspath(outdir)
-    keyargs = {"section": "refseq", "file_format": "fasta", "output": abs_outdir,
-               "parallel": threads, "group": "bacteria",
-               "species_taxid": NCBI_taxid, "metadata_table":abs_sumfile}
+    keyargs = {"section": "refseq", "file_formats": "fasta", "output": abs_outdir,
+               "parallel": threads, "groups": "bacteria",
+               "metadata_table":abs_sumfile}
     message = "Downloading all genomes for "
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
     if NCBI_species:
-        keyargs["genus"] = NCBI_species
+        keyargs["genera"] = NCBI_species
         message += f"NCBI species = {NCBI_species}"
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
     if NCBI_taxid:
-        keyargs["species_taxid"] = NCBI_taxid
+        keyargs["species_taxids"] = NCBI_taxid
         if NCBI_species:
             message += f" (NCBI_taxid = {NCBI_taxid})."
         else:
@@ -87,13 +87,13 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         #     bar.update()
         ret = ngd.download(**keyargs)
 
-    except:
+    except: # pragma: no cover
         # Error message if crash during execution of ncbi_genome_download
         logger.error(error_message)
         # bar.finish()
         sys.exit(1)
     attempts = 0
-    while ret == 75 and attempts < max_retries:
+    while ret == 75 and attempts < max_retries: # pragma: no cover
         # bar.update()
         attempts += 1
         logging.error(('Downloading from NCBI failed due to a connection error, '
@@ -107,7 +107,7 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
         sys.exit(1)
     nb_gen, db_dir = to_database(outdir)
     logger.info(f"Downloaded {nb_gen} genomes.")
-    return db_dir
+    return db_dir, nb_gen
 
 
 def to_database(outdir):

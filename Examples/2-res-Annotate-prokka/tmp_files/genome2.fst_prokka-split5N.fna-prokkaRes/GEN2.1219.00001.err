@@ -1,0 +1,170 @@
+Discrepancy Report Results
+
+Summary
+FATAL: MISSING_PROTEIN_ID:13 proteins have invalid IDs.
+DISC_SOURCE_QUALS_ASNDISC:strain (all present, all same)
+DISC_SOURCE_QUALS_ASNDISC:taxname (all present, all same)
+DISC_FEATURE_COUNT:CDS: 13 present
+DISC_COUNT_NUCLEOTIDES:5 nucleotide Bioseqs are present
+FEATURE_LOCATION_CONFLICT:13 features have inconsistent gene locations.
+SHORT_CONTIG:1 contigs are shorter than 200 nt.
+SHORT_SEQUENCES:1 sequences are shorter than 50 nt.
+NO_ANNOTATION:1 bioseqs have no features
+DISC_QUALITY_SCORES:Quality scores are missing on all sequences.
+ONCALLER_COMMENT_PRESENT:5 comment descriptors were found (all same)
+MISSING_GENOMEASSEMBLY_COMMENTS:5 bioseqs are missing GenomeAssembly structured comments
+SHORT_SEQUENCES_200:1 sequences are shorter than 200 bp.
+MOLTYPE_NOT_MRNA:5 molecule types are not set as mRNA.
+TECHNIQUE_NOT_TSA:5 technique are not set as TSA
+MISSING_STRUCTURED_COMMENT:5 sequences do not include structured comments.
+MISSING_PROJECT:18 sequences do not include project.
+DISC_INCONSISTENT_MOLINFO_TECH:Molinfo Technique Report (some missing, all same)
+
+
+Detailed Report
+
+FATAL: DiscRep_ALL:MISSING_PROTEIN_ID::13 proteins halid nvalid IDs.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1_1 (length 257)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1_2 (length 467)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_1 (length 74)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_2 (length 126)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_3 (length 277)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_4 (length 555)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_1 (length 255)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_2 (length 86)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_3 (length 193)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_4 (length 122)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_1 (length 435)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_2 (length 154)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_3 (length 337)
+
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::strain (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::5 sources have 'strain' for strain
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::taxname (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::5 sources have 'Genus species' for taxname
+DiscRep_ALL:DISC_FEATURE_COUNT::CDS: 13 present
+DiscRep_ALL:DISC_COUNT_NUCLEOTIDES::5 nucleotide Bioseqs are present
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:FEATURE_LOCATION_CONFLICT::13 features have inconsistent gene locations.
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	Histidine transport ATP-binding protein HisP	this_is_genome_1:1-774	AMHDIIJN_00001
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	hypothetical protein	this_is_genome_1:857-2260	AMHDIIJN_00002
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	Phage shock protein B	this_is_genome_2:28-252	AMHDIIJN_00003
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	5-carboxymethyl-2-hydroxymuconate Delta-isomerase	this_is_genome_2:301-681	AMHDIIJN_00004
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	N-acetylmuramoyl-L-alanine amidase AmiD	this_is_genome_2:764-1597	AMHDIIJN_00005
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	Glutamine--tRNA ligase	this_is_genome_2:1628-3295	AMHDIIJN_00006
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	tRNA (guanine-N(1)-)-methyltransferase	this_is_genome_3:30-797	AMHDIIJN_00007
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	hypothetical protein	this_is_genome_3:862-1122	AMHDIIJN_00008
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	hypothetical protein	this_is_genome_3:1170-1751	AMHDIIJN_00009
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	hypothetical protein	this_is_genome_3:1895-2263	AMHDIIJN_00010
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	C4-dicarboxylate TRAP transporter large permease protein DctM	this_is_genome_4:1-1308	AMHDIIJN_00011
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	hypothetical protein	this_is_genome_4:1340-1804	AMHDIIJN_00012
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:CDS	Tyrosine recombinase XerC	this_is_genome_4:1832-2845	AMHDIIJN_00013
+
+DiscRep_ALL:SHORT_CONTIG::1 contigs are shorter than 200 nt.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:SHORT_SEQUENCES::1 sequences are shorter than 50 nt.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:NO_ANNOTATION::1 bioseqs have no features
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:DISC_QUALITY_SCORES::Quality scores are missing on all sequences.
+
+DiscRep_ALL:ONCALLER_COMMENT_PRESENT::5 comment descriptors were found (all same)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+
+DiscRep_ALL:MISSING_GENOMEASSEMBLY_COMMENTS::5 bioseqs are missing GenomeAssembly structured comments
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:SHORT_SEQUENCES_200::1 sequences are shorter than 200 bp.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:MOLTYPE_NOT_MRNA::5 molecule types are not set as mRNA.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:TECHNIQUE_NOT_TSA::5 technique are not set as TSA
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:MISSING_STRUCTURED_COMMENT::5 sequences do not include structured comments.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:MISSING_PROJECT::18 sequences do not include project.
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1_1 (length 257)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1_2 (length 467)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_1 (length 74)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_2 (length 126)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_3 (length 277)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2_4 (length 555)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_1 (length 255)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_2 (length 86)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_3 (length 193)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3_4 (length 122)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_1 (length 435)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_2 (length 154)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4_3 (length 337)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+
+DiscRep_ALL:DISC_INCONSISTENT_MOLINFO_TECH::Molinfo Technique Report (some missing, all same)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::technique (all missing)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::5 Molinfos are missing field technique
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:genome2_small_5 (length 6)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_1 (length 2308, 2 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_2 (length 3295, 3 other)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_3 (length 2263)
+Examples/2-res-Annotate-prokka/tmp_files/genome2.fst_prokka-split5N.fna-prokkaRes/GEN2.1219.00001:this_is_genome_4 (length 2845)
+

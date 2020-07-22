@@ -11,12 +11,11 @@ June 2017
 import os
 import logging
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("tree.fasttree")
 
-
-def run_tree(alignfile, boot, treefile, quiet, threads, model, *args):
+def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     """
     Run FastTree for the given alignment file and options
 
@@ -34,10 +33,11 @@ def run_tree(alignfile, boot, treefile, quiet, threads, model, *args):
         Maximum number of threads to use
     model: str
         DNA substitution model chosen by user
-    args: tuple
+    kwargs: Object
         Used to be compatible with the 'run_tree' function of other softs like fastME and
-        quicktree, which may require more arguments
+        quicktree, which require more arguments
     """
+    model = kwargs["model"]
     define_nb_threads(threads)
     run_fasttree(alignfile, boot, treefile, model, quiet)
 
@@ -82,6 +82,7 @@ def run_fasttree(alignfile, boot, treefile, model, quiet):
         treefile = alignfile + ".fasttree_tree.nwk"
     cmd = "FastTreeMP -nt {} -noml -nocat {} -log {} {}".format(model, bootinfo,
                                                                 logfile, alignfile)
+    logger.info("Fasttree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:

@@ -1,0 +1,5 @@
+gembase_name	orig_name	to_annotate	gsize	nb_conts	L90
+EXAM.1219.00001	genome1.fst	genome1.fst_prodigal-split5N.fna	9808	2	2
+EXAM.1216.00002	genome3-chromo.fst-all.fna	genome3-chromo.fst-all.fna_prodigal-split5N.fna	8817	3	3
+GEN2.1219.00001	genome2.fst	genome2.fst_prodigal-split5N.fna	10717	5	4
+GEN4.1111.00001	genome4.fst	genome4.fst_prodigal-split5N.fna	7134	1	1

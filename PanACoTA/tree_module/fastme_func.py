@@ -12,12 +12,11 @@ from Bio import AlignIO
 import os
 import logging
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("tree.fastme")
 
-
-def run_tree(alignfile, boot, treefile, quiet, threads, model, write_boot):
+def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     """
     Run fastme for the given alignment file and options
 
@@ -33,11 +32,13 @@ def run_tree(alignfile, boot, treefile, quiet, threads, model, write_boot):
         True if nothing must be printed to stderr/stdout, False otherwise
     threads: int
         Maximum number of threads to use
-    model: str
+    kwargs["model"]: str
         DNA substitution model chosen by user
-    write_boot: bool
+    kwargs["wb"]: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     """
+    model = kwargs["model"]
+    write_boot = kwargs["wb"]
     align_phylip = alignfile + ".phylip"
     convert2phylip(alignfile, align_phylip)
     run_fastme(align_phylip, boot, write_boot, threads, model, treefile, quiet)
@@ -110,14 +111,13 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
     # Define log filename
     logfile = alignfile + ".fastme.log"
     matrix = alignfile + ".fastme_dist-mat.txt"
-    cmd = ("fastme -i {align} -d{model} -nB -s {th} {bs} -o {out} -I {log} "
-           "{wb}").format(align=alignfile, bs=bootinfo, th=threadinfo, model=model,
-                          out=treefile, log=logfile, wb=outboot)
+    cmd = (f"fastme -i {alignfile} -d{model} -nB -s {threadinfo} {bootinfo} "
+           f"-o {treefile} -I {logfile} {outboot}")
+    logger.details(cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:
         fnull = None
     error = ("Problem while running FastME. See log file ({}) for "
              "more information.").format(logfile)
-    logger.details(cmd)
     utils.run_cmd(cmd, error, stdout=fnull, eof=True, logger=logger, stderr=fnull)

@@ -64,7 +64,6 @@ def get_per_genome(persgen, list_gen, dname, outdir):
         * listdir : str, path to List directory
         * families : str, list of family numbers
     """
-    logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     # Define output directories
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
@@ -73,7 +72,10 @@ def get_per_genome(persgen, list_gen, dname, outdir):
 
     # Get list of all genomes
     all_genomes = get_all_genomes(list_gen)
+    logger.info(f"Found {len(all_genomes)} genomes.")
+
     # Sort proteins by strain
+    logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
     all_prots, fam_genomes, several = proteins_per_strain(persgen)
     # Write output files
     write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
@@ -123,6 +125,7 @@ def proteins_per_strain(persgen):
         * fam_genomes: dict, {fam_num: [genomes having a member in fam]}
         * several: dict, {fam_num: [genomes having several members in fam]}
     """
+    logger.info("Getting all persistent proteins and classify by strain.")
     all_prots = {}  # {strain: {member: fam_num}}
     fam_genomes = {}  # {fam_num: [genomes having a member in fam]}
     several = {}  # {fam_num: [genomes having several members in fam]}
@@ -218,13 +221,13 @@ def write_genome_file(listdir, aldir, dname, strain, member, several):
     gegenfile = os.path.join(listdir, dname + "-getEntry_gen_" + strain + ".txt")
     geprtfile = os.path.join(listdir, dname + "-getEntry_prt_" + strain + ".txt")
     if os.path.isfile(gegenfile) and os.path.isfile(geprtfile):
-        logger.warning("For genome {}, {} and {} already exist. The program will use them "
+        logger.warning(f"For genome {strain}, {geprtfile} and {gegenfile} already exist. "
+                       "The program will use them "
                        "to extract proteins and genes. If you prefer to rewrite them, use "
-                       "option -F (or --force).".format(strain, geprtfile, gegenfile))
+                       "option -F (or --force).")
         return
 
-    # If one of the 2 files already exists, overwrite both files (same behaviour
-    # as if no file exists)
+    # If at least one of the 2 files already exists, overwrite both files
     with open(gegenfile, "w") as gegf, open(geprtfile, "w") as gepf:
         for mem, fam in member.items():
             if strain not in several[fam]:
@@ -253,8 +256,12 @@ def write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname):
         name of dataset
     """
     for fam, genomes in fam_genomes.items():
-        missfile = os.path.join(aldir, dname + "-current." + fam + ".miss.lst")
+        # File where missing genomes will be written
+        missfile = os.path.join(aldir, f"{dname}-current.{fam}.miss.lst")
         with open(missfile, "w") as mff:
+            # missing = missing or several members:
+            # miss: all genomes - genomes in the family
+            # several: add to 'miss' genomes with several members in the family
             missing = (set(all_genomes) - set(genomes)).union(set(several[fam]))
             if missing:
                 mff.write("\n".join(missing) + "\n")

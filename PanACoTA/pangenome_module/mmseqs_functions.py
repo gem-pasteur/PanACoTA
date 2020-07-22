@@ -12,9 +12,11 @@ import os
 import time
 import multiprocessing
 import progressbar
+import copy
+
 from PanACoTA import utils
 
-logger = logging.getLogger("pangnome.mmseqs")
+logger = logging.getLogger("pangenome.mmseqs")
 
 
 def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=None, quiet=False):
@@ -55,8 +57,8 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     information = ("Will run MMseqs2 with:\n"
-                   "\t- minimum sequence identity = {}\n"
-                   "\t- cluster mode {}").format(min_id, clust_mode)
+                   f"\t- minimum sequence identity = {min_id*100}%\n"
+                   f"\t- cluster mode {clust_mode}")
     if threads > 1:
         information += "\n\t- {} threads".format(threads)
     logger.info(information)
@@ -211,7 +213,7 @@ def run_mmseqs_clust(args):
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
     cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
            "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
-    msg = "Problem while clustering proteins with mmseqs. See log in {}".format(logmmseq)
+    msg = "Problem while clustering proteins with mmseqs. See log in {logmmseq}"
     with open(logmmseq, "a") as logm:
         utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
 
@@ -243,14 +245,11 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
         - families : {fam_num: [all members]}
         - outfile : pangenome filename
     """
-    cmd = "mmseqs createtsv {0} {0} {1} {1}.tsv".format(mmseqdb, mmseqclust)
+    cmd = f"mmseqs createtsv {mmseqdb} {mmseqdb} {mmseqclust} {mmseqclust}.tsv"
     msg = "Problem while trying to convert mmseq result file to tsv file"
+    logger.info(f"MMseqs command: {cmd}")
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-    print("log file create tsv mmseqs:")
-    with open(logmmseq, "r") as logf:
-        for line in logf:
-            print(line)
     # Convert the tsv file to a 'pangenome' file: one line per family
     families, outfile = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
     return families, outfile
@@ -288,8 +287,8 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
     families = clusters_to_file(clusters, outfile)
     end = time.strftime('%Y-%m-%d_%H-%M-%S')
     with open(logmmseq, "a") as logm:
-        logm.write("\n------------\n\nStart: {}".format(start) + "\n")
-        logm.write("End: {}".format(end) + "\n")
+        logm.write(f"\n------------\n\nStart: {start} \n")
+        logm.write(f"End: {end}")
     return families, outfile
 
 
@@ -367,25 +366,29 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     if os.path.isfile(mmseqdb):
         for file in [mmseqdb + ext for ext in outext]:
             if not os.path.isfile(file):
-                break
+                continue
             files_existing.append(file)
         if len(files_existing) != len(outext):
-            logger.warning(("mmseq database {} already exists, but at least 1 associated "
+            logger.warning(f"mmseqs database {mmseqdb} already exists, but at least 1 associated "
                             "file (.dbtype, .index etc). is missing. The program will "
-                            "remove existing files and recreate the database.").format(mmseqdb))
+                            "remove existing files and recreate the database.")
+            files_remaining = copy.deepcopy(files_existing)
             for file in files_existing:
-                os.remove(file)
-                logger.details("Removing {}".format(file))
+                os.remove(file)  # Delete file
+                files_remaining.remove(file)  # Remove file from list of existing files
+                logger.details(f"Removing '{file}'.")
+            files_existing = copy.deepcopy(files_remaining)
         else:
-            logger.warning(("mmseq database {} already exists. The program will "
-                            "use it.").format(mmseqdb))
-            return
+            logger.warning(f"mmseqs database {mmseqdb} already exists. The program will "
+                           "use it.")
+            return 0
     if len(files_existing) != len(outext):
         logger.info("Creating database")
-        logger.info("exiting files: {}".format(len(files_existing)))
-        logger.info("Expected extentions: {}".format(len(outext)))
-        cmd = "mmseqs createdb {} {}".format(prt_path, mmseqdb)
-        msg = ("Problem while trying to convert database {} to mmseqs "
-               "database format.").format(prt_path)
+        logger.details("Existing files: {}".format(len(files_existing)))
+        logger.details("Expected extensions: {}".format(len(outext)))
+        cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
+        msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
+               "database format.")
+        logger.details(f"MMseqs command: {cmd}")
         with open(logmmseq, "w") as logf:
             utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)

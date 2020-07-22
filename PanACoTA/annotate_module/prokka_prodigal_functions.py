@@ -57,11 +57,11 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
     if prodigal_only:
         message = "Annotating all genomes with prodigal"
         run_annot = run_prodigal
-        main_logger = logging.getLogger("qc_annotate.prodigal")
+        main_logger = logging.getLogger("annotate.prodigal")
     else:
         message = "Annotating all genomes with prokka"
         run_annot = run_prokka
-        main_logger = logging.getLogger("qc_annotate.prokka")
+        main_logger = logging.getLogger("annotate.prokka")
     main_logger.info(message)
     # Get total number of genomes to annotate, used to show annotation progress
     nbgen = len(genomes)
@@ -184,8 +184,8 @@ def run_prokka(arguments):
     root.handlers = []
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
-    logger = logging.getLogger('run_prokka')
-    logger.log(utils.detail_lvl(), f"Start annotating {name} from {gpath} with Prokka")
+    logger = logging.getLogger('annotate.run_prokka')
+    logger.details(f"Start annotating {name} from {gpath} with Prokka")
 
     # Define prokka directory and logfile, and check their existence
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
@@ -195,17 +195,17 @@ def run_prokka(arguments):
     # sys.exit(1)
     # If result dir already exists, check if we can use it or next step or not
     if os.path.isdir(prok_dir) and not force:
-        logger.warning(("Prokka results folder already exists.").format(prok_dir))
+        logger.warning(f"Prokka results folder {prok_dir} already exists.")
         ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
         # If everything ok in the result dir, do not rerun prokka,
         # use those results for next step (formatting)
         if ok:
-            logger.log(utils.detail_lvl(), "Prokka did not run again, "
-                                           "formatting step used already generated results of "
-                                           "Prokka in {}. If you want to re-run prokka, first "
-                                           "remove this result folder, or use '-F' or '--force' "
-                                           "option if you want to rerun prokka for all genomes.")
-            logger.log(utils.detail_lvl(), "End annotating {} {}".format(name, gpath))
+            logger.details("Prokka did not run again, "
+                           "formatting step used already generated results of "
+                           f"Prokka in {prok_dir}. If you want to re-run prokka, first "
+                           "remove this result folder, or use '-F' or '--force' "
+                           "option if you want to rerun prokka for all genomes.")
+            logger.details(f"End annotating {name} {gpath}")
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:

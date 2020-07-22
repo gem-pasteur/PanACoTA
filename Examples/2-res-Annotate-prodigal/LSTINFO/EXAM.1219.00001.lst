@@ -1,0 +1,11 @@
+ 213 	 1880 	D	CDS	EXAM.1219.00001.0001b_00001	NA	| NA | NA |  ID=1_1;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.534 | NA
+ 1916 	 2746 	D	CDS	EXAM.1219.00001.0001b_00002	NA	| NA | NA |  ID=1_2;partial=00;start_type=ATG;rbs_motif=AGGAGG;rbs_spacer=5-10bp;gc_cont=0.570 | NA
+ 16 	 396 	D	CDS	EXAM.1219.00001.0002b_00003	NA	| NA | NA |  ID=2_1;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.538 | NA
+ 428 	 1837 	D	CDS	EXAM.1219.00001.0002i_00004	NA	| NA | NA |  ID=2_2;partial=00;start_type=ATG;rbs_motif=GGA/GAG/AGG;rbs_spacer=5-10bp;gc_cont=0.512 | NA
+ 1869 	 2642 	D	CDS	EXAM.1219.00001.0002i_00005	NA	| NA | NA |  ID=2_3;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.531 | NA
+ 2709 	 3443 	D	CDS	EXAM.1219.00001.0002i_00006	NA	| NA | NA |  ID=2_4;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.547 | NA
+ 3427 	 4254 	D	CDS	EXAM.1219.00001.0002i_00007	NA	| NA | NA |  ID=2_5;partial=00;start_type=ATG;rbs_motif=AGxAG;rbs_spacer=5-10bp;gc_cont=0.541 | NA
+ 4299 	 4763 	D	CDS	EXAM.1219.00001.0002i_00008	NA	| NA | NA |  ID=2_6;partial=00;start_type=ATG;rbs_motif=AGGA/GGAG/GAGG;rbs_spacer=11-12bp;gc_cont=0.596 | NA
+ 4818 	 5078 	D	CDS	EXAM.1219.00001.0002i_00009	NA	| NA | NA |  ID=2_7;partial=00;start_type=ATG;rbs_motif=GGA/GAG/AGG;rbs_spacer=5-10bp;gc_cont=0.487 | NA
+ 5117 	 5698 	D	CDS	EXAM.1219.00001.0002i_00010	NA	| NA | NA |  ID=2_8;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.546 | NA
+ 5717 	 7024 	D	CDS	EXAM.1219.00001.0002b_00011	NA	| NA | NA |  ID=2_9;partial=00;start_type=ATG;rbs_motif=None;rbs_spacer=None;gc_cont=0.524 | NA

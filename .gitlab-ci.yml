@@ -7,6 +7,7 @@ stages:
   - coverage
   - doc
   - deploy
+  - github
 
 
 build-from-ubuntu:
@@ -73,8 +74,21 @@ unit-test-ubuntu18.04:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
+    - mash --version
+    - ls PanACoTA/annotate_module
   script:
-    - py.test test/test_unit/test_prepare/test_filter.py::test_sketch_all -sv -x
+    - py.test test/test_unit/test_utils.py -vx
+    - py.test test/test_unit/test_utils-pan.py -vx
+    - py.test test/test_unit/test_prepare -v -x
+    # - py.test test/test_unit/test_annotate/test_genome_func.py -v -x
+    # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
+    # - py.test test/test_unit/test_pangenome -vx
+    # - py.test test/test_unit/test_pangenome/test_protseqfunc.py -vx
+    # - py.test test/test_unit/test_pangenome/test_mmseq_func.py -vx
+    - py.test test/test_unit/test_corepers -vx
+    - py.test test/test_unit/test_align/test_getseqs.py -vx
+    - py.test test/test_unit/test_align/test_alignment.py -xv
+    - py.test test/test_unit/test_tree -xv
     - mv .coverage .coverage-unit
   artifacts:
     paths:
@@ -100,25 +114,25 @@ unit-test-ubuntu18.04:
 #     expire_in: 1 hour
 
 
-coverage:
-  stage: coverage
-  except:
-    - docker
-    - helpers
-    - install
-  dependencies:
-    - unit-test-ubuntu18.04
-    # - func-test-ubuntu18.04
-  before_script:
-    - pip3 install -r requirements-dev.txt
-  script:
-    # - coverage combine .coverage-unit .coverage-functional
-    - coverage report
-    - coverage html
-  artifacts:
-    paths:
-      - htmlcov
-    expire_in: 1 hour
+# coverage:
+#   stage: coverage
+#   except:
+#     - docker
+#     - helpers
+#     - install
+#   dependencies:
+#     - unit-test-ubuntu18.04
+#     # - func-test-ubuntu18.04
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#   script:
+#     # - coverage combine .coverage-unit .coverage-functional
+#     - coverage report
+#     - coverage html
+#   artifacts:
+#     paths:
+#       - htmlcov
+#     expire_in: 1 hour
 
 
 sphinx-doc:
@@ -138,24 +152,24 @@ sphinx-doc:
     expire_in: 1 hour
 
 
-pages:
-  stage: deploy
-  only:
-    - doc
-    - master
-  dependencies:
-    - coverage
-    - sphinx-doc
-  script:
-    - mkdir -p public/htmlcov
-    - mv htmlcov public
-    - mkdir -p public/html-doc
-    - mv doc/build/html html-doc
-    - mv html-doc public
-  artifacts:
-    paths:
-      - public
-    expire_in: 1 hour
-  only:
-    - master
-    - doc
+# pages:
+#   stage: deploy
+#   only:
+#     - doc
+#     - master
+#   dependencies:
+#     - coverage
+#     - sphinx-doc
+#   script:
+#     - mkdir -p public/htmlcov
+#     - mv htmlcov public
+#     - mkdir -p public/html-doc
+#     - mv doc/build/html html-doc
+#     - mv html-doc public
+#   artifacts:
+#     paths:
+#       - public
+#     expire_in: 1 hour
+#   only:
+#     - master
+#     - doc

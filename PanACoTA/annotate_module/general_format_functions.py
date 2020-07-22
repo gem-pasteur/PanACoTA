@@ -165,7 +165,6 @@ def handle_genome(args):
         format_one_genome = fprodigal.format_one_genome
     else:
         format_one_genome = fprokka.format_one_genome
-
     # Set logger for this process
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -176,7 +175,7 @@ def handle_genome(args):
     logger = logging.getLogger('format.handle_genome')
     # Handle genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
-                                  prot_dir, gene_dir, rep_dir, gff_dir, logger)
+                                  prot_dir, gene_dir, rep_dir, gff_dir)
     return ok_format, genome
 
 
@@ -267,6 +266,13 @@ def get_contig_name(genome, cont_num):
     """
     From a genome name and a contig number, write the header corresponding to this contig
     (for 'Replicons' files)
+
+    Parameters
+    ----------
+    genome : str
+        genome name
+    cont_num : int
+        contig number
     """
     return ">{}.{}".format(genome, str(cont_num).zfill(4))
 

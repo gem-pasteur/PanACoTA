@@ -19,7 +19,9 @@ import multiprocessing
 import progressbar
 import threading
 
-from genomeAPCAT import utils
+from PanACoTA import utils
+
+main_logger = logging.getLogger("align.alignment")
 
 
 def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
@@ -51,7 +53,6 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
     bool
         True if everything went well, False if there was a problem in at least 1 family.
     """
-    main_logger = logging.getLogger("align.alignment")
     main_logger.info(("Starting alignment of all families: protein alignment, "
                       "back-translation to nucleotides, and add missing genomes in the family"))
     nbfam = len(all_fams)
@@ -64,45 +65,98 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
                    ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfam,
                                       term_width=100).start()
-    pool = multiprocessing.Pool(threads)
+    final = []
+    if threads == 1:
+        update_bar = 1
+        for num_fam in all_fams:
+            f = handle_family_1thread((prefix, num_fam, ngenomes))
+            final.append(f)
+            bar.update(update_bar)
+            update_bar+=1
 
-    # Create a Queue to put logs from processes, and handle them after from a single thread
-    m = multiprocessing.Manager()
-    q = m.Queue()
-    # arguments : (gpath, cores_prokka, name, force, nbcont, q) for each genome
-    arguments = [(prefix, num_fam, ngenomes, q) for num_fam in all_fams]
-    try:
-        final = pool.map_async(handle_family, arguments, chunksize=1)
-        pool.close()
-        # Listen for logs in processes
-        lp = threading.Thread(target=utils.logger_thread, args=(q,))
-        lp.start()
-        if not quiet:
-            while True:
-                if final.ready():
-                    break
-                remaining = final._number_left
-                bar.update(nbfam - remaining)
-            bar.finish()
-        pool.join()
-        q.put(None)
-        lp.join()
-        final = final.get()
-    # If an error occurs (or user kills with keybord), terminate pool and exit
-    except Exception as excp:  # pragma: no cover
-        pool.terminate()
-        main_logger.error(excp)
-        sys.exit(1)
-    # We re-aligned at least one family -> remove concatenated files and groupby
+    else:
+        pool = multiprocessing.Pool(threads)
+
+        # Create a Queue to put logs from processes, and handle them after from a single thread
+        m = multiprocessing.Manager()
+        q = m.Queue()
+        # arguments : (gpath, cores_prokka, name, force, nbcont, q) for each genome
+        arguments = [(prefix, num_fam, ngenomes, q) for num_fam in all_fams]
+        try:
+            final = pool.map_async(handle_family, arguments, chunksize=1)
+            pool.close()
+            # Listen for logs in processes
+            lp = threading.Thread(target=utils.logger_thread, args=(q,))
+            lp.start()
+            if not quiet:
+                while True:
+                    if final.ready():
+                        break
+                    remaining = final._number_left
+                    bar.update(nbfam - remaining)
+                bar.finish()
+            pool.join()
+            q.put(None)
+            lp.join()
+            final = final.get()
+        # If an error occurs (or user kills with keybord), terminate pool and exit
+        except Exception as excp:  # pragma: no cover
+            pool.terminate()
+            main_logger.error(excp)
+            sys.exit(1)
+        # We re-aligned at least one family -> remove concatenated files and groupby
     if set(final) != {"OK"}:
         aldir = os.path.split(prefix)[0]
-        concat = os.path.join(aldir, "{}-complete.cat.aln".format(dname))
+        concat = os.path.join(aldir, f"{dname}-complete.cat.aln")
         outdir = os.path.split(aldir)[0]
         treedir = os.path.join(outdir, "Phylo-" + dname)
         grpfile = os.path.join(treedir, dname + ".grp.aln")
         utils.remove(concat)
         utils.remove(grpfile)
     return False not in final
+
+
+def handle_family_1thread(args):
+    """
+    For the given family:
+
+    - align its proteins with mafft
+    - back-translate to nucleotides
+    - add missing genomes
+
+    Parameters
+    ----------
+    args : ()
+         (prefix, num_fam, ngenomes, q) with:
+
+         - prefix: path to ``aldir/<name of dataset>``
+         - num_fam: the current family number
+         - ngenomes: the total number of genomes in dataset
+
+    Returns
+    -------
+    bool
+        - "OK" if the files were not re-created, and have the expected format. This is used by
+          ``align_all_families`` function, to know if something was regenerated, or if everything
+          already existed with the expected format. If something was redone and concat/group files
+          exist, it removes them.
+        - False if any problem (extractions, alignment, btr, add missing genomes...)
+        - True if just generated all files, and everything is ok
+    """
+    prefix, num_fam, ngenomes = args
+    logger = logging.getLogger('align.align_family')
+    # Get file names
+    prt_file = "{}-current.{}.prt".format(prefix, num_fam)
+    gen_file = "{}-current.{}.gen".format(prefix, num_fam)
+    miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
+    mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
+    btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
+    status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
+                               num_fam, ngenomes, logger)
+    # If it returned true, Add missing genomes
+    if status1:
+        return add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+    return False
 
 
 def handle_family(args):
@@ -141,18 +195,7 @@ def handle_family(args):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('align.align_family')
-    # Get file names
-    prt_file = "{}-current.{}.prt".format(prefix, num_fam)
-    gen_file = "{}-current.{}.gen".format(prefix, num_fam)
-    miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
-    mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
-    btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
-    status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
-                               num_fam, ngenomes, logger)
-    # If it returned true, Add missing genomes
-    if status1:
-        return add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
-    return False
+    return handle_family_1thread((prefix, num_fam, ngenomes))
 
 
 def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger):
@@ -416,14 +459,15 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
         False otherwise
     """
     logger.log(utils.detail_lvl(), "Aligning family {}".format(num_fam))
-    cmd = "mafft --quiet --retree 2 --maxiterate 0 {}".format(prt_file)
+    cmd = "mafft --auto {}".format(prt_file)
     error = "Problem while trying to align fam {}".format(num_fam)
     stdout = open(mafft_file, "w")
-    ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
+    stderr = open(mafft_file + ".log", "w")
+    ret = utils.run_cmd(cmd, error, stdout=stdout, stderr=stderr, logger=logger)
+    logger.log(utils.detail_lvl(), cmd)
     stdout.close()
     if not isinstance(ret, int):
         ret = ret.returncode
-        print("ret = ", ret)
     if ret != 0:
         os.remove(mafft_file)
         return False

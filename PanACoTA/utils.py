@@ -32,7 +32,7 @@ except:
         import pickle
 
 
-def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False):
+def init_logger(logfile_base, level, name, log_details=False, verbose=0, quiet=False):
     """
     Create logger and its handlers, and set them to the given level
 
@@ -56,6 +56,10 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         minimum level that must be considered.
     name : str or None
         if we need to name the logger (used for tests)
+    log_details : bool
+        if True, force creation of .log.details file. Otherwise, just create
+        it if needed according to level
+
     verbose : int
         be more verbose:
         default (0): info in stdout, error and more in stderr ;
@@ -102,11 +106,11 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     logging.Logger.details = details
 
     # set level of logger
-    logger.setLevel(level)
+    logger.setLevel(logging.DEBUG)
 
-    # create formatter for log messages: "timestamp :: level :: message"
-    # :: %(name)s  to add the logger name
-    # my_format = '[%(asctime)s] :: from %(name)s %(levelname)s :: %(message)s'
+    # create formatter for log messages:
+    # "timestamp :: level :: message"
+    # (add :: %(name)s  to add the logger name)
     my_format = '[%(asctime)s] :: %(levelname)s :: %(message)s'
     formatter_file = logging.Formatter(my_format, '%Y-%m-%d %H:%M:%S')
     my_format_stream = '%(log_color)s  * [%(asctime)s] : %(levelname)s %(reset)s %(message)s'
@@ -138,23 +142,28 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
     errfile_handler.setFormatter(formatter_file)  # add formatter
     logger.addHandler(errfile_handler)  # add handler to logger
 
+
     # Create handler 3: detailsfile. Write everything to this file, except debug
     # Create it only if:
     # - level is <= info (for modules which have no details, so detailsfile is the same as
     # logfile)
     # - details==True force creation of detailsfile
     # - quiet==True nothing in stdout, put all log files so that user can check
-    if level < logging.INFO or quiet or details:
+    if level < logging.INFO or quiet or log_details:
         detfile_handler = RotatingFileHandler(detailfile, 'w', 10000000, 5)
         detfile_handler.setLevel(logging.DETAIL)
         detfile_handler.setFormatter(formatter_file)  # add formatter
         logger.addHandler(detfile_handler)  # add handler to logger
 
-    # Create handler 3: debug file. Write everything
+    # Formats for detailed log files
+    my_format_debug = '[%(asctime)s] :: %(levelname)s (from %(name)s logger) :: %(message)s'
+    formatter_file_debug = logging.Formatter(my_format_debug, '%Y-%m-%d %H:%M:%S')
+
+    # Create handler 4: debug file. Write everything
     if level < logging.DETAIL:
         debugfile_handler = RotatingFileHandler(debugfile, 'w', 10000000, 5)
         debugfile_handler.setLevel(logging.DEBUG)
-        debugfile_handler.setFormatter(formatter_file)  # add formatter
+        debugfile_handler.setFormatter(formatter_file_debug)  # add formatter
         logger.addHandler(debugfile_handler)  # add handler to logger
 
     # If not quiet, add handlers for stdout and stderr
@@ -168,9 +177,6 @@ def init_logger(logfile_base, level, name, details=False, verbose=0, quiet=False
         # if not verbose (level 0 or 1): only put info in stdout (remove details and debug)
         if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DETAIL))
-            stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
-        # if verbose (level 2): put info and details in stdout: only remove debug
-        if verbose < 2:
             stream_handler.addFilter(NoLevelFilter(logging.DEBUG))
         stream_handler.setFormatter(formatter_stream)
         logger.addHandler(stream_handler)  # add handler to logger
@@ -303,7 +309,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         call.wait()
         retcode = call.returncode
     except OSError:
-        logger.error(error + ": " + "{} does not exist".format(cmd))
+        logger.error(f"error: {cmd} does not exist")
         if eof:
             sys.exit(1)
         else:
@@ -315,7 +321,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
     return call
 
 
-def plot_distr(values, limit, title, text):
+def plot_distr(values, limit, title, text, logger):
     """
     Plot histogram of given 'values', and add a vertical line corresponding to the chosen
     'limit' and return the mpl figure
@@ -330,6 +336,8 @@ def plot_distr(values, limit, title, text):
         Title to give to plot
     text : str
         text to write near the vertical line representing the limit
+    logger : logging.Logger
+        logger object to write log information
 
     Returns
     -------
@@ -384,21 +392,21 @@ def write_warning_skipped(skipped, do_format=False, prodigal_only=False, logfile
     logger = logging.getLogger("utils")
     list_to_write = "\n".join(["\t- " + genome for genome in skipped])
     if not do_format:
-        logger.info("WARNING: Some genomes could not be annotated. See {0}".format(logfile))
-        logger.warning("{0} had problems while annotating some genomes, or "
+        logger.info(f"WARNING: Some genomes could not be annotated. See {soft}")
+        logger.warning(f"{soft} had problems while annotating some genomes, or "
                     "did not find any gene. Hence, they are not formatted, and absent "
                     "from your output database. Please look at the "
                     "current error log "
                     "(<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err) to get more "
                     "information on the problems. Here are those "
-                    "genomes:\n {1}".format(soft, list_to_write))
+                    f"genomes:\n{list_to_write}")
     else:
         logger.info(f"WARNING: Some genomes could not be formatted. See {logfile}")
-        logger.warning(("Some genomes were annotated by {0}, but could not be formatted, "
+        logger.warning((f"Some genomes were annotated by {soft}, but could not be formatted, "
                         "and are hence absent from your output database. Please look at "
                         "'<output_directory>/PanACoTA-annotate_list_genomes[-date].log.err' and "
                         ".details files to get more information about why they could not be "
-                        "formatted.\n{1}").format(soft, list_to_write))
+                        f"formatted.\n{list_to_write}"))
 
 
 def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
@@ -434,12 +442,11 @@ def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
     nb_disc = len(genomes) - len(kept_genomes)
     # Log number of genomes discarded.
     if not qc and nb_disc < 2:
-        logger.info("{} genome was discarded.".format(nb_disc))
+        logger.info(f"{nb_disc} genome was discarded.")
     elif not qc:
-        logger.info("{} genomes were discarded.".format(nb_disc))
+        logger.info(f"{nb_disc} genomes were discarded.")
     # Get input list file name (without path)
     _, name_lst = os.path.split(list_file)
-
     # if not QC, write discarded genomes to a file "discarded-[list_file].lst"
     if not qc:
         outdisc = os.path.join(res_path,
@@ -448,7 +455,7 @@ def write_genomes_info(genomes, kept_genomes, list_file, res_path, qc=False):
     # if QC, there is no 'discarded genome', just write information on all analyzed genomes
     else:
         outdisc = os.path.join(res_path,
-                               "info-genomes-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
+                               "ALL-GENOMES-info-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
         logger.info("Writing information on genomes in {}".format(outdisc))
     with open(outdisc, "w") as outdf:
         outdf.write("\t".join(["orig_name", "to_annotate", "gsize", "nb_conts", "L90"]) + "\n")
@@ -476,16 +483,13 @@ def write_lstinfo(list_file, genomes, outdir):
 
     """
     _, name_lst = os.path.split(list_file)
-
     outlst = os.path.join(outdir, "LSTINFO-" + ".".join(name_lst.split(".")[:-1]) + ".lst")
     with open(outlst, "w") as outf:
         outf.write("\t".join(["gembase_name", "orig_name", "to_annotate", "gsize",
                               "nb_conts", "L90"]) + "\n")
-        for genome, values in sorted(genomes.items(), key=sort_genomes):
+        for genome, values in sorted(genomes.items(), key=sort_genomes_byname_l90_nbcont):
             gembase, _, to_annote, gsize, nbcont, l90 = [str(x) for x in values]
-            to_annote_file = os.path.basename(to_annote)
-            outf.write("\t".join([gembase, genome, to_annote_file, gsize, nbcont, l90]) + "\n")
-
+            outf.write("\t".join([gembase, genome, to_annote, gsize, nbcont, l90]) + "\n")
 
 def sort_genomes_by_name(x):
     """
@@ -505,6 +509,7 @@ def sort_genomes_by_name(x):
         variable to take into account for sorting. If format is ESCO.1512.00001 return\
         ESCO and 00001. Otherwise, just return x itself (sort by alphabetical order)
     """
+    # get gembase name
     if isinstance(x, tuple):
         x = x[1][0]
 
@@ -526,7 +531,7 @@ def sort_genomes_byname_l90_nbcont(x):
     Parameters
     ----------
     x : [[]]
-        [genome_name, [species.date, path, gsize, nbcont, L90]]
+        [genome_name, [species.date, path, path_to_seq, gsize, nbcont, L90]]
 
     Returns
     -------
@@ -660,6 +665,7 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                                         "ignored when concatenating {}").format(file, genomes_inf))
                 # If there are files to concatenate, concatenate them
                 if to_concat:
+                    print(to_concat)
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
@@ -718,11 +724,11 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     logger.info(f"Reading given information on your genomes in {list_file}")
     genomes = {}
     if name and date:
-        spegenus = "{}.{}".format(name, date)
+        spegenus = f"{name}.{date}"
     column_order = {} # Put the number of column corresponding to each field
     if not os.path.isfile(list_file):
         logger.error(f"ERROR: The info file {list_file} that you gave does not exist. "
-                      "Please provide the  right path/name for this file.\nEnding program.")
+                      "Please provide the right path/name for this file.\nEnding program.")
         sys.exit(1)
     message_no_header = (f"ERROR: It seems that your info file {list_file} does not have a "
                           "header, or this header does not have, at least, the required "
@@ -731,6 +737,9 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     with open(list_file, "r") as lff:
         for line in lff:
             line = line.strip()
+            # Ignore empty lines
+            if line == "":
+                continue
             # Header line: Just get column number corresponding to each field
             if "to_annotate" in line:
                 column_headers = line.split("\t")
@@ -740,7 +749,6 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 if len(found) != 4:
                     logger.error(message_no_header)
                     sys.exit(1)
-                continue
             # If no header found, error message and exit
             if not column_order:
                 logger.error(message_no_header)
@@ -753,18 +761,20 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 infos = line.strip().split()
                 # Get genome name with its path to db_dir
                 gpath = infos[column_order["to_annotate"]]
+                gfile = os.path.basename(gpath)
+                gname = os.path.splitext(gfile)[0]
                 gsize = int(infos[column_order["gsize"]])
                 gl90 = int(infos[column_order["L90"]])
                 gcont = int(infos[column_order["nb_conts"]])
             # If invalid values, warning message and ignore genome
             except ValueError:
                 logger.warning(f"For genome {gname}, at least one of your columns 'gsize', "
-                                "'nb_conts' or 'L90' contains a non numeric character. "
+                                "'nb_conts' or 'L90' contains a non numeric value. "
                                 "This genome will be ignored.")
                 continue
             # If no value for at least 1 field, warning message and ignore genome
             except IndexError:
-                logger.error("ERROR: Check that all fields of {list_file} are filled in each "
+                logger.error(f"ERROR: Check that all fields of {list_file} are filled in each "
                              "line (can be 'NA')")
                 sys.exit(1)
             # Could we find genome file?
@@ -781,7 +791,11 @@ def read_genomes_info(list_file, name, date=None, logger=None):
                 gfile = os.path.basename(gpath)
                 gname = os.path.splitext(gfile)[0]
                 genomes[gfile] = [gname, gpath, gpath, gsize, gcont, gl90]
-    logger.info(("Found {} genomes in total").format(len(genomes)))
+    if len(genomes) > 0:
+        logger.info(("Found {} genomes in total").format(len(genomes)))
+    else:
+        logger.error(f"no genome listed in {list_file} were found.")
+        sys.exit(1)
     return genomes
 
 
@@ -893,7 +907,7 @@ def cat(list_files, output, title=None):
     """
     Equivalent of 'cat' unix command.
 
-    Concatenate all files in 'list_files' and save result in 'output'
+    Concatenate all files in 'list_files' and save result in 'output' folder.
     Concat using shutil.copyfileobj, in order to copy by chunks, to
     avoid memory problems if files are big.
 
@@ -904,7 +918,7 @@ def cat(list_files, output, title=None):
     output : str
         output filename, where all concatenated files will be written
     title : str or None
-        if you want to show a progressbar while concatenating files, add a title for this\
+        if you want to show a progressbar while concatenating files, add a title for this
         progressbar here. If no title, nothing will be shown during concatenation.
 
     """
@@ -913,7 +927,7 @@ def cat(list_files, output, title=None):
     if title:
         nbfiles = len(list_files)
         widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
-                   ' ', progressbar.Counter(), "/{}".format(nbfiles), ' (',
+                   ' ', progressbar.Counter(), f"/{nbfiles}" ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer()]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
         curnum = 1
@@ -1084,9 +1098,9 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     Returns
     -------
     tuple
-        - List of all contigs with their original and new name:
+        - List of all contigs with their original and new name: (list of str)
         ["contig1'\t'orig_name1", "contig2'\t'orig_name2" ...]
-        - List of all contigs with their size:
+        - List of all contigs with their size: (list of str)
         ["contig1'\t'size1", "contig2'\t'size2" ...]
     """
     # Initialize variables
@@ -1095,9 +1109,9 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     contig_num = 1
     # contig size
     cont_size = 0
-    # List of contigs [<name>\t<orig_name>]
+    # List of contigs (str) [<name>\t<orig_name>]
     contigs = []
-    # List of contigs with their sizes [<name>\t<size>]
+    # List of contigs (str) with their sizes [<name>\t<size>]
     sizes = []
     # Name of previous contig (to put to contigs, as we need to wait for the next
     # contig to know the size of the previous one)
@@ -1119,13 +1133,14 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-                    sizes.append(cont)
+                    sizes.append(cont.strip())
                     cor = "\t".join([prev_cont, prev_orig_name])
                     contigs.append(cor)
                     grf.write(cont)
                     grf.write(seq)
+
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                prev_orig_name = line
+                prev_orig_name = line.strip()
                 contig_num += 1
                 cont_size = 0
                 seq = ""
@@ -1135,7 +1150,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 cont_size += len(line.strip())
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-        sizes.append(cont)
+        sizes.append(cont.strip())
         cor = "\t".join([prev_cont, prev_orig_name])
         contigs.append(cor)
         grf.write(cont)
@@ -1217,7 +1232,7 @@ def write_list(list_names, fileout):
     """
     with open(fileout, "w") as fo:
         for genome in list_names:
-            fo.write(genome + "\n")
+            fo.write(str(genome) + "\n")
 
 
 def list_to_str(list, sep='\t'):

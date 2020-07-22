@@ -14,7 +14,7 @@ import sys
 import logging
 import progressbar
 import multiprocessing
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("align.post")
 
@@ -233,7 +233,7 @@ def write_groups(outfile, sequences):
     """
     logger.details("Writing alignments per genome")
     with open(outfile, "w") as outf:
-        for genome in sorted(sequences, key=utils.sort_genomes):
+        for genome in sorted(sequences, key=utils.sort_genomes_by_name):
             # write header for genome
             outf.write(">" + genome + "\n")
             # Write all sequences
@@ -261,6 +261,6 @@ def get_genome(header, all_genomes):
     for genome in all_genomes:
         if genome in header:
             return genome
-    logger.error(("Protein {} does not correspond to any genome name "
-                  "given... {}").format(header, all_genomes))
+    logger.error((f"Protein {header} does not correspond to any genome name "
+                  f"given... {all_genomes}"))
     return None

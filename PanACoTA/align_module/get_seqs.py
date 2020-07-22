@@ -6,7 +6,7 @@ import os
 import logging
 import progressbar
 
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("align.extract")
 
@@ -43,7 +43,6 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
                        "family, remove its prt and gen extraction files. If you want to "
                        "re-extract all families, use option -F (or --force).")
         return
-
     logger.info("Extracting proteins and genes from all genomes")
     nbgen = len(all_genomes)
     bar = None
@@ -145,7 +144,6 @@ def get_genome_seqs(fasta, tabfile, files_todo, outfile=None):
     """
     with open(tabfile, "r") as tabf:
         to_extract = get_names_to_extract(tabf, outfile)
-
     if outfile:
         if os.path.isfile(outfile):
             logger.warning("Sequences are already extracted in {}. This will "
@@ -205,7 +203,7 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     ----------
     to_extract : dict or []
         {sequence_to_extract: file_to_which_it_will_be_extracted} or list of sequences to
-        extract (if an output filename is also given in 'outf')
+        extract, all in a same outfile (name must be given in 'outf')
     fasf : _io.TextIO
         open file containing sequences in multi-fasta format
     files_todo : list or None
@@ -217,32 +215,44 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
         list, will extract all sequences of this list). Otherwise, if None,
         each sequence will be extracted to its corresponding value in 'to_extract'.
     """
+
+    # Create optimized index for requests
     if files_todo is None:
         files_todo = []
-    out_given = (outf is not None)
-    extract = False
+    files_todo = frozenset(files_todo)
+    if type(to_extract) == list:
+        to_extract = frozenset(to_extract)
+
+    # State machine variables
+    previous_fp = None
+    
     for line in fasf:
-        if line.startswith(">"):
-            seq = line.split(">")[1].split()[0]
+        if line[0] == '>':
+            # Close previous file if needed
+            if outf is None and previous_fp is not None:
+                previous_fp.close()
+            previous_fp = None
+
+            # Extract sequence name
+            last_char = line.find(' ')
+            if last_char == -1:
+                last_char = len(line)
+            seq = line[1:last_char].strip()
+
             # Seq is part of sequences to extract
             if seq in to_extract:
-                # if out_given, outf is already open. Otherwise, open it only if must be written
-                if not out_given:
-                    # get corresponding outfile
+                # Open the right file
+                previous_fp = outf
+                if previous_fp is None:
                     out = to_extract[seq]
                     if out in files_todo:
-                        outf = open(out, "a")
+                        previous_fp = open(out, "a")
                     else:
-                        outf = None
-                if outf:
-                    outf.write(line)
-                    extract = True
-                else:
-                    extract = False
-            else:
-                if not out_given and outf:
-                    outf.close()
-                extract = False
-        else:
-            if extract:
-                outf.write(line)
+                        print(f"Sequence {seq} not written because no output file specified", file=sys.stderr)
+
+        # Write the line content if the file pointer is opened
+        if previous_fp is not None:
+            previous_fp.write(line)
+
+    if outf is None and previous_fp is not None:
+        previous_fp.close()

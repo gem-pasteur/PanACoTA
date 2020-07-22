@@ -22,11 +22,12 @@ def main_from_parse(args):
     args : argparse.Namespace
         result of argparse parsing of all arguments in command line
     """
-    main(args.corepers, args.list_genomes, args.dataset_name, args.dbpath, args.outdir,
-         args.threads, args.force, args.verbose, args.quiet)
+    cmd = "PanACoTA " + ' '.join(args.argv)
+    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath, 
+         args.outdir, args.threads, args.force, args.verbose, args.quiet)
 
 
-def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
+def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
     """
     Align given core genome families
 
@@ -65,10 +66,11 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
     from PanACoTA.align_module import get_seqs as gseqs
     from PanACoTA.align_module import alignment as ali
     from PanACoTA.align_module import post_align as post
+    from PanACoTA import __version__ as version
 
     # test if prokka is installed and in the path
     if not utils.check_installed("mafft"):  # pragma: no cover
-        print("fftns (from mafft) is not installed. 'PanACoTA align' cannot run.")
+        print("mafft is not installed. 'PanACoTA align' cannot run.")
         sys.exit(1)
 
     if force and os.path.isdir(outdir):
@@ -87,19 +89,26 @@ def main(corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=
         level = logging.DEBUG
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-align_" + dname)
-    level = logging.DEBUG
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
-    logger = logging.getLogger()
+    utils.init_logger(logfile_base, level, 'align', log_details=True, verbose=verbose, quiet=quiet)
+    logger = logging.getLogger("align")
+    logger.info(f'PanACoTA version {version}')
+    logger.info("Command used\n \t > " + cmd)
+
     all_genomes, aldir, listdir, fam_nums = p2g.get_per_genome(corepers, list_genomes,
                                                                dname, outdir)
+    # generate required files
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
     prefix = os.path.join(aldir, dname)
+    
+    # Align all families
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), dname, quiet, threads)
     if not status:
         logger.error(("At least one alignment did not run well. See detailed log file for "
                       "more information. Program will stop here, alignments won't be "
                       "grouped by genome."))
         sys.exit(1)
+
+    # post-process alignment files
     post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
     logger.info("END")
 

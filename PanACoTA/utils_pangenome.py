@@ -9,12 +9,12 @@ April 2017
 """
 import logging
 import os
-from genomeAPCAT import utils
+from PanACoTA import utils
 
 logger = logging.getLogger("utils.pan")
 
 
-def read_pangenome(pangenome, families=None):
+def read_pangenome(pangenome, logger, families=None):
     """
     Read pangenome information
 
@@ -39,7 +39,7 @@ def read_pangenome(pangenome, families=None):
         - all_strains: list of all genome names
     """
     if families:
-        fams_by_strain, all_strains = get_fams_info(families)
+        fams_by_strain, all_strains = get_fams_info(families, logger)
         if not os.path.isfile(pangenome + ".bin"):
             logger.details("Saving all information to a binary file for later use")
             utils.save_bin([fams_by_strain, families, all_strains], pangenome + ".bin")
@@ -47,13 +47,13 @@ def read_pangenome(pangenome, families=None):
         logger.info("Retrieving info from binary file")
         fams_by_strain, families, all_strains = utils.load_bin(pangenome + ".bin")
     else:
-        fams_by_strain, families, all_strains = read_pan_file(pangenome)
+        fams_by_strain, families, all_strains = read_pan_file(pangenome, logger)
         logger.info("Saving all information to a binary file for later use")
         utils.save_bin([fams_by_strain, families, all_strains], pangenome + ".bin")
     return fams_by_strain, families, all_strains
 
 
-def get_fams_info(families):
+def get_fams_info(families, logger):
     """
     From all families as list of members, get more information:
 
@@ -62,7 +62,10 @@ def get_fams_info(families):
 
     Parameters
     ----------
-    families : {num: [members]}
+    families : dict
+        {num: [members]}
+    logger : logging.Logger
+        logger object to write log information
 
     Returns
     -------
@@ -74,16 +77,16 @@ def get_fams_info(families):
     """
     logger.info("Retrieving information from pan families")
     fams_by_strain = {}
-    all_strains = []
+    all_strains = set()
     for num, fam in families.items():
         fams_by_strain[num] = {}
         for gene in fam:
             read_gene(gene, num, fams_by_strain, all_strains)
-    sort_all_strains = sorted(all_strains, key=utils.sort_genomes)
+    sort_all_strains = sorted(list(all_strains), key=utils.sort_genomes_by_name)
     return fams_by_strain, sort_all_strains
 
 
-def read_pan_file(filein):
+def read_pan_file(filein, logger):
     """
     Read PanGenome file in 'filein', and put it into Python objects
 
@@ -91,6 +94,7 @@ def read_pan_file(filein):
     ----------
     filein : str
         path to pangenome file
+    logger : 
 
     Returns
     -------
@@ -104,7 +108,7 @@ def read_pan_file(filein):
     logger.info("Reading and getting information from pangenome file")
     fams_by_strain = {}
     families = {}
-    all_strains = []
+    all_strains = set()
     nfam = 0
     with open(filein, 'r') as coref:
         for line in coref:
@@ -116,7 +120,7 @@ def read_pan_file(filein):
                 read_gene(gene, fam_num, fams_by_strain, all_strains)
             families[fam_num] = genes_ok
             nfam += 1
-    sort_all_strains = sorted(all_strains, key=utils.sort_genomes)
+    sort_all_strains = sorted(list(all_strains), key=utils.sort_genomes_by_name)
     return fams_by_strain, families, sort_all_strains
 
 
@@ -132,8 +136,8 @@ def read_gene(gene, num, fams_by_strain, all_strains):
         num of family from which the given gene is
     fams_by_strain : dict
         {fam_num: {strain: [members]}}
-    all_strains : list
-        list of all strains
+    all_strains : set
+        set of all strains
 
     """
     # if format is ESCO.1512.00001.i001_12313 genome name is ESCO.1512.00001
@@ -147,4 +151,4 @@ def read_gene(gene, num, fams_by_strain, all_strains):
     else:
         fams_by_strain[num][strain] = [gene]
     if strain not in all_strains:
-        all_strains.append(strain)
+        all_strains.add(strain)

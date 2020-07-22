@@ -1,0 +1,14 @@
+locus_tag	ftype	length_bp	gene	EC_number	COG	product
+AMHDIIJN_00001	CDS	774	hisP		COG4598	Histidine transport ATP-binding protein HisP
+AMHDIIJN_00002	CDS	1404				hypothetical protein
+AMHDIIJN_00003	CDS	225	pspB			Phage shock protein B
+AMHDIIJN_00004	CDS	381	hpcD	5.3.3.10		5-carboxymethyl-2-hydroxymuconate Delta-isomerase
+AMHDIIJN_00005	CDS	834	amiD	3.5.1.28	COG3023	N-acetylmuramoyl-L-alanine amidase AmiD
+AMHDIIJN_00006	CDS	1668	glnS	6.1.1.18	COG0008	Glutamine--tRNA ligase
+AMHDIIJN_00007	CDS	768	trmD	2.1.1.228	COG0336	tRNA (guanine-N(1)-)-methyltransferase
+AMHDIIJN_00008	CDS	261				hypothetical protein
+AMHDIIJN_00009	CDS	582				hypothetical protein
+AMHDIIJN_00010	CDS	369				hypothetical protein
+AMHDIIJN_00011	CDS	1308	dctM		COG1593	C4-dicarboxylate TRAP transporter large permease protein DctM
+AMHDIIJN_00012	CDS	465				hypothetical protein
+AMHDIIJN_00013	CDS	1014	xerC			Tyrosine recombinase XerC
