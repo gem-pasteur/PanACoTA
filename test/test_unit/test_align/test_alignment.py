@@ -36,14 +36,10 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    # utils.init_logger(LOGFILE_BASE, LOG_LEVEL, 'test_getseq', verbose=1)
     os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    # for f in LOGFILES:
-    #     if os.path.exists(f):
-    #         os.remove(f)
     shutil.rmtree(GENEPATH)
     print("teardown")
 
