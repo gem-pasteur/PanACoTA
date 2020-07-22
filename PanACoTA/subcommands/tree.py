@@ -188,7 +188,7 @@ def build_parser(parser):
                                 "'JC69' (or 'J'), 'K2P' (or 'K'), 'F81' (or '1'), "
                                 "'F84' (or '4'), 'TN93' (or 'T'), 'LogDet' (or 'L').\n"
                                 "For IQtree, choices are HKY, JC, F81, K2P, K3P, K81uf,"
-                                " TN/TrN, TNef, TIM, TIMef, TVM, TVMef, SYM, GTR."))
+                                " TNef, TIM, TIMef, TVM, TVMef, SYM, GTR."))
     optional.add_argument("-B", dest="write_boot", action="store_true",
                           help=("Add this option if you want to write all bootstrap "
                                 "pseudo-trees. Only available with FastME and IQtree."))
@@ -228,7 +228,7 @@ def check_args(parser, args):
                      "JC69": "J", "K2P": "K", "F81": "1", "F84": "4",
                      "TN93": "T", "LogDet": "L"}
     models_fasttree = {"GTR": "-gtr", "JC": ""}
-    models_iqtree = set(["HKY", "JC", "F81", "K2P", "K3P", "K81uf", "TN/TrN",
+    models_iqtree = set(["HKY", "JC", "F81", "K2P", "K3P", "K81uf",
                          "TNef", "TIM", "TIMef", "TVM", "TVMef", "SYM", "GTR"])
     models_iqtree = {mod: mod for mod in models_iqtree}
 
