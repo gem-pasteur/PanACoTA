@@ -90,10 +90,11 @@ unit-test-ubuntu18.04:
     - py.test test/test_unit/test_align/test_getseqs.py -vx
     - py.test test/test_unit/test_align/test_alignment.py -xv
     - py.test test/test_unit/test_tree -xv
-    - mv .coverage .coverage-unit
+    # - mv .coverage .coverage-unit
   artifacts:
     paths:
-      - .coverage-unit
+      # - .coverage-unit
+      - .coverage
     expire_in: 1 hour
 
 
