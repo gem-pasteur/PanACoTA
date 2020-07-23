@@ -50,6 +50,7 @@
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00014
 			product	hypothetical protein
+			db_xref	12345
 >Feature test.0417.00002.0005
 >Feature test.0417.00002.0006
 >Feature test.0417.00002.0007

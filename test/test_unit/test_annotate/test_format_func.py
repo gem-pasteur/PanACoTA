@@ -9,10 +9,41 @@ import os
 import logging
 import shutil
 from io import StringIO
+import pytest
 
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as ffunc
+import test.test_unit.utilities_for_tests as tutil
 
+
+ANNOTEDIR = os.path.join("test", "data", "annotate")
+EXP_ANNOTE = os.path.join(ANNOTEDIR, "exp_files")
+GENEPATH = os.path.join(ANNOTEDIR, "generated_by_unit-tests")
+
+
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
+    """
+    Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
+    """
+    # utils.init_logger(LOGFILE_BASE, 0, 'test_fastme', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    # for f in LOGFILES:
+    #     if os.path.exists(f):
+    #         os.remove(f)
+    shutil.rmtree(GENEPATH)
+    print("teardown")
 
 # Define variables and functions used by several tests
 def my_logger():
@@ -51,21 +82,18 @@ def test_write_gene():
     strand = "C"
     start = str(154)
     end = str(656)
-    lstfile = "toto.lst"
+    lstfile = os.path.join(GENEPATH, "toto.lst")
     lstopenfile = open(lstfile, "w")
     crispres, lst_line = ffunc.write_gene(gtype, locus_num, gene_name, product, crispr_num,
                                           cont_loc, genome, cont_num, ecnum, inf2, db_xref, strand,
                                           start, end, lstopenfile)
     lstopenfile.close()
-    exp_file = os.path.join("test", "data", "annotate", "exp_files", "res_test_write_geneCDS.lst")
     assert crispres == crispr_num
-    with open(exp_file, "r") as expf, open(lstfile, "r") as lstf:
-        for line_exp, line_out in zip(expf, lstf):
-            assert line_exp == line_out
     assert lst_line == ("154\t656\tC\tCDS\tESCO.0216.00005.0015i_5621221\tabc\t| new product "
                         "| 454.12.5 | more information... dfd _ with _ pipe_characters... | "
                         "mydb_pipe")
-    os.remove(lstfile)
+    exp_file = os.path.join(EXP_ANNOTE, "res_test_write_geneCDS.lst")
+    assert tutil.compare_order_content(exp_file, lstfile)
 
 
 def test_write_crispr():
@@ -87,23 +115,18 @@ def test_write_crispr():
     strand = "D"
     start = str(154)
     end = str(656)
-    lstfile = "toto.lst"
+    lstfile = os.path.join(GENEPATH, "toto.lst")
     lstopenfile = open(lstfile, "w")
     crispres, lstline = ffunc.write_gene(gtype, locus_num, gene_name, product, crispr_num,
                                          cont_loc, genome, cont_num, ecnum, inf2, db_xref, strand,
                                          start, end, lstopenfile)
     lstopenfile.close()
-    exp_file = os.path.join("test", "data", "annotate", "exp_files",
-                            "res_test_write_geneCRISPR.lst")
+    exp_file = os.path.join(EXP_ANNOTE, "res_test_write_geneCRISPR.lst")
     assert crispres == 2
-    with open(exp_file, "r") as expf, open(lstfile, "r") as lstf:
-        for line_exp, line_out in zip(expf, lstf):
-            print(f"\n{line_out}\n{line_exp}")
-            assert line_exp == line_out
     assert lstline == ("154\t656\tD\tCRISPR\tESCO.0216.00005.0015b_CRISPR1\tcrispr\t| "
                        "crispr-array | NA | more information... dfd _ with _ pipe_characters... | "
                        "mydb_pipe")
-    os.remove(lstfile)
+    assert tutil.compare_order_content(exp_file, lstfile)
 
 
 def test_contig_name():
@@ -116,11 +139,154 @@ def test_contig_name():
     head_line = ffunc.get_contig_name(genome, cont_num)
     assert head_line == ">ESCO.1218.00005.0030"
 
-# def test_to_complete():
-#     # To show that those tests are not complete
-#     assert False
-#
-#
+
+def test_write_header_gene():
+    """
+    From a given line of lstinfo file, giving info for a gene (start, end, gene name,
+    product, EC number, more information), check that the header line of the protein and
+    gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("4416\t6068\tD\tCDS\ttest.0417.00002.0001i_00005\tyiaD\t| "
+               "putative lipoprotein YiaD | 6.3.2.- | similar to AA sequence:UniProtKB:P37665")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    outfile.close()
+    exp = (">test.0417.00002.0001i_00005 1653 yiaD | putative lipoprotein YiaD | 6.3.2.- "
+           "| similar to AA sequence:UniProtKB:P37665\n")
+    assert res == exp
+
+
+def test_write_header_gene_no_name():
+    """
+    From a given line of lstinfo file, giving info for a gene with many unknown parts (gene
+    name, product, EC number and more information are NAs), check that the header line of the
+    protein and gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("4632\t5000\tC\tCDS\ttest.0417.00002.0002b_00011\tNA\t| hypothetical protein "
+               "| NA | NA")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    exp = ">test.0417.00002.0002b_00011 369 NA | hypothetical protein | NA | NA\n"
+    assert res == exp
+    outfile.close()
+
+
+def test_write_header_crispr():
+    """
+    From a given line of lstinfo file, giving info for a CRISPR check that the header
+    line of the protein and gene files are generated as expected.
+    """
+    outfile = StringIO()
+    lstline = ("296902\t2968265\tC\tCRISPR\ttest.0417.00002.0003b_CRISPR1\tcrispr\t| "
+               "crispr-array | NA | NA")
+    ffunc.write_header(lstline, outfile)
+    res = outfile.getvalue()
+    exp = ">test.0417.00002.0003b_CRISPR1 2671364 crispr | crispr-array | NA | NA\n"
+    assert res == exp
+    outfile.close()
+
+
+# def test_handle_genome_nores():
+#     """
+#     Test that when we try to format a genome which is not in results,
+#     it returns a tuple with "no_res" and the genome name.
+#     """
+#     results = {"abcd.fasta": True}
+#     prodigal_only = False
+#     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
+#             "gene/dir", "rep/dir", "gff/dir", prodigal_only, my_logger()[0])
+#     res = ffunc.handle_genome(args)
+#     assert res == ("no_res", "toto.fasta")
+
+
+# def test_handle_genome_badprok():
+#     """
+#     Test that when we try to format a genome which is in results, but with False,
+#     it returns a tuple with "bad_prokka" and the genome name.
+#     """
+#     results = {"abcd.fasta": True, "toto.fasta": False}
+#     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
+#             "gene/dir", "rep/dir", "gff/dir", False, my_logger()[0])
+#     res = ffunc.handle_genome(args)
+#     assert res == ("bad_prokka", "toto.fasta")
+
+
+# def test_handle_genome_formatok():
+#     """
+#     Test that when we try to format a genome which is in results, with True,
+#     it returns a tuple with "True" and the genome name.
+#     """
+#     gpath = os.path.join("test", "data", "annotate", "genomes",
+#                          "B2_A3_5.fasta-split5N.fna-short-contig.fna")
+#     name = "test.0417.00002"
+#     prok_path = os.path.join("test", "data", "annotate", "exp_files")
+#     lst_dir = os.path.join("test", "data", "annotate")
+#     prot_dir = lst_dir
+#     gene_dir = lst_dir
+#     rep_dir = lst_dir
+#     gff_dir = lst_dir
+#     results = {"B2_A3_5.fasta-split5N.fna-short-contig.fna": True, "toto.fasta": False}
+#     args = ("B2_A3_5.fasta-split5N.fna-short-contig.fna", name, gpath, prok_path,
+#             lst_dir, prot_dir,
+#             gene_dir, rep_dir, gff_dir, results, my_logger()[0])
+#     res = ffunc.handle_genome(args)
+#     assert res == (True, "B2_A3_5.fasta-split5N.fna-short-contig.fna")
+#     os.remove(os.path.join(lst_dir, name + ".prt"))
+#     os.remove(os.path.join(lst_dir, name + ".fna"))
+#     os.remove(os.path.join(lst_dir, name + ".gen"))
+#     os.remove(os.path.join(lst_dir, name + ".lst"))
+#     os.remove(os.path.join(lst_dir, name + ".gff"))
+
+
+# def test_handle_genome_formaterror():
+#     """
+#     Test that when we try to format a genome which is in results, but with False,
+#     it returns a tuple with "bad_prokka" and the genome name.
+#     """
+#     logger = my_logger()
+#     gpath = os.path.join("test", "data", "annotate", "genomes",
+#                          "B2_A3_5.fasta-problems.fna-short-contig.fna")
+#     name = "test.0417.00002"
+#     prok_path = os.path.join("test", "data", "annotate", "exp_files")
+#     tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+#                             name + ".tbl")
+#     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+#                           name + ".tbl")
+#     shutil.copyfile(tbl_init, tblout)
+#     gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
+#                             name + ".gff")
+#     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
+#                           name + ".gff")
+#     shutil.copyfile(gff_init, gffout)
+#     lst_dir = os.path.join("test", "data", "annotate")
+#     prot_dir = lst_dir
+#     gene_dir = lst_dir
+#     rep_dir = lst_dir
+#     gff_dir = lst_dir
+#     results = {"B2_A3_5.fasta-problems.fna-short-contig.fna": True, "toto.fasta": False}
+#     args = ("B2_A3_5.fasta-problems.fna-short-contig.fna", name, gpath,
+#             prok_path, lst_dir, prot_dir, gene_dir, rep_dir, gff_dir, results, logger[0])
+#     res = ffunc.handle_genome(args)
+#     assert res == (False, "B2_A3_5.fasta-problems.fna-short-contig.fna")
+#     msg = ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
+#            "test/data/annotate/exp_files/B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/"
+#            "test.0417.00002.ffn.\n"
+#            "Gen file will not be created.")
+#     q = logger[0]
+#     assert q.qsize() == 1
+#     assert q.get().message == msg
+#     # remove tblout which was copied for this test
+#     assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
+#     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
+#     assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
+#     assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
+#     assert not os.path.isfile(os.path.join(lst_dir, name + ".gff"))
+#     os.remove(tblout)
+#     os.remove(gffout)
+
+
 # def test_tbl_to_lst_new_name():
 #     """
 #     Check that generated lstinfo file is as expected, when the genome name has changed between
@@ -149,52 +315,9 @@ def test_contig_name():
 #     os.remove(lstfile)
 
 
-# def test_write_header_gene():
-#     """
-#     From a given line of lstinfo file, giving info for a gene (start, end, gene name,
-#     product, EC number, more information), check that the header line of the protein and
-#     gene files are generated as expected.
-#     """
-#     outfile = StringIO()
-#     lstline = ("4416\t6068\tD\tCDS\ttest.0417.00002.i0001_00005\tyiaD\t| "
-#                "putative lipoprotein YiaD | 6.3.2.- | similar to AA sequence:UniProtKB:P37665")
-#     ffunc.write_header(lstline, outfile)
-#     res = outfile.getvalue()
-#     exp = (">test.0417.00002.i0001_00005 1653 yiaD | putative lipoprotein YiaD | 6.3.2.- "
-#            "| similar to AA sequence:UniProtKB:P37665\n")
-#     assert res == exp
-#     outfile.close()
 
 
-# def test_write_header_gene_no_name():
-#     """
-#     From a given line of lstinfo file, giving info for a gene with many unknown parts (gene
-#     name, product, EC number and more information are NAs), check that the header line of the
-#     protein and gene files are generated as expected.
-#     """
-#     outfile = StringIO()
-#     lstline = ("4632\t5000\tC\tCDS\ttest.0417.00002.b0002_00011\tNA\t| hypothetical protein "
-#                "| NA | NA")
-#     ffunc.write_header(lstline, outfile)
-#     res = outfile.getvalue()
-#     exp = ">test.0417.00002.b0002_00011 369 NA | hypothetical protein | NA | NA\n"
-#     assert res == exp
-#     outfile.close()
 
-
-# def test_write_header_crispr():
-#     """
-#     From a given line of lstinfo file, giving info for a CRISPR check that the header
-#     line of the protein and gene files are generated as expected.
-#     """
-#     outfile = StringIO()
-#     lstline = ("296902\t2968265\tC\tCRISPR\ttest.0417.00002.b0003_CRISPR1\tcrispr\t| "
-#                "crispr-array | NA | NA")
-#     ffunc.write_header(lstline, outfile)
-#     res = outfile.getvalue()
-#     exp = ">test.0417.00002.b0003_CRISPR1 2671364 crispr | crispr-array | NA | NA\n"
-#     assert res == exp
-#     outfile.close()
 
 
 # def test_create_prt_wrong_header_sep():
@@ -631,102 +754,6 @@ def test_contig_name():
 #     assert logfound.levelname == "ERROR"
 
 
-# def test_handle_genome_nores():
-#     """
-#     Test that when we try to format a genome which is not in results,
-#     it returns a tuple with "no_res" and the genome name.
-#     """
-#     results = {"abcd.fasta": True}
-#     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-#             "gene/dir", "rep/dir", "gff/dir", results, my_logger()[0])
-#     res = ffunc.handle_genome(args)
-#     assert res == ("no_res", "toto.fasta")
-
-
-# def test_handle_genome_badprok():
-#     """
-#     Test that when we try to format a genome which is in results, but with False,
-#     it returns a tuple with "bad_prokka" and the genome name.
-#     """
-#     results = {"abcd.fasta": True, "toto.fasta": False}
-#     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-#             "gene/dir", "rep/dir", "gff/dir", results, my_logger()[0])
-#     res = ffunc.handle_genome(args)
-#     assert res == ("bad_prokka", "toto.fasta")
-
-
-# def test_handle_genome_formatok():
-#     """
-#     Test that when we try to format a genome which is in results, with True,
-#     it returns a tuple with "True" and the genome name.
-#     """
-#     gpath = os.path.join("test", "data", "annotate", "genomes",
-#                          "B2_A3_5.fasta-split5N.fna-short-contig.fna")
-#     name = "test.0417.00002"
-#     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-#     lst_dir = os.path.join("test", "data", "annotate")
-#     prot_dir = lst_dir
-#     gene_dir = lst_dir
-#     rep_dir = lst_dir
-#     gff_dir = lst_dir
-#     results = {"B2_A3_5.fasta-split5N.fna-short-contig.fna": True, "toto.fasta": False}
-#     args = ("B2_A3_5.fasta-split5N.fna-short-contig.fna", name, gpath, prok_path,
-#             lst_dir, prot_dir,
-#             gene_dir, rep_dir, gff_dir, results, my_logger()[0])
-#     res = ffunc.handle_genome(args)
-#     assert res == (True, "B2_A3_5.fasta-split5N.fna-short-contig.fna")
-#     os.remove(os.path.join(lst_dir, name + ".prt"))
-#     os.remove(os.path.join(lst_dir, name + ".fna"))
-#     os.remove(os.path.join(lst_dir, name + ".gen"))
-#     os.remove(os.path.join(lst_dir, name + ".lst"))
-#     os.remove(os.path.join(lst_dir, name + ".gff"))
-
-
-# def test_handle_genome_formaterror():
-#     """
-#     Test that when we try to format a genome which is in results, but with False,
-#     it returns a tuple with "bad_prokka" and the genome name.
-#     """
-#     logger = my_logger()
-#     gpath = os.path.join("test", "data", "annotate", "genomes",
-#                          "B2_A3_5.fasta-problems.fna-short-contig.fna")
-#     name = "test.0417.00002"
-#     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-#     tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-#                             name + ".tbl")
-#     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-#                           name + ".tbl")
-#     shutil.copyfile(tbl_init, tblout)
-#     gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-#                             name + ".gff")
-#     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-#                           name + ".gff")
-#     shutil.copyfile(gff_init, gffout)
-#     lst_dir = os.path.join("test", "data", "annotate")
-#     prot_dir = lst_dir
-#     gene_dir = lst_dir
-#     rep_dir = lst_dir
-#     gff_dir = lst_dir
-#     results = {"B2_A3_5.fasta-problems.fna-short-contig.fna": True, "toto.fasta": False}
-#     args = ("B2_A3_5.fasta-problems.fna-short-contig.fna", name, gpath,
-#             prok_path, lst_dir, prot_dir, gene_dir, rep_dir, gff_dir, results, logger[0])
-#     res = ffunc.handle_genome(args)
-#     assert res == (False, "B2_A3_5.fasta-problems.fna-short-contig.fna")
-#     msg = ("Unknown header format >EPKOMDHM_i00002 hypothetical protein in "
-#            "test/data/annotate/exp_files/B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes/"
-#            "test.0417.00002.ffn.\n"
-#            "Gen file will not be created.")
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
-#     # remove tblout which was copied for this test
-#     assert not os.path.isfile(os.path.join(lst_dir, name + ".prt"))
-#     assert not os.path.isfile(os.path.join(lst_dir, name + ".gen"))
-#     assert not os.path.isfile(os.path.join(lst_dir, name + ".fna"))
-#     assert not os.path.isfile(os.path.join(lst_dir, name + ".lst"))
-#     assert not os.path.isfile(os.path.join(lst_dir, name + ".gff"))
-#     os.remove(tblout)
-#     os.remove(gffout)
 
 
 # def test_format1genome():

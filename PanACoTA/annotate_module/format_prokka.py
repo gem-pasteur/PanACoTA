@@ -201,8 +201,8 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
     bool :
         True if genome name used in lstfile and prokka tblfile are the same, False otherwise
     """
-    # Number CRISPRs. By default, 0 CRISPR
-    crispr_num = 0
+    # Number CRISPRs. By default, 0 CRISPR -> next one will be CRISPR1
+    crispr_num = 1
     # Protein localisation in contig (b = border ; i = inside)
     cont_loc = "b"
     prev_cont_loc = "b"
@@ -229,9 +229,10 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
             # If new contig, write the previous one, and get information for this new one
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
+                # # Write print prev: {lstline}")
                 cont_num += 1  # new contig
-                cont_name = ">" + line.split()[-1] + "\n" # contig name in tbl
-                exp_cont_name = contigs[cont_num -1].split("\t")[1] # contig name in
+                cont_name = elems[0].split()[1] # contig name in tbl
+                exp_cont_name = contigs[cont_num -1].split("\t")[0] # contig name in
                 # 'contigs' (at the previous step)
             else:
                 # Get line type, and retrieve info according to it
@@ -258,7 +259,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
                     # New contig
                     if cont_num != prev_cont_num:
                         # Check if
-                        # - it is not the first gene of the genome (prev_cont_num =! -1)
+                        # - it is not the first gene of the genome (prev_cont_num != -1)
                         # - current contig 'cont_name' (name after 'feature') and
                         # contig corresponding to cont_num 'exp_cont_name' in contigs are the
                         # same? If not -> contigs without any gene without any feature between them

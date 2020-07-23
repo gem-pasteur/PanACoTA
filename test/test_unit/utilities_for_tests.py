@@ -60,16 +60,25 @@ def compare_order_content(file1, file2):
     """
     with open(file1, "r") as f1:
         lines_f1 = f1.readlines()
-
+        # Remove empty lines at the end of the file
+        while lines_f1[-1].strip() == "":
+            lines_f1 = lines_f1[:-1]
     with open(file2, "r") as f2:
         lines_f2 = f2.readlines()
-        if len(lines_f1) != len(lines_f2):
-            print(f"not same number of lines in {file1} and {file2}")
+        # Remove empty lines at the end of the file
+        while lines_f2[-1].strip() == "":
+            lines_f2 = lines_f2[:-1]
+
+    # Compare number of lines
+    if len(lines_f1) != len(lines_f2):
+        print(f"not same number of lines in {file1} and {file2}")
+        return False
+
+    # Compare content of lines, in order
+    for line1, line2 in zip(lines_f1, lines_f2):
+        if line1.split() != line2.split():
+            print(f"'{line1}' vs '{line2}' do not correspond.")
             return False
-        for line1, line2 in zip(lines_f1, lines_f2):
-            if line1.split() != line2.split():
-                print(f"'{line1}' vs {line2} do not correspond.")
-                return False
     return True
 
 
