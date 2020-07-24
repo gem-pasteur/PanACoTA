@@ -115,7 +115,7 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.list_file, arguments.db_path, arguments.db_path2, arguments.res_path,
+    main(cmd, arguments.list_file, arguments.db_path, arguments.res_path,
          arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
          arguments.force, arguments.qc_only, arguments.from_info, arguments.tmpdir,
@@ -123,7 +123,7 @@ def main_from_parse(arguments):
          arguments.small)
 
 
-def main(cmd, list_file, db_path, db_path2, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
          verbose=0, quiet=False, prodigal_only=False, small=False):
     """
@@ -395,7 +395,7 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
-    required.add_argument("-d", dest="db_path", required=True,
+    required.add_argument("-d", dest="db_path", 
                           help="Path to folder containing all multifasta genome files")
     required.add_argument("-r", dest="res_path", required=True,
                           help="Path to folder where output annotated genomes must be saved")
@@ -430,14 +430,6 @@ def build_parser(parser):
                                "least 4 columns, tab separated, with the following headers: "
                                "'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other column "
                                "will be ignored.")
-    optional.add_argument("-d2", dest="db_path2",
-                          help="Path to 2nd folder containing multifasta genome files. "
-                               "Used if you run annotation of sequences found in 2 different "
-                               "folders. For example, if you ran this module, and now want to "
-                               "rerun it with different parameters, but using the already "
-                               "generated sequences to annotate, some of them are in db_path "
-                               "whereas others are in the previous tmp_path (sequences cut, "
-                               "prokka with small headers...")
     optional.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
                           help="Add this option if you only want syntactical annotation, given "
                                "by prodigal, and not functional annotation requiring prokka and "
@@ -585,6 +577,17 @@ def check_args(parser, args):
     if not args.from_info and not args.list_file:
         parser.error("You must provide a list of genomes to annotate. Either raw genomes "
                      "(see -l option), or genomes with quality information (see --info option).")
+    
+    # If no info file nor db_path, ask for 1 of them
+    if not args.db_path and not args.from_info:
+        parser.error("You must provide a path to your database genome sequences (-d <db_path>). "
+                     "If you already have a LSTINFO file, it contains this db_path. Use it with "
+                     "--info <lstinfo file> option.")
+
+    # If given LSTINFO, already contains paths to genome to annotate. db_path must not be provided
+    if args.from_info and args.db_path:
+        parser.error("If you run from your LSTINFO file, this one already contains the path of genomes "
+                     "to annotate. Remove -d <db_path> option.")
 
     # WARNINGS
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
@@ -604,12 +607,6 @@ def check_args(parser, args):
                               "header", "yellow"))
     print()
 
-    # If db_path2 is used only with infofile
-    if args.db_path2 and not args.from_info:
-        parser.error("Using '-d2 <path>' means that you are running from an info file, whose "
-                     "sequences come from 2 different folders (db_path and tmp_path if from a "
-                     "previous run of this module). Use --info <info-file> or "
-                     "remove '-d2 <path>' ")
     return args
 
 
