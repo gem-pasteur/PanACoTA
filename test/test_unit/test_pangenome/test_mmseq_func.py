@@ -10,37 +10,45 @@ import time
 import shutil
 import glob
 import logging
+import pytest
 
 import PanACoTA.pangenome_module.mmseqs_functions as mmseqs
 import PanACoTA.utils as utils
-import test.test_unit.utilities_for_tests as util_test
+import test.test_unit.utilities_for_tests as tutil
 
 LOGFILE_BASE = "logfile_test.txt"
 LEVEL = logging.DEBUG
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
+# Define variables shared by several tests
+PANDIR = os.path.join("test", "data", "pangenome")
+PATH_TEST_FILES = os.path.join(PANDIR, "test_files")
+PATH_EXP_FILES = os.path.join(PANDIR, "exp_files")
+GENEPATH = os.path.join(PANDIR, "generated_by_unit-tests")
 
 
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_mmseq', verbose=1)
-    print("setup")
-
-
-def teardown_module():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
     """
+    utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_getseq', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH)
+    for f in LOGFILES:
+        if os.path.exists(f):
+            os.remove(f)
     print("teardown")
-    for file in LOGFILES:
-        os.remove(file)
-
-
-# Define variables shared by several tests
-PATH_TEST_PAN = os.path.join("test", "data", "pangenome")
-PATH_TEST_FILES = os.path.join(PATH_TEST_PAN, "test_files")
-PATH_EXP_FILES = os.path.join(PATH_TEST_PAN, "exp_files")
 
 # Clusters expected for the given databank (ref: [members]
 EXP_CLUSTERS = {"GEN2.1017.00001.i0002_00004": ["GEN2.1017.00001.i0002_00004",
@@ -128,24 +136,21 @@ def test_create_mmseqdb(caplog):
     Just check that all expected outfiles are present.
     """
     caplog.set_level(logging.DEBUG)
-    filename = "test_create_mmseqsdb.msdb"
+    filename = os.path.join(GENEPATH, "test_create_mmseqsdb.msdb")
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
-    logfile = "test_create_mmseqsdb.log"
+    logfile = os.path.join(GENEPATH, "test_create_mmseqsdb.log")
     mmseqs.create_mmseqs_db(filename, prt_path, logfile)
+
     outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
-        os.remove(file)
-
     assert "Creating database" in caplog.text
     assert "Existing files: 0" in caplog.text
     assert "Expected extensions: 7" in caplog.text
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[1].levelname == "DETAIL"
     assert caplog.records[2].levelname == "DETAIL"
-
     assert os.path.isfile(logfile)
-    os.remove(logfile)
 
 
 def test_create_mmseqdb_exist(caplog):
