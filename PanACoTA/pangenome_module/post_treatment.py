@@ -81,15 +81,15 @@ def open_outputs_to_write(fams_by_strain, families, all_strains, pangenome):
     panquali = pangenome + ".quali.txt"
     panquanti = pangenome + ".quanti.txt"
     pansum = pangenome + ".summary.txt"
-    with open(panquali, "w") as pqlf, open(panquanti, "w") as pqtf, open(pansum, "w") as psf:
+    with open(pansum, "w") as psf:
         psf.write("num_fam,nb_members,sum_quanti,sum_quali,"
                   "nb_0,nb_mono,nb_multi,sum_0_mono_multi,max_multi\n")
         res = generate_and_write_outputs(fams_by_strain, families,
-                                         all_strains, pqlf, pqtf, psf)
+                                         all_strains, panquali, panquanti, psf)
     return res
 
 
-def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf, psf):
+def generate_and_write_outputs(fams_by_strain, families, all_strains, panquali, panquanti, psf):
     """
     From the python objects of pangenome, generate qualitative and quantitative matrix,
     as well as summary file.
@@ -161,7 +161,7 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
     matrix_quanti = np.vstack((header, matrix_quanti))
     # Transpose matrix: lines = genomes, columns = families
     tmatrix_quali = matrix_quali.transpose()
-    np.savetxt(pqlf, tmatrix_quali, delimiter=",", fmt="%s") 
+    np.savetxt(panquali, tmatrix_quali, delimiter=",", fmt="%s") 
     tmatrix_quanti = matrix_quanti.transpose()
-    np.savetxt(pqtf, tmatrix_quanti, delimiter=",", fmt="%s") 
+    np.savetxt(panquanti, tmatrix_quanti, delimiter=",", fmt="%s") 
     return qualis, quantis, summaries
