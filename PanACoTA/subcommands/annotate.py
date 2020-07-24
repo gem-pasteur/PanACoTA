@@ -573,6 +573,14 @@ def check_args(parser, args):
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use the given sequences as is. It will not cut "
                      "them. So, you cannot use both --cutN and --info")
+    if args.l90 != 100 and args.from_info:
+        parser.error("If you provide a list of genomes with their calculated L90 and number of "
+                     "contigs, PanACoTA will use this information, and not re-calculate it. "
+                     "So, you cannot use both --info and --l90")
+    if args.nbcont != 999 and args.from_info:
+        parser.error("If you provide a list of genomes with their calculated L90 and number of "
+                     "contigs, PanACoTA will use this information, and not re-calculate it. "
+                     "So, you cannot use both --info and --nbcont")
     # Give a lst_file or an info file, not nothing
     if not args.from_info and not args.list_file:
         parser.error("You must provide a list of genomes to annotate. Either raw genomes "
