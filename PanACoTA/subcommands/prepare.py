@@ -310,8 +310,8 @@ def build_parser(parser):
                           help=("If you already downloaded refseq genomes and do not want to "
                                 "check them, add this option to directly go to the next steps:"
                                 "quality control (L90, number of contigs...) and mash filter. "
-                                "Don't forget to specify the outdir (-o option) where you "
-                                "already downloaded those genomes."))
+                                "Don't forget to specify the db_dir (-d option) where you "
+                                "already have your genome sequences."))
     optional.add_argument("-d", dest="db_dir",
                           help=("If your already downloaded sequences are not in the default "
                                 "directory (outdir/Database_init), you can specify here the "
