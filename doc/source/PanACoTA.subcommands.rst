@@ -7,19 +7,19 @@
     :undoc-members:
     :show-inheritance:
 
+``prepare`` module
+------------------------
 
-``align`` module
-----------------
-
-.. automodule:: PanACoTA.subcommands.align
+.. automodule:: PanACoTA.subcommands.prepare
     :members:
     :undoc-members:
     :show-inheritance:
 
-``corepers`` module
--------------------
 
-.. automodule:: PanACoTA.subcommands.corepers
+``annotate`` module
+------------------------
+
+.. automodule:: PanACoTA.subcommands.annotate
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,10 +32,18 @@
     :undoc-members:
     :show-inheritance:
 
-``qc_and_annote`` module
-------------------------
+``corepers`` module
+-------------------
 
-.. automodule:: PanACoTA.subcommands.qc_and_annote
+.. automodule:: PanACoTA.subcommands.corepers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+``align`` module
+----------------
+
+.. automodule:: PanACoTA.subcommands.align
     :members:
     :undoc-members:
     :show-inheritance:
