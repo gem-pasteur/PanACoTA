@@ -2,7 +2,9 @@
 Running PanACoTA: tutorial
 ==========================
 
-``PanACoTA`` contains 5 subcommands, for the different steps:
+``PanACoTA`` contains 6 subcommands, for the different steps:
+
+    - ``prepare`` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
     - ``annotate`` (annotate all genomes of the dataset, after a quality control)
     - ``pangenome`` (generate pan-genome)
     - ``corepers`` (generate core-genome or persistent-genome)
@@ -18,10 +20,20 @@ Each subcommand has its own options and inputs. To get the list of required argu
     PanACoTA <subcommand> -h
 
 
-.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
+.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. 
 
-.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. For example, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``, and your sequence file is the same as previously, and the default parameters are 10 for ``-t`` and 0.5 for ``-i``. You can run either ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5), ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``), ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``) or ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``) according to your needs (if default values are ok, you do not need to specify the option).
+For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
 
+.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. 
+
+Example: your sequence file is the same as previously, and the default parameters are ``-t=10`` and ``-i=0.5``. Therefore, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``. You can run either:
+
+    - ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5) 
+    - ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``) 
+    - ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``)
+    - ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``)
+
+according to your needs (if default values are ok, you do not need to specify the option).
 
 
 Here are the options shared by all subcommands:
@@ -34,6 +46,157 @@ Here are the options shared by all subcommands:
         + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
 
 We will now describe each subcommand, with its options.
+
+
+``prepare`` subcommand
+======================
+
+You can see all required arguments and available options with::
+
+    PanACoTA prepare -h
+
+The ``prepare`` module works in 3 steps:
+
+    1) Downloading sequences from refseq
+    2) Quality control to filter genomes in terms of sequence quality
+    3) Filtering step dedicated to remove redundant and miss-classified genomes, based on Mash genetic distance.
+
+You can choose to skip steps 1 and 2. Here, we describe how to run this module, starting from step 1, skipping step 1 (starting from step 2), and skipping steps 1 and 2 (starting from step 3).
+
+Inputs
+------
+
+Your input will depend on the step from which you are starting. 
+
+- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species.
+- If you start from step 2, your input will be a database of fasta sequences, in :ref:`sequences format <seq>`.
+- If you start from step 3, your input will be the database as previously, as well as the LSTINFO output of :ref:`step 2 <step2>`.
+
+
+Outputs
+-------
+
+Genome sequences
+^^^^^^^^^^^^^^^^
+All sequences are in fasta format, as described in :ref:`sequences format <seq>`.
+
+In your output directory, you will find:
+
+- Only if you started from step 1: A folder called ``refseq/bacteria``, containing 1 folder per genome (called with the genome accession number), and, inside, the genome sequence in fasta.gz format, and the MD5SUMS of this file.
+- Only if you started from step 1: A folder called ``Database_init``, containing all genomes downloaded in fasta format
+- Only if you started from step 1 or 2: A folder called ``tmp_files`` containing your genomic sequences, split at each stretch of at least 5 ``N`` (see :ref:`sequences format <seq>` for more details on the splitting part).
+
+
+Discarded files
+^^^^^^^^^^^^^^^
+``discarded-by-L90_nbcont-<datasetname>.lst``
+
+This file contains the list of genomes discarded by the quality control step:
+
+- path to the genome original sequence
+- path to the genome sequence after 'N' splitting procedure
+- genome size (number of bases)
+- number of contigs in genome
+- L90 of genome
+
+Example:
+
+.. code-block:: text
+
+    orig_name                                          to_annotate                                                    gsize   nb_conts    L90
+    <outdir>/Database_init/genome1.fst                 <outdir>/<tmp>/genome1.fst_prepare-split5N.fna                 9808    2           2  
+    <outdir>/Database_init/genome3-chromo.fst-all.fna  <outdir>/<tmp>/genome3-chromo.fst-all.fna_prepare-split5N.fna  8817    3           3   
+    <outdir>/Database_init/genome2.fst                 <outdir>/<tmp>/genome2.fst_prepare-split5N.fna                 10711   4           4
+    <outdir>/Database_init/genome4.fst                 <outdir>/<tmp>/genome4.fst_prepare-split5N.fna                 7134    1           1
+
+
+``discarded-byminash-<datasetname>-<min_dist>_<max_dist>.lst``
+
+This file contains the list of genomes discarded by the filtering step:
+
+1. path to the genome original sequence
+2. path to the genome which discarded genome 1.
+3. distance between genome 1. and genome 2. (which is not inside the given thresholds)
+
+Example:
+
+.. code-block:: text
+
+    to_annotate                                     problem_compared_with                 dist
+    <outdir>/<database>/genome1.fst                 <outdir>/<database>/genome1-bis.fst   0.07
+    <outdir>/<database>/genome3-chromo.fst-all.fna  <outdir>/<database>/genomeX.fst       0.0000004
+
+.. _step2:
+
+Info file
+^^^^^^^^^
+
+``LSTINFO-<datasetname>-filtered-<min_dist>_<max_dist>.lst``
+
+This file contains the list of all genomes with 4 columns:
+
+- path to the genome sequence after 'N' splitting procedure
+- genome size (number of bases)
+- number of contigs in genome
+- L90 of genome
+
+Example:
+
+.. code-block:: text
+
+    to_annotate                                     gsize   nb_conts    L90
+    <outdir>/<database>/genome1.fst                 9808    2           2
+    <outdir>/<database>/genome3-chromo.fst-all.fna  8817    3           3
+    <outdir>/<database>/genome2.fst                 10711   4           4
+    <outdir>/<database>/genome4.fst                 7134    1           1
+
+
+Running from step 1
+-------------------
+
+To download genomes, and then process them by the `prepare` filters, run::
+
+    PanACoTA prepare [-t <NCBI taxid> -s <NCBI species]
+
+Give at least one of those 2 parameters. With:
+
+- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the species you want to study. For example, taxid for *E. coli* is 562 (see `NCBI taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?lvl=0&id=562>`_)
+- ``-s <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes (for example "escherichia coli")
+
+Running from step 2
+-------------------
+
+If you already have your genomes, run::
+
+    PanACoTA prepare --norefseq -o <outdir> [-d <db_dir>]
+
+With:
+
+- ``<outdir>``: the directory where you want to save your results (no need to create the directory before, the program will do it). 
+- ``<db_dir>``: directory where your database sequences are. By default, it will search to `<outdir>/Database_init`. So, if your sequences are already there, you do not need to add this option.
+
+
+Running from step 3
+-------------------
+
+If you already have your genomes, and already ran quality control. You only need to run the filtering step, by running::
+
+    PanACoTA prepare -M --info <info file> -o <outdir>
+
+With ``info file``: a file in the same format as the one generated by :ref:`step 2 <step2>`.
+
+Options
+-------
+
+Here is the complete list of options available when running ``PanACoTA prepare``. You can get them by running ``PanACoTA annotate -h``:
+
+- ``--tmp <dirname>``:  to specify where the temporary files must be saved. By default, they are saved in ``<outdir>/tmp_files``.
+- ``--cutN <number>``: by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
+- ``--l90 <l90>``: to specify the maximum L90 value accepted to keep a genome. Default is 100
+- ``--nbcont <number>``: to specify the maximum number of contigs allowed to keep a genome. Default is 999
+- ``--min <float>``: min distance from which we keep both genomes. By default, genomes whose distance to the reference is less than 1e-4 are discarded.
+- ``--max <float>``: max distance from which we keep both genomes. By default, genomes whose distance to the reference is more than 0.06 are discarded.
+- ``-p <number>``: if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
 
 
 ``annotate`` subcommand
@@ -76,6 +239,7 @@ Example:
     genome.fasta genome-plasmids.fasta :: .0217
 
 We have here a dataset with 5 genomes:
+
     - the 1st genome's sequence is in the file called ``genome1.fasta`` (it can be either a fasta or multi-fasta, according to the assembly status - complete/draft - of the genome). Its species name and date will be the default ones given to the program
     - the 2nd genome's sequence is in 2 files: for example, its chromosome is in ``genome2-chromo1.fasta``, and its plasmid is in ``genome2-pl.fst``. Again, each of those files can contain complete or draft sequences. As the previous genome, its species name and date will be the default ones.
     - the 3rd genome's sequence is in ``g3.fa``. Its species name will be ``ESCO``, while its date will be the default one.
@@ -137,13 +301,15 @@ The annotation step will create 4 result folders. Here is a description of their
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file contains the list of all genomes annotated, sorted by species, and, in each species, by increasing L90 and number of contigs, with 5 columns:
+
     - new name of genome (called 'gembase_name'), with format ``<name>.<date>.<strain>`` with:
 
         - ``name`` given in ``-n <name>`` or line in list_file
         - ``date`` given in ``--date <date>``, line in list_file or current date
         - ``strain`` is a number with 5 digits, identifying the different genomes of a same species.
         - for example: ``ESCO.0217.00002`` for the 2nd strain of Escherichia coli.
-    - original name of genome (as given in list_file)
+    - path to original genome sequence
+    - path to the genome sequence after ‘N’ splitting procedure
     - genome size (number of bases)
     - number of contigs in genome
     - L90 of genome
@@ -152,11 +318,11 @@ Example:
 
 .. code-block:: text
 
-    gembase_name    orig_name                   gsize   nb_conts    L90
-    ESCO.0817.00001 genome1.fst                 9808    2           2
-    ESCO.1216.00002 genome3-chromo.fst-all.fna  8817    3           3
-    GEN2.0817.00001 genome2.fst                 10711   4           4
-    GEN4.1111.00001 genome4.fst                 7134    1           1
+    gembase_name      orig_name                                   to_annotate                                                  gsize   nb_conts    L90
+    ESCO.0817.00001   <path database>/genome1.fst                 <path_tmp>/genome1.fst_prokka-split5N.fna                    9808    2           2
+    ESCO.1216.00002   <path database>/genome3-chromo.fst-all.fna  <path_tmp>/genome3-chromo.fst-all.fna_prokka-split5N.fna     8817    3           3
+    GEN2.0817.00001   <path database>/genome2.fst                 <path_tmp>/genome2.fst_prokka-split5N.fna                    10711   4           4
+    GEN4.1111.00001   <path database>/genome4.fst                 <path_tmp>/genome4.fst_prokka-split5N.fna                    7134    1           1
 
 .. _lstf:
 
@@ -164,14 +330,15 @@ LSTINFO folder
 ^^^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.lst``, containing 1 line per sequence annotated (gene, tRNA, rRNA etc.), with the following informations:
+
     - start position of sequence in the replicon
     - end position of sequence in the replicon
     - strand (D for direct, C for complement)
     - type of sequence (CDS, rRNA, CRISPR, etc.)
     - name of the sequence annotated. The name is ``<genome_name>.<contig><place>_<num>`` where:
 
-        + ``<place>`` is ``i`` when the sequence is inside its replicon, or ``b`` when it is at the border of its replicon (first and last sequence of each replicon)
         + ``<contig>`` is the contig number, with 4 digits
+        + ``<place>`` is ``i`` when the sequence is inside its replicon, or ``b`` when it is at the border of its replicon (first and last sequence of each replicon)
         + ``<num>`` is the unique sequence number.
         + For example: ``ESCO.0217.00002.0001i_00005`` is a gene from the 2nd strain of *E. coli*, in contig 1 (not the first or last gene of this contig), and is the 5th sequence annotated in this genome.
     - gene name when applicable
@@ -256,11 +423,11 @@ With this information, you will be able to see which genomes should be removed f
 
 You can run this quality control with (order of arguments does not matter)::
 
-    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -Q
+    PanACoTA annotate -l <list_file> -d <dbpath> -r <res_path> -Q
 
 with:
 
-    - ``<list_file>`` your list file as described in :ref:`input formats<lfile>`.
+    - ``-l <list_file>`` your list file as described in :ref:`input formats<lfile>`.
     - ``-d <dbpath>`` the path to the folder containing all your fasta files listed in list_file.
     - ``-r <res_path>`` path to the directory where you want to put the results (no need to create the directory before, the program will do it).
     - ``-Q`` specify that you only want the quality control
@@ -283,12 +450,12 @@ And log files:
 
 .. _annot:
 
-Annotation
-----------
+QC and Annotation
+-----------------
 
 When you know the limits you want to use for the L90 and number of contigs, you can run the full annotation step, and not only the quality control. Use::
 
-    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num> --prodigal --small]
+    PanACoTA annotate -l <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num> --prodigal --small]
 
 with:
     - same arguments as before
@@ -312,6 +479,17 @@ This will create a folder ``<res_path>``, with the following files inside:
     - prokka result folders in your ``tmp_files`` directory
     - The 5 folders ``LSTINFO``, ``gff3``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
 
+Annotation only
+---------------
+
+When you already have information on genome sequences, and just want to annotate those which are bellow the thresholds. Use::
+
+    PanACoTA annotate --info <lstinfo file> -r <res_path> -n <name> [--prodigal --small]
+
+with:
+    - same arguments as before for -r and -n
+    - ``--info <filename>``: name of your LSTINFO file containing information on your genomes, as described :ref:`here<lstinfof>`
+
 .. _option:
 
 Options
@@ -319,11 +497,10 @@ Options
 
 Here is the complete list of options available when running ``PanACoTA annotate``. You can get them by running ``PanACoTA annotate -h``:
 
-    - ``-n <name>``: required when not running quality control only (see :ref:`annotation<annot>`)
     - ``-Q``: run quality control only (see :ref:`QC only<qco>`)
     - ``--l90 <l90>``: *optional*. to specify the maximum L90 value accepted to keep a genome. Default is 100
     - ``--nbcont <number>``: *optional*. to specify the maximum number of contigs allowed to keep a genome. Default is 999
-    - ``--cutN <number>``: *optional*. by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
+    - ``--cutn <number>``: *optional*. by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
     - ``--date <date>``: *optional*. date used to name the genome (in gembase_format, see :ref:`first column of LSTINFO_file<lstinfof>`). If not given, and no information is given on a line in the list_file, the current date will be used.
     - ``--tmp <tmpdir>``: *optional*. to specify where the temporary files must be saved. By default, they are saved in ``<res_path>/tmp_files``.
     - ``--annot_dir <annot_dir>``: *optional*. to specify where the prokka/prodigal output folders must be saved. By default, they are saved in the same directory as ``<tmpdir>``. This can be useful if you want to run this step on a dataset for which some genomes are already annotated. For those genomes, it will use the already annotated results found in ``<annot_dir>`` to run the formatting steps, and it will only annotate the genomes not found.
@@ -331,6 +508,7 @@ Here is the complete list of options available when running ``PanACoTA annotate`
     - ``--threads <number>``: *optional*. if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
     - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
     - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
+
 
 ``pangenome`` subcommand
 ========================
