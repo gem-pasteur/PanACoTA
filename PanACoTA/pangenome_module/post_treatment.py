@@ -9,6 +9,8 @@ as a summary file for the pangenome.
 April 2017
 """
 import logging
+import numpy as np
+
 from PanACoTA import utils
 from PanACoTA import utils_pangenome as utilsp
 
@@ -80,10 +82,8 @@ def open_outputs_to_write(fams_by_strain, families, all_strains, pangenome):
     panquanti = pangenome + ".quanti.txt"
     pansum = pangenome + ".summary.txt"
     with open(panquali, "w") as pqlf, open(panquanti, "w") as pqtf, open(pansum, "w") as psf:
-        pqlf.write("fam_num " + utils.list_to_str(all_strains))
-        pqtf.write("fam_num " + utils.list_to_str(all_strains))
-        psf.write("num_fam nb_members sum_quanti sum_quali "
-                  "nb_0 nb_mono nb_multi sum_0_mono_multi max_multi\n")
+        psf.write("num_fam,nb_members,sum_quanti,sum_quali,"
+                  "nb_0,nb_mono,nb_multi,sum_0_mono_multi,max_multi\n")
         res = generate_and_write_outputs(fams_by_strain, families,
                                          all_strains, pqlf, pqtf, psf)
     return res
@@ -123,9 +123,18 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
 
     """
     logger.info("Generating qualitative and quantitative matrix, and summary file")
+
+    # Matrix has:
+    # - 1 row per family (header will be added after)
+    # - 1 column for fam nums + 1 column per strain
+    matrix_quali = np.empty((len(families), len(all_strains) + 1), dtype=int)
+    matrix_quanti = np.empty((len(families), len(all_strains) + 1), dtype=int)
+
+    # also save matrix as python objects
     qualis = {}
     quantis = {}
     summaries = {}
+    row = 0
     for fam_num in sorted(fams_by_strain, key=lambda x: int(x)):
         strains = fams_by_strain[fam_num]
         quali = [1 if strain in strains else 0 for strain in all_strains]
@@ -134,12 +143,25 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, pqlf, pqtf
         nb_mono = quanti.count(1)
         nb_multi = len(quanti) - nb_0 - nb_mono
         max_multi = max(quanti)
+        # Add line to quali and quanti matrices
+        matrix_quali[row,:] = [fam_num] + quali
+        matrix_quanti[row,:] = [fam_num] + quanti
+        # Write summary line
         summ = [len(families[fam_num]), sum(quanti), sum(quali),
                 nb_0, nb_mono, nb_multi, nb_0 + nb_mono + nb_multi, max_multi]
-        pqlf.write(str(fam_num) + " " + utils.list_to_str(quali, sep=" "))
-        pqtf.write(str(fam_num) + " " + utils.list_to_str(quanti, sep=" "))
-        psf.write(str(fam_num) + " " + utils.list_to_str(summ, sep=" "))
+        psf.write(f"{fam_num},{utils.list_to_str(summ, sep=',')}")
+        # Complete python objects with quali, quanti, sumary
         qualis[fam_num] = quali
         quantis[fam_num] = quanti
         summaries[fam_num] = summ
+        row += 1
+    # Add headers to quali and quanti matrix
+    header = np.array(["fam_num"] + all_strains)
+    matrix_quali = np.vstack((header, matrix_quali))
+    matrix_quanti = np.vstack((header, matrix_quanti))
+    # Transpose matrix: lines = genomes, columns = families
+    tmatrix_quali = matrix_quali.transpose()
+    np.savetxt(pqlf, tmatrix_quali, delimiter=",", fmt="%s") 
+    tmatrix_quanti = matrix_quanti.transpose()
+    np.savetxt(pqtf, tmatrix_quanti, delimiter=",", fmt="%s") 
     return qualis, quantis, summaries

@@ -151,12 +151,9 @@ EXP_SUMS = {'1': [4, 4, 4, 0, 4, 0, 4, 1], '2': [1, 1, 1, 3, 1, 0, 4, 1],
             '13': [4, 4, 4, 0, 4, 0, 4, 1], '14': [4, 4, 4, 0, 4, 0, 4, 1],
             '15': [1, 1, 1, 3, 1, 0, 4, 1], '16': [1, 1, 1, 3, 1, 0, 4, 1]}
 
-EXP_QUALIF = os.path.join("test", "data", "pangenome", "exp_files",
-                          "exp_pangenome-4genomes.lst.quali.txt")
-EXP_QUANTIF = os.path.join("test", "data", "pangenome", "exp_files",
-                           "exp_pangenome-4genomes.lst.quanti.txt")
-EXP_SUMF = os.path.join("test", "data", "pangenome", "exp_files",
-                        "exp_pangenome-4genomes.lst.summary.txt")
+EXP_QUALIF = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst.quali_transpose.txt")
+EXP_QUANTIF = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst.quanti_transpose.txt")
+EXP_SUMF = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst.summary.txt")
 
 
 def test_write_outputs(caplog):
@@ -166,23 +163,24 @@ def test_write_outputs(caplog):
     """
     caplog.set_level(logging.DEBUG)
     base = "test_write_out"
-    pqlf = io.StringIO(base + ".quali.txt")
-    pqtf = io.StringIO(base + ".quanti.txt")
+    pqlf = io.StringIO(base + ".quali_transpose.txt")
+    pqtf = io.StringIO(base + ".quanti_transpose.txt")
     psf = io.StringIO(base + ".sum.txt")
+    # run cmd
     res = post.generate_and_write_outputs(FAMS_BY_STRAIN, FAMILIES, 
                                           ALL_STRAINS, pqlf, pqtf, psf)
+    # Check returned outputs
     (qualis, quantis, sums) = res
     assert qualis == EXP_QUALIS
     assert quantis == EXP_QUANTIS
     assert sums == EXP_SUMS
+    # Check generated files
     # check content of matrix quali file
     with open(EXP_QUALIF, "r") as eq:
-        next(eq)  # skip header
         for line_out, line_exp in zip(pqlf.getvalue().split("\n"), eq):
             assert line_out == line_exp.strip()
     # Check content of matrix quanti file
     with open(EXP_QUANTIF, "r") as eq:
-        next(eq)  # skip header
         for line_out, line_exp in zip(pqtf.getvalue().split("\n"), eq):
             assert line_out == line_exp.strip()
     # Check content of summary file
@@ -207,6 +205,8 @@ def test_open_out():
     """
     pangenome = os.path.join(GENEPATH, "test_open_out_pangenome.txt")
     res = post.open_outputs_to_write(FAMS_BY_STRAIN, FAMILIES, ALL_STRAINS, pangenome)
+
+    # Check function output
     qualis, quantis, sums = res
     assert qualis == EXP_QUALIS
     assert quantis == EXP_QUANTIS
@@ -215,11 +215,9 @@ def test_open_out():
     # Check presence and content of quali matrix file
     assert os.path.isfile(pangenome + ".quali.txt")
     assert tutil.compare_order_content(pangenome + ".quali.txt", EXP_QUALIF)   
-
     # Check presence and content of quanti matrix file
     assert os.path.isfile(pangenome + ".quanti.txt")
     assert tutil.compare_order_content(pangenome + ".quanti.txt", EXP_QUANTIF) 
-
     # Check presence and content of summary file
     assert os.path.isfile(pangenome + ".summary.txt")
     assert tutil.compare_order_content(pangenome + ".summary.txt", EXP_SUMF) 
