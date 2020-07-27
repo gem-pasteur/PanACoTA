@@ -96,7 +96,9 @@ def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, thread
             sys.exit(1)
         from PanACoTA.tree_module import iqtree_func as tree
 
-    outdir = os.path.dirname(align)
+    # If outdir does not already exist, create it
+    if not os.path.isdir(outdir):
+        os.makedirs(outdir)
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-tree-" + soft)
     # level is the minimum level that will be considered.
