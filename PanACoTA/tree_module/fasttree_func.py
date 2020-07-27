@@ -15,7 +15,7 @@ from PanACoTA import utils
 
 logger = logging.getLogger("tree.fasttree")
 
-def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
+def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
     """
     Run FastTree for the given alignment file and options
 
@@ -25,7 +25,7 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
         path to file containing all persistent families aligned, and grouped by genome
     boot: int or None
         number of bootstraps to calculate, None if no bootstrap asked
-    treefile: str or None
+    outdir: str or None
         Path to the tree file that must be created
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
@@ -39,7 +39,7 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     """
     model = kwargs["model"]
     define_nb_threads(threads)
-    run_fasttree(alignfile, boot, treefile, model, quiet)
+    run_fasttree(alignfile, boot, outdir, model, quiet)
 
 
 def define_nb_threads(threads):
@@ -55,7 +55,7 @@ def define_nb_threads(threads):
     os.environ["OMP_NUM_THREADS"] = str(threads)
 
 
-def run_fasttree(alignfile, boot, treefile, model, quiet):
+def run_fasttree(alignfile, boot, outdir, model, quiet):
     """
     Run FastTree on given alignment
 
@@ -77,9 +77,9 @@ def run_fasttree(alignfile, boot, treefile, model, quiet):
         bootinfo = "-nosupport"
     else:
         bootinfo = "-boot {}".format(boot)
-    logfile = alignfile + ".fasttree.log"
-    if not treefile:
-        treefile = alignfile + ".fasttree_tree.nwk"
+    align_name = os.path.basename(alignfile)
+    logfile = os.path.join(outdir, align_name + ".fasttree.log")
+    treefile = os.path.join(outdir, align_name + ".fasttree_tree.nwk")
     cmd = "FastTreeMP -nt {} -noml -nocat {} -log {} {}".format(model, bootinfo,
                                                                 logfile, alignfile)
     logger.info("Fasttree command: " + cmd)

@@ -20,11 +20,11 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.alignment, args.boot, args.outfile, args.soft, args.model,
+    main(cmd, args.alignment, args.boot, args.outdir, args.soft, args.model,
          args.write_boot, args.memory, args.fast, args.threads, args.verbose, args.quiet)
 
 
-def main(cmd, align, boot, outfile, soft, model, write_boot, memory, fast, threads, verbose, quiet):
+def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, threads, verbose, quiet):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
 
@@ -34,7 +34,7 @@ def main(cmd, align, boot, outfile, soft, model, write_boot, memory, fast, threa
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    outfile: str or None
+    outdir: str or None
         Path to file which will contain the tree inferred
     soft: str
         Soft to use to infer the phylogenetic tree: 1 of quicktree, fasttree or fastme
@@ -114,7 +114,7 @@ def main(cmd, align, boot, outfile, soft, model, write_boot, memory, fast, threa
     logger = logging.getLogger("tree")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
-    tree.run_tree(align, boot, outfile, quiet, threads, model=model, wb=write_boot,
+    tree.run_tree(align, boot, outdir, quiet, threads, model=model, wb=write_boot,
                   mem=memory, s=soft, f=fast)
 
     logger.info("END")
@@ -170,10 +170,9 @@ def build_parser(parser):
                           help=("Indicate how many bootstraps you want to compute. By "
                                 "default, no bootstrap is calculated. For IQtree, it "
                                 "will use ultrafast bootstrap (>=1000)."))
-    optional.add_argument("-o", dest="outfile",
-                          help=("By default, the output tree file will be called "
-                                "'<input_alignment_filename>.<software_used>_tree.nwk'. You "
-                                "can give a custom output name with this option."))
+    optional.add_argument("-o", dest="outdir", default=".",
+                          help=("Directory where tree results will be saved. "
+                                "By default, it is saved in the current directory."))
     optional.add_argument("--threads", dest="threads", default=1, type=thread_num,
                           help=("add this option if you want to parallelize on several threads. "
                                 "Indicate on how many threads you want to parallelize. "
@@ -261,7 +260,7 @@ def check_args(parser, args):
         parser.error(msg)
 
     # Write bootstrap option only available for fastme and iqtree
-    if (args.soft != "iqtree" and args.soft != "iqtree2" and args.soft != "fastme" 
+    if (args.soft != "iqtree" and args.soft != "iqtree2" and args.soft != "fastme"
         and args.write_boot):
         msg = "'-B' option is only available with FastME and IQtree."
         parser.error(msg)

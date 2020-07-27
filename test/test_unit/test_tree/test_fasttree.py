@@ -74,22 +74,17 @@ def test_run_fasttree_default(caplog):
     """
     caplog.set_level(logging.DEBUG)
     boot = None
-    treefile = os.path.join(GENEPATH, "test_tree-fasttree-default")
     model = "-gtr"
     quiet = False
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_fasttree(cur_al, boot, treefile, model, quiet)
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree_tree.nwk")
+    ft.run_fasttree(ALIGNMENT, boot, GENEPATH, model, quiet)
     assert os.path.isfile(treefile)
-    logs = cur_al + ".fasttree.log"
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree.log")
     assert os.path.isfile(logs)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln")in caplog.text
+            "-log test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln")in caplog.text
     assert tutil.is_tree_lengths(treefile)
     assert not tutil.is_tree_bootstrap(treefile)
 
@@ -101,22 +96,18 @@ def test_run_fasttree_boot(caplog):
     """
     caplog.set_level(logging.DEBUG)
     boot = 10
-    treefile = os.path.join(GENEPATH, "test_tree-fasttree-boot")
     model = "-gtr"
     quiet = False
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_fasttree(cur_al, boot, treefile, model, quiet)
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree_tree.nwk")
+    ft.run_fasttree(ALIGNMENT, boot, GENEPATH, model, quiet)
     assert os.path.isfile(treefile)
-    logs = cur_al + ".fasttree.log"
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree.log")
     assert os.path.isfile(logs)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -boot 10 "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln") in caplog.text
+            "-log test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert not tutil.is_tree_lengths(treefile)
     assert tutil.is_tree_bootstrap(treefile)
 
@@ -130,20 +121,16 @@ def test_run_fasttree_boot_noname_jc(caplog):
     boot = 100
     model = ""
     quiet = False
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_fasttree(cur_al, boot, None, model, quiet)
-    treefile = cur_al + ".fasttree_tree.nwk"
+    ft.run_fasttree(ALIGNMENT, boot, GENEPATH, model, quiet)
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree_tree.nwk")
     assert os.path.isfile(treefile)
-    logs = cur_al + ".fasttree.log"
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree.log")
     assert os.path.isfile(logs)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt  -noml -nocat -boot 100 "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln") in caplog.text
+            "-log test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert not tutil.is_tree_lengths(treefile)
     assert tutil.is_tree_bootstrap(treefile)
 
@@ -156,21 +143,18 @@ def test_run_fasttree_default_quiet(caplog):
     """
     caplog.set_level(logging.DEBUG)
     boot = None
-    treefile = os.path.join(GENEPATH, "test_tree-fasttree-quiet")
     model = "-gtr"
     quiet = True
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_fasttree(cur_al, boot, treefile, model, quiet)
-    logs = cur_al + ".fasttree.log"
+    ft.run_fasttree(ALIGNMENT, boot, GENEPATH, model, quiet)
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree_tree.nwk")
+    assert os.path.isfile(treefile)
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.fasttree.log")
     assert os.path.isfile(logs)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln") in caplog.text
+            "-log test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert tutil.is_tree_lengths(treefile)
     assert not tutil.is_tree_bootstrap(treefile)
 
@@ -183,48 +167,44 @@ def test_run_tree(caplog):
     # without bootstrap
     caplog.set_level(logging.DEBUG)
     boot = None
-    treefile = None
     quiet = False
     threads = 15
     model = "-gtr"
-    # Copy input alignment file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    ft.run_tree(cur_al, boot, treefile, quiet, threads, model=model)
+    ft.run_tree(ALIGNMENT, boot, ".", quiet, threads, model=model)
     # Check it used 15 threads
     res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = res.communicate()
     assert "OpenMP (15 threads)" in stdout.decode()
     # Check outputs
-    out_tree = cur_al + ".fasttree_tree.nwk"
+    out_tree = "exp_pers4genomes.grp.aln.fasttree_tree.nwk"
     assert os.path.isfile(out_tree)
-    out_log = cur_al + ".fasttree.log"
+    out_log = "exp_pers4genomes.grp.aln.fasttree.log"
     assert os.path.isfile(out_log)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -nosupport "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln") in caplog.text
+            "-log ./exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert tutil.is_tree_lengths(out_tree)
     assert not tutil.is_tree_bootstrap(out_tree)
+    os.remove(out_tree)
+    os.remove(out_log)
 
     # with bootstrap
     boot = 127
     quiet = True
-    cur_al2 = os.path.join(aldir, "alignment-boot.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al2)
-    ft.run_tree(cur_al2, boot, treefile, quiet, 1, model=model)
+    ft.run_tree(ALIGNMENT, boot, ".", quiet, 1, model=model)
     res = subprocess.Popen("FastTreeMP", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, _ = res.communicate()
     assert "OpenMP (1 threads)" in stdout.decode()
-    out_tree = cur_al2 + ".fasttree_tree.nwk"
+    out_tree = "exp_pers4genomes.grp.aln.fasttree_tree.nwk"
     assert os.path.isfile(out_tree)
-    out_log = cur_al2 + ".fasttree.log"
+    out_log = "exp_pers4genomes.grp.aln.fasttree.log"
     assert os.path.isfile(out_log)
     assert "Running FasttreeMP..." in caplog.text
     assert ("FastTreeMP -nt -gtr -noml -nocat -boot 127 "
-            "-log test/data/tree/generated_by_unit-tests/aldir/alignment-boot.grp.aln.fasttree.log "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment-boot.grp.aln") in caplog.text
+            "-log ./exp_pers4genomes.grp.aln.fasttree.log "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert not tutil.is_tree_lengths(out_tree)
     assert tutil.is_tree_bootstrap(out_tree)
+    os.remove(out_tree)
+    os.remove(out_log)
