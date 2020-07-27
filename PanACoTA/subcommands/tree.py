@@ -288,7 +288,7 @@ def check_args(parser, args):
             args.model = check_model(models_fasttree, args.model)
         else:
             args.model = "-gtr"
-    elif args.soft == "iqtree":
+    elif args.soft == "iqtree" or args.soft == "iqtree2":
         if args.model:
             args.model = check_model(models_iqtree, args.model)
         else:
