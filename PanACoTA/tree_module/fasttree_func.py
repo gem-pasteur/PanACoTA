@@ -78,10 +78,7 @@ def run_fasttree(alignfile, boot, outdir, model, quiet):
     else:
         bootinfo = "-boot {}".format(boot)
     align_name = os.path.basename(alignfile)
-    print(alignfile)
-    print(align_name)
     logfile = os.path.join(outdir, align_name + ".fasttree.log")
-    print(logfile)
     treefile = os.path.join(outdir, align_name + ".fasttree_tree.nwk")
     cmd = f"FastTreeMP -nt {model} -noml -nocat {bootinfo} -log {logfile} {alignfile}"
     logger.info("Fasttree command: " + cmd)

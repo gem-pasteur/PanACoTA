@@ -15,7 +15,7 @@ from PanACoTA import utils
 
 logger = logging.getLogger("tree.iqtree")
 
-def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
+def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
     """
     Run IQtree for the given alignment file and options
 
@@ -25,7 +25,7 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
         path to file containing all persistent families aligned, and grouped by genome
     boot: int or None
         number of bootstraps to calculate, None if no bootstrap asked
-    treefile: str or None
+    outdir: str or None
         Path to the tree file that must be created
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
@@ -84,16 +84,14 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
         seqtype = "--seqtype DNA"
 
     # Define treefile name if not given.
-    if not treefile:
-        treefile = alignfile + ".iqtree_tree"
-    logfile = treefile + ".log"
+    align_name = os.path.basename(alignfile)
+    logfile = os.path.join(outdir, align_name + ".iqtree.log")
+    treefile = os.path.join(outdir, align_name + ".iqtree_tree")
     # get prefix cmd:
     if soft == "iqtree":
         prefix = f"-pre {treefile}"
     else:
         prefix = f"--prefix {treefile}"
-
-
     cmd = (f"{soft} -s {alignfile} {threadinfo} -m {model} {mem_info} {bootinfo} {wb_info} "
     	   f"{seqtype} {prefix} -quiet {fast}")
     logger.info("IQtree command: " + cmd)
