@@ -16,7 +16,7 @@ from PanACoTA import utils
 
 logger = logging.getLogger("tree.fastme")
 
-def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
+def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
     """
     Run fastme for the given alignment file and options
 
@@ -26,8 +26,8 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    treefile: str
-        Path to file which will contain the tree inferred
+    outdir: str
+        output directory to save all results
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
     threads: int
@@ -39,9 +39,10 @@ def run_tree(alignfile, boot, treefile, quiet, threads, **kwargs):
     """
     model = kwargs["model"]
     write_boot = kwargs["wb"]
-    align_phylip = alignfile + ".phylip"
+    align_name = os.path.basename(alignfile)
+    align_phylip = os.path.join(outdir, align_name + ".phylip")
     convert2phylip(alignfile, align_phylip)
-    run_fastme(align_phylip, boot, write_boot, threads, model, treefile, quiet)
+    run_fastme(align_phylip, boot, write_boot, threads, model, outdir, quiet)
 
 
 def convert2phylip(infile, outfile):
@@ -67,7 +68,7 @@ def convert2phylip(infile, outfile):
         AlignIO.write(alignments, output_handle, "phylip-relaxed")
 
 
-def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
+def run_fastme(alignfile, boot, write_boot, threads, model, outdir, quiet):
     """
     Run fastME on the given alignment.
 
@@ -83,8 +84,8 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
         Maximum number of threads to use
     model: str or None
         DNA substitution model chosen by user. None if default one
-    treefile: str or None
-        Path to file which will contain the tree inferred
+    outdir: str
+        output directory to save all results
     quiet: bool
         True if nothing must be printed to stderr/stdout, False otherwise
     """
@@ -96,21 +97,24 @@ def run_fastme(alignfile, boot, write_boot, threads, model, treefile, quiet):
     # Get bootstrap information
     if boot:
         bootinfo = "-b {}".format(boot)
+    print(boot)
     # Get threads information
     if threads:
         threadinfo = "-T {}".format(threads)
+    print(threads)
     # Get output filename
-    if not treefile:
-        treefile = alignfile + ".fastme_tree.nwk"
+    align_name = os.path.basename(alignfile)
+    logfile = os.path.join(outdir, align_name + ".fastme.log")
+    treefile = os.path.join(outdir, align_name + ".fastme_tree.nwk")
+    print(treefile)
+    print(logfile)
     # If bootstrap pseudo-trees must be written, define the filename here
     if write_boot:
-        outboot = "-B " + alignfile + ".fastme_bootstraps.nwk"
+        outboot = "-B " + os.path.join(outdir, align_name + ".fastme_bootstraps.nwk")
+    print(outboot)
     # Put default model if not given
     if not model:
         model = "T"
-    # Define log filename
-    logfile = alignfile + ".fastme.log"
-    matrix = alignfile + ".fastme_dist-mat.txt"
     cmd = (f"fastme -i {alignfile} -d{model} -nB -s {threadinfo} {bootinfo} "
            f"-o {treefile} -I {logfile} {outboot}")
     logger.details(cmd)

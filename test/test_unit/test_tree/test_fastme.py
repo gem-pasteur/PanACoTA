@@ -86,24 +86,24 @@ def test_run_fme_default(caplog):
     """
     caplog.set_level(logging.DEBUG)
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
-    align = os.path.join(GENEPATH, "align_tree.ph")
-    # Copy file to output directory
-    shutil.copyfile(source_align, align)
     boot = None
     write_boot = False
     threads = 1
     model = None
-    treefile = os.path.join(GENEPATH, "test_tree-fastme-default")
     quiet = False
-    fme.run_fastme(align, boot, write_boot, threads, model, treefile, quiet)
+    outdir = GENEPATH
+    fme.run_fastme(source_align, boot, write_boot, threads, model, outdir, quiet)
 
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/align_tree.ph -dT -nB -s -T 1 "
-            " -o test/data/tree/generated_by_unit-tests/test_tree-fastme-default "
-            "-I test/data/tree/generated_by_unit-tests/align_tree.ph.fastme.log") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
+    assert os.path.isfile(treefile)
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dT -nB -s -T 1 "
+            " -o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
+            "-I test/data/tree/generated_by_unit-tests/"
+            "exp_align_phylip.ph.fastme.log") in caplog.text
     assert tree_util.is_tree_lengths(treefile)
     assert not tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".fastme.log"
+    logs = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme.log")
     assert os.path.isfile(logs)
 
 
@@ -114,27 +114,23 @@ def test_run_fme_boot_j(caplog):
     """
     caplog.set_level(logging.DEBUG)
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
-    align = os.path.join(GENEPATH, "align_tree.ph")
-    # Copy file to output directory
-    shutil.copyfile(source_align, align)
     boot = 105
     write_boot = False
     threads = 1
     model = "J"
-    treefile = os.path.join(GENEPATH, "test_tree-fastme-boot-JC69.tree")
     quiet = False
-    fme.run_fastme(align, boot, write_boot, threads, model, treefile, quiet)
-
+    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
+    treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
+    assert os.path.isfile(treefile)
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/align_tree.ph -dJ -nB -s -T 1 "
-            "-b 105 -o test/data/tree/generated_by_unit-tests/test_tree-fastme-boot-JC69.tree "
-            "-I test/data/tree/generated_by_unit-tests/align_tree.ph.fastme.log") in caplog.text
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dJ -nB -s -T 1 "
+            "-b 105 -o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
+            "-I test/data/tree/generated_by_unit-tests/"
+            "exp_align_phylip.ph.fastme.log") in caplog.text
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".fastme.log"
+    logs = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme.log")
     assert os.path.isfile(logs)
-    bootfile = align + "_fastme_boot.txt"
-    assert os.path.isfile(bootfile)
 
 
 def test_run_fme_boot_write_f84(caplog):
@@ -145,29 +141,26 @@ def test_run_fme_boot_write_f84(caplog):
     """
     caplog.set_level(logging.DEBUG)
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
-    align = os.path.join(GENEPATH, "align_tree.ph")
-    # Copy file to output directory
-    shutil.copyfile(source_align, align)
     boot = 105
     write_boot = True
     threads = 1
     model = "4"
-    treefile = os.path.join(GENEPATH, "test_tree-fastme-boot-F84.tree")
     quiet = False
-    fme.run_fastme(align, boot, write_boot, threads, model, treefile, quiet)
+    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
 
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/align_tree.ph -d4 -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d4 -nB -s -T 1 "
             "-b 105 "
-            "-o test/data/tree/generated_by_unit-tests/test_tree-fastme-boot-F84.tree "
-            "-I test/data/tree/generated_by_unit-tests/align_tree.ph.fastme.log "
+            "-o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
+            "-I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log "
             "-B test/data/tree/generated_by_unit-tests/"
-            "align_tree.ph.fastme_bootstraps.nwk") in caplog.text
+            "exp_align_phylip.ph.fastme_bootstraps.nwk") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".fastme.log"
+    logs = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme.log")
     assert os.path.isfile(logs)
-    bootfile = align + ".fastme_bootstraps.nwk"
+    bootfile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_bootstraps.nwk")
     assert os.path.isfile(bootfile)
 
 
@@ -178,30 +171,25 @@ def test_run_fme_notreename_rysym(caplog):
     """
     caplog.set_level(logging.DEBUG)
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
-    align = os.path.join(GENEPATH, "align_tree.ph")
-    # Copy file to output directory
-    shutil.copyfile(source_align, align)
     boot = 105
     write_boot = True
     threads = 1
     model = "Y"
-    treename = None
     quiet = True
-    fme.run_fastme(align, boot, write_boot, threads, model, treename, quiet)
+    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/align_tree.ph -dY -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dY -nB -s -T 1 "
             "-b 105 "
-            "-o test/data/tree/generated_by_unit-tests/align_tree.ph.fastme_tree.nwk "
-            "-I test/data/tree/generated_by_unit-tests/align_tree.ph.fastme.log "
+            "-o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
+            "-I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log "
             "-B test/data/tree/generated_by_unit-tests/"
-            "align_tree.ph.fastme_bootstraps.nwk") in caplog.text
-    treefile = align + ".fastme_tree.nwk"
+            "exp_align_phylip.ph.fastme_bootstraps.nwk") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".fastme.log"
+    logs = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme.log")
     assert os.path.isfile(logs)
-    bootfile = align + ".fastme_bootstraps.nwk"
-    assert os.path.isfile(bootfile)
+    bootfile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_bootstraps.nwk")
     assert os.path.isfile(treefile)
 
 
@@ -210,57 +198,59 @@ def test_run_tree(caplog):
     Test generating tree from fasta alignment with fastme (conversion)
     """
     caplog.set_level(logging.DEBUG)
-    boot = 110
-    align = os.path.join(GENEPATH, "align_tree.aln")
-    # Copy file to output directory
-    shutil.copyfile(ALIGNMENT, align)
-    treefile = os.path.join(GENEPATH, "test_run_tree-fastme.tree")
+    boot = None
     quiet = False
     threads = 1
     model = 'T'
     write_boot = False
-    fme.run_tree(align, boot, treefile, quiet, threads, model=model, wb=write_boot)
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
     assert "Converting fasta alignment to PHYLIP-relaxed format" in caplog.text
     assert "Running FastME..." in caplog.text
     assert ("fastme "
-            "-i test/data/tree/generated_by_unit-tests/align_tree.aln.phylip -dT -nB -s -T 1 "
-            "-b 110 -o test/data/tree/generated_by_unit-tests/test_run_tree-fastme.tree "
+            "-i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
+            "-dT -nB -s -T 1  "
+            "-o test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
-            "align_tree.aln.phylip.fastme.log") in caplog.text
-    assert not tree_util.is_tree_lengths(treefile)
-    assert tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".phylip.fastme.log"
+            "exp_pers4genomes.grp.aln.phylip.fastme.log") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk")
+    assert tree_util.is_tree_lengths(treefile)
+    assert not tree_util.is_tree_bootstrap(treefile)
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip.fastme.log")
     assert os.path.isfile(logs)
-    phylip = align + ".phylip"
+    phylip = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip")
     assert os.path.isfile(phylip)
-    bootfile = align + ".phylip_fastme_boot.txt"
-    assert os.path.isfile(bootfile)
-    os.remove(treefile)
-    os.remove(logs)
-    os.remove(bootfile)
 
     # Redo with phylip alignments already generated
-    boot = None
+    boot = 110
     treefile = os.path.join(GENEPATH, "test_rerun_tree-fastme.tree")
     quiet = False
     threads = 1
     model = 'T'
-    write_boot = False
-    fme.run_tree(align, boot, treefile, quiet, threads, model=model, wb=write_boot)
+    write_boot = True
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
     assert "Phylip alignment file already existing." in caplog.text
     assert ("The Phylip alignment file "
-            "test/data/tree/generated_by_unit-tests/align_tree.aln.phylip "
+            "test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
             "already exists. The program will use it instead of re-converting "
-            "test/data/tree/generated_by_unit-tests/align_tree.aln") in caplog.text
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/align_tree.aln.phylip "
-            "-dT -nB -s -T 1 "
-            " -o test/data/tree/generated_by_unit-tests/test_rerun_tree-fastme.tree "
+    assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
+            "-dT -nB -s -T 1 -b 110 "
+            "-o test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
-            "align_tree.aln.phylip.fastme.log") in caplog.text
-    assert tree_util.is_tree_lengths(treefile)
-    assert not tree_util.is_tree_bootstrap(treefile)
-    logs = align + ".phylip.fastme.log"
+            "exp_pers4genomes.grp.aln.phylip.fastme.log "
+            "-B test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.phylip.fastme_bootstraps.nwk") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk")
+    assert not tree_util.is_tree_lengths(treefile)
+    assert tree_util.is_tree_bootstrap(treefile)
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip.fastme.log")
     assert os.path.isfile(logs)
-    phylip = align + ".phylip"
+    phylip = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip")
     assert os.path.isfile(phylip)
+    bootfile = "test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip.fastme_bootstraps.nwk"
+    # bootfile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.phylip.fastme_bootstraps.nwk")
+    assert os.path.isfile(bootfile)
+
