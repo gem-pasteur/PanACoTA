@@ -40,10 +40,15 @@ def compare_file_content(file1, file2):
     with open(file1, "r") as f1:
         lines_f1 = f1.readlines()
         lines_f1 = [l.strip() for l in lines_f1]
+        # Remove empty lines at the end of the file
+        while lines_f1[-1].strip() == "":
+            lines_f1 = lines_f1[:-1]
 
     with open(file2, "r") as f2:
         lines_f2 = f2.readlines()
         lines_f2 = [l.strip() for l in lines_f2]
+        while lines_f2[-1].strip() == "":
+            lines_f2 = lines_f2[:-1]
         if len(lines_f1) != len(lines_f2):
             print(f"not same number of lines in {file1} and {file2}")
             return False

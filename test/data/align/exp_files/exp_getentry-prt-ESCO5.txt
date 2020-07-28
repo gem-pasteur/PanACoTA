@@ -1,3 +1,4 @@
-ESCO5_1 Aldir/TEST6-current.1.prt
-ESCO5_2 Aldir/TEST6-current.3.prt
-ESCO5_4 Aldir/TEST6-current.4.prt
+ESCO5_1 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.1.prt
+ESCO5_2 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.3.prt
+ESCO5_4 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.4.prt
+
