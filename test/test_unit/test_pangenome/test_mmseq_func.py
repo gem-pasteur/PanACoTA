@@ -158,64 +158,67 @@ def test_create_mmseqdb_exist(caplog):
     Check that, when trying to create mmseqdb while all output files already exist,
     it logs a warning message and quits without creating it
     """
-    filename = "test_create_mmseqsdb.msdb"
+    filename = os.path.join(GENEPATH, "test_create_mmseqsdb_exist.msdb")
     outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
         open(file, "w").close()
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
-    logfile = "test_create_mmseqsdb_exist.log"
+    logfile = os.path.join(GENEPATH, "test_create_mmseqsdb_exist.log")
     mmseqs.create_mmseqs_db(filename, prt_path, logfile)
 
     # Check files created/existing
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
-        os.remove(file)
-    if os.path.isfile(logfile):
-        os.remove(logfile)
-
-    assert ("mmseqs database test_create_mmseqsdb.msdb already exists. "
-            "The program will use it.") in caplog.text
+    assert ("mmseqs database "
+            "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb_exist.msdb "
+            "already exists. The program will use it.") in caplog.text
     assert caplog.records[0].levelname == "WARNING"
 
 
 def test_create_mmseqdb_not_all_exist(caplog):
     """
     Check that, when trying to create mmseqdb while the output database exists but at least
-    1 associated file is missing (here, "_h.dbtype") -> message saying that files already exist, except some associated so database will be recreated.
+    1 associated file is missing (here, ".dbtype") -> message saying that files already exist, except some associated so database will be recreated.
     """
     caplog.set_level(logging.DEBUG)
-    filename = "test_create_mmseqsdb.msdb"
+    filename = os.path.join(GENEPATH, "test_create_mmseqsdb_not-all-exists.msdb")
     outext_miss = ["", ".index", ".lookup", "_h.index", ".dbtype"]
     for file in [filename + ext for ext in outext_miss]:
         open(file, "w").close()
-    prt_path = prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
-    logfile = "test_create_mmseqsdb_exist.log"
+    prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
+    logfile = os.path.join(GENEPATH, "test_create_mmseqsdb_exist.log")
 
     # Run mmseqs creation
     mmseqs.create_mmseqs_db(filename, prt_path, logfile)
 
     # Check that all expected files have been created (not only the files created before running)
     # and remove them, as well as the logfile
-    outext_exp = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
+    outext_exp = ["", ".index", ".lookup", "_h", "_h.index", "_h.dbtype"]
     for file in [filename + ext for ext in outext_exp]:
         assert os.path.isfile(file)
-        os.remove(file)
-    os.remove(logfile)
 
     # Get logs info
     found_text = caplog.text
     # Check log content + level
-    assert ("mmseqs database test_create_mmseqsdb.msdb already exists, but at least 1 "
+    assert ("mmseqs database test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb already exists, but at least 1 "
             "associated file (.dbtype, .index etc). is missing. The program will "
             "remove existing files and recreate the database.") in found_text
     assert caplog.records[0].levelname == "WARNING"
-    assert ("Removing 'test_create_mmseqsdb.msdb'.") in found_text
-    assert ("Removing 'test_create_mmseqsdb.msdb.index'.") in found_text
-    assert ("Removing 'test_create_mmseqsdb.msdb.lookup'.") in found_text
-    assert not ("Removing test_create_mmseqsdb.msdb_h'.") in found_text
-    assert ("Removing 'test_create_mmseqsdb.msdb_h.index'.") in found_text
-    assert ("Removing 'test_create_mmseqsdb.msdb.dbtype'.") in found_text
-    assert not ("Removing 'test_create_mmseqsdb.msdb_h.dbtype'.") in found_text
+    assert ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb'") in found_text
+    assert ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb.index'.") in found_text
+    assert ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb.lookup'") in found_text
+    assert not ("Removing test/data/pangenome/generated_by_unit-tests/"
+                "test_create_mmseqsdb_not-all-exists.msdb_h'.") in found_text
+    assert ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb_h.index'.") in found_text
+    assert ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+            "test_create_mmseqsdb_not-all-exists.msdb.dbtype'.") in found_text
+    assert not ("Removing 'test/data/pangenome/generated_by_unit-tests/"
+                "test_create_mmseqsdb_not-all-exists.msdb_h.dbtype'.") in found_text
     for num in range(1, 6):
         assert caplog.records[num].levelname == "DETAIL"
     assert ("Creating database") in found_text
@@ -226,13 +229,11 @@ def test_create_mmseqdb_not_all_exist(caplog):
     assert caplog.records[8].levelname == "DETAIL"
 
 
-# TODO
-#
 def test_cluster2file():
     """
     Check that given clusters are written as expected to output file
     """
-    fileout = "test_clusters2file.txt"
+    fileout = os.path.join(GENEPATH, "test_clusters2file.txt")
     clusters = {"ESCO.0216.00001.i001_00006":
                 ["ESCO.0216.00002.b010_00115", "ESCO.0216.00001.i001_00006",
                  "ESCA.0216.00001.i001_00015", "ESCO.0216.00001.b010_00115",
@@ -271,7 +272,6 @@ def test_cluster2file():
             fam = line.split()[1:]
             assert num in list(range(1, 4))
             assert fam in exp_fams
-    os.remove(fileout)
 
 
 def test_tsv2cluster():
@@ -294,9 +294,9 @@ def test_tsv2pangenome_outgiven():
     From mmseq tsv file, generate output pangenome file with a given name for it
     """
     mmseqclust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
-    logmmseq = "test_tsv2pan.log"
+    logmmseq = os.path.join(GENEPATH, "test_tsv2pan.log")
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    outfile1 = "test_tsv2pan_outpangenome.txt"
+    outfile1 = os.path.join(GENEPATH, "test_tsv2pan_outpangenome.txt")
     fams, outfile = mmseqs.mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile1)
     # Check that outfile nae was not modified by the function
     assert outfile1 == outfile
@@ -323,16 +323,14 @@ def test_tsv2pangenome_outgiven():
             lines_exp += line_exp.split()[1:]
             lines_out += line.split()[1:]
     assert set(lines_exp) == set(lines_out)
-    os.remove(outfile)
     # Check content of logfile
     with open(logmmseq, "r") as logf:
         first_lines = [logf.readline() for _ in range(3)]
         assert first_lines == ["\n", "------------\n", "\n"]
         start_line = logf.readline().strip()
-        assert start_line == "Start: {}".format(start)
+        assert start_line == f"Start: {start}"
         end_line = logf.readline().strip()
         assert "End: " in end_line
-    os.remove(logmmseq)
 
 
 def test_tsv2pangenome_default():
@@ -340,10 +338,15 @@ def test_tsv2pangenome_default():
     From mmseq tsv file, generate output pangenome file with default name
     """
     mmseqclust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
-    logmmseq = "test_tsv2pan-def.log"
+    mmseqsclust_test = os.path.join(GENEPATH, "mmseq_clust-out_for_test")
+    shutil.copyfile(mmseqclust, mmseqsclust_test)
+    mmseqclust_tsv = os.path.join(PATH_TEST_FILES, "mmseq_clust-out.tsv")
+    mmseqsclust_test_tsv = os.path.join(GENEPATH, "mmseq_clust-out_for_test.tsv")
+    shutil.copyfile(mmseqclust_tsv, mmseqsclust_test_tsv)
+    logmmseq = os.path.join(GENEPATH, "test_tsv2pan-def.log")
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    fams, outfile = mmseqs.mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start)
-    exp_out = os.path.join(PATH_TEST_FILES, "PanGenome-mmseq_clust-out.tsv.lst")
+    fams, outfile = mmseqs.mmseqs_tsv_to_pangenome(mmseqsclust_test, logmmseq, start)
+    exp_out = os.path.join(GENEPATH, "PanGenome-mmseq_clust-out_for_test.tsv.lst")
     # Check name of output file (because not given)
     assert outfile == exp_out
     # Check that the number of families is as expected
@@ -366,7 +369,6 @@ def test_tsv2pangenome_default():
             lines_exp += line_exp.split()[1:]
             lines_out += line.split()[1:]
     assert set(lines_exp) == set(lines_out)
-    os.remove(outfile)
     # Check logfile content
     with open(logmmseq, "r") as logf:
         first_lines = [logf.readline() for _ in range(3)]
@@ -375,7 +377,6 @@ def test_tsv2pangenome_default():
         assert start_line == "Start: {}".format(start)
         end_line = logf.readline().strip()
         assert "End: " in end_line
-    os.remove(logmmseq)
 
 
 def test_mmseq2pan_givenout():
@@ -384,14 +385,14 @@ def test_mmseq2pan_givenout():
     functions called).+ write pangenome to ouput file
     """
     # file witch will contain pangenome
-    outfile1 = "test_mmseq2pan.lst"
+    outfile1 = os.path.join(GENEPATH, "test_mmseq2pan.lst")
     # files with output of mmseqs clusters (in mmseqs format)
     mmseqclust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
     # mmseq db used for clustering
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
     # Initialyze logfile with start time
     start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    logmmseq = "test_mmseq2pan-out.log"
+    logmmseq = os.path.join(GENEPATH, "test_mmseq2pan-out.log")
 
     # Run mmseqs2pan
     fams, outf = mmseqs.mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile1)
@@ -420,8 +421,6 @@ def test_mmseq2pan_givenout():
             lines_exp.append(tuple(line_exp.split()[1:]))
             lines_out.append(tuple(line.split()[1:]))
     assert set(lines_exp) == set(lines_out)
-    os.remove(outf)
-    os.remove(logmmseq)
 
 
 def test_run_clust():
@@ -431,10 +430,10 @@ def test_run_clust():
     depend on its version, and we are here testing PanACoTA.
     """
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
-    mmseqclust = "test_mmseq_cluster-out"
-    tmpdir = "test_mmseq_tmp"
+    mmseqclust = os.path.join(GENEPATH, "test_mmseq_cluster-out")
+    tmpdir = os.path.join(GENEPATH, "test_mmseq_tmp")
     os.makedirs(tmpdir)
-    logmmseq = "test_mmseq_cluster.log"
+    logmmseq = os.path.join(GENEPATH, "test_mmseq_cluster.log")
     min_id = 0.8
     threads = 1
     clust_mode = 1
@@ -451,11 +450,6 @@ def test_run_clust():
                                            mmseqclust + ".dbtype"])
     assert os.path.isfile(logmmseq)
     assert os.path.isdir(tmpdir)
-    # Remove files created by this test
-    shutil.rmtree(tmpdir)
-    for file in generated_outfiles:
-        os.remove(file)
-    os.remove(logmmseq)
 
 
 def test_get_logmmseq():
@@ -499,7 +493,7 @@ def test_do_pangenome_defaultname(caplog):
     and compare output pangenome to the expected one.
     """
     caplog.set_level(logging.DEBUG)
-    outdir = "test_do_pangenome_outdir"
+    outdir = os.path.join(GENEPATH, "test_do_pangenome_outdir")
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
     min_id = 0.8
@@ -540,7 +534,6 @@ def test_do_pangenome_defaultname(caplog):
     assert set(lines_exp) == set(lines_out)
     assert "Clustering proteins..." in caplog.text
     assert caplog.records[1].levelname == "INFO"
-    shutil.rmtree(outdir)
 
 
 def test_do_pangenome_given_panfile(caplog):
@@ -550,7 +543,7 @@ def test_do_pangenome_given_panfile(caplog):
     No possibility to check if quiet was not applied...
     """
     caplog.set_level(logging.DEBUG)
-    outdir = "test_do_pangenome_outdir_pan-name"
+    outdir = os.path.join(GENEPATH, "test_do_pangenome_outdir_pan-name")
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
     min_id = 0.8
@@ -558,7 +551,7 @@ def test_do_pangenome_given_panfile(caplog):
     threads = 1
     start = "STARTTIME"
     quiet = False
-    panfile = "test_res_pangenome_given-name"
+    panfile = os.path.join(GENEPATH, "test_res_pangenome_given-name")
     # Check outdir does not exit before
     assert not os.path.isdir(outdir)
     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
@@ -593,9 +586,6 @@ def test_do_pangenome_given_panfile(caplog):
     # Check log
     assert "Clustering proteins..." in caplog.text
     assert caplog.records[1].levelname == "INFO"
-    # Remove dir created for this test, and pangenome file generated
-    shutil.rmtree(outdir)
-    os.remove(panfile)
 
 
 def test_do_pangenome_quiet(caplog):
@@ -606,7 +596,7 @@ def test_do_pangenome_quiet(caplog):
     No possibility to check if quiet was applied...
     """
     caplog.set_level(logging.DEBUG)
-    outdir = "test_do_pangenome_outdir_quiet"
+    outdir = os.path.join(GENEPATH, "test_do_pangenome_outdir_quiet")
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
     min_id = 0.8
@@ -645,7 +635,6 @@ def test_do_pangenome_quiet(caplog):
             lines_out.append(tuple(line.split()[1:]))
     assert set(lines_exp) == set(lines_out)
     assert "Clustering proteins..." in caplog.text
-    shutil.rmtree(outdir)
 
 
 def test_do_pangenome_exist(caplog):
@@ -654,7 +643,7 @@ def test_do_pangenome_exist(caplog):
     run mmseq again, but just converts it to pangenome.
     """
     caplog.set_level(logging.DEBUG)
-    outdir = "test_do_pangenome_outdir_exist"
+    outdir = os.path.join(GENEPATH, "test_do_pangenome_outdir_exist")
     prt_bank = "exp_EXEM.All.prt"
     mmseqdb = os.path.join(PATH_TEST_FILES, "mmseq_db")
     min_id = 0.8
@@ -669,8 +658,9 @@ def test_do_pangenome_exist(caplog):
     shutil.copyfile(orig_clust + ".index", out_clust + ".index")
     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, min_id,
                                         clust_mode, threads, start)
-    assert ("mmseqs clustering test_do_pangenome_outdir_exist/exp_EXEM.All.prt-clust-0.8-"
-            "mode1_STARTTIME already exists. The program will now convert it to a "
+    assert ("mmseqs clustering test/data/pangenome/generated_by_unit-tests/"
+            "test_do_pangenome_outdir_exist/exp_EXEM.All.prt-clust-0.8-mode1_STARTTIME "
+            "already exists. The program will now convert it to a "
             "pangenome file.") in caplog.text
     # assert
     # Check creation of empty tmp directory
@@ -701,7 +691,6 @@ def test_do_pangenome_exist(caplog):
     assert set(lines_exp) == set(lines_out)
     assert "Clustering proteins..." not in caplog.text
     assert caplog.records[1].levelname == "WARNING"
-    shutil.rmtree(outdir)
 
 
 def test_run_all_pangenome(caplog):
@@ -712,7 +701,7 @@ def test_run_all_pangenome(caplog):
     caplog.set_level(logging.DEBUG)
     min_id = 0.8
     clust_mode = 1
-    outdir = "test_run_allpangenome"
+    outdir = os.path.join(GENEPATH, "test_run_allpangenome")
     os.makedirs(outdir)
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     threads = 1
@@ -772,8 +761,6 @@ def test_run_all_pangenome(caplog):
     assert caplog.records[2].levelname == "DETAIL"
     assert caplog.records[3].levelname == "DETAIL"
 
-    shutil.rmtree(outdir)
-
 
 def test_run_all_pangenome_givenfile_parallel(caplog):
     """
@@ -783,7 +770,7 @@ def test_run_all_pangenome_givenfile_parallel(caplog):
     caplog.set_level(logging.DEBUG)
     min_id = 0.8
     clust_mode = 1
-    outdir = "test_run_allpangenome_paralell"
+    outdir = os.path.join(GENEPATH, "test_run_allpangenome_paralell")
     os.makedirs(outdir)
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     threads = 2
@@ -834,6 +821,3 @@ def test_run_all_pangenome_givenfile_parallel(caplog):
     assert caplog.records[1].levelname == "INFO"
     assert caplog.records[2].levelname == "DETAIL"
     assert caplog.records[3].levelname == "DETAIL"
-
-    # remove test folder
-    shutil.rmtree(outdir)
