@@ -85,17 +85,12 @@ def test_run_quicktree_default(caplog):
     caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_stockholm.stk")
     boot = None
-    treefile = os.path.join(GENEPATH, "test_quicktree_default")
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment-qt.grp.aln")
-    shutil.copyfile(align, cur_al)
-    qt.run_quicktree(cur_al, boot, treefile)
+    qt.run_quicktree(align, boot, GENEPATH)
     assert "Running Quicktree..." in caplog.text
     assert ("quicktree -in a -out t  "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment-qt.grp.aln") in caplog.text
-    log_file = cur_al + ".quicktree.log"
+            "test/data/tree/exp_files/exp_align_stockholm.stk") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_align_stockholm.stk.quicktree_tree.nwk")
+    log_file = os.path.join(GENEPATH, "exp_align_stockholm.stk.quicktree.log")
     assert os.path.isfile(log_file)
     assert tree_util.is_tree_lengths(treefile)
     assert not tree_util.is_tree_bootstrap(treefile)
@@ -108,19 +103,14 @@ def test_run_quicktree_boot_notree(caplog):
     caplog.set_level(logging.DEBUG)
     align = os.path.join(EXPPATH, "exp_align_stockholm.stk")
     boot = 111
-    treename = None
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment-qt.grp.aln")
-    shutil.copyfile(align, cur_al)
-    qt.run_quicktree(cur_al, boot, treename)
+    qt.run_quicktree(align, boot, GENEPATH)
     assert "Running Quicktree..." in caplog.text
     assert ("quicktree -in a -out t -boot 111 "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment-qt.grp.aln") in caplog.text
-    log_file = cur_al + ".quicktree.log"
+            "test/data/tree/exp_files/exp_align_stockholm.stk") in caplog.text
+    treefile = os.path.join(GENEPATH, "exp_align_stockholm.stk.quicktree_tree.nwk")
+    log_file = os.path.join(GENEPATH, "exp_align_stockholm.stk.quicktree.log")
     assert os.path.isfile(log_file)
-    treefile = cur_al + ".quicktree_tree.nwk"
+    assert os.path.isfile(treefile)
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
 
@@ -132,39 +122,32 @@ def test_run_twice(caplog):
     """
     caplog.set_level(logging.DEBUG)
     boot = 111
-    treename = None
-    # Copy input file to the folder used for test results
-    aldir = os.path.join(GENEPATH, "aldir")
-    os.makedirs(aldir)
-    cur_al = os.path.join(aldir, "alignment.grp.aln")
-    shutil.copyfile(ALIGNMENT, cur_al)
-    qt.run_tree(cur_al, boot, treename)
+    qt.run_tree(ALIGNMENT, boot, GENEPATH)
     assert "Converting fasta alignment to stockholm format." in caplog.text
     assert "Running Quicktree..." in caplog.text
     assert ("quicktree -in a -out t -boot 111 "
-            "test/data/tree/generated_by_unit-tests/aldir/"
-            "alignment.grp.aln.stockholm") in caplog.text
-    stock = cur_al + ".stockholm"
+            "test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.stockholm") in caplog.text
+    stock = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.stockholm")
     assert os.path.isfile(stock)
-    log_file = stock + ".quicktree.log"
+    log_file = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.stockholm.quicktree.log")
     assert os.path.isfile(log_file)
-    treefile = stock + ".quicktree_tree.nwk"
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.stockholm.quicktree_tree.nwk")
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
 
     boot = None
-    treename = os.path.join(GENEPATH, "test-run-all-quicktree")
-    qt.run_tree(cur_al, boot, treename)
+    qt.run_tree(ALIGNMENT, boot, GENEPATH)
     assert "Stockholm alignment file already existing." in caplog.text
     assert ("The Stockholm alignment file "
-            "test/data/tree/generated_by_unit-tests/aldir/alignment.grp.aln.stockholm "
+            "test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.stockholm "
             "already exists. The program will use it "
-            "instead of re-converting test/data/tree/generated_by_unit-tests/aldir/"
-            "alignment.grp.aln.") in caplog.text
+            "instead of re-converting "
+            "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert "Running Quicktree..." in caplog.text
-    assert ("quicktree -in a -out t  test/data/tree/generated_by_unit-tests/aldir/"
-            "alignment.grp.aln.stockholm") in caplog.text
+    assert ("quicktree -in a -out t  test/data/tree/generated_by_unit-tests/"
+            "exp_pers4genomes.grp.aln.stockholm") in caplog.text
     assert os.path.isfile(stock)
     assert os.path.isfile(log_file)
-    assert tree_util.is_tree_lengths(treename)
-    assert not tree_util.is_tree_bootstrap(treename)
+    assert tree_util.is_tree_lengths(treefile)
+    assert not tree_util.is_tree_bootstrap(treefile)

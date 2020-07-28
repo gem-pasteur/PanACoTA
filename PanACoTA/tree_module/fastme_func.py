@@ -97,21 +97,16 @@ def run_fastme(alignfile, boot, write_boot, threads, model, outdir, quiet):
     # Get bootstrap information
     if boot:
         bootinfo = "-b {}".format(boot)
-    print(boot)
     # Get threads information
     if threads:
         threadinfo = "-T {}".format(threads)
-    print(threads)
     # Get output filename
     align_name = os.path.basename(alignfile)
     logfile = os.path.join(outdir, align_name + ".fastme.log")
     treefile = os.path.join(outdir, align_name + ".fastme_tree.nwk")
-    print(treefile)
-    print(logfile)
     # If bootstrap pseudo-trees must be written, define the filename here
     if write_boot:
         outboot = "-B " + os.path.join(outdir, align_name + ".fastme_bootstraps.nwk")
-    print(outboot)
     # Put default model if not given
     if not model:
         model = "T"

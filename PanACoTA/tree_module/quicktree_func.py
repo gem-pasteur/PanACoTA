@@ -17,7 +17,7 @@ from PanACoTA import utils
 logger = logging.getLogger("tree.quicktree")
 
 
-def run_tree(alignfile, boot, treefile, *args, **kwargs):
+def run_tree(alignfile, boot, outdir, *args, **kwargs):
     """
     Run quicktree for the given alignment file and options
 
@@ -27,8 +27,8 @@ def run_tree(alignfile, boot, treefile, *args, **kwargs):
         Path to file containing alignments of persistent families grouped by genome
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    treefile: str or None
-        Path to file which will contain the tree inferred
+    outdir: str or None
+        Path to the tree file that must be created
     args: tuple
         Used to be compatible with the 'run_tree' function of other softs like fastME and
         fastTree which require more arguments like the DNA substitution model, the number of
@@ -38,9 +38,10 @@ def run_tree(alignfile, boot, treefile, *args, **kwargs):
         fastTree which require more arguments like the DNA substitution model, the number of
         threads to use, etc.
     """
-    align_stock = alignfile + ".stockholm"
+    align_name = os.path.basename(alignfile)
+    align_stock = os.path.join(outdir, align_name + ".stockholm")
     convert2stockholm(alignfile, align_stock)
-    run_quicktree(align_stock, boot, treefile)
+    run_quicktree(align_stock, boot, outdir)
 
 
 def convert2stockholm(infile, outfile):
@@ -66,34 +67,34 @@ def convert2stockholm(infile, outfile):
         AlignIO.write(alignments, output_handle, "stockholm")
 
 
-def run_quicktree(alignfile, boot, treefile):
+def run_quicktree(alignfile, boot, outdir):
     """
     Run quicktree on the given alignment.
 
     Parameters
     ----------
     alignfile: str
-        Path to file containing alignments of persistent families grouped by genome
+        Path to file containing alignments of persistent families grouped by genome,
+        in Stockholm format
     boot: int or None
         Number of bootstraps to compute. None if no bootstrap asked
-    treefile: str or None
-        Path to file which will contain the tree inferred
+    outdir: str or None
+        Path to the tree file that must be created
     """
     logger.info("Running Quicktree...")
     bootinfo = ""
 
     # Get bootstrap information
     if boot:
-        bootinfo = "-boot {}".format(boot)
-    # Get output filename
-    if not treefile:
-        treefile = alignfile + ".quicktree_tree.nwk"
-    cmd = "quicktree -in a -out t {boot} {infile}".format(boot=bootinfo, infile=alignfile)
+        bootinfo = f"-boot {boot}"
+    # Get output filename and logfile name
+    align_name = os.path.basename(alignfile)
+    logfile = os.path.join(outdir, align_name + ".quicktree.log")
+    treefile = os.path.join(outdir, align_name + ".quicktree_tree.nwk")
+    cmd = f"quicktree -in a -out t {bootinfo} {alignfile}"
     outfile = open(treefile, "w")
-    # Define log filename
-    logfile = alignfile + ".quicktree.log"
     logfilef = open(logfile, "w")
-    error = ("Problem while running quicktree. See log file ({}) for "
-             "more information.").format(logfile)
+    error = (f"Problem while running quicktree. See log file ({logfile}) for "
+             "more information.")
     logger.details(cmd)
     utils.run_cmd(cmd, error, stdout=outfile, eof=True, logger=logger, stderr=logfilef)
