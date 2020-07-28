@@ -154,7 +154,7 @@ def test_get_names_files():
     Test that given an open tab file (containing 2 columns: name of sequence to extract,
     file where it must be extracted), it returns the expected dict of sequences to extract
     """
-    tabfile = os.path.join(EXPPATH, "exp_getentry-gen-ESCO2.txt")
+    tabfile = os.path.join(EXPPATH, "exp_getentry-gen-ESCO2_write.txt")
     with open(tabfile, "r") as tabf:
         toext = gseq.get_names_to_extract(tabf, outfile=None)
     exp_toext = {'ESCO2_00001': "Aldir/TEST6-current.1.gen",
@@ -186,7 +186,7 @@ def test_get_names_out_and2columns():
     sequences to extract (all to extract to the same given output file, the 2nd column of tab
     file is ignored).
     """
-    tabfile = os.path.join(EXPPATH, "exp_getentry-gen-ESCO2.txt")
+    tabfile = os.path.join(EXPPATH, "exp_getentry-gen-ESCO2_write.txt")
     outfile = os.path.join(GENEPATH, "test_getnames_2columns")
     with open(tabfile, "r") as tabf:
         toext = gseq.get_names_to_extract(tabf, outfile=outfile)
@@ -424,7 +424,7 @@ def test_get_all_seqs(caplog):
         shutil.copyfile(genome_gen, gen_out)
         shutil.copyfile(genome_prt, prt_out)
     gseq.get_all_seqs(all_genomes, dname, DBPATH, listdir, aldir, all_fams, quiet)
-    
+
     # For each family, check that prt and gen files exist, and their content
     for fam in all_fams:
         fam_prt = os.path.join(aldir, f"{dname}-current.{fam}.prt")
@@ -435,7 +435,7 @@ def test_get_all_seqs(caplog):
         assert os.path.isfile(fam_gen)
         exp_fam_gen = os.path.join(ref_aldir, f"current.{fam}.gen")
         assert tutil.compare_file_content(fam_gen, exp_fam_gen)
-    
+
     # Check logs
     assert "Extracting proteins and genes from all genomes" in caplog.text
     for gen in all_genomes:
@@ -596,9 +596,9 @@ def test_get_all_seqs_allexist(caplog):
     # Check that concat file was removed
     assert os.path.isfile(concat)
     # Check logs
-    assert ("All extraction files already existing (see detailed log for " 
+    assert ("All extraction files already existing (see detailed log for "
             "more information)") in caplog.text
-    assert ("All prt and gene files for all families already exist. The program " 
-            "will use them for the next step. If you want to re-extract a given " 
-            "family, remove its prt and gen extraction files. If you want to " 
+    assert ("All prt and gene files for all families already exist. The program "
+            "will use them for the next step. If you want to re-extract a given "
+            "family, remove its prt and gen extraction files. If you want to "
             "re-extract all families, use option -F (or --force).") in caplog.text
