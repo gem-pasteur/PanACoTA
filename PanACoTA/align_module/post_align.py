@@ -190,7 +190,7 @@ def read_alignments(all_alns, all_genomes):
         - {genome_name: [list of sequences for this genome]}
         - None if problem with a protein for which we don't find the genome
     """
-    sequences = {}  # name: [list of sequences]
+    sequences = {}  # name: [ordered list of sequences]
     genome = None
     seq = ""
     with open(all_alns, 'r') as alnf:
