@@ -64,7 +64,7 @@ build-from-test-image:
     - py.test test/test_install/test_make_all-installed.py
 
 
-unit-test-ubuntu18.04:
+unit-test-ubuntu:
   stage: test
   except:
     - docker
@@ -92,7 +92,7 @@ unit-test-ubuntu18.04:
     expire_in: 1 hour
 
 
-# func-test-ubuntu16.04:
+# func-test-ubuntu:
 #   stage: test
 #   except:
 #     - docker

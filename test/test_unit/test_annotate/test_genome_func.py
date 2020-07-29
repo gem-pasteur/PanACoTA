@@ -24,7 +24,6 @@ EXP_DIR = os.path.join(DBDIR, 'exp_files')
 BASELINE_DIR = os.path.abspath(os.path.join(EXP_DIR, "baseline"))
 GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
 logger = logging.getLogger('test_genome_func')
-# BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
 
 
 @pytest.fixture(autouse=True)
