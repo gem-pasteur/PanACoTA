@@ -138,13 +138,13 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
         return False
     # Open original sequence file
     with open(gpath, "r") as genf:
-        # If a new file must be created (sequences cut, and/or annotating with prokka), open it
+        # If a new file must be created (sequences cut), open it
         gresf = None
         if grespath:
             gresf = open(grespath, "w")
 
         # Initialize variables
-        cur_contig_name = "" # header text (less than 20 characters if prokka used)
+        cur_contig_name = "" # header text 
         contig_sizes = {}  # {header text: size}
         cur_seq = "" # sequence
         num = 1 # Used to get unique contig names
@@ -154,7 +154,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
             #### NEW CONTIG
             # Line corresponding to a new contig
             if line.startswith(">"):
-                # If not first contig, write info to  output file (if needed)
+                # If not first contig, write info to output file (if needed)
                 if cur_seq != "":
                     num = format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes,
                                         gresf, num, logger)
@@ -162,12 +162,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
                     if num == -1:
                         return False
                 # Get contig name for next turn, and reset sequence
-                # If prodigal, contig name is as given by original sequence
-                if soft != "prokka":
-                    cur_contig_name = line.strip()
-                # If prokka, contig name is 1st word, 1st 15 characters
-                else:
-                    cur_contig_name = line.split()[0][:15]
+                cur_contig_name = line.strip()
                 # Initialize for next contig
                 cur_seq = ""
             # #### SEQUENCE LINE
@@ -242,11 +237,7 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
     if cut:
         new_file = genome + "_{}-split{}N.fna".format(soft, len(pat) - 1)
         grespath = os.path.join(tmp_path, new_file)
-    # If user does not want to cut, but annotates with prokka, need a new file with headers shorter
-    elif soft == 'prokka':
-        new_file = genome + f"_{soft}-shorter-contigs.fna".format(soft)
-        grespath = os.path.join(tmp_path, new_file)
-    # If no cut and using prodigal, just keep original sequence, no need to create new file.
+    # If no cutl, just keep original sequence, no need to create new file.
     # Just check that contigs have different names
     return gpath, grespath
 
@@ -256,8 +247,7 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     Format given contig, and save to output file if needed
 
     - if cut: cut it and write each subsequence
-    - if prokka: write new contig (15 first characters of 1st word + contig_num)
-    - if prodigal (and no cut), just check that contig names are different
+    - write new contig just check that contig names are different
 
     Parameters
     ----------

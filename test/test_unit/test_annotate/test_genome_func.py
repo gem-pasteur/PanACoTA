@@ -338,7 +338,7 @@ def test_get_outdir_prokka_nocut():
   pat = None
   gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, GENEPATH, genome, cut, pat)
   assert gpath == os.path.join(GEN_PATH, "genome1.fasta")
-  assert grespath == os.path.join(GENEPATH, "genome1.fasta_prokka-shorter-contigs.fna")
+  assert not grespath
 
 
 def test_get_outdir_prokka_cut():
@@ -418,7 +418,7 @@ def test_analyse1genome_cut_prodigal():
     # is the same as the path to the genome itself
     initf = os.path.join(GEN_PATH, "genome2.fasta")  # initial genome path
     outf = os.path.join(GENEPATH, "genome2.fasta_prodigal-split5N.fna")  # path to geerated genome
-    exp_out = os.path.join(EXP_DIR, "genome2_prodigal-split5N.fna") # expected generated genome
+    exp_out = os.path.join(EXP_DIR, "genome2-split5N.fna") # expected generated genome
     assert os.path.isfile(outf)
     assert tutil.compare_order_content(outf, exp_out)
     exp_genomes = {gs[0]: ["SAEN.1113"],
@@ -448,7 +448,7 @@ def test_analyse1genome_cut_prokka():
     # is the same as the path to the genome itself
     initf = os.path.join(GEN_PATH, "genome2.fasta")  # initial genome path
     outf = os.path.join(GENEPATH, "genome2.fasta_prokka-split5N.fna")  # path to geerated genome
-    exp_out = os.path.join(EXP_DIR, "genome2_prokka-split5N.fna") # expected generated genome
+    exp_out = os.path.join(EXP_DIR, "genome2-split5N.fna") # expected generated genome
     assert os.path.isfile(outf)
     assert tutil.compare_order_content(outf, exp_out)
     exp_genomes = {gs[0]: ["SAEN.1113"],
@@ -565,10 +565,9 @@ def test_analyse_all_genomes_nocut(caplog):
     gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=False)
     # construct expected results
     gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
-    opaths = [os.path.join(GENEPATH, gname + "_prokka-shorter-contigs.fna") for gname in gs]
-    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
-                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 67, 3, 3],
-                   gs[2]: ["ESCO.0416", gpaths[2], opaths[2], 70, 4, 1]}
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], gpaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", gpaths[2], gpaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
     assert ("Calculating genome size, number of contigs, L90") in caplog.text
 
@@ -618,10 +617,9 @@ def test_analyse_all_genomes_nocut_empty(caplog):
     gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=True)
     # construct expected results
     gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
-    opaths = [os.path.join(GENEPATH, gname + "_prokka-shorter-contigs.fna") for gname in gs]
-    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
-                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 67, 3, 3],
-                   gs[3]: ["ESCO.0123", gpaths[3], opaths[3], 70, 4, 1]}
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], gpaths[1], 67, 3, 3],
+                   gs[3]: ["ESCO.0123", gpaths[3], gpaths[3], 70, 4, 1]}
     assert exp_genomes == genomes
     assert ("Calculating genome size, number of contigs, L90") in caplog.text
     assert ("Your file test/data/annotate/genomes/empty.fasta "
