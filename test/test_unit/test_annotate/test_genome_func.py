@@ -8,19 +8,49 @@ Unit tests for utils.py
 import pytest
 import os
 import logging
+import shutil
 
-import test.test_unit.utilities_for_tests as util
+import test.test_unit.utilities_for_tests as tutil
 import PanACoTA.annotate_module.genome_seq_functions as gfunc
 
 import matplotlib
 matplotlib.use('AGG')
 
 # Define variables used by several tests
-DBPATH = os.path.join("test", "data", "annotate", "genomes")
-TMP_PATH = os.path.join('test', 'data', 'annotate', "tmp_files")
-EXP_DIR = os.path.join('test', 'data', 'annotate', 'exp_files')
+DBDIR = os.path.join("test", "data", "annotate")
+GEN_PATH = os.path.join(DBDIR, "genomes")
+TMP_PATH = os.path.join(DBDIR, "tmp_files")
+EXP_DIR = os.path.join(DBDIR, 'exp_files')
+BASELINE_DIR = os.path.abspath(os.path.join(EXP_DIR, "baseline"))
+GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
 logger = logging.getLogger('test_genome_func')
 # BASELINE_DIR = os.path.join("..", "..", "data", "annotate", "exp_files", "baseline")
+
+
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
+    """
+    Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
+    """
+    # utils.init_logger(LOGFILE_BASE, 0, 'test_postalign', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH)
+    # for f in LOGFILES:
+    #     if os.path.exists(f):
+    #         os.remove(f)
+    print("teardown")
+
 
 
 def test_calc_l90_exact():
@@ -43,116 +73,49 @@ def test_calc_l90_more():
     assert l90 == 3
 
 
+def test_calc_l90_error():
+    """
+    Calculate L90 according to the given genome size and contig sizes
+    3 contigs get exactly more than 90%, but 2 contigs get less -> l90 = 3
+    """
+    cont_size = {}
+    assert not gfunc.calc_l90(cont_size)
+
+
 def test_rename_genomes():
     """
-    From a list of genomes ({genome: [name.date, path, gsize, nbcont, L90]}),
+    From a list of genomes ({genome: [name.date, path, path_to_seq, gsize, nbcont, L90]}),
     order them by species, and by decreasing quality (L90, nb_cont), and rename them,
     as well as their contigs.
     """
-    genomes_dir = os.path.join("test", "data", "annotate", "genomes")
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
 
-    genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), "pathtoseq1", 51, 4, 2],
-               gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), "pathToSeq2", 67, 3, 3],
-               gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), "pathToSeq3", 70, 4, 1],
-               gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), "pathToSeq4", 114, 5, 2],
-               gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), "path_to_seq5", 106, 3, 1],
-               gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), "pathtoseq6", 116, 4, 2],
-               gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
+    genomes = {gs[0]: ["SAEN.1113", os.path.join(GEN_PATH, gs[0]), "pathtoseq1", 51, 4, 2],
+               gs[1]: ["SAEN.1114", os.path.join(GEN_PATH, gs[1]), "pathToSeq2", 67, 3, 3],
+               gs[2]: ["ESCO.0416", os.path.join(GEN_PATH, gs[2]), "pathToSeq3", 70, 4, 1],
+               gs[3]: ["ESCO.0216", os.path.join(GEN_PATH, gs[3]), "pathToSeq4", 114, 5, 2],
+               gs[4]: ["SAEN.1115", os.path.join(GEN_PATH, gs[4]), "path_to_seq5", 106, 3, 1],
+               gs[5]: ["ESCO.0216", os.path.join(GEN_PATH, gs[5]), "pathtoseq6", 116, 4, 2],
+               gs[6]: ["SAEN.1115", os.path.join(GEN_PATH, gs[6]), "pathtoseq7", 137, 3, 2]}
     gfunc.rename_all_genomes(genomes)
     # SAEN genomes 1 and 2 have same characteristics. Their place will be chosen randomly,
     # so take into account both choices
     exp_genomes = {gs[0]: ["SAEN.1113.00003",
-                           os.path.join(genomes_dir, gs[0]), "pathtoseq1", 51, 4, 2],
+                           os.path.join(GEN_PATH, gs[0]), "pathtoseq1", 51, 4, 2],
                    gs[1]: ["SAEN.1114.00004",
-                           os.path.join(genomes_dir, gs[1]), "pathToSeq2", 67, 3, 3],
+                           os.path.join(GEN_PATH, gs[1]), "pathToSeq2", 67, 3, 3],
                    gs[2]: ["ESCO.0416.00001",
-                           os.path.join(genomes_dir, gs[2]), "pathToSeq3", 70, 4, 1],
+                           os.path.join(GEN_PATH, gs[2]), "pathToSeq3", 70, 4, 1],
                    gs[3]: ["ESCO.0216.00003",
-                           os.path.join(genomes_dir, gs[3]), "pathToSeq4", 114, 5, 2],
+                           os.path.join(GEN_PATH, gs[3]), "pathToSeq4", 114, 5, 2],
                    gs[4]: ["SAEN.1115.00001",
-                           os.path.join(genomes_dir, gs[4]), "path_to_seq5", 106, 3, 1],
+                           os.path.join(GEN_PATH, gs[4]), "path_to_seq5", 106, 3, 1],
                    gs[5]: ["ESCO.0216.00002",
-                           os.path.join(genomes_dir, gs[5]), "pathtoseq6", 116, 4, 2],
+                           os.path.join(GEN_PATH, gs[5]), "pathtoseq6", 116, 4, 2],
                    gs[6]: ["SAEN.1115.00002",
-                           os.path.join(genomes_dir, gs[6]), "pathtoseq7", 137, 3, 2]}
+                           os.path.join(GEN_PATH, gs[6]), "pathtoseq7", 137, 3, 2]}
     assert genomes == exp_genomes
-
-
-def test_get_outdir_prodigal_nocut():
-  """
-  When we use prodigal, and do not cut at each stretch of 5N, no need to create a modified
-  sequence. So, check that get_output_dir returns an empty res_path (as we will not create
-  any new sequence)
-  """
-  soft = "prodigal"
-  genome = "genome1.fasta"
-  cut = False
-  pat = None
-  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
-  assert not grespath
-  assert gpath == os.path.join(DBPATH, "genome1.fasta")
-
-
-def test_get_outdir_prodigal_cut():
-  """
-  When using prodigal, and cut at each stretch of 4 'N', check that the output
-  dir where modified sequence must be store is as expected (in tmp_dir, and adding "-split4N").
-  """
-  soft = "prodigal"
-  genome = "genome1.fasta"
-  cut = True
-  pat = "NNNN+"
-  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
-  assert gpath == os.path.join(DBPATH, "genome1.fasta")
-  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prodigal-split4N.fna")
-
-
-def test_get_outdir_prokka_nocut():
-  """
-  When using prokka, and don't cut sequence, check that the output
-  dir where modified sequence must be store is as expected (in tmp dir, indicating
-  "shorter_contigs" because we need to shorten the contig headers for prokka)
-  """
-  soft = "prokka"
-  genome = "genome1.fasta"
-  cut = False
-  pat = None
-  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
-  assert gpath == os.path.join(DBPATH, "genome1.fasta")
-  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prokka-shorter-contigs.fna")
-
-
-def test_get_outdir_prokka_cut():
-  """
-  When using prokka, and cut at each stretch of 3 'N', check that the output
-  dir where modified sequence must be store is as expected (in tmp_di, indicating "-split3N"
-  because sequence will be cut)
-  """
-  soft = "prokka"
-  genome = "genome1.fasta"
-  cut = True
-  pat = "NNN+"
-  gpath, grespath = gfunc.get_output_dir(soft, DBPATH, TMP_PATH, genome, cut, pat)
-  assert gpath == os.path.join(DBPATH, "genome1.fasta")
-  assert grespath == os.path.join(TMP_PATH, "genome1.fasta_prokka-split3N.fna")
-
-
-def test_get_outdir_no_input_seq():
-    """
-    Test that when the given genome name does not exist in the dbpath, it exists in tmp path.
-    It means that it is a concatenation of 2 files of dbpath, which was saved in tmppath
-    """
-    soft = "prodigal"
-    genome = "prokka_out_for_test-supHeader.faa"
-    tmp_path = os.path.join("test", "data", "annotate", "test_files")
-    cut = True
-    pat = "NNNNNNN+"
-    gpath, grespath = gfunc.get_output_dir(soft, DBPATH, tmp_path, genome, cut, pat)
-    assert gpath == os.path.join(tmp_path, "prokka_out_for_test-supHeader.faa")
-    assert grespath == os.path.join(tmp_path,
-                                  "prokka_out_for_test-supHeader.faa_prodigal-split7N.fna")
 
 
 def test_split_contig_nocut():
@@ -165,7 +128,7 @@ def test_split_contig_nocut():
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
     cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {"contig_1": 10}
-    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    resfile = os.path.join(GENEPATH, "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
     num = 2
 
@@ -175,10 +138,7 @@ def test_split_contig_nocut():
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
     assert num == 3
     assert os.path.exists(resfile)
-    assert util.compare_order_content(resfile, exp_file)
-
-    # Remove created file
-    os.remove(resfile)
+    assert tutil.compare_order_content(resfile, exp_file)
 
 
 def test_split_contig_cut():
@@ -192,7 +152,7 @@ def test_split_contig_cut():
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
     cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {">contig_1": 10}
-    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    resfile = os.path.join(GENEPATH, "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
     num = 2
 
@@ -202,10 +162,7 @@ def test_split_contig_cut():
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
     assert num == 4
     assert os.path.exists(resfile)
-    assert util.compare_order_content(resfile, exp_file)
-
-    # Remove created file
-    os.remove(resfile)
+    assert tutil.compare_order_content(resfile, exp_file)
 
 
 def test_split_empty_contig():
@@ -218,7 +175,7 @@ def test_split_empty_contig():
     whole_seq = "NNNNNAACTGCTTTTTAAGCGCGCTCCTGCGNGGTTGTGTGGGCCCAGAGCGAGNCG"
     cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {"contig_1": 10}
-    resfile = os.path.join("test", "data", "annotate", "test_split_contig_nocut.fna")
+    resfile = os.path.join(GENEPATH, "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
     num = 2
 
@@ -228,15 +185,12 @@ def test_split_empty_contig():
     exp_file = os.path.join(EXP_DIR, "exp_split_empty_contig.fna")
     assert num == 3
     assert os.path.exists(resfile)
-    assert util.compare_order_content(resfile, exp_file)
-
-    # Remove created file
-    os.remove(resfile)
+    assert tutil.compare_order_content(resfile, exp_file)
 
 
 def test_format_contig_cut():
     """
-    For a given contig, if we want to annotate it with prodigal, and cut at each stretch of 5 'N'
+    For a given contig, if we want to annotate it, and cut at each stretch of 5 'N'
     check that it writes this contig, split, in the expected file
     """
     cut = True
@@ -244,7 +198,7 @@ def test_format_contig_cut():
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
     cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {}
-    resfile = os.path.join("test", "data", "annotate", "test_format_cont_cut5N.fna")
+    resfile = os.path.join(GENEPATH, "test_format_cont_cut5N.fna")
     gresf = open(resfile, "w")
     num = 2
 
@@ -254,25 +208,22 @@ def test_format_contig_cut():
 
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
     assert os.path.exists(resfile)
-    assert util.compare_order_content(resfile, exp_file)
+    assert tutil.compare_order_content(resfile, exp_file)
     assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 26,
                             ">my_contig_name_for_my_sequence_3\n": 25}
 
-    # Remove created file
-    os.remove(resfile)
 
-
-def test_format_contig_nocut_prokka():
+def test_format_contig_nocut():
     """
-    For a given contig, if we want to annotate it with prodigal, and cut at each stretch of 5 'N'
-    check that it writes this contig, split, in the expected file
+    For a given contig, if we want to annotate it with prokka, and do not cut at each stretch of 
+    5 'N'check that it writes this contig as given
     """
     cut = False
     pat = None
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
     cur_contig_name = ">my_contig_name_for_my_sequence"
     contig_sizes = {}
-    resfile = os.path.join("test", "data", "annotate", "test_format_cont_nocut_prokka.fna")
+    resfile = os.path.join(GENEPATH, "test_format_cont_nocut_prokka.fna")
     gresf = open(resfile, "w")
     num = 2
 
@@ -282,16 +233,15 @@ def test_format_contig_nocut_prokka():
 
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
     assert os.path.exists(resfile)
-    assert util.compare_order_content(resfile, exp_file)
+    assert tutil.compare_order_content(resfile, exp_file)
     assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 56}
-
-    # Remove created file
-    os.remove(resfile)
 
 
 def test_format_contig_nocut_prodigal_notSameName():
     """
-    For a given contig, if we want to annotate it with prodigal, and do not cut, then we keep the same file. However, we must check that contig names are all different.
+    For a given contig, if we want to annotate it with prodigal, and do not cut, 
+    then we keep the same file (no need to split at 20 characters) 
+    However, we must check that contig names are all different.
     Add 2 contigs, to be sure the 'num' parameter is not increased.
     """
     cut = False
@@ -347,6 +297,81 @@ def test_format_contig_nocut_prodigal_SameName(caplog):
                             ">mycontig": 155}
 
 
+def test_get_outdir_prodigal_nocut():
+  """
+  When we use prodigal, and do not cut at each stretch of 5N, no need to create a modified
+  sequence. So, check that get_output_dir returns an empty res_path (as we will not create
+  any new sequence)
+  """
+  soft = "prodigal"
+  genome = "genome1.fasta"
+  cut = False
+  pat = None
+  gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, GENEPATH, genome, cut, pat)
+  assert not grespath
+  assert gpath == os.path.join(GEN_PATH, "genome1.fasta")
+
+
+def test_get_outdir_prodigal_cut():
+  """
+  When using prodigal, and cut at each stretch of 4 'N', check that the output
+  dir where modified sequence must be store is as expected (in tmp_dir, and adding "-split4N").
+  """
+  soft = "prodigal"
+  genome = "genome1.fasta"
+  cut = True
+  pat = "NNNN+"
+  gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, GENEPATH, genome, cut, pat)
+  assert gpath == os.path.join(GEN_PATH, "genome1.fasta")
+  assert grespath == os.path.join(GENEPATH, "genome1.fasta_prodigal-split4N.fna")
+
+
+def test_get_outdir_prokka_nocut():
+  """
+  When using prokka, and don't cut sequence, check that the output
+  dir where modified sequence must be store is as expected (in tmp dir, indicating
+  "shorter_contigs" because we need to shorten the contig headers for prokka)
+  """
+  soft = "prokka"
+  genome = "genome1.fasta"
+  cut = False
+  pat = None
+  gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, GENEPATH, genome, cut, pat)
+  assert gpath == os.path.join(GEN_PATH, "genome1.fasta")
+  assert grespath == os.path.join(GENEPATH, "genome1.fasta_prokka-shorter-contigs.fna")
+
+
+def test_get_outdir_prokka_cut():
+  """
+  When using prokka, and cut at each stretch of 3 'N', check that the output
+  dir where modified sequence must be store is as expected (in tmp_di, indicating "-split3N"
+  because sequence will be cut)
+  """
+  soft = "prokka"
+  genome = "genome1.fasta"
+  cut = True
+  pat = "NNN+"
+  gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, GENEPATH, genome, cut, pat)
+  assert gpath == os.path.join(GEN_PATH, "genome1.fasta")
+  assert grespath == os.path.join(GENEPATH, "genome1.fasta_prokka-split3N.fna")
+
+
+def test_get_outdir_no_input_seq():
+    """
+    Test that when the given genome name does not exist in the dbpath, it exists in tmp path.
+    It means that it is a concatenation of 2 files of dbpath, which was saved in tmppath
+    """
+    soft = "prodigal"
+    genome = "prokka_out_for_test-supHeader.faa"
+    tmp_path = os.path.join("test", "data", "annotate", "test_files")
+    cut = True
+    pat = "NNNNNNN+"
+    gpath, grespath = gfunc.get_output_dir(soft, GEN_PATH, tmp_path, genome, cut, pat)
+    assert gpath == os.path.join(tmp_path, "prokka_out_for_test-supHeader.faa")
+    assert grespath == os.path.join(tmp_path,
+                                  "prokka_out_for_test-supHeader.faa_prodigal-split7N.fna")
+
+
 def test_analyse1genome_nocut_prodigal():
     """
     Analyse the given genome, without cutting at stretches of N, will be annotated by prodigal:
@@ -362,326 +387,361 @@ def test_analyse1genome_nocut_prodigal():
     cut = False
     pat = None
     soft = "prodigal"
-    assert gfunc.analyse_genome(genome, DBPATH, TMP_PATH, cut, pat, genomes, soft)
+    assert gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, soft, logger)
 
     # Check that information on analyzed genome are correct. And path to 'genome to annotate'
     # is the same as the path to the genome itself
-    outf = os.path.join(DBPATH, "genome2.fasta")
+    outf = os.path.join(GEN_PATH, "genome2.fasta")
     exp_genomes = {gs[0]: ["SAEN.1113"],
                    gs[1]: ["SAEN.1114", outf, outf, 67, 3, 3],
                    gs[2]: ["ESCO.0416"]}
     assert genomes == exp_genomes
 
 
-# def test_analyse1genome_cut_prodigal():
-#     # New file created in tmp path, with same contig names, but contigs seqs cut at each stretch
-#     # -> check 'genomes' + output file
-#     assert False
+def test_analyse1genome_cut_prodigal():
+    '''
+    Analyse the given genome, cutting at stretches of 5N, in order to annotate it
+    Create new genome file in outdir, calculate genome size, nb contigs and L90, and add it 
+    to the genomes dict, as well as the path to the genome file.
+    '''
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    genome = gs[1]
+    cut = True
+    pat = "NNNNN+"
+    soft = "prodigal"
+    assert gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, soft, logger)
+
+    # Check that information on analyzed genome are correct. And path to 'genome to annotate'
+    # is the same as the path to the genome itself
+    initf = os.path.join(GEN_PATH, "genome2.fasta")  # initial genome path
+    outf = os.path.join(GENEPATH, "genome2.fasta_prodigal-split5N.fna")  # path to geerated genome
+    exp_out = os.path.join(EXP_DIR, "genome2_prodigal-split5N.fna") # expected generated genome
+    assert os.path.isfile(outf)
+    assert tutil.compare_order_content(outf, exp_out)
+    exp_genomes = {gs[0]: ["SAEN.1113"],
+                   gs[1]: ["SAEN.1114", initf, outf, 55, 5, 4],
+                   gs[2]: ["ESCO.0416"]}
+    assert genomes == exp_genomes
 
 
-# def test_analyse1genome_nocut_prokka():
-#     # New file created in tmp with shortened contig names, but same content (not split)
-#     # -> check 'genomes' + output file
-#     assert False
+def test_analyse1genome_cut_prokka():
+    '''
+    Analyse the given genome, cutting at stretches of 5N, in order to annotate it with prokka
+    Create new genome file in outdir, with shortened contig names, calculate genome size, 
+    nb contigs and L90, and add it 
+    to the genomes dict, as well as the path to the genome file.
+    '''
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    genome = gs[1]
+    cut = True
+    pat = "NNNNN+"
+    soft = "prokka"
+    assert gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, soft, logger)
+
+    # Check that information on analyzed genome are correct. And path to 'genome to annotate'
+    # is the same as the path to the genome itself
+    initf = os.path.join(GEN_PATH, "genome2.fasta")  # initial genome path
+    outf = os.path.join(GENEPATH, "genome2.fasta_prokka-split5N.fna")  # path to geerated genome
+    exp_out = os.path.join(EXP_DIR, "genome2_prokka-split5N.fna") # expected generated genome
+    assert os.path.isfile(outf)
+    assert tutil.compare_order_content(outf, exp_out)
+    exp_genomes = {gs[0]: ["SAEN.1113"],
+                   gs[1]: ["SAEN.1114", initf, outf, 55, 5, 4],
+                   gs[2]: ["ESCO.0416"]}
+    assert genomes == exp_genomes
 
 
-# def test_analyse1genome_cut_prokka():
-#     # New file created in tmp with shortened contig names, and contigs cut at each stretch
-#     # -> check 'genomes' + output file
-#     assert False
-
-# def test_analyse1genome_empty():
-#     assert False
-
-
-# tests
-# -> analyse genome
-# -> analyse all genomes
-# -> plot_distributions
-
-# def test_analyse1genome_nocut_empty():
-#     """
-#     Analyse the given genome: without cutting at stretches of N. The genome is an empty
-#     file, so it is not possible to calculate L90
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
-#     open(os.path.join(DBPATH, gs[3]), "w").close()
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"],
-#                gs[3]: ["ESCO.0415"]}
-#     genome = gs[3]
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     cut = False
-#     pat = "NNNNN+"
-#     assert not gfunc.analyse_genome(genome, DBPATH, tmp_path, cut, pat, genomes)
-#     exp_genomes = {gs[0]: ["SAEN.1113"],
-#                    gs[1]: ["SAEN.1114"],
-#                    gs[2]: ["ESCO.0416"],
-#                    gs[3]: ["ESCO.0415"]}
-#     assert genomes == exp_genomes
-#     os.remove(os.path.join(DBPATH, gs[3]))
-#     os.remove(os.path.join(tmp_path, gs[3] + "-short-contig.fna"))
+def test_analyse1genome_cut_same_names():
+    """
+    Analyse a genome. Its contig names all have the same first 20 characters. There is no
+    stretch of at least 5N, so contigs are not split.
+    New contig names should be uniq, and not all ending with _0!
+    """
+    genome = "genome_long_header.fst"
+    genomes = {genome: ["SAEN.1015.0117"]}
+    cut = True
+    pat = "NNNNN+"
+    assert gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, "prokka", logger)
+    in_f = os.path.join(GEN_PATH, genome)  # genome given
+    out_f = os.path.join(GENEPATH, genome + "_prokka-split5N.fna")  # genome generated
+    exp_f = os.path.join(EXP_DIR, "res_genome_short-long_header.fst") # expected genome generated
+    exp_genomes = {genome: ["SAEN.1015.0117", in_f, out_f, 151, 3, 3]}
+    assert genomes == exp_genomes
+    assert tutil.compare_order_content(out_f, exp_f)
 
 
-# def test_analyse1genome_cut():
-#     """
-#     Analyse the given genome: cut at each stretch of 5 N, put it to a new file,
-#     and then calculate its genome size, nb contigs and L90. Add this information
-#     to the genomes dict, as well as the path to the genome file (cut).
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"]}
-#     genome = gs[1]
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     cut = True
-#     pat = "NNNNN+"
-#     assert gfunc.analyse_genome(genome, DBPATH, tmp_path, cut, pat, genomes)
-#     out_f = os.path.join(tmp_path, gs[1] + "-split5N.fna")
-#     exp_f = os.path.join(tmp_path, "exp_files", "res_genome2.fasta-split5N.fna")
-#     exp_genomes = {gs[0]: ["SAEN.1113"],
-#                    gs[1]: ["SAEN.1114", out_f, 55, 5, 4],
-#                    gs[2]: ["ESCO.0416"]}
-#     assert genomes == exp_genomes
-#     with open(out_f, "r") as outf, open(exp_f, "r") as expf:
-#         for line_exp, line_out in zip(expf, outf):
-#             assert line_exp == line_out
-#     os.remove(out_f)
+def test_analyse1genome_same_names_nocut(caplog):
+    """
+    Analyse a genome. 2 contigs have the same name, and we do not generate a new file (no cut)
+    should return false with corresponding error message
+    """
+    caplog.set_level(logging.DEBUG)
+    genome = "genome_2_identical_headers.fst"
+    genomes = {genome: ["SAEN.1015.0117"]}
+    cut = False
+    pat = None
+    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, 
+                                    "prodigal", logger)
+    assert ("myheader contig name is used for several contigs. Please put different names for "
+            "each contig. This genome will be ignored") in caplog.text
 
 
-# def test_analyse1genome_cut_same_names():
-#     """
-#     Analyse a genome. Its contig names all have the same first 20 characters. There is no
-#     stretch of at least 5N, so contigs are not split.
-#     New contig names should be uniq, and not all ending with _0!
-#     """
-#     genome = "genome_long_header.fst"
-#     genomes = {genome: ["SAEN.1015.0117"]}
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     cut = True
-#     pat = "NNNNN+"
-#     assert gfunc.analyse_genome(genome, DBPATH, tmp_path, cut, pat, genomes)
-#     out_f = os.path.join(tmp_path, genome + "-split5N.fna")
-#     exp_f = os.path.join("test", "data", "annotate", "exp_files",
-#                          "res_genome_short-long_header.fst")
-#     exp_genomes = {genome: ["SAEN.1015.0117", out_f, 151, 3, 3]}
-#     assert genomes == exp_genomes
-#     with open(out_f, "r") as outf, open(exp_f, "r") as expf:
-#         for line_exp, line_out in zip(expf, outf):
-#             assert line_exp == line_out
-#     os.remove(out_f)
+def test_analyse1genome_same_last_name_nocut(caplog):
+    """
+    Analyse a genome. 2 contigs have the same name, and we do not generate a new file (no cut)
+    should return false with corresponding error message
+    """
+    caplog.set_level(logging.DEBUG)
+    genome = "genome_2_identical_headers-lastContig.fst"
+    genomes = {genome: ["SAEN.1015.0117"]}
+    cut = False
+    pat = None
+    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, 
+                                    "prodigal", logger)
+    assert ("myheader contig name is used for several contigs. Please put different names for "
+            "each contig. This genome will be ignored") in caplog.text
 
 
-# def test_analyse1genome_cut_empty():
-#     """
-#     Analyse the given genome: cut at each stretch of 5 N, but the file is empty.
-#     Check that it returns False
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
-#     open(os.path.join(DBPATH, gs[3]), "w").close()
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"],
-#                gs[3]: ["ESCO.0415"]}
-#     genome = gs[3]
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     cut = True
-#     pat = "NNNNN+"
-#     assert not gfunc.analyse_genome(genome, DBPATH, tmp_path, cut, pat, genomes)
-#     exp_genomes = {gs[0]: ["SAEN.1113"],
-#                    gs[1]: ["SAEN.1114"],
-#                    gs[2]: ["ESCO.0416"],
-#                    gs[3]: ["ESCO.0415"]}
-#     assert genomes == exp_genomes
-#     out_f = os.path.join(tmp_path, gs[3] + "-split5N.fna")
-#     with open(out_f, "r") as outf:
-#         assert outf.readlines() == []
-#     os.remove(os.path.join(DBPATH, gs[3]))
-#     os.remove(out_f)
+def test_analyse1genome_nofile(caplog):
+    '''
+    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false 
+    with corresponding error message.
+    '''
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    genome = "toto"
+    cut = True
+    pat = "NNNNN+"
+    soft = "prodigal"
+    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, soft, logger)
+    assert "The file toto does not exist"
 
 
-# def test_analyse_all_genomes_nocut():
-#     """
-#     Analyze all given genomes: don't cut at stretches of N, but look at their sequence
-#     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
-#     path to the genomic sequence, to the genomes dict.
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"]}
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
-#     nbn = 0
-#     # Run analysis
-#     gfunc.analyse_all_genomes(genomes, DBPATH, tmp_path, nbn)
-#     # construct expected results
-#     exp_genomes = {gs[0]: ["SAEN.1113", opaths[0], 51, 4, 2],
-#                    gs[1]: ["SAEN.1114", opaths[1], 67, 3, 3],
-#                    gs[2]: ["ESCO.0416", opaths[2], 70, 4, 1]}
-#     assert exp_genomes == genomes
-#     for f in opaths:
-#         os.remove(f)
+def test_analyse1genome_empty(caplog):
+    '''
+    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false 
+    with corresponding error message.
+    '''
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    genome = "genome1.fasta"
+    # create empty genome file
+    open(os.path.join(GENEPATH, genome), "w").close()
+    cut = True
+    pat = "NNNNN+"
+    soft = "prodigal"
+    assert not gfunc.analyse_genome(genome, GENEPATH, GENEPATH, cut, pat, genomes, soft, logger)
+    assert ("Your file test/data/annotate/generated_by_unit-tests/genome1.fasta does not contain "
+            "any gene. Please check that you really gave a fasta sequence file") in caplog.text
+    gres = os.path.join(GENEPATH, "toto.fna_prodigal-split5N.fna")
+    assert not os.path.isfile(gres)
 
 
-# def test_analyse_all_genomes_nocut_empty():
-#     """
-#     Analyze all given genomes: don't cut at stretches of N, but look at their sequence
-#     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
-#     path to the genomic sequence, to the genomes dict.
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
-#     open(os.path.join(DBPATH, gs[3]), "w").close()
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"],
-#                gs[3]: ["ESCO.0123"]}
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     opaths = [os.path.join(tmp_path, gname + "-short-contig.fna") for gname in gs]
-#     nbn = 0
-#     # Run analysis
-#     gfunc.analyse_all_genomes(genomes, DBPATH, tmp_path, nbn)
-#     # construct expected results
-#     exp_genomes = {gs[0]: ["SAEN.1113", opaths[0], 51, 4, 2],
-#                    gs[1]: ["SAEN.1114", opaths[1], 67, 3, 3],
-#                    gs[2]: ["ESCO.0416", opaths[2], 70, 4, 1]}
-#     assert exp_genomes == genomes
-#     os.remove(os.path.join(DBPATH, gs[3]))
-#     for f in opaths:
-#         os.remove(f)
+def test_analyse_all_genomes_nocut(caplog):
+    """
+    Analyze all given genomes: don't cut at stretches of N, but look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    nbn = 0
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=False)
+    # construct expected results
+    gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
+    opaths = [os.path.join(GENEPATH, gname + "_prokka-shorter-contigs.fna") for gname in gs]
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", gpaths[2], opaths[2], 70, 4, 1]}
+    assert exp_genomes == genomes
+    assert ("Calculating genome size, number of contigs, L90") in caplog.text
 
 
-# def test_analyse_all_genomes_cut():
-#     """
-#     Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
-#     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
-#     path to the genomic sequence, to the genomes dict.
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"]}
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
-#     nbn = 5
-#     # Run analysis
-#     gfunc.analyse_all_genomes(genomes, DBPATH, tmp_path, nbn)
-#     # construct expected results
-#     exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
-#                    gs[1]: ["SAEN.1114", gpaths[1], 55, 5, 4],
-#                    gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
-#     out_f = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
-#     exp_f = [os.path.join(tmp_path, "exp_files", "res_" + gname + "-split5N.fna") for gname in gs]
-#     assert exp_genomes == genomes
-#     for out, exp in zip(out_f, exp_f):
-#         with open(out, "r") as outf, open(exp, "r") as expf:
-#             for line_exp, line_out in zip(expf, outf):
-#                 assert line_exp == line_out
-#         os.remove(out)
+def test_analyse_all_genomes_cut(caplog):
+    """
+    Analyze all given genomes: cut at stretches of 3N, and look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"]}
+    nbn = 3
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=False)
+    # construct expected results
+    gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
+    opaths = [os.path.join(GENEPATH, gname + "_prokka-split3N.fna") for gname in gs]
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 51, 6, 5],
+                   gs[2]: ["ESCO.0416", gpaths[2], opaths[2], 70, 4, 1]}
+    assert exp_genomes == genomes
+    assert ("Cutting genomes at each time there are at least 3 'N' in a row, " 
+            "and then, calculating genome size, number of contigs and L90.") in caplog.text
 
 
-# def test_analyse_all_genomes_cut_empty():
-#     """
-#     Analyze all given genomes: cut at each stretch of 5 'N', look at the output sequence
-#     file, to calculate L90, genome size and nb contigs. Add this information, as well as the
-#     path to the genomic sequence, to the genomes dict.
-#     """
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "empty.fasta"]
-#     open(os.path.join(DBPATH, gs[3]), "w").close()
-#     genomes = {gs[0]: ["SAEN.1113"],
-#                gs[1]: ["SAEN.1114"],
-#                gs[2]: ["ESCO.0416"],
-#                gs[3]: ["ESCO.0123"]}
-#     tmp_path = os.path.join("test", "data", "annotate")
-#     gpaths = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
-#     nbn = 5
-#     # Run analysis
-#     gfunc.analyse_all_genomes(genomes, DBPATH, tmp_path, nbn)
-#     # construct expected results
-#     exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], 51, 4, 2],
-#                    gs[1]: ["SAEN.1114", gpaths[1], 55, 5, 4],
-#                    gs[2]: ["ESCO.0416", gpaths[2], 70, 4, 1]}
-#     out_f = [os.path.join(tmp_path, gname + "-split5N.fna") for gname in gs]
-#     exp_f = [os.path.join(tmp_path, "exp_files", "res_" + gname + "-split5N.fna") for gname in gs]
-#     assert exp_genomes == genomes
-#     for out, exp in zip(out_f[:-1], exp_f[:-1]):
-#         with open(out, "r") as outf, open(exp, "r") as expf:
-#             for line_exp, line_out in zip(expf, outf):
-#                 assert line_exp == line_out
-#         os.remove(out)
-#     with open(out_f[-1], "r") as outf:
-#         assert outf.readlines() == []
-#     os.remove(out_f[-1])
-#     os.remove(os.path.join(DBPATH, gs[3]))
+def test_analyse_all_genomes_nocut_empty(caplog):
+    """
+    Analyze all given genomes: don't cut at stretches of N, but look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict. 1 genome is empty -> should be removed
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "empty.fasta", "genome3.fasta"]
+    empty_genome = os.path.join(GEN_PATH, gs[2])
+    # Add an empty genome to the original database
+    open(empty_genome, "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0123"]}
+    nbn = 0
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=True)
+    # construct expected results
+    gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
+    opaths = [os.path.join(GENEPATH, gname + "_prokka-shorter-contigs.fna") for gname in gs]
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 67, 3, 3],
+                   gs[3]: ["ESCO.0123", gpaths[3], opaths[3], 70, 4, 1]}
+    assert exp_genomes == genomes
+    assert ("Calculating genome size, number of contigs, L90") in caplog.text
+    assert ("Your file test/data/annotate/genomes/empty.fasta "
+            "does not contain any gene. Please check that you really gave a "
+            "fasta sequence file") in caplog.text
+
+    # remove the empty genome
+    os.remove(empty_genome)
 
 
-# def get_plot_distribs():
-#     """
-#     For all genomes, plot the distribution of their L90 values, and their number of contigs.
-#     Add a vertical line at the given threshold.
-#     genomes: {genome: [name, path, size, nbcont, l90]}
-#     output of plot_distributions is L90_vals, nbcont_vals, l90_dist, nbcont_dist
-#     these outputs will be compared to expected results in tests
-#     """
-#     genomes_dir = os.path.join("test", "data", "annotate", "genomes")
-#     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
-#           "genome5.fasta", "genome6.fasta", "genome7.fasta"]
-#     genomes = {gs[0]: ["SAEN.1113", os.path.join(genomes_dir, gs[0]), 51, 2, 2],
-#                gs[1]: ["SAEN.1114", os.path.join(genomes_dir, gs[1]), 67, 15, 13],
-#                gs[2]: ["ESCO.0416", os.path.join(genomes_dir, gs[2]), 70, 15, 11],
-#                gs[3]: ["ESCO.0216", os.path.join(genomes_dir, gs[3]), 114, 17, 11],
-#                gs[4]: ["SAEN.1115", os.path.join(genomes_dir, gs[4]), 106, 17, 12],
-#                gs[5]: ["ESCO.0216", os.path.join(genomes_dir, gs[5]), 116, 60, 50],
-#                gs[6]: ["SAEN.1115", os.path.join(genomes_dir, gs[6]), 137, 20, 12]}
-#     res_path = os.path.join("test", "data", "annotate")
-#     listfile_base = "test_plot_dist"
-#     l90 = 13
-#     nbconts = 19
-#     outdist = gfunc.plot_distributions(genomes, res_path, listfile_base, l90, nbconts)
-#     return outdist
+def test_analyse_all_genomes_cut_empty(caplog):
+    """
+    Analyze all given genomes: cut at stretches of 3N, and look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict. 1 genome is empty -> should be removed
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "empty.fasta", "genome3.fasta"]
+    empty_genome = os.path.join(GEN_PATH, gs[2])
+    # Add an empty genome to the original database
+    open(empty_genome, "w").close()
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0123"]}
+    nbn = 3
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=True)
+    # construct expected results
+    gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
+    opaths = [os.path.join(GENEPATH, gname + "_prokka-split3N.fna") for gname in gs]
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], opaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 51, 6, 5],
+                   gs[3]: ["ESCO.0123", gpaths[3], opaths[3], 70, 4, 1]}
+    assert exp_genomes == genomes
+    assert ("Cutting genomes at each time there are at least 3 'N' in a row, " 
+            "and then, calculating genome size, number of contigs and L90.") in caplog.text
+    assert ("Your file test/data/annotate/genomes/empty.fasta "
+            "does not contain any gene. Please check that you really gave a "
+            "fasta sequence file") in caplog.text
+
+    # remove the empty genome
+    os.remove(empty_genome)
 
 
-# @pytest.mark.mpl_image_compare(baseline_dir=BASELINE_DIR, tolerance=6, backend="agg")
-# def test_dist_l90():
-#     """
-#     For created L90 graph, check that calculated L90 values are as expected,
-#     and graph is also as expected
-#     """
-#     res_path = os.path.join("test", "data", "annotate")
-#     listfile_base = "test_plot_dist"
-#     outfile1 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
-#     outfile2 = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
-#     l90, _, dist, _ = get_plot_distribs()
-#     # Check that png file was created
-#     assert os.path.isfile(outfile1)
-#     assert os.path.isfile(outfile2)
-#     os.remove(outfile1)
-#     os.remove(outfile2)
-#     # Check values calculated for l90
-#     assert set(l90) == {2, 13, 11, 11, 12, 50, 12}
-#     # Check that output plot is as expected
-#     return dist
+def test_analyse_all_genomes_noseq(caplog):
+    """
+    Analyze all given genomes: no given sequence file exists
+    -> Exits with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["ESCO.0123"]}
+    nbn = 3
+    # Run analysis
+    with pytest.raises(SystemExit):
+        gfunc.analyse_all_genomes(genomes, "toto", GENEPATH, nbn, "prokka", logger, quiet=True)
+    assert ("No genome was found in the database folder toto. See logfile " 
+            "for more information.") in caplog.text
 
 
-# @pytest.mark.mpl_image_compare(baseline_dir=BASELINE_DIR, tolerance=6, backend="agg")
-# def test_dist_nbcont():
-#     """
-#     For created L90 graph, check that calculated L90 values are as expected,
-#     and graph is also as expected
-#     """
-#     res_path = os.path.join("test", "data", "annotate")
-#     listfile_base = "test_plot_dist"
-#     outfile1 = os.path.join(res_path, "QC_L90-" + listfile_base + ".png")
-#     outfile2 = os.path.join(res_path, "QC_nb-contigs-" + listfile_base + ".png")
-#     _, nbcont, _, dist = get_plot_distribs()
-#     # Check that png file was created
-#     assert os.path.isfile(outfile1)
-#     assert os.path.isfile(outfile2)
-#     os.remove(outfile1)
-#     os.remove(outfile2)
-#     # Check values calculated for l90
-#     assert set(nbcont) == {2, 15, 15, 17, 17, 60, 20}
-#     # Check that output plot is as expected
-#     return dist
+@pytest.mark.mpl_image_compare(baseline_dir=BASELINE_DIR, tolerance=6, backend="agg")
+def test_dist_l90():
+    """
+    For created L90 graph, check that calculated L90 values are as expected,
+    and graph is also as expected
+    """
+    listfile_base = "test_plot_dist"
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
+          "genome5.fasta", "genome6.fasta", "genome7.fasta"]
+    genomes = {gs[0]: ["SAEN.1113", 'orig_path',  'annot_path', 51, 2, 2],
+               gs[1]: ["SAEN.1114", 'orig_path', 'annot_path', 67, 15, 13],
+               gs[2]: ["ESCO.0416", 'orig_path', 'annot_path', 70, 15, 11],
+               gs[3]: ["ESCO.0216", 'orig_path', 'annot_path', 114, 17, 11],
+               gs[4]: ["SAEN.1115", 'orig_path', 'annot_path', 106, 17, 12],
+               gs[5]: ["ESCO.0216", 'orig_path', 'annot_path', 116, 60, 50],
+               gs[6]: ["SAEN.1115", 'orig_path', 'annot_path', 137, 20, 12]}
+    l90 = 13
+    nbconts = 19
+    l90, _, dist, _ = gfunc.plot_distributions(genomes, GENEPATH, listfile_base, l90, nbconts)
+    outfile1 = os.path.join(GENEPATH, "QC_L90-" + listfile_base + ".png")
+    outfile2 = os.path.join(GENEPATH, "QC_nb-contigs-" + listfile_base + ".png")
+    # Check that png file was created
+    assert os.path.isfile(outfile1)
+    assert os.path.isfile(outfile2)
+    # Check values calculated for l90
+    assert set(l90) == {2, 13, 11, 11, 12, 50, 12}
+    # Check that output plot is as expected
+    return dist
+
+
+
+@pytest.mark.mpl_image_compare(baseline_dir=BASELINE_DIR, tolerance=6, backend="agg")
+def test_dist_nbcont():
+    """
+    For created L90 graph, check that calculated L90 values are as expected,
+    and graph is also as expected
+    """
+    listfile_base = "test_plot_dist"
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome4.fasta",
+          "genome5.fasta", "genome6.fasta", "genome7.fasta"]
+    genomes = {gs[0]: ["SAEN.1113", 'orig_path',  'annot_path', 51, 2, 2],
+               gs[1]: ["SAEN.1114", 'orig_path', 'annot_path', 67, 15, 13],
+               gs[2]: ["ESCO.0416", 'orig_path', 'annot_path', 70, 15, 11],
+               gs[3]: ["ESCO.0216", 'orig_path', 'annot_path', 114, 17, 11],
+               gs[4]: ["SAEN.1115", 'orig_path', 'annot_path', 106, 17, 12],
+               gs[5]: ["ESCO.0216", 'orig_path', 'annot_path', 116, 60, 50],
+               gs[6]: ["SAEN.1115", 'orig_path', 'annot_path', 137, 20, 12]}
+    l90 = 13
+    nbconts = 19
+    _, nbcont, _, dist = gfunc.plot_distributions(genomes, GENEPATH, listfile_base, l90, nbconts)
+    outfile1 = os.path.join(GENEPATH, "QC_L90-" + listfile_base + ".png")
+    outfile2 = os.path.join(GENEPATH, "QC_nb-contigs-" + listfile_base + ".png")
+    # Check that png file was created
+    assert os.path.isfile(outfile1)
+    assert os.path.isfile(outfile2)
+    # Check values calculated for nbconts
+    assert set(nbcont) == {2, 15, 15, 17, 17, 60, 20}
+    # Check that output plot is as expected
+    return dist

@@ -193,16 +193,12 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
             os.remove(grespath)
         return False
     l90 = calc_l90(contig_sizes)
-    if not l90:
-        logger.error("Problem with genome {}. Not possible to get L90".format(genome))
-        return False
     # Everything ok for this genome -> complete its list of information in genomes dict
     # [spegenus.date] -> [spegenus.date, gpath, gpath_to_annotate, gsize, nbcont, L90]}
+    if grespath:
+        genomes[genome] += [gpath, grespath, gsize, nbcont, l90]
     else:
-        if grespath:
-            genomes[genome] += [gpath, grespath, gsize, nbcont, l90]
-        else:
-            genomes[genome] += [gpath, gpath, gsize, nbcont, l90]
+        genomes[genome] += [gpath, gpath, gsize, nbcont, l90]
     # If we wrote a new sequence file, close it
     if grespath:
         gresf.close()

@@ -78,7 +78,7 @@ unit-test-ubuntu18.04:
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test_prepare -v -x
-    # - py.test test/test_unit/test_annotate/test_genome_func.py -v -x
+    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
     # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
     - py.test test/test_unit/test_pangenome -vx
     - py.test test/test_unit/test_corepers -vx
