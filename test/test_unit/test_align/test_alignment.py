@@ -175,7 +175,7 @@ def test_backtranslate_wrongnbfam(caplog):
     # Chek btr file content
     assert os.path.isfile(btr_file)
     exp_btr = os.path.join(EXPPATH, "exp_btr.1.aln")
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_backtranslate_problem(caplog):
@@ -227,7 +227,7 @@ def test_mafft_align(caplog):
     assert "Aligning family 1" in caplog.text
     assert os.path.isfile(mafft_file)
     exp_mafft = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
 
 
 def test_mafft_align_error(caplog):
@@ -266,7 +266,7 @@ def test_mafft_align_wrongnbfam(caplog):
             "in test/data/align/generated_by_unit-tests/test_mafft_align.aln (4)") in caplog.text
     assert os.path.isfile(mafft_file)
     exp_mafft = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
 
 
 def test_check_extract(caplog):
@@ -355,9 +355,9 @@ def test_family_align(caplog):
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_family_align_wrongextract(caplog):
@@ -411,9 +411,9 @@ def test_family_align_mafftok_nobtr(caplog):
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_family_align_mafftempty_btrempty(caplog):
@@ -445,9 +445,9 @@ def test_family_align_mafftempty_btrempty(caplog):
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_family_align_mafftok_emptybtr(caplog):
@@ -476,8 +476,8 @@ def test_family_align_mafftok_emptybtr(caplog):
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_family_align_mafftok_btrok(caplog):
@@ -507,9 +507,9 @@ def test_family_align_mafftok_btrok(caplog):
     assert "Checking extractions for family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
-    tutil.compare_file_content(mafft_file, exp_mafft)
+    assert tutil.compare_file_content(mafft_file, exp_mafft)
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
-    tutil.compare_file_content(btr_file, exp_btr)
+    assert tutil.compare_file_content(btr_file, exp_btr)
 
 
 def test_family_align_nomafft_btrempty_errormafft(caplog):
@@ -675,7 +675,7 @@ def test_add_missing_btrmiss(caplog):
     assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) is True
     assert "Adding missing genomes for family 8" in caplog.text
     final_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
-    tutil.compare_file_content(btr_file, final_btr)
+    assert tutil.compare_file_content(btr_file, final_btr)
 
 
 def test_add_missing_btrmiss2(caplog):
@@ -700,7 +700,7 @@ def test_add_missing_btrmiss2(caplog):
     assert ("ERROR: family 8 contains 4 genomes in total instead of the 5 genomes in "
             "input") in caplog.text
     final_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
-    tutil.compare_file_content(btr_file, final_btr)
+    assert tutil.compare_file_content(btr_file, final_btr)
 
 
 def test_handle_family_true():
@@ -1060,10 +1060,10 @@ def test_align_all_exists_true(caplog):
     open(concat, "w").close()
     assert al.align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads)
     # Check output files
-    tutil.compare_order_content(out_mafft1, exp_mafft1)
-    tutil.compare_order_content(out_btr1, exp_btr1)
-    tutil.compare_order_content(out_mafft8, exp_mafft8)
-    tutil.compare_order_content(out_btr8, exp_btr8)
+    assert tutil.compare_order_content(out_mafft1, exp_mafft1)
+    assert tutil.compare_order_content(out_btr1, exp_btr1)
+    assert tutil.compare_order_content(out_mafft8, exp_mafft8)
+    assert tutil.compare_order_content(out_btr8, exp_btr8)
     assert os.path.isfile(concat)
     with open(concat, "r") as conf:
         assert conf.readlines() == []
@@ -1123,8 +1123,8 @@ def test_align_all_false(caplog):
     out_btr8 = os.path.join(aldir, dname + "-mafft-prt2nuc.8.aln")
     exp_mafft1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
     exp_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-prt2nuc.1.aln")
-    tutil.compare_order_content(out_mafft1, exp_mafft1)
-    tutil.compare_order_content(out_btr1, exp_btr1)
+    assert tutil.compare_order_content(out_mafft1, exp_mafft1)
+    assert tutil.compare_order_content(out_btr1, exp_btr1)
     assert not os.path.isfile(out_mafft8)
     assert not os.path.isfile(out_btr8)
     assert not os.path.isfile(concat)
