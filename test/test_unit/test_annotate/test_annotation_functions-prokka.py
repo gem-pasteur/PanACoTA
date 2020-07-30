@@ -67,28 +67,6 @@ def my_logger(name):
     return q, logging.getLogger(name)
 
 
-def test_count_headers():
-    """
-    Count how many sequences there are in the given multi-fasta file
-    """
-    seqfile = os.path.join(GEN_PATH, "genome4.fasta")
-    nb = afunc.count_headers(seqfile)
-    assert nb == 5
-
-
-def test_count_tbl():
-    """
-    Count the different features found in the tbl file, and return
-    nbcont, nbCDS, nbGene, nbCRISPR
-    """
-    tblfile = os.path.join(TEST_DIR, "original_name.fna-prokkaRes", "prokka_out_for_test.tbl")
-    ncont, ncds, ngene, ncris = afunc.count_tbl(tblfile)
-    assert ncont == 7
-    assert ncds == 13
-    assert ngene == 15
-    assert ncris == 2
-
-
 def test_check_prokka_no_outdir():
     """
     Test that prokka returns the right error message when output directory does not exist

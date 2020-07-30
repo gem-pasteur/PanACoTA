@@ -235,10 +235,7 @@ def run_prokka(arguments):
     if ret.returncode != 0:
         return False
     ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
-    if ok:
-        logger.log(utils.detail_lvl(), "End annotating {} from {}.".format(name, gpath))
-    else:
-        logger.warning("Could not annotate {} from {}.".format(name, gpath))
+    logger.log(utils.detail_lvl(), "End annotating {} from {}.".format(name, gpath))
     return ok
 
 
@@ -278,7 +275,6 @@ def run_prodigal(arguments):
     logger = logging.getLogger('run_prodigal')
     logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
                                      "with Prodigal")
-
     # Define prodigal directory and logfile, and check their existence
     # By default, prodigal is in tmp_folder -> resdir/tmp_files/genome-prodigalRes
     g_ori_name = os.path.basename(gpath)
@@ -345,6 +341,7 @@ def run_prodigal(arguments):
                                                                    basic_outname + ".gff", meta
                                                                   )
     logger.details("Prodigal command: " + cmd)
+
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
     prodigalf.close()
     prodigalferr.close()
