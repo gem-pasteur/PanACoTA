@@ -359,6 +359,8 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
     """
     Prokka writes everything to stderr, and always returns a non-zero return code. So, we
     check if it ran well by checking the content of output directory.
+    This function is also used when prokka files already exist (prokka was run previously), to
+    check if everything is ok before going to next step.
 
     Parameters
     ----------
