@@ -460,21 +460,22 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
     bool
         True if everything went well, False otherwise
     """
+    oriname = os.path.basename(gpath)
     faafile = glob.glob(os.path.join(prodigal_dir, "*.faa"))
     ffnfile = glob.glob(os.path.join(prodigal_dir, "*.ffn"))
     gfffile = glob.glob(os.path.join(prodigal_dir, "*.gff"))
     missing_file = False
 
     if len(faafile) != 1:
-        logger.error("{} {}: no or several .faa file".format(name, oriname))
+        logger.error("{} {}: no or several .faa file(s)".format(name, oriname))
         logger.info("no faa")
         missing_file = True
     if len(ffnfile) !=  1:
-        logger.error("{} {}: no or several .ffn file".format(name, oriname))
+        logger.error("{} {}: no or several .ffn file(s)".format(name, oriname))
         missing_file = True
         logger.info("no ffn")
     if len(gfffile) != 1:
-        logger.error("{} {}: no or several .gff file".format(name, oriname))
+        logger.error("{} {}: no or several .gff file(s)".format(name, oriname))
         missing_file = True
         logger.info("no gff")
 
