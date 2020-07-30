@@ -75,6 +75,8 @@ unit-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
+    - prokka --version
+    - prodigal -v
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test_prepare -v -x
