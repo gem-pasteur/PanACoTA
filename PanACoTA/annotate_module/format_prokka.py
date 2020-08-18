@@ -209,6 +209,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
     # Current contig number. Used to compare with new one, to know if protein is
     # inside or at the border of a contig
     cont_num = 0
+    exp_cont_num = 0
     prev_cont_num = -1
     # Information on current feature. At the beginning, everything empty, no information
     gene_name = "NA"
@@ -223,16 +224,16 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
     feature_type = ""
 
     # Open files to convert tbl to lst
-    with open(tblfile) as tblf, open(lstfile, "w") as lstf:
+    with open(tblfile, "r") as tblf, open(lstfile, "w") as lstf:
         for line in tblf:
             elems = line.strip().split("\t")
             # If new contig, write the previous one, and get information for this new one
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
-                # # Write print prev: {lstline}")
-                cont_num += 1  # new contig
                 cont_name = elems[0].split()[1] # contig name in tbl
-                exp_cont_name = contigs[cont_num -1].split("\t")[0] # contig name in
+                cont_num = int(cont_name.split("_")[-1])  # contig number of feature in tbl
+                exp_cont_num += 1  # new contig
+                exp_cont_name = contigs[exp_cont_num -1].split("\t")[0] # contig name in
                 # 'contigs' (at the previous step)
             else:
                 # Get line type, and retrieve info according to it
@@ -267,15 +268,16 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
                         # contigs generated while reading the prokka output genome)
 
                         # not first contig and cont_name not corresponding
-                        if prev_cont_num != -1 and cont_name != exp_cont_name:
+                        if prev_cont_num != -1 and cont_num != exp_cont_num:
                             # Save current prev_cont_num to know from which contig there
                             # are no genes
                             save_prev_cont_num = prev_cont_num
                             # Find which cont_num corresponds to this cont_name
                             try:
-                                while cont_name != exp_cont_name:
+                                while cont_num != exp_cont_num:
                                     prev_cont_num += 1
                                     exp_cont_name = contigs[prev_cont_num -1].split("\t")[0]
+                                    exp_cont_num = int(exp_cont_name.split("_")[-1])
                             except IndexError:
                                 logger.error(f"{cont_name} found in {tblfile} does not exist "
                                              f"in genome {genome}.")
@@ -296,7 +298,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
                             cont_loc = "i"
                     # If we are in the first contig, prev = current
                     if prev_cont_num == -1:
-                        prev_cont_num = cont_num
+                        prev_cont_num = exp_cont_num
                         prev_cont_loc = cont_loc
 
                     # If not first feature of the contig, write the previous feature to .lst file
@@ -318,7 +320,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
                         strand = "D"
                     # Initialize variables for next feature (except start, end, strand
                     # and feature type which just calculated)
-                    prev_cont_num = cont_num
+                    prev_cont_num = exp_cont_num
                     prev_cont_loc = cont_loc
                     cont_name = exp_cont_name
                     locus_num = "NA"

@@ -293,7 +293,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
             logger.error(("We did not find any genome listed in {} in the folder {}. "
                           "Please check your list to give valid genome "
                           "names.").format(list_file, db_path))
-            sys.exit(-1)
+            sys.exit(1)
         # Get L90, nbcontig, size for all genomes, and cut at row of cutn 'N' if asked
         # -> genome: [spegenus.date, orig_path, to_annotate_path, size, nbcont, l90]
         gfunc.analyse_all_genomes(genomes, db_path, tmp_dir, cutn, soft,
@@ -350,7 +350,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # Information on genomes to format
     # results_ok = {genome: [gembase_name, path_to_origfile, path_split_gembase,
     #               gsize, nbcont, L90]}
-    results_ok = {genome:info for (genome,info) in genomes.items() if results[genome]}
+    results_ok = {genome:info for genome, info in kept_genomes.items() if results[genome]}
     # If no genome was ok, no need to format them. Just print that no genome was annotated,
     # end program.
     if not results_ok:
@@ -395,7 +395,7 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
-    required.add_argument("-d", dest="db_path", 
+    required.add_argument("-d", dest="db_path",
                           help="Path to folder containing all multifasta genome files")
     required.add_argument("-r", dest="res_path", required=True,
                           help="Path to folder where output annotated genomes must be saved")
@@ -585,7 +585,7 @@ def check_args(parser, args):
     if not args.from_info and not args.list_file:
         parser.error("You must provide a list of genomes to annotate. Either raw genomes "
                      "(see -l option), or genomes with quality information (see --info option).")
-    
+
     # If no info file nor db_path, ask for 1 of them
     if not args.db_path and not args.from_info:
         parser.error("You must provide a path to your database genome sequences (-d <db_path>). "

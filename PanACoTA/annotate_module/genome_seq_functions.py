@@ -144,7 +144,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
             gresf = open(grespath, "w")
 
         # Initialize variables
-        cur_contig_name = "" # header text 
+        cur_contig_name = "" # header text
         contig_sizes = {}  # {header text: size}
         cur_seq = "" # sequence
         num = 1 # Used to get unique contig names
@@ -384,7 +384,7 @@ def rename_all_genomes(genomes):
         change 1st field of genomes dict. name -> gembase_name (with strain number)
 
     """
-    logger.info("Renaming kept genomes according to their quality.")
+    logger.info(f"Renaming kept genomes according to their quality ({len(genomes)} genomes)")
     # Keep previous genome name (ESCO.0109 -> ESCO)
     last_name = ""
     # Keep last strain number
