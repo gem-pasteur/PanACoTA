@@ -13,12 +13,12 @@ We provide 4 different fictive genomes:
 
     - genome1:
 
-        * 1 file, with 1 contig (fasta file)
+        * 1 file, with 1 contig (fasta file) ``genome1.fst``
         * example of complete genome of a bacteria without plasmid. However, there is a stretch of 11 "N" in its sequence. It will then be split into 2 contigs with the default parameters.
 
     - genome2:
 
-        * 1 file, with 3 contigs (multifasta)
+        * 1 file, with 4 contigs (multifasta) ``genome2.fst``
         * example of a draft genome
 
     - genome3:
@@ -32,13 +32,13 @@ We provide 4 different fictive genomes:
 
     - genome4:
 
-        * 1 file, with 1 contig (fasta)
+        * 1 file, with 1 contig (fasta) ``genome4.fst``
         * example of a complete genome (no stretch of "N" in the sequence)
 
 Annotate step
 =============
 
-To annotate genomes, you need to provide a list of genomes to annotate, in a text file. An example, corresponding to the genomes in ``Examples/genomes`` is provided in ``Examples/input_files/list_genomes.lst``. Here is its content:
+To annotate genomes, you need to provide a list of genomes to annotate, in a text file. An example, corresponding to the genomes in ``Examples/genomes_init`` is provided in ``Examples/input_files/list_genomes.lst``. Here is its content:
 
 .. code-block:: text
 
@@ -57,9 +57,9 @@ Quality control
 
 If you just want to do quality control on the dataset, type::
 
-    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -Q
+    PanACoTA annotate -d Examples/genomes_init -l Examples/input_files/list_genomes.lst -r Examples/1-res-QC -Q
 
-This will create a folder ``my_results``, containing:
+This will create a folder ``Examples/1-res-QC``, containing:
 
 - ``QC_L90-list_genomes.png``: histogram of the L90 values of all genomes:
 
@@ -77,35 +77,36 @@ This will create a folder ``my_results``, containing:
 - ``PanACoTA-annotate_list_genomes.log``: log file. See information on what happened during the run: traceback of stdout.
 - ``PanACoTA-annotate_list_genomes.log.err``: log file but only with Warnings and Errors. If it is empty, everything went well!
 - ``PanACoTA-annotate_list_genomes.log.details``: with the quality control only option, this file is exactly the same as the ``.log`` file. It will add details when annotation step is run.
-- ``info-genomes-list_genomes.lst``: file with information on each genome: size, number of contigs and L90::
+- ``ALL-GENOMES-info-list_genomes.lst``: file with information on each genome: size, number of contigs and L90::
 
-    orig_name                   gsize   nb_conts   L90
-    genome1.fst                 9808    2          2
-    genome2.fst                 10711   4          4
-    genome3-chromo.fst-all.fna  8817    3          3
-    genome4.fst                 7134    1          1
+    orig_name                   to_annotate                                    gsize   nb_conts   L90
+    genome1.fst                 genome1.fst_prokka-split5N.fna                 9808    2          2
+    genome2.fst                 genome2.fst_prokka-split5N.fna                 10717   5          4
+    genome3-chromo.fst-all.fna  genome3-chromo.fst-all.fna_prokka-split5N.fna  8817    3          3
+    genome4.fst                 genome4.fst_prokka-split5N.fna                 7134    1          1
 
 - ``tmp_files`` folder: For genome3, which contains 2 original files, you can find the concatenation of them in the file ``genome3-chromo.fst-all.fna``. This folder also contains your genomic sequences, split at each stretch of at least 5 'N', in files called ``<whole_genome_filename>-split5N.fna``. You can check that, now:
 
     * genome1 contains 2 contigs (its original contig contains a stretch of more than 5 ``N``)
-    * genome2 contains 4 contigs (the first contig of original file contains a stretch of 5 ``N``)
+    * genome2 contains 5 contigs (the first contig of original file contains a stretch of 5 ``N``)
     * genome3 contains 3 contigs (1 from the chromosome file, and 2 from the plasmid file, which contains a stretch of 6 ``N``)
     * genome4 still contains 1 contig
 
-In the ``QC_L90-list_genomes.png``, we can see that all genomes have a L90 lower or equal to 4. Similarly, in ``QC_nb-contigs-list_genomes.png``, we can see that all genomes have less or equal to 4 contigs. This is consistent with the ``info-genomes-list_genomes.lst`` file.
+In the ``QC_L90-list_genomes.png``, we can see that all genomes have a L90 lower or equal to 4. Similarly, in ``QC_nb-contigs-list_genomes.png``, we can see that all genomes have less or equal to 5 contigs. This is consistent with the ``ALL-GENOMES-info-list_genomes.lst`` file.
+
 
 Annotation: functional (default) or only syntactic
 --------------------------------------------------
 
-Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits with:
+Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits with. Here, we only annotate genomes with less than 10 contigs and a maximum of 3 for L90 (meaning that genome2 is removed from analysis):
 
 Functional annotation with Prokka (default)::
 
-    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10
+    PanACoTA annotate -d Examples/genomes_init -r Examples/1-res-prokka -l Examples/input_files/list_genomes.lst -n EXAM --l90 3 --nbcont 10
 
 Only syntactic annotation with Prodigal::
 
-    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal
+    PanACoTA annotate -d Examples/genomes_init -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal
 
 Yes, you should get an error message! Check indicated log files to get more information. Here is what happened:
 

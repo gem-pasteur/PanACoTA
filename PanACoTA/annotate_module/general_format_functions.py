@@ -30,7 +30,8 @@ import PanACoTA.annotate_module.format_prokka as fprokka
 import PanACoTA.annotate_module.format_prodigal as fprodigal
 
 
-def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False):
+def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False,
+                   changed_name=False):
     """
     For all genomes which were annotated (by prokka or prodigal), reformat them
     in order to have, in 'res_path', the following folders:
@@ -55,6 +56,9 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
         number of threads to use to while formatting genomes
     quiet : bool
         True if nothing must be sent to stderr/stdout, False otherwise
+    changed_name : bool
+        True if contig names have been changed (cutn != 0) -> contig names end by '_num',
+        False otherwise.
 
     Returns
     -------
@@ -96,7 +100,7 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
     # (genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir, rep_dir,
     # gff_dir, results, prodigal_only, q)
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
-               rep_dir, gff_dir, prodigal_only, q)
+               rep_dir, gff_dir, prodigal_only, q, changed_name)
               for genome, (name, _, gpath, _, _, _) in genomes_ok.items()]
 
     # Create pool and launch parallel formating steps
@@ -158,7 +162,7 @@ def handle_genome(args):
         * genome name (used to get info from the pool.map_async)
     """
     (genome, name, gpath, annot_path, lst_dir, prot_dir,
-     gene_dir, rep_dir, gff_dir, prodigal_only, q) = args
+     gene_dir, rep_dir, gff_dir, prodigal_only, q, changed) = args
 
     # Define which formatting must be used, given the annotation software
     if prodigal_only:
@@ -175,7 +179,7 @@ def handle_genome(args):
     logger = logging.getLogger('format.handle_genome')
     # Handle genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
-                                  prot_dir, gene_dir, rep_dir, gff_dir)
+                                  prot_dir, gene_dir, rep_dir, gff_dir, changed_name=changed)
     return ok_format, genome
 
 

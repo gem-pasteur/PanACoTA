@@ -33,7 +33,7 @@ logger = logging.getLogger("annotate.prokka_format")
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir):
+                      rep_dir, gff_dir, changed_name=False):
     """
      Format the given genome, and create its corresponding files in the following folders:
 
@@ -61,8 +61,9 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         path to Replicons folder
     gff_dir : str
         path to gff3 folder
-    logger : logging.Logger
-        logger object to write log information
+    changed_name : bool
+        True if contig names have been changed (cutn != 0) -> contig names end by '_num',
+        False otherwise.
 
     Returns
     -------
@@ -100,7 +101,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, changed_name)
     if not ok_tbl:
         try:
             os.remove(res_lst_file)
@@ -160,7 +161,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     return True
 
 
-def tbl2lst(tblfile, lstfile, contigs, genome):
+def tbl2lst(tblfile, lstfile, contigs, genome, changed_name):
     """
     Read prokka tbl file, and convert it to the lst file.
 
@@ -195,6 +196,9 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
         List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
     genome : str
         genome name (gembase format)
+    changed_name : bool
+        True if contig names have been changed (cutn != 0) -> contig names end by '_num',
+        False otherwise.
 
     Returns
     -------
@@ -231,7 +235,8 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
             # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
                 cont_name = elems[0].split()[1] # contig name in tbl
-                cont_num = int(cont_name.split("_")[-1])  # contig number of feature in tbl
+                if changed_name:
+                    cont_num = int(cont_name.split("_")[-1])  # contig number of feature in tbl
                 exp_cont_num += 1  # new contig
                 exp_cont_name = contigs[exp_cont_num -1].split("\t")[0] # contig name in
                 # 'contigs' (at the previous step)
@@ -258,10 +263,14 @@ def tbl2lst(tblfile, lstfile, contigs, genome):
                 else:
                     # Check contig: new or same as previous?
                     # New contig
-                    if cont_num != prev_cont_num:
+                    if (changed_name and cont_num != prev_cont_num) or
+                       (not_changed_name and cont_name != exp_cont_name):
                         # Check if
                         # - it is not the first gene of the genome (prev_cont_num != -1)
-                        # - current contig 'cont_name' (name after 'feature') and
+                        # - if contig names have been changed (end by _num) current contig number
+                        # is the same as the previous one
+                        # - if contig names have not been changed, current contig
+                        # 'cont_name' (name after 'feature') and
                         # contig corresponding to cont_num 'exp_cont_name' in contigs are the
                         # same? If not -> contigs without any gene without any feature between them
                         # - this new contig is as expected (next contig of the list of
