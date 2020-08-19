@@ -1,4 +1,4 @@
->Feature test.0417.00002.0001
+>Feature toto_1
 287	787	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00001
@@ -16,7 +16,7 @@
 			inference	similar to AA sequence:UniProtKB:Q9KS45
 			locus_tag	JGIKIPIJ_00008
 			product	Actin cross-linking toxin VgrG1
->Feature test.0417.00002.0002
+>Feature toto_2
 77	1237	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00009
@@ -37,7 +37,7 @@
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00011
 			product	hypothetical protein
->Feature test.0417.00002.0003
+>Feature toto_3
 2968265	296902	repeat_region
 			rpt_family	CRISPR
 			score	13
@@ -45,14 +45,14 @@
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00013
 			product	hypothetical protein
->Feature test.0417.00002.0004
+>Feature toto_4
 4535	7888	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00014
 			product	hypothetical protein
 			db_xref	12345
->Feature test.0417.00002.0005
->Feature test.0417.00002.0007
+>Feature toto_5
+>Feature toto_7
 3039279	3039355	tRNA
 			inference	COORDINATES:profile:Aragorn:1.2
 			locus_tag	PROKKA_02927
