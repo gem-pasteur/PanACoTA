@@ -29,11 +29,11 @@ import logging
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as general
 
-logger = logging.getLogger("annotate.prokka_format")
+# logger = logging.getLogger("annotate.prokka_format")
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir, changed_name=False):
+                      rep_dir, gff_dir, logger, changed_name=False):
     """
      Format the given genome, and create its corresponding files in the following folders:
 
@@ -101,7 +101,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, changed_name)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, logger, changed_name)
     if not ok_tbl:
         try:
             os.remove(res_lst_file)
@@ -161,7 +161,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     return True
 
 
-def tbl2lst(tblfile, lstfile, contigs, genome, changed_name):
+def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
     """
     Read prokka tbl file, and convert it to the lst file.
 
@@ -212,34 +212,33 @@ def tbl2lst(tblfile, lstfile, contigs, genome, changed_name):
     prev_cont_loc = "b"
     # Current contig number. Used to compare with new one, to know if protein is
     # inside or at the border of a contig
-    cont_num = 0
-    exp_cont_num = 0
     prev_cont_num = -1
+    prev_cont_name = ""
+    tbl_cont_num = 0  # Contig number in tbl file (<orig_name>_<cont_num>)
+    lst_cont_num = 0  # Exp cont num: new feature means exp_cont_num += 1
+    # prev_cont_num = -1  # Previous contig number seen
     # Information on current feature. At the beginning, everything empty, no information
     gene_name = "NA"
+    locus_num = "NA"
     product = "NA"
     ecnum = "NA"
     inf2 = "NA"
     db_xref = "NA"
-    start = -1
-    end = -1
+    start = "-1"
+    end = "-1"
     strand = "D"
     # Feature type (CDS, tRNA...)
     feature_type = ""
 
-    # Open files to convert tbl to lst
     with open(tblfile, "r") as tblf, open(lstfile, "w") as lstf:
         for line in tblf:
             elems = line.strip().split("\t")
-            # If new contig, write the previous one, and get information for this new one
-            # 2 elements: ">Feature" feature_name
             if line.startswith(">Feature"):
-                cont_name = elems[0].split()[1] # contig name in tbl
+                tbl_cont_name = line.split()[-1]
                 if changed_name:
-                    cont_num = int(cont_name.split("_")[-1])  # contig number of feature in tbl
-                exp_cont_num += 1  # new contig
-                exp_cont_name = contigs[exp_cont_num -1].split("\t")[0] # contig name in
-                # 'contigs' (at the previous step)
+                    tbl_cont_num = int(tbl_cont_name.split("_")[-1])
+                lst_cont_num += 1  # expected lst cont num is prev lst_cont_num + 1
+                lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
             else:
                 # Get line type, and retrieve info according to it
                 # If it is not the line with start, end, type, there are only 2 elements
@@ -258,68 +257,52 @@ def tbl2lst(tblfile, lstfile, contigs, genome, changed_name):
                         inf2 = elems[1]
                     if "db_xref" in elems[0]:
                         db_xref = elems[1]
-                # new gene:
-                #  3 elements = start end and type of the feature
+                # Information on start, end, type
                 else:
-                    # Check contig: new or same as previous?
-                    # New contig
-                    if (changed_name and cont_num != prev_cont_num) or
-                       (not_changed_name and cont_name != exp_cont_name):
-                        # Check if
-                        # - it is not the first gene of the genome (prev_cont_num != -1)
-                        # - if contig names have been changed (end by _num) current contig number
-                        # is the same as the previous one
-                        # - if contig names have not been changed, current contig
-                        # 'cont_name' (name after 'feature') and
-                        # contig corresponding to cont_num 'exp_cont_name' in contigs are the
-                        # same? If not -> contigs without any gene without any feature between them
-                        # - this new contig is as expected (next contig of the list of
-                        # contigs generated while reading the prokka output genome)
-
-                        # not first contig and cont_name not corresponding
-                        if prev_cont_num != -1 and cont_num != exp_cont_num:
-                            # Save current prev_cont_num to know from which contig there
-                            # are no genes
-                            save_prev_cont_num = prev_cont_num
-                            # Find which cont_num corresponds to this cont_name
-                            try:
-                                while cont_num != exp_cont_num:
-                                    prev_cont_num += 1
-                                    exp_cont_name = contigs[prev_cont_num -1].split("\t")[0]
-                                    exp_cont_num = int(exp_cont_name.split("_")[-1])
-                            except IndexError:
-                                logger.error(f"{cont_name} found in {tblfile} does not exist "
-                                             f"in genome {genome}.")
-                                return False
-                            logger.details("No feature found in contigs between contig {} and "
-                                           "contig {}.".format(save_prev_cont_num, prev_cont_num))
-                        # Previous loc was 'i' (because we were in the same contig as
-                        # the previous one).
-                        # But now, we know the it was the last gene of its contig: we change
-                        # loc to 'b'
+                    # new gene
+                    # if new gene is not on the same contig as previously, 
+                    # get new contig and loc = 'b'
+                    if changed_name and tbl_cont_num != prev_cont_num:
+                        lst_cont_num = get_new_contig(lst_cont_num, tbl_cont_num, 
+                                                      tbl_cont_name, tblfile, genome, logger)
+                        if not lst_cont_num:
+                            return False
+                        lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
+                        # We now have the new contig name/num.
+                        # Previous loc was 'i' (because we were in the same contig as the 
+                        # previous one). But now, we know the it was the last gene of 
+                        # its contig: we change loc to 'b'
                         prev_cont_loc = "b"
                         cont_loc = "b"
-                    # Same contig as previously
-                    else:
-                        # Same contig but prev_loc = "b" (previous feature was the first of this
-                        # contig) -> loc is now i for this current feature
-                        if prev_cont_loc == "b":
-                            cont_loc = "i"
-                    # If we are in the first contig, prev = current
-                    if prev_cont_num == -1:
-                        prev_cont_num = exp_cont_num
-                        prev_cont_loc = cont_loc
+                    elif not changed_name and tbl_cont_name != prev_cont_name:
+                        lst_cont_num = get_new_contig_renamed(lst_cont_num, lst_cont_name, 
+                                                              tbl_cont_name, contigs, tblfile, 
+                                                              genome, logger)
+                        if not lst_cont_num:
+                            return False
+                        lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
+                        # We now have the new contig name/num.
+                        # Previous loc was 'i' (because we were in the same contig as the 
+                        # previous one). But now, we know the it was the last gene of 
+                        # its contig: we change loc to 'b'
+                        prev_cont_loc = "b"
+                        cont_loc = "b"
 
-                    # If not first feature of the contig, write the previous feature to .lst file
-                    # (The first feature will be written once 2nd feature as been read)
-                    if start != -1 and end != -1:
+                    # Same contig as previously: this gene is inside the contig (cont_loc = "i"). 
+                    # If, in fact, it was the last gene of this contig, it will be changed 
+                    # when discovering next gene.
+                    else:
+                        cont_loc = "i"
+                    # If not first gene of the contig, write the previous gene to .lst file
+                    # The first gene will be written while reading the 2nd gene
+                    if start != "-1" and end != "-1":
                         crispr_num, lstline = general.write_gene(feature_type, locus_num,
                                                                  gene_name, product, crispr_num,
                                                                  prev_cont_loc, genome,
                                                                  prev_cont_num, ecnum, inf2,
                                                                  db_xref, strand, start, end, lstf)
 
-                    # Get new values for start, end, strand and feature type
+                    # Get new values for the next gene: start, end, strand and feature type
                     start, end, feature_type = elems
                     # Get strain of gene
                     if int(end) < int(start):
@@ -327,26 +310,64 @@ def tbl2lst(tblfile, lstfile, contigs, genome, changed_name):
                         strand = "C"
                     else:
                         strand = "D"
-                    # Initialize variables for next feature (except start, end, strand
-                    # and feature type which just calculated)
-                    prev_cont_num = exp_cont_num
+                    # Initialize variables for next feature 
+                    # (except start, end, strand and feature type that we just calculated).
+                    # prev_cont_num = exp_cont_num
                     prev_cont_loc = cont_loc
-                    cont_name = exp_cont_name
+                    prev_cont_num = lst_cont_num
+                    prev_cont_name = lst_cont_name
                     locus_num = "NA"
                     gene_name = "NA"
                     product = "NA"
                     ecnum = "NA"
                     inf2 = "NA"
                     db_xref = "NA"
+
         # Write last feature
         if start != -1 and end != -1:
             prev_cont_loc = "b"
-            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name,
-                                               product, crispr_num, prev_cont_loc,
-                                               genome, prev_cont_num,
-                                               ecnum, inf2, db_xref,
-                                               strand, start, end, lstf)
+            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name, product, 
+                                               crispr_num, prev_cont_loc, genome, prev_cont_num, 
+                                               ecnum, inf2, db_xref, strand, start, end, lstf)
     return True
+
+
+def get_new_contig(lst_cont_num, tbl_cont_num, tbl_cont_name, tblfile, genome, logger):
+    # New contig is not the same as previously. Check that there are no contigs without any 
+    # gene between thos 2 contigs.
+    # If expected lst cont num is not the same as found tbl cont num, it means that 
+    # some contigs do not have any gene. Skip them, and go to corresponding lst cont num
+    if lst_cont_num != tbl_cont_num:
+        save_lst_num = lst_cont_num
+        try:
+            while lst_cont_num != tbl_cont_num:
+                lst_cont_num += 1
+            logger.details(f"No feature found in contigs between contig {save_lst_num} and "
+                           f"contig {lst_cont_num}.")
+        # If tbl contig num was not found in lst cont nums: error!
+        except IndexError:
+            logger.error(f"{tbl_cont_name} found in {tblfile} does not exist "
+                         f"in genome {genome}.")
+            return False
+    return lst_cont_num
+
+
+def get_new_contig_renamed(lst_cont_num, lst_cont_name, tbl_cont_name, contigs, 
+                           tblfile, genome, logger):
+    if lst_cont_name != tbl_cont_name:
+        save_lst_name = lst_cont_name
+        try:
+            while lst_cont_name != tbl_cont_name:
+                lst_cont_num += 1
+                lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
+            logger.details(f"No feature found in contigs between contig {save_lst_name} and "
+                           f"contig {lst_cont_name}.")
+        # If tbl contig num was not found in lst cont nums: error!
+        except IndexError:
+            logger.error(f"{tbl_cont_name} found in {tblfile} does not exist "
+                         f"in genome {genome}.")
+            return False
+    return lst_cont_num
 
 
 def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, logger):
