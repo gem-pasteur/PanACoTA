@@ -272,7 +272,7 @@ def run_prodigal(arguments):
     root.handlers = []
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
-    logger = logging.getLogger('run_prodigal')
+    logger = logging.getLogger('annotate.run_prodigal')
     logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
                                      "with Prodigal")
     # Define prodigal directory and logfile, and check their existence
