@@ -1098,10 +1098,10 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     Returns
     -------
     tuple
-        - List of all contigs with their original and new name: (list of str)
-        ["contig1'\t'orig_name1", "contig2'\t'orig_name2" ...]
+        - Dict of all contigs with their original and new name: (list of str)
+        {>orig_name: >new_name}
         - List of all contigs with their size: (list of str)
-        ["contig1'\t'size1", "contig2'\t'size2" ...]
+        {"new_name': 'size1"}
     """
     # Initialize variables
 
@@ -1110,9 +1110,9 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     # contig size
     cont_size = 0
     # List of contigs (str) [<name>\t<orig_name>]
-    contigs = []
+    contigs = {}
     # List of contigs (str) with their sizes [<name>\t<size>]
-    sizes = []
+    sizes = {}
     # Name of previous contig (to put to contigs, as we need to wait for the next
     # contig to know the size of the previous one)
     prev_cont = ""
@@ -1133,12 +1133,10 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-                    sizes.append(cont.strip())
-                    cor = "\t".join([prev_cont, prev_orig_name])
-                    contigs.append(cor)
+                    sizes[prev_cont] = cont_size
+                    contigs[prev_cont] = prev_orig_name
                     grf.write(cont)
                     grf.write(seq)
-
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 prev_orig_name = line.strip()
                 contig_num += 1
@@ -1150,9 +1148,8 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 cont_size += len(line.strip())
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-        sizes.append(cont.strip())
-        cor = "\t".join([prev_cont, prev_orig_name])
-        contigs.append(cor)
+        sizes[prev_cont] = cont_size
+        contigs[prev_cont] = prev_orig_name
         grf.write(cont)
         grf.write(seq)
     return contigs, sizes

@@ -907,12 +907,12 @@ def test_rename_contigs():
     exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
     contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile)
     print(sizes)
-    assert contigs == [">ESCO.0216.00005.0001\t>H561_S27 L001_R1_001_(paired)_contig_1",
-                       ">ESCO.0216.00005.0002\t>H561_S28 L001_R1_001_(paired)_contig_2",
-                       ">ESCO.0216.00005.0003\t>H561_S29 L001_R1_001_(paired)_contig_115"]
-    assert sizes == [">ESCO.0216.00005.0001\t3480",
-                     ">ESCO.0216.00005.0002\t7080",
-                     ">ESCO.0216.00005.0003\t2583"]
+    assert contigs == {">ESCO.0216.00005.0001":">H561_S27 L001_R1_001_(paired)_contig_1",
+                       ">ESCO.0216.00005.0002":">H561_S28 L001_R1_001_(paired)_contig_2",
+                       ">ESCO.0216.00005.0003":">H561_S29 L001_R1_001_(paired)_contig_115"}
+    assert sizes == {">ESCO.0216.00005.0001":3480,
+                     ">ESCO.0216.00005.0002":7080,
+                     ">ESCO.0216.00005.0003":2583}
     assert utilities.compare_order_content(outfile, exp_file)
 
 
