@@ -129,6 +129,7 @@ def test_run_fme_boot_j(caplog):
             "exp_align_phylip.ph.fastme.log") in caplog.text
     assert not tree_util.is_tree_lengths(treefile)
     assert tree_util.is_tree_bootstrap(treefile)
+    os.remove(os.path.join(EXPPATH, "exp_align_phylip.ph_fastme_boot.txt"))
     logs = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme.log")
     assert os.path.isfile(logs)
 
