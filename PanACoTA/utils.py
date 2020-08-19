@@ -1100,7 +1100,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
     tuple
         - Dict of all contigs with their original and new name: (list of str)
         {>orig_name: >new_name}
-        - List of all contigs with their size: (list of str)
+        - Dict of all contigs with their size: (list of str)
         {"new_name': 'size1"}
     """
     # Initialize variables
