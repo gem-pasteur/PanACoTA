@@ -393,7 +393,7 @@ Headers are ``<replicon_name> <size>``, with size corresponding to the number of
 gff3 folder
 ^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, with fields as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following header format.
+This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, with fields as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following header format. It does not contain the nucleotide sequences, which already are in the Replicons folder.
 
 .. code-block:: text
 
