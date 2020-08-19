@@ -41,6 +41,7 @@ def setup_teardown_module():
     print("setup")
 
     yield
+    
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
@@ -81,7 +82,7 @@ def test_count_tbl():
     """
     tblfile = os.path.join(TEST_DIR, "original_name.fna-prokkaRes", "prokka_out_for_test.tbl")
     ncont, ncds, ngene, ncris = afunc.count_tbl(tblfile)
-    assert ncont == 7
+    assert ncont == 6
     assert ncds == 13
     assert ngene == 15
     assert ncris == 2
