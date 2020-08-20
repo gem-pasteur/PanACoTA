@@ -8,7 +8,7 @@
 ##sequence-region contname 1 6009
 JGIKIPgffgIJ	Prodigal:2.6	CDS	287	787	.	+	0	ID=EPKOMDHM_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
 JGIKIPgffgIJ	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=EPKOMDHM_00005;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
-JGIKIPgffgIJ	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
+JGIKIPgffgIJ	Prodigal:2.6	CDS	9000	12002	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
 toto	Prodigal:2.6	CDS	78	1237	.	+	0	ID=EPKOMDHM_00008;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00008;product=hypothetical protein
 toto	Prodigal:2.6	CDS	1279	2346	.	+	0	ID=EPKOMDHM_00009;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00009;product=hypothetical protein
 toto	Prodigal:2.6	CDS	2419	3000	.	+	0	ID=EPKOMDHM_00010;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00010;product=hypothetical protein

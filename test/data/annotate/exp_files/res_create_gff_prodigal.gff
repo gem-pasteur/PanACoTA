@@ -8,7 +8,7 @@
 ##sequence-region	test.0417.00002.0007	1	15000
 test.0417.00002.0001	Prodigal:2.6	CDS	287	787	.	+	0	ID=test.0417.00002.0001b_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
 test.0417.00002.0001	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=test.0417.00002.0001i_00002;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
-test.0417.00002.0001	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=test.0417.00002.0001b_00003;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
+test.0417.00002.0001	Prodigal:2.6	CDS	9000	12002	.	-	0	ID=test.0417.00002.0001b_00003;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
 test.0417.00002.0002	Prodigal:2.6	CDS	77	1237	.	+	0	ID=test.0417.00002.0002b_00004;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00008;product=hypothetical protein
 test.0417.00002.0002	Prodigal:2.6	CDS	1279	2346	.	+	0	ID=test.0417.00002.0002i_00005;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00009;product=hypothetical protein
 test.0417.00002.0002	Prodigal:2.6	CDS	2419	3000	.	+	0	ID=test.0417.00002.0002i_00006;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00010;product=hypothetical protein

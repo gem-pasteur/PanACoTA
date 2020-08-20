@@ -66,7 +66,7 @@ def test_create_gen_lst(caplog):
     caplog.set_level(logging.DEBUG)
     logger = logging.getLogger("test_prodigal")
     genfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal_out_for_test.ffn")
     contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
                "toto": "test.0417.00002.0002",
                "other_header": "test.0417.00002.0003",
@@ -83,6 +83,8 @@ def test_create_gen_lst(caplog):
                                         name, logger)
     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
     assert tutil.compare_order_content(exp_lst, res_lst_file)
+    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.gen")
+    assert tutil.compare_order_content(exp_gen, res_gen_file)
 
 
 def test_create_gen_lst_cont_unknown(caplog):
@@ -185,6 +187,89 @@ def test_create_gff_wrong_start(caplog):
             "(78 in gff, 77 in ffn") in caplog.text
 
 
+def test_create_prt(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    exp_prt = os.path.join(EXP_ANNOTE, "res_create_prt_prodigal.faa")
+    assert tutil.compare_order_content(exp_prt, res_prt_file)
+
+
+def test_create_prt_wrong_lst(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-wrongformat.lst")
+    assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    assert ("Problem in format of lstline (1279\t2346\tCDS\ttest.0417.00002.0002i_00005\tNA\t"
+            "| NA | NA | fefer | NA") in caplog.text
+
+
+def test_create_prt_short_lst(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-shortlst.lst")
+    assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    assert ("No more protein in lst file. We cannot get information on this "
+            "protein (>toto_00011 # 2419 # 3000 # 1 # a)! Check that you do not have "
+            "more proteins than genes in prodigal results") in caplog.text
+
+
+def test_create_prt_end_not_int_lst(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-notint.lst")
+    assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    assert ("Start and/or end of protein test.0417.00002.0001i_00002 position is not a number "
+            "(start = 4416; end = a6068)") in caplog.text
+
+
+def test_create_prt_not_divisible3_lst(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-not-divisible3.lst")
+    assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    assert ("Gene test.0417.00002.0001b_00003 has a number of nucleotides (3001) "
+            "that is not divisible by 3.") in caplog.text
+
+
+def test_create_prt_not_moreprots_lst(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-more-proteins.lst")
+    assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
+    assert ("Protein test.0417.00002.0007b_00015 is in .lst file but its sequence is not "
+            "in the protein file generated by prodigal.") in caplog.text
 
 # # def test_tbl_to_lst_not_changed_names(caplog):
 #     """
