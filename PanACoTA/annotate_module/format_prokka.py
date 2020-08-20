@@ -260,36 +260,36 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
                 # Information on start, end, type
                 else:
                     # new gene
-                    # if new gene is not on the same contig as previously, 
+                    # if new gene is not on the same contig as previously,
                     # get new contig and loc = 'b'
                     if changed_name and tbl_cont_num != prev_cont_num:
-                        lst_cont_num = get_new_contig(lst_cont_num, tbl_cont_num, 
+                        lst_cont_num = get_new_contig(lst_cont_num, tbl_cont_num,
                                                       tbl_cont_name, tblfile, genome, logger)
                         if not lst_cont_num:
                             return False
                         lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
                         # We now have the new contig name/num.
-                        # Previous loc was 'i' (because we were in the same contig as the 
-                        # previous one). But now, we know the it was the last gene of 
+                        # Previous loc was 'i' (because we were in the same contig as the
+                        # previous one). But now, we know the it was the last gene of
                         # its contig: we change loc to 'b'
                         prev_cont_loc = "b"
                         cont_loc = "b"
                     elif not changed_name and tbl_cont_name != prev_cont_name:
-                        lst_cont_num = get_new_contig_renamed(lst_cont_num, lst_cont_name, 
-                                                              tbl_cont_name, contigs, tblfile, 
+                        lst_cont_num = get_new_contig_renamed(lst_cont_num, lst_cont_name,
+                                                              tbl_cont_name, contigs, tblfile,
                                                               genome, logger)
                         if not lst_cont_num:
                             return False
                         lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
                         # We now have the new contig name/num.
-                        # Previous loc was 'i' (because we were in the same contig as the 
-                        # previous one). But now, we know the it was the last gene of 
+                        # Previous loc was 'i' (because we were in the same contig as the
+                        # previous one). But now, we know the it was the last gene of
                         # its contig: we change loc to 'b'
                         prev_cont_loc = "b"
                         cont_loc = "b"
 
-                    # Same contig as previously: this gene is inside the contig (cont_loc = "i"). 
-                    # If, in fact, it was the last gene of this contig, it will be changed 
+                    # Same contig as previously: this gene is inside the contig (cont_loc = "i").
+                    # If, in fact, it was the last gene of this contig, it will be changed
                     # when discovering next gene.
                     else:
                         cont_loc = "i"
@@ -310,7 +310,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
                         strand = "C"
                     else:
                         strand = "D"
-                    # Initialize variables for next feature 
+                    # Initialize variables for next feature
                     # (except start, end, strand and feature type that we just calculated).
                     # prev_cont_num = exp_cont_num
                     prev_cont_loc = cont_loc
@@ -326,16 +326,16 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
         # Write last feature
         if start != -1 and end != -1:
             prev_cont_loc = "b"
-            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name, product, 
-                                               crispr_num, prev_cont_loc, genome, prev_cont_num, 
+            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name, product,
+                                               crispr_num, prev_cont_loc, genome, prev_cont_num,
                                                ecnum, inf2, db_xref, strand, start, end, lstf)
     return True
 
 
 def get_new_contig(lst_cont_num, tbl_cont_num, tbl_cont_name, tblfile, genome, logger):
-    # New contig is not the same as previously. Check that there are no contigs without any 
+    # New contig is not the same as previously. Check that there are no contigs without any
     # gene between thos 2 contigs.
-    # If expected lst cont num is not the same as found tbl cont num, it means that 
+    # If expected lst cont num is not the same as found tbl cont num, it means that
     # some contigs do not have any gene. Skip them, and go to corresponding lst cont num
     if lst_cont_num != tbl_cont_num:
         save_lst_num = lst_cont_num
@@ -352,7 +352,7 @@ def get_new_contig(lst_cont_num, tbl_cont_num, tbl_cont_name, tblfile, genome, l
     return lst_cont_num
 
 
-def get_new_contig_renamed(lst_cont_num, lst_cont_name, tbl_cont_name, contigs, 
+def get_new_contig_renamed(lst_cont_num, lst_cont_name, tbl_cont_name, contigs,
                            tblfile, genome, logger):
     if lst_cont_name != tbl_cont_name:
         save_lst_name = lst_cont_name
