@@ -111,6 +111,7 @@ If you installed the dependencies (such as prokka) via our installation script, 
 ## Quick run
 
 `PanACoTA` contains 5 different subcommands:
+
 - `annotate` (annotate all genomes of the dataset, after a quality control)
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
