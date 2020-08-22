@@ -29,7 +29,7 @@ logger = logging.getLogger("annotate.prodigal_format")
 
 
 def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir, logger, changed_name=False):
+                      rep_dir, gff_dir, logger):
     """
     Format the given genome, and create its corresponding files in the following folders:
 
@@ -96,10 +96,10 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
 
     # First, create .gen and .lst files. If they could not be formatted,
     # remove those files, and return False with error message
-    ok = create_gene_lst(contigs, gen_file, res_gene_file, res_lst_file, name, logger)
+    ok = create_gene_lst(contigs, gen_file, res_gene_file, res_lst_file, gpath, name)
     if not ok:
         try:
-            os.remove(res_gen_file)
+            os.remove(res_gene_file)
             os.remove(res_lst_file)
         except OSError:
             pass
@@ -107,7 +107,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Create gff files.
-    ok = create_gff(gpath, res_rep_file, res_gff_file, res_lst_file, gff_file, name)
+    ok = create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, sizes)
     # If problem while formatting the genome (rep or gff file), remove all
     # already created files, and return False (genome not formatted) with error message.
     if not ok:
@@ -141,7 +141,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     return ok
 
 
-def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name, logger):
+def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
     """
     Generate .gen file, from sequences contained in .ffn, but changing the
     headers to match with gembase format.
@@ -158,7 +158,7 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name, 
     res_lst_file : str
         generated .lst file to write in LSTINFO directory
     gpath : str
-        path to the genome given to prodigal
+        path to the genome given to prodigal. Only used for error message
     name : str
         gembase name of the genome to format
     logger : logging.Logger
