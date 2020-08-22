@@ -64,38 +64,8 @@ def test_create_gen_lst(caplog):
     - contig without gene (should be skipped)
     """
     caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
     genfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.ffn")
-    contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
-               "toto": "test.0417.00002.0002",
-               "other_header": "test.0417.00002.0003",
-               "my contig": "test.0417.00002.0004",
-               "bis": "test.0417.00002.0005",
-               "ter": "test.0417.00002.0006",
-               "contname": "test.0417.00002.0007"
-               }
-    name = "test.0417.00002"
-    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
-    res_lst_file = os.path.join(GENEPATH, "prodigal_res.lst")
-    gpath = "original_genome_name"
-    assert prodigalfunc.create_gene_lst(contigs, genfile, res_gen_file, res_lst_file, gpath,
-                                        name, logger)
-    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
-    assert tutil.compare_order_content(exp_lst, res_lst_file)
-    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.gen")
-    assert tutil.compare_order_content(exp_gen, res_gen_file)
-
-
-def test_create_gen_lst_cont_unknown(caplog):
-    """
-    A contig name in the gen file does not exist -> error message, and all result files
-    must be removed for this genome
-    """
-    caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
-    genfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.ffn")
     contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
                "toto": "test.0417.00002.0002",
                "other_header": "test.0417.00002.0003",
@@ -108,10 +78,38 @@ def test_create_gen_lst_cont_unknown(caplog):
     res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
     res_lst_file = os.path.join(GENEPATH, "prodigal_res.lst")
     gpath = "original_genome_name"
+    assert prodigalfunc.create_gene_lst(contigs, genfile, res_gen_file, res_lst_file, gpath,
+                                        name)
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert tutil.compare_order_content(exp_lst, res_lst_file)
+    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.gen")
+    assert tutil.compare_order_content(exp_gen, res_gen_file)
+
+
+def test_create_gen_lst_cont_unknown(caplog):
+    """
+    A contig name in the gen file does not exist -> error message, and all result files
+    must be removed for this genome
+    """
+    caplog.set_level(logging.DEBUG)
+    genfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
+                           "prodigal.outtest.ok.faa")
+    contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
+               "toto": "test.0417.00002.0002",
+               "other_header": "test.0417.00002.0003",
+               "my contig": "test.0417.00002.0004",
+               "bis": "test.0417.00002.0005",
+               "ter": "test.0417.00002.0006",
+               "contname": "test.0417.00002.0007"
+               }
+    name = "test.0417.00002"
+    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
+    res_lst_file = os.path.join(GENEPATH, "prodigal_res.lst")
+    gpath = "original_genome_name"
     assert not prodigalfunc.create_gene_lst(contigs, genfile, res_gen_file, res_lst_file,
-                                            gpath, name, logger)
-    assert ("my contig found in test/data/annotate/test_files/original_name.fna-prodigalRes/"
-            "prodigal_out_for_test.faa does not exist in original_genome_name") in caplog.text
+                                            gpath, name)
+    assert ("my_contig found in test/data/annotate/test_files/original_name.fna-prodigalRes/"
+            "prodigal.outtest.ok.faa does not exist in original_genome_name") in caplog.text
 
 
 def test_create_gff(caplog):
@@ -122,7 +120,7 @@ def test_create_gff(caplog):
     caplog.set_level(logging.DEBUG)
     logger = logging.getLogger("test_prodigal")
     gfffile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.gff")
+                           "prodigal.outtest.ok.gff")
     contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
                "toto": "test.0417.00002.0002",
                "other_header": "test.0417.00002.0003",
@@ -158,7 +156,7 @@ def test_create_gff_wrong_start(caplog):
     caplog.set_level(logging.DEBUG)
     logger = logging.getLogger("test_prodigal")
     gfffile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test-wrong-start.gff")
+                           "prodigal.outtest.wrong-start.gff")
     contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
                "toto": "test.0417.00002.0002",
                "other_header": "test.0417.00002.0003",
@@ -180,8 +178,8 @@ def test_create_gff_wrong_start(caplog):
     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
     gpath = "original_genome_name"
     assert not prodigalfunc.create_gff(gpath, gfffile, res_gff_file, exp_lst, contigs, sizes)
-    assert ("Files prodigal_out_for_test-wrong-start.ffn and "
-            "prodigal_out_for_test-wrong-start.gff "
+    assert ("Files prodigal.outtest.wrong-start.ffn and "
+            "prodigal.outtest.wrong-start.gff "
             "(in prodigal tmp_files: original_genome_name-prodigalRes) "
             "do not have the same start value for gene EPKOMDHM_00008 "
             "(78 in gff, 77 in ffn") in caplog.text
@@ -193,7 +191,7 @@ def test_create_prt(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
     assert prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -207,7 +205,7 @@ def test_create_prt_wrong_lst(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-wrongformat.lst")
     assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -221,7 +219,7 @@ def test_create_prt_short_lst(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-shortlst.lst")
     assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -236,7 +234,7 @@ def test_create_prt_end_not_int_lst(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-notint.lst")
     assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -250,7 +248,7 @@ def test_create_prt_not_divisible3_lst(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                           "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-not-divisible3.lst")
     assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -264,7 +262,7 @@ def test_create_prt_not_moreprots_lst(caplog):
     """
     caplog.set_level(logging.DEBUG)
     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prodigalRes",
-                           "prodigal_out_for_test.faa")
+                        "prodigal.outtest.ok.faa")
     res_prt_file = os.path.join(GENEPATH, "prodigal_res.gff")
     exp_lst = os.path.join(TEST_ANNOTE, "test_create_prt_prodigal-more-proteins.lst")
     assert not prodigalfunc.create_prt(protfile, res_prt_file, exp_lst)
@@ -274,9 +272,29 @@ def test_create_prt_not_moreprots_lst(caplog):
 
 def test_format_1genome(caplog):
     """
-    Test that when prodigal results are ok, all files are
-    generated as expected.
+    Test that when prodigal results are ok, all files are generated as expected.
     """
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test_prodigal")
+    name = "prodigal.outtest.ok"
+    gpath =  os.path.join(TEST_ANNOTE, "original_name.fna") # path to original genome, given to prodigal for annotation
+    prod_path = TEST_ANNOTE
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gene_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+
+    os.makedirs(prot_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(rep_dir)
+    os.makedirs(gene_dir)
+    os.makedirs(gff_dir)
+
+    assert prodigalfunc.format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
+                      rep_dir, gff_dir, logger)
+
+
 # # def test_tbl_to_lst_not_changed_names(caplog):
 #     """
 #     Check that generated lstinfo file is as expected, when the genome name is the same as
