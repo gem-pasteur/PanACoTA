@@ -551,7 +551,7 @@ def test_read_genomes_info_nofile(caplog):
 def test_read_genomes_info_wrongheader(caplog):
     """
     Read lstinfo file and get all genomes information
-    When wrong header (not all required columns), exits and appropriate error message  
+    When wrong header (not all required columns), exits and appropriate error message
     """
     caplog.set_level(logging.DEBUG)
     name = "ESCO"
@@ -569,7 +569,7 @@ def test_read_genomes_info_wrongheader(caplog):
 def test_read_genomes_info_noheader(caplog):
     """
     Read lstinfo file and get all genomes information
-    When no header, exits and appropriate error message  
+    When no header, exits and appropriate error message
     """
     caplog.set_level(logging.DEBUG)
     name = "ESCO"
@@ -587,7 +587,7 @@ def test_read_genomes_info_noheader(caplog):
 def test_read_genomes_info_not_int(caplog):
     """
     Read lstinfo file and get all genomes information
-    When a nbcont column is not an int for 1 genome, writes error message and ignores the genome 
+    When a nbcont column is not an int for 1 genome, writes error message and ignores the genome
     """
     caplog.set_level(logging.DEBUG)
     name = "ESCO"
@@ -598,11 +598,11 @@ def test_read_genomes_info_not_int(caplog):
     assert 'Found 2 genomes in total' in caplog.text
     assert ("For genome A_H738-and-B2_A3_5, at least one of your columns 'gsize', "
             "'nb_conts' or 'L90' contains a non numeric value. This genome will be ignored") in caplog.text
-    exp = {"genome1.fasta": 
-            ["genome1", "test/data/annotate/genomes/genome1.fasta", 
+    exp = {"genome1.fasta":
+            ["genome1", "test/data/annotate/genomes/genome1.fasta",
              "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
-           "genome7.fasta": 
-            ["genome7", "test/data/annotate/genomes/genome7.fasta", 
+           "genome7.fasta":
+            ["genome7", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
     assert genomes == exp
 
@@ -610,7 +610,7 @@ def test_read_genomes_info_not_int(caplog):
 def test_read_genomes_info_not_all_filled(caplog):
     """
     Read lstinfo file and get all genomes information
-    1 column not filled for at least 1 genome: exits and write appropriate error message  
+    1 column not filled for at least 1 genome: exits and write appropriate error message
     """
     caplog.set_level(logging.DEBUG)
     name = "ESCO"
@@ -636,11 +636,11 @@ def test_read_genomes_info_no_path(caplog):
     assert ("data/annotate/genomes/A_H738-and-B2_A3_5.fna genome file does not exist. "
             "This genome will be ignored") in caplog.text
     assert 'Found 2 genomes in total' in caplog.text
-    exp = {"genome1.fasta": 
-            ["genome1", "test/data/annotate/genomes/genome1.fasta", 
+    exp = {"genome1.fasta":
+            ["genome1", "test/data/annotate/genomes/genome1.fasta",
              "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
-           "genome7.fasta": 
-            ["genome7", "test/data/annotate/genomes/genome7.fasta", 
+           "genome7.fasta":
+            ["genome7", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
     assert genomes == exp
 
@@ -648,7 +648,7 @@ def test_read_genomes_info_no_path(caplog):
 def test_read_genomes_info_no_genomes(caplog):
     """
     Read lstinfo file and get all genomes information
-    When no genome in lstinfo correspond to existing paths, exits and appropriate error message 
+    When no genome in lstinfo correspond to existing paths, exits and appropriate error message
     """
     caplog.set_level(logging.DEBUG)
     name = "ESCO"
@@ -672,14 +672,14 @@ def test_read_genomes_info_ok(caplog):
     assert ("Reading given information on your genomes in "
             "test/data/annotate/test_files/lstinfo.lst") in caplog.text
     assert 'Found 3 genomes in total' in caplog.text
-    exp = {"genome1.fasta": 
-            ["genome1", "test/data/annotate/genomes/genome1.fasta", 
+    exp = {"genome1.fasta":
+            ["genome1", "test/data/annotate/genomes/genome1.fasta",
              "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
-           "A_H738-and-B2_A3_5.fna": 
-            ["A_H738-and-B2_A3_5", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 
+           "A_H738-and-B2_A3_5.fna":
+            ["A_H738-and-B2_A3_5", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna",
              "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 6],
-           "genome7.fasta": 
-            ["genome7", "test/data/annotate/genomes/genome7.fasta", 
+           "genome7.fasta":
+            ["genome7", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
     assert genomes == exp
 
@@ -696,14 +696,14 @@ def test_read_genomes_info_date_ok(caplog):
     assert ("Reading given information on your genomes in "
             "test/data/annotate/test_files/lstinfo.lst") in caplog.text
     assert 'Found 3 genomes in total' in caplog.text
-    exp = {"test/data/annotate/genomes/genome1.fasta": 
-            ["ESCO.0720", "test/data/annotate/genomes/genome1.fasta", 
+    exp = {"test/data/annotate/genomes/genome1.fasta":
+            ["ESCO.0720", "test/data/annotate/genomes/genome1.fasta",
              "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
-           "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna": 
-            ["ESCO.0720", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 
+           "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna":
+            ["ESCO.0720", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna",
              "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 6],
-           "test/data/annotate/genomes/genome7.fasta": 
-            ["ESCO.0720", "test/data/annotate/genomes/genome7.fasta", 
+           "test/data/annotate/genomes/genome7.fasta":
+            ["ESCO.0720", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
     assert genomes == exp
 
@@ -907,12 +907,12 @@ def test_rename_contigs():
     exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
     contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile)
     print(sizes)
-    assert contigs == {">ESCO.0216.00005.0001":">H561_S27 L001_R1_001_(paired)_contig_1",
-                       ">ESCO.0216.00005.0002":">H561_S28 L001_R1_001_(paired)_contig_2",
-                       ">ESCO.0216.00005.0003":">H561_S29 L001_R1_001_(paired)_contig_115"}
-    assert sizes == {">ESCO.0216.00005.0001":3480,
-                     ">ESCO.0216.00005.0002":7080,
-                     ">ESCO.0216.00005.0003":2583}
+    assert contigs == {"H561_S27 L001_R1_001_(paired)_contig_1":"ESCO.0216.00005.0001",
+                       "H561_S28 L001_R1_001_(paired)_contig_2":"ESCO.0216.00005.0002",
+                       "H561_S29 L001_R1_001_(paired)_contig_115":"ESCO.0216.00005.0003"}
+    assert sizes == {"ESCO.0216.00005.0001":3480,
+                     "ESCO.0216.00005.0002":7080,
+                     "ESCO.0216.00005.0003":2583}
     assert utilities.compare_order_content(outfile, exp_file)
 
 
