@@ -84,11 +84,11 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
     if not contigs:
         try:
+            os.remove(res_rep_file)
             os.remove(res_lst_file)
             os.remove(res_gff_file)
             os.remove(res_gene_file)
             os.remove(res_prt_file)
-            os.remove(res_rep_file)
         except OSError:
             pass
         logger.error("Problems while generating Replicon file for {}".format(name))
@@ -99,8 +99,11 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     ok = create_gene_lst(contigs, gen_file, res_gene_file, res_lst_file, gpath, name)
     if not ok:
         try:
+            os.remove(res_rep_file)
             os.remove(res_gene_file)
             os.remove(res_lst_file)
+            os.remove(res_gff_file)
+            os.remove(res_prot_file)
         except OSError:
             pass
         logger.error(f"Problems while generating .gen and .lst files for {name}")
@@ -116,10 +119,11 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_lst_file)
             os.remove(res_rep_file)
             os.remove(res_gff_file)
+            os.remove(res_prot_file)
         except OSError:
             pass
-        logger.error("Problems while generating .fna (Replicons folder) and .gff (gff3 folder) "
-                     "files for {}".format(name))
+        logger.error("Problems while generating .gff (gff3 folder) "
+                     "file for {}".format(name))
         return False
 
     # Generate .prt files (in Proteins directory)
@@ -135,7 +139,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_prot_file)
         except OSError:
             pass
-        logger.error("Problems while generating .prt files (Proteins folder) "
+        logger.error("Problems while generating .prt file (Proteins folder) "
                      "for {}".format(name))
         return False
     return ok
@@ -209,8 +213,11 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
                 (gname, start, end, strand, info) = lineffn.strip().split(">")[-1].split("#")
                 # Get contig number from prodigal gene header: prodigal first part of header is:
                 #  <original genome name contig name>_<protein number>
-                contig_name = "_".join(gname.strip().split("_")[:-1])
-
+                contig_name = gname.strip().split("_")
+                if len(contig_name) > 1:
+                    contig_name = "_".join(contig_name[:-1])
+                else:
+                    contig_name = contig_name[0]
                 # If new contig:
                 # - previous gene was the last of its contig -> prev_loc = "b" ;
                 # - the current gene is the first of its contig (loc = "b")
@@ -221,7 +228,8 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
                         contig_num = contigs[contig_name].split(".")[-1]
                     # if not in the list, problem, return false
                     else:
-                        logger.error(f"{contig_name} found in {gen_file} does not exist in {gpath}.")
+                        logger.error(f"'{contig_name}' found in {gen_file} does not exist in "
+                                     f"{gpath}.")
                         return False
                     prev_loc = 'b'
                     loc = 'b'

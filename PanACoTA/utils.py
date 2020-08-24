@@ -1135,10 +1135,11 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
                     prevcont_nohead = "".join(prev_cont.split(">")[1:])
                     prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
-                    sizes[prevcont_nohead] = cont_size
-                    contigs[prev_orig_name_nohead] = prevcont_nohead
-                    grf.write(cont)
-                    grf.write(seq)
+                    if prev_orig_name_nohead:
+                        sizes[prevcont_nohead] = cont_size
+                        contigs[prev_orig_name_nohead] = prevcont_nohead
+                        grf.write(cont)
+                        grf.write(seq)
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
                 prev_orig_name = line.strip()
                 contig_num += 1
@@ -1152,10 +1153,11 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
         prevcont_nohead = "".join(prev_cont.split(">")[1:])
         prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
-        contigs[prev_orig_name_nohead] = prevcont_nohead
-        sizes[prevcont_nohead] = cont_size
-        grf.write(cont)
-        grf.write(seq)
+        if prev_orig_name_nohead:
+            contigs[prev_orig_name_nohead] = prevcont_nohead
+            sizes[prevcont_nohead] = cont_size
+            grf.write(cont)
+            grf.write(seq)
     return contigs, sizes
 
 
