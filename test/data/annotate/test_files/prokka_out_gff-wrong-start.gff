@@ -6,11 +6,11 @@
 ##sequence-region test.0417.00002.0005 1 6009
 test.0417.00002.0001	Prodigal:2.6	CDS	287	787	.	+	0	ID=EPKOMDHM_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
 test.0417.00002.0001	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=EPKOMDHM_00005;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
-test.0417.00002.0001	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=toto;product=Major exported protein
+test.0417.00002.0001	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
 test.0417.00002.0002	Prodigal:2.6	CDS	77	1237	.	+	0	ID=EPKOMDHM_00008;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00008;product=hypothetical protein
 test.0417.00002.0002	Prodigal:2.6	CDS	1279	2346	.	+	0	ID=EPKOMDHM_00009;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00009;product=hypothetical protein
 test.0417.00002.0002	Prodigal:2.6	CDS	2419	3000	.	+	0	ID=EPKOMDHM_00010;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00010;product=hypothetical protein
-test.0417.00002.0002	Prodigal:2.6	CDS	3500	4000	.	+	0	ID=EPKOMDHM_00011;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00011;product=hypothetical protein
+test.0417.00002.0002	Prodigal:2.6	CDS	3000	4000	.	+	0	ID=EPKOMDHM_00011;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00011;product=hypothetical protein
 test.0417.00002.0002	Prodigal:2.6	CDS	4632	5000	.	-	0	ID=EPKOMDHM_00012;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00012;product=hypothetical protein
 test.0417.00002.0003	Prodigal:2.6	repeat_region	296902	2968265	.	-	0	ID=EPKOMDHM_00027;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P0A6C5;locus_tag=EPKOMDHM_00027
 test.0417.00002.0003	Prodigal:2.6	CDS	3399	4538	.	+	0	ID=EPKOMDHM_00028;eC_number=3.1.11.5;Name=recD;gene=recD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P04993;locus_tag=EPKOMDHM_00028;product=RecBCD enzyme subunit RecD
