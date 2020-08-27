@@ -29,7 +29,7 @@ import logging
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.general_format_functions as general
 
-# logger = logging.getLogger("annotate.prokka_format")
+logger = logging.getLogger("annotate.prokka_format")
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
@@ -101,7 +101,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, logger, changed_name)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, gpath)
     if not ok_tbl:
         try:
             os.remove(res_lst_file)
@@ -115,7 +115,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Create gff3 file for annotations
-    ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, logger)
+    ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
     if not ok_gff:
         try:
             os.remove(res_lst_file)
@@ -161,7 +161,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     return True
 
 
-def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
+def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
     """
     Read prokka tbl file, and convert it to the lst file.
 
@@ -192,10 +192,12 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
         name of prokka output tbl file to read
     lstfile : str
         name of lst file to generate
-    contigs : list
-        List of all contigs with their size ["contig1'\t'size1", "contig2'\t'size2" ...]
+    contigs : dict
+        {original_contig_name: gembase_contig_name}
     genome : str
         genome name (gembase format)
+    gpath : str
+        path to the genome given to prodigal. Only used for error message
     changed_name : bool
         True if contig names have been changed (cutn != 0) -> contig names end by '_num',
         False otherwise.
@@ -235,10 +237,6 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
             elems = line.strip().split("\t")
             if line.startswith(">Feature"):
                 tbl_cont_name = line.split()[-1]
-                if changed_name:
-                    tbl_cont_num = int(tbl_cont_name.split("_")[-1])
-                lst_cont_num += 1  # expected lst cont num is prev lst_cont_num + 1
-                lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
             else:
                 # Get line type, and retrieve info according to it
                 # If it is not the line with start, end, type, there are only 2 elements
@@ -262,37 +260,28 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
                     # new gene
                     # if new gene is not on the same contig as previously,
                     # get new contig and loc = 'b'
-                    if changed_name and tbl_cont_num != prev_cont_num:
-                        lst_cont_num = get_new_contig(lst_cont_num, tbl_cont_num,
-                                                      tbl_cont_name, tblfile, genome, logger)
-                        if not lst_cont_num:
+                    if tbl_cont_name != prev_cont_name:
+                        print("diff", tbl_cont_name, prev_cont_name)
+                        # Check that this contig name is in the list, and get its gembase contig
+                        # number
+                        if tbl_cont_name in contigs:
+                            contig_num = contigs[tbl_cont_name].split(".")[-1]
+                        # if not in the list, problem, return false
+                        else:
+                            logger.error(f"'{tbl_cont_name}' found in {tblfile} does not exist in "
+                                         f"{gpath}.")
                             return False
-                        lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
-                        # We now have the new contig name/num.
                         # Previous loc was 'i' (because we were in the same contig as the
                         # previous one). But now, we know the it was the last gene of
                         # its contig: we change loc to 'b'
                         prev_cont_loc = "b"
                         cont_loc = "b"
-                    elif not changed_name and tbl_cont_name != prev_cont_name:
-                        lst_cont_num = get_new_contig_renamed(lst_cont_num, lst_cont_name,
-                                                              tbl_cont_name, contigs, tblfile,
-                                                              genome, logger)
-                        if not lst_cont_num:
-                            return False
-                        lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
-                        # We now have the new contig name/num.
-                        # Previous loc was 'i' (because we were in the same contig as the
-                        # previous one). But now, we know the it was the last gene of
-                        # its contig: we change loc to 'b'
-                        prev_cont_loc = "b"
-                        cont_loc = "b"
-
                     # Same contig as previously: this gene is inside the contig (cont_loc = "i").
                     # If, in fact, it was the last gene of this contig, it will be changed
                     # when discovering next gene.
                     else:
-                        cont_loc = "i"
+                        cont_loc = 'i'
+
                     # If not first gene of the contig, write the previous gene to .lst file
                     # The first gene will be written while reading the 2nd gene
                     if start != "-1" and end != "-1":
@@ -314,8 +303,8 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
                     # (except start, end, strand and feature type that we just calculated).
                     # prev_cont_num = exp_cont_num
                     prev_cont_loc = cont_loc
-                    prev_cont_num = lst_cont_num
-                    prev_cont_name = lst_cont_name
+                    prev_cont_num = contig_num
+                    prev_cont_name = tbl_cont_name
                     locus_num = "NA"
                     gene_name = "NA"
                     product = "NA"
@@ -332,45 +321,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome, logger, changed_name):
     return True
 
 
-def get_new_contig(lst_cont_num, tbl_cont_num, tbl_cont_name, tblfile, genome, logger):
-    # New contig is not the same as previously. Check that there are no contigs without any
-    # gene between thos 2 contigs.
-    # If expected lst cont num is not the same as found tbl cont num, it means that
-    # some contigs do not have any gene. Skip them, and go to corresponding lst cont num
-    if lst_cont_num != tbl_cont_num:
-        save_lst_num = lst_cont_num
-        try:
-            while lst_cont_num != tbl_cont_num:
-                lst_cont_num += 1
-            logger.details(f"No feature found in contigs between contig {save_lst_num} and "
-                           f"contig {lst_cont_num}.")
-        # If tbl contig num was not found in lst cont nums: error!
-        except IndexError:
-            logger.error(f"{tbl_cont_name} found in {tblfile} does not exist "
-                         f"in genome {genome}.")
-            return False
-    return lst_cont_num
-
-
-def get_new_contig_renamed(lst_cont_num, lst_cont_name, tbl_cont_name, contigs,
-                           tblfile, genome, logger):
-    if lst_cont_name != tbl_cont_name:
-        save_lst_name = lst_cont_name
-        try:
-            while lst_cont_name != tbl_cont_name:
-                lst_cont_num += 1
-                lst_cont_name = contigs[lst_cont_num - 1].split("\t")[0]
-            logger.details(f"No feature found in contigs between contig {save_lst_name} and "
-                           f"contig {lst_cont_name}.")
-        # If tbl contig num was not found in lst cont nums: error!
-        except IndexError:
-            logger.error(f"{tbl_cont_name} found in {tblfile} does not exist "
-                         f"in genome {genome}.")
-            return False
-    return lst_cont_num
-
-
-def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, logger):
+def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs):
     """
     From the lstinfo file and contig names (retrieved from generation of Replicons files),
     generate a gff file.
@@ -396,15 +347,15 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, lo
     Parameters
     ----------
     gpath : str
-        path to the genome sequence given to prokka
+        path to the genome sequence given to prokka. Only used for error message
     res-gff_file : str
         path to the gff file that must be created in result database
     res-lst_file : str
         path to the lst file that was created in result database in the previous step
+    sizes : list
+        dict of contig names with their size. {"gembase1": "size", "gembase2":"size2" ...]
     contigs : list
-        list of contig names with their size. ["contig1"\t"size1", "contig2"\t"size2" ...]
-    logger : logging.Logger
-        logger object to put information
+        dict of contig original and gembase names. {"contig1": "gembase1"...}
 
     Returns
     -------
@@ -420,17 +371,11 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, lo
         # Write headers of gff3 file
         gfff.write("##gff-version  3\n")
         # Write all sequences with their size
-        for contig in contigs:
+        for contig in sorted(contigs):
+            new_name = contigs[contig]
+            end = sizes[new_name]
             # Write the list of contigs, with their size
-            cont_name, end = contig.split("\t")
-            gfff.write("##sequence-region\t{}\t{}\t{}".format(cont_name[1:], "1", end))
-
-        # Create an iterator of contig names, that will be used to get contig name
-        # corresponding to a given gene name (in lst, we only have gene name,
-        # but in gff we need corresponding contig name)
-        iter_contig = iter(contigs)
-        contig = next(iter_contig)
-        cname = contig.split("\t")[0][1:]
+            gfff.write(f"##sequence-region\t{new_name}\t{1}\t{end}\n")
 
         # Now, convert each line of prokka gff to gembase formatted gff line
         for linegff in prokf:
@@ -438,47 +383,41 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, lo
             # beginning of the file.
             if linegff.startswith("#"):
                 continue
+            # We do not write sequences
+            if linegff.startswith('>'):
+                break
             # Get all information from prokka gff line. Strip each of them as trailing whitespace
             # can be hidden (leading to information from gff considered as different from
             # information from lst)
             fields_g = linegff.strip().split("\t")
             fields_g = [info.strip() for info in fields_g]
-
             # Ignore lines with sequence
-            if len(fields_g) != 9:
-                continue
+            # if len(fields_g) != 9:
+            #     continue
             (contig_name, source, type_g, start_g, end_g,
              score, strand_g, phase, attributes) = fields_g
-
             # Get information given to this same sequence from the lst file
             # (next lst line corresponds to next gff line without #), as, for each format,
             # there is 1 line per gene)
             linelst = lstf.readline()
-            fields_l = linelst.strip().split("\t")
+            fields_l = linelst.split("\t")
             fields_l = [info.strip() for info in fields_l]
             start_l, end_l, strand_l, type_l, locus_l, l_gene, l_info = fields_l
 
-            # Get contig name 'cname'.
-            # -> if same contig as contig of previous gene -> cname does not change
-            # -> if not same contig, cname not in contig, so get next contig name
-            # (iterator of contigs created here-above)
-            # We use while, instead of just taking the next contig, because
-            # there could be a contig existing in replicon but not having any gene.
-            while cname not in locus_l:
-                contig = next(iter_contig)
-                cname = contig.split("\t")[0][1:]
-
-            # Get gff filename to give information to user if error message
-            gff = os.path.basename(res_gff_file)
-            lstf_name =  os.path.basename(res_lst_file)
-            # Path where gff generated by prokka is
+            # Get gff and ffn filenames to give information to user if error message
+            gff = os.path.basename(prokka_gff_file)
+            tbl = gff.replace(".gff", ".tbl")
+            # Path where gff and ffn generated by prodigal are
             tmp = gpath + "-prokkaRes"
-            # Get gene name given by prodigal to current feature
+            # Get gene name given by prodigal to current gene
             gname = attributes.split("ID=")[1].split(";")[0]
             # Get locus_tag given by prokka to current feature (should be the same as ID)
             loc_name = attributes.split("locus_tag=")[1].split(";")[0]
+            if loc_name != gname:
+                logger.error(f"Problem in {gff}: ID={gname} whereas locus_tag={loc_name}.")
+                return False
 
-            # Compare information from lst and information from prokka gff (start,
+            # Compare information from lst and information from prodigal gff (start,
             # end and type of feature). They should correspond
             for (elemg, eleml, label) in zip([start_g, end_g, type_g],
                                              [start_l, end_l, type_l],
@@ -486,18 +425,22 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, contigs, lo
                 # If 1 element is different (start or end position, or type), print error
                 # message and return False: this genome could not be converted to gff
                 if elemg != eleml:
-                    logger.error("Files {} and {} (in prokka tmp_files: {}) do not have "
-                                 "the same {} value for gene {} ({} in gff, {} in "
-                                 "ffn))".format(gff, lstf_name, tmp, label, gname, elemg, eleml))
+                    # For CRISPR, prokka puts repeat_region in gff
+                    if elemg == "repeat_region" and eleml == "CRISPR":
+                        continue
+                    logger.error(f"Files {tbl} and {gff} (in prokka tmp_files: {tmp}) "
+                                 f"do not have the same {label} value for gene {gname} ({elemg} "
+                                 f"in gff, {eleml} in tbl)")
                     return False
 
             # Replace prokka ID and locus_tag with the new gene name (in gembase format),
             # found in the corresponding lst line
             at_split = attributes.split(";")
-            newID = [atr if "ID" not in atr else 'ID={}'.format(locus_l) for atr in at_split]
-            new = [atr if "locus_tag" not in atr else 'locus_tag={}'.format(locus_l) for atr in newID]
+            newID = [atr if "ID" not in atr else f'ID={locus_l}' for atr in at_split]
+            new = [atr if "locus_tag" not in atr else f'locus_tag={locus_l}' for atr in newID]
 
             # Write new line of gff file
+            cname = contigs[contig_name]
             info = "\t".join([cname, source, type_g, start_g, end_g, score, strand_g,
                               phase, ";".join(new)])
             gfff.write(info + "\n")

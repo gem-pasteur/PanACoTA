@@ -177,7 +177,7 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
     seq = ""
     # number of the current gene (first gene is 1, 2nd is 2 etc. each number is unique: do not
     # re-start at 1 for each new contig)
-    locus_num = 1
+    locus_num = 0
     # contig name of the last gene. To check if we are now in a new contig (-> loc = b) or not
     prev_cont_name = ""
     # Previous ontig number: contig number to use in gembase format
@@ -240,30 +240,15 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
                 else:
                     loc = 'i'
 
-                # If it is the first gene of the genome, we do not have any "previous gene"
-                # to write .
+                # If it is not the first gene of the genome, write previous gene information
+                if prev_start != "":
+                    # Write line in LSTINFO file, + header and sequence to the gene file
+                    _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
+                                                  prev_loc, name, prev_cont_num, "NA", prev_info,
+                                                  "NA", prev_strand, prev_start, prev_end, r_lst)
+                    gfunc.write_header(lstline, r_gen)
+                    r_gen.write(seq)
                 # -> get new information, save it for the next gene, and go to next line
-                if prev_start == "":
-                    prev_start = start
-                    prev_end = end
-                    prev_cont_name = contig_name
-                    prev_cont_num = contig_num
-                    prev_info = info
-                    # Convert strand 1/-1 to D/C
-                    if int(strand) == 1:
-                        strand = "D"
-                    else:
-                        strand = "C"
-                    prev_strand = strand
-                    continue
-
-                # Write line in LSTINFO file, + header and sequence to the gene file
-                _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                              prev_loc, name, prev_cont_num, "NA", prev_info,
-                                              "NA", prev_strand, prev_start, prev_end, r_lst)
-                gfunc.write_header(lstline, r_gen)
-                r_gen.write(seq)
-
                 # Strands are 1/-1 in prodigal, while we use D,C -> convert, so that next time
                 # we find a new gene, it writes this before updating for this new gene
                 if int(strand) == 1:
@@ -280,14 +265,17 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
                 prev_strand = strand
                 prev_loc = loc
                 prev_info = info
-        # Write last gene of the genome (-> loc = 'b')
-        prev_loc = "b"
-        _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                      prev_loc, name, prev_cont_num, "NA", prev_info, "NA",
-                                      prev_strand, prev_start, prev_end, r_lst)
-        gfunc.write_header(lstline, r_gen)
-        r_gen.write(seq)
-        return True
+        # Write last gene of the genome (-> loc = 'b'),
+        # Just check that there was at least 1 gene found (prev_start != "").
+        # Otherwise, nothing to write
+        if prev_start != "":
+            prev_loc = "b"
+            _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
+                                          prev_loc, name, prev_cont_num, "NA", prev_info, "NA",
+                                          prev_strand, prev_start, prev_end, r_lst)
+            gfunc.write_header(lstline, r_gen)
+            r_gen.write(seq)
+    return True
 
 
 def create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, sizes):
