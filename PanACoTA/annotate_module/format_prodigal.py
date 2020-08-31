@@ -88,7 +88,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_lst_file)
             os.remove(res_gff_file)
             os.remove(res_gene_file)
-            os.remove(res_prt_file)
+            os.remove(res_prot_file)
         except OSError:
             pass
         logger.error("Problems while generating Replicon file for {}".format(name))
