@@ -564,7 +564,6 @@ def create_prt(faaseq, lstfile, prtseq, logger):
     bool :
         True if conversion went well, False otherwise
     """
-
     problem = False
     with open(faaseq) as faa, open(lstfile) as lst, open(prtseq, "w") as prt:
         for line in faa:
@@ -577,8 +576,7 @@ def create_prt(faaseq, lstfile, prtseq, logger):
                     logger.error(("Unknown header format {} in {}. "
                                   "Error: {}\nPrt file not created "
                                   "from {}.").format(line.strip(), faaseq, err, faaseq))
-                    problem = True
-                    break
+                    return False
                 gen_id_lst = 0
                 # get line of lst corresponding to the gene ID
                 lstline = ""
@@ -592,17 +590,14 @@ def create_prt(faaseq, lstfile, prtseq, logger):
                 if gen_id == gen_id_lst:
                     general.write_header(lstline, prt)
                 else:
-                    logger.error(("Missing info for protein {} in {}. If it is actually present "
-                                  "in the lst file, check that proteins are ordered by increasing "
-                                  "number in both lst and faa files.\nPrt file not created "
-                                  "from {}.").format(line.strip(), lstfile, faaseq))
-                    problem = True
-                    break
+                    logger.error(f"Missing info for protein {line.strip()} (from {faaseq}) "
+                                 f"in {lstfile}. If it is actually present "
+                                 "in the lst file, check that proteins are ordered by increasing "
+                                 "number in both lst and faa files.")
+                    return False
             # not header: inside sequence, copy it to the .prt file
             else:
                 prt.write(line)
-    if problem:
-        os.remove(prtseq)
-    return not problem
+    return True
 
 
