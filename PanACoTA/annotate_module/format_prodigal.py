@@ -29,7 +29,7 @@ logger = logging.getLogger("annotate.prodigal_format")
 
 
 def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir, logger):
+                      rep_dir, gff_dir):
     """
     Format the given genome, and create its corresponding files in the following folders:
 

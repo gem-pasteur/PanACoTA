@@ -292,7 +292,7 @@ def test_format_1genome(caplog):
     os.makedirs(gff_dir)
 
     assert prodigalfunc.format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
-                                          rep_dir, gff_dir, logger)
+                                          rep_dir, gff_dir)
 
 
 def test_format_1genome_emptygpath(caplog):
@@ -328,7 +328,7 @@ def test_format_1genome_emptygpath(caplog):
     assert len(os.listdir(gen_dir) ) == 1
 
     assert not prodigalfunc.format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gen_dir,
-                                              rep_dir, gff_dir, logger)
+                                              rep_dir, gff_dir)
     # Check that all files were removed
     assert len(os.listdir(rep_dir) ) == 0
     assert len(os.listdir(lst_dir) ) == 0
@@ -373,7 +373,7 @@ def test_format_1genome_wrongffn(caplog):
     assert len(os.listdir(gff_dir) ) == 1
 
     assert not prodigalfunc.format_one_genome(used_gpath, name, prod_path, lst_dir, prot_dir,
-                                              gene_dir, rep_dir, gff_dir, logger)
+                                              gene_dir, rep_dir, gff_dir)
     # Check that all files were removed
     assert len(os.listdir(rep_dir) ) == 0
     assert len(os.listdir(gene_dir) ) == 0
@@ -434,7 +434,7 @@ def test_format_1genome_wronglst(caplog):
     # Copy generated lstfile, but modify first line to have a difference between gff and lst starts
 
     assert not prodigalfunc.format_one_genome(used_gpath, name, prod_path, lst_dir, prot_dir,
-                                              gene_dir, rep_dir, gff_dir, logger)
+                                              gene_dir, rep_dir, gff_dir)
     # # # Check that replicon file was removed
     assert len(os.listdir(rep_dir) ) == 0
     assert len(os.listdir(gene_dir) ) == 0
@@ -498,7 +498,7 @@ def test_format_1genome_wrongprt(caplog):
     # Copy generated lstfile, but modify first line to have a difference between gff and lst starts
 
     assert not prodigalfunc.format_one_genome(used_gpath, name, prod_path, lst_dir, prot_dir,
-                                              gene_dir, rep_dir, gff_dir, logger)
+                                              gene_dir, rep_dir, gff_dir)
     # # # Check that replicon file was removed
     # # assert len(os.listdir(rep_dir) ) == 0
     assert ("Protein prodigal.outtest.ok.0007b_00013 is in .lst file but its sequence is not in "
