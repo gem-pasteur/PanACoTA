@@ -128,7 +128,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         logger.error("Problems while generating .gff file for {}".format(name))
         return False
     # create Genes file (and check no problem occurred with return code)
-    ok_gene = create_gen(prokka_ffn_file, res_lst_file, res_gene_file, logger)
+    ok_gene = create_gen(prokka_ffn_file, res_lst_file, res_gene_file)
     # If gene file not created because a problem occurred, return False:
     # format did not run for this genome
     if not ok_gene:
@@ -447,7 +447,7 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
         return True
 
 
-def create_gen(ffnseq, lstfile, genseq, logger):
+def create_gen(ffnseq, lstfile, genseq):
     """
     Generate .gen file, from sequences contained in .ffn, but changing the
     headers using the information in .lst
@@ -488,20 +488,17 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                         general.write_header(lstline, gen)
                         crispr_id += 1
                     else:
-                        logger.error(("Problem with CRISPR numbers in {}. CRISPR {} in ffn is "
-                                      "CRISPR num {}, whereas it is annotated as CRISPR num {} "
-                                      "in lst file.").format(lstfile, line_ffn.strip(), crispr_id,
-                                                             crispr_id_lst))
-                        problem = True
-                        break
+                        logger.error(f"Problem with CRISPR numbers in {lstfile}. "
+                                     f"CRISPR {line_ffn.strip()} in ffn is CRISPR num "
+                                     f"{crispr_id}, whereas it is annotated as CRISPR num "
+                                     f"{crispr_id_lst} in lst file.")
+                        return False
                 # It is not a CRISPR in lstline, and header of ffn does not have a gene format:
                 # problem
                 else:
-                    logger.error(("Unknown header format {} in {}."
-                                  "\nGen file will not be "
-                                  "created.").format(line_ffn.strip(), ffnseq))
-                    problem = True
-                    break
+                    logger.error((f"Unknown header format {line_ffn.strip()} in {ffnseq}.\n"
+                                  "Gen file will not be created."))
+                    return False
             # If ffn contains a gene header, find its information in lst file
             else:
                 gen_id = int(test_gen_id)
@@ -521,6 +518,9 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                 # exist in .lst -> problem.
                 while gen_id > gen_id_lst:
                     lstline = lst.readline().strip()
+                    if not lstline:
+                        gen_id_lst = "-1"
+                        break
                     id_lst = lstline.split("\t")[4].split("_")[-1]
                     # don't cast to int if info for a crispr
                     if id_lst.isdigit():
@@ -530,15 +530,11 @@ def create_gen(ffnseq, lstfile, genseq, logger):
                     general.write_header(lstline.strip(), gen)
                 # If gene ID of ffn not found, write error message and stop
                 else:
-                    logger.error("Missing info for gene {} in {}. If it is actually present "
-                                 "in the lst file, check that genes are ordered by increasing "
-                                 "number in both lst and ffn files.\nGen file not created "
-                                 "from {}.".format(line_ffn.strip(), lstfile, ffnseq))
-                    problem = True
-                    break
-    if problem:
-        os.remove(genseq)
-    return not problem
+                    logger.error(f"Missing info for gene {line_ffn.strip()} "
+                                 f"(from {ffnseq}) in {lstfile}. If it is actually present "
+                                 "in the lst file, check that genes are ordered by increasing number in both lst and ffn files.")
+                    return False
+    return True
 
 
 def create_prt(faaseq, lstfile, prtseq, logger):
