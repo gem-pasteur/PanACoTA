@@ -145,7 +145,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
 
 
     # If gene file was created, create Proteins file
-    ok_prt = create_prt(prokka_faa_file, res_lst_file, res_prt_file, logger)
+    ok_prt = create_prt(prokka_faa_file, res_lst_file, res_prt_file)
     # If protein file not created, return False: format did not run for this genome
     if not ok_prt:
         try:
@@ -537,7 +537,7 @@ def create_gen(ffnseq, lstfile, genseq):
     return True
 
 
-def create_prt(faaseq, lstfile, prtseq, logger):
+def create_prt(faaseq, lstfile, prtseq):
     """
     Generate .prt file, from sequences in .faa, but changing the headers
     using information in .lst
@@ -556,8 +556,6 @@ def create_prt(faaseq, lstfile, prtseq, logger):
         lstinfo converted from prokka tab file
     prtseq : str
         output file where converted proteins must be saved
-    logger : logging.Logger
-        log object to add information
 
     Returns
     -------
@@ -572,10 +570,9 @@ def create_prt(faaseq, lstfile, prtseq, logger):
                 try:
                     # get gene ID
                     gen_id = int(line.split()[0].split("_")[-1])
-                except Exception as err:
-                    logger.error(("Unknown header format {} in {}. "
-                                  "Error: {}\nPrt file not created "
-                                  "from {}.").format(line.strip(), faaseq, err, faaseq))
+                except ValueError as err:
+                    logger.error(f"Unknown header format {line.strip()} in {faaseq}. "
+                                 f"Gene ID is not a number.")
                     return False
                 gen_id_lst = 0
                 # get line of lst corresponding to the gene ID
