@@ -301,7 +301,6 @@ def test_format_1genome_emptygpath(caplog):
     and no file generated
     """
     caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
     name = "prodigal.outtest.ok"
     # Create empty file, that we give to prodigal for formatting step
     gpath =  os.path.join(GENEPATH, "original_name-empty.fna")
@@ -344,7 +343,6 @@ def test_format_1genome_wrongffn(caplog):
     -> no file generated
     """
     caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
     name = "prodigal.outtest.ok"
     # path to original genome, given to prodigal for annotation
     orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
