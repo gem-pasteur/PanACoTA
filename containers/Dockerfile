@@ -4,6 +4,13 @@ from ubuntu:18.04
 RUN apt-get update &&\
     apt-get -y upgrade
 
+# Avec ubuntu 16.04, ajouter
+# apt install software-properties-common
+# add-apt-repository ppa:deadsnakes/ppa
+# apt-get update
+# apt-get install python3.6
+
+
 
 # Install packages needed and update pip
 RUN apt-get install -y \
