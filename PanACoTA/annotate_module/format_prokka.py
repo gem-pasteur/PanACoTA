@@ -33,7 +33,7 @@ logger = logging.getLogger("annotate.prokka_format")
 
 
 def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
-                      rep_dir, gff_dir, logger, changed_name=False):
+                      rep_dir, gff_dir):
     """
      Format the given genome, and create its corresponding files in the following folders:
 
@@ -61,9 +61,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         path to Replicons folder
     gff_dir : str
         path to gff3 folder
-    changed_name : bool
-        True if contig names have been changed (cutn != 0) -> contig names end by '_num',
-        False otherwise.
 
     Returns
     -------
@@ -90,11 +87,11 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
     if not contigs:
         try:
+            os.remove(res_rep_file)
             os.remove(res_lst_file)
             os.remove(res_gff_file)
             os.remove(res_gene_file)
             os.remove(res_prt_file)
-            os.remove(res_rep_file)
         except OSError:
             pass
         logger.error("Problems while generating Replicon file for {}".format(name))
@@ -113,7 +110,6 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             pass
         logger.error("Problems while generating LSTINFO file for {}".format(name))
         return False
-
     # Create gff3 file for annotations
     ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
     if not ok_gff:
@@ -261,7 +257,6 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
                     # if new gene is not on the same contig as previously,
                     # get new contig and loc = 'b'
                     if tbl_cont_name != prev_cont_name:
-                        print("diff", tbl_cont_name, prev_cont_name)
                         # Check that this contig name is in the list, and get its gembase contig
                         # number
                         if tbl_cont_name in contigs:
@@ -370,12 +365,11 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
             open(res_gff_file, "w") as gfff:
         # Write headers of gff3 file
         gfff.write("##gff-version  3\n")
-        # Write all sequences with their size
-        for contig in sorted(contigs):
-            new_name = contigs[contig]
-            end = sizes[new_name]
-            # Write the list of contigs, with their size
-            gfff.write(f"##sequence-region\t{new_name}\t{1}\t{end}\n")
+        # Write all sequences with their size. Order by name in gembase format
+        for old, new in sorted(contigs.items(), key=lambda items:items[1]):
+            end = sizes[new]
+            # Write the list of cobisntigs, with their size
+            gfff.write(f"##sequence-region\t{new}\t{1}\t{end}\n")
 
         # Now, convert each line of prokka gff to gembase formatted gff line
         for linegff in prokf:
@@ -403,7 +397,6 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
             fields_l = linelst.split("\t")
             fields_l = [info.strip() for info in fields_l]
             start_l, end_l, strand_l, type_l, locus_l, l_gene, l_info = fields_l
-
             # Get gff and ffn filenames to give information to user if error message
             gff = os.path.basename(prokka_gff_file)
             tbl = gff.replace(".gff", ".tbl")
