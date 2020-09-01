@@ -1,28 +1,30 @@
 ##gff-version 3
-##sequence-region test.0417.00002.0001 1 9603
-##sequence-region test.0417.00002.0002 1 22446
-##sequence-region test.0417.00002.0003 1 51012
-##sequence-region test.0417.00002.0004 1 31459
-##sequence-region test.0417.00002.0005 1 6009
-test.0417.00002.0001	Prodigal:2.6	CDS	287	787	.	+	0	ID=EPKOMDHM_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
-test.0417.00002.0001	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=EPKOMDHM_00005;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
-test.0417.00002.0001	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
-test.0417.00002.0002	Prodigal:2.6	CDS	77	1237	.	+	0	ID=EPKOMDHM_00008;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00008;product=hypothetical protein
-test.0417.00002.0002	Prodigal:2.6	CDS	1279	2346	.	+	0	ID=EPKOMDHM_00009;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00009;product=hypothetical protein
-test.0417.00002.0002	Prodigal:2.6	CDS	2419	3000	.	+	0	ID=EPKOMDHM_00010;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00010;product=hypothetical protein
-test.0417.00002.0002	Prodigal:2.6	CDS	3500	4000	.	+	0	ID=EPKOMDHM_00011;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00011;product=hypothetical protein
-test.0417.00002.0002	Prodigal:2.6	CDS	4632	5000	.	-	0	ID=EPKOMDHM_00012;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00012;product=hypothetical protein
-test.0417.00002.0003	Prodigal:2.6	repeat_region	296902	2968265	.	-	0	ID=EPKOMDHM_00027;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P0A6C5;locus_tag=EPKOMDHM_00027
-test.0417.00002.0003	Prodigal:2.6	CDS	3399	4538	.	+	0	ID=EPKOMDHM_00028;eC_number=3.1.11.5;Name=recD;gene=recD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P04993;locus_tag=EPKOMDHM_00028;product=RecBCD enzyme subunit RecD
-test.0417.00002.0004	Prodigal:2.6	CDS	4535	7888	.	+	0	ID=EPKOMDHM_00029;eC_number=3.1.11.5;Name=recB;gene=recB;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P08394;locus_tag=EPKOMDHM_00029;product=RecBCD enzyme subunit RecB
-test.0417.00002.0007	Prodigal:2.6	tRNA	3039279	3039355	.	+	0	ID=EPKOMDHM_00030;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P05458;locus_tag=EPKOMDHM_00030
-test.0417.00002.0007	Prodigal:2.6	tRNA	3039389	3039465	.	+	0	ID=EPKOMDHM_00031;eC_number=3.1.11.5;Name=recC;gene=recC;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P07648;locus_tag=EPKOMDHM_00031;product=RecBCD enzyme subunit RecC
-test.0417.00002.0007	Prodigal:2.6	CDS	7854	9491	.	+	0	ID=EPKOMDHM_00032;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00032;product=hypothetical protein
-test.0417.00002.0007	Prodigal:2.6	CDS	9525	11285	.	+	0	ID=EPKOMDHM_00033;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00033;product=hypothetical protein
-test.0417.00002.0007	Prodigal:2.6	repeat_region	2994578	2994971	.	+	0	ID=EPKOMDHM_00034;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00034;product=hypothetical protein
-test.0417.00002.0007	Prodigal:2.6	CDS	11249	12328	.	+	0	ID=EPKOMDHM_00035;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00035;product=hypothetical protein
+##sequence-region JGIKIPgffgIJ 1 9603
+##sequence-region toto 1 22446
+##sequence-region other_header 1 51012
+##sequence-region my_contig 1 31459
+##sequence-region bis 1 6009
+##sequence-region ter 1 6009
+##sequence-region contname 1 6009
+JGIKIPgffgIJ	Prodigal:2.6	CDS	287	787	.	+	0	ID=EPKOMDHM_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
+JGIKIPgffgIJ	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=EPKOMDHM_00005;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
+JGIKIPgffgIJ	Prodigal:2.6	CDS	9000	12000	.	-	0	ID=EPKOMDHM_00006;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein
+toto	Prodigal:2.6	CDS	77	1237	.	+	0	ID=EPKOMDHM_00008;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00008;product=hypothetical protein
+toto	Prodigal:2.6	CDS	1279	2346	.	+	0	ID=EPKOMDHM_00009;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00009;product=hypothetical protein
+toto	Prodigal:2.6	CDS	2419	3000	.	+	0	ID=EPKOMDHM_00010;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00010;product=hypothetical protein
+toto	Prodigal:2.6	CDS	3500	4000	.	+	0	ID=EPKOMDHM_00011;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00011;product=hypothetical protein
+toto	Prodigal:2.6	CDS	4632	5000	.	-	0	ID=EPKOMDHM_00012;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00012;product=hypothetical protein
+other_header	Prodigal:2.6	repeat_region	296902	2968265	.	-	0	ID=EPKOMDHM_00027;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P0A6C5;locus_tag=EPKOMDHM_00027
+other_header	Prodigal:2.6	CDS	3399	4538	.	+	0	ID=EPKOMDHM_00028;eC_number=3.1.11.5;Name=recD;gene=recD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P04993;locus_tag=EPKOMDHM_00028;product=RecBCD enzyme subunit RecD
+my_contig	Prodigal:2.6	CDS	4535	7888	.	+	0	ID=EPKOMDHM_00029;eC_number=3.1.11.5;Name=recB;gene=recB;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P08394;locus_tag=EPKOMDHM_00029;product=RecBCD enzyme subunit RecB
+contname	Prodigal:2.6	tRNA	3039279	3039355	.	+	0	ID=EPKOMDHM_00030;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P05458;locus_tag=EPKOMDHM_00030
+contname	Prodigal:2.6	tRNA	3039389	3039465	.	+	0	ID=EPKOMDHM_00031;eC_number=3.1.11.5;Name=recC;gene=recC;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P07648;locus_tag=EPKOMDHM_00031;product=RecBCD enzyme subunit RecC
+contname	Prodigal:2.6	CDS	7854	9491	.	+	0	ID=EPKOMDHM_00032;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00032;product=hypothetical protein
+contname	Prodigal:2.6	CDS	9525	11285	.	+	0	ID=EPKOMDHM_00033;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00033;product=hypothetical protein
+contname	Prodigal:2.6	repeat_region	2994578	2994971	.	+	0	ID=EPKOMDHM_00034;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00034;product=hypothetical protein
+contname	Prodigal:2.6	CDS	11249	12328	.	+	0	ID=EPKOMDHM_00035;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00035;product=hypothetical protein
 ##FASTA
->test.0417.00002.0001
+>JGIKIPgffgIJ
 TCTCATACTACCCAATTTCTTAAAAGTGCAAATTTGTGAAGCTTATCCTGTTATTATTTT
 AAGTTTCATGCCAAATTCTCTCACCAGATAATGCCGCCCTCTTCCGAAAAATAATCAAGA
 GGCCAAACAATATCTAAAATGATACAACTGTATCTATTCCCCTGAAAAATACATTATTCA
@@ -184,7 +186,7 @@ GTGCTGGAATTTGATGAGAAATAATGGAGGCTCTTATGAACGTACAGTTCTTCGACCACG
 CACACCACAAGCTCAAAATTCGCGGCCTGAAAAGCCCGGTGGACGTGCTGACGTTTACGG
 GCCGGGAACAACTCAGCGCACCCTTCCGCTACGACATTGAATTTACCAGTACCGATAAAA
 CCA
->test.0417.00002.0002
+>toto
 CGATCTGATAGCTAATTGTAAGAAGATAAAGGAAGGCAACGATAAAAACGAGGACACCAC
 CTGGGCATGGGTAGCGATGATCCTGACACTGGTCGGTCTTATTCCAGTGGCAGGTTCTTT
 AATTAAAGGGATCTTCAAAGTGCTGTTTAATTCGATAAGAAAGGCGGCGCTTTCCAGTAG
@@ -560,7 +562,7 @@ TGTCGATGAGTCTCAATAACACACCGCTGCAGGGCGCGCATATCAACGTCGTCAGTGGTA
 ATTTTATTATTGCCCAGCCGCTGGGCGTCGATGACGGCGTGGATTACTGTCATAGCGGGC
 GTATCCGGCGGATTGATGAAGACGCGATCCATCGTCAACTGGACAGCGGTGCAATAGTGC
 TAATGG
->test.0417.00002.0003
+>other_header
 GGCCGGTCGCTGTTTCGGTCACTGGCGAGAGCTTTAATCTGACCTCGGAAGAGATTGCCA
 CTCAACTGGCCATCAAACTGAAAGCTGAAAAAATGATTGGTTTTTGCTCTTCCCAGGGCG
 TCACTAATGACGACGGTGATATTGTCTCCGAACTTTTCCCTAACGAAGCGCAAGCACGGG
@@ -1412,7 +1414,7 @@ TCATTCTGACTGCGGTAGAAAAAGTGGCCATTAACTTCGGAAAAGAGAATGAACAGTGGC
 TCGATCGCCTGTCGTTAAGTGATGCTGAACGCTTTATCGAAGAAGGTCATTTTGCGAAAG
 GTTCTATGCTGCCTAAAGTGGAAGCTGCCGCCTCGTTTGCTCGCTCTCGCGCAGGTCGTG
 AAGCACTGATTA
->test.0417.00002.0004
+>my_contig
 CCGTATTGAGCAAAGCGAAAGAGGGGATTGAAGGCAAAACCGGAACGGTGATTTGTCAGT
 AATTTAAAGGCCGGATGGGTAATACCATCCGGCCATTTTCATTTAAGCCACTTCCAGCAC
 TTCTTTTGTCGCTTTAACGCCCTGATGCATCAACATCATTAACGCCTCAAGTACGCCGCC
@@ -1938,7 +1940,7 @@ TCAAGCTATTTGCCGAAATGGGCTTCAAATGTTTTCGTACTTCCATCGCCTGGACGCGCA
 TTTTTCCAAAAGGCGATGAAGCTCAGCCAAACGAAGAAGGGCTGAAGTTCTACGATGATA
 TGATCGATGAACTGCTGAAATACAACATCGAACCGGTGATCACCCTCTCCCACTTTGAAA
 TGCCGCTGCATCTGGTGCA
->test.0417.00002.0005
+>bis
 GCAATATGGTAGCTGGACCAACCGTAAAGTGGTTGATTTCTTTGTCCGTTTCGCGGAAGT
 GGTATTTGAACGCTATAAGCATAAAGTCAAATACTGGATGACTTTCAACGAAATTAACAA
 CCAGCGTAACTGGCGTGCACCGCTGTTCGGTTACTGCTGCTCCGGCGTGGTGTATACCGA
