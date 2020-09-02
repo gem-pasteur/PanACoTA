@@ -26,10 +26,10 @@ PanACoTA is a software providing tools for large scale comparative genomics:
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- [**prokka**](https://github.com/tseemann/prokka) (to annotate the genomes) and/or [**prodigal**](https://github.com/hyattpd/Prodigal)
-- [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
-- [**mafft**](http://mafft.cbrc.jp/alignment/software/) (to align persistent genome)
-- At least one of those softwares, to infer a phylogenetic tree:
+- [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (for 'annotate module' - to uniformly annotate your genomes) 
+- [**mmseqs**](https://github.com/soedinglab/MMseqs2) ('pangenome module' - to generate pangenomes)
+- [**mafft**](http://mafft.cbrc.jp/alignment/software/) ('align module' - to align persistent genome)
+- At least one of those softwares, to infer a phylogenetic tree ('tree module'):
     - [**IQ Tree**](http://www.iqtree.org/)
     - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install): We advise to download C code, and compile as described here above.
     - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
@@ -102,7 +102,7 @@ If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [
 
 `PanACoTA` contains 6 different subcommands:
 
-- `prepare` (download and prepare your dataset, with several controls)
+- `prepare` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
 - `annotate` (annotate all genomes of the dataset, after a quality control)
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
@@ -132,7 +132,7 @@ You can find more information in [PanACoTA documentation](http://aperrin.pages.p
 
 This part is for people who want to work on developing `PanACoTA` package. In the documentation, there is a part dedicated to [developers](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/develop.html).
 
-PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
+PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation
 
 ## Installing `PanACoTA` (development mode)
 

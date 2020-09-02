@@ -3,7 +3,7 @@ About PanACoTA
 ==============
 
 
-PanACoTA program is available at `<https://gitlab.pasteur.fr/aperrin/PanACoTA>`_.
+PanACoTA program is available at `<https://github.com/gem-pasteur/PanACoTA>`_.
 
 Copyright © `GEM <https://research.pasteur.fr/fr/team/microbial-evolutionary-genomics/>`_ - Institut Pasteur, CNRS UMR3525
 

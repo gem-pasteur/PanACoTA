@@ -4,6 +4,8 @@ Work on PanACoTA code
 
 This part is for people who want to work on developing `PanACoTA` package: adding new features, correcting bugs etc.
 
+PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation
+
 
 Installing ``PanACoTA`` in development mode
 ===========================================

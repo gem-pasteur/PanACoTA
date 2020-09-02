@@ -3,19 +3,18 @@ Starting with PanACoTA
 ======================
 
 
-``PanACoTA`` is a Python package, developed in Python 3.
+``PanACoTA`` is a Python package, developed in Python 3.6.
 
 Downloading and updating
 ========================
 
 
-You can download ``PanACoTA`` source code by downloading an archive (zip, tar.gz), or by cloning its github repository. By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download ``PanACoTA`` source code by downloading an archive of a given release (zip, tar.gz), or by cloning its github repository. By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
 .. code-block:: bash
 
     git clone https://github.com/gem-pasteur/PanACoTA.git
-
-When asked, give your github login, and password.
+ve your github login, and password.
 
 This will create a repository called ``PanACoTA``. Go inside this repository (``cd PanACoTA``) to install the software, as described hereafter.
 
@@ -39,10 +38,10 @@ Dependencies
 
 There are several external dependencies, and you can install only the ones you need for your study:
 
-- `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_ (if you want to uniformly annotate your genomes) 
-- `mmseqs <https://github.com/soedinglab/MMseqs2>`_  (if you want to generate pangenomes)
-- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ (if you want to align persistent genome)
-- At least one of those softwares, if you want to infer a phylogenetic tree:
+- `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_  (for 'annotate module' - to uniformly annotate your genomes)
+- `mmseqs <https://github.com/soedinglab/MMseqs2>`_  ('pangenome module' - to generate pangenomes)
+- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ ('align module' - to align persistent genome)
+- At least one of those softwares, if you want to infer a phylogenetic tree ('tree module'):
 
     - `IQtree <http://www.iqtree.org/>`_
     - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described :ref:`here above <fasttree>`.
@@ -90,6 +89,7 @@ just as any other software.
 
 .. warning:: If you plan to work on the scripts, choose the development installation (see :doc:`Developer documentation <develop>`).
 
+.. _uninstall:
 
 Uninstalling ``PanACoTA``
 ----------------------------
@@ -115,6 +115,8 @@ If you want to install a new version of ``PanACoTA``:
     ./make upgrade   # upgrade to the new version
 
 .. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the second command line (``sudo ./make upgrade``) to upgrade. Or, if you installed the package locally, use ``./make upgrade --user`` to upgrade this local version.
+
+If you installed it by downloading a zip file, see :ref:`Uninstall it <uninstall>`), and install the new version (by cloning gitlab repository, or downloading the new zip file).
 
 
 Quick run
