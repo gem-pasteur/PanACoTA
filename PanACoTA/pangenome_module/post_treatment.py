@@ -1,6 +1,38 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+# ###############################################################################
+# This file is part of PanACOTA.                                                #
+#                                                                               #
+# Authors: Amandine Perrin                                                      #
+# Copyright © 2018-2020 Institut Pasteur (Paris).                               #
+# See the COPYRIGHT file for details.                                           #
+#                                                                               #
+# PanACOTA is a software providing tools for large scale bacterial comparative  #
+# genomics. From a set of complete and/or draft genomes, you can:               #
+#    -  Do a quality control of your strains, to eliminate poor quality         #
+# genomes, which would not give any information for the comparative study       #
+#    -  Uniformly annotate all genomes                                          #
+#    -  Do a Pan-genome                                                         #
+#    -  Do a Core or Persistent genome                                          #
+#    -  Align all Core/Persistent families                                      #
+#    -  Infer a phylogenetic tree from the Core/Persistent families             #
+#                                                                               #
+# PanACOTA is free software: you can redistribute it and/or modify it under the #
+# terms of the Affero GNU General Public License as published by the Free       #
+# Software Foundation, either version 3 of the License, or (at your option)     #
+# any later version.                                                            #
+#                                                                               #
+# PanACOTA is distributed in the hope that it will be useful, but WITHOUT ANY   #
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS     #
+# FOR A PARTICULAR PURPOSE. See the Affero GNU General Public License           #
+# for more details.                                                             #
+#                                                                               #
+# You should have received a copy of the Affero GNU General Public License      #
+# along with PanACOTA (COPYING file).                                           #
+# If not, see <https://www.gnu.org/licenses/>.                                  #
+# ###############################################################################
+
 """
 Functions to generate the matrix pan_quali, pan_quanti, as well
 as a summary file for the pangenome.
@@ -161,7 +193,7 @@ def generate_and_write_outputs(fams_by_strain, families, all_strains, panquali, 
     matrix_quanti = np.vstack((header, matrix_quanti))
     # Transpose matrix: lines = genomes, columns = families
     tmatrix_quali = matrix_quali.transpose()
-    np.savetxt(panquali, tmatrix_quali, delimiter=",", fmt="%s") 
+    np.savetxt(panquali, tmatrix_quali, delimiter=",", fmt="%s")
     tmatrix_quanti = matrix_quanti.transpose()
-    np.savetxt(panquanti, tmatrix_quanti, delimiter=",", fmt="%s") 
+    np.savetxt(panquanti, tmatrix_quanti, delimiter=",", fmt="%s")
     return qualis, quantis, summaries
