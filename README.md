@@ -51,11 +51,9 @@ You can then add the output `FastTreeMP` to your `$PATH` to be able to run it fr
 
 ## Downloading and updating `PanACoTA`
 
-You can download `PanACoTA` source code by downloading a [zip file](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/repository/archive.zip?ref=master), or by cloning its gitlab repository (which is more recommended). By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download `PanACoTA` source code by downloading a [zip file](https://github.com/gem-pasteur/PanACoTA/archive/master.zip), or by cloning its github repository (which is more recommended). By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
-    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation PanACoTA
-
-Give your gitlab login, and password.
+    git clone https://github.com/gem-pasteur/PanACoTA.git
 
 This will create a repository called `PanACoTA`. Go inside this repository to install `PanACoTA`, as described hereafter.
 
@@ -133,6 +131,8 @@ You can find more information in [PanACoTA documentation](http://aperrin.pages.p
 # <a name="develop"></a>  Development
 
 This part is for people who want to work on developing `PanACoTA` package. In the documentation, there is a part dedicated to [developers](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/develop.html).
+
+PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
 
 ## Installing `PanACoTA` (development mode)
 
