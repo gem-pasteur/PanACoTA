@@ -325,7 +325,7 @@ def test_check_prokka_wrong_cont():
     nbcont = 10
     assert not afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
     msg = ("prokka_out_for_test original_name.fna: no matching number of contigs; "
-           "nbcontig=10; in tbl =7")
+           "nbcontig=10; in tbl =6")
     q = logger[0]
     assert q.qsize() == 1
     assert q.get().message == msg
@@ -421,7 +421,7 @@ def test_check_prokka_tbl_crispr_newversion():
     shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
     logf = os.path.join(GENEPATH, "prokka.log")
     gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 7
+    nbcont = 6
     assert afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
 
 
@@ -435,7 +435,7 @@ def test_check_prokka_ok():
     name = "prokka_out_for_test"
     logf = os.path.join(GENEPATH, "prokka.log")
     gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 7
+    nbcont = 6
     assert afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
 
 
@@ -450,7 +450,7 @@ def test_run_prokka_out_exists_ok():
     cores_prokka = 1
     name = "prokka_out_for_test"
     force = False
-    nbcont = 7
+    nbcont = 6
     arguments = (gpath, TEST_DIR, cores_prokka, name, force, nbcont, None, logger[0])
     assert afunc.run_prokka(arguments)
 
@@ -491,7 +491,7 @@ def test_run_prokka_out_exists_error():
     gpath = "path/to/nogenome/original_name-error"
     cores_prokka = 1
     force = False
-    nbcont = 7
+    nbcont = 6
     arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
