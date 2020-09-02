@@ -1,11 +1,13 @@
 image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/testing-ubuntu
 
+
 stages:
   - build
   - test
   - coverage
   - doc
   - deploy
+  - github
 
 
 build-from-ubuntu:
@@ -14,17 +16,10 @@ build-from-ubuntu:
   only:
     - install
   script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_ubuntu.py
 
-build-from-base:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-base
-  stage: build
-  only:
-    - install
-  script:
-    - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_base.py
 
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
@@ -32,92 +27,115 @@ build-from-barrnap:
   only:
     - install
   script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_barrnap.py
 
-build-from-prokka:
-  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-prokkaonly
-  stage: build
-  only:
-    - install
-  script:
-    - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prokka.py
 
-build-from-annote-quicktree:
+build-from-prokka-quicktree:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-annote-quicktree
   stage: build
   only:
     - install
   script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_prokka-quicktree.py
+
+
+build-from-prodigal:
+  image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-prodigal
+  stage: build
+  only:
+    - install
+  script:
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements-dev.txt
+    - py.test test/test_install/test_make_prodigal.py
+
 
 build-from-test-image:
   stage: build
   only:
     - install
   script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py
 
-unit-test-ubuntu16.04:
+
+unit-test-ubuntu:
   stage: test
   except:
     - docker
     - helpers
+    - install
   before_script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
+  script:
     - prokka --version
-    - mmseqs -h | head
-    - mafft --version
-    - fastme -h
-
-  script:
-    - py.test test/test_unit
-    - more test_mmseq_cluster.log
-    - mv .coverage .coverage-unit
+    - prodigal -v
+    - py.test test/test_unit/test_utils.py -vx
+    - py.test test/test_unit/test_utils-pan.py -vx
+    - py.test test/test_unit/test_prepare -v -x
+    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
+    # - py.test test/test_unit/test_annotate/test_format_prodigal.py -vx
+    # - py.test test/test_unit/test_annotate/test_format_prokka.py -vx
+    # - py.test test/test_unit/test_annotate/test_annotation_functions-prokka.py  -vx
+    - py.test test/test_unit/test_annotate/test_annotation_general.py  -vx
+    # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
+    - py.test test/test_unit/test_pangenome -vx
+    - py.test test/test_unit/test_corepers -vx
+    - py.test test/test_unit/test_align -vx
+    - py.test test/test_unit/test_tree -xv
+    # - mv .coverage .coverage-unit
   artifacts:
     paths:
-      - .coverage-unit
+      # - .coverage-unit
+      - .coverage
     expire_in: 1 hour
 
-func-test-ubuntu16.04:
-  stage: test
-  except:
-    - docker
-    - helpers
-  before_script:
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    - py.test test/test_functional
-    - mv .coverage .coverage-functional
-  artifacts:
-    paths:
-      - .coverage-functional
-    expire_in: 1 hour
+
+# func-test-ubuntu:
+#   stage: test
+#   except:
+#     - docker
+#     - helpers
+#     - install
+#   before_script:
+#     - pip3 install -r requirements-dev.txt
+#     - ./make
+#   script:
+#     - py.test test/test_functional
+#     - mv .coverage .coverage-functional
+#   artifacts:
+#     paths:
+#       - .coverage-functional
+#     expire_in: 1 hour
+
 
 coverage:
   stage: coverage
   except:
     - docker
     - helpers
+    - install
   dependencies:
-    - unit-test-ubuntu16.04
-    - func-test-ubuntu16.04
+    - unit-test-ubuntu
+    # - func-test-ubuntu
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
-    - coverage combine .coverage-unit .coverage-functional
+    # - coverage combine .coverage-unit .coverage-functional
     - coverage report
     - coverage html
   artifacts:
     paths:
       - htmlcov
     expire_in: 1 hour
+
 
 sphinx-doc:
   stage: doc
@@ -135,8 +153,12 @@ sphinx-doc:
       - doc/build/html
     expire_in: 1 hour
 
+
 pages:
   stage: deploy
+  only:
+    - doc
+    - master
   dependencies:
     - coverage
     - sphinx-doc

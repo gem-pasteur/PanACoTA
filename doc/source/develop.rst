@@ -1,12 +1,14 @@
-========================
+=====================
 Work on PanACoTA code
-========================
+=====================
 
 This part is for people who want to work on developing `PanACoTA` package: adding new features, correcting bugs etc.
 
+PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation
+
 
 Installing ``PanACoTA`` in development mode
-==============================================
+===========================================
 
 If you want to install ``PanACoTA`` while still working on modifying the scripts, type:
 
@@ -52,7 +54,7 @@ If you want to run only a specific test, run::
 
     py.test test/test_<unit or functional>/<test_file.py>::<test_name>
 
-When you run tests (all of them or individual ones), it will also always generate the coverage report. Open ``htmlcov/index.html`` on your browser if you want to check code coverage of your new function/module. The on-line version can be found `here <http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov/>`_, and is automatically updated at each push on master branch.
+When you run tests (all of them or individual ones), it will also always generate the coverage report. Open ``htmlcov/index.html`` on your browser if you want to check code coverage of your new function/module. The online version can be found `here <http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov/>`_, and is automatically updated at each push on master branch.
 
 .. warning:: If you add new features, or modify existing scripts please complete/update the tests!
 
@@ -70,4 +72,4 @@ This documentation is generated with `sphinx <http://www.sphinx-doc.org/en/stabl
 
 Then, open ``doc/build/html/index.html`` on your browser.
 
-The on-line version will be automatically updated when modifications on rst files are pushed on master branch.
+The online version will be automatically updated when modifications on rst files are pushed on master branch.

@@ -1,1 +1,1 @@
-""" genomeAPCAT corepers_module unit-tests"""
+""" PanACoTA corepers_module unit-tests"""

@@ -1,0 +1,1 @@
+"""pangenome module of PanACoTA"""

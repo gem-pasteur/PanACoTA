@@ -1,8 +1,10 @@
-=============================
+==========================
 Running PanACoTA: tutorial
-=============================
+==========================
 
-``PanACoTA`` contains 5 subcommands, for the different steps:
+``PanACoTA`` contains 6 subcommands, for the different steps:
+
+    - ``prepare`` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
     - ``annotate`` (annotate all genomes of the dataset, after a quality control)
     - ``pangenome`` (generate pan-genome)
     - ``corepers`` (generate core-genome or persistent-genome)
@@ -18,10 +20,20 @@ Each subcommand has its own options and inputs. To get the list of required argu
     PanACoTA <subcommand> -h
 
 
-.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
+.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. 
 
-.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. For example, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``, and your sequence file is the same as previously, and the default parameters are 10 for ``-t`` and 0.5 for ``-i``. You can run either ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5), ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``), ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``) or ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``) according to your needs (if default values are ok, you do not need to specify the option).
+For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
 
+.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. 
+
+Example: your sequence file is the same as previously, and the default parameters are ``-t=10`` and ``-i=0.5``. Therefore, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``. You can run either:
+
+    - ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5) 
+    - ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``) 
+    - ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``)
+    - ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``)
+
+according to your needs (if default values are ok, you do not need to specify the option).
 
 
 Here are the options shared by all subcommands:
@@ -34,6 +46,157 @@ Here are the options shared by all subcommands:
         + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
 
 We will now describe each subcommand, with its options.
+
+
+``prepare`` subcommand
+======================
+
+You can see all required arguments and available options with::
+
+    PanACoTA prepare -h
+
+The ``prepare`` module works in 3 steps:
+
+    1) Downloading sequences from refseq
+    2) Quality control to filter genomes in terms of sequence quality
+    3) Filtering step dedicated to remove redundant and miss-classified genomes, based on Mash genetic distance.
+
+You can choose to skip steps 1 and 2. Here, we describe how to run this module, starting from step 1, skipping step 1 (starting from step 2), and skipping steps 1 and 2 (starting from step 3).
+
+Inputs
+------
+
+Your input will depend on the step from which you are starting. 
+
+- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species.
+- If you start from step 2, your input will be a database of fasta sequences, in :ref:`sequences format <seq>`.
+- If you start from step 3, your input will be the database as previously, as well as the LSTINFO output of :ref:`step 2 <step2>`.
+
+
+Outputs
+-------
+
+Genome sequences
+^^^^^^^^^^^^^^^^
+All sequences are in fasta format, as described in :ref:`sequences format <seq>`.
+
+In your output directory, you will find:
+
+- Only if you started from step 1: A folder called ``refseq/bacteria``, containing 1 folder per genome (called with the genome accession number), and, inside, the genome sequence in fasta.gz format, and the MD5SUMS of this file.
+- Only if you started from step 1: A folder called ``Database_init``, containing all genomes downloaded in fasta format
+- Only if you started from step 1 or 2: A folder called ``tmp_files`` containing your genomic sequences, split at each stretch of at least 5 ``N`` (see :ref:`sequences format <seq>` for more details on the splitting part).
+
+
+Discarded files
+^^^^^^^^^^^^^^^
+``discarded-by-L90_nbcont-<datasetname>.lst``
+
+This file contains the list of genomes discarded by the quality control step:
+
+- path to the genome original sequence
+- path to the genome sequence after 'N' splitting procedure
+- genome size (number of bases)
+- number of contigs in genome
+- L90 of genome
+
+Example:
+
+.. code-block:: text
+
+    orig_name                                          to_annotate                                                    gsize   nb_conts    L90
+    <outdir>/Database_init/genome1.fst                 <outdir>/<tmp>/genome1.fst_prepare-split5N.fna                 9808    2           2  
+    <outdir>/Database_init/genome3-chromo.fst-all.fna  <outdir>/<tmp>/genome3-chromo.fst-all.fna_prepare-split5N.fna  8817    3           3   
+    <outdir>/Database_init/genome2.fst                 <outdir>/<tmp>/genome2.fst_prepare-split5N.fna                 10711   4           4
+    <outdir>/Database_init/genome4.fst                 <outdir>/<tmp>/genome4.fst_prepare-split5N.fna                 7134    1           1
+
+
+``discarded-byminash-<datasetname>-<min_dist>_<max_dist>.lst``
+
+This file contains the list of genomes discarded by the filtering step:
+
+1. path to the genome original sequence
+2. path to the genome which discarded genome 1.
+3. distance between genome 1. and genome 2. (which is not inside the given thresholds)
+
+Example:
+
+.. code-block:: text
+
+    to_annotate                                     problem_compared_with                 dist
+    <outdir>/<database>/genome1.fst                 <outdir>/<database>/genome1-bis.fst   0.07
+    <outdir>/<database>/genome3-chromo.fst-all.fna  <outdir>/<database>/genomeX.fst       0.0000004
+
+.. _step2:
+
+Info file
+^^^^^^^^^
+
+``LSTINFO-<datasetname>-filtered-<min_dist>_<max_dist>.lst``
+
+This file contains the list of all genomes with 4 columns:
+
+- path to the genome sequence after 'N' splitting procedure
+- genome size (number of bases)
+- number of contigs in genome
+- L90 of genome
+
+Example:
+
+.. code-block:: text
+
+    to_annotate                                     gsize   nb_conts    L90
+    <outdir>/<database>/genome1.fst                 9808    2           2
+    <outdir>/<database>/genome3-chromo.fst-all.fna  8817    3           3
+    <outdir>/<database>/genome2.fst                 10711   4           4
+    <outdir>/<database>/genome4.fst                 7134    1           1
+
+
+Running from step 1
+-------------------
+
+To download genomes, and then process them by the `prepare` filters, run::
+
+    PanACoTA prepare [-t <NCBI taxid> -s <NCBI species]
+
+Give at least one of those 2 parameters. With:
+
+- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the species you want to study. For example, taxid for *E. coli* is 562 (see `NCBI taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?lvl=0&id=562>`_)
+- ``-s <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes (for example "escherichia coli")
+
+Running from step 2
+-------------------
+
+If you already have your genomes, run::
+
+    PanACoTA prepare --norefseq -o <outdir> [-d <db_dir>]
+
+With:
+
+- ``<outdir>``: the directory where you want to save your results (no need to create the directory before, the program will do it). 
+- ``<db_dir>``: directory where your database sequences are. By default, it will search to `<outdir>/Database_init`. So, if your sequences are already there, you do not need to add this option.
+
+
+Running from step 3
+-------------------
+
+If you already have your genomes, and already ran quality control. You only need to run the filtering step, by running::
+
+    PanACoTA prepare -M --info <info file> -o <outdir>
+
+With ``info file``: a file in the same format as the one generated by :ref:`step 2 <step2>`.
+
+Options
+-------
+
+Here is the complete list of options available when running ``PanACoTA prepare``. You can get them by running ``PanACoTA annotate -h``:
+
+- ``--tmp <dirname>``:  to specify where the temporary files must be saved. By default, they are saved in ``<outdir>/tmp_files``.
+- ``--cutN <number>``: by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
+- ``--l90 <l90>``: to specify the maximum L90 value accepted to keep a genome. Default is 100
+- ``--nbcont <number>``: to specify the maximum number of contigs allowed to keep a genome. Default is 999
+- ``--min <float>``: min distance from which we keep both genomes. By default, genomes whose distance to the reference is less than 1e-4 are discarded.
+- ``--max <float>``: max distance from which we keep both genomes. By default, genomes whose distance to the reference is more than 0.06 are discarded.
+- ``-p <number>``: if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
 
 
 ``annotate`` subcommand
@@ -76,6 +239,7 @@ Example:
     genome.fasta genome-plasmids.fasta :: .0217
 
 We have here a dataset with 5 genomes:
+
     - the 1st genome's sequence is in the file called ``genome1.fasta`` (it can be either a fasta or multi-fasta, according to the assembly status - complete/draft - of the genome). Its species name and date will be the default ones given to the program
     - the 2nd genome's sequence is in 2 files: for example, its chromosome is in ``genome2-chromo1.fasta``, and its plasmid is in ``genome2-pl.fst``. Again, each of those files can contain complete or draft sequences. As the previous genome, its species name and date will be the default ones.
     - the 3rd genome's sequence is in ``g3.fa``. Its species name will be ``ESCO``, while its date will be the default one.
@@ -137,13 +301,15 @@ The annotation step will create 4 result folders. Here is a description of their
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This file contains the list of all genomes annotated, sorted by species, and, in each species, by increasing L90 and number of contigs, with 5 columns:
+
     - new name of genome (called 'gembase_name'), with format ``<name>.<date>.<strain>`` with:
 
         - ``name`` given in ``-n <name>`` or line in list_file
         - ``date`` given in ``--date <date>``, line in list_file or current date
         - ``strain`` is a number with 5 digits, identifying the different genomes of a same species.
         - for example: ``ESCO.0217.00002`` for the 2nd strain of Escherichia coli.
-    - original name of genome (as given in list_file)
+    - path to original genome sequence
+    - path to the genome sequence after ‘N’ splitting procedure
     - genome size (number of bases)
     - number of contigs in genome
     - L90 of genome
@@ -152,11 +318,11 @@ Example:
 
 .. code-block:: text
 
-    gembase_name    orig_name                   gsize   nb_conts    L90
-    ESCO.0817.00001 genome1.fst                 9808    2           2
-    ESCO.1216.00002 genome3-chromo.fst-all.fna  8817    3           3
-    GEN2.0817.00001 genome2.fst                 10711   4           4
-    GEN4.1111.00001 genome4.fst                 7134    1           1
+    gembase_name      orig_name                                   to_annotate                                                  gsize   nb_conts    L90
+    ESCO.0817.00001   <path database>/genome1.fst                 <path_tmp>/genome1.fst_prokka-split5N.fna                    9808    2           2
+    ESCO.1216.00002   <path database>/genome3-chromo.fst-all.fna  <path_tmp>/genome3-chromo.fst-all.fna_prokka-split5N.fna     8817    3           3
+    GEN2.0817.00001   <path database>/genome2.fst                 <path_tmp>/genome2.fst_prokka-split5N.fna                    10711   4           4
+    GEN4.1111.00001   <path database>/genome4.fst                 <path_tmp>/genome4.fst_prokka-split5N.fna                    7134    1           1
 
 .. _lstf:
 
@@ -164,16 +330,17 @@ LSTINFO folder
 ^^^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.lst``, containing 1 line per sequence annotated (gene, tRNA, rRNA etc.), with the following informations:
+
     - start position of sequence in the replicon
     - end position of sequence in the replicon
     - strand (D for direct, C for complement)
     - type of sequence (CDS, rRNA, CRISPR, etc.)
-    - name of the sequence annotated. The name is ``<genome_name>.<place><contig>_<num>`` where:
+    - name of the sequence annotated. The name is ``<genome_name>.<contig><place>_<num>`` where:
 
-        + ``<place>`` is ``i`` when the sequence is inside its replicon, or ``b`` when it is at the border of its replicon (first and last sequence of each replicon)
         + ``<contig>`` is the contig number, with 4 digits
+        + ``<place>`` is ``i`` when the sequence is inside its replicon, or ``b`` when it is at the border of its replicon (first and last sequence of each replicon)
         + ``<num>`` is the unique sequence number.
-        + For example: ``ESCO.0217.00002.i0001_00005`` is a gene from the 2nd strain of E. coli, in contig 1 (not the first or last gene of this contig), and is the 5th sequence annotated in this genome.
+        + For example: ``ESCO.0217.00002.0001i_00005`` is a gene from the 2nd strain of *E. coli*, in contig 1 (not the first or last gene of this contig), and is the 5th sequence annotated in this genome.
     - gene name when applicable
     - more information on the sequence annotated (product, similar sequences in PFAM, etc.)
 
@@ -181,35 +348,61 @@ Example of a file which would be called ``ESCO.0417.00002.lst``:
 
 .. code-block:: text
 
-    34685   35866   C       CDS     ESCO.0417.00002.b0001_00001     thlA                | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359
-    37546   40215   D       tRNA    ESCO.0417.00002.i0001_00002     NA                  | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2
-    45121   47569   D       CDS     ESCO.0417.00002.i0001_00003     NA                  | Prophage CP4-57 regulatory protein (AlpA) | NA | protein motif:Pfam:PF05930.6
-    50124   52465   D       CDS     ESCO.0417.00002.b0001_00004     P22 coat protein 5  | P22 coat protein - gene protein 5 | NA | protein motif:Pfam:PF11651.2
-    1       2600    C       tRNA    ESCO.0417.00002.b0004_00005     NA                  | tRNA-Gly(ccc) | NA | COORDINATES:profile:Aragorn:1.2
-    3500    5000    D       CDS     ESCO.0417.00002.i0004_00006     NA                  | hypothetical protein | NA | NA
-    10000   10215   C       CRISPR  ESCO.0417.00002.b0004_CRISPR1   crispr              | crispr-array | NA | NA
-    4568    5896    D       CDS     ESCO.0417.00002.b0006_00007     NA                  | hypothetical protein | NA | NA
-    126     456     D       CDS     ESCO.0417.00002.b0007_00008     NA                  | hypothetical protein | NA | NA
+    34685   35866   C       CDS     ESCO.0417.00002.0001b_00001     thlA                | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359 | COG:COG4598
+    37546   40215   D       tRNA    ESCO.0417.00002.0001i_00002     NA                  | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+    45121   47569   D       CDS     ESCO.0417.00002.0001i_00003     NA                  | Prophage CP4-57 regulatory protein (AlpA) | NA | protein motif:Pfam:PF05930.6 | NA
+    50124   52465   D       CDS     ESCO.0417.00002.0001b_00004     P22 coat protein 5  | P22 coat protein - gene protein 5 | NA | protein motif:Pfam:PF11651.2 | NA
+    1       2600    C       tRNA    ESCO.0417.00002.0004b_00005     NA                  | tRNA-Gly(ccc) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+    3500    5000    D       CDS     ESCO.0417.00002.0004i_00006     NA                  | hypothetical protein | NA | NA | NA
+    10000   10215   C       CRISPR  ESCO.0417.00002.0004b_CRISPR1   crispr              | crispr-array | NA | NA | NA
+    4568    5896    D       CDS     ESCO.0417.00002.0006b_00007     NA                  | hypothetical protein | NA | NA | NA
+    126     456     D       CDS     ESCO.0417.00002.0007b_00008     NA                  | hypothetical protein | NA | NA | NA
 
 Proteins folder
 ^^^^^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.prt``. This file is a multi-fasta file, and contains amino-acid sequences, corresponding to all CDS annotated.
+This folder contains 1 file per genome, called ``<genome_name>.prt``. This file is a multi-fasta file, which contains amino-acid sequences, corresponding to all CDS annotated (only 'CDS' features found in the corresponding file in LSTINFO folder).
+
+Headers are ``<genome_name>.<contig><place>_<num> size gene_name other_information`` with:
+
+- ``<genome_name>.<contig><place>_<num>`` as previously described (LSTINFO folder)
+- ``size`` is the protein size in nucleotides
+- gene name when applicable (for example hisP)
+- other information on the sequence annotated (product, similar sequences in PFAM, etc.)
+
+Example, corresponding to first gene of LSTINFO example file:
+
+.. code-block:: text
+
+    >ESCO.0417.00002.0001b_00001 1182   thlA    | Acetyl-CoA acetyltransferase | 2.3.1.9 | similar to AA sequence:UniProtKB:P45359 | COG:COG4598
 
 Genes folder
 ^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.gen``. This file, in multi-fasta format, contains nucleic sequences, corresponding to all sequences annotated (found in corresponding file in LSTINFO folder).
 
+Headers are the same as for the Protein folder files.
+
 Replicons folder
 ^^^^^^^^^^^^^^^^
 
 This folder contains 1 file per genome, called ``<genome_name>.fna``. It corresponds to the input file, containing all replicons of the genome, but with contigs renamed.
 
+Headers are ``<replicon_name> <size>``, with size corresponding to the number of nucleotides in the sequence.
+
 gff3 folder
 ^^^^^^^^^^^
 
-This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_
+This folder contains 1 file per genome, called ``<genome_name>.gff``. It is a file in gff3 format, with fields as described `here <http://www.ensembl.org/info/website/upload/gff3.html>`_, and with the following header format. It does not contain the nucleotide sequences, which already are in the Replicons folder.
+
+.. code-block:: text
+
+    ##gff-version 3
+    ##sequence-region <contig_name> <begin> <end>
+    ##sequence-region <contig_name> <begin> <end>
+    <lines for each feature of contig1>
+    <lines for each feature of contig2>
+
 
 .. _qco:
 
@@ -230,11 +423,11 @@ With this information, you will be able to see which genomes should be removed f
 
 You can run this quality control with (order of arguments does not matter)::
 
-    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -Q
+    PanACoTA annotate -l <list_file> -d <dbpath> -r <res_path> -Q
 
 with:
 
-    - ``<list_file>`` your list file as described in :ref:`input formats<lfile>`.
+    - ``-l <list_file>`` your list file as described in :ref:`input formats<lfile>`.
     - ``-d <dbpath>`` the path to the folder containing all your fasta files listed in list_file.
     - ``-r <res_path>`` path to the directory where you want to put the results (no need to create the directory before, the program will do it).
     - ``-Q`` specify that you only want the quality control
@@ -257,50 +450,64 @@ And log files:
 
 .. _annot:
 
-Annotation
-----------
+QC and Annotation
+-----------------
 
 When you know the limits you want to use for the L90 and number of contigs, you can run the full annotation step, and not only the quality control. Use::
 
-    PanACoTA annotate <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num>]
+    PanACoTA annotate -l <list_file> -d <dbpath> -r <res_path> -n <name> [--l90 <num> --nbcont <num> --prodigal --small]
 
 with:
     - same arguments as before
     - ``-n <name>`` the default species name to use, for lines of the list_file which do not contain this information. This name must contain 4 alpha-numeric characters.
     - ``--l90 <num>``: *optional*. If the default value (max L90 = 100) does not fit your data, choose your own maximum limit.
     - ``--nbcont <num>``: *optional*. If the default value (max nb_contigs = 999) does not fit your data, choose your own maximum limit.
+    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
+    - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
 
 This command will run the same steps as described in quality control only, with additional steps:
 
     - Keeping only genomes with L90 lower than the limit and number of contigs lower than the limit
     - For each species, ordering the genomes by increasing L90 and number of contigs, and assigning them a strain number
-    - annotating each genome with prokka
-    - formatting prokka results to the 4 output folders (see :ref:`output formats <outform>`)
+    - annotating each genome with prokka/prodigal
+    - formatting prokka/prodigal results to the 5 output folders (see :ref:`output formats <outform>`)
 
-This will also create a folder ``<res_path>``, with the following files inside:
+This will create a folder ``<res_path>``, with the following files inside:
 
     - same files as quality control only, except ``info-genomes-<list_file>.lst``.
     - ``LSTINFO_<list_file>.lst``: information on annotated genomes, as described :ref:`here<lstinfof>`
     - prokka result folders in your ``tmp_files`` directory
     - The 5 folders ``LSTINFO``, ``gff3``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
 
+Annotation only
+---------------
+
+When you already have information on genome sequences, and just want to annotate those which are bellow the thresholds. Use::
+
+    PanACoTA annotate --info <lstinfo file> -r <res_path> -n <name> [--prodigal --small]
+
+with:
+    - same arguments as before for -r and -n
+    - ``--info <filename>``: name of your LSTINFO file containing information on your genomes, as described :ref:`here<lstinfof>`
+
 .. _option:
 
 Options
 -------
 
-Here is the list of options available when running ``PanACoTA annotate``:
+Here is the complete list of options available when running ``PanACoTA annotate``. You can get them by running ``PanACoTA annotate -h``:
 
-    - ``-n <name>``: required when not running quality control only (see :ref:`annotation<annot>`)
     - ``-Q``: run quality control only (see :ref:`QC only<qco>`)
-    - ``--l90 <l90>``: to specify the maximum L90 value accepted to keep a genome. Default is 100
-    - ``--nbcont <number>``: to specify the maximum number of contigs allowed to keep a genome. Default is 999
-    - ``--cutN <number>``: by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
-    - ``--date <date>``: date used to name the genome (in gembase_format, see :ref:`first column of LSTINFO_file<lstinfof>`). If not given, and no information is given on a line in the list_file, the current date will be used.
-    - ``--tmp <tmpdir>``: to specify where the temporary files must be saved. By default, they are saved in ``<res_path>/tmp_files``.
-    - ``--prok <prok_dir>``: to specify where the prokka output folders must be saved. By default, they are saved in the same directory as ``<tmpdir>``. This can be useful if you want to run this step on a dataset for which some genomes are already annotated. For those genomes, it will use the already annotated results found in ``<prok_dir>`` to run the formatting steps, and it will only annotate the genomes not found.
-    - ``-F`` or ``--force``: Force run: Add this option if you want to run prokka and formatting steps for all genomes even if their result folder (for prokka step) or files (for format step) already exist: override existing results. Without this option, if there already are results in the given result folder, the program stops. If there are no results, but prokka folder already exists, prokka won't run again, and the formating step will use the already existing folder if correct, or skip the genome if there are problems in prokka folder.
-    - ``--threads <number>``: if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
+    - ``--l90 <l90>``: *optional*. to specify the maximum L90 value accepted to keep a genome. Default is 100
+    - ``--nbcont <number>``: *optional*. to specify the maximum number of contigs allowed to keep a genome. Default is 999
+    - ``--cutn <number>``: *optional*. by default, each sequence is split at each stretch of at least 5 ``N`` (see :ref:`sequence format<seq>`). If you do not want to split sequences, put 0. If you want to change the condition, put the minimum number of ``N`` required to split the sequence.
+    - ``--date <date>``: *optional*. date used to name the genome (in gembase_format, see :ref:`first column of LSTINFO_file<lstinfof>`). If not given, and no information is given on a line in the list_file, the current date will be used.
+    - ``--tmp <tmpdir>``: *optional*. to specify where the temporary files must be saved. By default, they are saved in ``<res_path>/tmp_files``.
+    - ``--annot_dir <annot_dir>``: *optional*. to specify where the prokka/prodigal output folders must be saved. By default, they are saved in the same directory as ``<tmpdir>``. This can be useful if you want to run this step on a dataset for which some genomes are already annotated. For those genomes, it will use the already annotated results found in ``<annot_dir>`` to run the formatting steps, and it will only annotate the genomes not found.
+    - ``-F`` or ``--force``: *optional*. Force run: Add this option if you want to run prokka/prodigal and formatting steps for all genomes even if their result folder (for prokka/prodigal step) or files (for format step) already exist: override existing results. Without this option, if there already are results in the given result folder, the program stops. If there are no results, but prokka/prodigal folder already exists, prokka/prodigal won't run again, and the formating step will use the already existing folder if correct, or skip the genome if there are problems in prokka folder.
+    - ``--threads <number>``: *optional*. if you have several cores available, you can use them to run this step faster, by handling several genomes at the same time, in parallel. By default, only 1 core is used. You can specify how many cores you want to use, or put 0 to use all cores of your computer.
+    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
+    - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
 
 
 ``pangenome`` subcommand
@@ -346,20 +553,23 @@ All other information than the genome names in the first columns will be ignored
 protein files
 ^^^^^^^^^^^^^
 
-Each genome in your list_file corresponds to a protein file in ``dbdir``. This protein file is in multi-fasta format, and the headers must follow this format: ``<genome-name_without_space_nor_dot>_<numeric_chars>``. For example ``my-genome-1_00056`` or ``my_genome_1_00056`` are valid protein headers.
+Each genome in your list_file corresponds to a protein file in ``dbdir``. This protein file is in multi-fasta format, 
+and the headers must follow this format: 
+``<genome-name_without_space_nor_dot>_<numeric_chars>``. 
+For example ``my-genome-1_00056`` or ``my_genome_1_00056`` are valid protein headers. 
 
 .. warning:: All proteins of a genome must have the same ``<genome-name_without_space_nor_dot>``. Otherwise, they won't be considered in the same genome, which will produce errors in your core or persistent genome!
 
-Ideally, you should follow the 'gembase_format', ``<name>.<date>.<strain_num>.<place><contig>_<num>`` (as it is described in :ref:`LSTINFO folder format <lstf>`, field "name of the sequence annotated"), where the genome name, shared by all proteins of the genome, is ``<name>.<date>.<strain_num>``, with:
-
-    - ``<name>`` the species name in alpha-numeric characters (like ESCO for E. coli).
-    - ``<date>`` date associated to the genome (alpha-numeric characters)
-    - ``<strain_num>`` strain number (only numeric characters)
-
+Ideally, you should follow the 'gembase_format', ``<name>.<date>.<strain_num>.<contig><place>_<num>`` 
+(as it is described in :ref:`LSTINFO folder format <lstf>`, field "name of the sequence annotated"), 
+where the genome name, shared by all proteins of the genome.
 
 If your protein files were generated by ``PanACoTA annotate``, they are already in this format!
 
-Those fields will be used to sort pangenome families by species (if you do a pangenome containing different species), strain number (inside a same species), and protein number (inside a same strain). They will also be essential if you want to generate a core or persistent genome after.
+Those fields will be used to sort genes inside pangenome families. They are sorted by species ``<genome-name_without_space_nor_dot>`` 
+(if you do a pangenome containing different species), 
+strain number ``<strain_num>`` (inside a same species), and protein number ``<num>`` (inside a same strain). If you do not use gembase format,
+families will only be sorted by protein number (the ``<numeric_chars>`` part).
 
 
 Output file formats
@@ -386,37 +596,48 @@ This fictive pangenome contains 4 families. Family 1 contains 4 proteins, family
 Qualitative matrix
 ^^^^^^^^^^^^^^^^^^
 
-You will also find a qualitative matrix corresponding to your pangenome. Its columns correspond to the different genomes, and its lines to the different families. In each cell, there is a 1 if the genome has a member in the family, or 0 if not. For example, the qualitative matrix corresponding to the pangenome example just above is:
+You will also find a qualitative matrix corresponding to your pangenome. 
+Its columns correspond to the different families, and its lines to the different genomes. 
+In each cell, there is a 1 if the genome has a member in the family, or 0 if not. 
+For example, the qualitative matrix corresponding to the pangenome example just above is:
 
 .. code-block:: text
 
-    fam_num ESCO.0217.00001 ESCO.0217.00002 ESCO.1216.00003 ESCO.1216.00005 ESCO/1216.00006 ESCO.0317.00007
-    1       1               1               1               0               0               0
-    2       1               0               0               0               0               0
-    3       0               0               0               1               0               1
-    4       0               0               0               0               1               0
+    fam_num           1     2     3     4    
+    ESCO.0217.00001   1     1     0     0
+    ESCO.0217.00002   1     0     0     0
+    ESCO.1216.00003   1     0     0     0
+    ESCO.1216.00005   0     0     1     0
+    ESCO/1216.00006   0     0     0     1
+    ESCO.0317.00007   0     0     1     0
+
+This file can be used as an input to do GWAS analysis with `treeWAS <https://github.com/caitiecollins/treeWAS>`_.
 
 .. _quanti:
 
 Quantitative matrix
 ^^^^^^^^^^^^^^^^^^^
 
-You will also find a quantitative matrix. As for the qualitative matrix, columns correspond to the different genomes, and lines to the different families. But here, each cell contains the number of members from the given genome in the given family. Here is the quantitative matrix corresponding to the pangenome example above:
+You will also find a quantitative matrix. As for the qualitative matrix, columns correspond to the different families, 
+and lines to the different genomes. But here, each cell contains the number of members from the given genome in the given family. 
+Here is the quantitative matrix corresponding to the pangenome example above:
 
 .. code-block:: text
 
-    fam_num ESCO.0217.00001 ESCO.0217.00002 ESCO.1216.00003 ESCO.1216.00005 ESCO/1216.00006 ESCO.0317.00007
-    1       1               2               1               0               0               0
-    2       1               0               0               0               0               0
-    3       0               0               0               1               0               1
-    4       0               0               0               0               3               0
+    fam_num           1     2     3     4    
+    ESCO.0217.00001   1     1     0     0
+    ESCO.0217.00002   2     0     0     0
+    ESCO.1216.00003   1     0     0     0
+    ESCO.1216.00005   0     0     1     0
+    ESCO/1216.00006   0     0     0     3
+    ESCO.0317.00007   0     0     1     0
 
 .. _sum:
 
 Summary file
 ^^^^^^^^^^^^
 
-FInally, you will also find a summary file, containing useful information on each family of your pangenome. The different columns correspond to:
+Finally, you will also find a summary file, containing useful information on each family of your pangenome. The different columns correspond to:
 
     - ``num_fam``: family number, as in the 3 other files
     - ``nb_members``: total number of members in the family
@@ -455,12 +676,14 @@ with:
     - ``-i <min_id>``: minimum percentage of identity required to put 2 proteins in the same family. When doing a pangenome at the species level, we commonly use a threshold of 80% of identity.
 
 
-This will create (if not already existing) your ``outdir``, and, after execution, this directory will contain your pangenome file, as well as other useful files:
+This will create (if not already existing) your ``outdir``, and, after execution, this directory will contain your pangenome file, 
+as well as other useful files. If you did not specify a pangenome filename (``-f`` option), the default pangenome name will be 
+``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst``:
 
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst``: your pangenome file, which format is described :ref:`here above<panfile>`
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.quali.txt``: :ref:`qualitative matrix<quali>`
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.quanti.txt``: :ref:`quantitative matrix<quanti>`
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.summary.txt``: :ref:`summary file<sum>`
+    - ``<pangenome_file or default>``: your pangenome file, which format is described :ref:`here above<panfile>`
+    - ``<pangenome_file or default>.quali.txt``: :ref:`qualitative matrix<quali>`
+    - ``<pangenome_file or default>.quanti.txt``: :ref:`quantitative matrix<quanti>`
+    - ``<pangenome_file or default>.summary.txt``: :ref:`summary file<sum>`
 
 
 It will also contain other files and directories, that could help you if you need to investigate the results (see :ref:`options<optpan>` for the meaning of parameters between ``<>`` not described in the main command line):
@@ -470,7 +693,7 @@ It will also contain other files and directories, that could help you if you nee
     - ``<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>*``: 3 files (``*`` being nothing, ``.index``, ``.tsv``) generated by MMseqs2 corresponding to the clustering of your proteins
     - ``PanACoTA-pangenome_<dataset_name>.log*``: the 3 log files as in the annotate subcommand (.log, .log.details, .log.err). See their description :ref:`here<logf>`
     - ``mmseq_<dataset_name>.All.prt_<min_id>-mode<mode_num_given>_<current_date_and_time>.log``: MMseqs2 log file.
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.bin`` is a binary file containing Python objects corresponding to the pangenome. File only used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
+    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.bin`` is a binary file of the pangenome in PanACoTA format. This file is only used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
 
 In your ``outdir`` folder (or where you specified if you used the ``-s`` option), you should have a new file, ``<dataset_name>.All.prt``, containing all proteins of all your genomes.
 
@@ -522,8 +745,9 @@ If you want to do a persistent genome, use the following options to specify what
     - ``-t <tol>``:  min % of genomes (between 0 and 1) having exactly 1 member in a family to consider the family as persistent. Default value is 1, and 100% of genomes required corresponds to the coregenome (so no need to put this option if you want a coregenome)
     - ``-X``: the ``-t`` parameter defines how many genomes must have exactly 1 member in the family to consider it as persistent. By default, all genomes present in a family must have exactly 1 member. You can put this option to get a ``mixed persistent genome``, meaning that a family is considered as persistent if at least ``tol%`` of the genomes have exactly 1 member, and other genomes have either 0 either several members. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
     - ``-M``: *not compatible with -X*. You can put this option if you want to allow several member in any genome of a family. With this option, ``-t`` now defines the minimum percentage of genomes having at least 1 member in a family to consider it as persistent.
+    - ``-F``: When you specify the ``-t <tol>`` option, with a number lower than 1, you can add this option to use floor('tol'*N) as a minimum number of genomes instead of ceil('tol'*N) which is the default behavior.
 
-You can also specify your core/persistent genome file path and name with ``-o <path/to/outfile``. By default, it will be saved in the same directory as your pangenome, and be called ``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst``, where:
+You can also specify your core/persistent genome file path and name with ``-o <path/to/outdir``. By default, it will be saved in the same directory as your pangenome, and be called ``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst``, where:
 
     - ``<pangenome>`` is your given pangenome filename
     - ``<tol>`` is the number between 0 and 1 used in ``-t`` option (1 if not given)
@@ -683,7 +907,7 @@ with:
 
     - ``-c <pers_genome>``: persistent genome file whose families must be aligned
     - ``-l <list_file>``: list of all genomes, as described :ref:`here<lfilealign>`
-    - ``-n <dataset_name>``: name of the dataset to align. For example, ESCO200-0.9-mixed to align the mixed persistent genome of 200 *E. coli* strains, where mixed persistent genome was generated such that there are at least 90% of the genomes in each family.
+    - ``-n <dataset_name>``: name of the dataset to align. For example, you can put ESCO200-0.9-mixed for the alignment of the mixed persistent genome of 200 *E. coli* strains, where mixed persistent genome was generated such that there are at least 90% of the genomes in each family.
     - ``-d <dbdir>``: directory containing the ``Proteins`` and ``Genes`` folders, with files corresponding to :ref:`list_file<lfilealign>`
     - ``-o <resdir>``: directory where you want to have the temporary and result files
 
@@ -732,32 +956,52 @@ Corresponding to this phylogenetic tree:
 Do tree
 -------
 
-By default, 'tree' subcommand will use `FastTreeMP <http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0009490>`_ software to infer the phylogenetic tree. To infer the tree from your alignment file, run:
+By default, 'tree' subcommand will use `IQtree <http://www.iqtree.org/>`_ software to infer the phylogenetic tree. 
+To infer the tree from your alignment file, run:
 
 .. code-block:: bash
 
     PanACoTA tree -a <align_file>
 
-However, we also provide the possibility to use `FastME <https://academic.oup.com/mbe/article/32/10/2798/1212138/FastME-2-0-A-Comprehensive-Accurate-and-Fast>`_ or `Quicktree <https://www.ncbi.nlm.nih.gov/pubmed/12424131>`_. For that, add the option ``-s <soft>`` with ``fastme`` or ``quicktree`` in ``<soft>``.
+However, we also provide the possibility to use `FastTree <http://www.microbesonline.org/fasttree/#Install>`_, `FastME <https://academic.oup.com/mbe/article/32/10/2798/1212138/FastME-2-0-A-Comprehensive-Accurate-and-Fast>`_ or `Quicktree <https://www.ncbi.nlm.nih.gov/pubmed/12424131>`_. For that, add the option ``-s <soft>`` with ``fastme`` or ``quicktree`` in ``<soft>``.
 
 
 See ``PanACoTA tree -h`` to have an overview of all options available.
 
+IQtree options
+^^^^^^^^^^^^^^
+
+If you use IQtree (default one), you can use the following options:
+
+    - ``-o <outdir>``: by default, the output files (tree, logs) will be in the current directory. Add this option if you want to save them somewhere else.
+    - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is GTR (Generalized Time Reversible). You can choose between: HKY, JC, F81, K2P, K3P, K81uf, TNef, TIM, TIMef, TVM, TVMef, SYM, GTR.
+    - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated
+    - ``-B``: Add this option if you want to write all bootstrap pseudo-trees
+    - ``--threads <num>``: Indicate how many threads you want to use. By default, it uses only 1 thread. Put 0 if you want to use all your computer cores
+    - ``--mem <num>``: Specify maximal RAM usage in GB | MB.
+    - ``-fast``: use -fast option of IQtree
+
+In your ``outdir``, you will find, together with the :ref:`regular PanACoTA log files<logf>`:
+
+- ``<align_file>.iqtree_tree.log``, the logfile of IQtree
+- ``<align_file>.iqtree_tree.treefile``, the tree in Newick format
+- Other files starting by ``<align_file>.iqtree_tree``, generated by IQtree
+
+
 FastTree options
 ^^^^^^^^^^^^^^^^
+To use FastTree with default options, run::
 
-If you use FastTree (default one), you can use the following options:
+    PanACoTA tree -a <align_file> -s fasttree
+
+You can also specify the following options:
 
     - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated
     - ``-o <outfile>``: by default, the output tree file will be called ``<align_file>.fasttree_tree.nwk``. You can give a custom output name with this option
     - ``--threads <num>``: Indicate how many threads you want to use. By default, it uses only 1 thread. Put 0 if you want to use all your computer cores
     - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is GTR. You can choose between: ``GTR`` (Generalized Time Reversible) and ``JC`` (Jukes-Cantor)
 
-In your ``<outdir>`` directory, you will find:
-
-    - ``<dataset_name>.grp.aln.fasttree.log``: logfile of FastTree, with information on running steps, and intermediate trees inferred
-    - ``<dataset_name>.grp.aln.fasttree_tree.nwk``: the final tree inferred, in Newick format
-    - ``PanACoTA-tree-fasttree.log*``: the 3 log files as in the :ref:`other steps<logf>`
+In your ``<outdir>`` directory, you will find your treefile, called ``<align_file>.fasttree_tree.nwk``
 
 
 FastME options
@@ -777,10 +1021,10 @@ You can also specify the following options:
 
 In your ``<outdir>`` directory, you will find:
 
-    - ``<dataset_name>.grp.aln.phylip``: alignment converted in Phylip-relaxed format, the input of FastME
-    - ``<dataset_name>.grp.aln.phylip.fastme.log``: logfile of FastME, with information on running steps
-    - ``<dataset_name>.grp.aln.phylip.fastme_dist-mat.txt``: distance matrix of all given genomes
-    - ``<dataset_name>.grp.aln.phylip.fastme_tree.nwk``: the final tree inferred in Newick format
+    - ``<align_file>.phylip``: alignment converted in Phylip-relaxed format, the input of FastME
+    - ``<align_file>.phylip.fastme.log``: logfile of FastME, with information on running steps
+    - ``<align_file>.phylip.fastme_dist-mat.txt``: distance matrix of all given genomes
+    - ``<align_file>.phylip.fastme_tree.nwk``: the final tree inferred in Newick format
     - ``PanACoTA-tree-fastme.log*``: the 3 log files as in the :ref:`other steps<logf>`
 
 Quicktree options
@@ -797,7 +1041,7 @@ You can also specify the following options:
 
 In your ``<outdir>`` directory, you will find:
 
-    - ``<dataset_name>.grp.aln.stockholm``: alignment converted in Stockholm format, the input of Quicktree
-    - ``<dataset_name>.grp.aln.stockholm.quicktree.log``: logfile of quicktree, empty if no error occurred
-    - ``<dataset_name>.grp.aln.stockholm.quicktree_tree.nwk``: the final tree inferred in Newick format
+    - ``<align_file>.stockholm``: alignment converted in Stockholm format, the input of Quicktree
+    - ``<align_file>.stockholm.quicktree.log``: logfile of quicktree, empty if no error occurred
+    - ``<align_file>.stockholm.quicktree_tree.nwk``: the final tree inferred in Newick format
     - ``PanACoTA-tree-quicktree.log*``: the 3 log files as in the :ref:`other steps<logf>`

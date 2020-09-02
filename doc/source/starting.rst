@@ -1,23 +1,22 @@
-=========================
+======================
 Starting with PanACoTA
-=========================
+======================
 
 
-``PanACoTA`` is a Python package, developed in Python 3.
+``PanACoTA`` is a Python package, developed in Python 3.6.
 
 Downloading and updating
 ========================
 
 
-You can download ``PanACoTA`` source code by downloading an archive (zip, tar.gz), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download ``PanACoTA`` source code by downloading an archive of a given release (zip, tar.gz), or by cloning its github repository. By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
 .. code-block:: bash
 
-    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
+    git clone https://github.com/gem-pasteur/PanACoTA.git
+ve your github login, and password.
 
-When asked, give your gitlab login, and password.
-
-This will create a repository called ``pipeline_annotation``. Go inside this repository (``cd pipeline_annotation``) to install ``PanACoTA``, as described hereafter.
+This will create a repository called ``PanACoTA``. Go inside this repository (``cd PanACoTA``) to install the software, as described hereafter.
 
 If a new version of ``PanACoTA`` is released, and you want to use it, type the following command to update the source code:
 
@@ -37,20 +36,19 @@ Dependencies
 
 ``PanACoTA`` is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
-Its external dependencies are:
+There are several external dependencies, and you can install only the ones you need for your study:
 
-- `prokka <https://github.com/tseemann/prokka>`_  (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `PanACoTA` (see :ref:`Install section <installing>`)
-- `mmseqs <https://github.com/soedinglab/MMseqs2>`_  (to generate pangenomes)
-- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ (to align persistent genome)
-- At least one of those softwares, to infer a phylogenetic tree:
+- `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_  (for 'annotate module' - to uniformly annotate your genomes)
+- `mmseqs <https://github.com/soedinglab/MMseqs2>`_  ('pangenome module' - to generate pangenomes)
+- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ ('align module' - to align persistent genome)
+- At least one of those softwares, if you want to infer a phylogenetic tree ('tree module'):
 
+    - `IQtree <http://www.iqtree.org/>`_
     - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described :ref:`here above <fasttree>`.
     - `FastME <http://www.atgc-montpellier.fr/fastme/binaries.php>`_
     - `Quicktree <https://github.com/tseemann/quicktree/releases>`_
 
-You can either install the external dependencies yourself, with the version you want, or use the installation script ``make``, for the dependencies that it installs.
-
-To be able to install the dependencies (by yourself, or with the installation script), make sure you already have:
+To be able to install the dependencies, make sure you already have:
 
 - ``tar``
 - ``git``
@@ -72,8 +70,7 @@ You can then add the output ``FastTreeMP`` to your ``$PATH`` to be able to run i
 Installing ``PanACoTA``
 --------------------------
 
-
-To install ``PanACoTA`` from the ``pipeline_annotation`` directory, type:
+To install ``PanACoTA``, from its directory, type:
 
 .. code-block:: bash
 
@@ -88,11 +85,11 @@ or
 You will then be able to use the package from any directory in your computer,
 just as any other software.
 
-.. note:: If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access, use ``./make --user`` to install it locally.
-
-.. warning:: Dependencies installed by ``make`` script are: 'prokka'. You must install the other dependencies yourself. After installation of these programs, they should be in your ``$PATH`` (i.e. you can type in a terminal ``mmseqs``, ``fftns``, ``FastTreeMP``, ``fastme`` or ``quicktree`` and no ``command not found`` should be displayed).
+.. note:: If you have permission issues, you can either use ``sudo`` before the previous command lines to install it as root, or, if you do not have root access (or prefer a local installation), use ``./make --user`` to install it locally.
 
 .. warning:: If you plan to work on the scripts, choose the development installation (see :doc:`Developer documentation <develop>`).
+
+.. _uninstall:
 
 Uninstalling ``PanACoTA``
 ----------------------------
@@ -119,22 +116,15 @@ If you want to install a new version of ``PanACoTA``:
 
 .. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the second command line (``sudo ./make upgrade``) to upgrade. Or, if you installed the package locally, use ``./make upgrade --user`` to upgrade this local version.
 
-
-Cleaning dependencies
----------------------
-
-If you installed the dependencies (such as prokka) via our installation script, but now want to install your own version, you can remove all dependencies downloaded and installed by ``make`` by doing:
-
-.. code-block:: bash
-
-    ./make clean
+If you installed it by downloading a zip file, see :ref:`Uninstall it <uninstall>`), and install the new version (by cloning gitlab repository, or downloading the new zip file).
 
 
 Quick run
 =========
 
-``PanACoTA`` contains 5 different subcommands:
+``PanACoTA`` contains 6 different subcommands:
 
+- ``prepare`` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
 - ``annotate`` (annotate all genomes of the dataset, after a quality control)
 - ``pangenome`` (generate pan-genome)
 - ``corepers`` (generate core-genome or persistent-genome)

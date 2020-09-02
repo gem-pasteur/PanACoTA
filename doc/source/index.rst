@@ -1,7 +1,12 @@
 .. PanACoTA documentation master file
 
 Welcome to PanACoTA's documentation!
-=======================================
+====================================
+
+If you use PanACoTA, please cite:
+
+XXXXXXXXX
+
 
 .. toctree::
    :maxdepth: 2

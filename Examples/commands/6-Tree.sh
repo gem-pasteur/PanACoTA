@@ -1,0 +1,1 @@
+PanACoTA tree -a Examples/5-align/Phylo-GENO3_1/GENO3_1.grp.aln -o Examples/6-tree

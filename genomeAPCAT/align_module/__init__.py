@@ -1,3 +1,0 @@
-"""
-genomeAPCAT align submodule
-"""

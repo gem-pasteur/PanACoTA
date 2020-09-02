@@ -1,11 +1,11 @@
-===================
+================
 What is PanACoTA
-===================
+================
 
-``PanACoTA`` is a software providing tools for large scale bacterial comparative genomics. From a set of complete and/or draft genomes, you can:
+``PanACoTA``  (PANgenome with Annotations, COre identification, Tree and corresponding Alignments) is a software providing tools for large scale bacterial comparative genomics. You can download all refseq genomes for a given species, or use your set of complete and/or draft genomes, to:
 
 - Do a quality control of your strains, to eliminate poor quality genomes, which would not give any information for the comparative study
-- Uniformly annotate all genomes
+- Uniformly annotate all genomes (with functional annotation, or only syntactic annotation, according to your needs)
 - Do a Pan-genome
 - Do a Core or Persistent genome
 - Align all Core/Persistent families

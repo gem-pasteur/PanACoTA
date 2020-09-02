@@ -12,6 +12,7 @@ This README file provides some essential information to install/use PanACoTA. Bu
 ---
 
 PanACoTA is a software providing tools for large scale comparative genomics:
+
 - annotation of genomes
 - pan-genome
 - persistent genome
@@ -25,18 +26,16 @@ PanACoTA is a software providing tools for large scale comparative genomics:
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
 Its external dependencies are:
-- [**prokka**](https://github.com/tseemann/prokka) (to annotate the genomes). If you do not already have it, this software will be automatically installed by `make` script, along with `PanACoTA` (see [Install section](#install)
-)
-- [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
-- [**mafft**](http://mafft.cbrc.jp/alignment/software/) (to align persistent genome)
-- At least one of those softwares, to infer a phylogenetic tree:
+- [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (for 'annotate module' - to uniformly annotate your genomes) 
+- [**mmseqs**](https://github.com/soedinglab/MMseqs2) ('pangenome module' - to generate pangenomes)
+- [**mafft**](http://mafft.cbrc.jp/alignment/software/) ('align module' - to align persistent genome)
+- At least one of those softwares, to infer a phylogenetic tree ('tree module'):
+    - [**IQ Tree**](http://www.iqtree.org/)
     - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install): We advise to download C code, and compile as described here above.
     - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
     - [**Quicktree**](https://github.com/tseemann/quicktree/releases)
 
-You can either install the external dependencies yourself, with the version you want, or use the installation script `make`, which will install the dependencies.
-
-To be able to install the dependencies (by yourself, or with the installation script), make sure you already have:
+To be able to install the dependencies, make sure you already have:
 
 - `tar`
 - `git`
@@ -52,13 +51,11 @@ You can then add the output `FastTreeMP` to your `$PATH` to be able to run it fr
 
 ## Downloading and updating `PanACoTA`
 
-You can download `PanACoTA` source code by downloading a [zip file](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/repository/archive.zip?ref=master), or by cloning its gitlab repository. By cloning the gitlab repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+You can download `PanACoTA` source code by downloading a [zip file](https://github.com/gem-pasteur/PanACoTA/archive/master.zip), or by cloning its github repository (which is more recommended). By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
 
-    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation
+    git clone https://github.com/gem-pasteur/PanACoTA.git
 
-Give your gitlab login, and password.
-
-This will create a repository called `pipeline_annotation`. Go inside this repository to install `PanACoTA`, as described hereafter.
+This will create a repository called `PanACoTA`. Go inside this repository to install `PanACoTA`, as described hereafter.
 
 If a new version of `PanACoTA` is released, and you want to use it, type the following command to update the source code:
 
@@ -84,10 +81,6 @@ If you have permission issues, you can either use 'sudo' before the previous com
 
 **Warning:** If you plan to work on the scripts, choose the development installation (see [Development section](#develop)).
 
-**Note**: Dependencies installed by make:
-- prokka
-- barrnap (if prokka is not already installed)
-
 ## <a name="uninstall"></a> Uninstalling `PanACoTA`
 
 If you don't want `PanACoTA` anymore, or if you want to install a newer version, uninstall it by typing:
@@ -96,23 +89,20 @@ If you don't want `PanACoTA` anymore, or if you want to install a newer version,
 
 ## Upgrade to new version
 
-If you want to install a new version of `PanACoTA` (and you downloaded it by cloning the gitlab repository):
+If you want to install a new version of `PanACoTA` (and you got it by cloning the gitlab repository):
 - update source code to the new version (`git pull`)
 - upgrade installation to the new version (`./make upgrade`)
 
 If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file).
 
-## Cleaning dependencies
-
-If you installed the dependencies (such as prokka) via our installation script, but now want to install your own version, you can remove all dependencies downloaded and installed by `make` by doing:
-
-    ./make clean
 
 # Running `PanACoTA`
 
 ## Quick run
 
-`PanACoTA` contains 5 different subcommands:
+`PanACoTA` contains 6 different subcommands:
+
+- `prepare` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
 - `annotate` (annotate all genomes of the dataset, after a quality control)
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
@@ -132,7 +122,7 @@ Each subcommand has its own options and inputs. To get the list of required argu
 We provide a folder, `Examples`, containing genomic sequences (in `Examples/genomes`) and examples of input files (in `Examples/input_files`) for the software.
 In the [example part of documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/examples.html), you will find information explaining you how to run the different modules of `PanACoTA` with this dataset, so that you can try the software. We also describe the results that should be created by each command line.
 
-**Note:** the provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations, but running very fast. Hence, the examples results should not be interpreted biologically!
+**Note:** the provided genomic sequences are taken from real genomes, but then modified and drastically shortened in order to have an example showing different situations, but running very fast. Hence, the examples results should not be interpreted biologically!
 
 ## Documentation
 
@@ -140,7 +130,9 @@ You can find more information in [PanACoTA documentation](http://aperrin.pages.p
 
 # <a name="develop"></a>  Development
 
-This part is for people who want to work on developing `PanACoTA` package.
+This part is for people who want to work on developing `PanACoTA` package. In the documentation, there is a part dedicated to [developers](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/develop.html).
+
+PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https://gitlab.pasteur.fr/aperrin/pipeline_annotation
 
 ## Installing `PanACoTA` (development mode)
 
@@ -150,16 +142,13 @@ If you want to install `PanACoTA` while still working on modifying the scripts, 
 
 Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
 
-If you don't want to install the software, you can still test it, and contribute to the tests and documentation
- by installing the libraries needed for the software, and those 
+If you don't want to install the software, you can still test it, and contribute to the tests and documentation by installing the libraries needed for the software, and those 
 needed for development by running:
 
     pip3 install -r requirements.txt  # dependencies used by PanACoTA
     pip3 install -r requirements-dev.txt  # libraries used to run tests, generate documentation etc.
 
-**Note:** biopython is only used for 'tree' subcommand, with option ``--soft fastme`` or ``--soft quicktree``. If you do not
-plan to use this, you do not need to install biopython. You can comment the ``biopython>=1.60`` line in 
-``requirements.txt`` (add a ``#`` at the beginning of the line). 
+**Note:** biopython is only used for 'tree' subcommand, with option ``--soft fastme`` or ``--soft quicktree``. If you do not plan to use this, you do not need to install biopython. You can comment the ``biopython>=1.60`` line in ``requirements.txt`` (add a ``#`` at the beginning of the line). 
 
 ## Running Tests
 
@@ -173,6 +162,7 @@ or, if you installed the package (final or development mode):
     py.test test/test_unit
     py.test test/test_functional
 
+Add ``-sv`` for more details on each test.
 
 ## Contributing to documentation
 

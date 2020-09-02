@@ -76,6 +76,7 @@ def is_package_installed(pkg_name):
     bool
         True if package is installed, False otherwise
     """
+    spec = ""
     spec = importlib.util.find_spec(pkg_name)
     return spec is not None
 

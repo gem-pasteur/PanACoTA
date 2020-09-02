@@ -1,9 +1,0 @@
-1	831	D	CDS	GEN4.1111.00001.b0001_00001	amiD	| N-acetylmuramoyl-L-alanine amidase AmiD | 3.5.1.28 | similar to AA sequence:UniProtKB:P75820
-861	1241	D	CDS	GEN4.1111.00001.i0001_00002	hpcD	| 5-carboxymethyl-2-hydroxymuconate Delta-isomerase | 5.3.3.10 | similar to AA sequence:UniProtKB:Q05354
-1271	2074	D	CDS	GEN4.1111.00001.i0001_00003	hpcG	| 2-oxo-hept-4-ene-1,7-dioate hydratase | 4.2.1.163 | similar to AA sequence:UniProtKB:P42270
-2111	3514	D	CDS	GEN4.1111.00001.i0001_00004	NA	| hypothetical protein | NA | NA
-3535	4308	D	CDS	GEN4.1111.00001.i0001_00005	hisP	| Histidine transport ATP-binding protein HisP | NA | similar to AA sequence:UniProtKB:P02915
-4327	5094	D	CDS	GEN4.1111.00001.i0001_00006	trmD	| tRNA (guanine-N(1)-)-methyltransferase | 2.1.1.228 | similar to AA sequence:UniProtKB:P0A873
-5138	5398	D	CDS	GEN4.1111.00001.i0001_00007	NA	| hypothetical protein | NA | NA
-5413	5994	D	CDS	GEN4.1111.00001.i0001_00008	NA	| hypothetical protein | NA | NA
-6052	7134	D	CDS	GEN4.1111.00001.b0001_00009	dctM	| C4-dicarboxylate TRAP transporter large permease protein DctM | NA | similar to AA sequence:UniProtKB:O07838

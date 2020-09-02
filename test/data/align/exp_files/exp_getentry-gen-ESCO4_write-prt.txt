@@ -1,0 +1,3 @@
+ESCO4_00001 test/data/align/generated_by_unit-tests/Aldir/test_write_genome-current.1.gen
+ESCO4_00003 test/data/align/generated_by_unit-tests/Aldir/test_write_genome-current.3.gen
+ESCO4_00004 test/data/align/generated_by_unit-tests/Aldir/test_write_genome-current.2.gen

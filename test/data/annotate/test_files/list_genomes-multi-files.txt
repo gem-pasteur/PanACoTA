@@ -1,4 +1,4 @@
-A_H738.fasta B2_A3_5.fasta-split5N.fna-gembase.fna
+A_H738.fasta B2_A3_5.fasta-split5N.fna-short-contig.fna 
 
 H299_H561.fasta  genome6.fasta genome.fna ::ABCD
 genome2.fasta::TOTO

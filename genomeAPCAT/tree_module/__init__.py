@@ -1,3 +1,0 @@
-"""
-genomeAPCAT tree_module
-"""

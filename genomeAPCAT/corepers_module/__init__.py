@@ -1,1 +1,0 @@
-"""corepers module of genomeAPCAT"""

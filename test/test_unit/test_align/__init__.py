@@ -1,1 +1,1 @@
-""" genomeAPCAT align_module unit-tests"""
+""" PanACoTA align_module unit-tests"""

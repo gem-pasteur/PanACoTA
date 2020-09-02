@@ -1,1 +1,1 @@
-include genomeAPCAT/align_module/prt2codon.awk
+include PanACoTA/align_module/prt2codon.awk
