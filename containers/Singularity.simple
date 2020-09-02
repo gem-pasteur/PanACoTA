@@ -1,0 +1,51 @@
+Bootstrap: docker
+From:python:3.7-stretch
+
+%post
+    # Update apt-get packages
+    apt-get update &&\
+    apt-get -y upgrade
+
+    # To use the "local" python, not the system one.
+    export PATH="/usr/local/bin":$PATH
+    # To avoid using python things installed in the HOME of root
+    # (that will be mounted during singularity build)
+    export PYTHONNOUSERSITE=1
+
+    # Install packages needed
+    apt-get install -y wget
+    # apt-get install -y \
+    #    wget \
+    #    python3 \
+    #    python3-pip
+
+    # Upgrade pip
+    pip3 install --upgrade pip
+
+    # For manually-installed programs
+    mkdir -p /opt/src
+
+    # Install PanACoTA
+    cd /opt/src
+    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
+    cd /opt/src/pipeline_annotation
+    git checkout dev &&\
+    ./make
+
+
+%environment
+    export LC_ALL=C
+    # To use the "local" python, not the system one.
+    export PATH="/usr/local/bin":$PATH
+    # To avoid using python things installed in the HOME of the user
+    # (that will be mounted during container execution)
+    export PYTHONNOUSERSITE=1
+
+
+%runscript
+    if [ "$*" ]
+    then
+        exec /usr/local/bin/PanACoTA "$@"
+    else
+        exec /usr/local/bin/PanACoTA -h
+    fi
