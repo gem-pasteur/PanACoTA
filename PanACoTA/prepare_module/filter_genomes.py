@@ -1,5 +1,37 @@
 #!/usr/bin/env python3
 
+# ###############################################################################
+# This file is part of PanACOTA.                                                #
+#                                                                               #
+# Authors: Amandine Perrin                                                      #
+# Copyright © 2018-2020 Institut Pasteur (Paris).                               #
+# See the COPYRIGHT file for details.                                           #
+#                                                                               #
+# PanACOTA is a software providing tools for large scale bacterial comparative  #
+# genomics. From a set of complete and/or draft genomes, you can:               #
+#    -  Do a quality control of your strains, to eliminate poor quality         #
+# genomes, which would not give any information for the comparative study       #
+#    -  Uniformly annotate all genomes                                          #
+#    -  Do a Pan-genome                                                         #
+#    -  Do a Core or Persistent genome                                          #
+#    -  Align all Core/Persistent families                                      #
+#    -  Infer a phylogenetic tree from the Core/Persistent families             #
+#                                                                               #
+# PanACOTA is free software: you can redistribute it and/or modify it under the #
+# terms of the Affero GNU General Public License as published by the Free       #
+# Software Foundation, either version 3 of the License, or (at your option)     #
+# any later version.                                                            #
+#                                                                               #
+# PanACOTA is distributed in the hope that it will be useful, but WITHOUT ANY   #
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS     #
+# FOR A PARTICULAR PURPOSE. See the Affero GNU General Public License           #
+# for more details.                                                             #
+#                                                                               #
+# You should have received a copy of the Affero GNU General Public License      #
+# along with PanACOTA (COPYING file).                                           #
+# If not, see <https://www.gnu.org/licenses/>.                                  #
+# ###############################################################################
+
 """
 Functions helping for doing quality control on genomes in order to eliminate
 bad quality sequences, and then run Mash loops in order to discard too close genomes.
@@ -158,7 +190,7 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
 
     # Sketch genomes
     sketch_all(genomes, sorted_genomes, outdir, list_reps, out_msh, mash_log, threads)
-    
+
     # Compute pairwise distances
     compare_all(out_msh, matrix, sparse_mat, mash_log, threads)
     # Iteratively discard genomes
