@@ -26,8 +26,8 @@ import progressbar
 import multiprocessing
 import threading
 import PanACoTA.utils as utils
-# import PanACoTA.annotate_module.format_prokka as fprokka
-# import PanACoTA.annotate_module.format_prodigal as fprodigal
+import PanACoTA.annotate_module.format_prokka as fprokka
+import PanACoTA.annotate_module.format_prodigal as fprodigal
 
 
 def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False,
@@ -179,7 +179,7 @@ def handle_genome(args):
     logger = logging.getLogger('format.handle_genome')
     # Handle genome
     ok_format = format_one_genome(gpath, name, annot_path, lst_dir,
-                                  prot_dir, gene_dir, rep_dir, gff_dir, logger)
+                                  prot_dir, gene_dir, rep_dir, gff_dir)
     return ok_format, genome
 
 
