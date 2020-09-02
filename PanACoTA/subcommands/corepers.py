@@ -185,7 +185,9 @@ def build_parser(parser):
     required = parser.add_argument_group('Required arguments')
     required.add_argument("-p", dest="pangenome", required=True,
                           help="PanGenome file (1 line per family, first column is fam number)")
-
+    required.add_argument("-o", dest="outputdir", required=True,
+                          help=("Specify the output directory for your core/persistent genome."),
+                          default=".")
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-t", "--tol", dest="tol", default=1, type=percentage,
                           help=("min %% of genomes having at least 1 member in a family to "
@@ -207,12 +209,6 @@ def build_parser(parser):
                                "only 1 member exactly is allowed. This option is not compatible "
                                "with -M (which is allowing multigenic families: having several "
                                "members in any number of genomes).")
-    optional.add_argument("-o", dest="outputdir",
-                          help=("You can specify an output directory for your core/persistent genome. "
-                                "By default, it will be saved in the current directory. "
-                                "Your output file will be named: "
-                                "PersGenome_<pangenome_filename>_tol[-multi][-mixed].lst"),
-                          default=".")
     optional.add_argument("-F", dest="floor", action="store_true",
                           help="When you specify the '-tol' option, with a number lower "
                                "than 1, you can add this option to use floor('tol'*N) "

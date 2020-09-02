@@ -159,6 +159,8 @@ def build_parser(parser):
     required.add_argument("-a", dest="alignment", required=True,
                           help=("Alignment file in multi-fasta: each header will be a "
                                 "leaf of the inferred tree."))
+    required.add_argument("-o", dest="outdir", required=True,
+                          help=("Directory where tree results will be saved. "))
 
     # Choose with which soft inferring phylogenetic tree
     softparse = parser.add_argument_group('Choose soft to use (default is IQtree)')
@@ -172,9 +174,7 @@ def build_parser(parser):
                           help=("Indicate how many bootstraps you want to compute. By "
                                 "default, no bootstrap is calculated. For IQtree, it "
                                 "will use ultrafast bootstrap (>=1000)."))
-    optional.add_argument("-o", dest="outdir", default=".",
-                          help=("Directory where tree results will be saved. "
-                                "By default, it is saved in the current directory."))
+
     optional.add_argument("--threads", dest="threads", default=1, type=thread_num,
                           help=("add this option if you want to parallelize on several threads. "
                                 "Indicate on how many threads you want to parallelize. "
