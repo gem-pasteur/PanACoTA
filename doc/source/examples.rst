@@ -57,9 +57,9 @@ Quality control
 
 If you just want to do quality control on the dataset, type::
 
-    PanACoTA annotate -d Examples/genomes_init -l Examples/input_files/list_genomes.lst -r Examples/1-res-QC -Q
+    PanACoTA annotate -d Examples/genomes_init -l Examples/input_files/list_genomes.lst -r Examples/2-res-QC -Q
 
-This will create a folder ``Examples/1-res-QC``, containing:
+This will create a folder ``Examples/2-res-QC``, containing:
 
 - ``QC_L90-list_genomes.png``: histogram of the L90 values of all genomes:
 
@@ -102,17 +102,17 @@ Now that you have seen the distribution of L90 and #contig values in your genome
 
 Functional annotation with Prokka (default)::
 
-    PanACoTA annotate -d Examples/genomes_init -r Examples/1-res-prokka -l Examples/input_files/list_genomes.lst -n EXAM --l90 3 --nbcont 10
+    PanACoTA annotate -d Examples/genomes_init -r Examples/2-res-prokka -l Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10
 
 Only syntactic annotation with Prodigal::
 
-    PanACoTA annotate -d Examples/genomes_init -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal
+    PanACoTA annotate -d Examples/genomes_init -r Examples/2-res-prodigal -l Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal
 
 Yes, you should get an error message! Check indicated log files to get more information. Here is what happened:
 
 Prodigal does not accept, by default, sequences smaller than 20000 nucleotides, which is the case in this example. So, to run prodigal on such small sequences, we need to add the ``--small`` option::
 
-    PanACoTA annotate -d Examples/genomes -r my_results Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal --small
+    PanACoTA annotate -d Examples/genomes_init -r Examples/2-res-prodigal -l Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal --small
 
 .. note:: Only use --small option if you need to (if you have really small sequences). But keep in mind that, with so small sequences, annotation will be limited!
 
@@ -120,7 +120,7 @@ Here, we put the L90 limit to 3, which should lead to the removal of 1 genome (g
 
 We also have to add an option, `-n <name>` to specify the default name to give to the genomes if it is not specified in the list file (here, for genome1 and genome3). We here choose `GENO`, as short for 'genome'... Choose more appropriate names!
 
-In your ``my_results`` directory, you should now have:
+In your result directory, you should now have:
 
 - the png files as previously: the distribution of values is the same, but the new limit for L90 now appears as a red line, as it is in the same range as the values:
 
@@ -143,10 +143,10 @@ In your ``my_results`` directory, you should now have:
 PanGenome step
 ==============
 
-To do a pangenome, you need to provide the list of genomes to consider, with 1 genome per line. Only the first column (genome name) will be considered, but you can use a file containing other columns...such as the one you already have in the result folder of annotation step: ``LSTINFO-list_genomes.lst``! However, of course, if you want to do a pangenome of less genomes than the ones you annotated, you are free to create a new file with the genomes you want!
-Here, we are doing a pangenome of the 3 genomes annotated before. Here is the command line:
+To do a pangenome, you need to provide the list of genomes to consider, with 1 genome per line. Only the first column (genome name) will be considered, but you can use a file containing other columns...such as the one you already have in the result folder of annotation step: ``LSTINFO-list_genomes.lst``! However, of course, if you want to do a pangenome of less genomes than the ones you annotated, you are free to create a new file with the genomes you want.
+Here, we are doing a pangenome of the 3 genomes annotated by prokka before. Here is the command line::
 
-    PanACoTA pangenome -l my_results/LSTINFO-list_genomes.lst -n GENO3 -d my_results/Proteins -i 0.8 -o my_results/pangenome
+    PanACoTA pangenome -l Examples/2-res-prokka/LSTINFO-list_genomes.lst -n GENO3 -d Examples/2-res-prokka/Proteins -i 0.8 -o Examples/3-pangenome
 
 With:
 
@@ -156,32 +156,37 @@ With:
     - ``-i``: we want a pangenome with 80% identity
     - ``-o``: put all result and temporary files to this directory
 
-In your ``my_results/pangenome`` folder, you should have your pangenome in a file called ``PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst``. It contains 1 line per family. The first column is the family number, and others are all family members. You also have the qualitative (``.quali.txt``) and quantitative (``.quanti.txt``) matrix of this pangenome, as well as a summary file (``.summary.txt``). See more information on those files in :ref:`output format description<panfile>`.
+In your ``Examples/3-pangenome`` folder, you should have your pangenome in a file called ``PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst``. It contains 1 line per family. The first column is the family number, and others are all family members. You also have the qualitative (``.quali.txt``) and quantitative (``.quanti.txt``) matrix of this pangenome, as well as a summary file (``.summary.txt``). See more information on those files in :ref:`output format description<panfile>`.
 
-In your ``my_results/Proteins`` folder, you should have a new file, ``GENO3.All.prt``, containing all proteins of the 3 genomes.
+In your ``Examples/2-res-prokka/Proteins`` folder, you should have a new file, ``GENO3.All.prt``, containing all proteins of the 3 genomes.
 
 If you used the same dataset and parameters as in this file, you should get a pangenome with 14 families.
 
 Core/Persistent Genome step
 ===========================
 
-The core genome is inferred from the PanGenome. So, the only required file is your pangenome, obtained at last step. By default, it will generate a CoreGenome. Here is the command line to obtain the CoreGenome of our dataset::
+The core genome is inferred from the pangenome. So, the only required file is your pangenome, obtained at last step. By default, it will generate a core genome. Here is the command line to obtain the core genome of our dataset::
 
-    PanACoTA corepers -p my_results/pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst
+    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst -o Examples/4-corepers
 
 **Replace `<date>` by your real filename**
 
-You now have your Core genome (we used the default parameter) in ``my_results/pangenome/PersGenome_<pangenome-filename>_1.lst``. With ``_1`` meaning that you asked for 100% of genomes present in each family.
-If you used the same dataset and parameters as in this file, you should get a coregenome with **6 families**.
+You now have your core genome (we used the default parameter) in ``Examples/4-corepers/PersGenome_<pangenome-filename>_1.lst``. With ``_1`` meaning that you asked for 100% of genomes present in each family.
+If you used the same dataset and parameters as in this file, you should get a core genome with **6 families**.
 
-If you want a Persistent Genome, specify the required :ref:`options<docorepers>` (minimum percentage of genomes in a family to be considered as persistent, allowing or not multi/mixed families...).
+If you want a persistent genome, specify the required :ref:`options<docorepers>` (minimum percentage of genomes in a family to be considered as persistent, allowing or not multi/mixed families...). For example, for a strict persistent genome at 95%::
+
+    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst -o Examples/4-corepers -t 0.95
+
+The output file will be ``Examples/4-corepers/PersGenome_<pangenome-filename>_0.95.lst``, and will contain the same 6 families (95% of 3 genomes is all genomes).
+
 
 Alignment step
 ==============
 
 You can then do an alignment of all the proteins of each persistent family. For example, to align the 6 core families found in the previous step::
 
-    PanACoTA align -c my_results/pangenome/PersGenome_<pangenome-filename>_1.lst -l my_results/LSTINFO-list_genomes.lst -n GENO3-1 -d my_results -o my_results/Phylogeny
+    PanACoTA align -c Examples/4-corepers/PersGenome_<pangenome-filename>_1.lst -l Examples/2-res-prokka/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/2-res-prokka -o Examples/5-align
 
 **Replace `PersGenome_<pangenome-filename>_1.lst` by your real persistent genome filename**
 
@@ -193,7 +198,7 @@ with:
     - ``-d``: path to the folder containing the directories 'Proteins' and 'Genes'
     - ``-o``: put all result and temporary files to this directory
 
-In your output directory ``my_results/Phylogeny``, you will find a directory called ``Phylo-GENO3-1``, containing your alignment file: ``GENO3-1.grp.aln``.
+In your output directory ``Examples/5-align``, you will find a directory called ``Phylo-GENO3_1``, containing your alignment file: ``GENO3_1.grp.aln``.
 
 See :ref:`here <doalign>` for a description of the other files generated, as well as the options available.
 
@@ -201,15 +206,15 @@ See :ref:`here <doalign>` for a description of the other files generated, as wel
 Tree step
 =========
 
-You can infer a phylogenetic tree from the alignment of persistent families. By default, it uses FastTree to infer the phylogenetic tree, with a GTR DNA substitution model, and no bootstrap. To run this on the alignment generated by the previous step using 5 threads, use::
+You can infer a phylogenetic tree from the alignment of persistent families. By default, it uses IQ TREE to infer the phylogenetic tree, with a GTR DNA substitution model, and no bootstrap. To run this on the alignment generated by the previous step, use::
 
-    PanACoTA tree -a my_results/Phylogeny/Phylo-GENO3-1/GENO3-1.grp.aln --threads 5
+    PanACoTA tree -a Examples/5-align/Phylo-GENO3_1/GENO3_1.grp.aln -o Examples/6-tree
 
-In your output directory, ``my_results/Phylogeny/Phylo-GENO3-1``, you will find your phylogenetic tree file, called ``GENO3-1.grp.aln.fasttree_tree.nwk``. If you followed all previous steps, your file should contain something close to:
+In your output directory, ``Examples/6-tree``, you will find your phylogenetic tree file, called ``GENO3_1.grp.aln.iqtree_tree.treefile``. If you followed all previous steps, your file should contain something close to (can differ a little depending on your version of IQ TREE):
 
 .. code-block:: text
 
-    (GEN4.1111.00001:0.005736088,GENO.0817.00001:0.003952369,GENO.1216.00002:0.004406055);
+    (GEN4.1111.00001:0.0054333949,GENO.0920.00001:0.0040715866,GENO.1216.00002:0.0045089138);
 
-See the :ref:`tree part of tutorial<dotree>` to get more information on all options available, output files generated, as well as how to use FastME or Quicktree instead of FastTree to infer the phylogenetic tree.
+See the :ref:`tree part of tutorial<dotree>` to get more information on all options available, output files generated, as well as how to use FastTree, FastME or Quicktree instead of IQ TREE to infer the phylogenetic tree.
 
