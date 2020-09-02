@@ -14,24 +14,12 @@ From:python:3.7-stretch
 
     # Install packages needed
     apt-get install -y wget
-    # apt-get install -y \
-    #    wget \
-    #    python3 \
-    #    python3-pip
 
     # Upgrade pip
     pip3 install --upgrade pip
 
     # For manually-installed programs
     mkdir -p /opt/src
-
-    # Update makeblastdb and blastp for prokka
-    cd /opt/src
-    wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
-    tar zxvpf ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
-    cp /opt/src/ncbi-blast-2.10.1+/bin/makeblastdb /usr/local/bin/ &&\
-    cp /opt/src/ncbi-blast-2.10.1+/bin/blastp /usr/local/bin/ &&\
-    rm ncbi-blast-2.10.1+-x64-linux.tar.gz
 
     # Install mash
     cd /opt/src
@@ -40,7 +28,14 @@ From:python:3.7-stretch
     rm mash-Linux64-v2.2.tar &&\
     mv /opt/src/mash-Linux64-v2.2/mash /usr/local/bin &&\
     rm -r mash-Linux64-v2.2
-
+    
+    # Update makeblastdb and blastp for prokka
+    cd /opt/src
+    wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
+    tar zxvpf ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
+    cp /opt/src/ncbi-blast-2.10.1+/bin/makeblastdb /usr/local/bin/ &&\
+    cp /opt/src/ncbi-blast-2.10.1+/bin/blastp /usr/local/bin/ &&\
+    rm ncbi-blast-2.10.1+-x64-linux.tar.gz
 
     # Install barrnap
     cd /opt/src
@@ -72,7 +67,6 @@ From:python:3.7-stretch
     git clone https://github.com/tseemann/prokka.git
     /opt/src/prokka/bin/prokka --setupdb &&\
     ln -s /opt/src/prokka/bin/prokka /usr/local/bin
-
 
     # Install MMseqs2 Version: f05f8c51d6e9c7c0b15fbd533e4b678303f50b3e
     cd /opt/src
@@ -141,7 +135,6 @@ From:python:3.7-stretch
     cd /opt/src
     git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
     cd /opt/src/pipeline_annotation
-    git checkout dev &&\
     ./make
 
 
