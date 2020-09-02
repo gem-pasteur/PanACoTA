@@ -1,6 +1,38 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+# ###############################################################################
+# This file is part of PanACOTA.                                                #
+#                                                                               #
+# Authors: Amandine Perrin                                                      #
+# Copyright © 2018-2020 Institut Pasteur (Paris).                               #
+# See the COPYRIGHT file for details.                                           #
+#                                                                               #
+# PanACOTA is a software providing tools for large scale bacterial comparative  #
+# genomics. From a set of complete and/or draft genomes, you can:               #
+#    -  Do a quality control of your strains, to eliminate poor quality         #
+# genomes, which would not give any information for the comparative study       #
+#    -  Uniformly annotate all genomes                                          #
+#    -  Do a Pan-genome                                                         #
+#    -  Do a Core or Persistent genome                                          #
+#    -  Align all Core/Persistent families                                      #
+#    -  Infer a phylogenetic tree from the Core/Persistent families             #
+#                                                                               #
+# PanACOTA is free software: you can redistribute it and/or modify it under the #
+# terms of the Affero GNU General Public License as published by the Free       #
+# Software Foundation, either version 3 of the License, or (at your option)     #
+# any later version.                                                            #
+#                                                                               #
+# PanACOTA is distributed in the hope that it will be useful, but WITHOUT ANY   #
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS     #
+# FOR A PARTICULAR PURPOSE. See the Affero GNU General Public License           #
+# for more details.                                                             #
+#                                                                               #
+# You should have received a copy of the Affero GNU General Public License      #
+# along with PanACOTA (COPYING file).                                           #
+# If not, see <https://www.gnu.org/licenses/>.                                  #
+# ###############################################################################
+
 """
 align is a subcommand of PanACoTA
 
@@ -23,7 +55,7 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath, 
+    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath,
          args.outdir, args.threads, args.force, args.verbose, args.quiet)
 
 
@@ -99,7 +131,7 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
     # generate required files
     gseqs.get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, fam_nums, quiet)
     prefix = os.path.join(aldir, dname)
-    
+
     # Align all families
     status = ali.align_all_families(prefix, fam_nums, len(all_genomes), dname, quiet, threads)
     if not status:
