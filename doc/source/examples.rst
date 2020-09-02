@@ -1,6 +1,6 @@
-========
-Examples
-========
+====================
+Tutorial on examples
+====================
 
 We provide a folder, ``Examples``, containing genomic sequences (in ``Examples/genomes``).
 

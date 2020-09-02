@@ -14,8 +14,8 @@ XXXXXXXXX
 
    whatis
    starting
-   usage
    examples
+   usage
    about
 
 

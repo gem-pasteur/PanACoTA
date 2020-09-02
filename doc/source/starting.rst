@@ -5,34 +5,9 @@ Starting with PanACoTA
 
 ``PanACoTA`` is a Python package, developed in Python 3.6.
 
-Downloading and updating
-========================
-
-
-You can download ``PanACoTA`` source code by downloading an archive of a given release (zip, tar.gz), or by cloning its github repository. By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
-
-.. code-block:: bash
-
-    git clone https://github.com/gem-pasteur/PanACoTA.git
-ve your github login, and password.
-
-This will create a repository called ``PanACoTA``. Go inside this repository (``cd PanACoTA``) to install the software, as described hereafter.
-
-If a new version of ``PanACoTA`` is released, and you want to use it, type the following command to update the source code:
-
-.. code-block:: bash
-
-    git pull
-
-Then, you will be able to upgrade to the new version (see :ref:`Upgrade section <upgrade>`).
-
-
-
-Installation: '**./make**' and its options
-========================================================
 
 Dependencies
-------------
+============
 
 ``PanACoTA`` is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
@@ -64,6 +39,31 @@ For FastTree, we advise to download C code from `here <http://www.microbesonline
     gcc -DOPENMP -fopenmp -DUSE_DOUBLE -Wall -O3 -finline-functions -funroll-loops -o FastTreeMP -lm FastTree.c
 
 You can then add the output ``FastTreeMP`` to your ``$PATH`` to be able to run it from everywhere.
+
+Installation:
+=============
+
+Downloading and updating
+------------------------
+
+
+You can get ``PanACoTA`` source code by downloading an archive of a given release (zip, tar.gz), or by cloning its github repository. By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
+
+.. code-block:: bash
+
+    git clone https://github.com/gem-pasteur/PanACoTA.git
+ve your github login, and password.
+
+This will create a repository called ``PanACoTA``. Go inside this repository (``cd PanACoTA``) to install the software, as described hereafter.
+
+If a new version of ``PanACoTA`` is released, and you want to use it, type the following command to update the source code:
+
+.. code-block:: bash
+
+    git pull
+
+Then, you will be able to upgrade to the new version (see :ref:`Upgrade section <upgrade>`).
+
 
 .. _installing:
 
@@ -116,7 +116,7 @@ If you want to install a new version of ``PanACoTA``:
 
 .. note:: If you have permission issues, and installed the package as root, use ``sudo`` before the second command line (``sudo ./make upgrade``) to upgrade. Or, if you installed the package locally, use ``./make upgrade --user`` to upgrade this local version.
 
-If you installed it by downloading a zip file, see :ref:`Uninstall it <uninstall>`), and install the new version (by cloning gitlab repository, or downloading the new zip file).
+If you installed it by downloading a zip file, :ref:`Uninstall it <uninstall>`, and install the new version (by cloning gitlab repository, or downloading the new zip file).
 
 
 Quick run
@@ -143,3 +143,18 @@ Each subcommand has its own options and inputs. To get the list of required argu
 
     PanACoTA <subcommand> -h
 
+Running with singularity image
+==============================
+
+We provide a singularity image, to help running PanACoTA on a cluster.
+
+First, download the singularity image::
+
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
+
+Then, you can run PanACoTA in the same way as previously, using:
+
+.. code-block:: bash
+
+    ./panacota.img -h  # to get help on the whole PanACoTA program
+    ./panacota.img <subcommand_name> <arguments_for_subcommand>  # to run a module of PanACoTA on your data.

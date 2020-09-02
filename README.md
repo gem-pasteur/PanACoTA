@@ -132,6 +132,21 @@ In the [example part of documentation](http://aperrin.pages.pasteur.fr/pipeline_
 
 You can find more information in [PanACoTA documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)!
 
+
+## On cluster
+
+We provide a singularity image, to help running PanACoTA on a cluster.
+
+First, download the singularity image:
+
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA:simple
+
+Then, you can run PanACoTA as previously:
+
+    ./panacota.img -h  # to get help on the whole PanACoTA program
+    ./panacota.img <subcommand_name> <arguments_for_subcommand>  # to run a module of PanACoTA on your data.
+
+
 # <a name="develop"></a>  Development
 
 This part is for people who want to work on developing `PanACoTA` package. In the documentation, there is a part dedicated to [developers](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/develop.html).

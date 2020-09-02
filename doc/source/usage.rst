@@ -1,6 +1,6 @@
-==========================
-Running PanACoTA: tutorial
-==========================
+=================================
+Running PanACoTA - help by module
+=================================
 
 ``PanACoTA`` contains 6 subcommands, for the different steps:
 
