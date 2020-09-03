@@ -138,7 +138,7 @@ We provide a singularity image, to help running PanACoTA on a cluster.
 
 First, download the singularity image:
 
-    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA:simple
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
 
 Then, you can run PanACoTA as previously:
 
