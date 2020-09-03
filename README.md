@@ -1,6 +1,6 @@
 # **-- PanACoTA --**
 
-[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/commits/master)
+[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/pipelines)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
  
