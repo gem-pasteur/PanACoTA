@@ -605,7 +605,7 @@ def check_args(parser, args):
     if args.cutn != 5 and args.from_info:
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use the given sequences as is. It will not cut "
-                     "them. So, you cannot use both --cutN and --info")
+                     "them. So, you cannot use both --cutn and --info.")
     if args.l90 != 100 and args.from_info:
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use this information, and not re-calculate it. "
@@ -642,10 +642,6 @@ def check_args(parser, args):
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
         if args.from_info:
             print(colored(nosplit_message(), "yellow"))
-            if not args.prodigal_only:
-                print(colored("\t-> Check that your genomes have unique headers, where headers "
-                              "are the 20 first characters of first word of current "
-                              "header", "yellow"))
     print()
 
     return args
