@@ -116,7 +116,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
 
     # Generate replicon file (same as input sequence but with gembase formatted headers). From
     # this file, get contig names, to be used to generate gff file
-    contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file)
+    contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file, logger)
     if not contigs:
         try:
             os.remove(res_rep_file)

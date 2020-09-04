@@ -5,8 +5,8 @@
 Functional tests for genomeAPCAT annotate
 """
 
-from genomeAPCAT.subcommands import annote as annot
-import genomeAPCAT.utils as utils
+from PanACoTA.subcommands import annotate as annot
+import PanACoTA.utils as utils
 
 import pytest
 import os
@@ -18,23 +18,34 @@ import matplotlib
 matplotlib.use('AGG')
 
 
-LOGFILE_BASE = "test_main_from_parse"
+# LOGFILE_BASE = "test_main_from_parse"
+# Define variables used by several tests
+DBDIR = os.path.join("test", "data", "annotate")
+GEN_PATH = os.path.join(DBDIR, "genomes")
+EXP_DIR = os.path.join(DBDIR, 'exp_files')
+TEST_DIR = os.path.join(DBDIR, 'test_files')
+GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
 
 
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
-
-
-def teardown_module():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
     """
-    os.remove(LOGFILE_BASE + ".log")
-    os.remove(LOGFILE_BASE + ".log.details")
-    os.remove(LOGFILE_BASE + ".log.err")
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    # shutil.rmtree(GENEPATH)
+    print("teardown")
 
 
 def test_main_from_parse():
@@ -42,18 +53,15 @@ def test_main_from_parse():
     Test that when a tmp folder is given by user, tmp files are saved in it,
     and prokka files too.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-default.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcfromparse")
-    tmpdir = os.path.join("test", "data", "annotate", "tmp_funcGivenTmp")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
+    tmpdir = os.path.join(GENEPATH, "tmp_funcGivenTmp")
     name = "ESCO"
-    l90 = 1
+    l90 = 100
     date = "0417"
     args = argparse.Namespace()
     args.list_file = list_file
-    args.db_path = dbpath
-    args.res_path = resdir
+    args.db_path = GEN_PATH
+    args.res_path = GENEPATH
     args.name = name
     args.date = date
     args.l90 = l90
@@ -66,13 +74,16 @@ def test_main_from_parse():
     args.prokkadir = None
     args.verbose = False
     args.quiet = False
+    args.from_info = False
+    args.prodigal_only = False
+    args.small = False
+    args.annotdir = False
+    args.argv = ["annotate", "test_annote.py", "test_main_from_parse"]
     annot.main_from_parse(args)
     # Check that tmp files exist in the right folder
-    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna"))
+    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna"))
     # Test that prokka folder is in the right directory
-    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
-    shutil.rmtree(tmpdir, ignore_errors=True)
-    shutil.rmtree(resdir, ignore_errors=True)
+    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-prokkaRes"))
 
 
 def test_main_novalid_genome(capsys):

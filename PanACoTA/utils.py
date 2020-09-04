@@ -697,7 +697,6 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                                         "ignored when concatenating {}").format(file, genomes_inf))
                 # If there are files to concatenate, concatenate them
                 if to_concat:
-                    print(to_concat)
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
@@ -1110,7 +1109,7 @@ def check_out_dirs(resdir):
         sys.exit(1)
 
 
-def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
+def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name', and save the output sequence in outfile.
@@ -1165,15 +1164,16 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-                    prevcont_nohead = "".join(prev_cont.split(">")[1:])
-                    prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
+                    prevcont_nohead = prev_cont.split(">")[1]
+                    prev_orig_name_nohead = prev_orig_name.split(">")[1]
                     if prev_orig_name_nohead:
                         sizes[prevcont_nohead] = cont_size
                         contigs[prev_orig_name_nohead] = prevcont_nohead
                         grf.write(cont)
                         grf.write(seq)
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                prev_orig_name = line.strip()
+                # keep only first string of contig
+                prev_orig_name = line.strip().split()[0]
                 contig_num += 1
                 cont_size = 0
                 seq = ""
@@ -1184,8 +1184,11 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
         prevcont_nohead = "".join(prev_cont.split(">")[1:])
-        prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
+        prev_orig_name_nohead = prev_orig_name.split(">")[1]
         if prev_orig_name_nohead:
+            if prev_orig_name_nohead in contigs:
+                logger.error(f"several contigs have the same name {prev_cont} in {gpath}.")
+                return False, False
             contigs[prev_orig_name_nohead] = prevcont_nohead
             sizes[prevcont_nohead] = cont_size
             grf.write(cont)
