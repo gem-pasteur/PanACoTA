@@ -1,6 +1,6 @@
 # **-- PanACoTA --**
 
-[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/pipeline)
+[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/pipelines)
 <!---
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 -->
