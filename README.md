@@ -3,7 +3,7 @@
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
 
 
-[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/commits/master)
+[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg?style=flat)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/pipelines)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)    
 This README file provides some essential information to install/use PanACoTA. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details : [![](doc/source/images/manual.jpg) ](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)
 
