@@ -55,7 +55,7 @@ import shutil
 import logging
 
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.general_format_functions as gfunc
+from PanACoTA.annotate_module import general_format_functions as gfunc
 
 logger = logging.getLogger("annotate.prodigal_format")
 
