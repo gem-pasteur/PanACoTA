@@ -7,8 +7,33 @@ Functional tests for the parser of annote_pipeline.py
 import pytest
 import argparse
 import time
+import os
+import shutil
 
 from PanACoTA.subcommands import annotate as annot
+DBDIR = os.path.join("test", "data", "annotate")
+GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
+
+
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
+    """
+    Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
+    """
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH)
+    print("teardown")
 
 
 def test_parser_noarg(capsys):

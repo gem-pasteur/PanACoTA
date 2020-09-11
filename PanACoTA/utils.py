@@ -629,7 +629,7 @@ def sort_proteins(x):
         sys.exit(1)
 
 
-def read_genomes(list_file, name, date, dbpath, tmp_path):
+def read_genomes(list_file, name, date, dbpath, tmp_path, logger):
     """
     Read list of genomes, and return them.
     If a genome has a name, also return it. Otherwise, return the name given by user.
@@ -657,7 +657,6 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     dict
         {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger("prepare.utils")
     logger.info("Reading genomes")
     genomes = {}
     # Check that given list file exists

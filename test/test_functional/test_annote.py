@@ -7,6 +7,7 @@ Functional tests for genomeAPCAT annotate
 
 from PanACoTA.subcommands import annotate as annot
 import PanACoTA.utils as utils
+import test.test_unit.utilities_for_tests as tutil
 
 import pytest
 import os
@@ -15,6 +16,8 @@ import shutil
 import time
 import argparse
 import matplotlib
+import logging
+import glob
 matplotlib.use('AGG')
 
 
@@ -40,11 +43,12 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    os.mkdir(GENEPATH)
+    if not os.path.isdir(GENEPATH):
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    # shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -76,14 +80,21 @@ def test_main_from_parse():
     args.quiet = False
     args.from_info = False
     args.prodigal_only = False
-    args.small = False
     args.annotdir = False
     args.argv = ["annotate", "test_annote.py", "test_main_from_parse"]
+    args.prodigal_only = False
+    args.small = False
     annot.main_from_parse(args)
+    # Check that only 2 fna files (over 3) were created in tmp files. The 3rd
+    # one is annotated from the original seq, nothing to merge
+    assert len(glob.glob(os.path.join(tmpdir, '*.fna'))) == 2
     # Check that tmp files exist in the right folder
     assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna"))
+    assert os.path.isfile(os.path.join(tmpdir, "H299_H561.fasta-all.fna"))
     # Test that prokka folder is in the right directory
     assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-prokkaRes"))
+    assert os.path.isdir(os.path.join(tmpdir, "B2_A3_5.fasta-changeName.fna-prokkaRes"))
+    assert os.path.isdir(os.path.join(tmpdir, "H299_H561.fasta-all.fna-prokkaRes"))
 
 
 def test_main_novalid_genome(capsys):
@@ -91,690 +102,450 @@ def test_main_novalid_genome(capsys):
     Test that when, in the list file, all genomes are wrong (do not correspond to
     filenames in the given dbpath), it closes the program with an error message.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files", "list_no_genome.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_NoGenome")
+    list_file = os.path.join(TEST_DIR, "list_no_genome.txt")
     name = "ESCO"
     date = "0417"
     with pytest.raises(SystemExit):
-        annot.main(list_file, dbpath, resdir, name, date)
+        annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date)
     _, err = capsys.readouterr()
     assert ("We did not find any genome listed in test/data/annotate/test_files/"
             "list_no_genome.txt "
             "in the folder test/data/annotate/genomes. Please check your list to give valid "
             "genome names.") in err
-    shutil.rmtree(resdir, ignore_errors=True)
 
 
-def test_main_given_tmp():
+def test_main_given_tmp_verbose3(capsys):
     """
     Test that when a tmp folder is given by user, tmp files are saved in it,
     and prokka files too.
+    + check that, with verbose=3, warning and details are written to stdout
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-default.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcGivenTmp")
-    tmpdir = os.path.join("test", "data", "annotate", "tmp_funcGivenTmp")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
+    tmpdir = os.path.join(GENEPATH, "tmp_funcGivenTmp")
     name = "ESCO"
     l90 = 1
     date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
-                                         tmp_dir=tmpdir)
-    assert skip == []
-    assert skipf == []
-    expk = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-             20031, 5, 1]
-            }
-    assert kept == expk
-    expg = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-             20031, 5, 1],
-            'H299_H561.fasta-all.fna':
-            ['ESCO.1015',
-             'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
-             13259, 7, 3],
-            'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.1116',
-             'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
-             '.fna',
-             120529, 5, 4]
-            }
-    assert allg == expg
+    verbose = 3
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90,
+               cutn=0, tmp_dir=tmpdir, verbose=verbose)
+    out, err = capsys.readouterr()
+    # Check that warnings are written to stderr
+    assert "WARNING" in err
+    assert ("toto.fst genome file does not exist. Its file will be ignored when "
+            "concatenating ['A_H738.fasta', 'genome1.fasta', 'toto.fst']") in err
     # Check that tmp files exist in the right folder
-    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna"))
+    # -> 2 fna files created (concatenations)
+    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna"))
+    assert os.path.isfile(os.path.join(tmpdir, "H299_H561.fasta-all.fna"))
     # Test that prokka folder is in the right directory
-    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
-    shutil.rmtree(resdir, ignore_errors=True)
-    shutil.rmtree(tmpdir, ignore_errors=True)
+    # Only 1 genome annotated by  prokka (the 2 others do not have appropriate L90/nbcont)
+    assert os.path.isdir(os.path.join(tmpdir, "A_H738.fasta-all.fna-prokkaRes"))
+    assert not os.path.isdir(os.path.join(tmpdir, "H299_H561.fasta-all.fna-prokkaRes"))
 
 
-def test_main_given_prokka():
-    """
-    Test that when a prokka folder is given by user, tmp files are saved in result/tmp_files,
-    and prokka files are saved in the given prokka folder.
-    """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-default.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcGivenTmp")
-    prokdir = os.path.join("test", "data", "annotate", "prokka_funcGivenTmp")
-    name = "ESCO"
-    l90 = 1
-    date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
-                                         prok_dir=prokdir)
-    assert skip == []
-    assert skipf == []
-    expk = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
-             '-contig.fna',
-             20031, 5, 1]
-            }
-    assert kept == expk
-    expg = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/res_test_funcGivenTmp/tmp_files/A_H738.fasta-all.fna-short'
-             '-contig.fna',
-             20031, 5, 1],
-            'H299_H561.fasta-all.fna':
-            ['ESCO.1015',
-             ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
-              'H299_H561.fasta-all.fna-short-contig.fna'),
-             13259, 7, 3],
-            'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.1116',
-             ('test/data/annotate/res_test_funcGivenTmp/tmp_files/'
-              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4]
-            }
-    assert allg == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "A_H738.fasta-all.fna-short-contig.fna"))
-    # Test that prokka folder is in the right directory (given)
-    assert os.path.isdir(os.path.join(prokdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
-    shutil.rmtree(resdir, ignore_errors=True)
-    shutil.rmtree(prokdir, ignore_errors=True)
-
-
-def test_main_given_tmp_and_prokka():
-    """
-    Test that when a tmp folder and a prokka folder are given by user, tmp files are saved in
-    tmp folder, and prokka files in prokka folder.
-    """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-default.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcGivenTmp")
-    prokdir = os.path.join("test", "data", "annotate", "prokka_funcGivenTmp")
-    tmpdir = os.path.join("test", "data", "annotate", "tmp_funcGivenTmp")
-    name = "ESCO"
-    l90 = 1
-    date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, cutn=0,
-                                         prok_dir=prokdir, tmp_dir=tmpdir)
-    assert skip == []
-    assert skipf == []
-    expk = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-             20031, 5, 1]
-            }
-    assert kept == expk
-    expg = {"A_H738.fasta-all.fna":
-            ["ESCO.1015.00001",
-             'test/data/annotate/tmp_funcGivenTmp/A_H738.fasta-all.fna-short-contig.fna',
-             20031, 5, 1],
-            'H299_H561.fasta-all.fna':
-            ['ESCO.1015',
-             'test/data/annotate/tmp_funcGivenTmp/H299_H561.fasta-all.fna-short-contig.fna',
-             13259, 7, 3],
-            'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.1116',
-             'test/data/annotate/tmp_funcGivenTmp/B2_A3_5.fasta-changeName.fna-short-contig'
-             '.fna',
-             120529, 5, 4]
-            }
-    assert allg == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(tmpdir, "A_H738.fasta-all.fna-short-contig.fna"))
-    # Test that prokka folder is in the right directory (given)
-    assert os.path.isdir(os.path.join(prokdir, "A_H738.fasta-all.fna-short-contig.fna-prokkaRes"))
-    assert os.path.isfile(os.path.join(prokdir, "A_H738.fasta-all.fna-short-contig.fna-prokka.log"))
-    shutil.rmtree(resdir, ignore_errors=True)
-    shutil.rmtree(prokdir, ignore_errors=True)
-    shutil.rmtree(tmpdir, ignore_errors=True)
-
-
-def test_main_all_discard_nbcont():
+def test_main_all_discard_nbcont(capsys):
     """
     Test that when the genomes given in list file have high nbcontigs compared
-    to given threshold, they appear in the list of genomes, but are not kept for analysis.
+    to given threshold, error message as there are no genome to annotate
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-allDiscard.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcAllDiscardNbcont")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
     name = "ESCO"
-    l90 = 100
     nbcont = 1
     cutn = 0
-    threads = 1
     date = "0417"
-    force = False
-    qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
-                                         cutn, threads, force, qc_only)
-    assert skip == []
-    assert skipf == []
-    assert kept == {}
-    expg = {'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4],
-            'H299_H561.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                           'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3],
-            'genome1.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardNbcont/tmp_files/'
-                           'genome1.fasta-short-contig.fna'),
-             51, 4, 2]
-            }
-    assert allg == expg
-    shutil.rmtree(resdir, ignore_errors=True)
-
-
-def test_main_all_discard_l90():
-    """
-    Test that when the genomes given in list file have high L90 compared
-    to given threshold, they appear in the list of genomes, but are not kept for analysis.
-    """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-allDiscard.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcAllDiscardL90")
-    name = "ESCO"
-    l90 = 1
-    nbcont = 999
-    cutn = 0
-    threads = 1
-    date = "0417"
-    force = False
-    qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
-                                         cutn, threads, force, qc_only)
-    assert skip == []
-    assert skipf == []
-    assert kept == {}
-    expg = {'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4],
-            'H299_H561.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                           'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3],
-            'genome1.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                           'genome1.fasta-short-contig.fna'),
-             51, 4, 2]
-            }
-    assert allg == expg
-    shutil.rmtree(resdir, ignore_errors=True)
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, nbcont=nbcont, cutn=cutn)
+    # check that there are the 2 concatenated genomes in tmppath.
+    # The third genome is listfile is composed of only 1 file, so no need to concatenate, nor
+    # to change the file as we do not use cutn
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files", "H299_H561.fasta-all.fna"))
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files", "A_H738.fasta-all.fna"))
+    out, err = capsys.readouterr()
+    assert 'No genome kept for annotation' in out
 
 
 def test_main_qc():
     """
-    Test that when only QC is run, it returns only the list of all genomes + list of genomes
-    that would be kept for an analysis. It does not return the list of genomes for
-    which annotation or format had problems, as this step did not run.
+    Test that when only QC is run, it writes:
+    - the list of all genomes with their characteristics
+    - the list of genomes that would be discarded for annotation
+    - the 2 png files
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-allDiscard.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcQC")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
     name = "ESCO"
-    l90 = 1
-    nbcont = 999
     cutn = 0
     threads = 1
+    l90 = 1
     date = "0417"
     force = False
     qc_only = True
-    allg, kept = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
-                            cutn, threads, force, qc_only)
-    assert kept == {}
-    expg = {'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4],
-            'H299_H561.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                           'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3],
-            'genome1.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcQC/tmp_files/'
-                           'genome1.fasta-short-contig.fna'),
-             51, 4, 2]
-            }
-    assert allg == expg
-    shutil.rmtree(resdir, ignore_errors=True)
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90=l90,
+                            cutn=cutn, qc_only=qc_only)
+    # Check files are here
+    lstfile = os.path.join(GENEPATH, "ALL-GENOMES-info-list_genomes-func-test-default.lst")
+    exp_lstfile = os.path.join(EXP_DIR, "exp_ALL-GENOMES-QC.lst")
+    discardedfile = os.path.join(GENEPATH, "discarded-list_genomes-func-test-default.lst")
+    exp_discarded = os.path.join(EXP_DIR, "exp_discarded_QC.lst")
+    assert os.path.isfile(lstfile)
+    assert os.path.isfile(discardedfile)
+    assert os.path.isfile(os.path.join(GENEPATH,
+                          "QC_L90-list_genomes-func-test-default.png"))
+    assert os.path.isfile(os.path.join(GENEPATH,
+                          "QC_nb-contigs-list_genomes-func-test-default.png"))
+    # Check content of discarded genomes
+    assert tutil.compare_file_content(lstfile, exp_lstfile)
+    assert tutil.compare_file_content(discardedfile, exp_discarded)
 
 
-def test_main_wrong_seq_names():
+def test_main_existresdirforce(capsys):
     """
-    Test that when some genome names given in the list file do not exist in the
-    db path, they are not considered in the list of genomes to annotate/format. The others
-    appear in the list of genomes.
+    Test that, when the pipeline is run on an existing result directory, but force option is on,
+    it removes the result folders and runs again.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-wrongNames.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcAllDiscardL90")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
+    # Create output directory with a prt file in Proteins folder
+    protdir = os.path.join(GENEPATH, "Proteins")
+    os.makedirs(protdir)
+    open(os.path.join(protdir, "toto.prt"), "w").close()
+    assert os.path.isfile(os.path.join(protdir, "toto.prt"))
     name = "ESCO"
-    l90 = 1
-    nbcont = 999
-    cutn = 0
-    threads = 1
     date = "0417"
-    force = False
-    qc_only = False
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, l90, nbcont,
-                                         cutn, threads, force, qc_only)
-    assert skip == []
-    assert skipf == []
-    assert kept == {}
-    expg = {'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                           'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4],
-            'H299_H561.fasta':
-            ['ESCO.0417', ('test/data/annotate/res_test_funcAllDiscardL90/tmp_files/'
-                           'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3]
-            }
-    assert allg == expg
-    shutil.rmtree(resdir, ignore_errors=True)
+    l90 = 1
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, force=True, l90=l90,
+               prodigal_only=True)
+    out, err = capsys.readouterr()
 
 
-def test_main_onexistingprokkadir():
+    # Check that tmp files exist in the right folder (result/tmp_files)
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files",
+                                       "B2_A3_5.fasta-changeName.fna_prodigal-split5N.fna"))
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files",
+                                       "H299_H561.fasta-all.fna_prodigal-split5N.fna"))
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files",
+                                       "H299_H561.fasta-all.fna"))
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files",
+                                       "A_H738.fasta-all.fna_prodigal-split5N.fna"))
+    assert os.path.isfile(os.path.join(GENEPATH, "tmp_files",
+                                       "A_H738.fasta-all.fna"))
+    # Test all result folders are empty (in particular Proteins) as no genome is annotated
+    assert os.path.isdir(protdir)
+    assert len(os.listdir(protdir)) == 1
+    assert not os.path.isfile(os.path.join(protdir, "toto.prt"))
+    assert os.path.isfile(os.path.join(protdir, "ESCO.1015.00001.prt"))
+
+
+def test_run_exist_resdir(caplog):
+    """
+    Test that when the pipeline is called, with a given resdir which already contains
+    results, the program ends, with an error message.
+    """
+    # Create output directory with a lst file in LSTINFO
+    os.makedirs(os.path.join(GENEPATH, "Proteins"))
+    open(os.path.join(GENEPATH, "Proteins", "toto.prt"), "w").close()
+    with pytest.raises(SystemExit):
+        annot.main("cmd", "list_file.lst", "path/db", GENEPATH, "toto", "0123")
+    assert ("ERROR: Your output directory already has .prt files in the "
+            "Proteins folder. Provide another result directory, or remove the "
+            "files in this one.") in caplog.text
+    # File was not removed
+    assert os.path.isfile(os.path.join(GENEPATH, "Proteins", "toto.prt"))
+
+
+def test_main_onexistingprokkadir(capsys):
     """
     Test that, when the pipeline is run with a given prokka dir, where prokka results already
-    exist, and are ok, all runs well
+    exist, and are ok, all runs well, no re-annotation, just format
+
+
+    main function arguments:
+    cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+    threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
+    verbose=0, quiet=False, prodigal_only=False, small=False):
+
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-exist_dir.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcExistingProkka")
-    prokdir = os.path.join("test", "data", "annotate", "exp_files")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
     name = "ESCO"
     date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         prok_dir=prokdir)
-    assert skip == []
-    assert skipf == []
-    expg = {'H299_H561.fasta':
-            ['ESCO.1015.00001',
-             ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
-              'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3],
-            'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.1116.00002',
-             ('test/data/annotate/res_test_funcExistingProkka/tmp_files/'
-              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4]
-            }
-    assert allg == expg
-    assert kept == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "B2_A3_5.fasta-changeName.fna-short-contig.fna"))
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "H299_H561.fasta-short-contig.fna"))
-    # Test that prokka folder was not recreated
-    prok_fold = os.path.join(resdir, "tmp_files",
-                             "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes")
-    assert not os.path.isdir(prok_fold)
-    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
-                                          "H299_H561.fasta-short-contig.fna-prokkaRes"))
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0, res_annot_dir=EXP_DIR,
+               verbose=3)
+    out, err = capsys.readouterr()
+    # Check that tmp files folder is empty (prokka res are somewhere else)
+    assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
     # Test that result files are in result dir
-    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist_dir.lst"))
-    shutil.rmtree(resdir, ignore_errors=True)
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert os.path.isfile(lstout)
+    assert tutil.compare_order_content(lstout, lstexp)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    log_content = open(logfile, "r").readlines()
+    assert ("Prokka results folder "
+            "test/data/annotate/exp_files/B2_A3_5.fasta-changeName.fna-prokkaRes "
+            "already exists") in " ".join(log_content)
+    assert ("Prokka did not run again, formatting step used already generated results of Prokka "
+            "in test/data/annotate/exp_files/H299_H561.fasta-prokkaRes. "
+            "If you want to re-run prokka, first remove this result folder, or use '-F' or "
+            "'--force' option if you want to rerun prokka "
+            "for all genomes.") in ' '.join(log_content)
 
 
-def test_main_onexistingprokkadirerrorprokk(capsys):
+def test_main_onexistingprodigaldir(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
+    exist, and are ok, all runs well, no re-annotation, just format
+
+
+    main function arguments:
+    cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
+    threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
+    verbose=0, quiet=False, prodigal_only=False, small=False):
+
+    """
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+    name = "ESCO"
+    date = "0417"
+    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0, res_annot_dir=EXP_DIR,
+               verbose=3, prodigal_only=True)
+    out, err = capsys.readouterr()
+    # Check that tmp files folder is empty (prokka res are somewhere else)
+    assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
+    # Test that result files are in result dir
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert os.path.isfile(lstout)
+    assert tutil.compare_order_content(lstout, lstexp)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    log_content = open(logfile, "r").readlines()
+    assert ("Prodigal results folder already exists") in " ".join(log_content)
+    assert ("Prodigal did not run again. Formatting step will use already generated results of "
+            "Prodigal in test/data/annotate/exp_files/H299_H561.fasta-prodigalRes. "
+            "If you want to re-run Prodigal, first remove this result folder, or use '-F' or "
+            "'--force' option.") in ' '.join(log_content)
+
+
+def test_main_existing_prokkadir_errorannot():
     """
     Test that, when the pipeline is run with a given prokka dir, where prokka results have
     problems (no tbl file and no gff file), it returns an error message and the genome with
     problems is in skipped.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-exist-dir-err.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    genome_ori = os.path.join(dbpath, "B2_A3_5.fasta-changeName.fna")
-    genome_here = os.path.join(dbpath, "B2_A3_5.fasta-problems.fna")
-    shutil.copyfile(genome_ori, genome_here)
-    resdir = os.path.join("test", "data", "annotate", "res_test_ProkErr")
-    prokdir = os.path.join("test", "data", "annotate", "exp_files")
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+
+    # Create directory with all files needed for the test
+    genome_path_used = os.path.join(GENEPATH, "genomes")
+    os.makedirs(genome_path_used)
+    ori_genome1 = os.path.join(GEN_PATH, "B2_A3_5.fasta-changeName.fna")
+    ori_prok_g1 = os.path.join(EXP_DIR, "B2_A3_5.fasta-changeName.fna-prokkaRes")
+    used_genome1 = os.path.join(genome_path_used, "B2_A3_5.fasta-changeName.fna")
+    used_prok_g1 = used_genome1 + "-prokkaRes"
+    # Copy original fasta file to genepath/genomes
+    shutil.copyfile(ori_genome1, used_genome1)
+    # Copy prokka results to genepath/genomes/gname-prokkaRes
+    shutil.copytree(ori_prok_g1, used_prok_g1)
+    # Same think for 2nd genome
+    ori_genome2 = os.path.join(GEN_PATH, "H299_H561.fasta")
+    ori_prok_g2 = os.path.join(EXP_DIR, "H299_H561.fasta-prokkaRes")
+    used_genome2 = os.path.join(genome_path_used, "H299_H561.fasta")
+    used_prok_g2 = used_genome2 + "-prokkaRes"
+    shutil.copyfile(ori_genome2, used_genome2)
+    shutil.copytree(ori_prok_g2, used_prok_g2)
+
+    # Remove tbl file for genome1, so that check_prokka returns an error
+    os.remove(os.path.join(used_prok_g1, "ESCO.1116.00002.tbl"))
+
+    # Run annotation
     name = "ESCO"
     date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         prok_dir=prokdir, verbose=True)
-    assert skip == ['B2_A3_5.fasta-problems.fna']
-    assert skipf == []
-    expg = {'H299_H561.fasta':
-            ['ESCO.1015.00001',
-             'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
-             13143, 3, 3],
-            'B2_A3_5.fasta-problems.fna':
-            ['ESCO.1116.00002',
-             'test/data/annotate/res_test_ProkErr/tmp_files/B2_A3_5.fasta-problems.fna-short'
-             '-contig.fna',
-             120529, 5, 4]
-            }
-    assert allg == expg
-    assert kept == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "B2_A3_5.fasta-problems.fna-short-contig.fna"))
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "H299_H561.fasta-short-contig.fna"))
-    # Test that prokka folder was not recreated
-    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
-                                          "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes"))
-    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
-                                          "H299_H561.fasta-short-contig.fna-prokkaRes"))
-    # Test that result files are in result dir
-    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist-dir-err.lst"))
-    # Check error messages
-    _, err = capsys.readouterr()
-    assert ("Prokka had problems while annotating some genomes, or did not find any gene. "
-            "Hence, they are not formatted, and absent from your output database. Please look "
-            "at their Prokka logs (<output_directory>/tmp_files/<genome_name>-prokka.log) and "
-            "to the current error log (<output_directory>/<input_filename>.log.err) to get "
-            "more information, and run again to annotate and format them. Here are the "
-            "genomes (problem with prokka or no gene found):") in err
-    assert "- B2_A3_5.fasta-problems.fna" in err
-    shutil.rmtree(resdir, ignore_errors=True)
-    os.remove(genome_here)
+    annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
+               res_annot_dir=genome_path_used)
+
+    # Check that only 1 genome was formated (the other one had problems with prokka)
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    assert len(os.listdir(prot_dir)) == 1
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    assert len(os.listdir(rep_dir)) == 1
+
+    # Check that the genome formated was not re-annotated
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    log_content = open(logfile, "r").readlines()
+    assert ("Prokka results folder "
+            "test/data/annotate/generated_by_unit-tests/genomes/H299_H561.fasta-prokkaRes "
+            "already exists") in " ".join(log_content)
+    # Check that genome not formated because error in prokka res
+    assert ("ESCO.1116.00002 B2_A3_5.fasta-changeName.fna: no .tbl file") in " ".join(log_content)
+    assert ("Problems in the files contained in your already existing output dir "
+            "(test/data/annotate/generated_by_unit-tests/genomes/"
+            "B2_A3_5.fasta-changeName.fna-prokkaRes). Please check it, "
+            "or remove it to re-annotate.") in ' '.join(log_content)
 
 
-def test_main_onexistingprokkadirerrorform(capsys):
+def test_main_existing_prodigaldir_errorannot(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal results have
+    problems for both genomes, it returns an error message and the genomes with
+    problems are in skipped. Error message with no genome to format.
+    """
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+
+    # Create directory with all files needed for the test
+    genome_path_used = os.path.join(GENEPATH, "genomes")
+    os.makedirs(genome_path_used)
+    ori_genome1 = os.path.join(GEN_PATH, "B2_A3_5.fasta-changeName.fna")
+    ori_prok_g1 = os.path.join(EXP_DIR, "B2_A3_5.fasta-changeName.fna-prodigalRes")
+    used_genome1 = os.path.join(genome_path_used, "B2_A3_5.fasta-changeName.fna")
+    used_prok_g1 = used_genome1 + "-prodigalRes"
+    # Copy original fasta file to genepath/genomes
+    shutil.copyfile(ori_genome1, used_genome1)
+    # Copy prokka results to genepath/genomes/gname-prokkaRes
+    shutil.copytree(ori_prok_g1, used_prok_g1)
+    # Same think for 2nd genome
+    ori_genome2 = os.path.join(GEN_PATH, "H299_H561.fasta")
+    ori_prok_g2 = os.path.join(EXP_DIR, "H299_H561.fasta-prodigalRes")
+    used_genome2 = os.path.join(genome_path_used, "H299_H561.fasta")
+    used_prok_g2 = used_genome2 + "-prodigalRes"
+    shutil.copyfile(ori_genome2, used_genome2)
+    shutil.copytree(ori_prok_g2, used_prok_g2)
+
+    # Remove faa file for genome1, so that check_prodigal returns an error
+    os.remove(os.path.join(used_prok_g1, "ESCO.1116.00002.faa"))
+    # Remove gff file for genome1, so that check_prodigal returns an error
+    os.remove(os.path.join(used_prok_g2, "ESCO.1015.00001.gff"))
+
+    # Run annotation
+    name = "ESCO"
+    date = "0417"
+    with pytest.raises(SystemExit):
+        annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
+                   res_annot_dir=genome_path_used, prodigal_only=True, verbose=15)
+
+    # Check that Replicons & co folders are not created
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    assert not os.path.isdir(prot_dir)
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    assert not os.path.isdir(rep_dir)
+
+    # Check that not formatted because exists + error
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    log_content = open(logfile, "r").readlines()
+    assert ("Error: No genome was correctly annotated, "
+            "no need to format them") in ' '.join(log_content)
+    assert ("Prodigal results folder already exists.") in ' '.join(log_content)
+    assert ("ESCO.1116.00002 B2_A3_5.fasta-changeName.fna: "
+            "no or several .faa file(s)") in ' '.join(log_content)
+    assert ("ESCO.1015.00001 H299_H561.fasta: "
+            "no or several .gff file(s)") in ' '.join(log_content)
+
+
+def test_main_existing_prokkadir_errorformat():
     """
     Test that, when the pipeline is run with a given prokka dir, where prokka results are ok
-    (good files), but have problems inside (wrong header format), it returns an error
+    (all expected files), but have problems inside (wrong header format), it returns an error
     message and the genome with problems is in skipped_format.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-exist-dir-err.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    genome_ori = os.path.join(dbpath, "B2_A3_5.fasta-changeName.fna")
-    genome_here = os.path.join(dbpath, "B2_A3_5.fasta-problems.fna")
-    shutil.copyfile(genome_ori, genome_here)
-    resdir = os.path.join("test", "data", "annotate", "res_test_ProkErr")
-    prokdir = os.path.join("test", "data", "annotate", "exp_files")
-    tbl_init = os.path.join(prokdir, "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes",
-                            "test.0417.00002.tbl")
-    tbl_here = os.path.join(prokdir, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                            "test.0417.00002.tbl")
-    shutil.copyfile(tbl_init, tbl_here)
-    gff_init = os.path.join(prokdir, "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes",
-                            "test.0417.00002.gff")
-    gff_here = os.path.join(prokdir, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-                            "test.0417.00002.gff")
-    shutil.copyfile(gff_init, gff_here)
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+
+    # Create directory with all files needed for the test
+    genome_path_used = os.path.join(GENEPATH, "genomes")
+    os.makedirs(genome_path_used)
+    ori_genome1 = os.path.join(GEN_PATH, "B2_A3_5.fasta-changeName.fna")
+    # orig prokka dir has a tbl file with wrong format
+    ori_prok_g1 = os.path.join(EXP_DIR, "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes")
+    used_genome1 = os.path.join(genome_path_used, "B2_A3_5.fasta-changeName.fna")
+    used_prok_g1 = used_genome1 + "-prokkaRes"
+    # Copy original fasta file to genepath/genomes
+    shutil.copyfile(ori_genome1, used_genome1)
+    # Copy prokka results to genepath/genomes/gname-prokkaRes
+    shutil.copytree(ori_prok_g1, used_prok_g1)
+    # Same think for 2nd genome
+    ori_genome2 = os.path.join(GEN_PATH, "H299_H561.fasta")
+    ori_prok_g2 = os.path.join(EXP_DIR, "H299_H561.fasta-prokkaRes")
+    used_genome2 = os.path.join(genome_path_used, "H299_H561.fasta")
+    used_prok_g2 = used_genome2 + "-prokkaRes"
+    shutil.copyfile(ori_genome2, used_genome2)
+    shutil.copytree(ori_prok_g2, used_prok_g2)
+
+    # Run annotation
     name = "ESCO"
     date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         prok_dir=prokdir, verbose=True)
-    assert skip == []
-    assert skipf == ['B2_A3_5.fasta-problems.fna']
-    expg = {'H299_H561.fasta':
-            ['ESCO.1015.00001',
-             'test/data/annotate/res_test_ProkErr/tmp_files/H299_H561.fasta-short-contig.fna',
-             13143, 3, 3],
-            'B2_A3_5.fasta-problems.fna':
-            ['ESCO.1116.00002',
-             ('test/data/annotate/res_test_ProkErr/tmp_files/'
-              'B2_A3_5.fasta-problems.fna-short-contig.fna'),
-             120529, 5, 4]
-            }
-    assert allg == expg
-    assert kept == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "B2_A3_5.fasta-problems.fna-short-contig.fna"))
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "H299_H561.fasta-short-contig.fna"))
-    # Test that prokka folder was not recreated
-    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
-                                          "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes"))
-    assert not os.path.isdir(os.path.join(resdir, "tmp_files",
-                                          "H299_H561.fasta-short-contig.fna-prokkaRes"))
-    # Test that result files are in result dir
-    assert os.path.isfile(os.path.join(resdir, "LSTINFO-list_genomes-func-test-exist-dir-err.lst"))
-    # Check error messages
-    _, err = capsys.readouterr()
-    assert ("Some genomes were annotated by prokka, but could not be formatted, "
-            "and are hence absent from your output database. Please look at log "
-            "files to get more information about why they could not be "
-            "formatted.") in err
-    assert "- B2_A3_5.fasta-problems.fna" in err
-    shutil.rmtree(resdir, ignore_errors=True)
-    os.remove(genome_here)
-    os.remove(tbl_here)
-    os.remove(gff_here)
+    annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
+               res_annot_dir=genome_path_used)
+
+    # Check that genome 1 is not formatted, while no error with prokka
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    log_content = open(logfile, "r").readlines()
+    assert ("Prokka results folder test/data/annotate/generated_by_unit-tests/genomes/"
+            "B2_A3_5.fasta-changeName.fna-prokkaRes already exists.") in ' '.join(log_content)
+    assert ("Prokka did not run again, formatting step used already generated "
+            "results of Prokka in test/data/annotate/generated_by_unit-tests/genomes/"
+            "B2_A3_5.fasta-changeName.fna-prokkaRes.") in ' '.join(log_content)
+    # Error while trying to format:
+    assert ("'changesHead.0417.00010.0005' found in "
+            "test/data/annotate/generated_by_unit-tests/genomes/"
+            "B2_A3_5.fasta-changeName.fna-prokkaRes/test.0417.00002.tbl "
+            "does not exist in test/data/annotate/generated_by_unit-tests/genomes/"
+            "B2_A3_5.fasta-changeName.fna") in ' '.join(log_content)
+    assert ("Problems while generating LSTINFO file for ESCO.1116.00002") in ' '.join(log_content)
 
 
-def test_run_exist_resdir(capsys):
+def test_main_frominfo(capsys):
     """
-    Test that when the pipeline is called, with a given resdir which already contains
-    results, the program ends, with an error message.
+    test that it runs well when giving an info file instead of list file + db etc.
+    It does not re-calculate L90 and nbcont
     """
-    resdir = os.path.join("test", "data", "annotate", "test_func_resdir")
-    # Create output directory with a lst file in LSTINFO
-    os.makedirs(os.path.join(resdir, "Proteins"))
-    open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
-    with pytest.raises(SystemExit):
-        annot.main("list_file.lst", "path/db", resdir, "toto", "0123")
+    listfile = None
+    dbpath = None
+    name = "TOTO"
+    date = "1205"
+    infofile = os.path.join(TEST_DIR, "lstinfo.lst")
+    annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
+               prodigal_only=True, small=True)
     out, err = capsys.readouterr()
-    print("out", out)
-    print("err", err)
-    assert ("ERROR: Your output directory already has .prt files in the "
-            "Proteins folder. Provide another result directory, or remove the "
-            "files in this one.") in err
-    shutil.rmtree(resdir)
+    # Check logs
+    assert ("Generating distribution of L90 and #contigs graphs.") in out
+
+    # Check output files present
+    protdir = os.path.join(GENEPATH, "Proteins")
+    assert len(os.listdir(protdir)) == 3
+    gffdir = os.path.join(GENEPATH, "gff3")
+    assert len(os.listdir(gffdir)) == 3
+    lstdir = os.path.join(GENEPATH, "LSTINFO")
+    assert len(os.listdir(lstdir)) == 3
+
+    # Check genomes are renamed as expected, and with expected L90/nbcont values
+    exp_lstinfo = os.path.join(EXP_DIR, "exp_LSTINFO-test-main-frominfo.lst")
+    res_lstinfo = os.path.join(GENEPATH, "LSTINFO-lstinfo.lst")
+    tutil.compare_order_content(exp_lstinfo, res_lstinfo)
 
 
-def test_main_onexistresdirforce():
+def test_main_novalid_genome_frominfo(capsys):
     """
-    Test that, when the pipeline is run on an existing result directory, but force option is on,
-    it removes the result folders and runs again.
+    Test that when, in the list file, all genomes are wrong (do not correspond to
+    filenames in the given dbpath), it closes the program with an error message.
     """
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-allDiscard.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    resdir = os.path.join("test", "data", "annotate", "res_test_funcExistResdirForce")
-    # Create output directory with a lst file in LSTINFO
-    os.makedirs(os.path.join(resdir, "Proteins"))
-    open(os.path.join(resdir, "Proteins", "toto.prt"), "w").close()
-    assert os.path.isfile(os.path.join(resdir, "Proteins", "toto.prt"))
-    name = "ESCO"
-    date = "0417"
-    allg, kept, skip, skipf = annot.main(list_file, dbpath, resdir, name, date, cutn=0,
-                                         force=True, threads=8)
-    assert skip == ["genome1.fasta"]
-    assert skipf == []
-    # 2 solutions as genome2 and H299 have the same L90 and nbcontig: randomly choose the
-    # order between the 2.
-    expg = {'H299_H561.fasta':
-            ['ESCO.0417.00002',
-             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-              'H299_H561.fasta-short-contig.fna'),
-             13143, 3, 3],
-            'B2_A3_5.fasta-changeName.fna':
-            ['ESCO.0417.00003',
-             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-              'B2_A3_5.fasta-changeName.fna-short-contig.fna'),
-             120529, 5, 4],
-            'genome1.fasta':
-            ['ESCO.0417.00001',
-             ('test/data/annotate/res_test_funcExistResdirForce/tmp_files/'
-              'genome1.fasta-short-contig.fna'),
-             51, 4, 2]
-            }
+    listfile = None
+    dbpath = None
+    name = "TOTO"
+    date = "1205"
+    infofile = os.path.join(TEST_DIR, "lstinfo-no-genome.lst")
+    with pytest.raises(SystemExit):
+        annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
+                   prodigal_only=True, small=True)
+    out, err = capsys.readouterr()
+    # Check logs
+    assert ("no genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "
+            "were found.") in err
 
-    assert allg == expg
-    assert kept == expg
-    # Check that tmp files exist in the right folder (result/tmp_files)
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "B2_A3_5.fasta-changeName.fna-short-contig.fna"))
-    assert os.path.isfile(os.path.join(resdir, "tmp_files",
-                                       "H299_H561.fasta-short-contig.fna"))
-    # Test that prokka files exist in the right folder (resdir/tmp_files)
-    assert os.path.isdir(os.path.join(resdir, "tmp_files",
-                                      "B2_A3_5.fasta-changeName.fna-short-contig.fna-prokkaRes"))
-    assert os.path.isdir(os.path.join(resdir, "tmp_files",
-                                      "H299_H561.fasta-short-contig.fna-prokkaRes"))
-    # Test that result folders were removed before run: toto.prt should not be in Proteins anymore
-    assert not os.path.isfile(os.path.join(resdir, "Proteins", "toto.prt"))
-    shutil.rmtree(resdir, ignore_errors=True)
+    # Check output folders not created
+    protdir = os.path.join(GENEPATH, "Proteins")
+    assert not os.path.isdir(protdir)
+    gffdir = os.path.join(GENEPATH, "gff3")
+    assert not os.path.isdir(gffdir)
+    lstdir = os.path.join(GENEPATH, "LSTINFO")
+    assert not os.path.isdir(lstdir)
 
-
-def test_annote_all():
-    """
-    Test that when we call the pipeline with all default parameters, all expected output files
-    are created. Check the content of result files (LSTINFO, Genes, Proteins, Replicons),
-    lstinfo, discarded and log files.
-    Test that prokka files are in the right folder (result/tmp_files), and that tmp files
-    are also in results/tmp_files (no tmp or prokka dir given, so default is used)
-    """
-    fulldate = time.strftime("%Y-%m-%d")
-    list_file = os.path.join("test", "data", "annotate", "test_files",
-                             "list_genomes-func-test-default.txt")
-    dbpath = os.path.join("test", "data", "annotate", "genomes")
-    respath = os.path.join("test", "data", "annotate", "res_test_funcDefault")
-    name = "GENO"
-    # check that log files do not already exist. If they do, remove them
-    log_files = [os.path.join(respath, "genomeAPCAT-annotate_list_genomes-func-test-default" + ext)
-                 for ext in [".log", ".log.err", ".log.details"]]
-    for lf in log_files:
-        if os.path.isfile(lf):
-            os.remove(lf)
-    cmd = "genomeAPCAT annotate {} -d {} -r {} -n {}".format(list_file, dbpath, respath, name)
-    ret = subprocess.call(cmd.split())
-    assert ret == 0
-    # Get output files
-    lstfile = [os.path.join(respath, "LSTINFO-list_genomes-func-test-default.lst")]
-    discfile = [os.path.join(respath, "discarded-list_genomes-func-test-default.lst")]
-    qc_files = [os.path.join(respath, qc + "list_genomes-func-test-default.png")
-                for qc in ["QC_L90-", "QC_nb-contigs-"]]
-    genomes = {"B2_A3_5.fasta-changeName.fna": "ESCO.1116.00002",
-               "H299_H561.fasta-all.fna": "ESCO.1015.00001",
-               "A_H738.fasta-all.fna": "GENO.1015.00001"}
-    split5n_files = [os.path.join(respath, "tmp_files", g + "-split5N.fna") for g in genomes]
-    proklogfiles = [os.path.join(respath, "tmp_files",
-                                 g + "-split5N.fna-prokka.log")
-                    for g in genomes]
-    prokka_files = [os.path.join(respath, "tmp_files",
-                                 g + "-split5N.fna-prokkaRes",
-                                 genomes[g])
-                    for g in genomes]
-    lstinffiles = [os.path.join(respath, "LSTINFO", name + ".lst")
-                   for name in list(genomes.values())]
-    prtfiles = [os.path.join(respath, "Proteins", name + ".prt")
-                for name in list(genomes.values())]
-    genfiles = [os.path.join(respath, "Genes", name + ".gen")
-                for name in list(genomes.values())]
-    repfiles = [os.path.join(respath, "Replicons", name + ".fna")
-                for name in list(genomes.values())]
-
-    # Check all output files exist
-    for f in (log_files + lstfile + discfile + qc_files + split5n_files +
-              proklogfiles + lstinffiles + prtfiles + genfiles + repfiles):
-        assert os.path.isfile(f)
-    for f in prokka_files:
-        assert os.path.isfile(f + ".tbl")
-        assert os.path.isfile(f + ".faa")
-        assert os.path.isfile(f + ".ffn")
-        assert os.path.isfile(f + ".gff")
-
-    # Check content of result database files
-    exp_dir = os.path.join("test", "data", "annotate", "exp_files", "results_test_func-default")
-    for f in (lstinffiles + prtfiles + genfiles + repfiles):
-        exp_file = os.sep.join(f.split(os.sep)[-2:])
-        exp_file_path = os.path.join(exp_dir, exp_file)
-        with open(exp_file_path, "r") as expf, open(f, "r") as outf:
-            for line_exp, line_out in zip(expf, outf):
-                assert line_exp == line_out
-
-    # Check that log files (error, details and log) contain expected information
-    with open(log_files[0], "r") as logf:
-        infos = []
-        for line in logf:
-            assert line.startswith("[" + fulldate)
-            assert line.count("::") == 2
-            infos.append(line.split("::")[-1].strip())
-        assert "Reading genomes" in infos
-        assert ("Cutting genomes at each stretch of at least 5 'N', and then, calculating "
-                "genome size, number of contigs and L90.") in infos
-        assert "Annotating all genomes with prokka" in infos
-        assert "Formatting all genomes" in infos
-    with open(log_files[1], "r") as logf:
-        infos = []
-        for line in logf:
-            assert line.startswith("[" + fulldate)
-            assert line.count("::") == 2
-            infos.append(line.split("::")[-1].strip())
-        assert ("toto.fst genome file does not exist. Its file will be ignored when "
-                "concatenating ['A_H738.fasta', 'toto.fst', 'genome1.fasta', "
-                "'genome.fst']") in infos
-        assert ("genome.fst genome file does not exist. Its file will be ignored when "
-                "concatenating ['A_H738.fasta', 'toto.fst', 'genome1.fasta', "
-                "'genome.fst']") in infos
-    with open(log_files[2], "r") as logd:
-        infos = []
-        for line in logd:
-            assert line.startswith("[" + fulldate)
-            assert line.count("::") == 2
-            infos.append(line.split("::")[-1].strip())
-        assert ("Start annotating GENO.1015.00001 {}/A_H738.fasta-all.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-        assert ("Start annotating ESCO.1015.00001 {}/H299_H561.fasta-all.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-        assert ("Start annotating ESCO.1116.00002 {}/B2_A3_5.fasta-changeName.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-        assert ("End annotating GENO.1015.00001 {}/A_H738.fasta-all.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-        assert ("End annotating ESCO.1015.00001 {}/H299_H561.fasta-all.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-        assert ("End annotating ESCO.1116.00002 {}/B2_A3_5.fasta-changeName.fna"
-                "-split5N.fna").format(os.path.join(respath, "tmp_files")) in infos
-    # Check file content of genomes "-all" files
-    # H299_H561.fasta and genome6.fasta
-    tmp_path = os.path.join(respath, "tmp_files")
-    exp__hand6 = os.path.join(dbpath, "H299_H561-and-genome6.fna")
-    handg6 = os.path.join(tmp_path, "H299_H561.fasta-all.fna")
-    with open(exp__hand6, "r") as expf, open(handg6, "r") as outf:
-        for line_exp, line_out in zip(expf, outf):
-            assert line_exp == line_out
-    os.remove(handg6)
-    # A_H738.fasta and genome1.fasta
-    exp_a_and_1 = os.path.join(dbpath, "A_H738-and-genome1.fna")
-    a_and_1 = os.path.join(tmp_path, "A_H738.fasta-all.fna")
-    with open(exp_a_and_1, "r") as expf, open(a_and_1, "r") as outf:
-        for line_exp, line_out in zip(expf, outf):
-            assert line_exp == line_out
-    os.remove(a_and_1)
-    # Check lstinfo file content
-    explst = os.path.join(exp_dir, "LSTINFO-list_genomes-func-test-default.lst")
-    with open(lstfile[0], "r") as expf, open(explst, "r") as outf:
-        for line_exp, line_out in zip(expf, outf):
-            assert line_exp == line_out
-    shutil.rmtree(respath)
+    # Check tmp_files is empty
+    tmp = os.path.join(GENEPATH, "tmp_files")
+    assert len(os.listdir(tmp)) == 0

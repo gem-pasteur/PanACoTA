@@ -225,6 +225,8 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         True if nothing must be sent to stdout/stderr, False otherwise
     prodigal_only : bool
         True -> run only prodigal. False -> run prokka
+    small : bool
+        True -> use -p meta option with prodigal
 
     Returns
     -------
@@ -245,7 +247,6 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     from PanACoTA.annotate_module import general_format_functions as ffunc
     from PanACoTA import utils
     from PanACoTA import __version__ as version
-
     # Check that needed softs are installed
     prokka = utils.check_installed("prokka")
     prodigal = utils.check_installed("prodigal")
@@ -255,7 +256,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         soft = "prokka"
 
     changed = cutn != 0
-    if not qc_only:
+    if not qc_only: # pragma: no cover
         # If user using prokka: check prokka is installed and in the path
             if not prodigal_only and not prokka:
                 print("Prokka is not installed. 'PanACoTA annotate' cannot run. Install prokka "
@@ -295,8 +296,8 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if list_file:
         listfile_base = os.path.basename(os.path.splitext(list_file)[0])
     else:
-        list_file = os.path.basename(os.path.splitext(from_info)[0])
-        listfile_base = list_file
+        list_file = from_info
+        listfile_base = os.path.basename(os.path.splitext(list_file)[0])
 
     # Initialize logger
     # set level of logger: level is the minimum level that will be considered.
@@ -321,7 +322,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     if not from_info:
         # Read genome names.
         # genomes = {genome: [spegenus.date]}
-        genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir)
+        genomes = utils.read_genomes(list_file, name, date, db_path, tmp_dir, logger)
         if not genomes:
             logger.error(("We did not find any genome listed in {} in the folder {}. "
                           "Please check your list to give valid genome "
@@ -337,7 +338,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         # orig_path is the path to the original sequence
         # and to_annotate_path the path to the sequence to annotate (once split etc.)
         # Here, both are the same, as we take given sequences as is.
-        genomes = utils.read_genomes_info(from_info, name, date, logger=logger)
+        genomes = utils.read_genomes_info(from_info, name, date, logger)
 
 
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
@@ -349,13 +350,17 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
                     if info[-2] <= nbcont and info[-1] <= l90}
     # Write discarded genomes to a file -> orig_name, to_annotate, gsize, nb_conts, L90
     utils.write_genomes_info(genomes, list(kept_genomes.keys()), list_file, res_dir)
+
+    if not kept_genomes:
+        logger.info("No genome kept for annotation.")
+        return 0
     # Info on folder containing original sequences
     if not from_info:
         logger.info(f"-> Original sequences folder ('orig_name' column): {db_path} ")
-        logger.info("\t-> If original sequence not found in {}, "
-                    "look for it in {}, as it must be a concatenation of several input sequence "
-                    "files.".format(db_path, tmp_dir))
-        if prodigal_only and cutn == 0:
+        logger.info(f"\t-> If original sequence not found in {db_path}, "
+                    f"look for it in {tmp_dir}, as it must be a concatenation of several "
+                    "input sequence files.")
+        if cutn == 0:
             logger.info("-> Sequences used for annotation ('to_annotate' column) are the "
                         "same as the previous ones (original sequences).")
         else:
@@ -368,7 +373,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         # orig_name, to_annnote, gsize, nb_conts, L90
         utils.write_genomes_info(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
-        return
+        return 0
 
     # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
@@ -388,7 +393,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # end program.
     if not results_ok:
         logger.error("Error: No genome was correctly annotated, no need to format them.")
-        return 1
+        sys.exit(1)
     # list of genomes skipped because annotation had problems: no format step run
     skipped = [genome for (genome, ok) in results.items() if not ok]
     # At least 1 genome was not annotated: write a message to warn on it
@@ -403,12 +408,15 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped_format = ffunc.format_genomes(results_ok, res_dir, res_annot_dir,
-                                          prodigal_only, threads, quiet=quiet, changed_name=changed)
+                                          prodigal_only, threads, quiet=quiet,
+                                          changed_name=changed)
+    print(skipped_format)
     # At least one genome could not be formatted -> warn user
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
                                     logfile = logfile_base)
     logger.info("Annotation step done.")
+    return 0
 
 
 def build_parser(parser):

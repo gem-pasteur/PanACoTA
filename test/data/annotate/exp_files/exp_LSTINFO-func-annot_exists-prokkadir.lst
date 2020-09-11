@@ -1,0 +1,3 @@
+gembase_name	orig_name	to_annotate	gsize	nb_conts	L90
+ESCO.1015.00001	H299_H561.fasta	test/data/annotate/genomes/H299_H561.fasta	13143	3	3
+ESCO.1116.00002	B2_A3_5.fasta-changeName.fna	test/data/annotate/genomes/B2_A3_5.fasta-changeName.fna	120529	5	4
