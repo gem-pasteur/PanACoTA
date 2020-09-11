@@ -90,30 +90,31 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_corepers -vx
     - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
-    # - mv .coverage .coverage-unit
+    - mv .coverage .coverage-unit
   artifacts:
     paths:
-      # - .coverage-unit
+      - .coverage-unit
       - .coverage
     expire_in: 1 hour
 
 
-# func-test-ubuntu:
-#   stage: test
-#   except:
-#     - docker
-#     - helpers
-#     - install
-#   before_script:
-#     - pip3 install -r requirements-dev.txt
-#     - ./make
-#   script:
-#     - py.test test/test_functional
-#     - mv .coverage .coverage-functional
-#   artifacts:
-#     paths:
-#       - .coverage-functional
-#     expire_in: 1 hour
+func-test-ubuntu:
+  stage: test
+  except:
+    - docker
+    - helpers
+    - install
+  before_script:
+    - pip3 install -r requirements-dev.txt
+    - ./make
+  script:
+    - py.test test/test_functional/test_annotate.py -xv
+    - py.test test/test_functional/test_annotate-parser.py -xv
+    - mv .coverage .coverage-functional
+  artifacts:
+    paths:
+      - .coverage-functional
+    expire_in: 1 hour
 
 
 coverage:
@@ -124,11 +125,11 @@ coverage:
     - install
   dependencies:
     - unit-test-ubuntu
-    # - func-test-ubuntu
+    - func-test-ubuntu
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
-    # - coverage combine .coverage-unit .coverage-functional
+    - coverage combine .coverage-unit .coverage-functional
     - coverage report
     - coverage html
   artifacts:
