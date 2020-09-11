@@ -8,7 +8,7 @@ Functional tests for the parser of pangenome.py
 import pytest
 import argparse
 
-from genomeAPCAT.subcommands import pangenome
+from PanACoTA.subcommands import pangenome
 
 
 def test_parser_noarg(capsys):
@@ -23,11 +23,12 @@ def test_parser_noarg(capsys):
     _, err = capsys.readouterr()
     assert "usage: " in err
     assert "-l LSTINFO_FILE -n DATASET_NAME -d DBPATH" in err
-    assert "-i MIN_ID -o OUTDIR\n" in err
-    assert " [-f OUTFILE] [-c {0,1,2}]" in err
+    assert "[-i MIN_ID]" in err
+    assert " -o OUTDIR" in err
+    assert "[-f OUTFILE] [-c {0,1,2}]" in err
     assert "[-s SPEDIR] [--threads THREADS] [-v]" in err
     assert "[-q] [-h]" in err
-    assert "the following arguments are required: -l, -n, -d, -i, -o" in err
+    assert "the following arguments are required: -l, -n, -d, -o" in err
 
 
 def test_perc_id_nonum(capsys):
@@ -89,7 +90,7 @@ def test_thread_no_int(capsys):
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     with pytest.raises(SystemExit):
-        pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 -o od --threads 1.5".split())
+        pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 1.5".split())
     _, err = capsys.readouterr()
     assert "argument --threads threads: invalid int value: 1.5" in err
 
@@ -104,8 +105,7 @@ def test_thread_too_many(capsys):
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     with pytest.raises(SystemExit):
-        pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 -o od "
-                                "--threads {}".format(nb*10).split())
+        pangenome.parse(parser, f"-l lstinfo -n TEST4 -d dbpath -o od --threads {nb*10}".split())
     _, err = capsys.readouterr()
     assert ("You have {} threads on your computer, you cannot ask for more: "
             "invalid value: {}").format(nb, nb*10) in err
@@ -119,7 +119,7 @@ def test_thread_neg(capsys):
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     with pytest.raises(SystemExit):
-        pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 -o od --threads -1".split())
+        pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads -1".split())
     _, err = capsys.readouterr()
     assert "Please provide a positive number of threads (or 0 for all threads)" in err
 
@@ -131,7 +131,7 @@ def test_parser_default():
     """
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 -o od".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"
@@ -155,8 +155,7 @@ def test_parser_all_threads():
     nb = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 "
-                                      "-o od --threads 0".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 0".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"
@@ -178,8 +177,7 @@ def test_parser_1thread():
     """
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -i 0.8 "
-                                      "-o od --threads 1".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 1".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"
