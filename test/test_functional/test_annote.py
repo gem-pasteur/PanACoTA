@@ -6,7 +6,6 @@ Functional tests for genomeAPCAT annotate
 """
 
 from PanACoTA.subcommands import annotate as annot
-import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
 
 import pytest
