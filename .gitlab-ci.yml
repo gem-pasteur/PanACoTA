@@ -108,8 +108,8 @@ func-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_annote-parser.py -xv
+    - py.test test/test_functional/test_annote.py -xv
     - mv .coverage .coverage-functional
   artifacts:
     paths:
