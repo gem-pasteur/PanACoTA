@@ -403,8 +403,9 @@ def test_read_genomes_nofile(caplog):
     Test that when the genome list file provided does not exist, it
     ends the program with an error message
     """
+    logger = logging.getLogger("default")
     with pytest.raises(SystemExit):
-        utils.read_genomes("toto.txt", "TOTO", "0417", "db/path", "tmppath")
+        utils.read_genomes("toto.txt", "TOTO", "0417", "db/path", "tmppath", logger)
     assert "ERROR: Your list file " in caplog.text
     assert "toto.txt" in caplog.text
     assert "does not exist. Please provide a list file." in caplog.text
@@ -416,12 +417,13 @@ def test_read_genomes_wrongname():
     Test that when the list file contains only genome names which do not exist,
     it returns an empty list of genomes to annotate/format.
     """
+    logger = logging.getLogger("default")
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join(DATA_DIR, "genomes")
     tmppath = "tmppath"
     list_file = os.path.join(DATA_DIR, "test_files", "list_genomes-wrongNames.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath, logger)
     assert genomes == {}
 
 
@@ -430,12 +432,13 @@ def test_read_genomes_ok(caplog):
     Test that when the list file contains genomes existing, it returns the expected list
     of genomes
     """
+    logger = logging.getLogger("default")
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join(DATA_DIR, "genomes")
     tmppath = "tmppath"
     list_file = os.path.join(DATA_DIR, "test_files", "list_genomes.lst")
-    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath, logger)
     exp = {"A_H738.fasta": ["ESCO.0417"],
            "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -450,12 +453,13 @@ def test_read_genomes_errors(caplog):
     Test that when the list file contains errors in name and date provided,
     it returns the expected errors, and the expected genome list.
     """
+    logger = logging.getLogger("default")
     name = "ESCO"
     date = "0417"
     dbpath = os.path.join(DATA_DIR, "genomes")
     tmppath = "tmppath"
     list_file = os.path.join(DATA_DIR, "test_files", "list_genomes-errors.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath, logger)
     exp = {"A_H738.fasta": ["ESCO.0417"],
            "B2_A3_5.fasta-split5N.fna-short-contig.fna": ["ESCO.0417"],
            "H299_H561.fasta": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
@@ -500,13 +504,14 @@ def test_read_genomes_multi_files(caplog):
     it returns the expected genome list, the expected errors (when some genome
     files do not exist) and the expected concatenated files.
     """
+    logger = logging.getLogger("default")
     name = "ESCO"
     date = "0417"
     tmppath = os.path.join(GENEPATH, "tmppath")
     os.mkdir(tmppath)
     dbpath = os.path.join(DATA_DIR, "genomes")
     list_file = os.path.join(DATA_DIR, "test_files", "list_genomes-multi-files.txt")
-    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath)
+    genomes = utils.read_genomes(list_file, name, date, dbpath, tmppath, logger)
     exp = {"A_H738.fasta-all.fna": ["ESCO.0417"],
            "H299_H561.fasta-all.fna": ["ABCD.0417"], "genome2.fasta": ["TOTO.0417"],
            "genome3.fasta": ["ESCO.0512"], "genome4.fasta": ["TOTO.0417"],
@@ -901,15 +906,15 @@ def test_rename_contigs():
     and save the output sequence to the given res_path.
     Check that the output file is as expected.
     """
+    logger = logging.getLogger("default")
     gpath = os.path.join(DATA_DIR, "genomes", "H299_H561.fasta")
     gembase_name = "ESCO.0216.00005"
     outfile = os.path.join(GENEPATH, "H299_H561.fasta-short-contig.fna")
     exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
-    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile)
-    print(sizes)
-    assert contigs == {"H561_S27 L001_R1_001_(paired)_contig_1":"ESCO.0216.00005.0001",
-                       "H561_S28 L001_R1_001_(paired)_contig_2":"ESCO.0216.00005.0002",
-                       "H561_S29 L001_R1_001_(paired)_contig_115":"ESCO.0216.00005.0003"}
+    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger)
+    assert contigs == {"H561_S27":"ESCO.0216.00005.0001",
+                       "H561_S28":"ESCO.0216.00005.0002",
+                       "H561_S29":"ESCO.0216.00005.0003"}
     assert sizes == {"ESCO.0216.00005.0001":3480,
                      "ESCO.0216.00005.0002":7080,
                      "ESCO.0216.00005.0003":2583}
