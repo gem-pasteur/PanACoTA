@@ -59,7 +59,7 @@ import sys
 import shutil
 import logging
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.general_format_functions as general
+from PanACoTA.annotate_module import general_format_functions as general
 
 logger = logging.getLogger("annotate.prokka_format")
 
