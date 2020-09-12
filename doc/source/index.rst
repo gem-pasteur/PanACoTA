@@ -5,7 +5,7 @@ Welcome to PanACoTA's documentation!
 
 If you use PanACoTA, please cite:
 
-PERRIN, A., & ROCHA, E. (2020). PanACoTA: A modular tool for massive microbial comparative genomics. BioRxiv. https://doi.org/10.1101/2020.09.11.293472
+Amandine PERRIN, Eduardo P.C. ROCHA (2020). PanACoTA: A modular tool for massive microbial comparative genomics. BioRxiv. https://doi.org/10.1101/2020.09.11.293472
 
 
 
