@@ -94,7 +94,7 @@ unit-test-ubuntu:
   artifacts:
     paths:
       - .coverage-unit
-      - .coverage
+      # - .coverage
     expire_in: 1 hour
 
 
