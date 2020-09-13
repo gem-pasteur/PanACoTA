@@ -144,6 +144,8 @@ You can find more information in [PanACoTA documentation](http://aperrin.pages.p
 
 ## On cluster
 
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+
 We provide a singularity image, to help running PanACoTA on a cluster.
 
 First, download the singularity image:
