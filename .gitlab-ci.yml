@@ -90,11 +90,11 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_corepers -vx
     - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
+    - coverage report
     - mv .coverage .coverage-unit
   artifacts:
     paths:
       - .coverage-unit
-      # - .coverage
     expire_in: 1 hour
 
 
@@ -112,6 +112,7 @@ func-test-ubuntu:
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_pangenome-parser.py -xv
     - py.test test/test_functional/test_pangenome.py -xv
+    - coverage report
     - mv .coverage .coverage-functional
   artifacts:
     paths:
