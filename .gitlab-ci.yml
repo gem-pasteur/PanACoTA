@@ -105,13 +105,15 @@ func-test-ubuntu:
     - helpers
     - install
   before_script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_functional/test_annote-parser.py -xv
-    - py.test test/test_functional/test_annote.py -xv
-    - py.test test/test_functional/test_pangenome-parser.py -xv
-    - py.test test/test_functional/test_pangenome.py -xv
+    - py.test test/test_functional/test_pangenome* -xv
+    # - py.test test/test_functional/test_annote-parser.py -xv
+    # - py.test test/test_functional/test_annote.py -xv
+    # - py.test test/test_functional/test_pangenome-parser.py -xv
+    # - py.test test/test_functional/test_pangenome.py -xv
     - coverage report
     - mv .coverage .coverage-functional
   artifacts:
