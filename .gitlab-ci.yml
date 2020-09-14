@@ -110,11 +110,11 @@ func-test-ubuntu:
     - ./make
   script:
     - py.test test/test_functional/test_pangenome* -vx
-    - py.test test/test_functional/test_annote.py -xv
+    - py.test test/test_functional/test_annote* -xv
     # - py.test test/test_functional/test_pangenome-parser.py -xv
     # - py.test test/test_functional/test_pangenome.py -xv
-    - coverage report
-    - py.test test/test_functional/test_annote-parser.py -vx
+    # - coverage report
+    # - py.test test/test_functional/test_annote-parser.py -vx
     - coverage report
     - mv .coverage .coverage-functional
   artifacts:
