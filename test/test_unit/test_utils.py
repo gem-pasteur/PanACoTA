@@ -918,6 +918,50 @@ def test_rename_contigs():
     assert utilities.compare_order_content(outfile, exp_file)
 
 
+def test_rename_contigs_duplicate(caplog):
+    """
+    From a given sequence, there are 2 contigs named "contig2". Stops and returns false
+    """
+    logger = logging.getLogger("default")
+    gpath = os.path.join(DATA_DIR, "genomes", "genome-duplicated-header.fasta")
+    gembase_name = "ESCO.0216.00005"
+    outfile = os.path.join(GENEPATH, "genome_dup_error.fna")
+    exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
+    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger)
+    assert not contigs
+    assert not sizes
+    with open(outfile, "r") as of:
+        assert of.readline().startswith(">ESCO.0216.00005.0001")
+        of.readline() # skip sequence
+        assert of.readline().startswith(">ESCO.0216.00005.0002")
+        of.readline() # skip sequence
+        assert of.readline().startswith(">ESCO.0216.00005.0003")
+    assert ("several contigs have the same name contig2 in test/data/annotate/genomes/"
+            "genome-duplicated-header.fasta.") in caplog.text
+
+
+def test_rename_contigs_duplicate_last(caplog):
+    """
+    The last contig of the sequence has the same name as a previous contig. Stops and returns false
+    """
+    logger = logging.getLogger("default")
+    gpath = os.path.join(DATA_DIR, "genomes", "genome-duplicated-header-last.fasta")
+    gembase_name = "ESCO.0216.00005"
+    outfile = os.path.join(GENEPATH, "genome_dup_error.fna")
+    exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
+    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger)
+    assert not contigs
+    assert not sizes
+    with open(outfile, "r") as of:
+        assert of.readline().startswith(">ESCO.0216.00005.0001")
+        of.readline() # skip sequence
+        assert of.readline().startswith(">ESCO.0216.00005.0002")
+        of.readline() # skip sequence
+        assert of.readline().startswith(">ESCO.0216.00005.0003")
+    assert ("several contigs have the same name contig2 in test/data/annotate/genomes/"
+            "genome-duplicated-header-last.fasta.") in caplog.text
+
+
 def test_cat_nobar():
     """
     Check that when cat is called on a list of several files, the output file

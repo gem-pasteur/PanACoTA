@@ -1150,6 +1150,10 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
                     prevcont_nohead = prev_cont.split(">")[1]
                     prev_orig_name_nohead = prev_orig_name.split(">")[1]
                     if prev_orig_name_nohead:
+                        if prev_orig_name_nohead in contigs:
+                            logger.error(f"several contigs have the same name "
+                                         f"{prev_orig_name_nohead} in {gpath}.")
+                            return False, False
                         sizes[prevcont_nohead] = cont_size
                         contigs[prev_orig_name_nohead] = prevcont_nohead
                         grf.write(cont)
@@ -1170,7 +1174,8 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
         prev_orig_name_nohead = prev_orig_name.split(">")[1]
         if prev_orig_name_nohead:
             if prev_orig_name_nohead in contigs:
-                logger.error(f"several contigs have the same name {prev_cont} in {gpath}.")
+                logger.error(f"several contigs have the same name {prev_orig_name_nohead} "
+                             f"in {gpath}.")
                 return False, False
             contigs[prev_orig_name_nohead] = prevcont_nohead
             sizes[prevcont_nohead] = cont_size
