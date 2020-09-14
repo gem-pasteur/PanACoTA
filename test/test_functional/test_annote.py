@@ -26,7 +26,7 @@ DBDIR = os.path.join("test", "data", "annotate")
 GEN_PATH = os.path.join(DBDIR, "genomes")
 EXP_DIR = os.path.join(DBDIR, 'exp_files')
 TEST_DIR = os.path.join(DBDIR, 'test_files')
-GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
+GENEPATH = os.path.join(DBDIR, "generated_by_func-tests")
 
 
 @pytest.fixture(autouse=True)
@@ -42,8 +42,7 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    if not os.path.isdir(GENEPATH):
-        os.mkdir(GENEPATH)
+    os.mkdir(GENEPATH)
     print("setup")
 
     yield
