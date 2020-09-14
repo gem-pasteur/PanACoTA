@@ -109,12 +109,12 @@ func-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_functional/test_pangenome* -xv
-    # - py.test test/test_functional/test_annote.py -xv
+    - py.test test/test_functional/test_pangenome* -vx
+    - py.test test/test_functional/test_annote.py -xv
     # - py.test test/test_functional/test_pangenome-parser.py -xv
     # - py.test test/test_functional/test_pangenome.py -xv
     - coverage report
-    - py.test test/test_functional/test_annote-parser.py -xv
+    - py.test test/test_functional/test_annote-parser.py -vx
     - coverage report
     - mv .coverage .coverage-functional
   artifacts:
