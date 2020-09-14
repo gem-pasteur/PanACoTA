@@ -28,14 +28,11 @@ def setup_teardown_module():
     Remove log files at the end of this test module
     """
     # Init logger to level detail (15)
-    utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_utils', verbose=1)
+    # utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_utils', verbose=1)
     os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    for f in LOGFILES:
-        if os.path.exists(f):
-            os.remove(f)
     shutil.rmtree(GENEPATH)
     print("teardown")
 
