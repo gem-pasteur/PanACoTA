@@ -829,22 +829,6 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     return genomes
 
 
-def gen_name(param):
-        if not utils.check_format(param):
-            msg = ("The genome name must contain 4 characters. For example, this name can "
-                   "correspond to the 2 first letters of genus, and 2 first letters of "
-                   "species, e.g. ESCO for Escherichia Coli.")
-            raise argparse.ArgumentTypeError(msg)
-        return param
-
-def date_name(param):
-    if not utils.check_format(param):
-        msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
-               "corresponding to the month (2 digits) and year (2 digits).")
-        raise argparse.ArgumentTypeError(msg)
-    return param
-
-
 def read_info(name_inf, name, date, genomes_inf):
     """
     From the given information in 'name_inf', check if there is a name (and if its
