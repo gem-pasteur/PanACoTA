@@ -43,6 +43,7 @@ def setup_teardown_module():
     - remove directory with generated results
     """
     if not os.path.isdir(GENEPATH):
+        print("setup")
         os.mkdir(GENEPATH)
     print("setup")
 
@@ -352,7 +353,7 @@ def test_main_existing_prokkadir_errorannot():
     # Remove tbl file for genome1, so that check_prokka returns an error
     os.remove(os.path.join(used_prok_g1, "ESCO.1116.00002.tbl"))
 
-    # Run annotation
+    # # Run annotation
     name = "ESCO"
     date = "0417"
     annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
@@ -367,14 +368,15 @@ def test_main_existing_prokkadir_errorannot():
     # Check that the genome formated was not re-annotated
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-    log_content = open(logfile, "r").readlines()
+    with open(logfile, "r") as lf:
+        log_content = lf.readlines()
     assert ("Prokka results folder "
-            "test/data/annotate/generated_by_unit-tests/genomes/H299_H561.fasta-prokkaRes "
+            "test/data/annotate/generated_by_func-tests/genomes/H299_H561.fasta-prokkaRes "
             "already exists") in " ".join(log_content)
     # Check that genome not formated because error in prokka res
     assert ("ESCO.1116.00002 B2_A3_5.fasta-changeName.fna: no .tbl file") in " ".join(log_content)
     assert ("Problems in the files contained in your already existing output dir "
-            "(test/data/annotate/generated_by_unit-tests/genomes/"
+            "(test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna-prokkaRes). Please check it, "
             "or remove it to re-annotate.") in ' '.join(log_content)
 
@@ -475,16 +477,16 @@ def test_main_existing_prokkadir_errorformat():
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
     log_content = open(logfile, "r").readlines()
-    assert ("Prokka results folder test/data/annotate/generated_by_unit-tests/genomes/"
+    assert ("Prokka results folder test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna-prokkaRes already exists.") in ' '.join(log_content)
     assert ("Prokka did not run again, formatting step used already generated "
-            "results of Prokka in test/data/annotate/generated_by_unit-tests/genomes/"
+            "results of Prokka in test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna-prokkaRes.") in ' '.join(log_content)
     # Error while trying to format:
     assert ("'changesHead.0417.00010.0005' found in "
-            "test/data/annotate/generated_by_unit-tests/genomes/"
+            "test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna-prokkaRes/test.0417.00002.tbl "
-            "does not exist in test/data/annotate/generated_by_unit-tests/genomes/"
+            "does not exist in test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna") in ' '.join(log_content)
     assert ("Problems while generating LSTINFO file for ESCO.1116.00002") in ' '.join(log_content)
 
