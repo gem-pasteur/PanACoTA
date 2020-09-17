@@ -20,24 +20,28 @@ ALDIR = os.path.join("test", "data", "align")
 EXPPATH = os.path.join(ALDIR, "exp_files")
 TESTPATH = os.path.join(ALDIR, "test_files")
 LOGFILE_BASE = "logs_test_postalign"
+GENEPATH = os.path.join(ALDIR, "generated_by_func_tests")
 
 
-def setup_module():
-    """
-    create logger at start of this test module
-    """
-    utils.init_logger(LOGFILE_BASE, 0, '', verbose=1)
-    print("Createc logger")
-
-
-def teardown_module():
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
     """
     Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
     """
-    os.remove(LOGFILE_BASE + ".log")
-    os.remove(LOGFILE_BASE + ".log.details")
-    os.remove(LOGFILE_BASE + ".log.err")
-    print("Remove log files")
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH, ignore_errors=True)
+    print("teardown")
 
 
 def test_main(caplog):
