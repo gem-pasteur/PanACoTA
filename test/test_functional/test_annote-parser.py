@@ -395,7 +395,6 @@ def test_parser_filter(capsys):
     assert not options.force
     assert options.qc_only
     stdout, _ = capsys.readouterr()
-    print(stdout)
     assert (" !! Your genomes will be filtered, and only the ones with 'L90' <= 10 and 'number of contigs' < 999 will be kept. If you want to change those thresholds, use '--l90' and '--nbcont' options.") in stdout
 
 
@@ -419,6 +418,5 @@ def test_parser_nosplit(capsys):
     assert not options.force
     assert options.qc_only
     stdout, _ = capsys.readouterr()
-    print(stdout)
     assert (" !! Your sequences will be used as is by PanACoTA. Be sure you already split your sequences at each row of X 'N' if needed.") in stdout
     assert ("PanACoTA will use the values (L90, nbcont) given in your info file. It will ignore the genomes for which those values are incorrect. It will also ignore genomes with more than 999 contigs.")

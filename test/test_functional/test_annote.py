@@ -277,7 +277,8 @@ def test_main_onexistingprokkadir(capsys):
     assert tutil.compare_order_content(lstout, lstexp)
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-    log_content = open(logfile, "r").readlines()
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
     assert ("Prokka results folder "
             "test/data/annotate/exp_files/B2_A3_5.fasta-changeName.fna-prokkaRes "
             "already exists") in " ".join(log_content)
@@ -315,7 +316,8 @@ def test_main_onexistingprodigaldir(capsys):
     assert tutil.compare_order_content(lstout, lstexp)
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-    log_content = open(logfile, "r").readlines()
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
     assert ("Prodigal results folder already exists") in " ".join(log_content)
     assert ("Prodigal did not run again. Formatting step will use already generated results of "
             "Prodigal in test/data/annotate/exp_files/H299_H561.fasta-prodigalRes. "
@@ -429,7 +431,8 @@ def test_main_existing_prodigaldir_errorannot(capsys):
     # Check that not formatted because exists + error
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-    log_content = open(logfile, "r").readlines()
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
     assert ("Error: No genome was correctly annotated, "
             "no need to format them") in ' '.join(log_content)
     assert ("Prodigal results folder already exists.") in ' '.join(log_content)
@@ -476,7 +479,8 @@ def test_main_existing_prokkadir_errorformat():
     # Check that genome 1 is not formatted, while no error with prokka
     logfile = os.path.join(GENEPATH,
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-    log_content = open(logfile, "r").readlines()
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
     assert ("Prokka results folder test/data/annotate/generated_by_func-tests/genomes/"
             "B2_A3_5.fasta-changeName.fna-prokkaRes already exists.") in ' '.join(log_content)
     assert ("Prokka did not run again, formatting step used already generated "

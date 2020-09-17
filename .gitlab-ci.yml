@@ -111,7 +111,6 @@ func-test-ubuntu:
   script:
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_annote-parser.py -vx
-    - coverage report
     - py.test test/test_functional/test_pangenome* -vx
     - py.test test/test_functional/test_corepers* -vx
     - coverage report
