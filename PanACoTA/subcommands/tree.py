@@ -313,9 +313,6 @@ def check_args(parser, args):
         else:
             args.model = "T"
     elif args.soft == "fasttree":
-        if args.write_boot:
-            msg = "'-B' option is only available with FastME, not with FastTree"
-            parser.error(msg)
         if args.model:
             args.model = check_model(models_fasttree, args.model)
         else:
