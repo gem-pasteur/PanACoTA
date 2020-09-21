@@ -97,25 +97,25 @@ def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, thread
     tree = None
     if soft == "fasttree":
         # test if fasttree is installed and in the path
-        if not utils.check_installed("FastTreeMP"):
+        if not utils.check_installed("FastTreeMP"): # pragma: no cover
             print("FastTreeMP is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import fasttree_func as tree
     elif soft == "fastme":
         # test if fastME is installed and in the path
-        if not utils.check_installed("fastme"):
+        if not utils.check_installed("fastme"): # pragma: no cover
             print("fastme is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import fastme_func as tree
     elif soft == "quicktree":
         # test if fastME is installed and in the path
-        if not utils.check_installed("quicktree"):
+        if not utils.check_installed("quicktree"):  # pragma: no cover
             print("quicktree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import quicktree_func as tree
     elif soft == "iqtree":
         if not utils.check_installed("iqtree"):
-            if not utils.check_installed("iqtree2"):
+            if not utils.check_installed("iqtree2"): # pragma: no cover
                 print("IQtree is not installed. 'PanACoTA tree' cannot run.")
                 sys.exit(1)
             else:
@@ -123,7 +123,7 @@ def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, thread
         from PanACoTA.tree_module import iqtree_func as tree
     elif soft == "iqtree2":
         # test if iqtree2 is installed and in the path
-        if not utils.check_installed("iqtree2"):
+        if not utils.check_installed("iqtree2"): # pragma: no cover
             print("iqtree2 is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import iqtree_func as tree
