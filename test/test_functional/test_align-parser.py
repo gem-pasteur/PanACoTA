@@ -111,3 +111,22 @@ def test_parser_allthreads():
     assert options.force is False
     assert options.verbose == 0
     assert options.quiet is False
+
+
+def test_parser_all_ok():
+    """
+    Test that when all arguments given are ok, it builds expected parser
+    """
+    parser = argparse.ArgumentParser(description="Align families", add_help=False)
+    align.build_parser(parser)
+    options = align.parse(parser, "-c cp -l listgenome -n dname -d dbpath -o outdir "
+                                  "--threads 1".split())
+    assert options.corepers == "cp"
+    assert options.list_genomes == "listgenome"
+    assert options.dataset_name == "dname"
+    assert options.dbpath == "dbpath"
+    assert options.outdir == "outdir"
+    assert options.threads == 1
+    assert options.force is False
+    assert options.verbose == 0
+    assert options.quiet is False
