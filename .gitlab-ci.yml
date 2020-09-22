@@ -112,6 +112,7 @@ func-test-ubuntu:
     - py.test test/test_functional/test_pangenome* -vx
     - py.test test/test_functional/test_corepers* -vx
     - py.test test/test_functional/test_align* -vx
+    - py.test test/test_functional/test_tree* -vx
     - py.test test/test_functional/test_tree-parser.py -vx
     - py.test test/test_functional/test_annote-parser.py -vx
     - py.test test/test_functional/test_annote.py -xv
