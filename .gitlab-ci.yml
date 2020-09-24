@@ -135,8 +135,8 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - coverage combine .coverage-unit .coverage-functional
-    - coverage report
     - coverage html
+    - coverage report
   artifacts:
     paths:
       - htmlcov
