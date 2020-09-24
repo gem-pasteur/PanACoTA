@@ -19,6 +19,7 @@ This README file provides some essential information to install/use PanACoTA. Bu
 &nbsp;
 &nbsp;
 &nbsp;
+&nbsp;
 
 ``PanACoTA``  (PANgenome with Annotations, COre identification, Tree and corresponding Alignments) is a software providing tools for large scale bacterial comparative genomics. You can download all refseq genomes for a given species, or use your set of complete and/or draft genomes, to:
 
@@ -28,6 +29,10 @@ This README file provides some essential information to install/use PanACoTA. Bu
 - Do a Core or Persistent genome
 - Align all Core/Persistent families
 - Infer a phylogenetic tree from the Core/Persistent families
+
+&nbsp;
+&nbsp;
+&nbsp;
 
 If you use PanACoTA, please cite:
 
