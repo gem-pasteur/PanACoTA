@@ -52,34 +52,37 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.alignment, args.boot, args.outdir, args.soft, args.model,
-         args.write_boot, args.memory, args.fast, args.threads, args.verbose, args.quiet)
+    main(cmd, args.alignment, args.outdir, args.soft, args.model, args.threads,
+         args.boot, args.write_boot, args.memory, args.fast, args.verbose, args.quiet)
 
 
-def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, threads, verbose, quiet):
+def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
+         memory=False, fast=False, verbose=0, quiet=False):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
 
     Parameters
     ----------
+    cmd: str
+        command used to launch tree module
     align: str
         Path to file containing alignments of persistent families grouped by genome
-    boot: int or None
-        Number of bootstraps to compute. None if no bootstrap asked
     outdir: str or None
         Path to file which will contain the tree inferred
     soft: str
         Soft to use to infer the phylogenetic tree: 1 of quicktree, fasttree or fastme
     model: str or None
         DNA substitution model chosen by user, None if quicktree used
+    threads: int
+        Maximum number of threads to use
+    boot: int or None
+        Number of bootstraps to compute. None if no bootstrap asked
     write_boot: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
     memory: str
         Maximal RAM usage in GB | MB | % - Only for iqtree
     fast: boolean
         use -fast option with IQtree
-    threads: int
-        Maximum number of threads to use
     verbose : int
         verbosity:
         - defaut 0 : stdout contains INFO, stderr contains ERROR.
@@ -97,24 +100,24 @@ def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, thread
     tree = None
     if soft == "fasttree":
         # test if fasttree is installed and in the path
-        if not utils.check_installed("FastTreeMP"):
+        if not utils.check_installed("FastTreeMP"): # pragma: no cover
             print("FastTreeMP is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import fasttree_func as tree
     elif soft == "fastme":
         # test if fastME is installed and in the path
-        if not utils.check_installed("fastme"):
+        if not utils.check_installed("fastme"): # pragma: no cover
             print("fastme is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import fastme_func as tree
     elif soft == "quicktree":
         # test if fastME is installed and in the path
-        if not utils.check_installed("quicktree"):
+        if not utils.check_installed("quicktree"):  # pragma: no cover
             print("quicktree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import quicktree_func as tree
     elif soft == "iqtree":
-        if not utils.check_installed("iqtree"):
+        if not utils.check_installed("iqtree"): # pragma: no cover
             if not utils.check_installed("iqtree2"):
                 print("IQtree is not installed. 'PanACoTA tree' cannot run.")
                 sys.exit(1)
@@ -123,7 +126,7 @@ def main(cmd, align, boot, outdir, soft, model, write_boot, memory, fast, thread
         from PanACoTA.tree_module import iqtree_func as tree
     elif soft == "iqtree2":
         # test if iqtree2 is installed and in the path
-        if not utils.check_installed("iqtree2"):
+        if not utils.check_installed("iqtree2"): # pragma: no cover
             print("iqtree2 is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import iqtree_func as tree
@@ -313,9 +316,6 @@ def check_args(parser, args):
         else:
             args.model = "T"
     elif args.soft == "fasttree":
-        if args.write_boot:
-            msg = "'-B' option is only available with FastME, not with FastTree"
-            parser.error(msg)
         if args.model:
             args.model = check_model(models_fasttree, args.model)
         else:

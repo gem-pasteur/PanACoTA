@@ -1,0 +1,1439 @@
+Seq-entry ::= set {
+  class genbank ,
+  seq-set {
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 9 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 11 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2020 } } } ,
+        create-date
+          std {
+            year 2020 ,
+            month 9 ,
+            day 11 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "H561_S27" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 3480 ,
+            seq-data
+              iupacna "AGCAGCACGCTTTTTAATCCGTCCACCGGACCTTCAACCGGCCCTTCGCTGATGG
+CATCGATCACACTCAGCAGCTGCGTGGACTTCAGGTTGTCCTTCGCTTCGCGCGGGGTATGCCCCTTACTGCTGCCTT
+TACCCATTCGTCATGCTCCATAAACGATAAAACCGCCCGGAGGCGGTTTCACATAAAACATTTTGCATCAGCGACCAA
+TCACCACAACCTGACCACCATCCCCTTCGTCTGCCGTGCTGATCTCCTGAGAAACCACGCGTGACCCCACGCGCATTT
+CACCGTACAGAACCGGCAGAACATTGCCCTGGGCAACCATGTTATCCAGTGAAGAAAAATAGGTATTCTGTTTGCCGT
+TATCCGTTGTCTGTGTGCGGGGGGTTTTGGGTTTAGGGGCCAGCATCTGTGCAACACCGCCAAGCGTCATACTGGCAC
+CGAGAGAAAACAGCAGATTACTCGCCATAATTCCTACCCCCGGCATCCATATAGCAACCGCCATAACAGCCGCCCCCA
+GCACAGCCTGAAACACACCGCCACTTTTGGCTCCTGCCAGACGCGGCACGATATGGATCACGGCACCATTTTCCAGCG
+GCTCATTAAGACGGGCAGACAATTCGGTTTCACCTGCATCACGCCCGGCAATGCGTACCTGGTACCAGCCGTCGCTCA
+GTTTCTGACGAAATGCCGGGATCTGCATGGCCAGCGCCCGGATGGCTTCGGACCCCGTTTTCACTCGAAGGTCGATGC
+GGCGGCCAAATCGTTGTAAATCCCCGTAAAGGCAGATGCGTGCCATGCCCGGTGACGCCAGAGGGAGTGTGTGCGTCG
+CTGCCATTTGTCGGTGTACCTCTCTCGTTTGCTCAGTTGTTCAGGAATATGGTGCAGCAGCTCGCTGTCACCACAGTA
+AATGGCGGCATGATTCGGCACCGATGAACCAAAACAGCACAGCAGCACATCGCCCGGCTGCGCCGCTGACAACGGCAC
+CTGATACAGCCCTGTGGCCTCCAGATTATCCAGATAGAGATTCTGACCGTTACGCCACCAGTCATCCCCGCGATGAAA
+ATCCGGCATCTCAATTCCCGCCAGATGGTAAGCGTCCCGGAACAGCGTGTAACAGTCCGTTACCCCGTGCTCAAAGCG
+CCGCCCGGTGAGATGCGGCACACAGCGGAATTTATGAATCGCCCCCCGGCAGACCAGCCACCACGGCAAATCACTCTG
+TACCTGCAGCCGCCGGTCGGCCTCACTCAGCCAGGGCAGACCACCGGGGTGGCTGTGGACCAGCGCCACAATCTCTCT
+CTGCATTTCTGCACTCAGCCAGTCCTCCGGCGACATCCGGAAATACTCCTCCGGCTCACTGGAGATATTCACGCAGGG
+AAAATATCTTTCCTCCTCCGGCGTTCTCACCACGAAGCCGCACGACTCCGCTGGCGCACATCGCCGGGCGTGCGCCAG
+AATCGCTGATTCTGTCTCTGTCATGGGATTTACTGCGAAAGTTTGTTAATGGAAAGGAAGCTGCCAAAGTTGCCGACA
+TTATTGCGAAACTTACAGCCACTCAGGCATTTGCTGCATTTATCCTTCGTGATATCGGACGTCGGCTGGTCATATTCA
+TCCGCGACCGCCGGACCGCTATAACCGCACTCATCGCCGCGATAGGTCCAGGTGCAGGTGTTGGCCAGCATGATACGT
+CCCGGAAAAACAGCGCCATCCGTTTCAGTCGGCGTGGACAGTACAAAAGAGGCACTGACCGCGCTCAGTTCGCTGCAC
+TGCTCGATGCGCCAGCGGCTGATCACCTCCTGCTCCGGATCGGCTTCGCTGTTTCCGTTGACGAAGTTCACCGCATCC
+AGAAAGCGGGCGTAAACCTTACGCCGGACCACCGTTCCGCCGACCAGACTCTGCAGATCTTCCGCCATCCCGGTGATC
+ATGCCGTGCAGGTTAGAGACCGTCAGTGTCGGACGGGCAGCACTGCCCTTGCCGTTCATCTCAAATCCACTCCCCTGA
+ATGGGATAGGCCTGATACTGCCGACTCTGCCAGGTGACAGACTCACCTTTTTCGTTCTGCTCATTACAGAAAAAGTAG
+CGATCCCCGCCTACCTCGGTCAGGTCGATTTCCCAGAGCACCACGCTGGCCGACTGCTCCGCACGAATGCATTCATTC
+AGCGTTTCCTGTTGTATGTCCTGCATCAGATCACCACTTCGTCAAACTGACACGAAAAATCGGTATAGGTGATATGTT
+CTGTCGCTGACCACGTTCGACACACCACTCTGATTTTTCTGTTAATACCCGGCGGGCGCCAAAAAAAAGATTTATAGC
+CTTCATGCCGGGCTAAAAATTTTTCAAATGAATCACGTTCATTCGCCTCAACTTTGAAATCACAGGTGAAAACGCGCA
+GAGAATGATTAAGTCCATTTGGACTTCGTTGCTCATAACCATCGCCAAATCTTACAGTTTTTATCGATGGTTTATTTT
+CTGTTTTCATTCCATCCTCTGGTAACCAGTGAAATTCTTCCGTATTAGCCACTTAACATTCCCCCATCACGTCGCATA
+TTTAACAGATTGCCCTGCACCCGCTGATCAACCATCCCCATAAGTGCTTTTATTGCCTGAGGGCCAATCTCTCCATTC
+TGGCCGTCATTTTGAATAGTGATTTGGTATACAGGGGCATAGGTAATATCTCCGCCTCCATTACCACTTTTACTATTA
+ATAGCTCTGACACCAAGAGAACCATCGGAAGTTCGTGTTAATGGCATAATGGCTTCCGGTCCAGCCTCACCAAAAACA
+CCAGCCCCTTTTGCAAAAGCAAAAAATTGCGGGGAATCATAAATACCGTTCGAATACGTGCTCAATGACGGAGACTCA
+TAAACACCGCCCTTTGCATTCGGAATAAATTTACTAATAGCACTCCCGATAGTTCCTAAAATCCCCCCAGAAGAACTG
+TTACTAATGCTGTCGAAAATCCCAGTAATTGAAGCCTTTAATGCTATTCGACTAAGATCCGAAATCACGGAAGTAGCG
+AAAGAACGAAAATTTGCCTTGCCTGTCGTGACAAAATCACCCAGCGCATCGGTCATCCCATCAAACATCTGAGTCGTG
+GTTGATTTTATCTGCTCACTGATATCCTTAGTGTCATCCAGCCAGTTATTGAATCCCTGGGAGGCACCACTAACCCAG
+TCTCCTGCCTGAATATCGAGCTGCTCGTTTTTCTGTCTGACAATTTCTTTTTCCCGTTCCAGAGCATCATTCAGAGCC
+TGCATTTTCTCTTGAAAAACATGATCTGACATTCCACGGGATTTATCTGCATAGTCACGTTCAAGTTGCAGACGCTGA
+TTGTTATATCCATGTTCAATCCGCAGTAATTCCTGCTGGCGTTGCTGATTTTTATCGCCAACCCCATAACCAGCAATC
+TGAATATCATACCCCTGCTGACGATTATCAATCGAAGCCTGCAATGAATCACGCCATGCTGTTATTTCGGC" } } ,
+        seq {
+          id {
+            local
+              str "H561_S27_1" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00001 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 180 ,
+            seq-data
+              ncbieaa "MKTGSEAIRALAMQIPAFRQKLSDGWYQVRIAGRDAGETELSARLNEPLENGAVI
+HIVPRLAGAKSGGVFQAVLGAAVMAVAIWMPGVGIMASNLLFSLGASMTLGGVAQMLAPKPKTPRTQTTDNGKQNTYF
+SSLDNMVAQGNVLPVLYGEMRVGSRVVSQEISTADEGDGGQVVVIGR" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 6 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 179 ,
+                        id
+                          local
+                            str "H561_S27_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S27_2" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00002 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 199 ,
+            seq-data
+              ncbieaa "MSPEDWLSAEMQREIVALVHSHPGGLPWLSEADRRLQVQSDLPWWLVCRGAIHKF
+RCVPHLTGRRFEHGVTDCYTLFRDAYHLAGIEMPDFHRGDDWWRNGQNLYLDNLEATGLYQVPLSAAQPGDVLLCCFG
+SSVPNHAAIYCGDSELLHHIPEQLSKRERYTDKWQRRTHSLWRHRAWHASAFTGIYNDLAAASTFE" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 7 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 198 ,
+                        id
+                          local
+                            str "H561_S27_2" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S27_3" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00003 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 232 ,
+            seq-data
+              ncbieaa "MQDIQQETLNECIRAEQSASVVLWEIDLTEVGGDRYFFCNEQNEKGESVTWQSRQ
+YQAYPIQGSGFEMNGKGSAARPTLTVSNLHGMITGMAEDLQSLVGGTVVRRKVYARFLDAVNFVNGNSEADPEQEVIS
+RWRIEQCSELSAVSASFVLSTPTETDGAVFPGRIMLANTCTWTYRGDECGYSGPAVADEYDQPTSDITKDKCSKCLSG
+CKFRNNVGNFGSFLSINKLSQ" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 8 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 231 ,
+                        id
+                          local
+                            str "H561_S27_3" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S27_4" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00004 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 98 ,
+            seq-data
+              ncbieaa "MKTENKPSIKTVRFGDGYEQRSPNGLNHSLRVFTCDFKVEANERDSFEKFLARHE
+GYKSFFWRPPGINRKIRVVCRTWSATEHITYTDFSCQFDEVVI" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 9 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 97 ,
+                        id
+                          local
+                            str "H561_S27_4" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S27_5" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00005 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 311 ,
+            seq-data
+              ncbieaa "MQASIDNRQQGYDIQIAGYGVGDKNQQRQQELLRIEHGYNNQRLQLERDYADKSR
+GMSDHVFQEKMQALNDALEREKEIVRQKNEQLDIQAGDWVSGASQGFNNWLDDTKDISEQIKSTTTQMFDGMTDALGD
+FVTTGKANFRSFATSVISDLSRIALKASITGIFDSISNSSSGGILGTIGSAISKFIPNAKGGVYESPSLSTYSNGIYD
+SPQFFAFAKGAGVFGEAGPEAIMPLTRTSDGSLGVRAINSKSGNGGGDITYAPVYQITIQNDGQNGEIGPQAIKALMG
+MVDQRVQGNLLNMRRDGGMLSG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 10 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 310 ,
+                        id
+                          local
+                            str "H561_S27_5" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 1 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S27_1" ,
+                location
+                  int {
+                    from 200 ,
+                    to 742 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S27" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00001" } } } } ,
+              {
+                id
+                  local
+                    id 2 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S27_2" ,
+                location
+                  int {
+                    from 739 ,
+                    to 1338 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S27" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00002" } } } } ,
+              {
+                id
+                  local
+                    id 3 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S27_3" ,
+                location
+                  int {
+                    from 1488 ,
+                    to 2186 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S27" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00003" } } } } ,
+              {
+                id
+                  local
+                    id 4 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S27_4" ,
+                location
+                  int {
+                    from 2186 ,
+                    to 2482 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S27" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00004" } } } } ,
+              {
+                id
+                  local
+                    id 5 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S27_5" ,
+                location
+                  int {
+                    from 2517 ,
+                    to 3452 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S27" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00005" } } } } } } } } ,
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 9 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 11 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2020 } } } ,
+        create-date
+          std {
+            year 2020 ,
+            month 9 ,
+            day 11 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "H561_S28" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 7080 ,
+            seq-data
+              iupacna "AGCAGCACGCTTTTTAATCCATCCACCGGACCTTCAACCGGCCCTTCGCTGATGG
+CATCGATCACACTCAGCAGCTGCGTGGACTTCAGGTTGTCCTTCGCTTCGCGCGGGGTATGCCCCTTACTGCTGCCTT
+TACCCATTCGTCATGCTCCATAAACGATAAAACCGCCCGGAGGCGGTTTCACATAAAACGTTTTTCATCAGCGACCAA
+TCACCACAACCTGACCACCATCACCTTCATCTGCTGTGCTGATCTCCTGAGATACCACACGTGATCCCACGCGCATTT
+CACCGTACAGAACGGGCAGAACATTGCCCTGGGCAACCATATTATCCAGTGAAGAAAAATAGGTGTTCTGTTTGCCGT
+TATCCGTTGTCTGTGTGCTGGGGGTTTTGGGTTTAGGGGCCAGCATCTGTGCAACACCGCCAAGCGTCATACTGGCAC
+CGAGAGAAAACAGCAGATTACTCGCCATAATTCCTACCCCCGGCATCCATATAGCAACCGCCATAACAGCCGCCCCCA
+GCACAGCCTGAAACACACCGCCACTTTTGGCTCCTGCCAGACGCGGCACGATATGGATCACAGCACCATTTGCCAGCG
+GTTCATTAAGACGGGCTGATAATTCCGTTTCACCTGTATCACGCCCGGCAATCCGTACCTGATACCAGCCGTCGCTCA
+GTTTCTGACGAAACGCCGGGAGCTGTGTGGCCAGCGCCCGGATGGCTTCAGCCCCCGTTTTCACACGAAGGTCGATGC
+GGCGACCAAATCGTTGTAAATCCCCGTAAAGGCAGATGCGCGCCATGCCCGGTGACGCCAGAGGGAGTGTGTGCGTCG
+CTGCCATTTGTCGGTATACCTCTCTCGTTTGCTCAGTTGTTCAGGAATATGGTGCAGCAGCTCGCCATCACCACAGTA
+AATGGCGGCATGATTCGGCACCGATGAACCAAAACAGCACAGCAGCACATCGCCCGGTTGTGCTGATGACAACGGCAC
+CTGATACAACCCTGTGGCCTCCAGATTATCCAGATAGAGATTCTGACCGTGACGCCACCAGTCATCCTCGCGATGAAA
+ATCCGGCATCTCAATCCCCGCCAGATGATAAGCATCCCGGAACAGCGTGTAACAGTCCGTCACCCCGTGCTCAAAGCG
+CCGCCCGGTGAGATGCGGCACACAGCGGAACTTATGAATCGTCCCCCGGCAGACCAGCCACCACGGCAAATCACTCTG
+CACCTGCAGCCGCCGGTCGGCCTCACTCAGCCAGGGCAGACCACCGGGGTGGCTGTGGACCAGCGCCACAATCTCACC
+CTGCATCTCTGCCCGCAGCCAGTCCTCCGGCGACATCCGGAAATACGCCTCCGGCTCACCGGAGATATTCACGCAGGG
+GAAATATCTTTCCCCTTCCGGCGTTCTCACCACGAAGCCGCACGACTCCGCTGGCGCACATCGCCGGGCGTGCGCCAG
+AATCGCTGATTCTGTCTCTGTCATGGGATTCACTGCGAAAGTTTGTTAATGGAAAGGAAGCCGCCAAAGTTGCCGACG
+TTATTGCGAAACTTACAGCCATTCAGGCATTTGCTGCATTTATCCTTCGTGATATCGGACGTCGGCTGATCATATTCA
+TCCGCGACAGCCGGACCGTGATAACCGCACTCATCACCGCGATAGGTCCAGGTGCAGGTATTAGCCAGCATGATGCGC
+CCCGGAAAAACGGCACCATCCGTTTCCGTCGGCGTGGACAGTACAAAGGAGGCACTGACCGCGCTCAGTTCGCTGCAC
+TGCTCGATGCGCCAGCGGCTGATCACCTCCTGCTCCGGATCGGCGTCGCTGTTTCCGTTGACGAAGTTCACCGCATCC
+AGAAAACGGGCGTAAACCTTACGCCGGACCACCGTTCCGCCGACCAGACTCTGCATATCTTCCGCCATCCCGGTGACC
+ATACCGTACAGGTTAGAAACCGTCAGCGTGGGGCGTGTACTGGTGCCTTTGCCATTCAGTTCAAAACCGCTCCCCTGA
+ATGGGATACGGCTGATACTGTCGCCCCTGCCAGGTGACCGGCTCACCTTTTTCGTTCTGCTCATTACAGAAAAAATAA
+CGTTCTCCACCGACCTCTGTCAGGTCGATTTCCCAGAGCACCACGCTGGCCGACTGCTCCGCACGGGTGCATTCATTC
+AGTGTTTCCTGCCGGATATCCTGCATCAGTTCACCACCTGTTCAAACTCTGCGCTGAACTCAACACGCAGCATACTGA
+CCCGCGACGACCATTTTGCGCAGGTCACCTTTATCTGCCGCCACTCATAAGGCGGCGTCCACAGAAAGGCTTTCCAGC
+CCCCGTGCTCTTCCAGAAACGACTCCAGTACCGTGGCCTCCCAACGGGGGACAGAAAGCGTCACGCTGTACGTTTTCA
+GGTTGGCATTCAGCCCGGCAGGCGCTCGCTGGGAATAGCCATCACCAAAGCGCACCTTTCTTACAGAAGGGGCCGAAG
+CCACATCCATACCGGGTTTCACTTTCCAGCGGAAGGTTTTCATCGTCCACCTCCGGAGAACAGGCCACCATCGCGCAT
+CTGCCCGGTCACAACATCCATTGCCGCCTTACGGGCTACGTCATAAACAGCCTTCAGCGCCTGTGGCCCTATCTGCCC
+GTTCGTGCCGTCGTTGTTAATCACCACATGGTTATTCTGCTCAAACGTCCCGGACGCCTGCGACCGGCTGTCTGCCAT
+GCTGCCCGGTGTACCGACATAACCGCCGGTGGCATAGCCGCGCATCAGCCGGTAAAGATTCCCCACGCCAATCCGGCT
+GGTTGCCTCCTTCGTGAAGACAAACTCACCACGGTGAACAATCCCCGCTGGCTCATATTTGCCGCCGGTTCCCGTAAA
+TCCCCCAGTCGCAAAATGGAATTTCGCCGCAGCGGCCTGAATGGCTGTACCGCCTGACGCGGATGCGCCGCCACCAAC
+AGCCCCGCCAATGGCGCTGCCGATACTCCCGACAATCCCCACCATTGCCTGCTTAAGCAGAATTTCTGTCATCATGGA
+CAGCACGGAACGGGTGAAGCTGCGCCAGTTCTGCTCACTGCCGGTCAGCATCGCCGCCATATTCTGTGCAATACCATC
+AAAGGTCTGCGTGGCTGCACTTTTTACCTGCGACATACTGTCCGTGGCGCTCTCTTCCCACTCACTCCAGCCGGACTT
+CAGGCCTGCCATCCAGCTCCCGCGAAGCTGGTCTTCAGCCGCCCAGGTCTTTTTCTGCTCTGACATGACGTTATTCAG
+CGCCAGCGGATTATCGCCATACCGTTCCTTCAGGCGCTGTTCCGTGGCTTCCCGTTCTGCCTGCCGGTCAGTCAGCCC
+CCGGCTTTTCGCATCAATGGCGGCCCGTTTTGCCCGTTGCTGCTGTGCGAATTTATCCGCCTGCTGCGCCAGCGCGTT
+CAGGCGCTCCTGATACGTAACCTTGTCGCCAAGTGCAGCCAGCTGGCGTTTGTACTCCAGCGTCTCATCTTTATGCGC
+CAGCAGGGATTTCTCCTGTGCGGACAGCTGGCGACGTTGTGCCGCCTCCTCCAGTACCGCGAACTGACTTTCTGCCTT
+CCACAAATCCCGGCGCTGCTGGCTGATTTTCTCATTCGCTCCGGCATGCTTCTCCAGCGTCCGGAGTTCTGCCTGAAG
+CGTCAGCAGGGCAGCATGAGCACTGTCTTCCTGACGATCGCCCGCAGACACCTTCACGCCGGACTGTTTCGGCTTTTT
+CAGCGTCGCTTCATAATCCTTTTTCGCCGCCGCCATCAGCGTGTTGTAATCTGCCTGCAGGATTTTCCCGTCTTTCAG
+TGCCTTGTTCAGTTCTTCCTGACGGGCGGTATATTTCTCCAGCGGCGTCTGCAGGCGTTCGTAAGCCTTCTGCGCCTC
+TTCGGTATATTTCAGCCGTGATGCCTCAGACTCGGCCCAGTCCTTTGCTGCCATCTCTCTGGCCTTTTCAAGATCGGC
+CTGCAACGTGGCGGCGGAAAGCCCAAGTTGCGCATTCGCTCTGTCCTCCCATGCTCCCCGGAGATTGGCAAGAAATGC
+TGAGGTTTTACCGCGCCGGTGGCTCCGGCTCTGATACCACTGCCATTTTTTGTCCGCCTCATCAAAAGCCTTTTCTGC
+TTTCTCCAGCATTCCCTGGGCAGTGTCCGGGCGACCAATATCCAGCACCGAATCCCACATGGATTTGAATGCCCGTGC
+TGTCCTGTCTGCCCAGGTCTCCAGCGTGCCCATGTTCTCTTTCAGGCGTCGGGTCTGGTCATCAAACCCTTTCGTTGC
+GGCCTCGTTCGCCGCCTGCAATGCCCCGGCTTCATCGCCGGAACGCTGCAACTGAGCAACATACGCAATCTGTTCCGC
+CGTCACGTTATGGAACTGGCGTGCCATCGCCGTCAACCCCGACGTCGGGTCTGTGGTCAGCTTCCCGAAGGCTTCAGC
+GACCTTGTCCACCTCCACACCGGATGCAGAGGAGAAACGCGCCACACTCTGGCTGATCGCCTCAAACTGCTCACCACC
+ACGCACACCGGCATTCACCAGCGCCGTCAGTGACTCGCTGGTCTGGTTAAACGTCAGCCCTGCCGCCTGCCCGGCTCT
+GGACAGGACCAGCATACGATCTGCCGTCAGTCCCGCCTGATTGCCGGAAAGGACCAGCGTTTTGTTGAAATCGGACAG
+GGTTGAGTTACCCTGATACCAGGCATACGCCAGCGCACCGGTCGCCACCGCCAGCGAGGTGGCCCCCACCATCGGCAG
+GGTGATCGCACCGGCAAGCCCCCTGAACATGGGGATCATCCCGCCGAAGGAGTCCTTCACCTGACCACCCTGTTGCAG
+CAGGATCAGCCACGGACTCTGCCCGCCTGCAAGCTGCGTGGCCACGTCGGTGAACTGCGCAGGCAGCATACGCATGGC
+GGCTTTATACTGCCCGACGGAAATCCCCGCTTTCTGTGCAGCCAGCGCCTGCCGGCTCATCGACTGTTCAACGACTGC
+CGCTGTTTTTTTCGCATCACTTTCCGTACCGGAAAAATGACGCCTGACTCTGGCCATCTGCTCGTCAAATCTGGCCGC
+ATCCAGACTCAAATCAACGACCAGATCGCCTACCGGTTCAGCCATACCGGACTCCTCCTGCGATCCCTTCTGATACTG
+TCATCAGCATTACGTCATCCTCCGTCATGTCCGCCACATCCGGGGAAGCGGGGATAACTTCATTCCCGTCCGGGCCAA
+AACGAACGCCTCCGGCAAGCCCTGCCGCTTTCTGCATCAGCACATCATCTTCAGGCTCTTCGTCAGCCTCACGCCGGT
+TCAGCAGACTGAAATCCAGCGGATGCATATCCGGATCGCTGAAAAACAGGCTGAGCACGGTGTACGTCAGCCCGGAAA
+AGTGCATATCCAGCAGAACATCATGAAAATAATGGGTACTGTAAAAGCGGTGCCAGTCGGCATACTCCGTGGATGACA
+TCCCGGCAAGCATGGCGCGCCAGTCGGGTCGCCCCATTTCACGCGCCAGTTTCAGGGCAAAACTCAGCTCACCGTCGA
+ACACTTTCCCGCAGAAACAGGCTCTGCAGGCCCGGCATCATCTGCCTGTTCAGGGGCATTATTCACAACAAACTCAGA
+CATTCCGGACAGACGTAACACCACGTTTTCAGCCTGAGCAATTGCCTCCGTGGGCCAGGTGGTAAGCACTTCCTGCTC
+AATCTGTTTAACGGCTTCATTCATGGACGGCAGCTTTGTCTTCTGCGGATGGTTATGCCACAGAGACATCGCCACCAG
+AAACGCCCCGCCTCTGATAAGATCCTCTACAGACACCTGCAGGTTGCCACTGGATTCAGCCTTTTTTTCCTGCTCTTT
+CAACCAGGCAAGATGCTCAATACGCTGCAGGGCTGACAGTTCAGAAAGCGTGACGGTCACACCGTTATGTTCAAATGA
+TTCGGTTTTCAGGAACATCGCTGACTCTCCGGATTAGCTGTTGGTGACGTTGATTTCTGCAACCGCAGCAAGTTCACC
+ATTACCGGATACGACCGGAATGTTGACCTTGCCTGCAGCAACACCTTTCACGGTGATGGTCATACCACTGACCGACAC
+GGTGGCTTTTGTTTTATCCGCAGACACCGCACGGAAGCTCTTGTCGGTTGCGCCTTCCGGCTGGAATGCCACGGTCAG
+CGTGGTGCTCCGCCCTTTCACCACCGAAGTGCTGGCAGGCGTCACGGTCATGCCGGTTGCCGCTGTGACCGTGCTGCG
+ATCTTCTGCCATCGACGGACGTCCCACGTTGGTGACTTTCACCGTGCGGGTGATCACTTCCTTCGCCGTCACCGCCTT
+ACCGATACTGCTGACCCAGCCGCGGAACACATCGACCGTGCCGTTCGGGAAGCGGATTTTATAGGCACGGGTATCCCC
+TTCATTAAACCACGCCAGCAGCGCCTGCTGCCCCTGCTCTCCGGGCATCCACGCCAGCGTGAAGCTGGTATCTCCGGC
+AGATTTCTGCCCCTGCCCGGTCGCAGCCCAGTCCGCATCTTCATCATCGAGATAGCTGTCGTCATAGGACTCAGCGGT
+CAGTTCGCCGGGCGTCAGGTCTTTAACTTTAGCCAGACGCGACCAGTCAACGTCTGAAAGCGGGTTCGCATAAGGGTC
+ACCGCTCCCCTTATAAACCAACAGGGTGGTCCCGGCACCTTTCACCGGCATTGTAGGATTTGGTACAGGCATAGCGTC
+CTCACATTTCATAGGTAATGACATACGTCAGATCGGCTGAACTCCACAGGCCCGCATCATCGTCGCGCCGGTAGTCAT
+AGCCACTGGCCACCATACTGGTGATCAAATCTGACAGCGCCGGGATATCGCTCATCACCGGATAAATCCGGGACTCCA
+TCCACGAATCCAGCTCTGAATCCGGCACCTGAGCAGGCAGGAAAACTTCAATATGCAGCTCTGCCTGCCAGGTATCGC
+TGTCCAGCTCTTCGCCCGTGTATTCAGCGCCGGTGAGATAAACGGCAATTGCCGGAAAATCTTCCTCATCAAAAACAG
+CGGGGCGACCATCAAAAAGCGTCGCCCCGGTGTCATGCTTCTCCAGTGCATCCAGTACGGCTGCACGGAGTTCAGTAT
+GTTTC" } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_1" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00006 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 180 ,
+            seq-data
+              ncbieaa "MKTGAEAIRALATQLPAFRQKLSDGWYQVRIAGRDTGETELSARLNEPLANGAVI
+HIVPRLAGAKSGGVFQAVLGAAVMAVAIWMPGVGIMASNLLFSLGASMTLGGVAQMLAPKPKTPSTQTTDNGKQNTYF
+SSLDNMVAQGNVLPVLYGEMRVGSRVVSQEISTADEGDGGQVVVIGR" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 20 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 179 ,
+                        id
+                          local
+                            str "H561_S28_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_2" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00007 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 247 ,
+            seq-data
+              ncbieaa "MTETESAILAHARRCAPAESCGFVVRTPEGERYFPCVNISGEPEAYFRMSPEDWL
+RAEMQGEIVALVHSHPGGLPWLSEADRRLQVQSDLPWWLVCRGTIHKFRCVPHLTGRRFEHGVTDCYTLFRDAYHLAG
+IEMPDFHREDDWWRHGQNLYLDNLEATGLYQVPLSSAQPGDVLLCCFGSSVPNHAAIYCGDGELLHHIPEQLSKRERY
+TDKWQRRTHSLWRHRAWRASAFTGIYNDLVAASTFV" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 21 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 246 ,
+                        id
+                          local
+                            str "H561_S28_2" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_3" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00008 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 232 ,
+            seq-data
+              ncbieaa "MQDIRQETLNECTRAEQSASVVLWEIDLTEVGGERYFFCNEQNEKGEPVTWQGRQ
+YQPYPIQGSGFELNGKGTSTRPTLTVSNLYGMVTGMAEDMQSLVGGTVVRRKVYARFLDAVNFVNGNSDADPEQEVIS
+RWRIEQCSELSAVSASFVLSTPTETDGAVFPGRIMLANTCTWTYRGDECGYHGPAVADEYDQPTSDITKDKCSKCLNG
+CKFRNNVGNFGGFLSINKLSQ" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 22 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 231 ,
+                        id
+                          local
+                            str "H561_S28_3" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_4" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00009 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 109 ,
+            seq-data
+              ncbieaa "MKTFRWKVKPGMDVASAPSVRKVRFGDGYSQRAPAGLNANLKTYSVTLSVPRWEA
+TVLESFLEEHGGWKAFLWTPPYEWRQIKVTCAKWSSRVSMLRVEFSAEFEQVVN" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 23 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 108 ,
+                        id
+                          local
+                            str "H561_S28_4" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_5" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00010 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 859 ,
+            seq-data
+              ncbieaa "MAEPVGDLVVDLSLDAARFDEQMARVRRHFSGTESDAKKTAAVVEQSMSRQALAA
+QKAGISVGQYKAAMRMLPAQFTDVATQLAGGQSPWLILLQQGGQVKDSFGGMIPMFRGLAGAITLPMVGATSLAVATG
+ALAYAWYQGNSTLSDFNKTLVLSGNQAGLTADRMLVLSRAGQAAGLTFNQTSESLTALVNAGVRGGEQFEAISQSVAR
+FSSASGVEVDKVAEAFGKLTTDPTSGLTAMARQFHNVTAEQIAYVAQLQRSGDEAGALQAANEAATKGFDDQTRRLKE
+NMGTLETWADRTARAFKSMWDSVLDIGRPDTAQGMLEKAEKAFDEADKKWQWYQSRSHRRGKTSAFLANLRGAWEDRA
+NAQLGLSAATLQADLEKAREMAAKDWAESEASRLKYTEEAQKAYERLQTPLEKYTARQEELNKALKDGKILQADYNTL
+MAAAKKDYEATLKKPKQSGVKVSAGDRQEDSAHAALLTLQAELRTLEKHAGANEKISQQRRDLWKAESQFAVLEEAAQ
+RRQLSAQEKSLLAHKDETLEYKRQLAALGDKVTYQERLNALAQQADKFAQQQRAKRAAIDAKSRGLTDRQAEREATEQ
+RLKERYGDNPLALNNVMSEQKKTWAAEDQLRGSWMAGLKSGWSEWEESATDSMSQVKSAATQTFDGIAQNMAAMLTGS
+EQNWRSFTRSVLSMMTEILLKQAMVGIVGSIGSAIGGAVGGGASASGGTAIQAAAAKFHFATGGFTGTGGKYEPAGIV
+HRGEFVFTKEATSRIGVGNLYRLMRGYATGGYVGTPGSMADSRSQASGTFEQNNHVVINNDGTNGQIGPQALKAVYDV
+ARKAAMDVVTGQMRDGGLFSGGGR" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 24 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 858 ,
+                        id
+                          local
+                            str "H561_S28_5" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_6" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00011 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 144 ,
+            seq-data
+              ncbieaa "MFDGELSFALKLAREMGRPDWRAMLAGMSSTEYADWHRFYSTHYFHDVLLDMHFS
+GLTYTVLSLFFSDPDMHPLDFSLLNRREADEEPEDDVLMQKAAGLAGGVRFGPDGNEVIPASPDVADMTEDDVMLMTV
+SEGIAGGVRYG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 25 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 143 ,
+                        id
+                          local
+                            str "H561_S28_6" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_7" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00012 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 140 ,
+            seq-data
+              ncbieaa "MFLKTESFEHNGVTVTLSELSALQRIEHLAWLKEQEKKAESSGNLQVSVEDLIRG
+GAFLVAMSLWHNHPQKTKLPSMNEAVKQIEQEVLTTWPTEAIAQAENVVLRLSGMSEFVVNNAPEQADDAGPAEPVSA
+GKCSTVS" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 26 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 139 ,
+                        id
+                          local
+                            str "H561_S28_7" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_8" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00013 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 246 ,
+            seq-data
+              ncbieaa "MPVPNPTMPVKGAGTTLLVYKGSGDPYANPLSDVDWSRLAKVKDLTPGELTAESY
+DDSYLDDEDADWAATGQGQKSAGDTSFTLAWMPGEQGQQALLAWFNEGDTRAYKIRFPNGTVDVFRGWVSSIGKAVTA
+KEVITRTVKVTNVGRPSMAEDRSTVTAATGMTVTPASTSVVKGRSTTLTVAFQPEGATDKSFRAVSADKTKATVSVSG
+MTITVKGVAAGKVNIPVVSGNGELAAVAEINVTNS" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 27 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 245 ,
+                        id
+                          local
+                            str "H561_S28_8" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S28_9" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00014 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 51 ,
+            seq-data
+              ncbieaa "MESRIYPVMSDIPALSDLITSMVASGYDYRRDDDAGLWSSADLTYVITYEM" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 28 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 50 ,
+                        id
+                          local
+                            str "H561_S28_9" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 11 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_1" ,
+                location
+                  int {
+                    from 200 ,
+                    to 742 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00006" } } } } ,
+              {
+                id
+                  local
+                    id 12 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_2" ,
+                location
+                  int {
+                    from 739 ,
+                    to 1482 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00007" } } } } ,
+              {
+                id
+                  local
+                    id 13 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_3" ,
+                location
+                  int {
+                    from 1488 ,
+                    to 2186 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00008" } } } } ,
+              {
+                id
+                  local
+                    id 14 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_4" ,
+                location
+                  int {
+                    from 2186 ,
+                    to 2515 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00009" } } } } ,
+              {
+                id
+                  local
+                    id 15 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_5" ,
+                location
+                  int {
+                    from 2512 ,
+                    to 5091 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00010" } } } } ,
+              {
+                id
+                  local
+                    id 16 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_6" ,
+                location
+                  int {
+                    from 5084 ,
+                    to 5518 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00011" } } } } ,
+              {
+                id
+                  local
+                    id 17 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_7" ,
+                location
+                  int {
+                    from 5500 ,
+                    to 5922 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00012" } } } } ,
+              {
+                id
+                  local
+                    id 18 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_8" ,
+                location
+                  int {
+                    from 5938 ,
+                    to 6678 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00013" } } } } ,
+              {
+                id
+                  local
+                    id 19 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S28_9" ,
+                location
+                  int {
+                    from 6686 ,
+                    to 6841 ,
+                    strand minus ,
+                    id
+                      local
+                        str "H561_S28" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00014" } } } } } } } } ,
+    set {
+      class nuc-prot ,
+      descr {
+        source {
+          org {
+            taxname "Genus species" ,
+            orgname {
+              mod {
+                {
+                  subtype strain ,
+                  subname "strain" } } ,
+              gcode 11 } } } ,
+        comment "Annotated using prokka 1.14.5 from
+ https://github.com/tseemann/prokka" ,
+        user {
+          type
+            str "NcbiCleanup" ,
+          data {
+            {
+              label
+                str "method" ,
+              data
+                str "SeriousSeqEntryCleanup" } ,
+            {
+              label
+                str "version" ,
+              data
+                int 8 } ,
+            {
+              label
+                str "month" ,
+              data
+                int 9 } ,
+            {
+              label
+                str "day" ,
+              data
+                int 11 } ,
+            {
+              label
+                str "year" ,
+              data
+                int 2020 } } } ,
+        create-date
+          std {
+            year 2020 ,
+            month 9 ,
+            day 11 } } ,
+      seq-set {
+        seq {
+          id {
+            local
+              str "H561_S29" } ,
+          descr {
+            molinfo {
+              biomol genomic } } ,
+          inst {
+            repr raw ,
+            mol dna ,
+            length 2583 ,
+            seq-data
+              iupacna "ATCATACAGTCATTTGTTAATATCTGTCTGACAAGGTACCAAGCAGAAAATAGGG
+TTAAGATATTTGTAGCCATAAATATCATATATACGTTAGCCTATTTTTTTGGGGTTTTATATTCCTTATTTATAGATC
+ACTGGGATAATGTTTGGAAAAATATTATTTTGTTTTATGTGCTTACAACAATAACAATGTTTTTCTTCTATTTTATAC
+GAAAAGGGAAGGTTGTTAAGCTATTTTTCTTTCATTATATCTCAAAAAATAAAGTTTACGAAACTTTTATTTTTGGCC
+TTTACCAGCTCCCTCATGTTTTAAGCTCTTGGGTAAGGCTTGGATATGATAGACTGGTATTGGGGGAACTAATATCAA
+TGAGCTATGTTGGCGGATATTCGGTTGCAGTTCAAATATCTCTTGTGTCTAGCGTGATATTTCAATCATTAAATAGGT
+TTTGGACCCCTTTCTTTATTAAAAAATTAAAGGAGAATAGTAAACAAAAAAAAATTATTGTTCTTGGAGGTTTTGGAA
+TTATCTGCATAACAATACTTAATATACTATTTGGTTACGCATATTTTATTTTTTTCTTGCCCACAAATTATTCATCAT
+TCTCCAATGCTCTTCCTATATTATGTATGGCATATATGTTTCAGGGGCTATATTTTTTGATTGTTAATTATATATATT
+ATCATGATGGTAATAAATTGATATCAATTCCATCCGTTGCCTCGATCGCTATACATATAGCTGTTGCCCCAGTTTTGA
+TAAAACATATGGGATATTATGGAGCTGCAATTTCCTTATTGATTAGTTGGATAGTTCTTTTTTTATTTACATGCGTCA
+TTATATTTTATGTTAGAAGGGGGTATCGTGGGTAATATATTTATTGTTGAGTCTCCGTTTCAGCTTTCAAATGCTTTA
+CTTTATCATAAAAAAAATGATAGTGTTATTGTCAGGCTCAACGGAGAAAATAAAAATGATTTTCAAATTGAAAAAATG
+TTATCGTCGTTTAATGGCAAGGTATATATAAAAAAAGCATCAAAAGAATCGAAATTCGATTTGATTAGATTTGTTTTA
+TTTTTTGCCGTCCCTGTATTGATTGCTAATTTAAATAAAAAAGTAATTATTGGGAATTATAATTCATTGTGGATGAGA
+GTCATGGGATATTTGTTTAACCCATTTCATTTTGCCGTCCTTGATGATGGGTTGATTACTATACGAACAATAAAAAGG
+TTGGATGATAATATATCGCGTTCTGGATCAATTAAGAAACGGTTTTTATTACTGCTGGCACCAAGATTTATAACGCAA
+TATAAGATATATTCCAACTTTATTCAGATATACAACCAAGAGATCAATAAGAGAAAAAGAACTACCCGAGCCATTAAG
+GCAGGGCGAGTTTGTTTTATTGGCTCTCCATTATTTGACAAAAATGTTCTCACATTTGATTTCTATGTAAAGTGCTTG
+GCTGCGATAAGTGATAACCTTAAGCGTTGTGGATATAGCATTGAGTATTACCCTCATCGCTCAGAAAAAAACATCTCA
+TATTTAAATGTTTTTTTTGACGATGTAATAAAATCAGATGATAGCATTGAAGTCTATTATTCAGCCAGTAATGAGTTG
+CCAGAAATATTTGTATCATTTTATTCATCGGCCCTTTTAAATTTGAGAAGTGATTATCCAGAGTGTAAATTTATATCT
+TATAAGTTAGATTGTAATGAAATCAATGGTAAGTTTAGGTATGAAATAATGGAGGCATATAACTTTTTGGCATTCTCT
+GGTATTGAGGTTGTAACTATATAGGAAAATAAGATAGAAAAGGGATATTGTTGGAGTCAATATAGAACAGAAATTATA
+GTCTAAACTAATTAATCACTATGAAGGTCTATGTAATTAAATGTTAACATATTCTGTCGTTAACTGGAAAGCAAAATT
+ATTATATTTCATTCTTTTTCTGAGTTTCCTTAATGCTGTTTTGAGGTTATCAGAGGATGGATTGTCGATTTATCGATT
+ATTTATCCCTTTGCAAATATTTTTAATTTATACATTAAGTGTCACCGAGTTCAAAAAGTTTATCGTAATTCTACTACT
+TTTATTATTGTTTGGTGCTACTGGATGTATGATATCCACTTATTCTCTTAATGAGAATAATCTTGTATTTCTAATACA
+TTACTCTATACTTATACTCACTTTTTTCTCTTCTTCTGTGTTGATATCTATTACTGGTGAAACTTGTTTTTACAAATT
+CACCGCGTTCTTTTTTGGTTTTTTAATTGTTACTGGTATTATGGATTTGTTTGGTGTTACATTTCCTAATATAGAACA
+TATACCAGACGCTATACGAGGAATACATAGAATAGAGAATGATTATTCACTTGCGCTGGTTTCGTTTGTTTTTGTTGT
+GTTTTCCATCTCTAGGAAAAAAATAACTGCTTCAATCCTTACTTTTTTTACGTCTGCGATTTGTTTTTATAATGACTC
+TAAAGTTGCATTACTTTTTGTCGTTGCTGGTTATTTTTGTTTTATATTTAAAAATATAAGGTTTAGACAAAAGGAATT
+CAGGTGGATATTATTTCTTTTTGTCATAATGC" } } ,
+        seq {
+          id {
+            local
+              str "H561_S29_1" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00015 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 235 ,
+            seq-data
+              ncbieaa "MFYVLTTITMFFFYFIRKGKVVKLFFFHYISKNKVYETFIFGLYQLPHVLSSWVR
+LGYDRLVLGELISMSYVGGYSVAVQISLVSSVIFQSLNRFWTPFFIKKLKENSKQKKIIVLGGFGIICITILNILFGY
+AYFIFFLPTNYSSFSNALPILCMAYMFQGLYFLIVNYIYYHDGNKLISIPSVASIAIHIAVAPVLIKHMGYYGAAISL
+LISWIVLFLFTCVIIFYVRRGYRG" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 31 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 234 ,
+                        id
+                          local
+                            str "H561_S29_1" } } } } } } ,
+        seq {
+          id {
+            local
+              str "H561_S29_2" } ,
+          descr {
+            title "hypothetical protein GBCPINBH_00016 [Genus species]" ,
+            molinfo {
+              biomol peptide ,
+              tech concept-trans } } ,
+          inst {
+            repr raw ,
+            mol aa ,
+            length 310 ,
+            seq-data
+              ncbieaa "MGNIFIVESPFQLSNALLYHKKNDSVIVRLNGENKNDFQIEKMLSSFNGKVYIKK
+ASKESKFDLIRFVLFFAVPVLIANLNKKVIIGNYNSLWMRVMGYLFNPFHFAVLDDGLITIRTIKRLDDNISRSGSIK
+KRFLLLLAPRFITQYKIYSNFIQIYNQEINKRKRTTRAIKAGRVCFIGSPLFDKNVLTFDFYVKCLAAISDNLKRCGY
+SIEYYPHRSEKNISYLNVFFDDVIKSDDSIEVYYSASNELPEIFVSFYSSALLNLRSDYPECKFISYKLDCNEINGKF
+RYEIMEAYNFLAFSGIEVVTI" } ,
+          annot {
+            {
+              data
+                ftable {
+                  {
+                    id
+                      local
+                        id 32 ,
+                    data
+                      prot {
+                        name {
+                          "hypothetical protein" } } ,
+                    location
+                      int {
+                        from 0 ,
+                        to 309 ,
+                        id
+                          local
+                            str "H561_S29_2" } } } } } } } ,
+      annot {
+        {
+          data
+            ftable {
+              {
+                id
+                  local
+                    id 29 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S29_1" ,
+                location
+                  int {
+                    from 162 ,
+                    to 869 ,
+                    strand plus ,
+                    id
+                      local
+                        str "H561_S29" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00015" } } } } ,
+              {
+                id
+                  local
+                    id 30 ,
+                data
+                  cdregion {
+                    frame one ,
+                    code {
+                      id 11 } } ,
+                product
+                  whole
+                    local
+                      str "H561_S29_2" ,
+                location
+                  int {
+                    from 862 ,
+                    to 1794 ,
+                    strand plus ,
+                    id
+                      local
+                        str "H561_S29" } ,
+                qual {
+                  {
+                    qual "inference" ,
+                    val "ab initio prediction:Prodigal:002006" } } ,
+                xref {
+                  {
+                    data
+                      gene {
+                        locus-tag "GBCPINBH_00016" } } } } } } } } } }

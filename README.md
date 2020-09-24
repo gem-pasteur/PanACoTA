@@ -1,19 +1,25 @@
-# **-- PanACoTA --**
-[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/pipelines)
-<!---
+# **PanACoTA**
+ [![License (AGPL version 3)](https://img.shields.io/badge/license-GNU%20AGPL%20version%203-green.svg)](COPYING)
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+[![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
+
+[![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+[![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/commits)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
--->
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
- 
- [![License (AGPL version 3)](https://img.shields.io/badge/license-GNU%20AGPL%20version%203-blue.svg?style=flat-square)](COPYING)
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+
+<!--
+ To get right angles instead of rounded ones, 
+add '?style=flat-square' after .svg -->
 
 
 This README file provides some essential information to install/use PanACoTA. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details : [![](doc/source/images/manual.jpg) ](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)
 
----
----
----
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
 
 ``PanACoTA``  (PANgenome with Annotations, COre identification, Tree and corresponding Alignments) is a software providing tools for large scale bacterial comparative genomics. You can download all refseq genomes for a given species, or use your set of complete and/or draft genomes, to:
 
@@ -24,6 +30,15 @@ This README file provides some essential information to install/use PanACoTA. Bu
 - Align all Core/Persistent families
 - Infer a phylogenetic tree from the Core/Persistent families
 
+&nbsp;
+&nbsp;
+&nbsp;
+
+If you use PanACoTA, please cite:
+
+Amandine PERRIN, Eduardo P.C. ROCHA (2020).  PanACoTA: A modular tool for massive microbial comparative genomics. BioRxiv. 
+[![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
+
 
 # Installation
 
@@ -31,11 +46,12 @@ This README file provides some essential information to install/use PanACoTA. Bu
 
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
-Its external dependencies are:
-- [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (for 'annotate module' - to uniformly annotate your genomes) 
-- [**mmseqs**](https://github.com/soedinglab/MMseqs2) ('pangenome module' - to generate pangenomes)
-- [**mafft**](http://mafft.cbrc.jp/alignment/software/) ('align module' - to align persistent genome)
-- At least one of those softwares, to infer a phylogenetic tree ('tree module'):
+PanACoTA has several dependencies. Install only the one(s) you need, according to the module you want to use: 
+- For prepare module: [**mash**](https://mash.readthedocs.io/en/latest/) (to filter genomes)
+- For annotate module: [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (to uniformly annotate your genomes) 
+- For pangenome module: [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
+- For align module: [**mafft**](http://mafft.cbrc.jp/alignment/software/) (to align persistent genome)
+- For tree module: At least one of those softwares, to infer a phylogenetic tree:
     - [**IQ Tree**](http://www.iqtree.org/)
     - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install): We advise to download C code, and compile as described here above.
     - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
@@ -137,11 +153,15 @@ You can find more information in [PanACoTA documentation](http://aperrin.pages.p
 
 ## On cluster
 
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+
 We provide a singularity image, to help running PanACoTA on a cluster.
 
 First, download the singularity image:
 
-    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA[:<version>]
+
+If you want a specific version, like version 1.0, specify `shub://gem-pasteur/PanACoTA:1.0`. If you want the latest version, use `shub://gem-pasteur/PanACoTA`or `shub://gem-pasteur/PanACoTA:latest`
 
 Then, you can run PanACoTA as previously:
 

@@ -62,6 +62,9 @@ import PanACoTA.annotate_module.format_prokka as fprokka
 import PanACoTA.annotate_module.format_prodigal as fprodigal
 
 
+main_logger = logging.getLogger("annotate.geneffunc")
+
+
 def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False,
                    changed_name=False):
     """
@@ -99,8 +102,6 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
         * skipped : list of genomes skipped because they had a problem in annotation step
         * skipped_format : list of genomes skipped because they had a problem in format step
     """
-
-    main_logger = logging.getLogger("qc_annotate.geneffunc")
     main_logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
     prot_dir = os.path.join(res_path, "Proteins")

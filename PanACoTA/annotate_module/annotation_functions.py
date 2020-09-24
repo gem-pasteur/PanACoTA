@@ -257,8 +257,8 @@ def run_prokka(arguments):
     #     - outdir exists (problems or not, we returned appropriate boolean)
     #     - if outdir exists exists but force, remove this outdir.
     # So, outdir does not exist -> run prokka
-    cmd = ("prokka --outdir {} --cpus {} "
-           "--prefix {} {}").format(prok_dir, threads, name, gpath)
+    cmd = (f"prokka --outdir {prok_dir} --cpus {threads} "
+           f"--prefix {name} {gpath}")
     error = (f"Error while trying to run prokka on {name} from {gpath}")
     logger.details("Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
@@ -267,7 +267,7 @@ def run_prokka(arguments):
     if ret.returncode != 0:
         return False
     ok = check_prokka(prok_dir, prok_logfile, name, gpath, nbcont, logger)
-    logger.log(utils.detail_lvl(), "End annotating {} from {}.".format(name, gpath))
+    logger.log(utils.detail_lvl(), f"End annotating {name} from {gpath}.")
     return ok
 
 

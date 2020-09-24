@@ -629,7 +629,7 @@ def sort_proteins(x):
         sys.exit(1)
 
 
-def read_genomes(list_file, name, date, dbpath, tmp_path):
+def read_genomes(list_file, name, date, dbpath, tmp_path, logger):
     """
     Read list of genomes, and return them.
     If a genome has a name, also return it. Otherwise, return the name given by user.
@@ -657,7 +657,6 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
     dict
         {genome: spegenus.date} spegenus.date = name.date
     """
-    logger = logging.getLogger("prepare.utils")
     logger.info("Reading genomes")
     genomes = {}
     # Check that given list file exists
@@ -697,7 +696,6 @@ def read_genomes(list_file, name, date, dbpath, tmp_path):
                                         "ignored when concatenating {}").format(file, genomes_inf))
                 # If there are files to concatenate, concatenate them
                 if to_concat:
-                    print(to_concat)
                     genome_name = to_concat[0] + "-all.fna"
                     concat_file = os.path.join(tmp_path, genome_name)
                     to_concat = [os.path.join(dbpath, gname) for gname in to_concat]
@@ -829,22 +827,6 @@ def read_genomes_info(list_file, name, date=None, logger=None):
         logger.error(f"no genome listed in {list_file} were found.")
         sys.exit(1)
     return genomes
-
-
-def gen_name(param):
-        if not utils.check_format(param):
-            msg = ("The genome name must contain 4 characters. For example, this name can "
-                   "correspond to the 2 first letters of genus, and 2 first letters of "
-                   "species, e.g. ESCO for Escherichia Coli.")
-            raise argparse.ArgumentTypeError(msg)
-        return param
-
-def date_name(param):
-    if not utils.check_format(param):
-        msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
-               "corresponding to the month (2 digits) and year (2 digits).")
-        raise argparse.ArgumentTypeError(msg)
-    return param
 
 
 def read_info(name_inf, name, date, genomes_inf):
@@ -1110,7 +1092,7 @@ def check_out_dirs(resdir):
         sys.exit(1)
 
 
-def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
+def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
     """
     For the given genome (sequence in gpath), rename all its contigs
     with the new name: 'gembase_name', and save the output sequence in outfile.
@@ -1165,15 +1147,20 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
                     cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-                    prevcont_nohead = "".join(prev_cont.split(">")[1:])
-                    prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
+                    prevcont_nohead = prev_cont.split(">")[1]
+                    prev_orig_name_nohead = prev_orig_name.split(">")[1]
                     if prev_orig_name_nohead:
+                        if prev_orig_name_nohead in contigs:
+                            logger.error(f"several contigs have the same name "
+                                         f"{prev_orig_name_nohead} in {gpath}.")
+                            return False, False
                         sizes[prevcont_nohead] = cont_size
                         contigs[prev_orig_name_nohead] = prevcont_nohead
                         grf.write(cont)
                         grf.write(seq)
                 prev_cont = ">" + gembase_name + "." + str(contig_num).zfill(4)
-                prev_orig_name = line.strip()
+                # keep only first string of contig
+                prev_orig_name = line.strip().split()[0]
                 contig_num += 1
                 cont_size = 0
                 seq = ""
@@ -1184,8 +1171,12 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile):
         # Write last contig
         cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
         prevcont_nohead = "".join(prev_cont.split(">")[1:])
-        prev_orig_name_nohead = "".join(prev_orig_name.split(">")[1:])
+        prev_orig_name_nohead = prev_orig_name.split(">")[1]
         if prev_orig_name_nohead:
+            if prev_orig_name_nohead in contigs:
+                logger.error(f"several contigs have the same name {prev_orig_name_nohead} "
+                             f"in {gpath}.")
+                return False, False
             contigs[prev_orig_name_nohead] = prevcont_nohead
             sizes[prevcont_nohead] = cont_size
             grf.write(cont)

@@ -5,10 +5,9 @@
 Functional tests for the parser of align subcommand
 """
 import argparse
-
 import pytest
 
-from genomeAPCAT.subcommands import align
+from PanACoTA.subcommands import align
 
 
 def test_parser_noarg(capsys):
@@ -114,10 +113,9 @@ def test_parser_allthreads():
     assert options.quiet is False
 
 
-def test_parser_default():
+def test_parser_all_ok():
     """
-    Test that when run with specifying that we want 1 thread, it returns 1 thread for threads
-    option.
+    Test that when all arguments given are ok, it builds expected parser
     """
     parser = argparse.ArgumentParser(description="Align families", add_help=False)
     align.build_parser(parser)

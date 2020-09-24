@@ -1,0 +1,156 @@
+Discrepancy Report Results
+
+Summary
+DISC_PROTEIN_NAMES:All proteins have same name "hypothetical protein"
+FATAL: MISSING_PROTEIN_ID:16 proteins have invalid IDs.
+DISC_SOURCE_QUALS_ASNDISC:strain (all present, all same)
+DISC_SOURCE_QUALS_ASNDISC:taxname (all present, all same)
+DISC_FEATURE_COUNT:CDS: 16 present
+DISC_COUNT_NUCLEOTIDES:3 nucleotide Bioseqs are present
+FEATURE_LOCATION_CONFLICT:16 features have inconsistent gene locations.
+DISC_QUALITY_SCORES:Quality scores are missing on all sequences.
+ONCALLER_COMMENT_PRESENT:3 comment descriptors were found (all same)
+MISSING_GENOMEASSEMBLY_COMMENTS:3 bioseqs are missing GenomeAssembly structured comments
+MOLTYPE_NOT_MRNA:3 molecule types are not set as mRNA.
+TECHNIQUE_NOT_TSA:3 technique are not set as TSA
+MISSING_STRUCTURED_COMMENT:3 sequences do not include structured comments.
+MISSING_PROJECT:19 sequences do not include project.
+DISC_INCONSISTENT_MOLINFO_TECH:Molinfo Technique Report (some missing, all same)
+
+
+Detailed Report
+
+DiscRep_ALL:DISC_PROTEIN_NAMES::All proteins have same name "hypothetical protein"
+
+FATAL: DiscRep_ALL:MISSING_PROTEIN_ID::16 proteins have invalid IDs.
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_1 (length 180)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_2 (length 199)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_3 (length 232)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_4 (length 98)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_5 (length 311)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_1 (length 180)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_2 (length 247)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_3 (length 232)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_4 (length 109)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_5 (length 859)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_6 (length 144)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_7 (length 140)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_8 (length 246)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_9 (length 51)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29_1 (length 235)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29_2 (length 310)
+
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::strain (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::3 sources have 'strain' for strain
+DiscRep_ALL:DISC_SOURCE_QUALS_ASNDISC::taxname (all present, all same)
+DiscRep_SUB:DISC_SOURCE_QUALS_ASNDISC::3 sources have 'Genus species' for taxname
+DiscRep_ALL:DISC_FEATURE_COUNT::CDS: 16 present
+DiscRep_ALL:DISC_COUNT_NUCLEOTIDES::3 nucleotide Bioseqs are present
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+
+DiscRep_ALL:FEATURE_LOCATION_CONFLICT::16 features have inconsistent gene locations.
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S27:c743-201	GBCPINBH_00001
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S27:c1339-740	GBCPINBH_00002
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S27:c2187-1489	GBCPINBH_00003
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S27:c2483-2187	GBCPINBH_00004
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S27:c3453-2518	GBCPINBH_00005
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c743-201	GBCPINBH_00006
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c1483-740	GBCPINBH_00007
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c2187-1489	GBCPINBH_00008
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c2516-2187	GBCPINBH_00009
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c5092-2513	GBCPINBH_00010
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c5519-5085	GBCPINBH_00011
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c5923-5501	GBCPINBH_00012
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c6679-5939	GBCPINBH_00013
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S28:c6842-6687	GBCPINBH_00014
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S29:163-870	GBCPINBH_00015
+
+DiscRep_SUB:FEATURE_LOCATION_CONFLICT::Coding region xref gene does not exist
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:CDS	hypothetical protein	H561_S29:863-1795	GBCPINBH_00016
+
+DiscRep_ALL:DISC_QUALITY_SCORES::Quality scores are missing on all sequences.
+
+DiscRep_ALL:ONCALLER_COMMENT_PRESENT::3 comment descriptors were found (all same)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29:Annotated using prokka 1.14.5 from https://github.com/tseemann/prokka
+
+DiscRep_ALL:MISSING_GENOMEASSEMBLY_COMMENTS::3 bioseqs are missing GenomeAssembly structured comments
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+
+DiscRep_ALL:MOLTYPE_NOT_MRNA::3 molecule types are not set as mRNA.
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+
+DiscRep_ALL:TECHNIQUE_NOT_TSA::3 technique are not set as TSA
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+
+DiscRep_ALL:MISSING_STRUCTURED_COMMENT::3 sequences do not include structured comments.
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+
+DiscRep_ALL:MISSING_PROJECT::19 sequences do not include project.
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_1 (length 180)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_2 (length 199)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_3 (length 232)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_4 (length 98)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27_5 (length 311)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_1 (length 180)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_2 (length 247)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_3 (length 232)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_4 (length 109)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_5 (length 859)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_6 (length 144)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_7 (length 140)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_8 (length 246)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28_9 (length 51)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29_1 (length 235)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29_2 (length 310)
+
+DiscRep_ALL:DISC_INCONSISTENT_MOLINFO_TECH::Molinfo Technique Report (some missing, all same)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::technique (all missing)
+DiscRep_SUB:DISC_INCONSISTENT_MOLINFO_TECH::3 Molinfos are missing field technique
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S27 (length 3480)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S28 (length 7080)
+test/data/annotate/exp_files/H299_H561.fasta-prokkaRes/ESCO.1015.00001:H561_S29 (length 2583)
+

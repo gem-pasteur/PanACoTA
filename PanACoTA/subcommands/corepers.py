@@ -64,11 +64,11 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.pangenome, args.tol, args.multi, args.mixed, outputdir=args.outputdir,
+    main(cmd, args.pangenome, args.tol, args.multi, args.mixed, args.outputdir,
          floor=args.floor, verbose=args.verbose, quiet=args.quiet)
 
 
-def main(cmd, pangenome, tol, multi, mixed, outputdir=None, floor=False, verbose=0, quiet=False):
+def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, quiet=False):
     """
     Read pangenome and deduce Persistent genome according to the user criteria
 
