@@ -1,0 +1,156 @@
+Bootstrap: docker
+From:python:3.7-stretch
+
+%post
+    # Update apt-get packages
+    apt-get update &&\
+    apt-get -y upgrade
+
+    # To use the "local" python, not the system one.
+    export PATH="/usr/local/bin":$PATH
+    # To avoid using python things installed in the HOME of root
+    # (that will be mounted during singularity build)
+    export PYTHONNOUSERSITE=1
+
+    # Install packages needed
+    apt-get install -y wget
+
+    # Upgrade pip
+    pip3 install --upgrade pip
+
+    # For manually-installed programs
+    mkdir -p /opt/src
+
+    # Install mash
+    cd /opt/src
+    wget https://github.com/marbl/Mash/releases/download/v2.2/mash-Linux64-v2.2.tar &&\
+    tar -xf mash-Linux64-v2.2.tar &&\
+    rm mash-Linux64-v2.2.tar &&\
+    mv /opt/src/mash-Linux64-v2.2/mash /usr/local/bin &&\
+    rm -r mash-Linux64-v2.2
+
+    # Update makeblastdb and blastp for prokka
+    cd /opt/src
+    wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \
+    tar zxvpf ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
+    cp /opt/src/ncbi-blast-2.10.1+/bin/makeblastdb /usr/local/bin/ &&\
+    cp /opt/src/ncbi-blast-2.10.1+/bin/blastp /usr/local/bin/ &&\
+    rm ncbi-blast-2.10.1+-x64-linux.tar.gz
+
+    # Install barrnap
+    cd /opt/src
+    wget https://github.com/tseemann/barrnap/archive/0.8.tar.gz &&\
+    tar -xf 0.8.tar.gz &&\
+    rm 0.8.tar.gz &&\
+    mv /opt/src/barrnap-0.8/bin/barrnap /usr/local/bin  &&\
+    # Remove heavy useless files
+    rm -r /opt/src/barrnap-0.8/examples /opt/src/barrnap-0.8/build/*.aln
+
+    # Install prodigal
+    cd /opt/src
+    wget https://github.com/hyattpd/Prodigal/archive/v2.6.3.tar.gz &&\
+    tar -xzf v2.6.3.tar.gz &&\
+    rm v2.6.3.tar.gz
+    cd /opt/src/Prodigal-2.6.3
+    make &&\
+    make install
+
+    # Install prokka:
+    cd /opt/src
+    apt-get install -y\
+        libdatetime-perl \
+        libxml-simple-perl \
+        libdigest-md5-perl \
+        git \
+        default-jre \
+        bioperl
+    git clone https://github.com/tseemann/prokka.git
+    /opt/src/prokka/bin/prokka --setupdb &&\
+    ln -s /opt/src/prokka/bin/prokka /usr/local/bin
+
+    # Install MMseqs2 Version: f05f8c51d6e9c7c0b15fbd533e4b678303f50b3e
+    cd /opt/src
+    wget https://mmseqs.com/latest/mmseqs-linux-sse41.tar.gz &&\
+    tar xvfz mmseqs-linux-sse41.tar.gz &&\
+    rm mmseqs-linux-sse41.tar.gz &&\
+    mv /opt/src/mmseqs/bin/mmseqs /usr/local/bin &&\
+    # remove useless files
+    rm -r /opt/src/mmseqs
+
+
+    # Install mafft 7.313
+    rm /usr/bin/mafft  # remove mafft installed with bioperl
+    cd /opt/src
+    wget https://mafft.cbrc.jp/alignment/software/mafft-7.313-with-extensions-src.tgz &&\
+    tar xf mafft-7.313-with-extensions-src.tgz &&\
+    rm mafft-7.313-with-extensions-src.tgz
+    cd /opt/src/mafft-7.313-with-extensions/core
+    make clean &&\
+    make &&\
+    make install
+
+
+    # Install FastTree version 2.1.11 Double precision (No SSE3)
+    cd /opt/src
+    wget http://www.microbesonline.org/fasttree/FastTree.c &&\
+    gcc -DOPENMP -fopenmp -DUSE_DOUBLE -Wall -O3 -finline-functions -funroll-loops -o FastTreeMP FastTree.c -lm &&\
+    ln -s /opt/src/FastTreeMP /usr/local/bin
+
+
+    ## Install FastME FastME 2.1.6.1
+    cd /opt/src
+    apt-get install -y automake  &&\
+    git clone https://gite.lirmm.fr/atgc/FastME.git
+    cd /opt/src/FastME
+    ./configure &&\
+    make &&\
+    make install
+
+
+    # Install quicktree
+    cd /opt/src
+    git clone https://github.com/tseemann/quicktree
+    cd quicktree
+    make &&\
+    ln -s /opt/src/quicktree/quicktree /usr/local/bin
+
+
+    # Install iqtree
+    cd /opt/src
+    wget https://github.com/Cibiv/IQ-TREE/releases/download/v1.6.12/iqtree-1.6.12-Linux.tar.gz
+    tar -xzf iqtree-1.6.12-Linux.tar.gz &&\
+    rm iqtree-1.6.12-Linux.tar.gz &&\
+    ln -s /opt/src/iqtree-1.6.12-Linux/bin/iqtree /usr/local/bin
+
+
+    # Install iqtree2
+    cd /opt/src
+    wget https://github.com/Cibiv/IQ-TREE/releases/download/v2.0.6/iqtree-2.0.6-Linux.tar.gz
+    tar -xzf iqtree-2.0.6-Linux.tar.gz &&\
+    rm iqtree-2.0.6-Linux.tar.gz &&\
+    ln -s /opt/src/iqtree-2.0.6-Linux/bin/iqtree2 /usr/local/bin
+
+
+    # Install PanACoTA
+    cd /opt/src
+    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
+    cd /opt/src/pipeline_annotation
+    ./make
+
+
+%environment
+    export LC_ALL=C
+    # To use the "local" python, not the system one.
+    export PATH="/usr/local/bin":$PATH
+    # To avoid using python things installed in the HOME of the user
+    # (that will be mounted during container execution)
+    export PYTHONNOUSERSITE=1
+
+
+%runscript
+    if [ "$*" ]
+    then
+        exec /usr/local/bin/PanACoTA "$@"
+    else
+        exec /usr/local/bin/PanACoTA -h
+    fi
