@@ -13,10 +13,11 @@ Dependencies
 
 There are several external dependencies, and you can install only the ones you need for your study:
 
-- `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_  (for 'annotate module' - to uniformly annotate your genomes)
-- `mmseqs <https://github.com/soedinglab/MMseqs2>`_  ('pangenome module' - to generate pangenomes)
-- `mafft <http://mafft.cbrc.jp/alignment/software/>`_ ('align module' - to align persistent genome)
-- At least one of those softwares, if you want to infer a phylogenetic tree ('tree module'):
+- For prepare module: `mash <https://mash.readthedocs.io/en/latest/>`_ (to filter genomes)
+- For annotate module: `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_  (to uniformly annotate your genomes)
+- For pangenome module: `mmseqs <https://github.com/soedinglab/MMseqs2>`_  (to generate pangenomes)
+- For align module: `mafft <http://mafft.cbrc.jp/alignment/software/>`_ (to align persistent genome)
+- For tree module: At least one of those softwares:
 
     - `IQtree <http://www.iqtree.org/>`_
     - `FastTreeMP <http://www.microbesonline.org/fasttree/#Install>`_: We advise to download C code, and compile as described :ref:`here above <fasttree>`.

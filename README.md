@@ -46,11 +46,12 @@ Amandine PERRIN, Eduardo P.C. ROCHA (2020).  PanACoTA: A modular tool for massiv
 
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
-Its external dependencies are:
-- [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (for 'annotate module' - to uniformly annotate your genomes) 
-- [**mmseqs**](https://github.com/soedinglab/MMseqs2) ('pangenome module' - to generate pangenomes)
-- [**mafft**](http://mafft.cbrc.jp/alignment/software/) ('align module' - to align persistent genome)
-- At least one of those softwares, to infer a phylogenetic tree ('tree module'):
+PanACoTA has several dependencies. Install only the one(s) you need, according to the module you want to use: 
+- For prepare module: [**mash**](https://mash.readthedocs.io/en/latest/) (to filter genomes)
+- For annotate module: [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (to uniformly annotate your genomes) 
+- For pangenome module: [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
+- For align module: [**mafft**](http://mafft.cbrc.jp/alignment/software/) (to align persistent genome)
+- For tree module: At least one of those softwares, to infer a phylogenetic tree:
     - [**IQ Tree**](http://www.iqtree.org/)
     - [**FastTreeMP**](http://www.microbesonline.org/fasttree/#Install): We advise to download C code, and compile as described here above.
     - [**FastME**](http://www.atgc-montpellier.fr/fastme/binaries.php)
