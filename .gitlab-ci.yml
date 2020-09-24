@@ -137,6 +137,8 @@ coverage:
     - coverage combine .coverage-unit .coverage-functional
     - coverage html
     - coverage report
+    # test coverage parsing: \d+\%\s*$
+    # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
     paths:
       - htmlcov
