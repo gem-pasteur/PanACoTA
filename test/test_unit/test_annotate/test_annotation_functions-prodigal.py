@@ -12,7 +12,7 @@ import shutil
 
 import test.test_unit.utilities_for_tests as tutil
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.annotation_functions as afunc
+from PanACoTA.annotate_module import annotation_functions as afunc
 
 
 # Define variables used by several tests
@@ -89,281 +89,239 @@ def test_check_prodigal_nofaa():
     assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
     msg = "prodigal_out_for_test-missfaa original_name.fna: no or several .faa file(s)"
     q = logger[0]
-    assert q.qsize() == 2
+    assert q.qsize() == 1
     assert q.get().message == msg
-    assert q.get().message == "no faa"
 
 
-# def test_check_prodigal_sevfaa():
-#     """
-#     Check that check_prodigal returns false when there is more than 1 faa file,
-#     and an error message
-#     """
-#     logger = my_logger("test_check_prodigal_sevfaa")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "out_test_nofaa")
-#     name = "prodigal_out_for_test-missfaa"
-#     os.makedirs(out_dir)
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + "2.faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = "prodigal_out_for_test-missfaa original_name.fna: several .faa files"
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_sevfaa():
+    """
+    Check that check_prodigal returns false when there is more than 1 faa file,
+    and an error message
+    """
+    logger = my_logger("test_check_prodigal_sevfaa")
+    ori_prod_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_nofaa")
+    name = "prodigal_out_for_test-missfaa"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prod_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prod_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prod_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + "2.faa"))
+    shutil.copyfile(os.path.join(ori_prod_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "prodigal_out_for_test-missfaa original_name.fna: no or several .faa file(s)"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
 
 
-# def test_check_prodigal_noffn():
-#     """
-#     Check that check_prodigal returns false when a ffn file is missing, and an error message
-#     """
-#     logger = my_logger("test_check_prodigal_noffn")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "out_test_noffn")
-#     name = "prodigal_out_for_test-missffn"
-#     os.makedirs(out_dir)
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = "prodigal_out_for_test-missffn original_name.fna: no .ffn file"
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_noffn():
+    """
+    Check that check_prodigal returns false when a ffn file is missing, and an error message
+    """
+    logger = my_logger("test_check_prodigal_noffn")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test-missffn"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "prodigal_out_for_test-missffn original_name.fna: no or several .ffn file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_sevffn():
-#     """
-#     Check that check_prodigal returns false when there is more than 1 ffn file,
-#     and an error message
-#     """
-#     logger = my_logger("test_check_prodigal_sevffn")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "out_test_noffn")
-#     name = "prodigal_out_for_test-missffn"
-#     os.makedirs(out_dir)
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + "2.ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = "prodigal_out_for_test-missffn original_name.fna: several .ffn files"
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_sevffn():
+    """
+    Check that check_prodigal returns false when there is more than 1 ffn file,
+    and an error message
+    """
+    logger = my_logger("test_check_prodigal_sevffn")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test-sevffn"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + "2.ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "prodigal_out_for_test-sevffn original_name.fna: no or several .ffn file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_nogff():
-#     """
-#     Check that check_prodigal returns false when a ffn file is missing, and an error message
-#     """
-#     logger = my_logger("test_check_prodigal_nogff")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "out_test_noffn")
-#     name = "prodigal_out_for_test-missgff"
-#     os.makedirs(out_dir)
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = "prodigal_out_for_test-missgff original_name.fna: no .gff file"
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_nogff():
+    """
+    Check that check_prodigal returns false when a ffn file is missing, and an error message
+    """
+    logger = my_logger("test_check_prodigal_nogff")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test-missgff"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    gpath = "path/to/nogenome/original_name.fna"
+    nbcont = 7
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "prodigal_out_for_test-missgff original_name.fna: no or several .gff file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_sevgff():
-#     """
-#     Check that check_prodigal returns false when there is more than 1 ffn file,
-#     and an error message
-#     """
-#     logger = my_logger("test_check_prodigal_sevgff")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "out_test_noffn")
-#     name = "prodigal_out_for_test-sevgff"
-#     os.makedirs(out_dir)
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + "2.gff"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = "prodigal_out_for_test-sevgff original_name.fna: several .gff files"
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_sevgff():
+    """
+    Check that check_prodigal returns false when there is more than 1 ffn file,
+    and an error message
+    """
+    logger = my_logger("test_check_prodigal_sevgff")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test-sevgff"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + "2.gff"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    gpath = "path/to/nogenome/original_name.fna"
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "prodigal_out_for_test-sevgff original_name.fna: no or several .gff file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_wrong_cont():
-#     """
-#     Check that check_prodigal returns an error message when the number of contigs in tbl
-#     file is not as expected
-#     """
-#     logger = my_logger("test_check_prodigal_wrong_cont")
-#     outdir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     name = "prodigal_out_for_test"
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 10
-#     assert not afunc.check_prodigal(outdir, logf, name, gpath, nbcont, logger[1])
-#     msg = ("prodigal_out_for_test original_name.fna: no matching number of contigs; "
-#            "nbcontig=10; in tbl =7")
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_emptyfaa():
+    """
+    Check that check_prodigal returns false when there are all expected files, but faa
+    file is empty
+    """
+    logger = my_logger("test_check_prodigal_ok")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test"
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    os.makedirs(out_dir)
+    open(os.path.join(out_dir, name + ".faa"), "w").close()
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    gpath = "path/to/nogenome/original_name.fna"
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "Genome prodigal_out_for_test (from original_name.fna): At least one of your prodigal result file is empty."
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_wrong_tbl_cds():
-#     """
-#     Check that check_prodigal returns an error message when the number of CDS in tbl
-#     file is different from the number of headers in faa file
-#     """
-#     logger = my_logger("test_check_prodigal_wrong_tbl_cds")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "res_checkprodigalWrongTbl")
-#     os.makedirs(out_dir)
-#     name = "prodigal_out_for_test-wrongCDS"
-#     tblfile = os.path.join(TEST_DIR, name + ".tbl")
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-
-#     shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg1 = ("prodigal_out_for_test-wrongCDS original_name.fna: "
-#             "no matching number of proteins between tbl and faa; "
-#             "faa=13; in tbl =12")
-#     msg2 = ("prodigal_out_for_test-wrongCDS original_name.fna: "
-#             "no matching number of genes between tbl and ffn; "
-#             "ffn=17; in tbl =14genes 2CRISPR")
-#     q = logger[0]
-#     assert q.qsize() == 2
-#     assert q.get().message == msg1
-#     assert q.get().message == msg2
+def test_check_prodigal_emptyffn():
+    """
+    Check that check_prodigal returns false when there are all expected files, but ffn
+    file is empty
+    """
+    logger = my_logger("test_check_prodigal_ok")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test"
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    os.makedirs(out_dir)
+    open(os.path.join(out_dir, name + ".ffn"), "w").close()
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    gpath = "path/to/nogenome/original_name.fna"
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "Genome prodigal_out_for_test (from original_name.fna): At least one of your prodigal result file is empty."
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_wrong_tbl_crispr():
-#     """
-#     Check that check_prodigal returns an error message when the number of headers in ffn
-#     file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
-#     """
-#     logger = my_logger("test_check_prodigal_wrong_tbl_crispr")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "res_checkprodigalWrongCRISPR")
-#     os.makedirs(out_dir)
-#     name = "prodigal_out_for_test-wrongtblCRISP"
-#     tblfile = os.path.join(TEST_DIR, name + ".tbl")
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-#                     os.path.join(out_dir, name + ".ffn"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
-#     logf = "prodigal.log"
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert not afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-#     msg = ("prodigal_out_for_test-wrongtblCRISP original_name.fna: "
-#            "no matching number of genes between tbl and ffn; "
-#            "ffn=17; in tbl =15genes 1CRISPR")
-#     q = logger[0]
-#     assert q.qsize() == 1
-#     assert q.get().message == msg
+def test_check_prodigal_emptygff():
+    """
+    Check that check_prodigal returns false when there are all expected files, but gff
+    file is empty
+    """
+    logger = my_logger("test_check_prodigal_ok")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test"
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    os.makedirs(out_dir)
+    open(os.path.join(out_dir, name + ".gff"), "w").close()
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    gpath = "path/to/nogenome/original_name.fna"
+    assert not afunc.check_prodigal(gpath, name, out_dir, logger[1])
+    msg = "Genome prodigal_out_for_test (from original_name.fna): At least one of your prodigal result file is empty."
+    q = logger[0]
+    assert q.qsize() == 1
+    assert msg in q.get().message
 
 
-# def test_check_prodigal_tbl_crispr_newversion():
-#     """
-#     Check that check_prodigal does not return an error message when the number of headers in ffn
-#     file is equal to the number of CDS in tbl file (1CRISPR in tbl, 0 in ffn), but
-#     does not contain the CRISPRs found in tbl
-#     As the new version of prodigal (1.12) does not put crisprs in .ffn
-#     """
-#     logger = my_logger("test_check_prodigal_tbl_crispr_newversion")
-#     ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     ori_name = "prodigal_out_for_test"
-#     out_dir = os.path.join(GENEPATH, "res_checkprodigalWrongCRISPRnewversion")
-#     os.makedirs(out_dir)
-#     name = "prodigal_out_for_test-wrongtblCRISPnewversion"
-#     ffnfile = os.path.join(TEST_DIR, name + ".ffn")
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-#                     os.path.join(out_dir, name + ".tbl"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-#                     os.path.join(out_dir, name + ".faa"))
-#     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-#                     os.path.join(out_dir, name + ".gff"))
-#     shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert afunc.check_prodigal(out_dir, logf, name, gpath, nbcont, logger[1])
-
-
-# def test_check_prodigal_ok():
-#     """
-#     Check that everything is ok with prodigal results (tbl, faa and ffn files exist,
-#     and number of CDS, CRISPR and genes correspond between them)
-#     """
-#     logger = my_logger("test_check_prodigal_ok")
-#     outdir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
-#     name = "prodigal_out_for_test"
-#     logf = os.path.join(GENEPATH, "prodigal.log")
-#     gpath = "path/to/nogenome/original_name.fna"
-#     nbcont = 7
-#     assert afunc.check_prodigal(outdir, logf, name, gpath, nbcont, logger[1])
+def test_check_prodigal_ok():
+    """
+    Check that everything is ok with prodigal results (tbl, faa and ffn files exist,
+    and number of CDS, CRISPR and genes correspond between them)
+    """
+    logger = my_logger("test_check_prodigal_ok")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prodigalRes")
+    ori_name = "prodigal.outtest.ok"
+    out_dir = os.path.join(GENEPATH, "out_test_noffn")
+    name = "prodigal_out_for_test"
+    logf = os.path.join(GENEPATH, "prodigal.log")
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    gpath = "path/to/nogenome/original_name.fna"
+    assert afunc.check_prodigal(gpath, name, out_dir, logger[1])
 
 
 # def test_run_prodigal_out_exists_ok():

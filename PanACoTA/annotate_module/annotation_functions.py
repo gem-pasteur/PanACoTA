@@ -500,24 +500,20 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
 
     if len(faafile) != 1:
         logger.error("{} {}: no or several .faa file(s)".format(name, oriname))
-        logger.info("no faa")
         missing_file = True
     if len(ffnfile) !=  1:
         logger.error("{} {}: no or several .ffn file(s)".format(name, oriname))
         missing_file = True
-        logger.info("no ffn")
     if len(gfffile) != 1:
         logger.error("{} {}: no or several .gff file(s)".format(name, oriname))
         missing_file = True
-        logger.info("no gff")
 
     # If we have all result files, check they are not empty
     if not missing_file:
         if (os.path.getsize(faafile[0]) == 0 or os.path.getsize(ffnfile[0]) == 0
             or os.path.getsize(gfffile[0]) == 0):
-            origname = os.path.basename(gpath)
             logger.error("Genome {} (from {}): At least one of your prodigal result file "
-                         "is empty.".format(name, origname))
+                         "is empty.".format(name, oriname))
             return False
     return not missing_file
 
