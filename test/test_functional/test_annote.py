@@ -318,7 +318,8 @@ def test_main_onexistingprodigaldir(capsys):
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
     with open(logfile, "r") as lc:
         log_content = lc.readlines()
-    assert ("Prodigal results folder already exists") in " ".join(log_content)
+    assert ("Prodigal results folder test/data/annotate/exp_files/H299_H561.fasta-prodigalRes "
+            "already exists") in " ".join(log_content)
     assert ("Prodigal did not run again. Formatting step will use already generated results of "
             "Prodigal in test/data/annotate/exp_files/H299_H561.fasta-prodigalRes. "
             "If you want to re-run Prodigal, first remove this result folder, or use '-F' or "
@@ -402,7 +403,7 @@ def test_main_existing_prodigaldir_errorannot(capsys):
     shutil.copyfile(ori_genome1, used_genome1)
     # Copy prokka results to genepath/genomes/gname-prokkaRes
     shutil.copytree(ori_prok_g1, used_prok_g1)
-    # Same think for 2nd genome
+    # Same thing for 2nd genome
     ori_genome2 = os.path.join(GEN_PATH, "H299_H561.fasta")
     ori_prok_g2 = os.path.join(EXP_DIR, "H299_H561.fasta-prodigalRes")
     used_genome2 = os.path.join(genome_path_used, "H299_H561.fasta")
@@ -435,7 +436,8 @@ def test_main_existing_prodigaldir_errorannot(capsys):
         log_content = lc.readlines()
     assert ("Error: No genome was correctly annotated, "
             "no need to format them") in ' '.join(log_content)
-    assert ("Prodigal results folder already exists.") in ' '.join(log_content)
+    assert ("Prodigal results folder test/data/annotate/generated_by_func-tests/genomes/"
+            "H299_H561.fasta-prodigalRes already exists.") in ' '.join(log_content)
     assert ("ESCO.1116.00002 B2_A3_5.fasta-changeName.fna: "
             "no or several .faa file(s)") in ' '.join(log_content)
     assert ("ESCO.1015.00001 H299_H561.fasta: "
