@@ -324,7 +324,7 @@ def run_prodigal(arguments):
     # otherwise it would have been deleted just before),
     # can we use it for next step ? -> check content.
     if os.path.isdir(prodigal_dir):
-        logger.warning(("Prodigal results folder already exists.").format(prodigal_dir))
+        logger.warning(f"Prodigal results folder {prodigal_dir} already exists.")
         ok = check_prodigal(gpath, name, prodigal_dir, logger)
         # If everything ok in the result dir, do not rerun prodigal,
         # use those results for next step (formatting)
@@ -512,7 +512,7 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
     if not missing_file:
         if (os.path.getsize(faafile[0]) == 0 or os.path.getsize(ffnfile[0]) == 0
             or os.path.getsize(gfffile[0]) == 0):
-            logger.error("Genome {} (from {}): At least one of your prodigal result file "
+            logger.error("Genome {} (from {}): At least one of your Prodigal result file "
                          "is empty.".format(name, oriname))
             return False
     return not missing_file
