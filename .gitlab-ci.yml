@@ -79,6 +79,7 @@ unit-test-ubuntu:
     - prodigal -v
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-pan.py -vx
+    - py.test test/test_unit/test-utils-argparse.py -vx
     - py.test test/test_unit/test_prepare -v -x
     - py.test test/test_unit/test_annotate/test_genome_func.py -vx
     # - py.test test/test_unit/test_annotate/test_format_prodigal.py -vx
