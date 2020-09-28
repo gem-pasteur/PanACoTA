@@ -329,7 +329,6 @@ def run_prodigal(arguments):
         # If everything ok in the result dir, do not rerun prodigal,
         # use those results for next step (formatting)
         if ok:
-            print("OK")
             logger.log(utils.detail_lvl(), "Prodigal did not run again. "
                                            "Formatting step will use already generated results of "
                                            "Prodigal in {}. If you want to re-run Prodigal, first "
@@ -340,7 +339,6 @@ def run_prodigal(arguments):
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:
-            print("PAS OK ")
             logger.warning("Problems in the files contained in your already existing output dir "
                            "({}). Please check it, or remove it to "
                            "re-annotate.".format(prodigal_dir))
@@ -509,6 +507,8 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
     if len(gfffile) != 1:
         logger.error("{} {}: no or several .gff file(s)".format(name, oriname))
         missing_file = True
+    print("missing file")
+    print(missing_file)
 
     # If we have all result files, check they are not empty
     if not missing_file:
@@ -516,6 +516,7 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
             or os.path.getsize(gfffile[0]) == 0):
             logger.error("Genome {} (from {}): At least one of your Prodigal result file "
                          "is empty.".format(name, oriname))
+            print("empty file")
             return False
     return not missing_file
 
