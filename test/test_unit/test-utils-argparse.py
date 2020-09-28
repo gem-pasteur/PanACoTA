@@ -90,7 +90,7 @@ def test_thread_num():
     nb_cpu = multiprocessing.cpu_count()
     with pytest.raises(argparse.ArgumentTypeError) as err:
         a = autils.thread_num(str(nb_cpu*2))
-    assert ("You have 16 threads on your computer, you cannot ask for more: invalid value: "
+    assert (f"You have {nb_cpu} threads on your computer, you cannot ask for more: invalid value: "
             f"{nb_cpu*2}") in str(err.value)
     with pytest.raises(argparse.ArgumentTypeError) as err:
         a = autils.thread_num("-1")
