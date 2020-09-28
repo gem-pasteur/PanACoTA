@@ -495,15 +495,14 @@ def test_run_prokka_out_exists_error():
     arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
-    # assert q.qsize() == 4
+    assert q.qsize() == 4
     # start annotating :
     assert q.get().message.startswith("Start annotating")
     # warning prokka results folder exists:
     assert q.get().message == ("Prokka results folder test/data/annotate/generated_by_unit-tests/"
                                "original_name-error-prokkaRes already exists.")
     # error, no tbl file
-    msg = "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
-    assert q.get().message == msg
+    assert q.get().message == "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
     # warning, files in outdir are not as expected
     assert q.get().message.startswith("Problems in the files contained in your already existing "
                                       "output dir ")
@@ -554,9 +553,9 @@ def test_run_prokka_out_exists_force():
         assert CDS == 16
     # Check that faa and ffn files are as expected
     assert os.path.isfile(out_faa)
-    tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
     # assert q.qsize() == 3
     assert q.get() .message.startswith("Start annotating test_runprokka_H299 from test/data/"
@@ -609,15 +608,11 @@ def test_run_prokka_out_doesnt_exist():
             if "CDS" in line:
                 CDS += 1
         assert CDS == 16
-    assert os.path.isfile(out_faa)
-    with open(exp_dir + ".faa", "r") as expf, open(out_faa, "r") as outf:
-        for line_exp, line_out in zip(expf, outf):
-            assert line_exp == line_out
     # Check that faa and ffn files are as expected
     assert os.path.isfile(out_faa)
-    tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
     assert q.qsize() == 3
     assert q.get().message.startswith("Start annotating")
@@ -635,12 +630,12 @@ def test_run_prokka_out_problem_running():
     """
     logger = my_logger("test_run_prokka_out_problem_running")
     utils.init_logger(LOGFILE_BASE, 0, 'test_run_prokka_out_problem_running')
-    gpath = os.path.join(GEN_PATH, "H299 H561.fasta")
+    gpath = os.path.join(GEN_PATH, "H299_H561bis.fasta")
     cores_prokka = 2
     name = "test_runprokka_H299-error"
     force = False
     nbcont = 3
-    logf = os.path.join(GENEPATH, "H299 H561.fasta-prokka.log")
+    logf = os.path.join(GENEPATH, "H299_H561.fasta-prokka.log")
     arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
@@ -648,8 +643,8 @@ def test_run_prokka_out_problem_running():
     assert q.get().message.startswith("Start annotating")
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
-                               "H299 H561.fasta-prokkaRes --cpus 2 "
+                               "H299_H561bis.fasta-prokkaRes --cpus 2 "
                                "--prefix test_runprokka_H299-error "
-                               "test/data/annotate/genomes/H299 H561.fasta")
+                               "test/data/annotate/genomes/H299_H561bis.fasta")
     assert q.get().message == ("Error while trying to run prokka on test_runprokka_H299-error "
-                               "from test/data/annotate/genomes/H299 H561.fasta")
+                               "from test/data/annotate/genomes/H299_H561bis.fasta")
