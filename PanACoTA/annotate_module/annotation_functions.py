@@ -553,7 +553,7 @@ def count_tbl(tblfile):
                 nb_cds += 1
             if "locus_tag" in line:
                 nb_gene += 1
-            if "repeat_region" in line:
+            if "repeat_region" in line or (len(line.split()) == 3 and "CRISPR" in line):
                 nb_crispr += 1
     return nbcont, nb_cds, nb_gene, nb_crispr
 

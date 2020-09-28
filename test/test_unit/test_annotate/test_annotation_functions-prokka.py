@@ -9,10 +9,11 @@ import pytest
 import os
 import logging
 import shutil
+import multiprocessing
 
 import test.test_unit.utilities_for_tests as tutil
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.annotation_functions as afunc
+from PanACoTA.annotate_module import annotation_functions as afunc
 
 
 # Define variables used by several tests
@@ -55,7 +56,6 @@ def my_logger(name):
     """
     logger given to function called by a subprocess
     """
-    import multiprocessing
     m = multiprocessing.Manager()
     q = m.Queue()
     qh = logging.handlers.QueueHandler(q)
@@ -72,10 +72,10 @@ def test_check_prokka_no_outdir():
     Test that prokka returns the right error message when output directory does not exist
     """
     logger = my_logger("test_check_prokka_no_outdir")
-    outdir = "toto"
+    outdir = "outdir"
     name = "prokka_out_for_test"
     logf = "prokka.log"
-    gpath = "path/to/nogenome/original_name.fna"
+    gpath = os.path.join(GENEPATH, "toto.fna")
     nbcont = 7
     assert not afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
     q = logger[0]
