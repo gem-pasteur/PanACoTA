@@ -326,6 +326,7 @@ def run_prodigal(arguments):
     if os.path.isdir(prodigal_dir):
         logger.warning(f"Prodigal results folder {prodigal_dir} already exists.")
         ok = check_prodigal(gpath, name, prodigal_dir, logger)
+        print("already existing")
         # If everything ok in the result dir, do not rerun prodigal,
         # use those results for next step (formatting)
         if ok:
