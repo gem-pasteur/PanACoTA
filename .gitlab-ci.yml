@@ -77,16 +77,16 @@ unit-test-ubuntu:
   script:
     - prokka --version
     - prodigal -v
-    - py.test test/test_unit/test_utils.py -vx
-    - py.test test/test_unit/test_utils-logging.py -xv
-    - py.test test/test_unit/test_utils-pan.py -vx
-    - py.test test/test_unit/test-utils-argparse.py -vx
-    - py.test test/test_unit/test_prepare -v -x
-    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
-    # - py.test test/test_unit/test_annotate/test_format_prodigal.py -vx
-    # - py.test test/test_unit/test_annotate/test_format_prokka.py -vx
-    - py.test test/test_unit/test_annotate/test_annotation_functions-prokka.py  -vx
-    - py.test test/test_unit/test_annotate/test_annotation_functions-prodigal.py  -vxs
+    # - py.test test/test_unit/test_utils.py -vx
+    # - py.test test/test_unit/test_utils-logging.py -xv
+    # - py.test test/test_unit/test_utils-pan.py -vx
+    # - py.test test/test_unit/test-utils-argparse.py -vx
+    # - py.test test/test_unit/test_prepare -v -x
+    # - py.test test/test_unit/test_annotate/test_genome_func.py -vx
+    # # - py.test test/test_unit/test_annotate/test_format_prodigal.py -vx
+    # # - py.test test/test_unit/test_annotate/test_format_prokka.py -vx
+    # - py.test test/test_unit/test_annotate/test_annotation_functions-prokka.py  -vx
+    - py.test test/test_unit/test_annotate/test_annotation_functions-prodigal.py::test_run_prodigal_out_exists_ok  -vxs
     - py.test test/test_unit/test_annotate/test_annotation_general.py  -vx
     # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
     - py.test test/test_unit/test_pangenome -vx
