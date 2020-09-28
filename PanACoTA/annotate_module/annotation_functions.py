@@ -339,6 +339,7 @@ def run_prodigal(arguments):
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:
+            print(os.listdir(prodigal_dir))
             logger.warning("Problems in the files contained in your already existing output dir "
                            "({}). Please check it, or remove it to "
                            "re-annotate.".format(prodigal_dir))
