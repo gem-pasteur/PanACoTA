@@ -458,8 +458,9 @@ def test_run_prokka_out_exists_ok():
     assert q.qsize() == 4
     # start annotating :
     assert q.get().message.startswith("Start annotating")
-    # # warning prokka results folder exists:
-    assert q.get().message.startswith("Prokka results folder test/data/annotate/test_files/"
+    # warning prokka results folder exists:
+    assert q.get().message.startswith("Prokka results folder test/data/annotate/"
+                                      "test_files/"
                                       "original_name.fna-prokkaRes already exists.")
     # Results in result folder are ok
     assert q.get().message.startswith("Prokka did not run again, formatting step used already "
@@ -505,7 +506,8 @@ def test_run_prokka_out_exists_error():
     assert q.get().message == "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
     # warning, files in outdir are not as expected
     assert q.get().message.startswith("Problems in the files contained in your already existing "
-                                      "output dir ")
+                                      "output dir (test/data/annotate/generated_by_unit-tests/"
+                                      "original_name-error-prokkaRes)")
 
 
 def test_run_prokka_out_exists_force():
@@ -557,7 +559,7 @@ def test_run_prokka_out_exists_force():
     assert os.path.isfile(out_ffn)
     assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
-    # assert q.qsize() == 3
+    assert q.qsize() == 4
     assert q.get() .message.startswith("Start annotating test_runprokka_H299 from test/data/"
                                        "annotate/genomes/H299_H561.fasta with Prokka")
     assert q.get() .message == ("Prokka results folder already exists, but removed because "
@@ -570,7 +572,7 @@ def test_run_prokka_out_exists_force():
                                        "from test/data/annotate/genomes/H299_H561.fasta")
 
 
-def test_run_prokka_out_doesnt_exist():
+def test_run_prokka_out_doesnt_exist_ok():
     """
     Test that when the output directory does not exist, it creates it, and runs prokka
     with all expected outfiles
