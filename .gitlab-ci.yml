@@ -78,6 +78,7 @@ unit-test-ubuntu:
     - prokka --version
     - prodigal -v
     - py.test test/test_unit/test_utils.py -vx
+    - py.test test/test_utils-logging.py -xv
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test-utils-argparse.py -vx
     - py.test test/test_unit/test_prepare -v -x
