@@ -59,7 +59,7 @@ import multiprocessing
 import threading
 import PanACoTA.utils as utils
 import PanACoTA.annotate_module.format_prokka as fprokka
-import PanACoTA.annotate_module.format_prodigal as fprodigal
+from PanACoTA.annotate_module import format_prodigal as fprodigal
 
 
 main_logger = logging.getLogger("annotate.geneffunc")
@@ -195,7 +195,7 @@ def handle_genome(args):
         * genome name (used to get info from the pool.map_async)
     """
     (genome, name, gpath, annot_path, lst_dir, prot_dir,
-     gene_dir, rep_dir, gff_dir, prodigal_only, q, changed) = args
+     gene_dir, rep_dir, gff_dir, prodigal_only, q) = args
 
     # Define which formatting must be used, given the annotation software
     if prodigal_only:
