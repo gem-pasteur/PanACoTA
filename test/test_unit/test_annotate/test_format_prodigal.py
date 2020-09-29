@@ -11,7 +11,7 @@ import shutil
 from io import StringIO
 import pytest
 
-import PanACoTA.annotate_module.format_prodigal as prodigalfunc
+from PanACoTA.annotate_module import format_prodigal as prodigalfunc
 import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
 
