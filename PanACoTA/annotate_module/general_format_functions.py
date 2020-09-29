@@ -133,7 +133,7 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
     # (genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir, rep_dir,
     # gff_dir, results, prodigal_only, q)
     params = [(genome, name, gpath, annot_path, lst_dir, prot_dir, gene_dir,
-               rep_dir, gff_dir, prodigal_only, q, changed_name)
+               rep_dir, gff_dir, prodigal_only, q)
               for genome, (name, _, gpath, _, _, _) in genomes_ok.items()]
 
     # Create pool and launch parallel formating steps
