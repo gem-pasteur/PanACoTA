@@ -58,7 +58,7 @@ import progressbar
 import multiprocessing
 import threading
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.format_prokka as fprokka
+from PanACoTA.annotate_module import format_prokka as fprokka
 from PanACoTA.annotate_module import format_prodigal as fprodigal
 
 

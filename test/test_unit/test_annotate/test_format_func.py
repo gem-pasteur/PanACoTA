@@ -39,9 +39,6 @@ def setup_teardown_module():
     print("setup")
 
     yield
-    # for f in LOGFILES:
-    #     if os.path.exists(f):
-    #         os.remove(f)
     shutil.rmtree(GENEPATH)
     print("teardown")
 
@@ -188,17 +185,17 @@ def test_write_header_crispr():
     outfile.close()
 
 
-# def test_handle_genome_nores():
-#     """
-#     Test that when we try to format a genome which is not in results,
-#     it returns a tuple with "no_res" and the genome name.
-#     """
-#     results = {"abcd.fasta": True}
-#     prodigal_only = False
-#     args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
-#             "gene/dir", "rep/dir", "gff/dir", prodigal_only, my_logger()[0])
-#     res = ffunc.handle_genome(args)
-#     assert res == ("no_res", "toto.fasta")
+def test_handle_genome_nores():
+    """
+    Test that when we try to format a genome which is not in results,
+    it returns a tuple with "no_res" and the genome name.
+    """
+    results = {"abcd.fasta": True}
+    prodigal_only = False
+    args = ("toto.fasta", "name", "genome/path", "prokka/path", "lst/dir", "prot/dir",
+            "gene/dir", "rep/dir", "gff/dir", prodigal_only, my_logger()[0])
+    res = ffunc.handle_genome(args)
+    assert res == ("no_res", "toto.fasta")
 
 
 # def test_handle_genome_badprok():
