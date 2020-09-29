@@ -82,8 +82,8 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test_utils-argparse.py -vx
     - py.test test/test_unit/test_prepare -v -x
-    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
     - py.test test/test_unit/test_annotate/test_format_prodigal.py -vx
+    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
     # - py.test test/test_unit/test_annotate/test_format_prokka.py -vx
     - py.test test/test_unit/test_annotate/test_annotation_*  -vx
     # - py.test test/test_unit/test_apnnotate/test_format_func.py -v -x
