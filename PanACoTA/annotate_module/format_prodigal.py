@@ -169,7 +169,7 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_rep_file)
             os.remove(res_gff_file)
             os.remove(res_prot_file)
-        except OSError:
+        except OSError: # pragma: no cover
             pass
         logger.error("Problems while generating .prt file (Proteins folder) "
                      "for {}".format(name))
