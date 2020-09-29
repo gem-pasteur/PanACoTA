@@ -11,9 +11,9 @@ import shutil
 from io import StringIO
 import pytest
 
-from PanACoTA.annotate_module import format_prodigal as prodigalfunc
-import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
+import PanACoTA.utils as utils
+from PanACoTA.annotate_module import format_prodigal as prodigalfunc
 
 ANNOTEDIR = os.path.join("test", "data", "annotate")
 GENOMES_DIR = os.path.join(ANNOTEDIR, "genomes")
