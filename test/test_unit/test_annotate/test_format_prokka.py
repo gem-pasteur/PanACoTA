@@ -11,7 +11,7 @@ import shutil
 from io import StringIO
 import pytest
 
-import PanACoTA.annotate_module.format_prokka as prokkafunc
+from PanACoTA.annotate_module import format_prokka as prokkafunc
 import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
 
@@ -22,6 +22,7 @@ GENEPATH = os.path.join(ANNOTEDIR, "generated_by_unit-tests")
 
 LOGFILE_BASE = os.path.join(GENEPATH, "logfile")
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
+
 
 @pytest.fixture(autouse=True)
 def setup_teardown_module():
@@ -40,7 +41,7 @@ def setup_teardown_module():
     print("setup")
 
     yield
-    shutil.rmtree(GENEPATH)
+    # shutil.rmtree(GENEPATH)
     print("teardown")
 
 
@@ -54,7 +55,13 @@ def test_tbl_to_lst_not_changed_names(caplog):
     - CDS features (some with all info = ECnumber, gene name, product etc. ;
     some with missing info)
     - tRNA type
-    - repeat_region type (*2)
+    - repeat_region type (*2) -> should be ignored in .lst
+            * 1 in prokka1 version (start end repeat_region
+                                        rpt_family CRISPR
+                                        score 7)
+            * 1 in prokka2 version (start end CRISPR
+                                        note CRISPR with x repeat units
+                                        rpt_family CRISPR)
     - contigs with more than 2 genes
     - contig with only 2 genes (both 'b' loc)
     - contig with 1 gene ('b' loc)

@@ -237,6 +237,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
     """
     # Number CRISPRs. By default, 0 CRISPR -> next one will be CRISPR1
     crispr_num = 1
+    crispr = False
     # Protein localisation in contig (b = border ; i = inside)
     cont_loc = "b"
     prev_cont_loc = "b"
@@ -320,7 +321,7 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
 
                     # If not first gene of the contig, write the previous gene to .lst file
                     # The first gene will be written while reading the 2nd gene
-                    if start != "-1" and end != "-1":
+                    if start != "-1" and end != "-1" and not crispr:
                         crispr_num, lstline = general.write_gene(feature_type, locus_num,
                                                                  gene_name, product, crispr_num,
                                                                  prev_cont_loc, genome,
@@ -329,6 +330,10 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
 
                     # Get new values for the next gene: start, end, strand and feature type
                     start, end, feature_type = elems
+                    crispr = "CRISPR" in feature_type or "repeat_region" in feature_type
+                    if crispr:
+                        continue
+
                     # Get strain of gene
                     if int(end) < int(start):
                         start, end = end, start
@@ -433,6 +438,9 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                 #     continue
                 (contig_name, source, type_g, start_g, end_g,
                  score, strand_g, phase, attributes) = fields_g
+                # Ignore CRISPR
+                if "CRISPR" in type_g or "repeat_region" in type_g:
+                    continue
                 # Get information given to this same sequence from the lst file
                 # (next lst line corresponds to next gff line without #), as, for each format,
                 # there is 1 line per gene)
@@ -461,9 +469,6 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                     # If 1 element is different (start or end position, or type), print error
                     # message and return False: this genome could not be converted to gff
                     if elemg != eleml:
-                        # For CRISPR, prokka puts repeat_region in gff
-                        if elemg == "repeat_region" and eleml == "CRISPR":
-                            continue
                         logger.error(f"Files {tbl} and {gff} (in prokka tmp_files: {tmp}) "
                                      f"do not have the same {label} value for gene {gname} ({elemg} "
                                      f"in gff, {eleml} in tbl)")
