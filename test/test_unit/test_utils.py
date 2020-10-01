@@ -17,6 +17,7 @@ matplotlib.use('AGG')
 
 # Define variables used by several tests
 DATA_DIR = os.path.join("test", "data", "annotate")
+TEST_DIR = os.path.join(DATA_DIR, "test_files")
 BASELINE_DIR = os.path.abspath(os.path.join(DATA_DIR, "exp_files", "baseline"))
 GENEPATH = os.path.join(DATA_DIR, "generated_by_unit-tests")
 LOGFILE_BASE = "test_prokka"
@@ -916,6 +917,52 @@ def test_rename_contigs():
                      "ESCO.0216.00005.0002":7080,
                      "ESCO.0216.00005.0003":2583}
     assert utilities.compare_order_content(outfile, exp_file)
+
+
+def test_rename_contigs_empty_fasta(caplog):
+    """
+    From an empty fasta file, ask to rename contigs. Should return empty tuple of dict, and error
+    message.
+    """
+    logger = logging.getLogger("default")
+    gpath = os.path.join(GENEPATH, "empty.fasta")
+    # Create empty fasta file
+    open(gpath, "w").close()
+    gembase_name = "ESCO.0216.00005"
+    outfile = os.path.join(GENEPATH, "H299_H561.fasta-short-contig.fna")
+    exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
+    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger)
+    assert contigs == {}
+    assert sizes == {}
+    # Check that outfile is empty
+    with open(outfile, "r") as of:
+        assert len(of.readlines()) == 0
+    # Check error message
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/empty.fasta does "
+            "not contain any sequence, or is not in fasta format") in caplog.text
+
+
+def test_rename_contigs_non_fasta(caplog):
+    """
+    From an file which is not empty, but not in fasta format (no headers starting with '>'),
+    check that contigs, sizes and outfile are empty, and error message is ok
+    """
+    logger = logging.getLogger("default")
+    gpath = os.path.join(TEST_DIR, "non-fasta.seq")
+    # Create empty fasta file
+    open(gpath, "w").close()
+    gembase_name = "ESCO.0216.00005"
+    outfile = os.path.join(GENEPATH, "H299_H561.fasta-short-contig.fna")
+    exp_file = os.path.join(DATA_DIR, "exp_files", "res_H299_H561-ESCO00005.fna")
+    contigs, sizes = utils.get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger)
+    assert contigs == {}
+    assert sizes == {}
+    # Check that outfile is empty
+    with open(outfile, "r") as of:
+        assert len(of.readlines()) == 0
+    # Check error message
+    assert ("Your genome test/data/annotate/test_files/non-fasta.seq does "
+            "not contain any sequence, or is not in fasta format") in caplog.text
 
 
 def test_rename_contigs_duplicate(caplog):
