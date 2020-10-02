@@ -40,14 +40,15 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    os.mkdir(GENEPATH)
+    if not os.path.exists(GENEPATH):
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
-    shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -357,72 +358,10 @@ def test_check_prokka_wrong_tbl_cds():
     assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
     msg1 = ("prokka_out_for_test-wrongCDS original_name.fna: "
             "no matching number of proteins between tbl and faa; "
-            "faa=13; in tbl =12")
-    msg2 = ("prokka_out_for_test-wrongCDS original_name.fna: "
-            "no matching number of genes between tbl and ffn; "
-            "ffn=17; in tbl =14genes 2CRISPR")
-    q = logger[0]
-    assert q.qsize() == 2
-    assert q.get().message == msg1
-    assert q.get().message == msg2
-
-
-def test_check_prokka_wrong_tbl_crispr():
-    """
-    Check that check_prokka returns an error message when the number of headers in ffn
-    file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
-    """
-    logger = my_logger("test_check_prokka_wrong_tbl_crispr")
-    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
-    ori_name = "prokka_out_for_test"
-    out_dir = os.path.join(GENEPATH, "res_checkProkkaWrongCRISPR")
-    os.makedirs(out_dir)
-    name = "prokka_out_for_test-wrongtblCRISP"
-    tblfile = os.path.join(TEST_DIR, name + ".tbl")
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-                    os.path.join(out_dir, name + ".ffn"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-                    os.path.join(out_dir, name + ".faa"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-                    os.path.join(out_dir, name + ".gff"))
-    shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
-    logf = "prokka.log"
-    gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 7
-    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
-    msg = ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
-           "no matching number of genes between tbl and ffn; "
-           "ffn=17; in tbl =15genes 1CRISPR")
+            "faa=14; in tbl =12")
     q = logger[0]
     assert q.qsize() == 1
-    assert q.get().message == msg
-
-
-def test_check_prokka_tbl_crispr_newversion():
-    """
-    Check that check_prokka does not return an error message when the number of headers in ffn
-    file is equal to the number of CDS in tbl file (1CRISPR in tbl, 0 in ffn), but
-    does not contain the CRISPRs found in tbl
-    As the new version of prokka (1.12) does not put crisprs in .ffn
-    """
-    logger = my_logger("test_check_prokka_tbl_crispr_newversion")
-    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
-    ori_name = "prokka_out_for_test"
-    out_dir = os.path.join(GENEPATH, "res_checkProkkaWrongCRISPRnewversion")
-    os.makedirs(out_dir)
-    name = "prokka_out_for_test-wrongtblCRISPnewversion"
-    ffnfile = os.path.join(TEST_DIR, name + ".ffn")
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-                    os.path.join(out_dir, name + ".tbl"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-                    os.path.join(out_dir, name + ".faa"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-                    os.path.join(out_dir, name + ".gff"))
-    shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
-    logf = os.path.join(GENEPATH, "prokka.log")
-    gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 6
-    assert afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    assert q.get().message == msg1
 
 
 def test_check_prokka_ok():
@@ -437,6 +376,8 @@ def test_check_prokka_ok():
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 6
     assert afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
+    q = logger[0]
+    assert q.qsize() == 0
 
 
 def test_run_prokka_out_exists_ok():

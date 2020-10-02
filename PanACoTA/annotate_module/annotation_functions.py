@@ -451,7 +451,7 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
             tblfile = tblfile[0]
             faafile = faafile[0]
             ffnfile = ffnfile[0]
-            fnbcont, tnb_cds, nb_gene, tnb_crispr = count_tbl(tblfile)
+            fnbcont, tnb_cds, nb_gene = count_tbl(tblfile)
             faaprot = count_headers(faafile)
             ffngene = count_headers(ffnfile)
             if nbcont != fnbcont:
@@ -461,12 +461,6 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
             if tnb_cds != faaprot:
                 logger.error(("{} {}: no matching number of proteins between tbl and faa; "
                               "faa={}; in tbl ={}").format(name, oriname, faaprot, tnb_cds))
-                problem = True
-            if nb_gene + tnb_crispr != ffngene and nb_gene != ffngene:
-                logger.error(("{} {}: no matching number of genes between tbl and ffn; "
-                              "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
-                                                                         ffngene, nb_gene,
-                                                                         tnb_crispr))
                 problem = True
     return not problem and not missing_file
 
@@ -525,7 +519,7 @@ def count_tbl(tblfile):
     - number of contigs
     - number of proteins (CDS)
     - number of genes (locus_tag)
-    - number of CRISPR arrays (repeat_region)
+    - number of CRISPR arrays (repeat_region) -> ignore crisprs
 
     Parameters
     ----------
@@ -540,7 +534,7 @@ def count_tbl(tblfile):
     nbcont = 0
     nb_cds = 0
     nb_gene = 0
-    nb_crispr = 0
+    # nb_crispr = 0
     with open(tblfile) as tblf:
         for line in tblf:
             if line.startswith(">"):
@@ -549,9 +543,9 @@ def count_tbl(tblfile):
                 nb_cds += 1
             if "locus_tag" in line:
                 nb_gene += 1
-            if "repeat_region" in line or (len(line.split()) == 3 and "CRISPR" in line):
-                nb_crispr += 1
-    return nbcont, nb_cds, nb_gene, nb_crispr
+            # if "repeat_region" in line or (len(line.split()) == 3 and "CRISPR" in line):
+            #     nb_crispr += 1
+    return nbcont, nb_cds, nb_gene  #, nb_crispr
 
 
 def count_headers(seqfile):
