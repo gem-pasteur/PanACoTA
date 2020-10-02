@@ -37,15 +37,16 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    os.mkdir(GENEPATH)
+    if not os.path.exists(GENEPATH):
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    
+
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
-    shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -81,11 +82,10 @@ def test_count_tbl():
     nbcont, nbCDS, nbGene, nbCRISPR
     """
     tblfile = os.path.join(TEST_DIR, "original_name.fna-prokkaRes", "prokka_out_for_test.tbl")
-    ncont, ncds, ngene, ncris = afunc.count_tbl(tblfile)
+    ncont, ncds, ngene = afunc.count_tbl(tblfile)
     assert ncont == 6
-    assert ncds == 13
-    assert ngene == 15
-    assert ncris == 2
+    assert ncds == 14
+    assert ngene == 16
 
 
 def test_run_all_1by1():
@@ -127,6 +127,8 @@ def test_run_all_1by1():
     message_end_annot2 = ("End annotating test_runall_1by1_2 from test/data/annotate/genomes/"
                             "A_H738.fasta.")
     qget = q.get().message
+    # Check logs. Given that it is executed in parallel, we cannot know in which order messages
+    # will appear
     assert qget == message_start_annot1 or message_start_annot2
     if qget == message_start_annot1:
         # Ending annotation of first genome (same genome as started because running 1by1)
@@ -214,7 +216,8 @@ def test_run_all_parallel_less_threads():
     Genomes H299 and A_H738 should run well, but genomes genome* have problems (no CDS found),
     so check_prokka should return false.
     """
-    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_less_threads')
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
     gpaths = [os.path.join(GEN_PATH, name) for name in gnames]
@@ -232,3 +235,14 @@ def test_run_all_parallel_less_threads():
     assert not final[gnames[2]]
     assert not final[gnames[3]]
     assert not final[gnames[4]]
+    q = logger[0]
+    # Check size of logs
+    # -> starting log -> 1 log
+    # -> for each genome ok (2 first ones): start annotate, prokka cmd, end annotate -> 6 logs
+    # -> for each genome not ok (3 others):
+    #           start annotate, prokka cmd, problem, end annotate -> 12 logs
+    assert q.qsize() == 19
+    # Check at least 1st log
+    assert q.get().message == "Annotating all genomes with prokka"
+
+
