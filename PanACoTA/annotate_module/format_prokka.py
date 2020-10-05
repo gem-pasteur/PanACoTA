@@ -460,7 +460,6 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                 if loc_name != gname:
                     logger.error(f"Problem in {gff}: ID={gname} whereas locus_tag={loc_name}.")
                     return False
-
                 # Compare information from lst and information from prodigal gff (start,
                 # end and type of feature). They should correspond
                 for (elemg, eleml, label) in zip([start_g, end_g, type_g],
@@ -513,48 +512,38 @@ def create_gen(ffnseq, lstfile, genseq):
         True if conversion went well, False otherwise
     """
     problem = False
+    write = True  # Write next sequence
     crispr_id = 1
     with open(ffnseq) as ffn, open(lstfile) as lst, open(genseq, "w") as gen:
         for line_ffn in ffn:
+            # Ignore gene that we do not want to write (should be a crispr)
             # If line of sequence, write it as is, and go to next line
             if not line_ffn.startswith(">"):
-                gen.write(line_ffn)
+                # We just read a seq line. If we can write (write is True), do it and go
+                # to next line
+                # Otherwise, just go to next line
+                if write:
+                    gen.write(line_ffn)
                 continue
-            lstline = lst.readline().strip()
-            # Try to get gene ID. If does not work, look if it is a CRISPR in lstinfo
+            # Try to get gene ID. If does not work, ignore this gene (it may be a
+            # CRISPR, and we ignore them
             test_gen_id = line_ffn.split()[0].split("_")[-1]
             if not test_gen_id.isdigit():
-                # If it is a CRISPR in lstline, and header of ffn does not have a gene format,
-                # then ffn contains the CRISPR sequence
-                if lstline.strip().split()[3] == "CRISPR":
-                    crispr_id_lst = int(lstline.split("\t")[4].split("_CRISPR")[-1])
-                    if crispr_id == crispr_id_lst:
-                        general.write_header(lstline, gen)
-                        crispr_id += 1
-                    else:
-                        logger.error(f"Problem with CRISPR numbers in {lstfile}. "
-                                     f"CRISPR {line_ffn.strip()} in ffn is CRISPR num "
-                                     f"{crispr_id}, whereas it is annotated as CRISPR num "
-                                     f"{crispr_id_lst} in lst file.")
-                        return False
-                # It is not a CRISPR in lstline, and header of ffn does not have a gene format:
-                # problem
-                else:
-                    logger.error((f"Unknown header format {line_ffn.strip()} in {ffnseq}.\n"
-                                  "Gen file will not be created."))
-                    return False
+                # Maybe a CRISPR? Or wrong gene name? -> ignore
+                logger.log(utils.detail_lvl(),
+                           f"Unknown header format for {line_ffn.strip()}. "
+                           "This gene will be ignored in .gen output file.")
+                write = False
+                continue
             # If ffn contains a gene header, find its information in lst file
             else:
+                write = True
+                lstline = lst.readline().strip()
                 gen_id = int(test_gen_id)
                 # genID exists, ffn header is for a gene. Check that it corresponds to
                 # information in lst file.
                 id_lst = lstline.split("\t")[4].split("_")[-1]
-                # if line in lst corresponds to a gene -> get gene ID.
-                # Otherwise, genID = 0 (CRISPR line in lst)
-                if id_lst.isdigit():
-                    gen_id_lst = int(id_lst)
-                else:
-                    gen_id_lst = 0
+                gen_id_lst = int(id_lst)
                 # in lst, find the same gene ID as in ffn (some gene IDs in lst can be absent
                 # from ffn, if prokka do not give their sequence).
                 # As they are ordered by increasing number, go to next lstline until
@@ -566,9 +555,7 @@ def create_gen(ffnseq, lstfile, genseq):
                         gen_id_lst = "-1"
                         break
                     id_lst = lstline.split("\t")[4].split("_")[-1]
-                    # don't cast to int if info for a crispr
-                    if id_lst.isdigit():
-                        gen_id_lst = int(id_lst)
+                    gen_id_lst = int(id_lst)
                 # If it found the same gene ID, write info in gene file
                 if gen_id == gen_id_lst:
                     general.write_header(lstline.strip(), gen)
