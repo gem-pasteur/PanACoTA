@@ -383,65 +383,65 @@ def test_create_gen_missing_lastSeq(caplog):
     assert tutil.compare_order_content(exp_gen, res_gen_file)
 
 
-# def test_create_prt(caplog):
-#     """
-#     Check that prt file is generated as expected
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prokkaRes",
-#                            "prokka_out_for_test.faa")
-#     res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
-#     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-#     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
-#     assert prokkafunc.create_prt(protfile, lstfile, res_prt_file)
-#     exp_prt = os.path.join(EXP_ANNOTE, "res_create_prt_prokka.faa")
-#     assert tutil.compare_order_content(exp_prt, res_prt_file)
+def test_create_prt(caplog):
+    """
+    Check that prt file is generated as expected
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "original_name.fna-prokkaRes",
+                           "prokka_out_for_test.faa")
+    res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
+    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert prokkafunc.create_prt(protfile, lstfile, res_prt_file)
+    exp_prt = os.path.join(EXP_ANNOTE, "res_create_prt_prokka.faa")
+    assert tutil.compare_order_content(exp_prt, res_prt_file)
 
 
-# def test_create_prt_wrong_header_int(caplog):
-#     """
-#     Test creating prt file, but the faa file has a header with wrong format (>JGIKIPIJ_d0008)
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderInt.faa")
-#     res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
-#     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-#     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
-#     assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
-#     assert ("Unknown header format >JGIKIPIJ_d0008 in test/data/annotate/test_files/"
-#             "prokka_out_for_test-wrongHeaderInt.faa. Gene ID is not a number.") in caplog.text
+def test_create_prt_wrong_header_int(caplog):
+    """
+    Test creating prt file, but the faa file has a header with wrong format (>JGIKIPIJ_d0008)
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderInt.faa")
+    res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
+    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
+    assert ("Unknown header format >JGIKIPIJ_d0008 in test/data/annotate/test_files/"
+            "prokka_out_for_test-wrongHeaderInt.faa. Gene ID is not a number.") in caplog.text
 
 
-# def test_create_prt_wrong_header_sep(caplog):
-#     """
-#     Test creating prt file, but the faa file has a header with wrong format,
-#     no '_' between name and gene ID (>JGIKIPIJ00008)
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderSep.faa")
-#     res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
-#     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-#     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
-#     assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
-#     assert ("Unknown header format >JGIKIPIJ00008 in test/data/annotate/test_files/"
-#             "prokka_out_for_test-wrongHeaderSep.faa. Gene ID is not a number.") in caplog.text
+def test_create_prt_wrong_header_sep(caplog):
+    """
+    Test creating prt file, but the faa file has a header with wrong format,
+    no '_' between name and gene ID (>JGIKIPIJ00008)
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderSep.faa")
+    res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
+    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
+    assert ("Unknown header format >JGIKIPIJ00008 in test/data/annotate/test_files/"
+            "prokka_out_for_test-wrongHeaderSep.faa. Gene ID is not a number.") in caplog.text
 
 
-# def test_create_prt_wrong_unknown_prot(caplog):
-#     """
-#     Test creating prt file, but the faa file has a protein (>sup-prot_00012)
-#     which is not in the lst file
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-supHeader.faa")
-#     res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
-#     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-#     exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
-#     assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
-#     assert ("Missing info for protein >sup-prot_00012 (from test/data/annotate/test_files/"
-#             "prokka_out_for_test-supHeader.faa) in test/data/annotate/exp_files/"
-#             "res_create_lst-prokka.lst. If it is actually present in the lst file, check that "
-#             "proteins are ordered by increasing number in both lst and faa files.") in caplog.text
+def test_create_prt_wrong_unknown_prot(caplog):
+    """
+    Test creating prt file, but the faa file has a protein (>sup-prot_00012)
+    which is not in the lst file
+    """
+    caplog.set_level(logging.DEBUG)
+    protfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-supHeader.faa")
+    res_prt_file = os.path.join(GENEPATH, "prokka_res.prt")
+    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_gene_lst_prodigal.lst")
+    assert not prokkafunc.create_prt(protfile, lstfile, res_prt_file)
+    assert ("Missing info for protein >sup-prot_00012 (from test/data/annotate/test_files/"
+            "prokka_out_for_test-supHeader.faa) in test/data/annotate/exp_files/"
+            "res_create_lst-prokka.lst. If it is actually present in the lst file, check that "
+            "proteins are ordered by increasing number in both lst and faa files.") in caplog.text
 
 
 # def test_format_1genome(caplog):
