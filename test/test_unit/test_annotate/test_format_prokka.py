@@ -350,7 +350,7 @@ def test_create_gen_supgen(caplog):
     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
     res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
     assert not prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    assert ("Missing info for gene >JGIKIPIJ_00015 (from test/data/annotate/test_files/prokka_out_for_test-supGene.ffn) in test/data/annotate/exp_files/res_create_lst-prokka.lst. If it is actually present in the lst file, check that genes are ordered by increasing number in both lst and ffn files.") in caplog.text
+    assert ("Missing info for gene >JGIKIPIJ_03050 (from test/data/annotate/test_files/prokka_out_for_test-supGene.ffn) in test/data/annotate/exp_files/res_create_lst-prokka.lst. If it is actually present in the lst file, check that genes are ordered by increasing number in both lst and ffn files.") in caplog.text
 
 
 def test_create_gen_missingSeq(caplog):
@@ -365,21 +365,6 @@ def test_create_gen_missingSeq(caplog):
     res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
     assert prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
     exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka-missGene.gen")
-    assert tutil.compare_order_content(exp_gen, res_gen_file)
-
-
-def test_create_gen_missing_lastSeq(caplog):
-    """
-    Check create gen file. The last gene in lst does not have a sequence in ffn.
-    Just skip it, and go to next sequence for gen file.
-    """
-    caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
-    ffnfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-noLastSeq.ffn")
-    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
-    assert prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka-miss-lastGene.gen")
     assert tutil.compare_order_content(exp_gen, res_gen_file)
 
 
