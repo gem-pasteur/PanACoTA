@@ -238,9 +238,6 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
     bool :
         True if genome name used in lstfile and prokka tblfile are the same, False otherwise
     """
-    # Number CRISPRs. By default, 0 CRISPR -> next one will be CRISPR1
-    crispr_num = 1
-    crispr = False
     # Protein localisation in contig (b = border ; i = inside)
     cont_loc = "b"
     prev_cont_loc = "b"
@@ -325,11 +322,11 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
                     # If not first gene of the contig, write the previous gene to .lst file
                     # The first gene will be written while reading the 2nd gene
                     if start != "-1" and end != "-1" and not crispr:
-                        crispr_num, lstline = general.write_gene(feature_type, locus_num,
-                                                                 gene_name, product, crispr_num,
-                                                                 prev_cont_loc, genome,
-                                                                 prev_cont_num, ecnum, inf2,
-                                                                 db_xref, strand, start, end, lstf)
+                        lstline = general.write_gene(feature_type, locus_num,
+                                                     gene_name, product,
+                                                     prev_cont_loc, genome,
+                                                     prev_cont_num, ecnum, inf2,
+                                                     db_xref, strand, start, end, lstf)
 
                     # Get new values for the next gene: start, end, strand and feature type
                     start, end, feature_type = elems
@@ -359,9 +356,9 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
         # Write last feature
         if start != -1 and end != -1:
             prev_cont_loc = "b"
-            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name, product,
-                                               crispr_num, prev_cont_loc, genome, prev_cont_num,
-                                               ecnum, inf2, db_xref, strand, start, end, lstf)
+            general.write_gene(feature_type, locus_num, gene_name, product,
+                               prev_cont_loc, genome, prev_cont_num,
+                               ecnum, inf2, db_xref, strand, start, end, lstf)
     return True
 
 
@@ -516,7 +513,6 @@ def create_gen(ffnseq, lstfile, genseq):
     """
     problem = False
     write = True  # Write next sequence
-    crispr_id = 1
     with open(ffnseq) as ffn, open(lstfile) as lst, open(genseq, "w") as gen:
         for line_ffn in ffn:
             # Ignore gene that we do not want to write (should be a crispr)

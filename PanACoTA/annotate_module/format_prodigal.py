@@ -52,6 +52,7 @@ July 2019
 
 import os
 import shutil
+import glob
 import logging
 
 import PanACoTA.utils as utils
@@ -100,9 +101,9 @@ def format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
     prodigal_dir = os.path.join(prod_path, os.path.basename(gpath) + "-prodigalRes")
 
     # Get prodigal result files
-    prot_file = os.path.join(prodigal_dir, name + ".faa")
-    gen_file = os.path.join(prodigal_dir, name + ".ffn")
-    gff_file = os.path.join(prodigal_dir, name + ".gff")
+    prot_file = glob.glob(os.path.join(prodigal_dir, "*.faa"))[0]
+    gen_file = glob.glob(os.path.join(prodigal_dir, "*.ffn"))[0]
+    gff_file = glob.glob(os.path.join(prodigal_dir, "*.gff"))[0]
 
     # Define names for generated gembase files
     res_prot_file = os.path.join(prot_dir, name + ".prt")
@@ -275,9 +276,9 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
                 # If it is not the first gene of the genome, write previous gene information
                 if prev_start != "":
                     # Write line in LSTINFO file, + header and sequence to the gene file
-                    _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                                  prev_loc, name, prev_cont_num, "NA", prev_info,
-                                                  "NA", prev_strand, prev_start, prev_end, r_lst)
+                    lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA",
+                                               prev_loc, name, prev_cont_num, "NA", prev_info,
+                                               "NA", prev_strand, prev_start, prev_end, r_lst)
                     gfunc.write_header(lstline, r_gen)
                     r_gen.write(seq)
                 # -> get new information, save it for the next gene, and go to next line
@@ -302,9 +303,9 @@ def create_gene_lst(contigs, gen_file, res_gen_file, res_lst_file, gpath, name):
         # Otherwise, nothing to write
         if prev_start != "":
             prev_loc = "b"
-            _, lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA", 0,
-                                          prev_loc, name, prev_cont_num, "NA", prev_info, "NA",
-                                          prev_strand, prev_start, prev_end, r_lst)
+            lstline = gfunc.write_gene("CDS", locus_num, "NA", "NA",
+                                       prev_loc, name, prev_cont_num, "NA", prev_info, "NA",
+                                       prev_strand, prev_start, prev_end, r_lst)
             gfunc.write_header(lstline, r_gen)
             r_gen.write(seq)
     return True

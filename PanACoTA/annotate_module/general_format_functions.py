@@ -65,8 +65,7 @@ from PanACoTA.annotate_module import format_prodigal as fprodigal
 main_logger = logging.getLogger("annotate.geneffunc")
 
 
-def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False,
-                   changed_name=False):
+def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, quiet=False):
     """
     For all genomes which were annotated (by prokka or prodigal), reformat them
     in order to have, in 'res_path', the following folders:
@@ -80,7 +79,8 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
     Parameters
     ----------
     genomes_ok : dict
-        genomes to format (annotation was OK) -> {genome: [name, gpath, size, nbcont, l90]}
+        genomes to format (annotation was OK) ->
+        {genome: [name, gpath, to_annot, size, nbcont, l90]}
     res_path : str
         path to folder where the 4 directories must be created
     annot_path : str
@@ -91,9 +91,6 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
         number of threads to use to while formatting genomes
     quiet : bool
         True if nothing must be sent to stderr/stdout, False otherwise
-    changed_name : bool
-        True if contig names have been changed (cutn != 0) -> contig names end by '_num',
-        False otherwise.
 
     Returns
     -------
@@ -216,7 +213,7 @@ def handle_genome(args):
     return ok_format, genome
 
 
-def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
+def write_gene(gtype, locus_num, gene_name, product, cont_loc,
                genome, cont_num, ecnum, inf2, db_xref, strand, start, end, lstopenfile):
     """
     Write given gene to output file
@@ -231,11 +228,6 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
         gene name found by prokka/prodigal ("NA" if no gene name -> Always the case with Prodigal)
     product : str
         found by prokka/Prodigal, "NA" if no product (always the case for prodigal)
-    crispr_num : int
-        current crispr number. In prokka tbl, CRISPRs are not numbered, they all
-        have the same name. We name them by adding a unique number to each CRISPR. If the current
-        gene to add is a CRISPR, this number will be incremented and returned. If not, this same
-        number will be returned.
     cont_loc : str
         'i' if the gene is inside a contig, 'b' if its on the border (first or last gene
         of the contig)
@@ -260,16 +252,9 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
 
     Returns
     -------
-    tuple :
-        Current crispr number, lstline
+    str :
+        lstline
     """
-    # if last gene was a crispr
-    if gtype == "repeat_region":
-        gtype = "CRISPR"
-        locus_num = "CRISPR" + str(crispr_num)
-        gene_name = "crispr"
-        product = "crispr-array"
-        crispr_num += 1
     locus_name = "{}.{}{}_{}".format(genome, str(cont_num).zfill(4), cont_loc,
                                      str(locus_num).zfill(5))
     # If '|' character found in those fields, replace by '_' to avoid problems while parsing
@@ -279,7 +264,7 @@ def write_gene(gtype, locus_num, gene_name, product, crispr_num, cont_loc,
                                         db_xref.replace("|", "_"))
     lst_line = "\t".join([start, end, strand, gtype, locus_name, gene_name, more_info])
     lstopenfile.write(lst_line + "\n")
-    return crispr_num, lst_line
+    return lst_line
 
 
 def write_header(lstline, outfile):
