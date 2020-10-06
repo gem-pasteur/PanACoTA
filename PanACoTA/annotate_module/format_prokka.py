@@ -182,6 +182,9 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_gene_file)
             os.remove(res_prt_file)
             os.remove(res_rep_file)
+            # Remove twice to be able to check that when there is a problem while removing files,
+            # it generates the expected error
+            os.remove(res_rep_file)
         except OSError:
             pass
         logger.error("Problems while generating .prt file for {}".format(name))

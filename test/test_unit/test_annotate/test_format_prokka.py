@@ -429,376 +429,379 @@ def test_create_prt_wrong_unknown_prot(caplog):
             "proteins are ordered by increasing number in both lst and faa files.") in caplog.text
 
 
-# def test_format_1genome(caplog):
-#     """
-#     Test that when prokka results are ok, all files are generated as expected.
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "test.0417.00002"
-#     # path to original genome, given to prodigal for annotation
-#     gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-#     prod_path = TEST_ANNOTE
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gene_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
+def test_format_1genome(caplog):
+    """
+    Test that when prokka results are ok, all files are generated as expected.
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "test.0417.00002"
+    # path to original genome, given to prodigal for annotation
+    gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
+    prok_path = TEST_ANNOTE
+    # Create result directories
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gene_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(prot_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(rep_dir)
+    os.makedirs(gene_dir)
+    os.makedirs(gff_dir)
 
-#     os.makedirs(prot_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(rep_dir)
-#     os.makedirs(gene_dir)
-#     os.makedirs(gff_dir)
+    assert prokkafunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
+                                        rep_dir, gff_dir)
 
-#     assert prokkafunc.format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
-#                                         rep_dir, gff_dir)
-
-#     # Check output files content
-#     # Replicons
-#     exp_rep = os.path.join(EXP_ANNOTE, "res_created_rep-prokka.fna")
-#     res_rep_file = os.path.join(rep_dir, "test.0417.00002.fna")
-#     assert tutil.compare_order_content(exp_rep, res_rep_file)
-#     # Proteins
-#     exp_prt = os.path.join(EXP_ANNOTE, "res_create_prt_prokka.faa")
-#     res_prt_file = os.path.join(prot_dir, "test.0417.00002.prt")
-#     assert tutil.compare_order_content(exp_prt, res_prt_file)
-#     # Genes
-#     exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka.gen")
-#     res_gen_file = os.path.join(gene_dir, "test.0417.00002.gen")
-#     assert tutil.compare_order_content(exp_gen, res_gen_file)
-#     # LSTINFO
-#     exp_lst = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-#     res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
-#     assert tutil.compare_order_content(exp_lst, res_lst_file)
-#     # gff
-#     exp_gff = os.path.join(EXP_ANNOTE, "res_create_gff-prokka.gff")
-#     res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
-#     assert tutil.compare_order_content(exp_gff, res_gff_file)
-
-
-# def test_format_1genome_emptygpath(caplog):
-#     """
-#     Test on formatting prokka results, when original ffn file is empty -> error message,
-#     and no file generated
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "prokka_out_for_test"
-#     # Create empty file, that we give to prodigal for formatting step
-#     gpath =  os.path.join(GENEPATH, "original_name-empty.fna")
-#     open(gpath, "w").close()
-#     # Create prokka result files (empty files, will not be read)
-#     gpath_prokres =  gpath + "-prokkaRes"
-#     os.makedirs(gpath_prokres)
-#     tbl_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.tbl")
-#     open(tbl_prokres, "w").close()
-#     gff_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.gff")
-#     open(gff_prokres, "w").close()
-#     ffn_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.ffn")
-#     open(ffn_prokres, "w").close()
-#     faa_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.faa")
-#     open(faa_prokres, "w").close()
-
-#     prok_path = GENEPATH
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gen_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
-#     os.makedirs(rep_dir)
-#     os.makedirs(gff_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(gen_dir)
-#     # Add empty res lst, gff and gen files, to check that it is removed at the end
-#     res_gff_file = os.path.join(gff_dir, "prokka_out_for_test.gff")
-#     open(res_gff_file, "w").close()
-#     assert len(os.listdir(gff_dir) ) == 1
-#     res_lst_file = os.path.join(lst_dir, "prokka_out_for_test.lst")
-#     open(res_lst_file, "w").close()
-#     assert len(os.listdir(lst_dir) ) == 1
-#     res_gen_file = os.path.join(gen_dir, "prokka_out_for_test.gen")
-#     open(res_gen_file, "w").close()
-#     assert len(os.listdir(gen_dir) ) == 1
-#     # res_gen_file = os.path.join(gen_dir, "prokka_out_for_test.gen")
-#     # open(res_gen_file, "w").close()
-#     # assert len(os.listdir(gen_dir) ) == 1
-
-#     assert not prokkafunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gen_dir,
-#                                               rep_dir, gff_dir)
-#     # Check that all files were removed
-#     assert len(os.listdir(rep_dir) ) == 0
-#     assert len(os.listdir(lst_dir) ) == 0
-#     assert len(os.listdir(gff_dir) ) == 0
-#     assert len(os.listdir(gen_dir) ) == 0
-#     assert ("Problems while generating Replicon file for prokka_out_for_test") in caplog.text
+    # Check output files content
+    # Replicons
+    exp_rep = os.path.join(EXP_ANNOTE, "res_created_rep-prokka.fna")
+    res_rep_file = os.path.join(rep_dir, "test.0417.00002.fna")
+    assert tutil.compare_order_content(exp_rep, res_rep_file)
+    # Proteins
+    exp_prt = os.path.join(EXP_ANNOTE, "res_create_prt_prokka.faa")
+    res_prt_file = os.path.join(prot_dir, "test.0417.00002.prt")
+    assert tutil.compare_order_content(exp_prt, res_prt_file)
+    # Genes
+    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka.gen")
+    res_gen_file = os.path.join(gene_dir, "test.0417.00002.gen")
+    assert tutil.compare_order_content(exp_gen, res_gen_file)
+    # LSTINFO
+    exp_lst = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
+    assert tutil.compare_order_content(exp_lst, res_lst_file)
+    # gff
+    exp_gff = os.path.join(EXP_ANNOTE, "res_create_gff-prokka.gff")
+    res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
+    assert tutil.compare_order_content(exp_gff, res_gff_file)
 
 
-# def test_format_1genome_pb_tbl(caplog):
-#     """
-#     Test on formatting prokka results, when prokka output tbl file does not have
-#     the expected format -> error message, and no file generated
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "test.0417.00002"
-#     # path to original genome, given to prodigal for annotation
-#     orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-#     # In generated_by_tests folder, create the original genome given to prokka
-#     # (copy from test_file)
-#     used_gpath = os.path.join(GENEPATH, "original_name.fna")
-#     used_respath = used_gpath + "-prokkaRes"
-#     os.makedirs(used_respath)
-#     shutil.copyfile(orig_gpath, used_gpath)
+def test_format_1genome_emptygpath(caplog):
+    """
+    Test on formatting prokka results, when original ffn file is empty -> error message,
+    and no file generated
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "prokka_out_for_test"
+    # Create empty file, that we give to prodigal for formatting step
+    gpath =  os.path.join(GENEPATH, "original_name-empty.fna")
+    open(gpath, "w").close()
+    # Create prokka result files (empty files, will not be read)
+    gpath_prokres =  gpath + "-prokkaRes"
+    os.makedirs(gpath_prokres)
+    tbl_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.tbl")
+    open(tbl_prokres, "w").close()
+    gff_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.gff")
+    open(gff_prokres, "w").close()
+    ffn_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.ffn")
+    open(ffn_prokres, "w").close()
+    faa_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.faa")
+    open(faa_prokres, "w").close()
+    # Create result directories
+    prok_path = GENEPATH
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gen_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(rep_dir)
+    os.makedirs(gff_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(gen_dir)
+    # Add empty res lst, gff and gen files, to check that it is removed at the end
+    res_gff_file = os.path.join(gff_dir, "prokka_out_for_test.gff")
+    open(res_gff_file, "w").close()
+    assert len(os.listdir(gff_dir) ) == 1
+    res_lst_file = os.path.join(lst_dir, "prokka_out_for_test.lst")
+    open(res_lst_file, "w").close()
+    assert len(os.listdir(lst_dir) ) == 1
+    res_gen_file = os.path.join(gen_dir, "prokka_out_for_test.gen")
+    open(res_gen_file, "w").close()
+    assert len(os.listdir(gen_dir) ) == 1
+    # res_gen_file = os.path.join(gen_dir, "prokka_out_for_test.gen")
+    # open(res_gen_file, "w").close()
+    # assert len(os.listdir(gen_dir) ) == 1
 
-#     # Create tbl_file with a wrong format
-#     with open(os.path.join(used_respath, "prokka_out_for_test.tbl"), "w") as ori:
-#         ori.write(">wrongheader # 1 # 2 # 1 # toto")
-#     # Add empty prokka res gff ffn and faa files (they won't be read, as it will stop
-#     # at tbl2lst)
-#     res_gff_file = os.path.join(used_respath, "prokka_out_for_test.gff")
-#     open(res_gff_file, "w").close()
-#     res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
-#     open(res_ffn_file, "w").close()
-#     res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
-#     open(res_faa_file, "w").close()
-
-#     # Create output directories
-#     prok_path = GENEPATH
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gen_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
-#     os.makedirs(rep_dir)
-#     os.makedirs(gff_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(gen_dir)
-#     # Add empty res lst, gff and gen files, to check that it is removed at the end
-#     res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
-#     open(res_gff_file, "w").close()
-#     assert len(os.listdir(gff_dir) ) == 1
-#     res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
-#     open(res_lst_file, "w").close()
-#     assert len(os.listdir(lst_dir) ) == 1
-#     res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
-#     open(res_gen_file, "w").close()
-#     assert len(os.listdir(gen_dir) ) == 1
-
-#     # Run formatting
-#     assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
-#                                             gen_dir, rep_dir, gff_dir)
-
-#     # Check that all files were removed
-#     assert len(os.listdir(rep_dir) ) == 0
-#     assert len(os.listdir(lst_dir) ) == 0
-#     assert len(os.listdir(gff_dir) ) == 0
-#     assert len(os.listdir(gen_dir) ) == 0
-#     assert("Wrong format for test/data/annotate/generated_by_unit-tests/"
-#            "original_name.fna-prokkaRes/prokka_out_for_test.tbl.") in caplog.text
-#     assert ("Problems while generating LSTINFO file for test.0417.00002") in caplog.text
+    assert not prokkafunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gen_dir,
+                                              rep_dir, gff_dir)
+    # Check that all files were removed
+    assert len(os.listdir(rep_dir) ) == 0
+    assert len(os.listdir(lst_dir) ) == 0
+    assert len(os.listdir(gff_dir) ) == 0
+    assert len(os.listdir(gen_dir) ) == 0
+    # Check log
+    assert ("Problems while generating Replicon file for prokka_out_for_test") in caplog.text
 
 
-# def test_format_1genome_pb_gff(caplog):
-#     """
-#     Test on formatting prokka results, when prokka output gff file does not have
-#     the expected format -> error message, and no file generated
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "test.0417.00002"
-#     # path to original genome, given to prodigal for annotation
-#     orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-#     # In generated_by_tests folder, create the original genome given to prokka
-#     # (copy from test_file)
-#     used_gpath = os.path.join(GENEPATH, "original_name.fna")
-#     used_respath = used_gpath + "-prokkaRes"
-#     os.makedirs(used_respath)
-#     shutil.copyfile(orig_gpath, used_gpath)
-#     # Copy tbl file, which is as expected (tbl2lst must succeed)
-#     orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.tbl")
-#     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
-#     shutil.copyfile(orig_tbl, used_tbl)
+def test_format_1genome_pb_tbl(caplog):
+    """
+    Test on formatting prokka results, when prokka output tbl file does not have
+    the expected format -> error message, and no file generated
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "test.0417.00002"
+    # path to original genome, given to prodigal for annotation
+    orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
+    # In generated_by_tests folder, create the original genome given to prokka
+    # (copy from test_file)
+    used_gpath = os.path.join(GENEPATH, "original_name.fna")
+    used_respath = used_gpath + "-prokkaRes"
+    os.makedirs(used_respath)
+    shutil.copyfile(orig_gpath, used_gpath)
 
-#     # Create gff_file with a wrong format
-#     with open(os.path.join(used_respath, "prokka_out_for_test.gff"), "w") as ori:
-#         ori.write("wrongheader # 1 # 2 # 1 # toto")
-#     # Add empty prokka res ffn and faa files
-#     res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
-#     open(res_ffn_file, "w").close()
-#     res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
-#     open(res_faa_file, "w").close()
+    # Create tbl_file with a wrong format
+    with open(os.path.join(used_respath, "prokka_out_for_test.tbl"), "w") as ori:
+        ori.write(">wrongheader # 1 # 2 # 1 # toto")
+    # Add empty prokka res gff ffn and faa files (they won't be read, as it will stop
+    # at tbl2lst)
+    res_gff_file = os.path.join(used_respath, "prokka_out_for_test.gff")
+    open(res_gff_file, "w").close()
+    res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
+    open(res_ffn_file, "w").close()
+    res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
+    open(res_faa_file, "w").close()
 
-#     # Create output directories
-#     prok_path = GENEPATH
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gen_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
-#     os.makedirs(rep_dir)
-#     os.makedirs(gff_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(gen_dir)
-#     # Add empty res lst, gff and gen files, to check that it is removed at the end
-#     res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
-#     open(res_gff_file, "w").close()
-#     assert len(os.listdir(gff_dir) ) == 1
-#     res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
-#     open(res_lst_file, "w").close()
-#     assert len(os.listdir(lst_dir) ) == 1
-#     res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
-#     open(res_gen_file, "w").close()
-#     assert len(os.listdir(gen_dir) ) == 1
+    # Create output directories
+    prok_path = GENEPATH
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gen_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(rep_dir)
+    os.makedirs(gff_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(gen_dir)
+    # Add empty res lst, gff and gen files, to check that it is removed at the end
+    res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
+    open(res_gff_file, "w").close()
+    assert len(os.listdir(gff_dir) ) == 1
+    res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
+    open(res_lst_file, "w").close()
+    assert len(os.listdir(lst_dir) ) == 1
+    res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
+    open(res_gen_file, "w").close()
+    assert len(os.listdir(gen_dir) ) == 1
 
-#     # Run formatting
-#     assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
-#                                             gen_dir, rep_dir, gff_dir)
+    # Run formatting
+    assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
+                                            gen_dir, rep_dir, gff_dir)
 
-#     # Check that all files were removed
-#     assert len(os.listdir(rep_dir) ) == 0
-#     assert len(os.listdir(lst_dir) ) == 0
-#     assert len(os.listdir(gff_dir) ) == 0
-#     assert len(os.listdir(gen_dir) ) == 0
-#     assert("Wrong format for test/data/annotate/generated_by_unit-tests/"
-#            "original_name.fna-prokkaRes/prokka_out_for_test.gff.") in caplog.text
-#     assert ("Problems while generating .gff file for test.0417.00002") in caplog.text
+    # Check that all files were removed
+    assert len(os.listdir(rep_dir) ) == 0
+    assert len(os.listdir(lst_dir) ) == 0
+    assert len(os.listdir(gff_dir) ) == 0
+    assert len(os.listdir(gen_dir) ) == 0
+    assert("Wrong format for test/data/annotate/generated_by_unit-tests/"
+           "original_name.fna-prokkaRes/prokka_out_for_test.tbl.") in caplog.text
+    assert ("Problems while generating LSTINFO file for test.0417.00002") in caplog.text
 
 
+def test_format_1genome_pb_gff(caplog):
+    """
+    Test on formatting prokka results, when prokka output gff file does not have
+    the expected format -> error message, and no file generated
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "test.0417.00002"
+    # path to original genome, given to prodigal for annotation
+    orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
+    # In generated_by_tests folder, create the original genome given to prokka
+    # (copy from test_file)
+    used_gpath = os.path.join(GENEPATH, "original_name.fna")
+    used_respath = used_gpath + "-prokkaRes"
+    os.makedirs(used_respath)
+    shutil.copyfile(orig_gpath, used_gpath)
+    # Copy tbl file, which is as expected (tbl2lst must succeed)
+    orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.tbl")
+    used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
+    shutil.copyfile(orig_tbl, used_tbl)
 
-# def test_format_1genome_pb_ffn(caplog):
-#     """
-#     Test on formatting prokka results, when prokka output ffn file does not have
-#     the expected format -> error message, and no file generated
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "test.0417.00002"
-#     # path to original genome, given to prodigal for annotation
-#     orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-#     # In generated_by_tests folder, create the original genome given to prokka
-#     # (copy from test_file)
-#     used_gpath = os.path.join(GENEPATH, "original_name.fna")
-#     used_respath = used_gpath + "-prokkaRes"
-#     os.makedirs(used_respath)
-#     shutil.copyfile(orig_gpath, used_gpath)
-#     # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
-#     orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.tbl")
-#     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
-#     shutil.copyfile(orig_tbl, used_tbl)
-#     orig_gff = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.gff")
-#     used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
-#     shutil.copyfile(orig_gff, used_gff)
+    # Create gff_file with a wrong format
+    with open(os.path.join(used_respath, "prokka_out_for_test.gff"), "w") as ori:
+        ori.write("wrongheader # 1 # 2 # 1 # toto")
+    # Add empty prokka res ffn and faa files
+    res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
+    open(res_ffn_file, "w").close()
+    res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
+    open(res_faa_file, "w").close()
 
-#     # Create ffn_file with a wrong format
-#     orig_ffn = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongFormat.ffn")
-#     used_ffn = os.path.join(used_respath, "prokka_out_for_test.ffn")
-#     shutil.copyfile(orig_ffn, used_ffn)
-#     # Add empty prokka res faa file
-#     res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
-#     open(res_faa_file, "w").close()
+    # Create output directories
+    prok_path = GENEPATH
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gen_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(rep_dir)
+    os.makedirs(gff_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(gen_dir)
+    # Add empty res lst, gff and gen files, to check that it is removed at the end
+    res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
+    open(res_gff_file, "w").close()
+    assert len(os.listdir(gff_dir) ) == 1
+    res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
+    open(res_lst_file, "w").close()
+    assert len(os.listdir(lst_dir) ) == 1
+    res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
+    open(res_gen_file, "w").close()
+    assert len(os.listdir(gen_dir) ) == 1
 
-#     # Create output directories
-#     prok_path = GENEPATH
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gen_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
-#     os.makedirs(rep_dir)
-#     os.makedirs(gff_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(gen_dir)
-#     # Add empty res lst, gff and gen files, to check that it is removed at the end
-#     res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
-#     open(res_gff_file, "w").close()
-#     assert len(os.listdir(gff_dir) ) == 1
-#     res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
-#     open(res_lst_file, "w").close()
-#     assert len(os.listdir(lst_dir) ) == 1
-#     res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
-#     open(res_gen_file, "w").close()
-#     assert len(os.listdir(gen_dir) ) == 1
+    # Run formatting
+    assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
+                                            gen_dir, rep_dir, gff_dir)
 
-#     # Run formatting
-#     assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
-#                                             gen_dir, rep_dir, gff_dir)
-
-#     # Check that all files were removed
-#     assert len(os.listdir(rep_dir) ) == 0
-#     assert len(os.listdir(lst_dir) ) == 0
-#     assert len(os.listdir(gff_dir) ) == 0
-#     assert len(os.listdir(gen_dir) ) == 0
-#     assert("Unknown header format >JGIKIPIJ-00005 in test/data/annotate/generated_by_unit-tests/"
-#            "original_name.fna-prokkaRes/prokka_out_for_test.ffn.\n"
-#            "Gen file will not be created.") in caplog.text
-#     assert ("Problems while generating .gen file for test.0417.00002") in caplog.text
+    # Check that all files were removed
+    assert len(os.listdir(rep_dir) ) == 0
+    assert len(os.listdir(lst_dir) ) == 0
+    assert len(os.listdir(gff_dir) ) == 0
+    assert len(os.listdir(gen_dir) ) == 0
+    assert("Wrong format for test/data/annotate/generated_by_unit-tests/"
+           "original_name.fna-prokkaRes/prokka_out_for_test.gff.") in caplog.text
+    assert ("Problems while generating .gff file for test.0417.00002") in caplog.text
 
 
-# def test_format_1genome_pb_faa(caplog):
-#     """
-#     Test on formatting prokka results, when prokka output faa file does not have
-#     the expected format -> error message, and no file generated
-#     """
-#     caplog.set_level(logging.DEBUG)
-#     name = "test.0417.00002"
-#     # path to original genome, given to prodigal for annotation
-#     orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-#     # In generated_by_tests folder, create the original genome given to prokka
-#     # (copy from test_file)
-#     used_gpath = os.path.join(GENEPATH, "original_name.fna")
-#     used_respath = used_gpath + "-prokkaRes"
-#     os.makedirs(used_respath)
-#     shutil.copyfile(orig_gpath, used_gpath)
-#     # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
-#     orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.tbl")
-#     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
-#     shutil.copyfile(orig_tbl, used_tbl)
-#     orig_gff = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.gff")
-#     used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
-#     shutil.copyfile(orig_gff, used_gff)
-#     orig_ffn = os.path.join(orig_gpath + "-prokkaRes",
-#                             "prokka_out_for_test.ffn")
-#     used_ffn = os.path.join(used_respath, "prokka_out_for_test.ffn")
-#     shutil.copyfile(orig_ffn, used_ffn)
-#     # Create faa_file with a wrong format
-#     orig_faa = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderInt.faa")
-#     used_faa = os.path.join(used_respath, "prokka_out_for_test.faa")
-#     shutil.copyfile(orig_faa, used_faa)
+def test_format_1genome_pb_ffn(caplog):
+    """
+    Test on formatting prokka results, when prokka output ffn file does not have
+    the expected format -> error message, and no file generated
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "test.0417.00002"
+    # path to original genome, given to prodigal for annotation
+    orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
+    # In generated_by_tests folder, create the original genome given to prokka
+    # (copy from test_file)
+    used_gpath = os.path.join(GENEPATH, "original_name.fna")
+    used_respath = used_gpath + "-prokkaRes"
+    os.makedirs(used_respath)
+    shutil.copyfile(orig_gpath, used_gpath)
+    # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
+    orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.tbl")
+    used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
+    shutil.copyfile(orig_tbl, used_tbl)
+    orig_gff = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.gff")
+    used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
+    shutil.copyfile(orig_gff, used_gff)
 
-#     # Create output directories
-#     prok_path = GENEPATH
-#     prot_dir = os.path.join(GENEPATH, "Proteins")
-#     lst_dir = os.path.join(GENEPATH, "LSTINFO")
-#     rep_dir = os.path.join(GENEPATH, "Replicons")
-#     gen_dir = os.path.join(GENEPATH, "Genes")
-#     gff_dir = os.path.join(GENEPATH, "gff")
-#     os.makedirs(rep_dir)
-#     os.makedirs(gff_dir)
-#     os.makedirs(lst_dir)
-#     os.makedirs(gen_dir)
-#     os.makedirs(prot_dir)
-#     # Add empty res lst, gff and gen files, to check that it is removed at the end
-#     res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
-#     open(res_gff_file, "w").close()
-#     assert len(os.listdir(gff_dir) ) == 1
-#     res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
-#     open(res_lst_file, "w").close()
-#     assert len(os.listdir(lst_dir) ) == 1
-#     res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
-#     open(res_gen_file, "w").close()
-#     assert len(os.listdir(gen_dir) ) == 1
+    # Create ffn_file with a wrong format
+    orig_ffn = os.path.join(TEST_ANNOTE, "prokka_out_for_test-supGene.ffn")
+    used_ffn = os.path.join(used_respath, "prokka_out_for_test.ffn")
+    shutil.copyfile(orig_ffn, used_ffn)
+    # Add empty prokka res faa file
+    res_faa_file = os.path.join(used_respath, "prokka_out_for_test.faa")
+    open(res_faa_file, "w").close()
 
-#     # Run formatting
-#     assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
-#                                             gen_dir, rep_dir, gff_dir)
+    # Create output directories
+    prok_path = GENEPATH
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gen_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(rep_dir)
+    os.makedirs(gff_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(gen_dir)
+    # Add empty res lst, gff and gen files, to check that it is removed at the end
+    res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
+    open(res_gff_file, "w").close()
+    assert len(os.listdir(gff_dir) ) == 1
+    res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
+    open(res_lst_file, "w").close()
+    assert len(os.listdir(lst_dir) ) == 1
+    res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
+    open(res_gen_file, "w").close()
+    assert len(os.listdir(gen_dir) ) == 1
 
-#     # Check that all files were removed
-#     assert len(os.listdir(rep_dir) ) == 0
-#     assert len(os.listdir(lst_dir) ) == 0
-#     assert len(os.listdir(gff_dir) ) == 0
-#     assert len(os.listdir(gen_dir) ) == 0
-#     assert("Unknown header format >JGIKIPIJ_d0008 in test/data/annotate/generated_by_unit-tests/"
-#            "original_name.fna-prokkaRes/prokka_out_for_test.faa. "
-#            "Gene ID is not a number.") in caplog.text
-#     assert ("Problems while generating .prt file for test.0417.00002") in caplog.text
+    # Run formatting
+    assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
+                                            gen_dir, rep_dir, gff_dir)
+
+    # Check that all files were removed
+    assert len(os.listdir(rep_dir) ) == 0
+    assert len(os.listdir(lst_dir) ) == 0
+    assert len(os.listdir(gff_dir) ) == 0
+    assert len(os.listdir(gen_dir) ) == 0
+    assert("Missing info for gene >JGIKIPIJ_03050 (from test/data/annotate/"
+           "generated_by_unit-tests/original_name.fna-prokkaRes/prokka_out_for_test.ffn) "
+           "in test/data/annotate/generated_by_unit-tests/LSTINFO/test.0417.00002.lst. "
+           "If it is actually present in the lst file, "
+           "check that genes are ordered by increasing number in both lst and "
+           "ffn files.") in caplog.text
+    assert ("Problems while generating .gen file for test.0417.00002") in caplog.text
+
+
+def test_format_1genome_pb_faa(caplog):
+    """
+    Test on formatting prokka results, when prokka output faa file does not have
+    the expected format -> error message, and no file generated
+    """
+    caplog.set_level(logging.DEBUG)
+    name = "test.0417.00002"
+    # path to original genome, given to prodigal for annotation
+    orig_gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
+    # In generated_by_tests folder, create the original genome given to prokka
+    # (copy from test_file)
+    used_gpath = os.path.join(GENEPATH, "original_name.fna")
+    used_respath = used_gpath + "-prokkaRes"
+    os.makedirs(used_respath)
+    shutil.copyfile(orig_gpath, used_gpath)
+    # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
+    orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.tbl")
+    used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
+    shutil.copyfile(orig_tbl, used_tbl)
+    orig_gff = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.gff")
+    used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
+    shutil.copyfile(orig_gff, used_gff)
+    orig_ffn = os.path.join(orig_gpath + "-prokkaRes",
+                            "prokka_out_for_test.ffn")
+    used_ffn = os.path.join(used_respath, "prokka_out_for_test.ffn")
+    shutil.copyfile(orig_ffn, used_ffn)
+    # Create faa_file with a wrong format
+    orig_faa = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongHeaderInt.faa")
+    used_faa = os.path.join(used_respath, "prokka_out_for_test.faa")
+    shutil.copyfile(orig_faa, used_faa)
+
+    # Create output directories
+    prok_path = GENEPATH
+    prot_dir = os.path.join(GENEPATH, "Proteins")
+    lst_dir = os.path.join(GENEPATH, "LSTINFO")
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    gen_dir = os.path.join(GENEPATH, "Genes")
+    gff_dir = os.path.join(GENEPATH, "gff")
+    os.makedirs(rep_dir)
+    os.makedirs(gff_dir)
+    os.makedirs(lst_dir)
+    os.makedirs(gen_dir)
+    os.makedirs(prot_dir)
+    # Add empty res lst, gff and gen files, to check that it is removed at the end
+    res_gff_file = os.path.join(gff_dir, "test.0417.00002.gff")
+    open(res_gff_file, "w").close()
+    assert len(os.listdir(gff_dir) ) == 1
+    res_lst_file = os.path.join(lst_dir, "test.0417.00002.lst")
+    open(res_lst_file, "w").close()
+    assert len(os.listdir(lst_dir) ) == 1
+    res_gen_file = os.path.join(gen_dir, "test.0417.00002.gen")
+    open(res_gen_file, "w").close()
+    assert len(os.listdir(gen_dir) ) == 1
+
+    # Run formatting
+    assert not prokkafunc.format_one_genome(used_gpath, name, prok_path, lst_dir, prot_dir,
+                                            gen_dir, rep_dir, gff_dir)
+
+    # Check that all files were removed
+    assert len(os.listdir(rep_dir) ) == 0
+    assert len(os.listdir(lst_dir) ) == 0
+    assert len(os.listdir(gff_dir) ) == 0
+    assert len(os.listdir(gen_dir) ) == 0
+    assert("Unknown header format >JGIKIPIJ_d0008 in test/data/annotate/generated_by_unit-tests/"
+           "original_name.fna-prokkaRes/prokka_out_for_test.faa. "
+           "Gene ID is not a number.") in caplog.text
+    assert ("Problems while generating .prt file for test.0417.00002") in caplog.text
