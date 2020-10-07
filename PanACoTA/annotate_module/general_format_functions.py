@@ -84,7 +84,7 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
     res_path : str
         path to folder where the 4 directories must be created
     annot_path : str
-        path to folder named "<genome_name>-[prokka, prodigal]Res" where all prokka/prodigal
+        path to folder containing "<genome_name>-[prokka, prodigal]Res" where all prokka/prodigal
         results are saved.
     prodigal_only: True if it was annotated by prodigal, False if annotated by prokka
     threads : int
@@ -94,10 +94,9 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
 
     Returns
     -------
-    (skipped, skipped_format) : tuple
+    skipped_format : list
 
-        * skipped : list of genomes skipped because they had a problem in annotation step
-        * skipped_format : list of genomes skipped because they had a problem in format step
+        list of genomes skipped because they had a problem in format step
     """
     main_logger.info("Formatting all genomes")
     lst_dir = os.path.join(res_path, "LSTINFO")
