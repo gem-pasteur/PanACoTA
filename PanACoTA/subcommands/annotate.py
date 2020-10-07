@@ -408,8 +408,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped_format = ffunc.format_genomes(results_ok, res_dir, res_annot_dir,
-                                          prodigal_only, threads, quiet=quiet,
-                                          changed_name=changed)
+                                          prodigal_only, threads, quiet=quiet)
     print(skipped_format)
     # At least one genome could not be formatted -> warn user
     if skipped_format:
