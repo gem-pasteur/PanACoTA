@@ -262,7 +262,7 @@ def run_prokka(arguments):
     error = (f"Error while trying to run prokka on {name} from {gpath}")
     logger.details("Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
-    ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf, logger=logger)
     prokf.close()
     if ret.returncode != 0:
         return False
