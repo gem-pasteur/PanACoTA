@@ -39,7 +39,7 @@ def setup_teardown_module():
     print("setup")
 
     yield
-    # shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH)
     print("teardown")
 
 # Define variables and functions used by several tests
@@ -355,6 +355,53 @@ def test_format_all_prodigal(caplog):
     assert "Formatting all genomes" in caplog.text
 
 
+def test_format_allpb_prokka(caplog):
+    """
+    Test that when giving a list of genomes, 1 that is correctly formatted, and 1 has a pb,
+    it returns the last one in skipped_format
+    """
+    caplog.set_level(logging.DEBUG)
+    # Create empty original sequence files
+    genomes = ["wrong.fasta", "error.fasta"]
+    gpaths = [os.path.join(GENEPATH, name) for name in genomes]
+    for file in gpaths:
+        open(file, "w").close()
+    # Add prokka (empty) result files to prokkaRes directory
+    prok_paths = [gpath + "-prokkaRes" for gpath in gpaths]
+    for prok_path in prok_paths:
+        os.makedirs(prok_path)
+        tbl_res = os.path.join(prok_path, "toto.tbl")
+        gff_res = os.path.join(prok_path, "toto.gff")
+        ffn_res = os.path.join(prok_path, "toto.ffn")
+        faa_res = os.path.join(prok_path, "toto.faa")
+        for file in [tbl_res, gff_res, ffn_res, faa_res]:
+            open(file, "w").close()
+    # Create output directory for .fna files
+    rep_dir = os.path.join(GENEPATH, "Replicons")
+    os.makedirs(rep_dir)
+    # genomes = {genome: [name, gpath, to_annot, size, nbcont, l90]}
+    genomes = {genomes[0]: ["test_wrong-fasta", gpaths[0], gpaths[0], 12656, 3, 1],
+               genomes[1]: ["test_error-fasta", gpaths[1], gpaths[1], 456464645, 5, 1]
+              }
+    res_path = GENEPATH
+    annotated_path = GENEPATH
+    # Try to format both genomes
+    skipped_format = ffunc.format_genomes(genomes, res_path, annotated_path, False, threads=1)
+    assert skipped_format == ["wrong.fasta", "error.fasta"]
+    # Get all names of expected output files
+    exp_folders = ["LSTINFO", "Proteins", "Genes", "Replicons", "gff3"]
+    for res_folder in [os.path.join(res_path, folder) for folder in exp_folders]:
+        assert len(os.listdir(res_folder)) == 0
+    # Check log
+    assert "Formatting all genomes" in caplog.text
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/wrong.fasta does not "
+            "contain any sequence, or is not in fasta format.") in caplog.text
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/error.fasta does not "
+            "contain any sequence, or is not in fasta format.") in caplog.text
+    assert "Problems while generating Replicon file for test_wrong-fasta" in caplog.text
+    assert "Problems while generating Replicon file for test_error-fasta" in caplog.text
+
+
 def test_format_1pb_prodigal(caplog):
     """
     Test that when giving a list of genomes, 1 that is correctly formatted, and 1 has a pb,
@@ -385,7 +432,7 @@ def test_format_1pb_prodigal(caplog):
     shutil.copytree(orig_res_files, used_res_path)
     # genomes = {genome: [name, gpath, to_annot, size, nbcont, l90]}
     genomes = {genome1: ["test_genome1", gpath1, gpath1, 12656, 3, 1],
-               genome2: ["test_H299_H561", gpath2, gpath2, 456464645, 5, 1]
+               genome2: ["test_runprokka_H299", gpath2, gpath2, 456464645, 5, 1]
                }
     res_path = GENEPATH
     annotated_path = GENEPATH
@@ -398,70 +445,12 @@ def test_format_1pb_prodigal(caplog):
     exp_extensions = [".lst", ".prt", ".gen", ".fna", ".gff"]
     # Check that output files are created, and contain what is expected
     for fol, ext in zip(exp_folders, exp_extensions):
-        exp_files = [os.path.join(exp_dir, fol, name + ext) for name in onames]
-        res_files = [os.path.join(res_path, fol, name + ext) for name in onames]
-        for res, exp in zip(res_files, exp_files):
-            assert os.path.isfile(res)
-            assert tutil.compare_order_content(res, exp)
+        exp_file = os.path.join(exp_dir, fol, "test_runprokka_H299" + ext)
+        res_file = os.path.join(res_path, fol, "test_runprokka_H299" + ext)
+        assert os.path.isfile(res_file)
+        assert tutil.compare_order_content(res_file, exp_file)
     # Check log
     assert "Formatting all genomes" in caplog.text
-
-# def test_format_all_error():
-#     """
-#     Test that when giving a list of 2 genomes, prokka ran without problem for both.
-#     But a problem appears while formatting the 2nd one. So, the 2nd one is not formatted,
-#     and appears in skipped_format. The first one is formated, and check that all
-#     output files are created.
-#     """
-#     # genomes = {genome: [name, gpath, size, nbcont, l90]}
-#     name = "test.0417.00002"
-#     initnames = ["H299_H561.fasta", "B2_A3_5.fasta-changeName.fna"]
-#     initpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in initnames]
-#     gnames = ["H299_H561.fasta-short-contig.fna", "B2_A3_5.fasta-problems.fna-short-contig.fna"]
-#     onames = ["test_runprokka_H299", "test.0417.00002"]
-#     gpaths = [os.path.join("test", "data", "annotate", "genomes", name) for name in gnames]
-#     for f1, f2 in zip(initpaths, gpaths):
-#         shutil.copyfile(f1, f2)
-#     genomes = {gnames[0]: [onames[0], gpaths[0], 12656, 3, 1],
-#                gnames[1]: [onames[1], gpaths[1], 456464645, 5, 1]
-#                }
-#     prok_path = os.path.join("test", "data", "annotate", "exp_files")
-#     res_path = os.path.join("test", "data", "annotate")
-#     tbl_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-#                             name + ".tbl")
-#     tblout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-#                           name + ".tbl")
-#     shutil.copyfile(tbl_init, tblout)
-#     gff_init = os.path.join(prok_path, "B2_A3_5.fasta-split5N.fna-short-contig.fna-prokkaRes",
-#                             name + ".gff")
-#     gffout = os.path.join(prok_path, "B2_A3_5.fasta-problems.fna-short-contig.fna-prokkaRes",
-#                           name + ".gff")
-#     shutil.copyfile(gff_init, gffout)
-#     results = {gnames[0]: True, gnames[1]: True}
-#     skipped, skipped_format = ffunc.format_genomes(genomes, results, res_path, prok_path)
-#     assert skipped == []
-#     assert skipped_format == ["B2_A3_5.fasta-problems.fna-short-contig.fna"]
-#     lstfiles = os.path.join(res_path, "LSTINFO")
-#     prtfiles = os.path.join(res_path, "Proteins")
-#     genfiles = os.path.join(res_path, "Genes")
-#     repfiles = os.path.join(res_path, "Replicons")
-#     gfffiles = os.path.join(res_path, "gff3")
-#     assert os.path.isfile(os.path.join(lstfiles, onames[0] + ".lst"))
-#     assert not os.path.isfile(os.path.join(lstfiles, onames[1] + ".lst"))
-#     assert os.path.isfile(os.path.join(prtfiles, onames[0] + ".prt"))
-#     assert not os.path.isfile(os.path.join(prtfiles, onames[1] + ".prt"))
-#     assert os.path.isfile(os.path.join(genfiles, onames[0] + ".gen"))
-#     assert not os.path.isfile(os.path.join(genfiles, onames[1] + ".gen"))
-#     assert os.path.isfile(os.path.join(repfiles, onames[0] + ".fna"))
-#     assert not os.path.isfile(os.path.join(repfiles, onames[1] + ".fna"))
-#     assert os.path.isfile(os.path.join(gfffiles, onames[0] + ".gff"))
-#     assert not os.path.isfile(os.path.join(gfffiles, onames[1] + ".gff"))
-#     shutil.rmtree(os.path.join(res_path, "LSTINFO"))
-#     shutil.rmtree(os.path.join(res_path, "Proteins"))
-#     shutil.rmtree(os.path.join(res_path, "Genes"))
-#     shutil.rmtree(os.path.join(res_path, "Replicons"))
-#     shutil.rmtree(os.path.join(res_path, "gff3"))
-#     os.remove(tblout)
-#     os.remove(gffout)
-#     for f in gpaths:
-#         os.remove(f)
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/wrong.fasta does not "
+            "contain any sequence, or is not in fasta format.") in caplog.text
+    assert "Problems while generating Replicon file for test_genome1" in caplog.text
