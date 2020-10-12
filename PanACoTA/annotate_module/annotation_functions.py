@@ -106,7 +106,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
                   ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
-                                      term_width=100).start()
+                                      term_width=79).start()
     # Get resource availability:
     # - number of threads used by prokka/prodigal (cores_annot)
     # - how many genomes can be annotated at the same time (pool_size)
