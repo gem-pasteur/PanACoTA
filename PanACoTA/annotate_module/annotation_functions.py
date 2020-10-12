@@ -423,10 +423,17 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
         missing_file = True
     else:
         oriname = os.path.basename(gpath)
+        fnafile = glob.glob(os.path.join(outdir, "*.fna"))
         tblfile = glob.glob(os.path.join(outdir, "*.tbl"))
         faafile = glob.glob(os.path.join(outdir, "*.faa"))
         ffnfile = glob.glob(os.path.join(outdir, "*.ffn"))
         gfffile = glob.glob(os.path.join(outdir, "*.gff"))
+        if len(fnafile) == 0:
+            logger.error("{} {}: no .fna file".format(name, oriname))
+            missing_file = True
+        elif len(fnafile) > 1:
+            logger.error("{} {}: several .fna files".format(name, oriname))
+            missing_file = True
         if len(tblfile) == 0:
             logger.error("{} {}: no .tbl file".format(name, oriname))
             missing_file = True

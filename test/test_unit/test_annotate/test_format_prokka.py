@@ -489,6 +489,8 @@ def test_format_1genome_emptygpath(caplog):
     # Create prokka result files (empty files, will not be read)
     gpath_prokres =  gpath + "-prokkaRes"
     os.makedirs(gpath_prokres)
+    fna_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.fna")
+    open(fna_prokres, "w").close()
     tbl_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.tbl")
     open(tbl_prokres, "w").close()
     gff_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.gff")
@@ -554,6 +556,9 @@ def test_format_1genome_pb_tbl(caplog):
         ori.write(">wrongheader # 1 # 2 # 1 # toto")
     # Add empty prokka res gff ffn and faa files (they won't be read, as it will stop
     # at tbl2lst)
+    orig_fna =  os.path.join(TEST_ANNOTE, "original_name.fna-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
     res_gff_file = os.path.join(used_respath, "prokka_out_for_test.gff")
     open(res_gff_file, "w").close()
     res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
@@ -617,6 +622,9 @@ def test_format_1genome_pb_gff(caplog):
                             "prokka_out_for_test.tbl")
     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
     shutil.copyfile(orig_tbl, used_tbl)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
 
     # Create gff_file with a wrong format
     with open(os.path.join(used_respath, "prokka_out_for_test.gff"), "w") as ori:
@@ -687,6 +695,9 @@ def test_format_1genome_pb_ffn(caplog):
                             "prokka_out_for_test.gff")
     used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
     shutil.copyfile(orig_gff, used_gff)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
 
     # Create ffn_file with a wrong format
     orig_ffn = os.path.join(TEST_ANNOTE, "prokka_out_for_test-supGene.ffn")
@@ -752,6 +763,9 @@ def test_format_1genome_pb_faa(caplog):
     os.makedirs(used_respath)
     shutil.copyfile(orig_gpath, used_gpath)
     # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
     orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
                             "prokka_out_for_test.tbl")
     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")

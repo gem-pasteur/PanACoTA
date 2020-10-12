@@ -495,13 +495,22 @@ def test_main_existing_prokkadir_errorformat():
     shutil.copyfile(ori_genome1, used_genome1)
     # Copy prokka results to genepath/genomes/gname-prokkaRes
     shutil.copytree(ori_prok_g1, used_prok_g1)
-    # Same think for 2nd genome
+    # and add .fna file to prokka-dir
+    used_fna1 = os.path.join(used_prok_g1, "B2_A3_5.fasta-changeName.fna")
+    shutil.copyfile(ori_genome1, used_fna1)
+
+    # Same thing for 2nd genome
     ori_genome2 = os.path.join(GEN_PATH, "H299_H561.fasta")
     ori_prok_g2 = os.path.join(EXP_DIR, "H299_H561.fasta-prokkaRes")
     used_genome2 = os.path.join(genome_path_used, "H299_H561.fasta")
     used_prok_g2 = used_genome2 + "-prokkaRes"
+    # Copy original fasta file to tmp resdir
     shutil.copyfile(ori_genome2, used_genome2)
+    # Copy folder with prokka result files to genepath result path
     shutil.copytree(ori_prok_g2, used_prok_g2)
+    # and add .fna file to prokka-dir
+    used_fna = os.path.join(used_prok_g2, "H299_H561.fasta")
+    shutil.copyfile(ori_genome2, used_fna)
 
     # Run annotation
     name = "ESCO"

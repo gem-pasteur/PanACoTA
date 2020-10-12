@@ -89,6 +89,67 @@ def test_check_prokka_no_outdir():
     assert q.get().message == msg
 
 
+def test_check_prokka_nofna():
+    """
+    Check that check_prokka returns false when a tbl file is missing, and an error message
+    """
+    logger = my_logger("test_check_prokka_nofna")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join(GENEPATH, "out_test_nofna")
+    name = "prokka_out_for_test-missfna"
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prokka.log")
+    nbcont = 7
+    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missfna original_name-error.fna: no .fna file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+
+
+def test_check_prokka_sevfna():
+    """
+    Check that check_prokka returns false when there is more than 1 tbl file,
+    and an error message
+    """
+    logger = my_logger("test_check_prokka_sevfna")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join(GENEPATH, "out_test_sevfna")
+    name = "prokka_out_for_test-sevfna"
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + "2.fna"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prokka.log")
+    nbcont = 7
+    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-sevfna original_name-error.fna: several .fna files"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+
+
 def test_check_prokka_notbl():
     """
     Check that check_prokka returns false when a tbl file is missing, and an error message
@@ -100,6 +161,8 @@ def test_check_prokka_notbl():
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -127,6 +190,8 @@ def test_check_prokka_sevtbl():
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -156,6 +221,8 @@ def test_check_prokka_nofaa():
     out_dir = os.path.join(GENEPATH, "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -183,6 +250,8 @@ def test_check_prokka_sevfaa():
     out_dir = os.path.join(GENEPATH, "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -213,6 +282,8 @@ def test_check_prokka_noffn():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -240,6 +311,8 @@ def test_check_prokka_sevffn():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -270,6 +343,8 @@ def test_check_prokka_nogff():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missgff"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -297,6 +372,8 @@ def test_check_prokka_sevgff():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-sevgff"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -348,6 +425,8 @@ def test_check_prokka_wrong_tbl_cds():
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongCDS"
     tblfile = os.path.join(TEST_DIR, name + ".tbl")
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -428,6 +507,8 @@ def test_run_prokka_out_exists_error():
     new_prok_dir = os.path.join(GENEPATH, "original_name-error-prokkaRes")
     name = "prokka_out_for_test-wrongCDS"
     os.makedirs(new_prok_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(new_prok_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(new_prok_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),

@@ -47,6 +47,7 @@ def setup_teardown_module():
     shutil.rmtree(GENEPATH)
     print("teardown")
 
+
 # Define variables and functions used by several tests
 def my_logger():
     """
@@ -150,11 +151,12 @@ def test_handle_genome_badprok():
     open(gpath, "w").close()
     prok_path = gpath + "-prokkaRes"
     os.makedirs(prok_path)
+    fna_res = os.path.join(prok_path, " toto.fna")
     tbl_res = os.path.join(prok_path, " toto.tbl")
     gff_res = os.path.join(prok_path, "toto.gff")
     ffn_res = os.path.join(prok_path, "toto.ffn")
     faa_res = os.path.join(prok_path, "toto.faa")
-    for file in [tbl_res, gff_res, ffn_res, faa_res]:
+    for file in [fna_res, tbl_res, gff_res, ffn_res, faa_res]:
         open(file, "w").close()
     # Create output directory for .fna file
     rep_dir = os.path.join(GENEPATH, "Replicons")
@@ -379,7 +381,8 @@ def test_format_allpb_prokka(caplog):
         gff_res = os.path.join(prok_path, "toto.gff")
         ffn_res = os.path.join(prok_path, "toto.ffn")
         faa_res = os.path.join(prok_path, "toto.faa")
-        for file in [tbl_res, gff_res, ffn_res, faa_res]:
+        fna_res = os.path.join(prok_path, "toto.fna")
+        for file in [fna_res, tbl_res, gff_res, ffn_res, faa_res]:
             open(file, "w").close()
     # Create output directory for .fna files
     rep_dir = os.path.join(GENEPATH, "Replicons")
@@ -399,9 +402,11 @@ def test_format_allpb_prokka(caplog):
         assert len(os.listdir(res_folder)) == 0
     # Check log
     assert "Formatting all genomes" in caplog.text
-    assert ("Your genome test/data/annotate/generated_by_unit-tests/wrong.fasta does not "
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/"
+            "wrong.fasta-prokkaRes/toto.fna does not "
             "contain any sequence, or is not in fasta format.") in caplog.text
-    assert ("Your genome test/data/annotate/generated_by_unit-tests/error.fasta does not "
+    assert ("Your genome test/data/annotate/generated_by_unit-tests/"
+            "error.fasta-prokkaRes/toto.fna does not "
             "contain any sequence, or is not in fasta format.") in caplog.text
     assert "Problems while generating Replicon file for test_wrong-fasta" in caplog.text
     assert "Problems while generating Replicon file for test_error-fasta" in caplog.text
