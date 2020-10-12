@@ -40,7 +40,11 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    if not os.path.exists(GENEPATH):
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
         os.mkdir(GENEPATH)
     print("setup")
 
