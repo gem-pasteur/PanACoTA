@@ -490,9 +490,13 @@ def test_run_prokka_out_exists_force():
     # we cannot compare the whole file.
     with open(out_tbl, "r") as outt:
         lines = [line.strip() for line in outt.readlines()]
-        assert ">Feature H561_S27" in lines
-        assert ">Feature H561_S28" in lines
-        assert ">Feature H561_S29" in lines
+        # Check that there are 3 contigs
+        feature = 0
+        for line in lines:
+            if 'Feature' in line:
+                feature += 1
+        assert feature == 3
+        # Check that there are 16 CDS
         CDS = 0
         for line in lines:
             if "CDS" in line:
@@ -512,7 +516,7 @@ def test_run_prokka_out_exists_force():
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
                                "H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runprokka_H299 "
-                               "test/data/annotate/genomes/H299_H561.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
     assert q.get() .message.startswith("End annotating test_runprokka_H299 "
                                        "from test/data/annotate/genomes/H299_H561.fasta")
 
@@ -547,9 +551,13 @@ def test_run_prokka_out_doesnt_exist_ok():
     # we cannot compare the whole file.
     with open(out_tbl, "r") as outt:
         lines = [line.strip() for line in outt.readlines()]
-        assert ">Feature H561_S27" in lines
-        assert ">Feature H561_S28" in lines
-        assert ">Feature H561_S29" in lines
+        # Check that there are 3 contigs
+        feature = 0
+        for line in lines:
+            if 'Feature' in line:
+                feature += 1
+        assert feature == 3
+        # Check that there are 16 CDS
         CDS = 0
         for line in lines:
             if "CDS" in line:
@@ -566,7 +574,7 @@ def test_run_prokka_out_doesnt_exist_ok():
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
                                "H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runprokka_H299 "
-                               "test/data/annotate/genomes/H299_H561.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
     assert q.get().message.startswith("End annotating")
 
 
@@ -592,6 +600,6 @@ def test_run_prokka_out_problem_running():
                                "--outdir test/data/annotate/generated_by_unit-tests/"
                                "H299_H561bis.fasta-prokkaRes --cpus 2 "
                                "--prefix test_runprokka_H299-error "
-                               "test/data/annotate/genomes/H299_H561bis.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561bis.fasta")
     assert q.get().message == ("Error while trying to run prokka on test_runprokka_H299-error "
                                "from test/data/annotate/genomes/H299_H561bis.fasta")

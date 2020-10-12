@@ -35,7 +35,12 @@ def setup_teardown_module():
     - remove directory with generated results
     """
     # utils.init_logger(LOGFILE_BASE, 0, 'test_fastme', verbose=1)
-    os.mkdir(GENEPATH)
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
