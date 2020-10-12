@@ -334,7 +334,8 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
 def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
     """
     Save the contig read just before into dicts and write it to sequence file.
-    Contig name must be at most 20 characters (required by prokka)
+    Unique ID of contig must be in the first field of header, before the first space
+    (required by prokka)
 
     Parameters
     ----------
@@ -368,7 +369,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
+        new_contig_name = ">{}_{}\n".format(num, cur_contig_name.split(">")[1])
         contig_sizes[new_contig_name] = len(seq)
         gresf.write(new_contig_name)
         gresf.write(seq + "\n")
