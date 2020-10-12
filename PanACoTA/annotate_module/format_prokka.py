@@ -101,6 +101,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     """
     prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
     # Get needed Prokka result files
+    fna_file = glob.glob(os.path.join(prokka_dir, "*.fna"))[0]
     prokka_tbl_file = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
     prokka_gff_file = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
     prokka_ffn_file = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
@@ -116,7 +117,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
 
     # Generate replicon file (same as input sequence but with gembase formatted headers). From
     # this file, get contig names, to be used to generate gff file
-    contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file, logger)
+    contigs, sizes = utils.get_genome_contigs_and_rename(name, fna_file, res_rep_file, logger)
     if not contigs:
         try:
             os.remove(res_rep_file)
@@ -130,7 +131,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, gpath)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, fna_file)
     if not ok_tbl:
         try:
             os.remove(res_rep_file)
@@ -143,7 +144,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         logger.error("Problems while generating LSTINFO file for {}".format(name))
         return False
     # Create gff3 file for annotations
-    ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
+    ok_gff = generate_gff(fna_file, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
     if not ok_gff:
         try:
             os.remove(res_rep_file)
