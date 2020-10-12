@@ -40,14 +40,16 @@ def setup_teardown_module():
     - remove directory with generated results
     """
     # utils.init_logger(LOGFILE_BASE, 0, 'test_postalign', verbose=1)
-    os.mkdir(GENEPATH)
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    shutil.rmtree(GENEPATH)
-    # for f in LOGFILES:
-    #     if os.path.exists(f):
-    #         os.remove(f)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -195,7 +197,7 @@ def test_format_contig_cut():
     cut = True
     pat = 'NNNNN+'
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name for_my_sequence"
     contig_sizes = {}
     resfile = os.path.join(GENEPATH, "test_format_cont_cut5N.fna")
     gresf = open(resfile, "w")
@@ -208,8 +210,8 @@ def test_format_contig_cut():
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
     assert os.path.exists(resfile)
     assert tutil.compare_order_content(resfile, exp_file)
-    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 26,
-                            ">my_contig_name_for_my_sequence_3\n": 25}
+    assert contig_sizes == {">2_my_contig_name for_my_sequence\n": 26,
+                            ">3_my_contig_name for_my_sequence\n": 25}
 
 
 def test_format_contig_nocut():
@@ -220,23 +222,21 @@ def test_format_contig_nocut():
     cut = False
     pat = None
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name_for_my_sequence\n"
     contig_sizes = {}
     resfile = os.path.join(GENEPATH, "test_format_cont_nocut_prokka.fna")
-    gresf = open(resfile, "w")
+    gresf = None
     num = 2
 
     assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
-                               num, logger=None) == 3
-    gresf.close()
+                               num, logger=None) == 2
 
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
-    assert os.path.exists(resfile)
-    assert tutil.compare_order_content(resfile, exp_file)
-    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 56}
+    assert not os.path.exists(resfile)
+    assert contig_sizes == {">my_contig_name_for_my_sequence\n": 56}
 
 
-def test_format_contig_nocut_prodigal_notSameName():
+def test_format_contig_nocut_notDuplicateName():
     """
     For a given contig, if we want to annotate it with prodigal, and do not cut,
     then we keep the same file (no need to split at 20 characters)
@@ -262,7 +262,7 @@ def test_format_contig_nocut_prodigal_notSameName():
                             ">mycontig": 155}
 
 
-def test_format_contig_nocut_prodigal_SameName(caplog):
+def test_format_contig_nocut_DuplicateName(caplog):
     """
     For a given contig, if we want to annotate it with prodigal, and do not cut, then we keep the same file. However, we must check that contig names are all different.
     Try to add a contig which name is already used, check that it prints the expected error,
@@ -460,7 +460,7 @@ def test_analyse1genome_cut_same_names():
     """
     Analyse a genome. Its contig names all have the same first 20 characters. There is no
     stretch of at least 5N, so contigs are not split.
-    New contig names should be uniq, and not all ending with _0!
+    New contig names should be uniq, and not all starting with '1_'!
     """
     genome = "genome_long_header.fst"
     genomes = {genome: ["SAEN.1015.0117"]}
