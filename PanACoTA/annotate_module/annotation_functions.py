@@ -147,8 +147,12 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
                     break
                 # If not done, get number of genomes left
                 remaining = final._number_left
-                # Update progress bar
-                bar.update(nbgen - remaining)
+                # Add this to start progressbar with 0% instead of N/A%
+                if remaining == nbgen:
+                    bar.update(0.0000001)
+                else:
+                    # Update progress bar
+                    bar.update(nbgen - remaining)
             # End progress bar
             bar.finish()
         pool.join()
