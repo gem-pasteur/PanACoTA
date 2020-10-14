@@ -53,7 +53,7 @@ from PanACoTA import utils
 logger = logging.getLogger("prepare.dds")
 
 
-def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threads):
+def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels, outdir, threads):
     """
     Download refseq genomes of given species
 
@@ -79,7 +79,7 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
 
     """
     # Name of summary file, with metadata for each strain:
-    sumfile = os.path.join(outdir, "assembly_summary-{}.txt".format(species_linked))
+    sumfile = os.path.join(outdir, f"assembly_summary-{species_linked}.txt")
     abs_sumfile = os.path.abspath(sumfile)
 
     # arguments needed to download all genomes of the given species
@@ -99,6 +99,10 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, outdir, threa
             message += f" (NCBI_taxid = {NCBI_taxid})."
         else:
             message += f" NCBI_taxid = {NCBI_taxid}"
+    # If assembly level(s) given, add it to arguments, and write to info message
+    if levels:
+        keyargs["assembly_levels"] = levels
+        message += f" (Only those assembly levels: {levels}). "
     logger.info(f"Metadata for all genomes will be saved in {sumfile}")
     logger.info(message)
 

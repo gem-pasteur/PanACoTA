@@ -204,9 +204,10 @@ def test_download():
     NCBI_taxid = "104099"
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq")
     threads = 1
+    levels = ""
 
-    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                        outdir, threads)
+    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels,
+                                                outdir, threads)
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
     # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
@@ -241,8 +242,9 @@ def test_download_noSpeName():
     NCBI_taxid = "104099"
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_noSpe")
     threads = 1
+    levels = ""
 
-    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+    db_dir, nb_gen = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels,
                                                 outdir, threads)
 
     # Check path to uncompressed files is as expected
@@ -277,8 +279,9 @@ def test_download_wrongTaxID(caplog):
     NCBI_taxid = "10409"
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
     threads = 1
+    levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels,
                                    outdir, threads)
 
     # Check path to uncompressed files does not exist
@@ -311,8 +314,9 @@ def test_download_diffSpeTaxID(caplog):
     NCBI_taxid = "104099"
     outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
     threads = 1
+    levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+        downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels,
                                    outdir, threads)
 
     # Check path to uncompressed files does not exist
