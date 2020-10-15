@@ -14,6 +14,33 @@ import PanACoTA.prepare_module.download_genomes_func as downg
 
 
 DATA_TEST_DIR = os.path.join("test", "data", "prepare")
+GENEPATH = os.path.join(DATA_TEST_DIR, "generated_by_unit-tests")
+
+
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
+    """
+    Remove log files at the end of this test module
+
+    Before each test:
+    - init logger
+    - create directory to put generated files
+
+    After:
+    - remove all log files
+    - remove directory with generated results
+    """
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH, ignore_errors=True)
+    print("teardown")
 
 
 def test_to_database():
@@ -38,7 +65,6 @@ def test_to_database():
     assert os.path.isfile(os.path.join(db_dir, "ACOR002.0519.fna"))
     assert os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
 
-    # Remove database created
     shutil.rmtree(db_dir)
 
 
@@ -49,11 +75,12 @@ def test_to_database_nofolder_refseq(caplog):
     """
     caplog.set_level(logging.DEBUG)
     with pytest.raises(SystemExit):
-        downg.to_database(DATA_TEST_DIR)
+        downg.to_database(GENEPATH)
 
     assert "ERROR" in caplog.text
     assert ("The folder containing genomes downloaded from NCBI refseq "
-            "(test/data/prepare/refseq/bacteria) does not exist.") in caplog.text
+            "(test/data/prepare/generated_by_unit-tests/refseq/bacteria) "
+            "does not exist.") in caplog.text
     assert ("Check that you really downloaded sequences (fna.gz) and that they are "
             "in this folder") in caplog.text
 
@@ -63,19 +90,17 @@ def test_to_database_nofolder_per_genome(caplog):
     Test behavior when the folder refseq/bacteria exists, but there are no folders inside
     -> should exit with error message
     """
-    empty_dir = os.path.join(DATA_TEST_DIR, "refseq", "bacteria")
+    empty_dir = os.path.join(GENEPATH, "refseq", "bacteria")
     os.makedirs(empty_dir)
     caplog.set_level(logging.DEBUG)
     with pytest.raises(SystemExit):
-        downg.to_database(DATA_TEST_DIR)
+        downg.to_database(GENEPATH)
     # Check error message is as expected
     assert "ERROR" in caplog.text
     assert ("The folder supposed to contain genomes downloaded from NCBI refseq "
-            "(test/data/prepare/refseq/bacteria) exists but is empty") in caplog.text
+            "(test/data/prepare/generated_by_unit-tests/refseq/bacteria) "
+            "exists but is empty") in caplog.text
     assert ("Check that you really downloaded sequences (fna.gz)") in caplog.text
-
-    # Remove files/folders specific to test
-    shutil.rmtree(os.path.join(DATA_TEST_DIR, "refseq"))
 
 
 def test_to_database_1empty_genome_folder(caplog):
@@ -83,32 +108,27 @@ def test_to_database_1empty_genome_folder(caplog):
     Test behavior when the folder refseq/bacteria exists, there are subfolders inside,
     but 1 of them is empty: warning message informing that this genome will be ignored
     """
-    out_dir = os.path.join(DATA_TEST_DIR, "genomes")
-    gz_genomes_folder = os.path.join(out_dir, "refseq", "bacteria")
+    caplog.set_level(logging.DEBUG)
+    out_dir = os.path.join(GENEPATH, "genomes")
+    refseq_dir = os.path.join(DATA_TEST_DIR, "genomes")
+    # Copy content of refseq in genomes test data to output folder that will be used
+    shutil.copytree(refseq_dir, out_dir)
 
     # Empty 1 directory: move its file to 'out_dir'
-    to_move_filename = "ACOR002.0519.fna.gz" # File that must be moved
-    to_empty_dir = "ACOR002" # Directory containing file to move
-    to_move_file = os.path.join(gz_genomes_folder, to_empty_dir, to_move_filename)
-    shutil.move(to_move_file, os.path.join(out_dir, to_move_filename))
-
+    to_remove = os.path.join(out_dir, "refseq", "bacteria", "ACOR003", "ACOR003.0519.fna.gz")
+    os.remove(to_remove)
     # Run to_database
     nb_gen, db_dir = downg.to_database(out_dir)
     assert nb_gen == 2
     assert db_dir == os.path.join(out_dir, "Database_init")
 
     # Check that a warning message was raised, indicating that genome is ignored
-    caplog.set_level(logging.DEBUG)
     assert "WARNING" in caplog.text
-    assert ("Problem with genome in ACOR002: no compressed fasta file downloaded. "
+    assert ("Problem with genome in ACOR003: no compressed fasta file downloaded. "
             "This genome will be ignored.") in caplog.text
-    assert not os.path.isfile(os.path.join(db_dir, "ACOR002.0519.fna"))
+    assert not os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
     assert os.path.isfile(os.path.join(db_dir, "ACOR001.0519.fna"))
-    assert os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
-
-    # Remove files/folders specific to test
-    shutil.move(os.path.join(out_dir, to_move_filename), to_move_file)
-    shutil.rmtree(db_dir)
+    assert os.path.isfile(os.path.join(db_dir, "ACOR002.0519.fna"))
 
 
 def test_to_database_several_genomes(caplog):
@@ -117,13 +137,15 @@ def test_to_database_several_genomes(caplog):
     but 1 of them contains more than 1 genome: warning message informing that this
     genome will be ignored
     """
-    out_dir = os.path.join(DATA_TEST_DIR, "genomes")
-    gz_genomes_folder = os.path.join(out_dir, "refseq", "bacteria")
+    out_dir = os.path.join(GENEPATH, "genomes")
+    refseq_dir = os.path.join(DATA_TEST_DIR, "genomes")
+    # Copy content of refseq in genomes test data to output folder that will be used
+    shutil.copytree(refseq_dir, out_dir)
 
     # Create a new gz file in one of the genome directories
     to_create_filename = "ACOR002.0519.bis.fna.gz" # Name of file that must be created
     to_fill_dir = "ACOR002" # Directory containing file to create
-    to_create_path = os.path.join(gz_genomes_folder, to_fill_dir, to_create_filename)
+    to_create_path = os.path.join(out_dir, "refseq", "bacteria", to_fill_dir, to_create_filename)
     # Create empty gz file
     open(to_create_path, "w").close()
 
@@ -141,29 +163,27 @@ def test_to_database_several_genomes(caplog):
     assert os.path.isfile(os.path.join(db_dir, "ACOR001.0519.fna"))
     assert os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
 
-    # Remove test files/folders
-    os.remove(to_create_path)
-    shutil.rmtree(db_dir)
-
 
 def test_to_database_1genome_wrong_format(caplog):
     """
     Test behavior when the folder refseq/bacteria exists, there is 1 genome per subfolder,
     but 1 genome cannot be unzipped
     """
-    out_dir = os.path.join(DATA_TEST_DIR, "genomes")
-    gz_genomes_folder = os.path.join(out_dir, "refseq", "bacteria")
+    # out_dir = os.path.join(DATA_TEST_DIR, "genomes")
+    # gz_genomes_folder = os.path.join(out_dir, "refseq", "bacteria")
+
+    out_dir = os.path.join(GENEPATH, "genomes")
+    refseq_dir = os.path.join(DATA_TEST_DIR, "genomes")
+    # Copy content of refseq in genomes test data to output folder that will be used
+    shutil.copytree(refseq_dir, out_dir)
 
     # Name of directory directly containing the original gz file
     to_corrupt_dir = "ACOR001"
-    # Name of original gz file that must be moved to be saved
-    to_empty_filename = "ACOR001.0519.fna.gz"
-    # Complete path to this original gz file
-    to_empty_path = os.path.join(gz_genomes_folder, to_corrupt_dir, to_empty_filename) #
-    # copy real gz genome file to outdir to save it, and create a fake one in place of it
-    shutil.copy(to_empty_path, os.path.join(out_dir, to_empty_filename))
+    to_corrupt_filename = "ACOR001.0519.fna.gz"
+    to_corrupt_path = os.path.join(out_dir, "refseq", "bacteria",  to_corrupt_dir,
+                                   to_corrupt_filename)
     # Create fake gz file (txt file)
-    false_gz = open(to_empty_path, "w")
+    false_gz = open(to_corrupt_path, "w")
     false_gz.write("This is not a gz file")
     false_gz.close()
 
@@ -176,19 +196,15 @@ def test_to_database_1genome_wrong_format(caplog):
     caplog.set_level(logging.DEBUG)
     assert "ERROR" in caplog.text
     assert ("Error while trying to uncompress "
-            "test/data/prepare/genomes/Database_init/ACOR001.0519.fna.gz. "
+            "test/data/prepare/generated_by_unit-tests/genomes/Database_init/ACOR001.0519.fna.gz. "
             "This genome will be ignored") in caplog.text
     # Check that there are only 2 files in the database, and that they correspond
     # to uncompressed gz files
     list_db = os.listdir(db_dir)
     assert len(list_db) == 2
-    assert not os.path.isfile(os.path.join(db_dir, to_empty_filename))
+    assert not os.path.isfile(os.path.join(db_dir, to_corrupt_filename))
     assert os.path.isfile(os.path.join(db_dir, "ACOR002.0519.fna"))
     assert os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
-
-    # Remove test files/Folders
-    shutil.move(os.path.join(out_dir, to_empty_filename), to_empty_path)
-    shutil.rmtree(db_dir)
 
 
 def test_download():
@@ -202,7 +218,7 @@ def test_download():
     species_linked = "Acetobacter_orleanensis"
     NCBI_species = "Acetobacter orleanensis"
     NCBI_taxid = "104099"
-    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq")
+    outdir = os.path.join(GENEPATH, "test_download_refseq")
     threads = 1
     levels = ""
 
@@ -210,7 +226,8 @@ def test_download():
                                                 outdir, threads)
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, as it is updated
+    # everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
     assert nb_gen >= 4
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
@@ -219,15 +236,35 @@ def test_download():
     # Check that assembly summary file wwas donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-Acetobacter_orleanensis.txt" )
     assert os.path.isfile(sum_file)
+    # Check number of genomes in summary file, and how many with scaffold or complete
+    # assembly level -> will check that when asking only for those levels, we get the same number
+    other = 0
+    scaf = 0
+    comp = 0
+    with open(sum_file, "r") as sf:
+        sf.readline()  # skip header
+        for line in sf:
+            if "complete" in line.split("\t")[13].lower():
+                comp += 1
+            elif "scaffold" in line.split("\t")[13].lower():
+                scaf += 1
+            else:
+                other += 1
+    assert other + scaf + comp == nb_gen
 
     # Check that the NCBI_genome_download output directory exists
     ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
     # And that it contains folders
     assert os.path.isdir(ngd_outdir)
-    assert len(os.listdir(ngd_outdir)) >= 3
+    assert len(os.listdir(ngd_outdir)) >= 4
 
-    # Remove test ouput dir
-    shutil.rmtree(outdir)
+    # Re-run, but only asking for complete and scaffold
+    outdir2 = os.path.join(GENEPATH, "test_download_refseq_only-scaf")
+    levels2 = "scaffold,complete"
+    db_dir2, nb_gen2 = downg.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
+                                                  levels2, outdir2, threads)
+    assert scaf + comp == nb_gen2
+    assert db_dir2 == os.path.join(outdir2, "Database_init")
 
 
 def test_download_noSpeName():
@@ -240,7 +277,7 @@ def test_download_noSpeName():
     species_linked = "toto"
     NCBI_species = None
     NCBI_taxid = "104099"
-    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_noSpe")
+    outdir = os.path.join(GENEPATH, "test_download_refseq_noSpe")
     threads = 1
     levels = ""
 
@@ -263,9 +300,7 @@ def test_download_noSpeName():
     ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
     # And that it contains folders
     assert os.path.isdir(ngd_outdir)
-    assert len(os.listdir(ngd_outdir)) >= 3
-    # Remove test ouput dir
-    shutil.rmtree(outdir)
+    assert len(os.listdir(ngd_outdir)) >= 4
 
 
 def test_download_wrongTaxID(caplog):
@@ -277,7 +312,7 @@ def test_download_wrongTaxID(caplog):
     species_linked = "Acetobacter_orleanensis"
     NCBI_species = None
     NCBI_taxid = "10409"
-    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
+    outdir = os.path.join(GENEPATH, "test_download_refseq_wrongTaxID")
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
@@ -312,7 +347,7 @@ def test_download_diffSpeTaxID(caplog):
     species_linked = "Acetobacter_orleanensis"
     NCBI_species = "Acetobacter fabarum"
     NCBI_taxid = "104099"
-    outdir = os.path.join(DATA_TEST_DIR, "test_download_refseq_wrongTaxID")
+    outdir = os.path.join(GENEPATH, "test_download_refseq_wrongTaxID")
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
