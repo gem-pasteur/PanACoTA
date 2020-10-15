@@ -312,7 +312,7 @@ def build_parser(parser):
                                 "By default, it will be saved in your "
                                 "out_dir/tmp_files.")
                           )
-    general.add_argument("--cutn", dest="cutn", type=int, default=5,
+    general.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "

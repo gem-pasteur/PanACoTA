@@ -99,3 +99,15 @@ def thread_num(param):
     elif param == 0:
         return nb_cpu
     return param
+
+
+def positive_int(param):
+    try:
+        param = int(param)
+    except ValueError:
+        msg = f"error: argument --cutn: invalid int value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0:
+        msg = f"error: argument --cutn must be a positive integer: invalid int value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    return param

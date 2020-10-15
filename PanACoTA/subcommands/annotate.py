@@ -479,7 +479,7 @@ def build_parser(parser):
     optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    optional.add_argument("--cutn", dest="cutn", type=int, default=5,
+    optional.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "
