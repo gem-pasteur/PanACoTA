@@ -96,7 +96,7 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
                    ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfam,
-                                      term_width=100).start()
+                                      term_width=79).start()
     final = []
     if threads == 1:
         update_bar = 1
