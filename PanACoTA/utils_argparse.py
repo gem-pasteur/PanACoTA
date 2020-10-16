@@ -111,3 +111,15 @@ def positive_int(param):
         msg = f"error: argument --cutn must be a positive integer: invalid int value: '{param}'"
         raise argparse.ArgumentTypeError(msg)
     return param
+
+
+def mash_dist(param):
+    try:
+        param = float(param)
+    except ValueError:
+        msg = f"error: mash distance: invalid float value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0 or param > 1:
+        msg = f"error: mash_distance must be between 0 and 1: invalid value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    return param

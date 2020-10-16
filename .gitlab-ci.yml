@@ -107,6 +107,7 @@ func-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
+    - py.test test/test_functional/test_prepare* -vx
     - py.test test/test_functional/test_pangenome* -vx
     - py.test test/test_functional/test_corepers* -vx
     - py.test test/test_functional/test_align* -vx

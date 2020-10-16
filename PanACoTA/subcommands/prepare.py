@@ -325,16 +325,18 @@ def build_parser(parser):
     general.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    general.add_argument("--min", dest="min_dist", default=1e-4, type=float,
+    general.add_argument("--min_dist", dest="min_dist", default=1e-4,
+                        type=utils_argparse.mash_dist,
                         help="By default, genomes whose distance to the reference is not "
                              "between 1e-4 and 0.06 are discarded. You can specify your own "
                              "lower limit (instead of 1e-4) with this option.")
-    general.add_argument("--max_dist", dest="max_dist", default=0.06, type=float,
-                        help="By default, genomes whose distance to the reference is not "
-                             "between 1e-4 and 0.06 are discarded. You can specify your own "
-                             "lower limit (instead of 0.06) with this option.")
-    general.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
-                          help=("Run 'N' downloads in parallel (default=1). Put 0 if "
+    general.add_argument("--max_dist", dest="max_dist", default=0.06,
+                         type=utils_argparse.mash_dist,
+                         help="By default, genomes whose distance to the reference is not "
+                              "between 1e-4 and 0.06 are discarded. You can specify your own "
+                              "lower limit (instead of 0.06) with this option.")
+    general.add_argument("-p", "--threads", dest="parallel", type=utils_argparse.thread_num,
+                         default=1, help=("Run 'N' downloads in parallel (default=1). Put 0 if "
                                 "you want to use all cores of your computer."))
 
     optional = parser.add_argument_group('Alternatives')
@@ -452,6 +454,11 @@ def check_args(parser, args):
     if args.verbose > 0 and args.quiet:
         parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
                      " You cannot have both.")
+
+    # min_dist must be higher than max_dist
+    if args.min_dist >= args.max_dist:
+        parser.error(f"min_dist ({args.min_dist}) cannot be higher "
+                     f"than max_dist ({args.max_dist})")
 
     # WARNINGS
     # User did not specify a species name
