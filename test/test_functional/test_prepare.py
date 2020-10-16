@@ -440,3 +440,48 @@ def test_main_norefseq_givendbdir(capsys):
     tmp_files = glob.glob(os.path.join(GENEPATH, "tmp_files", "*.fna_prepare-split2N.fna"))
     assert len(tmp_files) == 5
 
+
+def test_only_mash(capsys):
+    """
+    Running only mash step (giving genomes and corresponding LSTINFO file)
+    """
+    NCBI_species = ""
+    NCBI_taxid = ""
+    levels = ""
+    outdir = GENEPATH
+    tmp_dir = ""
+    threads = 1
+    no_refseq = False
+    db_dir = ""
+    only_mash = True
+    info_file = os.path.join(TEST_DIR, "test_lstinfo_onlymash.lst")
+    l90 = 100
+    nbcont = 999
+    cutn = 5
+    min_dist = 1e-4
+    max_dist = 0.06
+    verbose = 1
+    quiet = False
+    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
+                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
+                 verbose, quiet)
+    out, err = capsys.readouterr()
+    assert ("You asked to run only mash steps") in err
+    assert ("You want to run only mash steps. Getting information from "
+            "test/data/prepare/test_files/test_lstinfo_onlymash.lst") in out
+    assert ("Found 5 genomes in total") in out
+    assert ("Computing pairwise distances between all genomes") in out
+    assert ("Sorting all 5 genomes by quality") in out
+    assert ("Final number of genomes in dataset: 1") in out
+
+    # Check output files
+    assert len(os.listdir(os.path.join(outdir, "tmp_files"))) == 0
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(outdir, "*log*"))
+    assert len(log_files) == 3
+    # Check content of output lstinfo file
+    out_lst = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
+    exp_lst = os.path.join(DBDIR, "exp_files", "exp_lstinfo_run_only-mash.lst")
+    assert tutil.compare_order_content(out_lst, exp_lst)
+
+
