@@ -211,10 +211,10 @@ def test_parser_more_threads(capsys):
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     with pytest.raises(SystemExit):
-        prepare.parse(parser, "-p 3000".split())
+        prepare.parse(parser, "-p 30000".split())
     _, err = capsys.readouterr()
     assert (f"You have {nb_cpu} threads on your computer, you cannot ask for more: "
-            "invalid value: 50") in err
+            "invalid value: 30000") in err
 
 
 def test_parser_all_threads(capsys):
