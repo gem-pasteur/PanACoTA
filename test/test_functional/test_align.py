@@ -43,72 +43,72 @@ def setup_teardown_module():
     print("teardown")
 
 
-def test_main():
-    """
-    Test that when giving a database, a persistent genome and a list of genomes, it extracts
-    expected proteins by family, aligns each family, back-translates them, concatenates all
-    families into one file and groups them by genome.
-    """
-    corepers = os.path.join(TESTPATH, "test_pers0.99FX.lst")
-    list_genomes = os.path.join("test", "data", "pangenome", "test_files", "list_to_pan.txt")
-    dname = "TEST4"
-    dbpath = os.path.join("test", "data", "pangenome", "test_files", "example_db")
-    outdir = GENEPATH
-    threads = 1
-    force = False
-    cmd = "cmd"
-    al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force)
-    # Check creation of the 3 subdirectories
-    aldir = os.path.join(outdir, "Align-" + dname)
-    listdir = os.path.join(outdir, "List-" + dname)
-    treedir = os.path.join(outdir, "Phylo-" + dname)
-    assert os.path.isdir(aldir)
-    assert os.path.isdir(listdir)
-    assert os.path.isdir(treedir)
-    # Check content of listdir
-    genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
-    for gen in genomes:
-        assert os.path.isfile(os.path.join(listdir, f"{dname}-getEntry_gen_{gen}.txt"))
-        assert os.path.isfile(os.path.join(listdir, f"{dname}-getEntry_prt_{gen}.txt"))
-    # Check content of aldir
-    fams = [1, 4, 6, 8, 10, 11, 13, 14]
-    for fam in fams:
-        assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.gen'))
-        assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.prt'))
-        assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.miss.lst'))
-        assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln'))
-        assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-prt2nuc.{fam}.aln'))
-    out_concat = os.path.join(aldir, dname + "-complete.cat.aln")
-    exp_concat = os.path.join(EXPPATH, "exp_pers4genome-complete.cat.aln")
-    assert tutil.compare_order_content(out_concat, exp_concat)
-    # Check content of treedir
-    out_grp = os.path.join(treedir, dname + ".grp.aln")
-    exp_grp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
-    assert tutil.compare_order_content(out_grp, exp_grp)
-    # Check presence of log files, and log.err is empty
-    base_log = os.path.join(outdir, "PanACoTA-align_" + dname + ".log")
-    assert os.path.isfile(base_log)
-    assert os.path.isfile(base_log + ".details")
-    assert os.path.isfile(base_log + ".err")
-    with open(base_log + ".err", "r") as bf:
-        assert bf.readlines() == []
-    # Check logs
-    with open(base_log + ".details", "r") as lc:
-        log_content = lc.readlines()
-    assert ("Reading PersGenome and constructing lists of missing genomes in "
-            "each family") in " ".join(log_content)
-    assert "Extracting proteins and genes from all genomes" in " ".join(log_content)
-    for gen in genomes:
-        assert "Extracting proteins and genes from {}".format(gen) in " ".join(log_content)
-    assert ("Starting alignment of all families: protein alignment, back-translation to "
-            "nucleotides, and add missing genomes in the family") in " ".join(log_content)
-    for fam in fams:
-        assert "Checking extractions for family {}".format(fam) in " ".join(log_content)
-        assert "Aligning family {}".format(fam) in " ".join(log_content)
-        assert "Back-translating family {}".format(fam) in " ".join(log_content)
-    assert "Concatenating all alignment files" in " ".join(log_content)
-    assert "Grouping alignments per genome" in " ".join(log_content)
-    assert "END" in " ".join(log_content)
+# def test_main():
+#     """
+#     Test that when giving a database, a persistent genome and a list of genomes, it extracts
+#     expected proteins by family, aligns each family, back-translates them, concatenates all
+#     families into one file and groups them by genome.
+#     """
+#     corepers = os.path.join(TESTPATH, "test_pers0.99FX.lst")
+#     list_genomes = os.path.join("test", "data", "pangenome", "test_files", "list_to_pan.txt")
+#     dname = "TEST4"
+#     dbpath = os.path.join("test", "data", "pangenome", "test_files", "example_db")
+#     outdir = GENEPATH
+#     threads = 1
+#     force = False
+#     cmd = "cmd"
+#     al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force)
+#     # Check creation of the 3 subdirectories
+#     aldir = os.path.join(outdir, "Align-" + dname)
+#     listdir = os.path.join(outdir, "List-" + dname)
+#     treedir = os.path.join(outdir, "Phylo-" + dname)
+#     assert os.path.isdir(aldir)
+#     assert os.path.isdir(listdir)
+#     assert os.path.isdir(treedir)
+#     # Check content of listdir
+#     genomes = ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+#     for gen in genomes:
+#         assert os.path.isfile(os.path.join(listdir, f"{dname}-getEntry_gen_{gen}.txt"))
+#         assert os.path.isfile(os.path.join(listdir, f"{dname}-getEntry_prt_{gen}.txt"))
+#     # Check content of aldir
+#     fams = [1, 4, 6, 8, 10, 11, 13, 14]
+#     for fam in fams:
+#         assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.gen'))
+#         assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.prt'))
+#         assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.miss.lst'))
+#         assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln'))
+#         assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-prt2nuc.{fam}.aln'))
+#     out_concat = os.path.join(aldir, dname + "-complete.cat.aln")
+#     exp_concat = os.path.join(EXPPATH, "exp_pers4genome-complete.cat.aln")
+#     assert tutil.compare_order_content(out_concat, exp_concat)
+#     # Check content of treedir
+#     out_grp = os.path.join(treedir, dname + ".grp.aln")
+#     exp_grp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
+#     assert tutil.compare_order_content(out_grp, exp_grp)
+#     # Check presence of log files, and log.err is empty
+#     base_log = os.path.join(outdir, "PanACoTA-align_" + dname + ".log")
+#     assert os.path.isfile(base_log)
+#     assert os.path.isfile(base_log + ".details")
+#     assert os.path.isfile(base_log + ".err")
+#     with open(base_log + ".err", "r") as bf:
+#         assert bf.readlines() == []
+#     # Check logs
+#     with open(base_log + ".details", "r") as lc:
+#         log_content = lc.readlines()
+#     assert ("Reading PersGenome and constructing lists of missing genomes in "
+#             "each family") in " ".join(log_content)
+#     assert "Extracting proteins and genes from all genomes" in " ".join(log_content)
+#     for gen in genomes:
+#         assert "Extracting proteins and genes from {}".format(gen) in " ".join(log_content)
+#     assert ("Starting alignment of all families: protein alignment, back-translation to "
+#             "nucleotides, and add missing genomes in the family") in " ".join(log_content)
+#     for fam in fams:
+#         assert "Checking extractions for family {}".format(fam) in " ".join(log_content)
+#         assert "Aligning family {}".format(fam) in " ".join(log_content)
+#         assert "Back-translating family {}".format(fam) in " ".join(log_content)
+#     assert "Concatenating all alignment files" in " ".join(log_content)
+#     assert "Grouping alignments per genome" in " ".join(log_content)
+#     assert "END" in " ".join(log_content)
 
 
 def test_main_exist_ok():
