@@ -66,7 +66,7 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.level,
+    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.levels,
          arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
          arguments.db_dir, arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
@@ -226,15 +226,10 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
                                      "output folder called 'new_outdir', make sure you have "
                                      "'-o new_outdir' option, "
                                      "and you specified where the uncompressed sequences to "
-                                     "use are ('-d sequence_database_path' -> "
-                                     "my_outdir/Database_init). ")
+                                     "use are ('-d sequence_database_path'). ")
                         sys.exit(1)
                     # add genomes from refseq/bacteria folder to Database_init
                     nb_gen, _ = dgf.to_database(outdir)
-                    # If no genome found, error -> nothing to analyse
-                    if nb_gen == 0:
-                        logger.error(f"There is no genome in {refseqdir}.")
-                        sys.exit(1)
         # No sequence: Do all steps -> download, QC, mash filter
         else:
             # Download all genomes of the given taxID
