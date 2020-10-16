@@ -115,6 +115,36 @@ def test_parser_wrong_cont(capsys):
     assert "argument --nbcont: invalid int value: 10.5" in err
 
 
+def test_parser_wrong_level(capsys):
+    """
+    Test that when the script is called with a non integer limit of contig number,
+    it returns an error message
+    """
+    parser = argparse.ArgumentParser(description="prepare", add_help=False)
+    prepare.build_parser(parser)
+    with pytest.raises(SystemExit):
+        prepare.parse(parser, "-t 1234 -o toto -l toto".split())
+    _, err = capsys.readouterr()
+    assert ("Please choose between available assembly levels: 'all', 'complete', "
+            "'chromosome', 'scaffold', 'contig'. If several levels, provide a "
+            "comma-separated list. Invalid value: 'toto'") in err
+
+
+def test_parser_wrong_level_notcomma(capsys):
+    """
+    Test that when the script is called with a non integer limit of contig number,
+    it returns an error message
+    """
+    parser = argparse.ArgumentParser(description="prepare", add_help=False)
+    prepare.build_parser(parser)
+    with pytest.raises(SystemExit):
+        prepare.parse(parser, "-t 1234 -o outdir -l complete.scaffold".split())
+    _, err = capsys.readouterr()
+    assert ("Please choose between available assembly levels: 'all', 'complete', "
+            "'chromosome', 'scaffold', 'contig'. If several levels, provide a "
+            "comma-separated list. Invalid value: 'complete.scaffold'") in err
+
+
 def test_max_mash_dist(capsys):
     """
     Test that when user is giving a number for max_dist which is not valid:

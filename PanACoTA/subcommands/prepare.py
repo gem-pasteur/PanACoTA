@@ -66,14 +66,14 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.outdir,
-         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.db_dir,
-         arguments.only_mash,
+    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.level,
+         arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
+         arguments.db_dir, arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_dir,
+def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
@@ -239,7 +239,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
         else:
             # Download all genomes of the given taxID
             db_dir, nb_gen = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                                      outdir, threads)
+                                                      levels, outdir, threads)
             logger.info("{} refseq genome(s) downloaded".format(nb_gen))
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
@@ -290,13 +290,21 @@ def build_parser(parser):
     general = parser.add_argument_group('General arguments')
     general.add_argument("-t", dest="NCBI_species_taxid", default="",
                           help=("Species taxid to download, corresponding to the "
-                                "'species taxid' provided by the NCBI")
+                                "'species taxid' provided by the NCBI. A comma-separated "
+                                "list of taxid can also be provided.")
                          )
     general.add_argument("-s", dest="NCBI_species", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
                         )
+    general.add_argument("-l", "--assembly_level", dest="levels", default="",
+                          help=("Assembly levels of genomes to download (default: all). "
+                                "Possible levels are: 'all', 'complete', 'chromosome', "
+                                "'scaffold', 'contig'."
+                                "You can also provide a comma-separated list of assembly "
+                                "levels. For ex: 'complete,chromosome'")
+                          )
     general.add_argument("-o", dest="outdir",
                           help=("Give the path to the directory where you want to save the "
                                "downloaded database. In the given directory, it will create "
@@ -459,6 +467,15 @@ def check_args(parser, args):
     if args.min_dist >= args.max_dist:
         parser.error(f"min_dist ({args.min_dist}) cannot be higher "
                      f"than max_dist ({args.max_dist})")
+
+    # Check that levels, if given, are among possible ones
+    possible = ["all", "complete", "chromosome", "scaffold", "contig"]
+    if args.levels:
+        for level in args.levels.split(","):
+            if level not in possible:
+                parser.error("Please choose between available assembly levels: 'all', 'complete', "
+                             "'chromosome', 'scaffold', 'contig'. If several levels, provide a "
+                             f"comma-separated list. Invalid value: '{args.levels}'")
 
     # WARNINGS
     # User did not specify a species name
