@@ -207,7 +207,7 @@ def test_to_database_1genome_wrong_format(caplog):
     assert os.path.isfile(os.path.join(db_dir, "ACOR003.0519.fna"))
 
 
-def test_download():
+def test_download_specify_level():
     """
     Test that, given a taxid, and a species name,
     it downloads genomes in .gz, and uncompress them in the
