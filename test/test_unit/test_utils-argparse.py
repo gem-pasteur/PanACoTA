@@ -97,3 +97,39 @@ def test_thread_num():
     assert ("Please provide a positive number of threads (or 0 for all threads): "
             "Invalid value: -1") in str(err.value)
     assert autils.thread_num(0) == nb_cpu
+
+
+def test_positive_int():
+    """
+    Test checking that given argument is a positive integer
+    """
+    assert autils.positive_int("1") == 1
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.positive_int("1.1")
+    assert ("argument --cutn: invalid int value: '1.1'") in str(err.value)
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.positive_int("-1")
+    assert ("error: argument --cutn must be a positive integer: "
+            "invalid int value: '-1'") in str(err.value)
+
+
+def test_mash_dist():
+    """
+    Test checking that given value is ok for a mash distance
+    """
+    assert autils.mash_dist("0.05") == 0.05
+    assert autils.mash_dist("1e-4") == 0.0001
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.mash_dist("1.1.1")
+    assert ("error: mash distance: invalid float value: '1.1.1'") in str(err.value)
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.mash_dist("one")
+    assert ("error: mash distance: invalid float value: 'one'") in str(err.value)
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.mash_dist("1.000001")
+    assert ("error: mash distance must be between 0 and 1: "
+            "invalid value: '1.000001'") in str(err.value)
+    with pytest.raises(argparse.ArgumentTypeError) as err:
+        a = autils.mash_dist("-1e-4")
+    assert ("error: mash distance must be between 0 and 1: "
+            "invalid value: '-0.0001'") in str(err.value)

@@ -485,3 +485,87 @@ def test_only_mash(capsys):
     assert tutil.compare_order_content(out_lst, exp_lst)
 
 
+def test_only_mash_empty_lstinfo(capsys):
+    """
+    Running only mash step giving an empty lstinfo file -> error, no genome found
+    """
+    NCBI_species = ""
+    NCBI_taxid = ""
+    levels = ""
+    outdir = GENEPATH
+    tmp_dir = ""
+    threads = 1
+    no_refseq = False
+    db_dir = ""
+    only_mash = True
+    # Create empty lstinfo file
+    info_file = os.path.join(GENEPATH, "LSTINFO-empty.lst")
+    open(info_file, "w").close()
+    l90 = 100
+    nbcont = 999
+    cutn = 5
+    min_dist = 1e-4
+    max_dist = 0.06
+    verbose = 1
+    quiet = False
+    with pytest.raises(SystemExit):
+        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
+                     db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
+                     verbose, quiet)
+    out, err = capsys.readouterr()
+    assert ("You asked to run only mash steps") in err
+    assert ("You want to run only mash steps. Getting information from "
+            "test/data/prepare/generated_by_func-tests/LSTINFO-empty.lst") in out
+    assert ("No genome listed in test/data/prepare/generated_by_func-tests/LSTINFO-empty.lst "
+            "was found.") in err
+
+    # Check output files
+    assert len(os.listdir(os.path.join(outdir, "tmp_files"))) == 0
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(outdir, "*log*"))
+    assert len(log_files) == 3
+    # Check lstinfo file is still here and still empty
+    assert os.stat(info_file).st_size == 0
+
+
+def test_only_mash_no_lstinfo(capsys):
+    """
+    Running only mash step giving an info file which does not exist -> error missing infofile
+    """
+    NCBI_species = ""
+    NCBI_taxid = ""
+    levels = ""
+    outdir = GENEPATH
+    tmp_dir = ""
+    threads = 1
+    no_refseq = False
+    db_dir = ""
+    only_mash = True
+    # Create empty lstinfo file
+    info_file = "info_file.lst"
+    l90 = 100
+    nbcont = 999
+    cutn = 5
+    min_dist = 1e-4
+    max_dist = 0.06
+    verbose = 1
+    quiet = False
+    with pytest.raises(SystemExit):
+        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
+                     db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
+                     verbose, quiet)
+    out, err = capsys.readouterr()
+    assert ("You asked to run only mash steps") in err
+    assert ("Your info file info_file.lst does not exist. Please provide the  "
+            "right name/path, or remove the '--mash-only option to rerun "
+            "quality control.") in err
+
+    # Check output files
+    assert len(os.listdir(os.path.join(outdir, "tmp_files"))) == 0
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(outdir, "*log*"))
+    assert len(log_files) == 3
+    # Check that outdir contains only 4 elements: 3 logs + tmp_files repo
+    files = os.listdir(outdir)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 4

@@ -824,7 +824,7 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     if len(genomes) > 0:
         logger.info(("Found {} genomes in total").format(len(genomes)))
     else:
-        logger.error(f"no genome listed in {list_file} were found.")
+        logger.error(f"No genome listed in {list_file} was found.")
         sys.exit(1)
     return genomes
 

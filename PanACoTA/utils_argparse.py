@@ -120,6 +120,6 @@ def mash_dist(param):
         msg = f"error: mash distance: invalid float value: '{param}'"
         raise argparse.ArgumentTypeError(msg)
     if param < 0 or param > 1:
-        msg = f"error: mash_distance must be between 0 and 1: invalid value: '{param}'"
+        msg = f"error: mash distance must be between 0 and 1: invalid value: '{param}'"
         raise argparse.ArgumentTypeError(msg)
     return param

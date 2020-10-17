@@ -245,7 +245,7 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
     else:
         logger.warning('You asked to run only mash steps.')
         if not os.path.exists(info_file):  # info-file missing -> error and exit
-            logger.error(f"Your info file {info_file} does not exist. Please Provide the  "
+            logger.error(f"Your info file {info_file} does not exist. Please provide the  "
                           "right name/path, or remove the '--mash-only option to rerun "
                           "quality control.")
             sys.exit(1)

@@ -582,8 +582,8 @@ def test_main_novalid_genome_frominfo(capsys):
                    prodigal_only=True, small=True)
     out, err = capsys.readouterr()
     # Check logs
-    assert ("no genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "
-            "were found.") in err
+    assert ("No genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "
+            "was found.") in err
 
     # Check output folders not created
     protdir = os.path.join(GENEPATH, "Proteins")

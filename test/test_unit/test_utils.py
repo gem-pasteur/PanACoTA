@@ -660,8 +660,8 @@ def test_read_genomes_info_no_genomes(caplog):
         utils.read_genomes_info(lstinfo_file, name)
     assert ("Reading given information on your genomes in "
             "test/data/annotate/test_files/lstinfo-no-genome.lst") in caplog.text
-    assert ("no genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "
-            "were found.") in caplog.text
+    assert ("No genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "
+            "was found.") in caplog.text
 
 
 def test_read_genomes_info_ok(caplog):

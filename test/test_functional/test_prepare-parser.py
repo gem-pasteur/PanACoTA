@@ -164,12 +164,12 @@ def test_max_mash_dist(capsys):
     with pytest.raises(SystemExit):
         prepare.parse(parser, "--max_dist 1.5".split())
     _, err = capsys.readouterr()
-    assert "error: mash_distance must be between 0 and 1: invalid value: '1.5'" in err
+    assert "error: mash distance must be between 0 and 1: invalid value: '1.5'" in err
     # < 0
     with pytest.raises(SystemExit):
         prepare.parse(parser, "--max_dist -0.5".split())
     _, err = capsys.readouterr()
-    assert "error: mash_distance must be between 0 and 1: invalid value: '-0.5'" in err
+    assert "error: mash distance must be between 0 and 1: invalid value: '-0.5'" in err
 
 
 def test_min_mash_dist(capsys):
@@ -191,12 +191,12 @@ def test_min_mash_dist(capsys):
     with pytest.raises(SystemExit):
         prepare.parse(parser, "--min_dist 1.5".split())
     _, err = capsys.readouterr()
-    assert "error: mash_distance must be between 0 and 1: invalid value: '1.5'" in err
+    assert "error: mash distance must be between 0 and 1: invalid value: '1.5'" in err
     # < 0
     with pytest.raises(SystemExit):
         prepare.parse(parser, "--min_dist -0.5".split())
     _, err = capsys.readouterr()
-    assert "error: mash_distance must be between 0 and 1: invalid value: '-0.5'" in err
+    assert "error: mash distance must be between 0 and 1: invalid value: '-0.5'" in err
 
 
 def test_min_sup_max(capsys):
