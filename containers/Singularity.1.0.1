@@ -133,8 +133,9 @@ From:python:3.7-stretch
 
     # Install PanACoTA
     cd /opt/src
-    git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
-    cd /opt/src/pipeline_annotation
+    wget https://github.com/gem-pasteur/PanACoTA/archive/v1.0.1.tar.gz
+    tar -xzf v1.0.1.tar.gz
+    cd /opt/src/PanACoTA-1.0.1
     ./make
 
 
