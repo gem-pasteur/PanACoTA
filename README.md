@@ -45,7 +45,7 @@ Amandine PERRIN, Eduardo P.C. ROCHA (2020).  PanACoTA: A modular tool for massiv
 
 Installation
 - [Dependences](#dep)
-- [Pypi](#pypi)
+- [pip](#pypi)
 - [cloning github repository](#clone)
 - [singularity](#singularity)
 
@@ -92,7 +92,7 @@ You have different possibilities to install `PanACoTa`.
 
 **Warning:** If you plan to work on the scripts, choose the development installation (see [Development section](#develop)).
 
-### <a name="pypi"></a> From pypi
+### <a name="pypi"></a> From pip
 
 A very simple way to install the last stable version. This will install files in your python site-packages folder.
 
