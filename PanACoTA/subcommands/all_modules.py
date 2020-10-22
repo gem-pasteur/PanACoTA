@@ -89,7 +89,7 @@ def main(cmd, outdir, threads, NCBI_species_taxid, NCBI_species, levels, cutn, l
     if verbose >= 15:
         level = logging.DEBUG
     logfile_base = os.path.join(outdir, "PanACoTA-all_modules")
-    logfile_base = utils.init_logger(logfile_base, level, name='all_modules', log_details=True,
+    logfile_base = utils.init_logger(logfile_base, level, name='all_modules',
                                      verbose=verbose, quiet=quiet)
     logger = logging.getLogger('all_modules')
     logger.info(f'PanACoTA version {version}')
@@ -149,9 +149,30 @@ def main(cmd, outdir, threads, NCBI_species_taxid, NCBI_species, levels, cutn, l
     print(align_file)
 
     # Tree step
+    # models_fastme = {"p-distance": "p", "RY-symetric": "Y", "RY": "R",
+    #                  "JC69": "J", "K2P": "K", "F81": "1", "F84": "4",
+    #                  "TN93": "T", "LogDet": "L"}
+    # models_fasttree = {"GTR": "-gtr", "JC": ""}
+    # models_iqtree = set(["HKY", "JC", "F81", "K2P", "K3P", "K81uf",
+    #                      "TNef", "TIM", "TIMef", "TVM", "TVMef", "SYM", "GTR"])
+    # models_iqtree = {mod: mod for mod in models_iqtree}
+    if soft == "fasttree":
+        model = "-gtr"
+    elif soft =="iqtree" or soft == "iqtree2":
+        model = "GTR"
+    elif soft == "quicktree":
+        model = ""
+    elif soft == "fastme":
+        model = "T"
+    else:
+        logger.error(f"Soft {soft} is not possible.")
+        sys.exit(1)
     outdir_tree = os.path.join(outdir, "6-tree_module")
     tree.main("PanACoTA tree", align_file, outdir_tree, soft, model, threads, boot=False,
               write_boot=False, memory=False, fast=False, verbose=verbose, quiet=quiet)
+
+    logger.info("All modules of PanACOTA are finished.")
+
 
 def build_parser(parser):
     """
