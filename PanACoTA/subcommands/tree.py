@@ -147,7 +147,7 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
     if verbose >= 15:
         level = logging.DEBUG
 
-    utils.init_logger(logfile_base, level, 'tree', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, 'tree', verbose=verbose, quiet=quiet, log_details=True)
     logger = logging.getLogger("tree")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
