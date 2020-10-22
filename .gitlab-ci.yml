@@ -108,11 +108,12 @@ func-test-ubuntu:
     - ./make
   script:
     - py.test test/test_functional/test_prepare* -vx
-    - py.test test/test_functional/test_pangenome* -vx
+    - py.test test/test_functional/test_pangenome-parser.py -vx
+    - py.test test/test_functional/test_pangenome.py -vx
     - py.test test/test_functional/test_corepers* -vx
-    # - py.test test/test_functional/test_align* -vx
     - py.test test/test_functional/test_align-parser.py -vx
-    - py.test test/test_functional/test_tree* -vx
+    - py.test test/test_functional/test_align.py -vx
+    # - py.test test/test_functional/test_tree* -vx
     - py.test test/test_functional/test_annote-parser.py -vx
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_prepare* -vx
