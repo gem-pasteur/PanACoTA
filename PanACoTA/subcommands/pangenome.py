@@ -129,7 +129,7 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
         level = logging.DEBUG
     # name logfile, add timestamp if already existing
     logfile_base = os.path.join(outdir, "PanACoTA-pangenome_" + name)
-    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet)
+    utils.init_logger(logfile_base, level, '', verbose=verbose, quiet=quiet, log_details=True)
     logger = logging.getLogger("pangenome")
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
@@ -142,6 +142,8 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
                                               prt_path, threads, outfile, quiet)
     # Create matrix pan_quali, pan_quanti and summary file
     pt.post_treat(families, panfile)
+    logger.info("DONE")
+    return panfile
 
 
 def build_parser(parser):
@@ -155,17 +157,7 @@ def build_parser(parser):
     """
     import argparse
     import multiprocessing
-
-    def perc_id(param):
-        try:
-            param = float(param)
-        except Exception:
-            msg = "argument -i percentage_id: invalid float value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        if param < 0 or param > 1:
-            msg = ("The minimum %% of identity must be in [0, 1]. Invalid value: {}".format(param))
-            raise argparse.ArgumentTypeError(msg)
-        return param
+    from PanACoTA import utils_argparse
 
     def thread_num(param):
         try:
@@ -210,7 +202,7 @@ def build_parser(parser):
                                 "(including tmp folder)"))
 
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-i", dest="min_id", type=perc_id, default=0.8,
+    optional.add_argument("-i", dest="min_id", type=utils_argparse.perc_id, default=0.8,
                           help=("Minimum sequence identity to be considered in the same "
                                 "cluster (float between 0 and 1). Default is 0.8."))
     optional.add_argument("-f", dest="outfile",
