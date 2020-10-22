@@ -352,7 +352,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
 
     if not kept_genomes:
         logger.info("No genome kept for annotation.")
-        return 0
+        return "", 0
     # Info on folder containing original sequences
     if not from_info:
         logger.info(f"-> Original sequences folder ('orig_name' column): {db_path} ")
@@ -372,7 +372,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         # orig_name, to_annnote, gsize, nb_conts, L90
         utils.write_genomes_info(genomes, [], list_file, res_dir, qc=True)
         logger.info("QC only done.")
-        return 0
+        return "", 0
 
     # STEP 3. Rename genomes kept, ordered by decreasing quality
     gfunc.rename_all_genomes(kept_genomes)
