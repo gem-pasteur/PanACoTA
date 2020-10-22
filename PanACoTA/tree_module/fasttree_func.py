@@ -113,7 +113,7 @@ def run_fasttree(alignfile, boot, outdir, model, quiet):
     logfile = os.path.join(outdir, align_name + ".fasttree.log")
     treefile = os.path.join(outdir, align_name + ".fasttree_tree.nwk")
     cmd = f"FastTreeMP -nt {model} -noml -nocat {bootinfo} -log {logfile} {alignfile}"
-    logger.info("Fasttree command: " + cmd)
+    logger.details("Fasttree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:
@@ -121,5 +121,4 @@ def run_fasttree(alignfile, boot, outdir, model, quiet):
     stdout = open(treefile, "w")
     error = ("Problem while running Fasttree. See log file ({}) for "
              "more information.").format(logfile)
-    logger.details(cmd)
     utils.run_cmd(cmd, error, stdout=stdout, eof=True, logger=logger, stderr=fnull)

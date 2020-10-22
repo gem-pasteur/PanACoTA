@@ -126,12 +126,11 @@ def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
         prefix = f"--prefix {treefile}"
     cmd = (f"{soft} -s {alignfile} {threadinfo} -m {model} {mem_info} {bootinfo} {wb_info} "
     	   f"{seqtype} {prefix} -quiet {fast}")
-    logger.info("IQtree command: " + cmd)
+    logger.details("IQtree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
     else:
         fnull = None
     error = (f"Problem while running IQtree. See log file ({logfile}) for "
              "more information.")
-    logger.details(cmd)
     utils.run_cmd(cmd, error, eof=True, logger=logger, stderr=fnull)
