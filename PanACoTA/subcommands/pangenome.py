@@ -156,27 +156,7 @@ def build_parser(parser):
         parser to configure in order to extract command-line arguments
     """
     import argparse
-    import multiprocessing
     from PanACoTA import utils_argparse
-
-    def thread_num(param):
-        try:
-            param = int(param)
-        except Exception:
-            msg = "argument --threads threads: invalid int value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        nb_cpu = multiprocessing.cpu_count()
-        if param > nb_cpu:
-            msg = ("You have {} threads on your computer, you cannot ask for more: "
-                   "invalid value: {}").format(nb_cpu, param)
-            raise argparse.ArgumentTypeError(msg)
-        elif param < 0:
-            msg = ("Please provide a positive number of threads (or 0 for all threads): "
-                   "Invalid value: {}").format(param)
-            raise argparse.ArgumentTypeError(msg)
-        elif param == 0:
-            return multiprocessing.cpu_count()
-        return param
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
@@ -218,7 +198,7 @@ def build_parser(parser):
                           help=("use this option if you want to save the concatenated protein "
                                 "databank in another directory than the one containing all "
                                 "individual protein files ('Proteins' folder)."))
-    optional.add_argument("--threads", dest="threads", default=1, type=thread_num,
+    optional.add_argument("--threads", dest="threads", default=1, type=utils_argparse.thread_num,
                           help=("add this option if you want to parallelize on several threads. "
                                 "Indicate on how many threads you want to parallelize. "
                                 "By default, it uses 1 thread. Put 0 if you want to use "
