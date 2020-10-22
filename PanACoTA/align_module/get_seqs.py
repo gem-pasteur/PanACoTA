@@ -80,7 +80,7 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
     bar = None
     curnum = 1
     if not quiet:
-        widgets = ['Gene and Protein extraction:',
+        widgets = ['Extraction:',
                    progressbar.Bar(marker='█', left='', right='', fill=' '),
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer(), ' ',
