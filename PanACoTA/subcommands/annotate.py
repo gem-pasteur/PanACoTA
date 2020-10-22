@@ -340,7 +340,6 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         # Here, both are the same, as we take given sequences as is.
         genomes = utils.read_genomes_info(from_info, name, date, logger)
 
-
     # STEP 2. keep only genomes with 'good' (according to user thresholds) L90 and nb_contigs
     # genomes = {genome: [spegenus.date, orig_seq, path_to_splitSequence, size, nbcont, l90]}
     # Plot L90 and nb_contigs distributions
@@ -380,7 +379,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
     #                 gsize, nbcont, L90]}
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
-    utils.write_lstinfo(list_file, kept_genomes, res_dir)
+    outlst = utils.write_lstinfo(list_file, kept_genomes, res_dir)
 
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
@@ -409,13 +408,12 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped_format = ffunc.format_genomes(results_ok, res_dir, res_annot_dir,
                                           prodigal_only, threads, quiet=quiet)
-    print(skipped_format)
     # At least one genome could not be formatted -> warn user
     if skipped_format:
         utils.write_warning_skipped(skipped_format, do_format=True, prodigal_only=prodigal_only,
                                     logfile = logfile_base)
     logger.info("Annotation step done.")
-    return 0
+    return outlst, len(kept_genomes) - len(skipped) - len(skipped_format)
 
 
 def build_parser(parser):
