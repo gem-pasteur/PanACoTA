@@ -119,7 +119,7 @@ def format_genomes(genomes_ok, res_path, annot_path, prodigal_only, threads=1, q
                    progressbar.Bar(marker='█', left='', right=''),
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer()]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=79).start()
     # Create a Queue to put logs from processes, and handle them after from a single thread
     m = multiprocessing.Manager()
     q = m.Queue()

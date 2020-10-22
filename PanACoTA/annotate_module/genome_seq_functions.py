@@ -101,7 +101,7 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=Fals
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - ',
                    progressbar.ETA()
                    ]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=100).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=79).start()
         curnum = 1
     toremove = []
     # Analyse genomes 1 by 1
