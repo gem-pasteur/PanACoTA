@@ -117,9 +117,10 @@ def test_main_not_only_mash_infoexists():
     max_dist = 0.06
     verbose = 2
     quiet = False
-    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
-                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
-                 verbose, quiet)
+    out_info_file = os.path.join(outdir, "LSTINFO-104099-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir,
+                        threads, no_refseq, db_dir, only_mash, info_file, l90, nbcont,
+                        cutn, min_dist, max_dist, verbose, quiet) == out_info_file
 
     # Check output files
     summary =  os.path.join(GENEPATH, "assembly_summary-104099.txt")
@@ -316,9 +317,10 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     verbose = 2
     quiet = False
     info_file = ""
-    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
-                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
-                 verbose, quiet)
+    out_info_file = os.path.join(outdir, f"LSTINFO-123-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+                        no_refseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
+                        max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
     assert ("You asked to skip refseq downloads") in err
     assert ("Database folder test/data/prepare/generated_by_func-tests/"
@@ -372,9 +374,10 @@ def test_main_norefseq_defaultdbdir(capsys):
     verbose = 2
     quiet = False
     info_file = ""
-    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
-                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
-                 verbose, quiet)
+    out_info_file = os.path.join(outdir, "LSTINFO-123-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+                        no_refseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
+                        max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
     assert ("You asked to skip refseq downloads") in err
     assert ("Total number of genomes for 123: 5") in out
@@ -421,9 +424,10 @@ def test_main_norefseq_givendbdir(capsys):
     verbose = 2
     quiet = False
     info_file = ""
-    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
-                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
-                 verbose, quiet)
+    out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+                        no_refseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
+                        max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
     assert ("You asked to skip refseq downloads") in err
     assert ("Total number of genomes for NA: 5") in out
@@ -462,9 +466,10 @@ def test_only_mash(capsys):
     max_dist = 0.06
     verbose = 1
     quiet = False
-    prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq,
-                 db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
-                 verbose, quiet)
+    out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+                        no_refseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
+                        max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
     assert ("You asked to run only mash steps") in err
     assert ("You want to run only mash steps. Getting information from "
