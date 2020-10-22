@@ -142,7 +142,6 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels, outdi
         logger.error(error_message)
         sys.exit(1)
     nb_gen, db_dir = to_database(outdir)
-    logger.info(f"Downloaded {nb_gen} genomes.")
     return db_dir, nb_gen
 
 

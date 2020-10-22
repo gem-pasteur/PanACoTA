@@ -227,7 +227,7 @@ def iterative_mash(sorted_genomes, genomes, outdir, species_linked, min_dist, ma
                    progressbar.Counter(), "/{}".format(nbgen), ' ',
                    progressbar.Timer(), ' - '
                   ]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=100).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=len(to_try), term_width=79).start()
         done = 0
 
     while len(to_try) > 1:
@@ -504,4 +504,4 @@ def write_outputfiles(genomes, sorted_genomes, genomes_removed, outdir, gspecies
             disf.write(utils.list_to_str([genome] + info))
     logger.info(f"Final list of genomes in the dataset: {list_file}")
     logger.info(f"List of genomes discarded by minhash steps: {discard_file}")
-    return 0
+    return list_file
