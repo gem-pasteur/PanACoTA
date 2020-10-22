@@ -522,6 +522,8 @@ def write_lstinfo(list_file, genomes, outdir):
         for genome, values in sorted(genomes.items(), key=sort_genomes_byname_l90_nbcont):
             gembase, _, to_annote, gsize, nbcont, l90 = [str(x) for x in values]
             outf.write("\t".join([gembase, genome, to_annote, gsize, nbcont, l90]) + "\n")
+    return outlst
+
 
 def sort_genomes_by_name(x):
     """
@@ -943,7 +945,7 @@ def cat(list_files, output, title=None):
         widgets = [title + ': ', progressbar.Bar(marker='█', left='', right='', fill=' '),
                    ' ', progressbar.Counter(), f"/{nbfiles}" ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer()]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=100).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbfiles, term_width=79).start()
         curnum = 1
     with open(output, "w") as outf:
         for file in list_files:

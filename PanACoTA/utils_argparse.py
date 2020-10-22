@@ -43,6 +43,7 @@ April 2017
 from PanACoTA import utils
 import argparse
 
+
 def gen_name(param):
     if not utils.check_format(param):
         msg = ("The genome name must contain 4 characters. For example, this name can "
@@ -136,3 +137,15 @@ def percentage(param):
                    "be in [0, 1]. Invalid value: {}".format(param))
             raise argparse.ArgumentTypeError(msg)
         return param
+
+
+def perc_id(param):
+    try:
+        param = float(param)
+    except Exception:
+        msg = "argument -i percentage_id: invalid float value: {}".format(param)
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0 or param > 1:
+        msg = ("The minimum %% of identity must be in [0, 1]. Invalid value: {}".format(param))
+        raise argparse.ArgumentTypeError(msg)
+    return param
