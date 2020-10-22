@@ -144,6 +144,7 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, q
     # Write persistent genome to file
     pers.write_persistent(fams, outputfile)
     logger.info("Persistent genome step done.")
+    return outputfile
 
 
 def get_info(tol, multi, mixed, floor):
