@@ -93,7 +93,7 @@ def test_parser_quicktree_parallel(capsys):
     parser = argparse.ArgumentParser(description="Tree", add_help=False)
     tree.build_parser(parser)
     with pytest.raises(SystemExit):
-        tree.parse(parser, "-a align -s quicktree --threads 5 -o outdir".split())
+        tree.parse(parser, "-a align -s quicktree --threads 2 -o outdir".split())
     _, err = capsys.readouterr()
     assert ("You cannot run quicktree with multiple threads. Choose another software, or remove "
             "the --threads option.") in err
@@ -317,14 +317,16 @@ def test_parser_threads_ok():
     """
     parser = argparse.ArgumentParser(description="Tree", add_help=False)
     tree.build_parser(parser)
-    args = tree.parse(parser, "-a align -o outdir --threads 5".split())
+    import multiprocessing
+    nb = multiprocessing.cpu_count()
+    args = tree.parse(parser, f"-a align -o outdir --threads {nb}".split())
     assert args.alignment == "align"
     assert args.boot is None
     assert args.outdir == "outdir"
     assert args.soft == "iqtree"
     assert args.model == "GTR"
     assert args.write_boot is False
-    assert args.threads == 5
+    assert args.threads == nb
     assert args.verbose == 0
     assert args.quiet == False
 
