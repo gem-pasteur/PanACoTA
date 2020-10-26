@@ -4,14 +4,16 @@ Running PanACoTA - help by module
 
 ``PanACoTA`` contains 6 subcommands, for the different steps:
 
-    - ``prepare`` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
+    - ``prepare`` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control). To help you find NCBI species taxid you need, you can use their `taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi>`_
     - ``annotate`` (annotate all genomes of the dataset, after a quality control)
     - ``pangenome`` (generate pan-genome)
     - ``corepers`` (generate core-genome or persistent-genome)
     - ``align`` (align core/persistent families)
     - ``tree`` (infer phylogenetic tree from persistent genome)
 
-You can run them by typing::
+We also provide a subommand ``all`` to run all modules in a row.
+
+You can run each subcommand by typing::
 
     PanACoTA <subcommand_name> <arguments_for_subcommand>
 
@@ -19,31 +21,33 @@ Each subcommand has its own options and inputs. To get the list of required argu
 
     PanACoTA <subcommand> -h
 
+General information
+===================
 
-.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want. 
+Here are the options shared by all subcommands:
+
+    - ``-h`` or ``--help``: show help on subcommand, as described here above.
+    - ``--quiet``: do not write anything in stdout nor stderr. Log files are still created, so you can check what is running.
+    - ``-v`` or ``--verbose``: be more verbose:
+
+        + ``-v`` will add warnings in stderr (by default, only errors are displayed in stderr, warnings are just in log files),
+        + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
+
+.. note:: In the example command lines, we put ``<>`` around the fields that you have to replace by the information corresponding to what you want.
 
 For example, if we write ``command -D <seqfile>`` and the sequence file you want to use is in your current directory and is called ``my_sequence.fa``, then you should write ``command -D my_sequence.fa``.
 
-.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part. 
+.. note:: In the example command lines, commands between ``[]`` are optional, meaning that you can run the command line without this part.
 
 Example: your sequence file is the same as previously, and the default parameters are ``-t=10`` and ``-i=0.5``. Therefore, if we write ``command -D <seqfile> [-t <num> -i <percentage>]``. You can run either:
 
-    - ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5) 
-    - ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``) 
+    - ``command -D my_sequence`` (using default parameters for both options: 10 and 0.5)
+    - ``command -D my_sequence -t 8`` (specifying ``t=8`` option and default ``i=0.5``)
     - ``command -D my_sequence -i 0.9`` (default ``t=10`` and specified ``i=0.9``)
     - ``command -D my_sequence -t 8 -i 0.9`` (specifying both options: ``t=8`` and ``i=0.9``)
 
 according to your needs (if default values are ok, you do not need to specify the option).
 
-
-Here are the options shared by all subcommands:
-
-    - ``-h`` or ``--help``: show help on subcommand, as described here above.
-    - ``--quiet``: do not write anything on stdout nor stderr. Log files are still created, so you can check what is running.
-    - ``-v`` or ``--verbose``: be more verbose:
-
-        + ``-v`` will add warnings in stderr (by default, only errors are displayed in stderr, warnings are just in log files),
-        + ``-vv`` will do the same as ``-v``, and also add details to stdout (by default, only info is written to stdout)
 
 We will now describe each subcommand, with its options.
 
@@ -57,8 +61,8 @@ You can see all required arguments and available options with::
 
 The ``prepare`` module works in 3 steps:
 
-    1) Downloading sequences from refseq
-    2) Quality control to filter genomes in terms of sequence quality
+    1) Downloading assemblies from refseq
+    2) Quality control to filter assemblies in terms of sequence quality
     3) Filtering step dedicated to remove redundant and miss-classified genomes, based on Mash genetic distance.
 
 You can choose to skip steps 1 and 2. Here, we describe how to run this module, starting from step 1, skipping step 1 (starting from step 2), and skipping steps 1 and 2 (starting from step 3).
@@ -66,9 +70,9 @@ You can choose to skip steps 1 and 2. Here, we describe how to run this module, 
 Inputs
 ------
 
-Your input will depend on the step from which you are starting. 
+Your input will depend on the step from which you are starting.
 
-- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species.
+- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species. You can also specify which assembly level(s) you want to download
 - If you start from step 2, your input will be a database of fasta sequences, in :ref:`sequences format <seq>`.
 - If you start from step 3, your input will be the database as previously, as well as the LSTINFO output of :ref:`step 2 <step2>`.
 
@@ -78,17 +82,20 @@ Outputs
 
 Genome sequences
 ^^^^^^^^^^^^^^^^
+
+
 All sequences are in fasta format, as described in :ref:`sequences format <seq>`.
 
 In your output directory, you will find:
 
-- Only if you started from step 1: A folder called ``refseq/bacteria``, containing 1 folder per genome (called with the genome accession number), and, inside, the genome sequence in fasta.gz format, and the MD5SUMS of this file.
-- Only if you started from step 1: A folder called ``Database_init``, containing all genomes downloaded in fasta format
+- Only if you started from step 1: A folder called ``refseq/bacteria``, containing 1 folder per assembly (called with the assembly accession number), and, inside, the assembly sequence in fasta.gz format, and the MD5SUMS of this file.
+- Only if you started from step 1: A folder called ``Database_init``, containing all assemblies downloaded from refseq in fasta format
 - Only if you started from step 1 or 2: A folder called ``tmp_files`` containing your genomic sequences, split at each stretch of at least 5 ``N`` (see :ref:`sequences format <seq>` for more details on the splitting part).
 
 
 Discarded files
 ^^^^^^^^^^^^^^^
+
 ``discarded-by-L90_nbcont-<datasetname>.lst``
 
 This file contains the list of genomes discarded by the quality control step:
@@ -104,8 +111,8 @@ Example:
 .. code-block:: text
 
     orig_name                                          to_annotate                                                    gsize   nb_conts    L90
-    <outdir>/Database_init/genome1.fst                 <outdir>/<tmp>/genome1.fst_prepare-split5N.fna                 9808    2           2  
-    <outdir>/Database_init/genome3-chromo.fst-all.fna  <outdir>/<tmp>/genome3-chromo.fst-all.fna_prepare-split5N.fna  8817    3           3   
+    <outdir>/Database_init/genome1.fst                 <outdir>/<tmp>/genome1.fst_prepare-split5N.fna                 9808    2           2
+    <outdir>/Database_init/genome3-chromo.fst-all.fna  <outdir>/<tmp>/genome3-chromo.fst-all.fna_prepare-split5N.fna  8817    3           3
     <outdir>/Database_init/genome2.fst                 <outdir>/<tmp>/genome2.fst_prepare-split5N.fna                 10711   4           4
     <outdir>/Database_init/genome4.fst                 <outdir>/<tmp>/genome4.fst_prepare-split5N.fna                 7134    1           1
 
@@ -114,9 +121,9 @@ Example:
 
 This file contains the list of genomes discarded by the filtering step:
 
-1. path to the genome original sequence
-2. path to the genome which discarded genome 1.
-3. distance between genome 1. and genome 2. (which is not inside the given thresholds)
+- path to the genome original sequence
+- path to the genome which discarded genome 1.
+- distance between genome 1. and genome 2. (which is not inside the given thresholds)
 
 Example:
 
@@ -156,23 +163,37 @@ Running from step 1
 
 To download genomes, and then process them by the `prepare` filters, run::
 
-    PanACoTA prepare [-t <NCBI taxid> -s <NCBI species]
+    PanACoTA prepare [-t <NCBI species taxid> -s <NCBI species> -l <assembly_level(s)>]
 
-Give at least one of those 2 parameters. With:
+Give at least one of ``-t`` or ``-s`` parameters. With:
 
-- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the species you want to study. For example, taxid for *E. coli* is 562 (see `NCBI taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?lvl=0&id=562>`_)
-- ``-s <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes (for example "escherichia coli")
+- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the species you want to study.
+- ``-s <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes.
+
+If you do not want to download all assemblies in refseq, but only genomes with specific assembly levels, use option ``-l <level(s)>``. Give it a comma separated list of assembly levels you want to download, between 'all', 'complete', 'chromosome', 'scaffold', 'contig' (default is 'all').
+
+For example, if we want to download refseq assemblies of *Acetobacter orleanensis*. With the `taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=104099&lvl=3&p=has_linkout&p=blast_url&p=genome_blast&lin=f&keep=1&srchmode=1&unlock>`_, we can find its corresponding NCBI species taxid: "104099".
+To download all assembly levels::
+
+    PanACoTA prepare -t 104099 -s "Acetobacter orleanensis"
+
+Or, to download only complete and scaffold assemblies::
+
+    PanACoTA prepare -s "Acetobacter orleanensis" -l complete,scafflod
+
+Only one of 'species taxid' and 'species name' argument is enough.
+
 
 Running from step 2
 -------------------
 
-If you already have your genomes, run::
+If you already have your assemblies and/or genomes, run::
 
     PanACoTA prepare --norefseq -o <outdir> [-d <db_dir>]
 
 With:
 
-- ``<outdir>``: the directory where you want to save your results (no need to create the directory before, the program will do it). 
+- ``<outdir>``: the directory where you want to save your results (no need to create the directory before, the program will do it).
 - ``<db_dir>``: directory where your database sequences are. By default, it will search to `<outdir>/Database_init`. So, if your sequences are already there, you do not need to add this option.
 
 
@@ -553,21 +574,21 @@ All other information than the genome names in the first columns will be ignored
 protein files
 ^^^^^^^^^^^^^
 
-Each genome in your list_file corresponds to a protein file in ``dbdir``. This protein file is in multi-fasta format, 
-and the headers must follow this format: 
-``<genome-name_without_space_nor_dot>_<numeric_chars>``. 
-For example ``my-genome-1_00056`` or ``my_genome_1_00056`` are valid protein headers. 
+Each genome in your list_file corresponds to a protein file in ``dbdir``. This protein file is in multi-fasta format,
+and the headers must follow this format:
+``<genome-name_without_space_nor_dot>_<numeric_chars>``.
+For example ``my-genome-1_00056`` or ``my_genome_1_00056`` are valid protein headers.
 
 .. warning:: All proteins of a genome must have the same ``<genome-name_without_space_nor_dot>``. Otherwise, they won't be considered in the same genome, which will produce errors in your core or persistent genome!
 
-Ideally, you should follow the 'gembase_format', ``<name>.<date>.<strain_num>.<contig><place>_<num>`` 
-(as it is described in :ref:`LSTINFO folder format <lstf>`, field "name of the sequence annotated"), 
+Ideally, you should follow the 'gembase_format', ``<name>.<date>.<strain_num>.<contig><place>_<num>``
+(as it is described in :ref:`LSTINFO folder format <lstf>`, field "name of the sequence annotated"),
 where the genome name, shared by all proteins of the genome.
 
 If your protein files were generated by ``PanACoTA annotate``, they are already in this format!
 
-Those fields will be used to sort genes inside pangenome families. They are sorted by species ``<genome-name_without_space_nor_dot>`` 
-(if you do a pangenome containing different species), 
+Those fields will be used to sort genes inside pangenome families. They are sorted by species ``<genome-name_without_space_nor_dot>``
+(if you do a pangenome containing different species),
 strain number ``<strain_num>`` (inside a same species), and protein number ``<num>`` (inside a same strain). If you do not use gembase format,
 families will only be sorted by protein number (the ``<numeric_chars>`` part).
 
@@ -596,14 +617,14 @@ This fictive pangenome contains 4 families. Family 1 contains 4 proteins, family
 Qualitative matrix
 ^^^^^^^^^^^^^^^^^^
 
-You will also find a qualitative matrix corresponding to your pangenome. 
-Its columns correspond to the different families, and its lines to the different genomes. 
-In each cell, there is a 1 if the genome has a member in the family, or 0 if not. 
+You will also find a qualitative matrix corresponding to your pangenome.
+Its columns correspond to the different families, and its lines to the different genomes.
+In each cell, there is a 1 if the genome has a member in the family, or 0 if not.
 For example, the qualitative matrix corresponding to the pangenome example just above is:
 
 .. code-block:: text
 
-    fam_num           1     2     3     4    
+    fam_num           1     2     3     4
     ESCO.0217.00001   1     1     0     0
     ESCO.0217.00002   1     0     0     0
     ESCO.1216.00003   1     0     0     0
@@ -618,13 +639,13 @@ This file can be used as an input to do GWAS analysis with `treeWAS <https://git
 Quantitative matrix
 ^^^^^^^^^^^^^^^^^^^
 
-You will also find a quantitative matrix. As for the qualitative matrix, columns correspond to the different families, 
-and lines to the different genomes. But here, each cell contains the number of members from the given genome in the given family. 
+You will also find a quantitative matrix. As for the qualitative matrix, columns correspond to the different families,
+and lines to the different genomes. But here, each cell contains the number of members from the given genome in the given family.
 Here is the quantitative matrix corresponding to the pangenome example above:
 
 .. code-block:: text
 
-    fam_num           1     2     3     4    
+    fam_num           1     2     3     4
     ESCO.0217.00001   1     1     0     0
     ESCO.0217.00002   2     0     0     0
     ESCO.1216.00003   1     0     0     0
@@ -676,8 +697,8 @@ with:
     - ``-i <min_id>``: minimum percentage of identity required to put 2 proteins in the same family. When doing a pangenome at the species level, we commonly use a threshold of 80% of identity.
 
 
-This will create (if not already existing) your ``outdir``, and, after execution, this directory will contain your pangenome file, 
-as well as other useful files. If you did not specify a pangenome filename (``-f`` option), the default pangenome name will be 
+This will create (if not already existing) your ``outdir``, and, after execution, this directory will contain your pangenome file,
+as well as other useful files. If you did not specify a pangenome filename (``-f`` option), the default pangenome name will be
 ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst``:
 
     - ``<pangenome_file or default>``: your pangenome file, which format is described :ref:`here above<panfile>`
@@ -956,7 +977,7 @@ Corresponding to this phylogenetic tree:
 Do tree
 -------
 
-By default, 'tree' subcommand will use `IQtree <http://www.iqtree.org/>`_ software to infer the phylogenetic tree. 
+By default, 'tree' subcommand will use `IQtree <http://www.iqtree.org/>`_ software to infer the phylogenetic tree.
 To infer the tree from your alignment file, run:
 
 .. code-block:: bash
