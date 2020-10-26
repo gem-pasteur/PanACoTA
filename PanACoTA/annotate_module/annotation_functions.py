@@ -106,7 +106,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
                    progressbar.Percentage(), ') - ', progressbar.Timer(), ' - '
                   ]
         bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen,
-                                      term_width=100).start()
+                                      term_width=79).start()
     # Get resource availability:
     # - number of threads used by prokka/prodigal (cores_annot)
     # - how many genomes can be annotated at the same time (pool_size)
@@ -147,8 +147,12 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
                     break
                 # If not done, get number of genomes left
                 remaining = final._number_left
-                # Update progress bar
-                bar.update(nbgen - remaining)
+                # Add this to start progressbar with 0% instead of N/A%
+                if remaining == nbgen:
+                    bar.update(0.0000001)
+                else:
+                    # Update progress bar
+                    bar.update(nbgen - remaining)
             # End progress bar
             bar.finish()
         pool.join()
@@ -258,11 +262,11 @@ def run_prokka(arguments):
     #     - if outdir exists exists but force, remove this outdir.
     # So, outdir does not exist -> run prokka
     cmd = (f"prokka --outdir {prok_dir} --cpus {threads} "
-           f"--prefix {name} {gpath}")
+           f"--prefix {name} --centre prokka {gpath}")
     error = (f"Error while trying to run prokka on {name} from {gpath}")
     logger.details("Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
-    ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf, logger=logger)
     prokf.close()
     if ret.returncode != 0:
         return False
@@ -324,7 +328,7 @@ def run_prodigal(arguments):
     # otherwise it would have been deleted just before),
     # can we use it for next step ? -> check content.
     if os.path.isdir(prodigal_dir):
-        logger.warning(("Prodigal results folder already exists.").format(prodigal_dir))
+        logger.warning(f"Prodigal results folder {prodigal_dir} already exists.")
         ok = check_prodigal(gpath, name, prodigal_dir, logger)
         # If everything ok in the result dir, do not rerun prodigal,
         # use those results for next step (formatting)
@@ -419,10 +423,17 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
         missing_file = True
     else:
         oriname = os.path.basename(gpath)
+        fnafile = glob.glob(os.path.join(outdir, "*.fna"))
         tblfile = glob.glob(os.path.join(outdir, "*.tbl"))
         faafile = glob.glob(os.path.join(outdir, "*.faa"))
         ffnfile = glob.glob(os.path.join(outdir, "*.ffn"))
         gfffile = glob.glob(os.path.join(outdir, "*.gff"))
+        if len(fnafile) == 0:
+            logger.error("{} {}: no .fna file".format(name, oriname))
+            missing_file = True
+        elif len(fnafile) > 1:
+            logger.error("{} {}: several .fna files".format(name, oriname))
+            missing_file = True
         if len(tblfile) == 0:
             logger.error("{} {}: no .tbl file".format(name, oriname))
             missing_file = True
@@ -451,7 +462,7 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
             tblfile = tblfile[0]
             faafile = faafile[0]
             ffnfile = ffnfile[0]
-            fnbcont, tnb_cds, nb_gene, tnb_crispr = count_tbl(tblfile)
+            fnbcont, tnb_cds, nb_gene = count_tbl(tblfile)
             faaprot = count_headers(faafile)
             ffngene = count_headers(ffnfile)
             if nbcont != fnbcont:
@@ -461,12 +472,6 @@ def check_prokka(outdir, logf, name, gpath, nbcont, logger):
             if tnb_cds != faaprot:
                 logger.error(("{} {}: no matching number of proteins between tbl and faa; "
                               "faa={}; in tbl ={}").format(name, oriname, faaprot, tnb_cds))
-                problem = True
-            if nb_gene + tnb_crispr != ffngene and nb_gene != ffngene:
-                logger.error(("{} {}: no matching number of genes between tbl and ffn; "
-                              "ffn={}; in tbl ={}genes {}CRISPR").format(name, oriname,
-                                                                         ffngene, nb_gene,
-                                                                         tnb_crispr))
                 problem = True
     return not problem and not missing_file
 
@@ -500,24 +505,20 @@ def check_prodigal(gpath, name, prodigal_dir, logger):
 
     if len(faafile) != 1:
         logger.error("{} {}: no or several .faa file(s)".format(name, oriname))
-        logger.info("no faa")
         missing_file = True
     if len(ffnfile) !=  1:
         logger.error("{} {}: no or several .ffn file(s)".format(name, oriname))
         missing_file = True
-        logger.info("no ffn")
     if len(gfffile) != 1:
         logger.error("{} {}: no or several .gff file(s)".format(name, oriname))
         missing_file = True
-        logger.info("no gff")
 
     # If we have all result files, check they are not empty
     if not missing_file:
         if (os.path.getsize(faafile[0]) == 0 or os.path.getsize(ffnfile[0]) == 0
             or os.path.getsize(gfffile[0]) == 0):
-            origname = os.path.basename(gpath)
-            logger.error("Genome {} (from {}): At least one of your prodigal result file "
-                         "is empty.".format(name, origname))
+            logger.error("Genome {} (from {}): At least one of your Prodigal result file "
+                         "is empty.".format(name, oriname))
             return False
     return not missing_file
 
@@ -529,7 +530,7 @@ def count_tbl(tblfile):
     - number of contigs
     - number of proteins (CDS)
     - number of genes (locus_tag)
-    - number of CRISPR arrays (repeat_region)
+    - number of CRISPR arrays (repeat_region) -> ignore crisprs
 
     Parameters
     ----------
@@ -544,7 +545,7 @@ def count_tbl(tblfile):
     nbcont = 0
     nb_cds = 0
     nb_gene = 0
-    nb_crispr = 0
+    # nb_crispr = 0
     with open(tblfile) as tblf:
         for line in tblf:
             if line.startswith(">"):
@@ -553,9 +554,9 @@ def count_tbl(tblfile):
                 nb_cds += 1
             if "locus_tag" in line:
                 nb_gene += 1
-            if "repeat_region" in line:
-                nb_crispr += 1
-    return nbcont, nb_cds, nb_gene, nb_crispr
+            # if "repeat_region" in line or (len(line.split()) == 3 and "CRISPR" in line):
+            #     nb_crispr += 1
+    return nbcont, nb_cds, nb_gene  #, nb_crispr
 
 
 def count_headers(seqfile):

@@ -1,0 +1,37 @@
+>test.0417.00002.0001b_00001 501 NA | hypothetical protein | NA | NA | NA
+aacgcgcatccagcgctagagacgctctcgacgagc
+cagatctgca
+cacaacaggtcgcgctcg
+>test.0417.00002.0001i_00005 1653 yiaD | putative lipoprotein YiaD | NA | similar to AA sequence:UniProtKB:P37665 | NA
+cagagatgcccc
+ccgcgttt
+>test.0417.00002.0001b_00008 3001 vgrG1 | Actin cross-linking toxin VgrG1 | 6.3.2.- | similar to AA sequence:UniProtKB:Q9KS45 | NA
+aaccggcctcgcgcatcgcatcagcag
+>test.0417.00002.0002b_00009 1161 NA | hypothetical protein | NA | NA | NA
+acgctagagagctcgcgctaagagatc
+>test.0417.00002.0002i_00010 1068 NA | hypothetical protein | NA | NA | NA
+CCGAATAGCGCGCTCAGAGAGAGAGGA
+CGATAGCTCTCGCA
+CCGCATAGC
+>test.0417.00002.0002i_00011 582 NA | hypothetical protein | NA | NA | NA
+AAGCTCGCTAGACNNCTCGATACNNCTCGGATAGC
+>test.0417.00002.0002i_00011 501 NA | hypothetical protein | NA | NA | NA
+CAGATAGCNNCGCTAGAGGAGAGCTCTCGGAGA
+>test.0417.00002.0002b_00011 369 NA | hypothetical protein | NA | NA | NA
+CCGAGATCGCGCGCGCTCTTCTCGAGA
+>test.0417.00002.0003b_00013 1140 NA | hypothetical protein | NA | NA | NA
+AGCTCTCGAGAGGAGCGCTCGA
+CGCTCGCGCA
+CCTATAGGAACCACCGGGG
+>test.0417.00002.0004b_00014 3354 NA | hypothetical protein | NA | NA | 12345
+CAGGATAGCGCGCTCAGAG
+>test.0417.00002.0004b_00016 44128 NA | hypothetical protein | NA | similar to AA sequence:UniProtKB:P32 | 56
+AAGGGATATGGCCACACAGTT
+>test.0417.00002.0007b_02927 77 NA | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+CCAGAGATCGCGCGC
+>test.0417.00002.0007i_02928 77 NA | tRNA-Met(cat) | NA | COORDINATES:profile:Aragorn:1.2 | NA
+AGATATGGCGCGCTCTCTC
+>test.0417.00002.0007i_03015 1638 NA | hypothetical protein | NA | NA | NA
+AGATCCGCGCGCTATAGAGC
+>test.0417.00002.0007i_03016 1761 NA | hypothetical protein | NA | NA | NA
+AAGGATCTCTCGCGAGAGGA

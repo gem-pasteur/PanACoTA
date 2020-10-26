@@ -99,3 +99,27 @@ def thread_num(param):
     elif param == 0:
         return nb_cpu
     return param
+
+
+def positive_int(param):
+    try:
+        param = int(param)
+    except ValueError:
+        msg = f"error: argument --cutn: invalid int value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0:
+        msg = f"error: argument --cutn must be a positive integer: invalid int value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    return param
+
+
+def mash_dist(param):
+    try:
+        param = float(param)
+    except ValueError:
+        msg = f"error: mash distance: invalid float value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0 or param > 1:
+        msg = f"error: mash distance must be between 0 and 1: invalid value: '{param}'"
+        raise argparse.ArgumentTypeError(msg)
+    return param

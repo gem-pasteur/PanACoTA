@@ -408,8 +408,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
     skipped_format = []
     # Generate database (folders Proteins, Genes, Replicons, LSTINFO)
     skipped_format = ffunc.format_genomes(results_ok, res_dir, res_annot_dir,
-                                          prodigal_only, threads, quiet=quiet,
-                                          changed_name=changed)
+                                          prodigal_only, threads, quiet=quiet)
     print(skipped_format)
     # At least one genome could not be formatted -> warn user
     if skipped_format:
@@ -480,7 +479,7 @@ def build_parser(parser):
     optional.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    optional.add_argument("--cutn", dest="cutn", type=int, default=5,
+    optional.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "

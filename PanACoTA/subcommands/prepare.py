@@ -66,14 +66,14 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.outdir,
-         arguments.tmp_dir, arguments.parallel, arguments.no_refseq, arguments.db_dir,
-         arguments.only_mash,
+    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.levels,
+         arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
+         arguments.db_dir, arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_dir,
+def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
@@ -226,20 +226,15 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
                                      "output folder called 'new_outdir', make sure you have "
                                      "'-o new_outdir' option, "
                                      "and you specified where the uncompressed sequences to "
-                                     "use are ('-d sequence_database_path' -> "
-                                     "my_outdir/Database_init). ")
+                                     "use are ('-d sequence_database_path'). ")
                         sys.exit(1)
                     # add genomes from refseq/bacteria folder to Database_init
                     nb_gen, _ = dgf.to_database(outdir)
-                    # If no genome found, error -> nothing to analyse
-                    if nb_gen == 0:
-                        logger.error(f"There is no genome in {refseqdir}.")
-                        sys.exit(1)
         # No sequence: Do all steps -> download, QC, mash filter
         else:
             # Download all genomes of the given taxID
             db_dir, nb_gen = dgf.download_from_refseq(species_linked, NCBI_species, NCBI_taxid,
-                                                      outdir, threads)
+                                                      levels, outdir, threads)
             logger.info("{} refseq genome(s) downloaded".format(nb_gen))
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
@@ -250,7 +245,7 @@ def main(cmd, NCBI_species, NCBI_taxid, outdir, tmp_dir, threads, no_refseq, db_
     else:
         logger.warning('You asked to run only mash steps.')
         if not os.path.exists(info_file):  # info-file missing -> error and exit
-            logger.error(f"Your info file {info_file} does not exist. Please Provide the  "
+            logger.error(f"Your info file {info_file} does not exist. Please provide the  "
                           "right name/path, or remove the '--mash-only option to rerun "
                           "quality control.")
             sys.exit(1)
@@ -290,13 +285,21 @@ def build_parser(parser):
     general = parser.add_argument_group('General arguments')
     general.add_argument("-t", dest="NCBI_species_taxid", default="",
                           help=("Species taxid to download, corresponding to the "
-                                "'species taxid' provided by the NCBI")
+                                "'species taxid' provided by the NCBI. A comma-separated "
+                                "list of taxid can also be provided.")
                          )
     general.add_argument("-s", dest="NCBI_species", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
                         )
+    general.add_argument("-l", "--assembly_level", dest="levels", default="",
+                          help=("Assembly levels of genomes to download (default: all). "
+                                "Possible levels are: 'all', 'complete', 'chromosome', "
+                                "'scaffold', 'contig'."
+                                "You can also provide a comma-separated list of assembly "
+                                "levels. For ex: 'complete,chromosome'")
+                          )
     general.add_argument("-o", dest="outdir",
                           help=("Give the path to the directory where you want to save the "
                                "downloaded database. In the given directory, it will create "
@@ -312,7 +315,7 @@ def build_parser(parser):
                                 "By default, it will be saved in your "
                                 "out_dir/tmp_files.")
                           )
-    general.add_argument("--cutn", dest="cutn", type=int, default=5,
+    general.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int, default=5,
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "
@@ -325,16 +328,18 @@ def build_parser(parser):
     general.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num, default=999,
                           help=("Maximum number of contigs allowed to keep a genome. "
                                 "Default is 999."))
-    general.add_argument("--min", dest="min_dist", default=1e-4, type=float,
+    general.add_argument("--min_dist", dest="min_dist", default=1e-4,
+                        type=utils_argparse.mash_dist,
                         help="By default, genomes whose distance to the reference is not "
                              "between 1e-4 and 0.06 are discarded. You can specify your own "
                              "lower limit (instead of 1e-4) with this option.")
-    general.add_argument("--max_dist", dest="max_dist", default=0.06, type=float,
-                        help="By default, genomes whose distance to the reference is not "
-                             "between 1e-4 and 0.06 are discarded. You can specify your own "
-                             "lower limit (instead of 0.06) with this option.")
-    general.add_argument("-p", dest="parallel", type=utils_argparse.thread_num, default=1,
-                          help=("Run 'N' downloads in parallel (default=1). Put 0 if "
+    general.add_argument("--max_dist", dest="max_dist", default=0.06,
+                         type=utils_argparse.mash_dist,
+                         help="By default, genomes whose distance to the reference is not "
+                              "between 1e-4 and 0.06 are discarded. You can specify your own "
+                              "lower limit (instead of 0.06) with this option.")
+    general.add_argument("-p", "--threads", dest="parallel", type=utils_argparse.thread_num,
+                         default=1, help=("Run 'N' downloads in parallel (default=1). Put 0 if "
                                 "you want to use all cores of your computer."))
 
     optional = parser.add_argument_group('Alternatives')
@@ -452,6 +457,20 @@ def check_args(parser, args):
     if args.verbose > 0 and args.quiet:
         parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
                      " You cannot have both.")
+
+    # min_dist must be higher than max_dist
+    if args.min_dist >= args.max_dist:
+        parser.error(f"min_dist ({args.min_dist}) cannot be higher "
+                     f"than max_dist ({args.max_dist})")
+
+    # Check that levels, if given, are among possible ones
+    possible = ["all", "complete", "chromosome", "scaffold", "contig"]
+    if args.levels:
+        for level in args.levels.split(","):
+            if level not in possible:
+                parser.error("Please choose between available assembly levels: 'all', 'complete', "
+                             "'chromosome', 'scaffold', 'contig'. If several levels, provide a "
+                             f"comma-separated list. Invalid value: '{args.levels}'")
 
     # WARNINGS
     # User did not specify a species name

@@ -11,7 +11,7 @@ import shutil
 from io import StringIO
 import pytest
 
-import PanACoTA.annotate_module.format_prokka as prokkafunc
+from PanACoTA.annotate_module import format_prokka as prokkafunc
 import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
 
@@ -22,6 +22,7 @@ GENEPATH = os.path.join(ANNOTEDIR, "generated_by_unit-tests")
 
 LOGFILE_BASE = os.path.join(GENEPATH, "logfile")
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
+
 
 @pytest.fixture(autouse=True)
 def setup_teardown_module():
@@ -54,7 +55,13 @@ def test_tbl_to_lst_not_changed_names(caplog):
     - CDS features (some with all info = ECnumber, gene name, product etc. ;
     some with missing info)
     - tRNA type
-    - repeat_region type (*2)
+    - repeat_region type (*2) -> should be ignored in .lst
+            * 1 in prokka1 version (start end repeat_region
+                                        rpt_family CRISPR
+                                        score 7)
+            * 1 in prokka2 version (start end CRISPR
+                                        note CRISPR with x repeat units
+                                        rpt_family CRISPR)
     - contigs with more than 2 genes
     - contig with only 2 genes (both 'b' loc)
     - contig with 1 gene ('b' loc)
@@ -278,8 +285,44 @@ def test_create_gff_error_gff(caplog):
     res_lst = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
     gpath = "original_genome_name"
     assert not prokkafunc.generate_gff(gpath, gfffile, res_gff_file, res_lst, sizes, contigs)
-    assert ("Problem in prokka_out_gff-error.gff: ID=EPKOMDHM_00006 whereas "
+    assert ("Problem in prokka_out_gff-error.gff: ID=EPKOMDHM_00005 whereas "
             "locus_tag=toto") in caplog.text
+
+
+def test_create_gff_wrong_format(caplog):
+    """
+    Check generated gff file. The prokka output gff file has a problem (locus_tag != ID)
+    -> returns False with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test_prodigal")
+    gfffile = os.path.join(GENEPATH, "prokka_out_wrong_format.gff")
+    with open(gfffile, "w") as gfff:
+        gfff.write("##gff-version3\n")
+        gfff.write("##sequence-region bis 1 600\n")
+        gfff.write("JGIKIPgffgIJ    Prodigal:2.6    CDS 287 787\n")
+    contigs = {"JGIKIPgffgIJ": "test.0417.00002.0001",
+               "toto": "test.0417.00002.0002",
+               "other_header": "test.0417.00002.0003",
+               "my_contig": "test.0417.00002.0004",
+               "bis": "test.0417.00002.0005",
+               "ter": "test.0417.00002.0006",
+               "contname": "test.0417.00002.0007",
+              }
+    sizes = {"test.0417.00002.0001": 84,
+             "test.0417.00002.0002": 103,
+             "test.0417.00002.0003": 122,
+             "test.0417.00002.0004": 35,
+             "test.0417.00002.0005": 198,
+             "test.0417.00002.0006": 128,
+             "test.0417.00002.0007": 85
+            }
+    res_gff_file = os.path.join(GENEPATH, "prodigal_res.gff")
+    res_lst = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
+    gpath = "original_genome_name"
+    assert not prokkafunc.generate_gff(gpath, gfffile, res_gff_file, res_lst, sizes, contigs)
+    assert ("Wrong format for test/data/annotate/generated_by_unit-tests/"
+            "prokka_out_wrong_format.gff") in caplog.text
 
 
 def test_create_gen(caplog):
@@ -297,43 +340,9 @@ def test_create_gen(caplog):
     assert tutil.compare_order_content(exp_gen, res_gen_file)
 
 
-def test_create_gen_wrong_crispr(caplog):
+def test_create_gen_supgen(caplog):
     """
-    Check create gen file, but CRISPR number in lst is not the same as
-    expected from ffn -> error and returns False
-    """
-    caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
-    ffnfile = os.path.join(TEST_ANNOTE, "original_name.fna-prokkaRes",
-                           "prokka_out_for_test.ffn")
-    lstfile = os.path.join(TEST_ANNOTE, "test_create_gene_prokka-wrongCRISPRnum.lst")
-    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
-    assert not prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    assert ("Problem with CRISPR numbers in test/data/annotate/test_files/"
-            "test_create_gene_prokka-wrongCRISPRnum.lst. CRISPR >prokka_out_for_test "
-            "in ffn is CRISPR num 1, whereas it is annotated as CRISPR num 2 "
-            "in lst file.") in caplog.text
-
-
-def test_create_gen_wrong_format(caplog):
-    """
-    Check create gen file, but 1 header has a wrong format
-    -> error message and returns False
-    """
-    caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
-    ffnfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongFormat.ffn")
-    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
-    assert not prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    assert ("Unknown header format >JGIKIPIJ-00005 in test/data/annotate/test_files/"
-            "prokka_out_for_test-wrongFormat.ffn.\nGen file will not be created.") in caplog.text
-
-
-def test_create_gen_unknown_gene(caplog):
-    """
-    Check create gen file, but 1 gene is present in ffn, but not in lst
-    -> error message and returns False
+    Check create gen file. But there is a gene in ffn that is not in lst -> error
     """
     caplog.set_level(logging.DEBUG)
     logger = logging.getLogger("test_prodigal")
@@ -341,11 +350,7 @@ def test_create_gen_unknown_gene(caplog):
     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
     res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
     assert not prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    assert ("Missing info for gene >sup_gene_00012 (from test/data/annotate/test_files/"
-            "prokka_out_for_test-supGene.ffn) in test/data/annotate/exp_files/"
-            "res_create_lst-prokka.lst. If it is actually present in the lst file, "
-            "check that genes are ordered by increasing number in both "
-            "lst and ffn files.") in caplog.text
+    assert ("Missing info for gene >JGIKIPIJ_03050 (from test/data/annotate/test_files/prokka_out_for_test-supGene.ffn) in test/data/annotate/exp_files/res_create_lst-prokka.lst. If it is actually present in the lst file, check that genes are ordered by increasing number in both lst and ffn files.") in caplog.text
 
 
 def test_create_gen_missingSeq(caplog):
@@ -359,26 +364,8 @@ def test_create_gen_missingSeq(caplog):
     lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
     res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
     assert prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka-missingSeq.gen")
+    exp_gen = os.path.join(EXP_ANNOTE, "res_create_gene_prokka-missGene.gen")
     assert tutil.compare_order_content(exp_gen, res_gen_file)
-
-
-def test_create_gen_missingLst(caplog):
-    """
-    Check create gen file, but there is 1 gene in ffn which does not exist in lst
-    Error message and returns false
-    """
-    caplog.set_level(logging.DEBUG)
-    logger = logging.getLogger("test_prodigal")
-    ffnfile = os.path.join(TEST_ANNOTE, "prokka_out_for_test-noLstFor1gene.ffn")
-    lstfile = os.path.join(EXP_ANNOTE, "res_create_lst-prokka.lst")
-    res_gen_file = os.path.join(GENEPATH, "prodigal_res.gen")
-    assert not prokkafunc.create_gen(ffnfile, lstfile, res_gen_file)
-    assert ("Missing info for gene >JGIKIPIJ_003018 (from test/data/annotate/test_files/"
-            "prokka_out_for_test-noLstFor1gene.ffn) in test/data/annotate/exp_files/"
-            "res_create_lst-prokka.lst. If it is actually present in the lst file, "
-            "check that genes are ordered by increasing number in both lst "
-            "and ffn files.") in caplog.text
 
 
 def test_create_prt(caplog):
@@ -450,20 +437,20 @@ def test_format_1genome(caplog):
     name = "test.0417.00002"
     # path to original genome, given to prodigal for annotation
     gpath =  os.path.join(TEST_ANNOTE, "original_name.fna")
-    prod_path = TEST_ANNOTE
+    prok_path = TEST_ANNOTE
+    # Create result directories
     prot_dir = os.path.join(GENEPATH, "Proteins")
     lst_dir = os.path.join(GENEPATH, "LSTINFO")
     rep_dir = os.path.join(GENEPATH, "Replicons")
     gene_dir = os.path.join(GENEPATH, "Genes")
     gff_dir = os.path.join(GENEPATH, "gff")
-
     os.makedirs(prot_dir)
     os.makedirs(lst_dir)
     os.makedirs(rep_dir)
     os.makedirs(gene_dir)
     os.makedirs(gff_dir)
 
-    assert prokkafunc.format_one_genome(gpath, name, prod_path, lst_dir, prot_dir, gene_dir,
+    assert prokkafunc.format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
                                         rep_dir, gff_dir)
 
     # Check output files content
@@ -502,6 +489,8 @@ def test_format_1genome_emptygpath(caplog):
     # Create prokka result files (empty files, will not be read)
     gpath_prokres =  gpath + "-prokkaRes"
     os.makedirs(gpath_prokres)
+    fna_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.fna")
+    open(fna_prokres, "w").close()
     tbl_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.tbl")
     open(tbl_prokres, "w").close()
     gff_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.gff")
@@ -510,7 +499,7 @@ def test_format_1genome_emptygpath(caplog):
     open(ffn_prokres, "w").close()
     faa_prokres = os.path.join(gpath_prokres, "prokka_out_for_test.faa")
     open(faa_prokres, "w").close()
-
+    # Create result directories
     prok_path = GENEPATH
     prot_dir = os.path.join(GENEPATH, "Proteins")
     lst_dir = os.path.join(GENEPATH, "LSTINFO")
@@ -542,6 +531,7 @@ def test_format_1genome_emptygpath(caplog):
     assert len(os.listdir(lst_dir) ) == 0
     assert len(os.listdir(gff_dir) ) == 0
     assert len(os.listdir(gen_dir) ) == 0
+    # Check log
     assert ("Problems while generating Replicon file for prokka_out_for_test") in caplog.text
 
 
@@ -566,6 +556,9 @@ def test_format_1genome_pb_tbl(caplog):
         ori.write(">wrongheader # 1 # 2 # 1 # toto")
     # Add empty prokka res gff ffn and faa files (they won't be read, as it will stop
     # at tbl2lst)
+    orig_fna =  os.path.join(TEST_ANNOTE, "original_name.fna-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
     res_gff_file = os.path.join(used_respath, "prokka_out_for_test.gff")
     open(res_gff_file, "w").close()
     res_ffn_file = os.path.join(used_respath, "prokka_out_for_test.ffn")
@@ -629,6 +622,9 @@ def test_format_1genome_pb_gff(caplog):
                             "prokka_out_for_test.tbl")
     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")
     shutil.copyfile(orig_tbl, used_tbl)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
 
     # Create gff_file with a wrong format
     with open(os.path.join(used_respath, "prokka_out_for_test.gff"), "w") as ori:
@@ -675,7 +671,6 @@ def test_format_1genome_pb_gff(caplog):
     assert ("Problems while generating .gff file for test.0417.00002") in caplog.text
 
 
-
 def test_format_1genome_pb_ffn(caplog):
     """
     Test on formatting prokka results, when prokka output ffn file does not have
@@ -700,9 +695,12 @@ def test_format_1genome_pb_ffn(caplog):
                             "prokka_out_for_test.gff")
     used_gff = os.path.join(used_respath, "prokka_out_for_test.gff")
     shutil.copyfile(orig_gff, used_gff)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
 
     # Create ffn_file with a wrong format
-    orig_ffn = os.path.join(TEST_ANNOTE, "prokka_out_for_test-wrongFormat.ffn")
+    orig_ffn = os.path.join(TEST_ANNOTE, "prokka_out_for_test-supGene.ffn")
     used_ffn = os.path.join(used_respath, "prokka_out_for_test.ffn")
     shutil.copyfile(orig_ffn, used_ffn)
     # Add empty prokka res faa file
@@ -740,9 +738,12 @@ def test_format_1genome_pb_ffn(caplog):
     assert len(os.listdir(lst_dir) ) == 0
     assert len(os.listdir(gff_dir) ) == 0
     assert len(os.listdir(gen_dir) ) == 0
-    assert("Unknown header format >JGIKIPIJ-00005 in test/data/annotate/generated_by_unit-tests/"
-           "original_name.fna-prokkaRes/prokka_out_for_test.ffn.\n"
-           "Gen file will not be created.") in caplog.text
+    assert("Missing info for gene >JGIKIPIJ_03050 (from test/data/annotate/"
+           "generated_by_unit-tests/original_name.fna-prokkaRes/prokka_out_for_test.ffn) "
+           "in test/data/annotate/generated_by_unit-tests/LSTINFO/test.0417.00002.lst. "
+           "If it is actually present in the lst file, "
+           "check that genes are ordered by increasing number in both lst and "
+           "ffn files.") in caplog.text
     assert ("Problems while generating .gen file for test.0417.00002") in caplog.text
 
 
@@ -762,6 +763,9 @@ def test_format_1genome_pb_faa(caplog):
     os.makedirs(used_respath)
     shutil.copyfile(orig_gpath, used_gpath)
     # Copy tbl and gff files, which is as expected (tbl2lst and generate_gff must succeed)
+    orig_fna =  os.path.join(orig_gpath + "-prokkaRes", "prokka_out_for_test.fna")
+    fna_prokres = os.path.join(used_respath, "prokka_out_for_test.fna")
+    shutil.copyfile(orig_fna, fna_prokres)
     orig_tbl = os.path.join(orig_gpath + "-prokkaRes",
                             "prokka_out_for_test.tbl")
     used_tbl = os.path.join(used_respath, "prokka_out_for_test.tbl")

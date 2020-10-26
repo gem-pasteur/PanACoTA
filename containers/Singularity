@@ -28,7 +28,7 @@ From:python:3.7-stretch
     rm mash-Linux64-v2.2.tar &&\
     mv /opt/src/mash-Linux64-v2.2/mash /usr/local/bin &&\
     rm -r mash-Linux64-v2.2
-    
+
     # Update makeblastdb and blastp for prokka
     cd /opt/src
     wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz && \

@@ -1,11 +1,11 @@
 ##gff-version  3
-##sequence-region	test.0417.00002.0001	1	14000
-##sequence-region	test.0417.00002.0002	1	5000
-##sequence-region	test.0417.00002.0003	1	4600
-##sequence-region	test.0417.00002.0004	1	8000
-##sequence-region	test.0417.00002.0005	1	1
-##sequence-region	test.0417.00002.0006	1	10
-##sequence-region	test.0417.00002.0007	1	15000
+##sequence-region	test.0417.00002.0001	1	84
+##sequence-region	test.0417.00002.0002	1	103
+##sequence-region	test.0417.00002.0003	1	122
+##sequence-region	test.0417.00002.0004	1    35
+##sequence-region	test.0417.00002.0005	1	198
+##sequence-region	test.0417.00002.0006	1	128
+##sequence-region	test.0417.00002.0007	1	85
 test.0417.00002.0001	Prodigal:2.6	CDS	287	787	.	+	0	ID=test.0417.00002.0001b_00001;inference=ab initio prediction:Prodigal:2.6;locus_tag=EPKOMDHM_00001;product=hypothetical protein
 test.0417.00002.0001	Prodigal:2.6	CDS	4416	6068	.	+	0	ID=test.0417.00002.0001i_00002;Name=yiaD;gene=yiaD;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:P37665;locus_tag=EPKOMDHM_00005;product=putative lipoprotein YiaD
 test.0417.00002.0001	Prodigal:2.6	CDS	9000	12002	.	-	0	ID=test.0417.00002.0001b_00003;Name=vgrG1;gene=vgrG1;inference=ab initio prediction:Prodigal:2.6,similar to AA sequence:UniProtKB:Q9HI36;locus_tag=EPKOMDHM_00006;product=Major exported protein

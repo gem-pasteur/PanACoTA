@@ -85,7 +85,7 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
                    ' ', progressbar.Counter(), "/{}".format(nbgen), ' (',
                    progressbar.Percentage(), ") - ", progressbar.Timer(), ' ',
                    progressbar.ETA()]
-        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=150).start()
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=nbgen, term_width=79).start()
         curnum = 1
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")

@@ -1,1 +1,2 @@
 include PanACoTA/align_module/prt2codon.awk
+include requirements.txt

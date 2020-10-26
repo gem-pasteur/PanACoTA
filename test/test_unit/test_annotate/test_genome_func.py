@@ -40,14 +40,16 @@ def setup_teardown_module():
     - remove directory with generated results
     """
     # utils.init_logger(LOGFILE_BASE, 0, 'test_postalign', verbose=1)
-    os.mkdir(GENEPATH)
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    shutil.rmtree(GENEPATH)
-    # for f in LOGFILES:
-    #     if os.path.exists(f):
-    #         os.remove(f)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -125,7 +127,7 @@ def test_split_contig_nocut():
     """
     pat = None
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig name for my_sequence"
     contig_sizes = {"contig_1": 10}
     resfile = os.path.join(GENEPATH, "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
@@ -149,7 +151,7 @@ def test_split_contig_cut():
     """
     pat = "NNN+"
     whole_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name for_my_sequence"
     contig_sizes = {">contig_1": 10}
     resfile = os.path.join(GENEPATH, "test_split_contig_nocut.fna")
     gresf = open(resfile, "w")
@@ -195,7 +197,7 @@ def test_format_contig_cut():
     cut = True
     pat = 'NNNNN+'
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name for_my_sequence"
     contig_sizes = {}
     resfile = os.path.join(GENEPATH, "test_format_cont_cut5N.fna")
     gresf = open(resfile, "w")
@@ -208,38 +210,36 @@ def test_format_contig_cut():
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_cut3N.fna")
     assert os.path.exists(resfile)
     assert tutil.compare_order_content(resfile, exp_file)
-    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 26,
-                            ">my_contig_name_for_my_sequence_3\n": 25}
+    assert contig_sizes == {">2_my_contig_name for_my_sequence\n": 26,
+                            ">3_my_contig_name for_my_sequence\n": 25}
 
 
 def test_format_contig_nocut():
     """
-    For a given contig, if we want to annotate it with prokka, and do not cut at each stretch of 
+    For a given contig, if we want to annotate it with prokka, and do not cut at each stretch of
     5 'N'check that it writes this contig as given
     """
     cut = False
     pat = None
     cur_seq = "AACTGCTTTTTAAGCGCGCTCCTGCGNNNNNGGTTGTGTGGGCCCAGAGCGAGNCG"
-    cur_contig_name = ">my_contig_name_for_my_sequence"
+    cur_contig_name = ">my_contig_name_for_my_sequence\n"
     contig_sizes = {}
     resfile = os.path.join(GENEPATH, "test_format_cont_nocut_prokka.fna")
-    gresf = open(resfile, "w")
+    gresf = None
     num = 2
 
     assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
-                               num, logger=None) == 3
-    gresf.close()
+                               num, logger=None) == 2
 
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
-    assert os.path.exists(resfile)
-    assert tutil.compare_order_content(resfile, exp_file)
-    assert contig_sizes == {">my_contig_name_for_my_sequence_2\n": 56}
+    assert not os.path.exists(resfile)
+    assert contig_sizes == {">my_contig_name_for_my_sequence\n": 56}
 
 
-def test_format_contig_nocut_prodigal_notSameName():
+def test_format_contig_nocut_notDuplicateName():
     """
-    For a given contig, if we want to annotate it with prodigal, and do not cut, 
-    then we keep the same file (no need to split at 20 characters) 
+    For a given contig, if we want to annotate it with prodigal, and do not cut,
+    then we keep the same file (no need to split at 20 characters)
     However, we must check that contig names are all different.
     Add 2 contigs, to be sure the 'num' parameter is not increased.
     """
@@ -262,7 +262,7 @@ def test_format_contig_nocut_prodigal_notSameName():
                             ">mycontig": 155}
 
 
-def test_format_contig_nocut_prodigal_SameName(caplog):
+def test_format_contig_nocut_DuplicateName(caplog):
     """
     For a given contig, if we want to annotate it with prodigal, and do not cut, then we keep the same file. However, we must check that contig names are all different.
     Try to add a contig which name is already used, check that it prints the expected error,
@@ -400,7 +400,7 @@ def test_analyse1genome_nocut_prodigal():
 def test_analyse1genome_cut_prodigal():
     '''
     Analyse the given genome, cutting at stretches of 5N, in order to annotate it
-    Create new genome file in outdir, calculate genome size, nb contigs and L90, and add it 
+    Create new genome file in outdir, calculate genome size, nb contigs and L90, and add it
     to the genomes dict, as well as the path to the genome file.
     '''
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
@@ -429,8 +429,8 @@ def test_analyse1genome_cut_prodigal():
 def test_analyse1genome_cut_prokka():
     '''
     Analyse the given genome, cutting at stretches of 5N, in order to annotate it with prokka
-    Create new genome file in outdir, with shortened contig names, calculate genome size, 
-    nb contigs and L90, and add it 
+    Create new genome file in outdir, with shortened contig names, calculate genome size,
+    nb contigs and L90, and add it
     to the genomes dict, as well as the path to the genome file.
     '''
     gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta"]
@@ -460,7 +460,7 @@ def test_analyse1genome_cut_same_names():
     """
     Analyse a genome. Its contig names all have the same first 20 characters. There is no
     stretch of at least 5N, so contigs are not split.
-    New contig names should be uniq, and not all ending with _0!
+    New contig names should be uniq, and not all starting with '1_'!
     """
     genome = "genome_long_header.fst"
     genomes = {genome: ["SAEN.1015.0117"]}
@@ -485,7 +485,7 @@ def test_analyse1genome_same_names_nocut(caplog):
     genomes = {genome: ["SAEN.1015.0117"]}
     cut = False
     pat = None
-    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, 
+    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes,
                                     "prodigal", logger)
     assert ("myheader contig name is used for several contigs. Please put different names for "
             "each contig. This genome will be ignored") in caplog.text
@@ -501,7 +501,7 @@ def test_analyse1genome_same_last_name_nocut(caplog):
     genomes = {genome: ["SAEN.1015.0117"]}
     cut = False
     pat = None
-    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes, 
+    assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes,
                                     "prodigal", logger)
     assert ("myheader contig name is used for several contigs. Please put different names for "
             "each contig. This genome will be ignored") in caplog.text
@@ -509,7 +509,7 @@ def test_analyse1genome_same_last_name_nocut(caplog):
 
 def test_analyse1genome_nofile(caplog):
     '''
-    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false 
+    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false
     with corresponding error message.
     '''
     caplog.set_level(logging.DEBUG)
@@ -527,7 +527,7 @@ def test_analyse1genome_nofile(caplog):
 
 def test_analyse1genome_empty(caplog):
     '''
-    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false 
+    Test that when we ask to analyse a genome whose sequence file does not exist, it returns false
     with corresponding error message.
     '''
     caplog.set_level(logging.DEBUG)
@@ -592,7 +592,7 @@ def test_analyse_all_genomes_cut(caplog):
                    gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 51, 6, 5],
                    gs[2]: ["ESCO.0416", gpaths[2], opaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
-    assert ("Cutting genomes at each time there are at least 3 'N' in a row, " 
+    assert ("Cutting genomes at each time there are at least 3 'N' in a row, "
             "and then, calculating genome size, number of contigs and L90.") in caplog.text
 
 
@@ -654,7 +654,7 @@ def test_analyse_all_genomes_cut_empty(caplog):
                    gs[1]: ["SAEN.1114", gpaths[1], opaths[1], 51, 6, 5],
                    gs[3]: ["ESCO.0123", gpaths[3], opaths[3], 70, 4, 1]}
     assert exp_genomes == genomes
-    assert ("Cutting genomes at each time there are at least 3 'N' in a row, " 
+    assert ("Cutting genomes at each time there are at least 3 'N' in a row, "
             "and then, calculating genome size, number of contigs and L90.") in caplog.text
     assert ("Your file test/data/annotate/genomes/empty.fasta "
             "does not contain any gene. Please check that you really gave a "
@@ -679,7 +679,7 @@ def test_analyse_all_genomes_noseq(caplog):
     # Run analysis
     with pytest.raises(SystemExit):
         gfunc.analyse_all_genomes(genomes, "toto", GENEPATH, nbn, "prokka", logger, quiet=True)
-    assert ("No genome was found in the database folder toto. See logfile " 
+    assert ("No genome was found in the database folder toto. See logfile "
             "for more information.") in caplog.text
 
 

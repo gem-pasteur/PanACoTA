@@ -101,6 +101,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
     """
     prokka_dir = os.path.join(prok_path, os.path.basename(gpath) + "-prokkaRes")
     # Get needed Prokka result files
+    fna_file = glob.glob(os.path.join(prokka_dir, "*.fna"))[0]
     prokka_tbl_file = glob.glob(os.path.join(prokka_dir, "*.tbl"))[0]
     prokka_gff_file = glob.glob(os.path.join(prokka_dir, "*.gff"))[0]
     prokka_ffn_file = glob.glob(os.path.join(prokka_dir, "*.ffn"))[0]
@@ -116,7 +117,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
 
     # Generate replicon file (same as input sequence but with gembase formatted headers). From
     # this file, get contig names, to be used to generate gff file
-    contigs, sizes = utils.get_genome_contigs_and_rename(name, gpath, res_rep_file, logger)
+    contigs, sizes = utils.get_genome_contigs_and_rename(name, fna_file, res_rep_file, logger)
     if not contigs:
         try:
             os.remove(res_rep_file)
@@ -130,7 +131,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         return False
 
     # Convert prokka tbl file to gembase .lst file format
-    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, gpath)
+    ok_tbl = tbl2lst(prokka_tbl_file, res_lst_file, contigs, name, fna_file)
     if not ok_tbl:
         try:
             os.remove(res_rep_file)
@@ -143,7 +144,7 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
         logger.error("Problems while generating LSTINFO file for {}".format(name))
         return False
     # Create gff3 file for annotations
-    ok_gff = generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
+    ok_gff = generate_gff(fna_file, prokka_gff_file, res_gff_file, res_lst_file, sizes, contigs)
     if not ok_gff:
         try:
             os.remove(res_rep_file)
@@ -181,6 +182,9 @@ def format_one_genome(gpath, name, prok_path, lst_dir, prot_dir, gene_dir,
             os.remove(res_gff_file)
             os.remove(res_gene_file)
             os.remove(res_prt_file)
+            os.remove(res_rep_file)
+            # Remove twice to be able to check that when there is a problem while removing files,
+            # it generates the expected error
             os.remove(res_rep_file)
         except OSError:
             pass
@@ -235,8 +239,6 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
     bool :
         True if genome name used in lstfile and prokka tblfile are the same, False otherwise
     """
-    # Number CRISPRs. By default, 0 CRISPR -> next one will be CRISPR1
-    crispr_num = 1
     # Protein localisation in contig (b = border ; i = inside)
     cont_loc = "b"
     prev_cont_loc = "b"
@@ -320,15 +322,19 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
 
                     # If not first gene of the contig, write the previous gene to .lst file
                     # The first gene will be written while reading the 2nd gene
-                    if start != "-1" and end != "-1":
-                        crispr_num, lstline = general.write_gene(feature_type, locus_num,
-                                                                 gene_name, product, crispr_num,
-                                                                 prev_cont_loc, genome,
-                                                                 prev_cont_num, ecnum, inf2,
-                                                                 db_xref, strand, start, end, lstf)
+                    if start != "-1" and end != "-1" and not crispr:
+                        lstline = general.write_gene(feature_type, locus_num,
+                                                     gene_name, product,
+                                                     prev_cont_loc, genome,
+                                                     prev_cont_num, ecnum, inf2,
+                                                     db_xref, strand, start, end, lstf)
 
                     # Get new values for the next gene: start, end, strand and feature type
                     start, end, feature_type = elems
+                    crispr = "CRISPR" in feature_type or "repeat_region" in feature_type
+                    if crispr:
+                        continue
+
                     # Get strain of gene
                     if int(end) < int(start):
                         start, end = end, start
@@ -351,9 +357,9 @@ def tbl2lst(tblfile, lstfile, contigs, genome, gpath):
         # Write last feature
         if start != -1 and end != -1:
             prev_cont_loc = "b"
-            crispr_num, _ = general.write_gene(feature_type, locus_num, gene_name, product,
-                                               crispr_num, prev_cont_loc, genome, prev_cont_num,
-                                               ecnum, inf2, db_xref, strand, start, end, lstf)
+            general.write_gene(feature_type, locus_num, gene_name, product,
+                               prev_cont_loc, genome, prev_cont_num,
+                               ecnum, inf2, db_xref, strand, start, end, lstf)
     return True
 
 
@@ -433,6 +439,9 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                 #     continue
                 (contig_name, source, type_g, start_g, end_g,
                  score, strand_g, phase, attributes) = fields_g
+                # Ignore CRISPR
+                if "CRISPR" in type_g or "repeat_region" in type_g:
+                    continue
                 # Get information given to this same sequence from the lst file
                 # (next lst line corresponds to next gff line without #), as, for each format,
                 # there is 1 line per gene)
@@ -452,7 +461,6 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                 if loc_name != gname:
                     logger.error(f"Problem in {gff}: ID={gname} whereas locus_tag={loc_name}.")
                     return False
-
                 # Compare information from lst and information from prodigal gff (start,
                 # end and type of feature). They should correspond
                 for (elemg, eleml, label) in zip([start_g, end_g, type_g],
@@ -461,9 +469,6 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
                     # If 1 element is different (start or end position, or type), print error
                     # message and return False: this genome could not be converted to gff
                     if elemg != eleml:
-                        # For CRISPR, prokka puts repeat_region in gff
-                        if elemg == "repeat_region" and eleml == "CRISPR":
-                            continue
                         logger.error(f"Files {tbl} and {gff} (in prokka tmp_files: {tmp}) "
                                      f"do not have the same {label} value for gene {gname} ({elemg} "
                                      f"in gff, {eleml} in tbl)")
@@ -508,48 +513,37 @@ def create_gen(ffnseq, lstfile, genseq):
         True if conversion went well, False otherwise
     """
     problem = False
-    crispr_id = 1
+    write = True  # Write next sequence
     with open(ffnseq) as ffn, open(lstfile) as lst, open(genseq, "w") as gen:
         for line_ffn in ffn:
+            # Ignore gene that we do not want to write (should be a crispr)
             # If line of sequence, write it as is, and go to next line
             if not line_ffn.startswith(">"):
-                gen.write(line_ffn)
+                # We just read a seq line. If we can write (write is True), do it and go
+                # to next line
+                # Otherwise, just go to next line
+                if write:
+                    gen.write(line_ffn)
                 continue
-            lstline = lst.readline().strip()
-            # Try to get gene ID. If does not work, look if it is a CRISPR in lstinfo
+            # Try to get gene ID. If does not work, ignore this gene (it may be a
+            # CRISPR, and we ignore them
             test_gen_id = line_ffn.split()[0].split("_")[-1]
             if not test_gen_id.isdigit():
-                # If it is a CRISPR in lstline, and header of ffn does not have a gene format,
-                # then ffn contains the CRISPR sequence
-                if lstline.strip().split()[3] == "CRISPR":
-                    crispr_id_lst = int(lstline.split("\t")[4].split("_CRISPR")[-1])
-                    if crispr_id == crispr_id_lst:
-                        general.write_header(lstline, gen)
-                        crispr_id += 1
-                    else:
-                        logger.error(f"Problem with CRISPR numbers in {lstfile}. "
-                                     f"CRISPR {line_ffn.strip()} in ffn is CRISPR num "
-                                     f"{crispr_id}, whereas it is annotated as CRISPR num "
-                                     f"{crispr_id_lst} in lst file.")
-                        return False
-                # It is not a CRISPR in lstline, and header of ffn does not have a gene format:
-                # problem
-                else:
-                    logger.error((f"Unknown header format {line_ffn.strip()} in {ffnseq}.\n"
-                                  "Gen file will not be created."))
-                    return False
+                # Maybe a CRISPR? Or wrong gene name? -> ignore
+                logger.log(utils.detail_lvl(),
+                           f"Unknown header format for {line_ffn.strip()}. "
+                           "This gene will be ignored in .gen output file.")
+                write = False
+                continue
             # If ffn contains a gene header, find its information in lst file
             else:
+                write = True
+                lstline = lst.readline().strip()
                 gen_id = int(test_gen_id)
                 # genID exists, ffn header is for a gene. Check that it corresponds to
                 # information in lst file.
                 id_lst = lstline.split("\t")[4].split("_")[-1]
-                # if line in lst corresponds to a gene -> get gene ID.
-                # Otherwise, genID = 0 (CRISPR line in lst)
-                if id_lst.isdigit():
-                    gen_id_lst = int(id_lst)
-                else:
-                    gen_id_lst = 0
+                gen_id_lst = int(id_lst)
                 # in lst, find the same gene ID as in ffn (some gene IDs in lst can be absent
                 # from ffn, if prokka do not give their sequence).
                 # As they are ordered by increasing number, go to next lstline until
@@ -561,9 +555,7 @@ def create_gen(ffnseq, lstfile, genseq):
                         gen_id_lst = "-1"
                         break
                     id_lst = lstline.split("\t")[4].split("_")[-1]
-                    # don't cast to int if info for a crispr
-                    if id_lst.isdigit():
-                        gen_id_lst = int(id_lst)
+                    gen_id_lst = int(id_lst)
                 # If it found the same gene ID, write info in gene file
                 if gen_id == gen_id_lst:
                     general.write_header(lstline.strip(), gen)

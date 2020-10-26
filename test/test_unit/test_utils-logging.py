@@ -20,11 +20,16 @@ def setup_teardown_module():
     """
     # Init logger to level detail (15)
     # utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_utils', verbose=1)
-    os.mkdir(GENEPATH)
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
-    shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -288,7 +293,9 @@ def test_logger_info_verbose1(capsys):
     assert "info warning" in err
     assert "info error" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")
@@ -322,7 +329,9 @@ def test_logger_info_verbose2(capsys):
     assert "info warning" in err
     assert "info error" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")
@@ -354,7 +363,9 @@ def test_logger_warning(capsys):
     assert "info info" in out
     assert "info error" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")
@@ -387,7 +398,9 @@ def test_logger_warning_verbose1(capsys):
     assert "info error" in err
     assert "info warning" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")
@@ -421,7 +434,9 @@ def test_logger_warning_verbose2(capsys):
     assert "info error" in err
     assert "info warning" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")
@@ -454,7 +469,9 @@ def test_logger_critical(capsys):
     assert "info info" in out
     assert "info error" in err
     assert "info critical" in err
-    assert len(os.listdir(GENEPATH)) == 2
+    files = os.listdir(GENEPATH)
+    files = [f for f in files if "fuse" not in f]
+    assert len(files) == 2
     with open(logfile + ".log", "r") as logf:
         assert logf.readline().endswith(" :: INFO :: info info\n")
         assert logf.readline().endswith(" :: WARNING :: info warning\n")

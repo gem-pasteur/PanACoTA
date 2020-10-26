@@ -824,7 +824,7 @@ def read_genomes_info(list_file, name, date=None, logger=None):
     if len(genomes) > 0:
         logger.info(("Found {} genomes in total").format(len(genomes)))
     else:
-        logger.error(f"no genome listed in {list_file} were found.")
+        logger.error(f"No genome listed in {list_file} was found.")
         sys.exit(1)
     return genomes
 
@@ -1168,21 +1168,26 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
             else:
                 seq += line
                 cont_size += len(line.strip())
-        # Write last contig
-        cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
-        prevcont_nohead = "".join(prev_cont.split(">")[1:])
-        prev_orig_name_nohead = prev_orig_name.split(">")[1]
-        if prev_orig_name_nohead:
-            if prev_orig_name_nohead in contigs:
-                logger.error(f"several contigs have the same name {prev_orig_name_nohead} "
-                             f"in {gpath}.")
-                return False, False
+        # Write last contig, if there is one (if gpath not empty)
+        if prev_cont:
+            cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
+            prevcont_nohead = "".join(prev_cont.split(">")[1:])
+            prev_orig_name_nohead = prev_orig_name.split(">")[1]
+            if prev_orig_name_nohead:
+                if prev_orig_name_nohead in contigs:
+                    logger.error(f"several contigs have the same name {prev_orig_name_nohead} "
+                                 f"in {gpath}.")
+                    return False, False
             contigs[prev_orig_name_nohead] = prevcont_nohead
             sizes[prevcont_nohead] = cont_size
             grf.write(cont)
             grf.write(seq)
+    if not contigs:
+        logger.error(f"Your genome {gpath} does not contain any sequence, "
+                     "or is not in fasta format.")
     return contigs, sizes
-
+# Add test with empty gpath
+# Add test with non fasta gpath
 
 
 def logger_thread(q):

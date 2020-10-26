@@ -38,9 +38,9 @@
 			locus_tag	JGIKIPIJ_00011
 			product	hypothetical protein
 >Feature other_header
-2968265	296902	repeat_region
+2968265	296902	CRISPR
+			note	CRISPR with 3 repeat units
 			rpt_family	CRISPR
-			score	13
 3399	4538	CDS
 			inference	ab initio prediction:Prodigal:2.6
 			locus_tag	JGIKIPIJ_00013
@@ -51,6 +51,13 @@
 			locus_tag	JGIKIPIJ_00014
 			product	hypothetical protein
 			db_xref	12345
+45015	888	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00016
+			product	hypothetical protein
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P32
+			db_xref	56
 >Feature bis
 >Feature contname
 3039279	3039355	tRNA

@@ -1,9 +1,11 @@
 # **PanACoTA**
- [![License (AGPL version 3)](https://img.shields.io/badge/license-GNU%20AGPL%20version%203-green.svg)](COPYING)
+[![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
+[![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+
 [![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
 
-[![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+ [![License (AGPL version 3)](https://img.shields.io/badge/license-GNU%20AGPL%20version%203-green.svg)](COPYING)
 [![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/commits)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
 
@@ -39,14 +41,28 @@ If you use PanACoTA, please cite:
 Amandine PERRIN, Eduardo P.C. ROCHA (2020).  PanACoTA: A modular tool for massive microbial comparative genomics. BioRxiv. 
 [![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
 
+**Content of this README:**
+
+Installation
+- [Dependences](#dep)
+- [pip](#pypi)
+- [cloning github repository](#clone)
+- [singularity](#singularity)
+
+Running
+- [Quick run](#run)
+- [Examples](#example)
+- [Documentation](#doc)
+
+[Development](#develop)
 
 # Installation
 
-## Dependencies
+## <a name="dep"></a> Dependencies
 
 PanACoTA is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
-PanACoTA has several dependencies. Install only the one(s) you need, according to the module you want to use: 
+Then, PanACoTA has several external dependencies. If you use [`singularity`](#singularity) installation (for ex. to run on a cluster), you do not need to install any dependency. Otherwise, install only the one(s) you need, according to the module(s) you want to use: 
 - For prepare module: [**mash**](https://mash.readthedocs.io/en/latest/) (to filter genomes)
 - For annotate module: [**prokka**](https://github.com/tseemann/prokka) and/or [**prodigal**](https://github.com/hyattpd/Prodigal) (to uniformly annotate your genomes) 
 - For pangenome module: [**mmseqs**](https://github.com/soedinglab/MMseqs2) (to generate pangenomes)
@@ -70,55 +86,78 @@ For FastTree, we advise to download C code from [here](http://www.microbesonline
 
 You can then add the output `FastTreeMP` to your `$PATH` to be able to run it from everywhere.
 
+## <a name="install"></a> Installing `PanACoTA` and update
 
-## Downloading and updating `PanACoTA`
-
-You can download `PanACoTA` source code by downloading a [zip file](https://github.com/gem-pasteur/PanACoTA/archive/master.zip), or by cloning its github repository (which is more recommended). By cloning the github repository, you will then be able to update the code to new versions very easily and quickly. Here is how to clone the repository:
-
-    git clone https://github.com/gem-pasteur/PanACoTA.git
-
-This will create a repository called `PanACoTA`. Go inside this repository to install `PanACoTA`, as described hereafter.
-
-If a new version of `PanACoTA` is released, and you want to use it, type the following command to update the source code:
-
-    git pull
-
-Then, you will be able to upgrade to the new version (see bellow).
-
-## <a name="install"></a> Installing `PanACoTA` (final mode)
-
-
-To install `PanACoTA`, and all its dependencies, from the root directory, type:
-
-    ./make
-
-or
-
-    ./make install
-
-You will then be able to use the package from any directory in your computer,
-just as any other software.
-
-If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
+You have different possibilities to install `PanACoTa`.
 
 **Warning:** If you plan to work on the scripts, choose the development installation (see [Development section](#develop)).
 
+### <a name="pypi"></a> From pip
+
+A very simple way to install the last stable version. This will install files in your python site-packages folder.
+
+    pip install panacota
+
+And to get new version:
+
+    pip install panacota --upgrade
+
+If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
+
+### <a name="clone"></a> From github repository
+
+This allows you to get the very last version, and be able to test the last enhancements before they are uploaded to the other platforms. For that, go to where you want to install it `(<your_dir>)`, and type: 
+
+    git clone https://github.com/gem-pasteur/PanACoTA.git
+
+This will create a repository called `PanACoTA`, containing the content of this github repository. To install PanACoTA:
+
+    cd PanACoTA 
+    ./make
+
+If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
+
+To upload to new version, go back to your repository:
+
+    cd <your_dir>/PanACoTA
+    git pull
+    ./make update
+
+
+### <a name="singularity"></a> From singularity image
+
+[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+
+Very useful if you do not have permission rights on the computer, such as, for example, on a cluster. The other advantage is that you do not need to install any dependence (except singularity itself of course). Singularity image includes all of them. You just have to download 1 file, and nothing will be installed anywhere on your computer.
+
+First, download the singularity image:
+
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA[:<version>]
+
+If you want a specific version, like version 1.0, specify `shub://gem-pasteur/PanACoTA:1.0`. 
+
+To get latest version:
+
+    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
+
+(This is the same as `singularity pull --name panacota.img shub://gem-pasteur/PanACoTA:latest`)
+
+It will replace your file panacota.img by a new one corresponding to the latest version.
+
+### From zip version
+
+For people wanting to download source code of a specific version, we provide releases. You can download last one here: [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+
 ## <a name="uninstall"></a> Uninstalling `PanACoTA`
 
-If you don't want `PanACoTA` anymore, or if you want to install a newer version, uninstall it by typing:
+If you don't want `PanACoTA` anymore uninstall it by typing:
 
-    ./make uninstall
+    pip unintall panacota  # If you installed from pip
+    ./make uninstall  # If you installed from github repository
 
-## Upgrade to new version
+Or, if you used singularity, just remove the downloaded image: `rm -r panacota.img`
 
-If you want to install a new version of `PanACoTA` (and you got it by cloning the gitlab repository):
-- update source code to the new version (`git pull`)
-- upgrade installation to the new version (`./make upgrade`)
-
-If you installed it by downloading a zip file, [Uninstall it](#uninstall), and [install](#install) the new version (by cloning gitlab repository, or downloading the new zip file).
-
-
-# Running `PanACoTA`
+# <a name="run"></a> Running `PanACoTA`
 
 ## Quick run
 
@@ -139,33 +178,22 @@ Each subcommand has its own options and inputs. To get the list of required argu
 
     PanACoTA <subcommand> -h
 
-## Examples
+
+When using singularity, just replace `PanACoTA` by `./panacota.img`:
+
+    ./panacota.img <subcommand_name> <arguments_for_subcommand>  
+    ./panacota.img -h 
+
+## <a name="example"></a> Examples
 
 We provide a folder, `Examples`, containing genomic sequences (in `Examples/genomes`) and examples of input files (in `Examples/input_files`) for the software.
 In the [example part of documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/examples.html), you will find information explaining you how to run the different modules of `PanACoTA` with this dataset, so that you can try the software. We also describe the results that should be created by each command line.
 
 **Note:** the provided genomic sequences are taken from real genomes, but then modified and drastically shortened in order to have an example showing different situations, but running very fast. Hence, the examples results should not be interpreted biologically!
 
-## Documentation
+## <a name="doc"></a> Documentation
 
 You can find more information in [PanACoTA documentation](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)!
-
-
-## On cluster
-
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
-
-We provide a singularity image, to help running PanACoTA on a cluster.
-
-First, download the singularity image:
-
-    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
-
-Then, you can run PanACoTA as previously:
-
-    ./panacota.img -h  # to get help on the whole PanACoTA program
-    ./panacota.img <subcommand_name> <arguments_for_subcommand>  # to run a module of PanACoTA on your data.
-
 
 # <a name="develop"></a>  Development
 
@@ -175,9 +203,7 @@ PanACoTA is also hosted in gitlab, where all CI is done. Here is the link: https
 
 ## Installing `PanACoTA` (development mode)
 
-If you want to install `PanACoTA` while still working on modifying the scripts, type:
-
-    ./make develop
+If you want to install `PanACoTA` while still working on modifying the scripts, use `./make develop` instead of `./make install` once you have cloned the repository.
 
 Your changes will then be taken into account. As you installed the package, you will be able to run it from any directory in your computer.
 

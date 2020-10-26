@@ -9,10 +9,11 @@ import pytest
 import os
 import logging
 import shutil
+import multiprocessing
 
 import test.test_unit.utilities_for_tests as tutil
 import PanACoTA.utils as utils
-import PanACoTA.annotate_module.annotation_functions as afunc
+from PanACoTA.annotate_module import annotation_functions as afunc
 
 
 # Define variables used by several tests
@@ -39,14 +40,19 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    os.mkdir(GENEPATH)
+    if os.path.isdir(GENEPATH):
+        content = os.listdir(GENEPATH)
+        for f in content:
+            assert f.startswith(".fuse")
+    else:
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
     for f in LOGFILES:
         if os.path.exists(f):
             os.remove(f)
-    shutil.rmtree(GENEPATH)
+    shutil.rmtree(GENEPATH, ignore_errors=True)
     print("teardown")
 
 
@@ -55,7 +61,6 @@ def my_logger(name):
     """
     logger given to function called by a subprocess
     """
-    import multiprocessing
     m = multiprocessing.Manager()
     q = m.Queue()
     qh = logging.handlers.QueueHandler(q)
@@ -72,15 +77,76 @@ def test_check_prokka_no_outdir():
     Test that prokka returns the right error message when output directory does not exist
     """
     logger = my_logger("test_check_prokka_no_outdir")
-    outdir = "toto"
+    outdir = "outdir"
     name = "prokka_out_for_test"
     logf = "prokka.log"
-    gpath = "path/to/nogenome/original_name.fna"
+    gpath = os.path.join(GENEPATH, "toto.fna")
     nbcont = 7
     assert not afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
     q = logger[0]
     assert q.qsize() == 1
     msg = "Previous annotation could not run properly. Look at prokka.log for more information."
+    assert q.get().message == msg
+
+
+def test_check_prokka_nofna():
+    """
+    Check that check_prokka returns false when a tbl file is missing, and an error message
+    """
+    logger = my_logger("test_check_prokka_nofna")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join(GENEPATH, "out_test_nofna")
+    name = "prokka_out_for_test-missfna"
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prokka.log")
+    nbcont = 7
+    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-missfna original_name-error.fna: no .fna file"
+    q = logger[0]
+    assert q.qsize() == 1
+    assert q.get().message == msg
+
+
+def test_check_prokka_sevfna():
+    """
+    Check that check_prokka returns false when there is more than 1 tbl file,
+    and an error message
+    """
+    logger = my_logger("test_check_prokka_sevfna")
+    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
+    ori_name = "prokka_out_for_test"
+    out_dir = os.path.join(GENEPATH, "out_test_sevfna")
+    name = "prokka_out_for_test-sevfna"
+    gpath = "path/to/nogenome/original_name-error.fna"
+    os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
+                    os.path.join(out_dir, name + ".tbl"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
+                    os.path.join(out_dir, name + ".faa"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
+                    os.path.join(out_dir, name + ".ffn"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + "2.fna"))
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
+                    os.path.join(out_dir, name + ".gff"))
+    logf = os.path.join(GENEPATH, "prokka.log")
+    nbcont = 7
+    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    msg = "prokka_out_for_test-sevfna original_name-error.fna: several .fna files"
+    q = logger[0]
+    assert q.qsize() == 1
     assert q.get().message == msg
 
 
@@ -95,6 +161,8 @@ def test_check_prokka_notbl():
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -122,6 +190,8 @@ def test_check_prokka_sevtbl():
     name = "prokka_out_for_test-misstbl"
     gpath = "path/to/nogenome/original_name-error.fna"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
                     os.path.join(out_dir, name + ".faa"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -151,6 +221,8 @@ def test_check_prokka_nofaa():
     out_dir = os.path.join(GENEPATH, "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -178,6 +250,8 @@ def test_check_prokka_sevfaa():
     out_dir = os.path.join(GENEPATH, "out_test_nofaa")
     name = "prokka_out_for_test-missfaa"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
@@ -208,6 +282,8 @@ def test_check_prokka_noffn():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -235,6 +311,8 @@ def test_check_prokka_sevffn():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missffn"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -265,6 +343,8 @@ def test_check_prokka_nogff():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-missgff"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -292,6 +372,8 @@ def test_check_prokka_sevgff():
     out_dir = os.path.join(GENEPATH, "out_test_noffn")
     name = "prokka_out_for_test-sevgff"
     os.makedirs(out_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
                     os.path.join(out_dir, name + ".tbl"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -343,6 +425,8 @@ def test_check_prokka_wrong_tbl_cds():
     os.makedirs(out_dir)
     name = "prokka_out_for_test-wrongCDS"
     tblfile = os.path.join(TEST_DIR, name + ".tbl")
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(out_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(out_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -357,72 +441,10 @@ def test_check_prokka_wrong_tbl_cds():
     assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
     msg1 = ("prokka_out_for_test-wrongCDS original_name.fna: "
             "no matching number of proteins between tbl and faa; "
-            "faa=13; in tbl =12")
-    msg2 = ("prokka_out_for_test-wrongCDS original_name.fna: "
-            "no matching number of genes between tbl and ffn; "
-            "ffn=17; in tbl =14genes 2CRISPR")
-    q = logger[0]
-    assert q.qsize() == 2
-    assert q.get().message == msg1
-    assert q.get().message == msg2
-
-
-def test_check_prokka_wrong_tbl_crispr():
-    """
-    Check that check_prokka returns an error message when the number of headers in ffn
-    file is different from the number of CDS + CRISPR in tbl file (1CRISPR in tbl, 2 in ffn)
-    """
-    logger = my_logger("test_check_prokka_wrong_tbl_crispr")
-    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
-    ori_name = "prokka_out_for_test"
-    out_dir = os.path.join(GENEPATH, "res_checkProkkaWrongCRISPR")
-    os.makedirs(out_dir)
-    name = "prokka_out_for_test-wrongtblCRISP"
-    tblfile = os.path.join(TEST_DIR, name + ".tbl")
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
-                    os.path.join(out_dir, name + ".ffn"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-                    os.path.join(out_dir, name + ".faa"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-                    os.path.join(out_dir, name + ".gff"))
-    shutil.copyfile(tblfile, os.path.join(out_dir, name + ".tbl"))
-    logf = "prokka.log"
-    gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 7
-    assert not afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
-    msg = ("prokka_out_for_test-wrongtblCRISP original_name.fna: "
-           "no matching number of genes between tbl and ffn; "
-           "ffn=17; in tbl =15genes 1CRISPR")
+            "faa=14; in tbl =12")
     q = logger[0]
     assert q.qsize() == 1
-    assert q.get().message == msg
-
-
-def test_check_prokka_tbl_crispr_newversion():
-    """
-    Check that check_prokka does not return an error message when the number of headers in ffn
-    file is equal to the number of CDS in tbl file (1CRISPR in tbl, 0 in ffn), but
-    does not contain the CRISPRs found in tbl
-    As the new version of prokka (1.12) does not put crisprs in .ffn
-    """
-    logger = my_logger("test_check_prokka_tbl_crispr_newversion")
-    ori_prok_dir = os.path.join(TEST_DIR, "original_name.fna-prokkaRes")
-    ori_name = "prokka_out_for_test"
-    out_dir = os.path.join(GENEPATH, "res_checkProkkaWrongCRISPRnewversion")
-    os.makedirs(out_dir)
-    name = "prokka_out_for_test-wrongtblCRISPnewversion"
-    ffnfile = os.path.join(TEST_DIR, name + ".ffn")
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".tbl"),
-                    os.path.join(out_dir, name + ".tbl"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
-                    os.path.join(out_dir, name + ".faa"))
-    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".gff"),
-                    os.path.join(out_dir, name + ".gff"))
-    shutil.copyfile(ffnfile, os.path.join(out_dir, name + ".ffn"))
-    logf = os.path.join(GENEPATH, "prokka.log")
-    gpath = "path/to/nogenome/original_name.fna"
-    nbcont = 6
-    assert afunc.check_prokka(out_dir, logf, name, gpath, nbcont, logger[1])
+    assert q.get().message == msg1
 
 
 def test_check_prokka_ok():
@@ -437,6 +459,8 @@ def test_check_prokka_ok():
     gpath = "path/to/nogenome/original_name.fna"
     nbcont = 6
     assert afunc.check_prokka(outdir, logf, name, gpath, nbcont, logger[1])
+    q = logger[0]
+    assert q.qsize() == 0
 
 
 def test_run_prokka_out_exists_ok():
@@ -458,8 +482,9 @@ def test_run_prokka_out_exists_ok():
     assert q.qsize() == 4
     # start annotating :
     assert q.get().message.startswith("Start annotating")
-    # # warning prokka results folder exists:
-    assert q.get().message.startswith("Prokka results folder test/data/annotate/test_files/"
+    # warning prokka results folder exists:
+    assert q.get().message.startswith("Prokka results folder test/data/annotate/"
+                                      "test_files/"
                                       "original_name.fna-prokkaRes already exists.")
     # Results in result folder are ok
     assert q.get().message.startswith("Prokka did not run again, formatting step used already "
@@ -482,6 +507,8 @@ def test_run_prokka_out_exists_error():
     new_prok_dir = os.path.join(GENEPATH, "original_name-error-prokkaRes")
     name = "prokka_out_for_test-wrongCDS"
     os.makedirs(new_prok_dir)
+    shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".fna"),
+                    os.path.join(new_prok_dir, name + ".fna"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".ffn"),
                     os.path.join(new_prok_dir, name + ".ffn"))
     shutil.copyfile(os.path.join(ori_prok_dir, ori_name + ".faa"),
@@ -495,18 +522,18 @@ def test_run_prokka_out_exists_error():
     arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
-    # assert q.qsize() == 4
+    assert q.qsize() == 4
     # start annotating :
     assert q.get().message.startswith("Start annotating")
     # warning prokka results folder exists:
     assert q.get().message == ("Prokka results folder test/data/annotate/generated_by_unit-tests/"
                                "original_name-error-prokkaRes already exists.")
     # error, no tbl file
-    msg = "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
-    assert q.get().message == msg
+    assert q.get().message == "prokka_out_for_test-wrongCDS original_name-error: no .tbl file"
     # warning, files in outdir are not as expected
     assert q.get().message.startswith("Problems in the files contained in your already existing "
-                                      "output dir ")
+                                      "output dir (test/data/annotate/generated_by_unit-tests/"
+                                      "original_name-error-prokkaRes)")
 
 
 def test_run_prokka_out_exists_force():
@@ -544,9 +571,13 @@ def test_run_prokka_out_exists_force():
     # we cannot compare the whole file.
     with open(out_tbl, "r") as outt:
         lines = [line.strip() for line in outt.readlines()]
-        assert ">Feature H561_S27" in lines
-        assert ">Feature H561_S28" in lines
-        assert ">Feature H561_S29" in lines
+        # Check that there are 3 contigs
+        feature = 0
+        for line in lines:
+            if 'Feature' in line:
+                feature += 1
+        assert feature == 3
+        # Check that there are 16 CDS
         CDS = 0
         for line in lines:
             if "CDS" in line:
@@ -554,11 +585,11 @@ def test_run_prokka_out_exists_force():
         assert CDS == 16
     # Check that faa and ffn files are as expected
     assert os.path.isfile(out_faa)
-    tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
-    # assert q.qsize() == 3
+    assert q.qsize() == 4
     assert q.get() .message.startswith("Start annotating test_runprokka_H299 from test/data/"
                                        "annotate/genomes/H299_H561.fasta with Prokka")
     assert q.get() .message == ("Prokka results folder already exists, but removed because "
@@ -566,12 +597,12 @@ def test_run_prokka_out_exists_force():
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
                                "H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runprokka_H299 "
-                               "test/data/annotate/genomes/H299_H561.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
     assert q.get() .message.startswith("End annotating test_runprokka_H299 "
                                        "from test/data/annotate/genomes/H299_H561.fasta")
 
 
-def test_run_prokka_out_doesnt_exist():
+def test_run_prokka_out_doesnt_exist_ok():
     """
     Test that when the output directory does not exist, it creates it, and runs prokka
     with all expected outfiles
@@ -601,30 +632,30 @@ def test_run_prokka_out_doesnt_exist():
     # we cannot compare the whole file.
     with open(out_tbl, "r") as outt:
         lines = [line.strip() for line in outt.readlines()]
-        assert ">Feature H561_S27" in lines
-        assert ">Feature H561_S28" in lines
-        assert ">Feature H561_S29" in lines
+        # Check that there are 3 contigs
+        feature = 0
+        for line in lines:
+            if 'Feature' in line:
+                feature += 1
+        assert feature == 3
+        # Check that there are 16 CDS
         CDS = 0
         for line in lines:
             if "CDS" in line:
                 CDS += 1
         assert CDS == 16
-    assert os.path.isfile(out_faa)
-    with open(exp_dir + ".faa", "r") as expf, open(out_faa, "r") as outf:
-        for line_exp, line_out in zip(expf, outf):
-            assert line_exp == line_out
     # Check that faa and ffn files are as expected
     assert os.path.isfile(out_faa)
-    tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
     assert q.qsize() == 3
     assert q.get().message.startswith("Start annotating")
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
                                "H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runprokka_H299 "
-                               "test/data/annotate/genomes/H299_H561.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
     assert q.get().message.startswith("End annotating")
 
 
@@ -635,12 +666,12 @@ def test_run_prokka_out_problem_running():
     """
     logger = my_logger("test_run_prokka_out_problem_running")
     utils.init_logger(LOGFILE_BASE, 0, 'test_run_prokka_out_problem_running')
-    gpath = os.path.join(GEN_PATH, "H299 H561.fasta")
+    gpath = os.path.join(GEN_PATH, "H299_H561bis.fasta")
     cores_prokka = 2
     name = "test_runprokka_H299-error"
     force = False
     nbcont = 3
-    logf = os.path.join(GENEPATH, "H299 H561.fasta-prokka.log")
+    logf = os.path.join(GENEPATH, "H299_H561.fasta-prokka.log")
     arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
@@ -648,8 +679,8 @@ def test_run_prokka_out_problem_running():
     assert q.get().message.startswith("Start annotating")
     assert q.get().message == ("Prokka command: prokka "
                                "--outdir test/data/annotate/generated_by_unit-tests/"
-                               "H299 H561.fasta-prokkaRes --cpus 2 "
+                               "H299_H561bis.fasta-prokkaRes --cpus 2 "
                                "--prefix test_runprokka_H299-error "
-                               "test/data/annotate/genomes/H299 H561.fasta")
+                               "--centre prokka test/data/annotate/genomes/H299_H561bis.fasta")
     assert q.get().message == ("Error while trying to run prokka on test_runprokka_H299-error "
-                               "from test/data/annotate/genomes/H299 H561.fasta")
+                               "from test/data/annotate/genomes/H299_H561bis.fasta")

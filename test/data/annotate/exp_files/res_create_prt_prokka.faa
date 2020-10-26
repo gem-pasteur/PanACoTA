@@ -25,6 +25,8 @@ CGCTCGCGCA
 CCTATAGGAACCACCGGGG
 >test.0417.00002.0004b_00014 3354 NA | hypothetical protein | NA | NA | 12345
 CAGGATAGCGCGCTCAGAG
+>test.0417.00002.0004b_00016 44128 NA | hypothetical protein | NA | similar to AA sequence:UniProtKB:P32 | 56
+CCGAGGTGCGAGGTGTGTTGTGTGCG
 >test.0417.00002.0007i_03015 1638 NA | hypothetical protein | NA | NA | NA
 AGATCCGCGCGCTATAGAGC
 >test.0417.00002.0007i_03016 1761 NA | hypothetical protein | NA | NA | NA

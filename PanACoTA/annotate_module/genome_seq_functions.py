@@ -310,16 +310,7 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     if cut:
         # Cut sequence and write header + sequence to res file
         num = split_contig(pat, cur_seq, cur_contig_name, contig_sizes, gresf, num)
-    # PROKKA User does not want to cut, but will annotate with prokka, so we still
-    # have to create a new sequence file
-    elif gresf:
-        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
-        gresf.write(new_contig_name)
-        gresf.write(cur_seq + "\n")
-        contig_sizes[new_contig_name] = len(cur_seq)
-        num += 1
-    # PRODIGAL No cut, and prodigal used -> no new file created, but check
-    # contig unique names
+    # No cut -> no new file created, but check contig unique names
     else:
         if cur_contig_name in contig_sizes.keys():
             logger.error("{} contig name is used for several contigs. Please put "
@@ -334,7 +325,8 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
 def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
     """
     Save the contig read just before into dicts and write it to sequence file.
-    Contig name must be at most 20 characters (required by prokka)
+    Unique ID of contig must be in the first field of header, before the first space
+    (required by prokka)
 
     Parameters
     ----------
@@ -368,7 +360,7 @@ def split_contig(pat, whole_seq, cur_contig_name, contig_sizes, gresf, num):
         # we get empty contigs, if 2 occurrences of the pattern are side by side).
         if len(seq) == 0:
             continue
-        new_contig_name = "{}_{}\n".format(cur_contig_name, num)
+        new_contig_name = ">{}_{}\n".format(num, cur_contig_name.split(">")[1])
         contig_sizes[new_contig_name] = len(seq)
         gresf.write(new_contig_name)
         gresf.write(seq + "\n")

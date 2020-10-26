@@ -1,10 +1,10 @@
->contig1 dgfdgd_1
+>1_contig1 dgfdgd
 ACGTTGCTGC
->contig1 dgfdgd_2
+>2_contig1 dgfdgd
 AGCTGTCTAG
->contig2_3
+>3_contig2
 CGACGNNCGAG
->contig2_4
+>4_contig2
 AGGTG
->contig3_5
+>5_contig3
 ANNNNGGCTTGAGGTTGAA
