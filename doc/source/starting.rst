@@ -11,7 +11,7 @@ Dependencies
 
 ``PanACoTA`` is written in **python3**. So, you need python3 (and pip3 for installation) to run it.
 
-There are several external dependencies, and you can install only the ones you need for your study:
+There are several external dependencies. Install only the one(s) you need, according to the module(s) you want to use:
 
 - For prepare module: `mash <https://mash.readthedocs.io/en/latest/>`_ (to filter genomes)
 - For annotate module: `prokka <https://github.com/tseemann/prokka>`_  and/or `prodigal <https://github.com/hyattpd/Prodigal>`_  (to uniformly annotate your genomes)
