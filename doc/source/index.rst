@@ -15,8 +15,8 @@ Amandine PERRIN, Eduardo P.C. ROCHA (2020). PanACoTA: A modular tool for massive
 
    whatis
    starting
-   examples
    usage
+   examples
    about
 
 
