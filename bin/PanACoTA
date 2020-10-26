@@ -66,7 +66,7 @@ def parse_arguments(argv):
     checks = {}  # to add the function to call to check the subparser arguments
 
     # Running all modules at once. Start with ASCII art title, + small description of subcommand
-    parser_all = subparsers.add_parser('all_modules',
+    parser_all = subparsers.add_parser('all',
                                         formatter_class=argparse.RawDescriptionHelpFormatter,
                                         description=(dedent(header) +
                                         "\n=> Run all PanACoTA modules"),
@@ -74,7 +74,7 @@ def parse_arguments(argv):
                                         help="Run all PanACoTA modules",
                                         add_help=False)
     all_modules.build_parser(parser_all)
-    actions["all_modules"] = all_modules.main_from_parse
+    actions["all"] = all_modules.main_from_parse
     # checks["all_modules"] = all_modules.check_args
 
     # Preparation part. Start with ASCII art title, + small description of subcommand
