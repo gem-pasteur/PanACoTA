@@ -1,7 +1,10 @@
 # **PanACoTA**
 [![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
 [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+
+<!--
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
+-->
 
 [![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
 
@@ -126,21 +129,19 @@ To upload to new version, go back to your repository:
 
 ### <a name="singularity"></a> From singularity image
 
-[![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
-
 Very useful if you do not have permission rights on the computer, such as, for example, on a cluster. The other advantage is that you do not need to install any dependence (except singularity itself of course). Singularity image includes all of them. You just have to download 1 file, and nothing will be installed anywhere on your computer.
 
 First, download the singularity image:
 
-    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA[:<version>]
+    singularity pull --name panacota.img docker://gempasteur/panacota[:<version>] 
 
-If you want a specific version, like version 1.0, specify `shub://gem-pasteur/PanACoTA:1.0`. 
+If you want a specific version, like version 1.0, specify `docker://gempasteur/panacota:1.0`. 
 
 To get latest version:
 
-    singularity pull --name panacota.img shub://gem-pasteur/PanACoTA
+    singularity pull --name panacota.img docker://gempasteur/panacota
 
-(This is the same as `singularity pull --name panacota.img shub://gem-pasteur/PanACoTA:latest`)
+(This is the same as `singularity pull --name panacota.img docker://gempasteur/panacota:latest`)
 
 It will replace your file panacota.img by a new one corresponding to the latest version.
 
