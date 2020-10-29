@@ -426,7 +426,6 @@ def read_matrix(genomes, sorted_genomes, matrix):
 
     nbgen = len(sorted_genomes)
     corresp_abs = {genomes[genome][2]: num for num, genome in enumerate(sorted_genomes)}
-    print(len(corresp_abs))
     # Create square matrix with nbgen cols/lines. dok format is a 'Dictionary Of Keys'
     # -> writes (0, 1) value
     mat_sp = dok_matrix((nbgen, nbgen), dtype=float)
