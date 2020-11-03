@@ -144,6 +144,7 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, q
     # Write persistent genome to file
     pers.write_persistent(fams, outputfile)
     logger.info("Persistent genome step done.")
+    return outputfile
 
 
 def get_info(tol, multi, mixed, floor):
@@ -200,18 +201,7 @@ def build_parser(parser):
         parser to configure in order to extract command-line arguments
     """
     import argparse
-
-    def percentage(param):
-        try:
-            param = float(param)
-        except Exception:
-            msg = "argument -t tol: invalid float value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        if param < 0 or param > 1:
-            msg = ("The minimum %% of genomes required in a family to be persistent must "
-                   "be in [0, 1]. Invalid value: {}".format(param))
-            raise argparse.ArgumentTypeError(msg)
-        return param
+    from PanACoTA import utils_argparse
 
     # Create command-line parser for all options and arguments to give
     required = parser.add_argument_group('Required arguments')
@@ -221,7 +211,7 @@ def build_parser(parser):
                           help=("Specify the output directory for your core/persistent genome."),
                           default=".")
     optional = parser.add_argument_group('Optional arguments')
-    optional.add_argument("-t", "--tol", dest="tol", default=1, type=percentage,
+    optional.add_argument("-t", "--tol", dest="tol", default=1, type=utils_argparse.percentage,
                           help=("min %% of genomes having at least 1 member in a family to "
                                 "consider the family as persistent (between 0 and 1, "
                                 "default is 1 = 100%% of genomes = Core genome)."

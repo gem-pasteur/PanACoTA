@@ -40,6 +40,7 @@ from textwrap import dedent
 
 from PanACoTA import __version__ as version
 
+from PanACoTA.subcommands import all_modules
 from PanACoTA.subcommands import prepare
 from PanACoTA.subcommands import annotate
 from PanACoTA.subcommands import pangenome
@@ -97,6 +98,18 @@ def parse_arguments(argv):
     # dest: to be able to get the subparser called with args.subparser_called
     actions = {}  # to add the action to do according to the subparser called
     checks = {}  # to add the function to call to check the subparser arguments
+
+    # Running all modules at once. Start with ASCII art title, + small description of subcommand
+    parser_all = subparsers.add_parser('all',
+                                        formatter_class=argparse.RawDescriptionHelpFormatter,
+                                        description=(dedent(header) +
+                                        "\n=> Run all PanACoTA modules"),
+                                        epilog=footer,
+                                        help="Run all PanACoTA modules",
+                                        add_help=False)
+    all_modules.build_parser(parser_all)
+    actions["all"] = all_modules.main_from_parse
+    # checks["all_modules"] = all_modules.check_args
 
     # Preparation part. Start with ASCII art title, + small description of subcommand
     parser_prepare = subparsers.add_parser('prepare',

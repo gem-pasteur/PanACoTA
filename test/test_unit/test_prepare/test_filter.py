@@ -124,11 +124,12 @@ def test_write_output():
     max_dist = 0.06
 
     # Check everything works without error
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
+                                     genomes_removed, outdir, gspecies,
+                                     min_dist, max_dist) == list_file
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)
@@ -181,11 +182,12 @@ def test_write_output_no_discard():
     max_dist = 0.06
 
     # Check everything works without error
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
+                                     genomes_removed, outdir, gspecies,
+                                     min_dist, max_dist) == list_file
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)
@@ -231,11 +233,12 @@ def test_write_output_no_genome():
     max_dist = 0.06
 
     # Check everything works without error
+    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     assert filterg.write_outputfiles(genomes, sorted_genomes,
-                                     genomes_removed, outdir, gspecies, min_dist, max_dist) == 0
+                                     genomes_removed, outdir, gspecies,
+                                     min_dist, max_dist) == list_file
 
     # Check outfiles exist
-    list_file = os.path.join(outdir, "LSTINFO-Acetobacter_fabarum-filtered-0.0001_0.06.txt")
     discard_file = os.path.join(outdir, "discarded-by-minhash-Acetobacter_fabarum-0.0001_0.06.txt")
     assert os.path.isfile(list_file)
     assert os.path.isfile(discard_file)

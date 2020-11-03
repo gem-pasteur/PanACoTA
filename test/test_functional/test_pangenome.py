@@ -116,8 +116,9 @@ def test_main(caplog):
     used_dbpath = os.path.join(GENEPATH, "database")
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
-    pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-             threads, verbose=2)
+    out_panfile = os.path.join(outdir, "PanGenome-testPAN4.All.prt-clust-0.8-mode1_")
+    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode,
+                    spe_dir, threads, verbose=2).startswith(out_panfile)
     # Checl creation of prt bank
     prtbank = os.path.join(used_dbpath, "testPAN4.All.prt")
     assert os.path.isfile(prtbank)
@@ -181,8 +182,9 @@ def test_main_prt_exist(caplog):
     dest_prt_bank = os.path.join(used_dbpath, "test2PAN4.All.prt")
     shutil.copyfile(src_prt_bank, dest_prt_bank)
 
-    pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-             threads, verbose=15)
+    out_panfile = os.path.join(outdir, "PanGenome-test2PAN4.All.prt-clust-0.8-mode1_")
+    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+                    threads, verbose=15).startswith(out_panfile)
 
     # Check presence of mmseq DB files
     msdb = os.path.join(GENEPATH, "test2PAN4.All.prt-msDB")
@@ -251,8 +253,9 @@ def test_main_spedir(caplog):
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
 
-    pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-             threads, verbose=15)
+    out_panfile = os.path.join(outdir, "PanGenome-test3PAN4.All.prt-clust-0.8-mode1_")
+    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+                    threads, verbose=15).startswith(out_panfile)
     # Checl creation of prt bank
     prtbank = os.path.join(spe_dir, "test3PAN4.All.prt")
     assert os.path.isfile(prtbank)
@@ -322,8 +325,8 @@ def test_main_outfile(caplog):
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
 
-    pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-             threads, outfile=outfile)
+    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+                    threads, outfile=outfile) == os.path.join(outdir, outfile)
 
     prtbank = os.path.join(used_dbpath, "test4PAN4.All.prt")
     assert os.path.isfile(prtbank)

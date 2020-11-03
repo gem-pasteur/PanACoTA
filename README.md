@@ -164,7 +164,7 @@ Or, if you used singularity, just remove the downloaded image: `rm -r panacota.i
 
 `PanACoTA` contains 6 different subcommands:
 
-- `prepare` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control)
+- `prepare` (download genomes from refseq if you want to, or give your input database, to run a filtering quality control). To help you find NCBI species taxid you need, you can use their [taxonomy browser](https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi).
 - `annotate` (annotate all genomes of the dataset, after a quality control)
 - `pangenome` (generate pan-genome)
 - `corepers` (generate core-genome or persistent-genome)
@@ -184,6 +184,8 @@ When using singularity, just replace `PanACoTA` by `./panacota.img`:
 
     ./panacota.img <subcommand_name> <arguments_for_subcommand>  
     ./panacota.img -h 
+
+It also provides a subcommand `PanACoTA all` to run all modules in a row.
 
 ## <a name="example"></a> Examples
 

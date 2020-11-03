@@ -141,9 +141,9 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
         sys.exit(1)
 
     # post-process alignment files
-    post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
+    align_file = post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
     logger.info("END")
-    return 0
+    return align_file
 
 
 def build_parser(parser):

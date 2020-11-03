@@ -201,7 +201,7 @@ def test_launch_gbg(caplog):
     open(out_grp, "w").close()
     dname = "TESTlaunch"
     quiet = False
-    assert pal.launch_group_by_genome(all_genomes, alnfile, status, treedir, dname, quiet) is True
+    assert pal.launch_group_by_genome(all_genomes, alnfile, status, out_grp, dname, quiet) is True
     exp_grp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
     assert tutil.compare_order_content(out_grp, exp_grp)
     assert "Grouping alignments per genome" in caplog.text
@@ -224,7 +224,7 @@ def test_launch_gbg_existsempty(caplog):
     open(out_grp, "w").close()
     dname = "TESTlaunch"
     quiet = False
-    assert pal.launch_group_by_genome(all_genomes, alnfile, status, treedir, dname, quiet) is True
+    assert pal.launch_group_by_genome(all_genomes, alnfile, status, out_grp, dname, quiet) is True
     assert "Grouping alignments per genome" not in caplog.text
     with open(out_grp, "r") as outf:
         assert outf.readlines() == []
@@ -246,7 +246,7 @@ def test_launch_gbg_ok_notexist(caplog):
     out_grp = os.path.join(treedir, "TESTlaunch.grp.aln")
     dname = "TESTlaunch"
     quiet = False
-    assert pal.launch_group_by_genome(all_genomes, alnfile, status, treedir, dname, quiet) is True
+    assert pal.launch_group_by_genome(all_genomes, alnfile, status, out_grp, dname, quiet) is True
     exp_grp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
     assert tutil.compare_order_content(out_grp, exp_grp)
     assert "Grouping alignments per genome" in caplog.text

@@ -266,8 +266,10 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
     removed = fg.iterative_mash(sorted_genomes, genomes, outdir, species_linked,
                                 min_dist, max_dist, threads, quiet)
     # Write list of genomes kept, and list of genomes discarded by mash step
-    fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked, min_dist, max_dist)
+    info_file = fg.write_outputfiles(genomes, sorted_genomes, removed, outdir, species_linked,
+                                     min_dist, max_dist)
     logger.info("End")
+    return info_file
 
 
 def build_parser(parser):

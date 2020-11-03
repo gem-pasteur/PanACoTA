@@ -33,7 +33,8 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    os.mkdir(GENEPATH)
+    if not os.path.isdir(GENEPATH):
+        os.mkdir(GENEPATH)
     print("setup")
 
     yield
@@ -50,9 +51,10 @@ def test_main_default(capsys):
     soft = "iqtree"
     model = "GTR"
     threads = 1
+    verbose = 3
 
     cmd = "cmd test_main_default"
-    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads)
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, verbose=verbose)
     # Check output files
     iq_log_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.iqtree_tree.log")
     assert os.path.isfile(iq_log_file)
@@ -73,6 +75,7 @@ def test_main_default(capsys):
     assert os.path.isfile(logs_base + ".err")
     # Check logs
     out, err = capsys.readouterr()
+    print(out)
     assert "Running IQtree..." in out
     assert ("IQtree command: iqtree -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
             "-nt 1 -m GTR    -st DNA -pre test/data/tree/generated_by_func_tests/"
@@ -115,6 +118,43 @@ def test_main_quicktree(capsys):
     assert "Converting fasta alignment to stockholm format." in out
     assert "Running Quicktree..." in out
     assert ("quicktree -in a -out t  test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.stockholm") in out
+    assert "END" in out
+
+
+def test_main_quicktree_notverbose(capsys):
+    """
+    Test that when giving the alignment file, running with quicktree, no bootstraps,
+    it creates expected files
+    """
+    outdir = GENEPATH
+    soft = "quicktree"
+    model = None
+    threads = 1
+    cmd = "cmd: test_main_quicktree"
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads)
+    # Check output files
+    # stockholm alignments
+    stockholm = os.path.join(outdir, "exp_pers4genomes.grp.aln.stockholm")
+    assert os.path.isfile(stockholm)
+    # quicktree logfile
+    log_file = stockholm + ".quicktree.log"
+    assert os.path.isfile(log_file)
+    with open(log_file, "r") as logf:
+        assert logf.readlines() == []
+    # tree file
+    tree_file = stockholm + ".quicktree_tree.nwk"
+    assert os.path.isfile(tree_file)
+    assert tutils.is_tree_lengths(tree_file)
+    assert not tutils.is_tree_bootstrap(tree_file)
+    # log files
+    logs_base = os.path.join(outdir, "PanACoTA-tree-quicktree.log")
+    assert os.path.isfile(logs_base)
+    assert os.path.isfile(logs_base + ".details")
+    assert os.path.isfile(logs_base + ".err")
+    # Check logs
+    out, err = capsys.readouterr()
+    assert "Converting fasta alignment to stockholm format." in out
+    assert "Running Quicktree..." in out
     assert "END" in out
 
 
@@ -182,7 +222,7 @@ def test_main_fasttree(capsys):
     threads = 1
     boot = 100
     cmd = "cmd: test_main_fasttree"
-    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=boot)
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=boot, verbose=2)
     # Check output files
     # fastme logfile
     log_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.fasttree.log")
@@ -201,11 +241,12 @@ def test_main_fasttree(capsys):
     # log files
     logs_base = os.path.join(outdir, "PanACoTA-tree-fasttree.log")
     assert os.path.isfile(logs_base)
-    assert not os.path.isfile(logs_base + ".details")
+    assert os.path.isfile(logs_base + ".details")
     assert not os.path.isfile(logs_base + ".debug")
     assert os.path.isfile(logs_base + ".err")
     # Check logs
     out, err = capsys.readouterr()
+    print(out)
     assert "Running FasttreeMP..." in out
     assert ("Fasttree command: FastTreeMP -nt -gtr -noml -nocat -boot 100 "
             "-log test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.fasttree.log "
@@ -224,7 +265,8 @@ def test_main_iqtree2_newdir(capsys):
     threads = 1
 
     cmd = "cmd test_main_default"
-    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=1000, write_boot=True)
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=1000, write_boot=True,
+              verbose=2)
     # Check output files
     # Check iqtree logfile
     iq_log_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.iqtree_tree.log")
@@ -254,6 +296,7 @@ def test_main_iqtree2_newdir(capsys):
     logs_base = os.path.join(outdir, "PanACoTA-tree-iqtree2.log")
     assert os.path.isfile(logs_base)
     assert os.path.isfile(logs_base + ".err")
+    assert os.path.isfile(logs_base + ".details")
     # Check logs
     out, err = capsys.readouterr()
     assert "Running IQtree..." in out
@@ -278,7 +321,7 @@ def test_main_from_parse(capsys):
     args.model = "HKY"
     args.write_boot = False
     args.threads = 1
-    args.verbose = 1
+    args.verbose = 2
     args.quiet = False
     args.memory = False
     args.fast = False

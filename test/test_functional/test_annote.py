@@ -126,8 +126,9 @@ def test_main_given_tmp_verbose3(capsys):
     l90 = 10
     date = "0417"
     verbose = 3
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90,
-               cutn=3, tmp_dir=tmpdir, verbose=verbose)
+    info_file = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-default.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90,
+                      cutn=3, tmp_dir=tmpdir, verbose=verbose) == (info_file, 3)
     out, err = capsys.readouterr()
     # Check that warnings are written to stderr
     assert "WARNING" in err
@@ -164,7 +165,8 @@ def test_main_all_discard_nbcont(capsys):
     nbcont = 0
     cutn = 0
     date = "0417"
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, nbcont=nbcont, cutn=cutn)
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, nbcont=nbcont,
+                      cutn=cutn) == ("", 0)
     # check that there are the 2 concatenated genomes in tmppath.
     # The third genome is listfile is composed of only 1 file, so no need to concatenate, nor
     # to change the file as we do not use cutn
@@ -189,8 +191,8 @@ def test_main_qc():
     date = "0417"
     force = False
     qc_only = True
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90=l90,
-                            cutn=cutn, qc_only=qc_only)
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, l90=l90,
+                      cutn=cutn, qc_only=qc_only) == ("", 0)
     # Check files are here
     lstfile = os.path.join(GENEPATH, "ALL-GENOMES-info-list_genomes-func-test-default.lst")
     exp_lstfile = os.path.join(EXP_DIR, "exp_ALL-GENOMES-QC.lst")
@@ -223,13 +225,14 @@ def test_main_existresdirforce(capsys):
     date = "0417"
     l90 = 5
     cutn = 3
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, force=True, l90=l90,
-               prodigal_only=True, cutn = cutn, small=True)
+    info_file = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-default.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, force=True, l90=l90,
+                      prodigal_only=True, cutn = cutn, small=True) == (info_file, 4)
     out, err = capsys.readouterr()
 
     # Check that tmp files exist in the right folder
     # -> 2 fna files created (concatenations)
-    # -> + 3 files created (split 5N)
+    # -> + 4 files created (split 3N)
     assert os.path.isfile(os.path.join(GENEPATH, "tmp_files", "A_H738.fasta-all.fna"))
     assert os.path.isfile(os.path.join(GENEPATH, "tmp_files", "H299_H561.fasta-all.fna"))
     assert len(glob.glob(os.path.join(GENEPATH, "tmp_files", '*.fna'))) == 6
@@ -296,14 +299,14 @@ def test_main_onexistingprokkadir(capsys):
     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
     name = "ESCO"
     date = "0417"
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0, res_annot_dir=EXP_DIR,
-               verbose=3)
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=EXP_DIR, verbose=3) == (lstout, 2)
     out, err = capsys.readouterr()
     # Check that tmp files folder is empty (prokka res are somewhere else)
     assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
     # Test that result files are in result dir
-    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
-    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
     assert os.path.isfile(lstout)
     assert tutil.compare_order_content(lstout, lstexp)
     logfile = os.path.join(GENEPATH,
@@ -335,14 +338,14 @@ def test_main_onexistingprodigaldir(capsys):
     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
     name = "ESCO"
     date = "0417"
-    annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0, res_annot_dir=EXP_DIR,
-               verbose=3, prodigal_only=True)
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=EXP_DIR, verbose=3, prodigal_only=True) == (lstout, 2)
     out, err = capsys.readouterr()
     # Check that tmp files folder is empty (prokka res are somewhere else)
     assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
     # Test that result files are in result dir
-    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
-    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
     assert os.path.isfile(lstout)
     assert tutil.compare_order_content(lstout, lstexp)
     logfile = os.path.join(GENEPATH,
@@ -390,8 +393,9 @@ def test_main_existing_prokkadir_errorannot():
     # # Run annotation
     name = "ESCO"
     date = "0417"
-    annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
-               res_annot_dir=genome_path_used)
+    info_file = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    assert annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=genome_path_used) == (info_file, 1)
 
     # Check that only 1 genome was formated (the other one had problems with prokka)
     prot_dir = os.path.join(GENEPATH, "Proteins")
@@ -515,8 +519,9 @@ def test_main_existing_prokkadir_errorformat():
     # Run annotation
     name = "ESCO"
     date = "0417"
-    annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
-               res_annot_dir=genome_path_used)
+    info_file = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    assert annot.main("cmd", list_file, genome_path_used, GENEPATH, name, date, cutn=0,
+               res_annot_dir=genome_path_used) == (info_file, 1)
 
     # Check that genome 1 is not formatted, while no error with prokka
     logfile = os.path.join(GENEPATH,
@@ -547,8 +552,9 @@ def test_main_frominfo(capsys):
     name = "TOTO"
     date = "1205"
     infofile = os.path.join(TEST_DIR, "lstinfo.lst")
-    annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
-               prodigal_only=True, small=True)
+    out_infofile = os.path.join(GENEPATH, "LSTINFO-lstinfo.lst")
+    assert annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
+                      prodigal_only=True, small=True) == (out_infofile, 3)
     out, err = capsys.readouterr()
     # Check logs
     assert ("Generating distribution of L90 and #contigs graphs.") in out

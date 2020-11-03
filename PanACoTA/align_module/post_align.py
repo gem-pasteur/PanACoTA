@@ -76,9 +76,11 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     all_alns, status = concat_alignments(fam_nums, prefix, quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    res = launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
+    outfile = os.path.join(treedir, dname + ".grp.aln")
+    res = launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet)
     if not res:
         logger.error("An error occurred. We could not group sequences by genome.")
+    return outfile
 
 
 def concat_alignments(fam_nums, prefix, quiet):
@@ -124,7 +126,7 @@ def concat_alignments(fam_nums, prefix, quiet):
     return output, "Done"
 
 
-def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet):
+def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet):
     """
     Function calling group_by_genome in a pool, while giving information to user
     (time elapsed)
@@ -137,8 +139,8 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
         path to file containing all alignments concatenated
     status : str
         "OK" if concatenation file already existed before running, "Done" if just did concatenation
-    treedir : str
-        path to tree directory
+    outfile : str
+        file containing all families align by genome
     dname : str
         name of dataset
     quiet : bool
@@ -150,13 +152,17 @@ def launch_group_by_genome(all_genomes, all_alns, status, treedir, dname, quiet)
         - True if everything went well or was already done
         - False if error occurred in at least one step
     """
-    outfile = os.path.join(treedir, dname + ".grp.aln")
+    # Status = Done means that we just did the concatenation. So, if grouped by genome
+    # file already exists, remove it.
     if status == "Done":
-        utils.remove(outfile)
+        if os.path.isfile(outfile):
+            utils.remove(outfile)
+    # Status was not 'Done' (it was 'ok', concat file already existed). And by_genome file
+    # also already exists. Warn user
     if os.path.isfile(outfile):
         logger.info("Alignments already grouped by genome")
-        logger.warning(("Alignments already grouped by genome in {}. "
-                        "Program will end. ").format(outfile))
+        logger.warning((f"Alignments already grouped by genome in {outfile}. "
+                        "Program will end. "))
         return True
     logger.info("Grouping alignments per genome")
     bar = None
