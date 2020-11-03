@@ -7,12 +7,11 @@ Setup script
 
 import PanACoTA
 try:
-    from setuptools import setup
+    from setuptools import setup, find_packages
     from setuptools.command.test import test as TestCommand
 except ImportError:
-    from distutils.core import setup
+    from distutils.core import setup, find_packages
     from distutils.core import Command as TestCommand
-
 
 class PyTest(TestCommand):
     def initialize_options(self):
@@ -38,11 +37,11 @@ def parse_requirements(requirements):
                 and not l.startswith('#')]
 
 
-packages = ['PanACoTA', 'PanACoTA.prepare_module', 'PanACoTA.annotate_module',
-            'PanACoTA.pangenome_module', 'PanACoTA.corepers_module',
-            'PanACoTA.align_module', 'PanACoTA.tree_module', 'PanACoTA.subcommands']
+# packages = ['PanACoTA', 'PanACoTA.prepare_module', 'PanACoTA.annotate_module',
+#             'PanACoTA.pangenome_module', 'PanACoTA.corepers_module',
+#             'PanACoTA.align_module', 'PanACoTA.tree_module', 'PanACoTA.subcommands']
 requires = parse_requirements("requirements.txt")
-scripts = ['bin/PanACoTA']
+scripts = ['PanACoTA/bin/run_panacota.py']
 
 classifiers = [
     "Environment :: Console",
@@ -58,7 +57,7 @@ with open('README.md') as f:
 
 setup(
     name='PanACoTA',
-    packages=packages,
+    packages=find_packages(),
     version=PanACoTA.__version__,
     description="Large scale comparative genomics tools: annotate genomes, do pangenome, "
                 "core/persistent genome, align core/persistent families, infer phylogenetic tree.",
@@ -71,8 +70,13 @@ setup(
     package_data={'': ['LICENSE']},
     url='https://github.com/gem-pasteur/PanACoTA',
     scripts=scripts,
+    entry_points={
+          'console_scripts': ['PanACoTA=PanACoTA.bin.run_panacota:main']
+      },
+    python_requires='>=3.4',
     include_package_data=True,
     install_requires=requires,
+    extras_require={'dev': parse_requirements("requirements-dev.txt")},
     tests_require=['pytest'],
     cmdclass={'test': PyTest},
     classifiers=classifiers
