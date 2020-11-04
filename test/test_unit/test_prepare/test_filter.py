@@ -40,7 +40,7 @@ EXP_GENOMES = {
                                   1587120, 1, 1]
                }
 
-LOGFILE_BASE = "logfile_test.txt"
+LOGFILE_BASE = os.path.join(GENEPATH, "logfile_test.txt")
 LEVEL = logging.DEBUG
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
 
@@ -58,7 +58,7 @@ def setup_teardown_module():
     - remove all log files
     - remove directory with generated results
     """
-    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_filter', verbose=1)
+    # utils.init_logger(LOGFILE_BASE, LEVEL, 'test_filter', verbose=1)
     os.mkdir(GENEPATH)
     print("setup")
 
@@ -283,6 +283,7 @@ def test_sketch_all(caplog):
     """
     Test that all genomes are sketch, in the provided order
     """
+    utils.init_logger(LOGFILE_BASE, LEVEL, 'test_filter', verbose=1)
     caplog.set_level(logging.DEBUG)
     # We give 5 genomes
     genomes = {"genome1": ["g1_name", "g1_ori", os.path.join(GENOMES_DIR, "ACOR001.0519.fna"),
@@ -719,6 +720,65 @@ def test_check_quality_no_tmpdir(caplog):
     # Check logs
     caplog.set_level(logging.DEBUG)
     assert "tmp_dir_check_quality does not exist" in caplog.text
+
+
+def test_check_quality_same_contname(caplog):
+    """
+    quality control of all genomes in the database when one genome contains 2 contigs
+    with the same name: this genome is discarded + warning message
+    """
+    caplog.set_level(logging.DEBUG)
+    species_linked = "my-test-genomes"
+    db_path = os.path.join(DATA_TEST_DIR, "genomes", "genomes_comparison")
+    tmp_dir = os.path.join(GENEPATH, "tmp_dir_check_quality")
+    os.makedirs(tmp_dir)
+    # Copy all genomes to new database
+    db_path_used = os.path.join(GENEPATH, "database")
+    shutil.copytree(db_path, db_path_used)
+    # Add another genome, with 2 identical contig names
+    new_genome = os.path.join(db_path_used, "genome_duplicate.fst")
+    with open(new_genome, "w") as ng:
+        ng.write(">my_contig\nAACTATATAGGAAGACACACAATTAAGGGACAGG\n")
+        ng.write(">my_contig2\nCCNNCCGATTCGAGCACACAATTAAGGGACAGG\n")
+        ng.write(">my_contig\nCCANNCCATCTCTCTTATCTCTCTAANNNNCTCTANCCNNNNNNCCATTCA\n")
+    max_l90 = 100
+    max_cont = 100
+    cutn = 0
+
+    # Get genomes information
+    genomes = filterg.check_quality(species_linked, db_path_used, tmp_dir, max_l90, max_cont, cutn)
+
+    # Even if there was 1 more genome in the database, output list of genomes is the same,
+    # as the supplementary genome contains identical contig names
+    exp_genomes = {
+               "ACOR001.0519.fna": ["ACOR001.0519",
+                                    os.path.join(db_path_used, "ACOR001.0519.fna"),
+                                    os.path.join(db_path_used, "ACOR001.0519.fna"),
+                                    3013644, 269, 37],
+               "ACOR001.0519-bis.fna": ["ACOR001.0519-bis",
+                                        os.path.join(db_path_used, "ACOR001.0519-bis.fna"),
+                                        os.path.join(db_path_used, "ACOR001.0519-bis.fna"),
+                                        3013644, 269, 37],
+               "ACOR001.0519-almost-same.fna": ["ACOR001.0519-almost-same",
+                                        os.path.join(db_path_used, "ACOR001.0519-almost-same.fna"),
+                                        os.path.join(db_path_used, "ACOR001.0519-almost-same.fna"),
+                                        3012665, 261, 37],
+               "ACOR002.0519.fna": ["ACOR002.0519",
+                                    os.path.join(db_path_used, "ACOR002.0519.fna"),
+                                    os.path.join(db_path_used, "ACOR002.0519.fna"),
+                                    2997537, 78, 23],
+               "ACOC.1019.fna": ["ACOC.1019", os.path.join(db_path_used, "ACOC.1019.fna"),
+                                  os.path.join(db_path_used, "ACOC.1019.fna"),
+                                  1587120, 1, 1]
+               }
+
+    assert genomes == exp_genomes
+
+    # Check logs
+    assert ("Total number of genomes for my-test-genomes: 6") in caplog.text
+    assert ("In genome genome_duplicate.fst, '>my_contig' contig name is used for several "
+            "contigs. Please put different names for each contig. This genome will be "
+            "ignored.") in caplog.text
 
 
 def test_check_quality_no_genome(caplog):

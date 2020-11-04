@@ -188,7 +188,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
             if line.startswith(">"):
                 # If not first contig, write info to output file (if needed)
                 if cur_seq != "":
-                    num = format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes,
+                    num = format_contig(cut, pat, cur_seq, cur_contig_name, genome, contig_sizes,
                                         gresf, num, logger)
                     # If problem while formatting contig, return False -> genome ignored
                     if num == -1:
@@ -205,7 +205,7 @@ def analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger):
 
         # LAST CONTIG
         if cur_contig_name != "":
-            num = format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
+            num = format_contig(cut, pat, cur_seq, cur_contig_name, genome, contig_sizes, gresf,
                                 num, logger)
             if num == -1:
                 return False
@@ -274,7 +274,7 @@ def get_output_dir(soft, dbpath, tmp_path, genome, cut, pat):
     return gpath, grespath
 
 
-def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, logger):
+def format_contig(cut, pat, cur_seq, cur_contig_name, genome, contig_sizes, gresf, num, logger):
     """
     Format given contig, and save to output file if needed
 
@@ -291,6 +291,8 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
         current sequence (aa)
     cur_contig_name : str
         name of current contig
+    genome : str
+        name of current genome
     cont_sizes : dict
         {contig_name : sequence length}
     gresf : io.TextIOWrappe
@@ -313,9 +315,9 @@ def format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf, num, 
     # No cut -> no new file created, but check contig unique names
     else:
         if cur_contig_name in contig_sizes.keys():
-            logger.error("{} contig name is used for several contigs. Please put "
-                         "different names for each contig. This genome will be "
-                         "ignored.".format(cur_contig_name))
+            logger.error(f"In genome {genome}, '{cur_contig_name}' contig name is used for "
+                         "several contigs. Please put different names for each contig. "
+                         "This genome will be ignored.")
             return -1
         else:
             contig_sizes[cur_contig_name] = len(cur_seq)

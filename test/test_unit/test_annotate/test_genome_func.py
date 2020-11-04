@@ -203,7 +203,7 @@ def test_format_contig_cut():
     gresf = open(resfile, "w")
     num = 2
 
-    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, "genome", contig_sizes, gresf,
                                num, logger=None) == 4
     gresf.close()
 
@@ -228,7 +228,7 @@ def test_format_contig_nocut():
     gresf = None
     num = 2
 
-    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, gresf,
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, "genome", contig_sizes, gresf,
                                num, logger=None) == 2
 
     exp_file = os.path.join(EXP_DIR, "exp_split_contig_nocut.fna")
@@ -252,9 +252,9 @@ def test_format_contig_nocut_notDuplicateName():
     contig_sizes = {">mycontig": 155}
     num = 1
 
-    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, None,
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, "genome", contig_sizes, None,
                                num, logger=None) == 1
-    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, contig_sizes, None,
+    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, "genome", contig_sizes, None,
                                num, logger=None) == 1
 
     assert contig_sizes == {">my_contig_name_for_my_sequence": 56,
@@ -278,18 +278,19 @@ def test_format_contig_nocut_DuplicateName(caplog):
     num = 1
 
     # Try to add a contig already existing -> error log
-    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, contig_sizes, None,
+    assert gfunc.format_contig(cut, pat, cur_seq, cur_contig_name, "genome", contig_sizes, None,
                                num, logger) == -1
     assert contig_sizes == {">my_contig_name_for_my_sequence": 45,
                             ">mycontig": 155}
     # Check logs
     caplog.set_level(logging.DEBUG)
-    assert (">my_contig_name_for_my_sequence contig name is used for several contigs. "
+    assert ("In genome genome, '>my_contig_name_for_my_sequence' contig name is used for "
+            "several contigs. "
             "Please put different names for each contig. This genome will be "
             "ignored.") in caplog.text
 
     # Add a contig with new name. contig_sizes is completed
-    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, contig_sizes, None,
+    assert gfunc.format_contig(cut, pat, cur_seq2, cur_contig_name2, "genome", contig_sizes, None,
                                num, logger) == 1
     assert contig_sizes == {">my_contig_name_for_my_sequence": 45,
                             ">my_contig2": 17,
@@ -487,7 +488,8 @@ def test_analyse1genome_same_names_nocut(caplog):
     pat = None
     assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes,
                                     "prodigal", logger)
-    assert ("myheader contig name is used for several contigs. Please put different names for "
+    assert ("In genome genome_2_identical_headers.fst, '>myheader' contig name is used for "
+            "several contigs. Please put different names for "
             "each contig. This genome will be ignored") in caplog.text
 
 
@@ -503,7 +505,8 @@ def test_analyse1genome_same_last_name_nocut(caplog):
     pat = None
     assert not gfunc.analyse_genome(genome, GEN_PATH, GENEPATH, cut, pat, genomes,
                                     "prodigal", logger)
-    assert ("myheader contig name is used for several contigs. Please put different names for "
+    assert ("In genome genome_2_identical_headers-lastContig.fst, '>myheader' contig name "
+            "is used for several contigs. Please put different names for "
             "each contig. This genome will be ignored") in caplog.text
 
 
