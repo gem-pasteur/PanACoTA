@@ -29,3 +29,7 @@
 # along with PanACOTA (COPYING file).                                           #
 # If not, see <https://www.gnu.org/licenses/>.                                  #
 # ###############################################################################
+
+"""
+PanACoTA command
+"""
