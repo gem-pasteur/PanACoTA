@@ -476,8 +476,9 @@ def check_args(parser, args):
 
     # WARNINGS
     # User did not specify a species name
-    if not args.NCBI_species:
-        print(colored("WARNING: you did not provide a species name ('-s species' option'). "
+    if not args.NCBI_species and not args.outdir:
+        print(colored("WARNING: you did not provide a species name ('-s species' option') "
+            "nor an output directory ('-o outdir'). "
                       "All files will be downloaded in a folder called with the NCBI species "
                       f"taxid {args.NCBI_species_taxid} instead of the species name.", "yellow"))
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')

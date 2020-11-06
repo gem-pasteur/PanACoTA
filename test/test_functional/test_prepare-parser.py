@@ -336,13 +336,14 @@ def test_parser_nospecies(capsys):
     """
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
-    options = prepare.parse(parser, "-t 1234 -o outdir".split())
+    options = prepare.parse(parser, "-t 1234".split())
     assert not options.no_refseq
     assert not options.only_mash
     assert options.NCBI_species_taxid == "1234"
     assert options.NCBI_species == ""
     out, err = capsys.readouterr()
-    assert ("WARNING: you did not provide a species name ('-s species' option'). "
+    assert ("WARNING: you did not provide a species name ('-s species' option') "
+            "nor an output directory ('-o outdir'). "
             "All files will be downloaded in a folder called with the NCBI species "
             "taxid 1234 instead of the species name.") in out
 
