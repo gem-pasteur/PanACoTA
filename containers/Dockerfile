@@ -21,9 +21,9 @@ RUN apt-get install -y \
 RUN pip3 install --upgrade pip
 
 
-# Update makeblastdb and blastp for prokka
+# Update makeblastdb and blastp for prokka, with blast+ version 2.10.1
 WORKDIR /install-dir
-RUN wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/LATEST/ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
+RUN wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.10.1/ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
     tar zxvpf ncbi-blast-2.10.1+-x64-linux.tar.gz &&\
     cp /install-dir/ncbi-blast-2.10.1+/bin/makeblastdb /usr/local/bin/ &&\
     cp /install-dir/ncbi-blast-2.10.1+/bin/blastp /usr/local/bin/ &&\
