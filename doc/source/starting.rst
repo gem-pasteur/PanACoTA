@@ -134,6 +134,24 @@ To get latest version:
 
 It will replace your file ``panacota.img`` by a new one corresponding to the latest version.
 
+From conda
+**********
+
+Be careful while using conda, especially if you are not familiar with it. We advise to install PanACoTA in a dedicated conda environment, in order to avoid unwanted interactions with other softwares (like needed versions of dependencies automatically installed by conda). To install the package, use ``conda install -c bioconda panacota``. But, as described in `conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#id6>`_, we advise to install it with:
+
+.... code-block:: bash
+
+    source
+    # Create an environment: This creates the 'myenv' environment in '/envs/'. No packages will be installed in this environment.
+    conda create --name myenv
+    # Activate the environment
+    conda activate myenv
+    # Install PanACoTA
+    conda install -c bioconda panacota
+    # When you have finished using PanACoTA, deactivate environment
+    conda deactivate
+
+
 
 From zip version
 ****************
