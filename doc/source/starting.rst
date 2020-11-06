@@ -104,15 +104,10 @@ To upload to new version, go back to your repository:
     git pull
     ./make upgrade
 
-From singularity image
-**********************
-
 .. _singularity:
 
-|singularity|
-
-.. |singularity| image:: https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg
-   :target: https://singularity-hub.org/collections/4724
+From singularity image
+**********************
 
 Very useful if you do not have permission rights on the computer, such as, for example, on a cluster. The other advantage is that you do not need to install any dependence (except singularity itself of course). Singularity image includes all of them. You just have to download 1 file, and nothing will be installed anywhere on your computer.
 
@@ -139,9 +134,8 @@ From conda
 
 Be careful while using conda, especially if you are not familiar with it. We advise to install PanACoTA in a dedicated conda environment, in order to avoid unwanted interactions with other softwares (like needed versions of dependencies automatically installed by conda). To install the package, use ``conda install -c bioconda panacota``. But, as described in `conda documentation <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#id6>`_, we advise to install it with:
 
-.... code-block:: bash
+.. code-block:: bash
 
-    source
     # Create an environment: This creates the 'myenv' environment in '/envs/'. No packages will be installed in this environment.
     conda create --name myenv
     # Activate the environment
@@ -156,12 +150,12 @@ Be careful while using conda, especially if you are not familiar with it. We adv
 From zip version
 ****************
 
-For people wanting to download source code of a specific version, we provide releases. You can download last one here:
-
 |zip|
 
 .. |zip| image:: https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg
     :target: https://github.com/gem-pasteur/PanACoTA/releases
+
+For people wanting to download source code of a specific version, we provide releases. You can download last one here:
 
 
 .. _installing:
