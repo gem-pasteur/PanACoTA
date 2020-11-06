@@ -150,7 +150,7 @@ It will replace your file panacota.img by a new one corresponding to the latest 
 
 ### <a name="conda"></a> From conda
 
-[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/ppanggolin/README.html)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/panacota/README.html)
 
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/panacota/badges/version.svg)](https://anaconda.org/bioconda/panacota)
 
