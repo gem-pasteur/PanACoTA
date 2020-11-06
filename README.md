@@ -151,7 +151,6 @@ It will replace your file panacota.img by a new one corresponding to the latest 
 ### <a name="conda"></a> From conda
 
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/panacota/README.html)
-
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/panacota/badges/version.svg)](https://anaconda.org/bioconda/panacota)
 
 Be careful while using conda, especially if you are not familiar with it. We advise to install PanACoTA in a dedicated conda environment, in order to avoid unwanted interactions with other softwares (like needed versions of dependencies automatically installed by conda). To install the package, use `conda install -c bioconda panacota`. But, as described in [conda documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#id6), we advise to install it with:
