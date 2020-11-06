@@ -1,6 +1,6 @@
 # **PanACoTA**
-[![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
 [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+[![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/panacota/badges/version.svg)](https://anaconda.org/bioconda/panacota)
 
 <!--
