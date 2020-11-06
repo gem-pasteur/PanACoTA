@@ -1,6 +1,7 @@
 # **PanACoTA**
 [![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
 [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+[![Anaconda-Server Badge](https://anaconda.org/bioconda/panacota/badges/version.svg)](https://anaconda.org/bioconda/panacota)
 
 <!--
 [![https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg](https://www.singularity-hub.org/static/img/hosted-singularity--hub-%23e32929.svg)](https://singularity-hub.org/collections/4724)
