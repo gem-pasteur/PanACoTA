@@ -611,18 +611,19 @@ def check_args(parser, args):
         parser.error("If you provide a list of genomes with their calculated L90 and number of "
                      "contigs, PanACoTA will use the given sequences as is. It will not cut "
                      "them. So, you cannot use both --cutn and --info.")
-    if args.l90 != 100 and args.from_info:
-        parser.error("If you provide a list of genomes with their calculated L90 and number of "
-                     "contigs, PanACoTA will use this information, and not re-calculate it. "
-                     "So, you cannot use both --info and --l90")
-    if args.nbcont != 999 and args.from_info:
-        parser.error("If you provide a list of genomes with their calculated L90 and number of "
-                     "contigs, PanACoTA will use this information, and not re-calculate it. "
-                     "So, you cannot use both --info and --nbcont")
+
     # Give a lst_file or an info file, not nothing
     if not args.from_info and not args.list_file:
         parser.error("You must provide a list of genomes to annotate. Either raw genomes "
                      "(see -l option), or genomes with quality information (see --info option).")
+
+    # Choose between infofile or LSTINFO
+    if args.from_info and args.list_file:
+        parser.error("Either you want to annotate raw sequences (name of files in '-l infofile') "
+                     "which will first go through the QC process, "
+                     "OR you already did QC on your sequences and just want to annotate them "
+                     "(information on those sequences in '--info LSTINFO-file'). "
+                     "Please choose one of these 2 possibilities.")
 
     # If no info file nor db_path, ask for 1 of them
     if not args.db_path and not args.from_info:
@@ -632,8 +633,8 @@ def check_args(parser, args):
 
     # If given LSTINFO, already contains paths to genome to annotate. db_path must not be provided
     if args.from_info and args.db_path:
-        parser.error("If you run from your LSTINFO file, this one already contains the path of genomes "
-                     "to annotate. Remove -d <db_path> option.")
+        parser.error("If you run from your LSTINFO file, this one already contains the "
+                     "path of genomes to annotate. Remove -d <db_path> option.")
 
     # WARNINGS
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')

@@ -301,36 +301,20 @@ def test_parser_info_cutn(capsys):
             "PanACoTA will use the given sequences as is. It will not cut them. So, you cannot "
             "use both --cutn and --info.") in err
 
-
-def test_parser_info_l90(capsys):
+def test_info_and_lstfile(capsys):
     """
-    Test that when run with --info and --l90 x : error message
-    If we run from info file, will not touch the sequences.
+    Test that there is an error message if user gives both -l infofile and --info LSTINFO
     """
     parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
     annot.build_parser(parser)
     with pytest.raises(SystemExit):
-        annot.parse(parser, "-l list_file -d dbpath -r respath -n name "
-                            "--info infofile --l90 20".split())
+        annot.parse(parser, "-d dbpath -r respath -n name --nbcont 20 -l toto --info info".split())
     _, err = capsys.readouterr()
-    assert ("If you provide a list of genomes with their calculated L90 and number of contigs, "
-            "PanACoTA will use this information, and not re-calculate it. So, you cannot use "
-            "both --info and --l90") in err
-
-def test_parser_info_nbcont(capsys):
-    """
-    Test that when run with --info and --nbcont x : error message
-    If we run from info file, will not touch the sequences.
-    """
-    parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
-    annot.build_parser(parser)
-    with pytest.raises(SystemExit):
-        annot.parse(parser, "-l list_file -d dbpath -r respath -n name "
-                            "--info infofile --nbcont 20".split())
-    _, err = capsys.readouterr()
-    assert ("If you provide a list of genomes with their calculated L90 and number of contigs, "
-            "PanACoTA will use this information, and not re-calculate it. So, you cannot use "
-            "both --info and --nbcont") in err
+    assert ("Either you want to annotate raw sequences (name of files in '-l infofile') "
+            "which will first go through the QC process, "
+            "OR you already did QC on your sequences and just want to annotate them "
+            "(information on those sequences in '--info LSTINFO-file'). "
+            "Please choose one of these 2 possibilities.") in err
 
 
 def test_parser_noinfo_nolist(capsys):
