@@ -111,7 +111,11 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=Fals
             bar.update(curnum)
             curnum += 1
         # analyse genome, and check everything went well
-        res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger=logger)
+        try:
+            res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger=logger)
+        except UnicodeDecodeError:
+            logger.warning(f"'{genome}' does not seem to be a fasta file. It will be ignored.")
+            res = False
         # Problem while analysing genome -> genome ignored
         if not res:
             toremove.append(genome)

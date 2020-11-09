@@ -574,6 +574,32 @@ def test_analyse_all_genomes_nocut(caplog):
     assert ("Calculating genome size, number of contigs, L90") in caplog.text
 
 
+def test_analyse_all_genomes_binary(caplog):
+    """
+    Analyze all given genomes: don't cut at stretches of N, but look at their sequence
+    file, to calculate L90, genome size and nb contigs. Add this information, as well as the
+    path to the genomic sequence, to the genomes dict.
+    1 file is a binary file: write warning message and remove it from analysis.
+    """
+    caplog.set_level(logging.DEBUG)
+    gs = ["genome1.fasta", "genome2.fasta", "genome3.fasta", "genome.fna.bin"]
+    genomes = {gs[0]: ["SAEN.1113"],
+               gs[1]: ["SAEN.1114"],
+               gs[2]: ["ESCO.0416"],
+               gs[3]: ["BIN.1234"]}
+    nbn = 0
+    # Run analysis
+    gfunc.analyse_all_genomes(genomes, GEN_PATH, GENEPATH, nbn, "prokka", logger, quiet=False)
+    # construct expected results
+    gpaths = [os.path.join(GEN_PATH, gname) for gname in gs]
+    exp_genomes = {gs[0]: ["SAEN.1113", gpaths[0], gpaths[0], 51, 4, 2],
+                   gs[1]: ["SAEN.1114", gpaths[1], gpaths[1], 67, 3, 3],
+                   gs[2]: ["ESCO.0416", gpaths[2], gpaths[2], 70, 4, 1]}
+    assert exp_genomes == genomes
+    assert ("Calculating genome size, number of contigs, L90") in caplog.text
+    assert ("'genome.fna.bin' does not seem to be a fasta file. It will be ignored.") in caplog.text
+
+
 def test_analyse_all_genomes_cut(caplog):
     """
     Analyze all given genomes: cut at stretches of 3N, and look at their sequence
