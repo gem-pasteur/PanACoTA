@@ -277,7 +277,7 @@ def test_main_iqtree2_newdir(capsys):
             "-T 1 -m GTR -B 1000 --boot-trees --seqtype DNA "
             "--prefix test/data/tree/generated_by_func_tests/"
             "test_iqtree2/exp_pers4genomes.grp.aln.iqtree_tree "
-            "-quiet") in " ".join(iq_lines)
+            "--quiet") in " ".join(iq_lines)
     assert ("Alignment has 4 sequences with 6438 columns, "
             "81 distinct patterns") in " ".join(iq_lines)
     assert "Analysis results written to:" in " ".join(iq_lines)
@@ -303,7 +303,7 @@ def test_main_iqtree2_newdir(capsys):
     assert ("IQtree command: iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
             "-T 1 -m GTR  -B 1000 --boot-trees --seqtype DNA --prefix test/data/tree/"
             "generated_by_func_tests/test_iqtree2/exp_pers4genomes.grp.aln.iqtree_tree "
-            "-quiet") in out
+            "--quiet") in out
     assert "END" in out
 
 
