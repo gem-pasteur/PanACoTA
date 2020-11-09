@@ -99,7 +99,7 @@ def test_run_iqtree2_default(caplog):
     assert ("iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
             "-T 1 -m GTR    --seqtype DNA "
             "--prefix test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.iqtree_tree "
-            "-quiet") in caplog.text
+            "--quiet") in caplog.text
     assert tutil.is_tree_lengths(treefile)
     assert not tutil.is_tree_bootstrap(treefile)
 
@@ -183,7 +183,7 @@ def test_run_iqtree2_boot_write_boot(caplog):
     assert ("iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
             "-T 1 -m GTR  -B 1000 --boot-trees --seqtype DNA "
             "--prefix test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.iqtree_tree "
-            "-quiet") in caplog.text
+            "--quiet") in caplog.text
     assert not tutil.is_tree_lengths(treefile)
     assert tutil.is_tree_bootstrap(treefile)
 
@@ -236,9 +236,10 @@ def test_run_iqtree2_fast_mem_quiet(caplog):
     logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.iqtree_tree.log")
     assert os.path.isfile(logs)
     assert "Running IQtree..." in caplog.text
-    assert ("iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
-            "-T 1 -m GTR -mem 4GB   --seqtype DNA "
+    assert ("iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln -T 1 "
+            "-m GTR --mem 4GB   --seqtype DNA "
             "--prefix test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.iqtree_tree "
-            "-quiet -fast") in caplog.text
+            "--quiet -fast") in caplog.text
     assert tutil.is_tree_lengths(treefile)
     assert not tutil.is_tree_bootstrap(treefile)
+

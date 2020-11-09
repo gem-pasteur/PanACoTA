@@ -91,17 +91,27 @@ def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
     mem_info = ""
     threadinfo = ""
 
-    # Get info on all options
-    if boot and soft=="iqtree":
-        bootinfo = f"-bb {boot}"
-    elif boot:
-        bootinfo = f"-B {boot}"
-    if write_boot and soft == "iqtree":
-        wb_info = "-wbt"
-    elif write_boot:
-    	wb_info = "--boot-trees"
+    # Get info on all options (syntax changes according to IQtree version 1.x or 2.x)
+    if boot:
+        if soft=="iqtree":
+            bootinfo = f"-bb {boot}"
+        else:
+            bootinfo = f"-B {boot}"
+    if write_boot:
+        if soft == "iqtree":
+            wb_info = "-wbt"
+        else:
+    	    wb_info = "--boot-trees"
     if memory:
-    	mem_info = f"-mem {memory}"
+        if soft=="iqtree":
+    	    mem_info = f"-mem {memory}"
+        else:
+            mem_info = f"--mem {memory}"
+    # IQtree is always run quietly, but syntax depends on version:
+    if soft=="iqtree":
+        qu = "-quiet"
+    else:
+        qu = "--quiet"
     # Get threads information
     if threads:
     	if soft == "iqtree":
@@ -125,7 +135,7 @@ def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
     else:
         prefix = f"--prefix {treefile}"
     cmd = (f"{soft} -s {alignfile} {threadinfo} -m {model} {mem_info} {bootinfo} {wb_info} "
-    	   f"{seqtype} {prefix} -quiet {fast}")
+    	   f"{seqtype} {prefix} {qu} {fast}")
     logger.details("IQtree command: " + cmd)
     if quiet:
         fnull = open(os.devnull, 'w')

@@ -116,18 +116,22 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
             print("quicktree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import quicktree_func as tree
-    elif soft == "iqtree":
-        if not utils.check_installed("iqtree"): # pragma: no cover
-            if not utils.check_installed("iqtree2"):
-                print("IQtree is not installed. 'PanACoTA tree' cannot run.")
-                sys.exit(1)
-            else:
-                soft == "iqtree2"
-        from PanACoTA.tree_module import iqtree_func as tree
     elif soft == "iqtree2":
+        # by default, iqtree2 (not iqtree). 
+        # So, if user did not specify, it means iqtree2. But if 'iqtree2' command
+        # does not exist, use iqtree command instead.
         # test if iqtree2 is installed and in the path
         if not utils.check_installed("iqtree2"): # pragma: no cover
-            print("iqtree2 is not installed. 'PanACoTA tree' cannot run.")
+            if not utils.check_installed("iqtree"):
+                print("IQtree2 is not installed. 'PanACoTA tree' cannot run.")
+                sys.exit(1)
+            else:
+                soft == "iqtree"
+        from PanACoTA.tree_module import iqtree_func as tree
+    elif soft == "iqtree":
+        # user specifically asked for iqtree (version 1)
+        if not utils.check_installed("iqtree"): # pragma: no cover
+            print("IQtree is not installed. 'PanACoTA tree' cannot run.")
             sys.exit(1)
         from PanACoTA.tree_module import iqtree_func as tree
 
@@ -179,11 +183,13 @@ def build_parser(parser):
                           help=("Directory where tree results will be saved. "))
 
     # Choose with which soft inferring phylogenetic tree
-    softparse = parser.add_argument_group('Choose soft to use (default is IQtree)')
+    softparse = parser.add_argument_group('Choose soft to use (default is IQtree2)')
     softs = ["fasttree", "fastme", "quicktree", "iqtree", "iqtree2"]
-    softparse.add_argument("-s", "--soft", dest="soft", choices=softs, default="iqtree",
+    softparse.add_argument("-s", "--soft", dest="soft", choices=softs, default="iqtree2",
                            help=("Choose with which software you want to infer the "
-                                 "phylogenetic tree. Default is IQtree."))
+                                 "phylogenetic tree. Default is IQtree2 "
+                                 "(versions 2.x of IQtree). If you want version 1.x of "
+                                 "IQtree, use '-s iqtree'"))
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-b", "--boot", dest="boot", type=int,
