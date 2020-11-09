@@ -243,7 +243,7 @@ def test_parser_default():
     assert args.alignment == "align"
     assert args.boot is None
     assert args.outdir == "outdir"
-    assert args.soft == "iqtree"
+    assert args.soft == "iqtree2"
     assert args.model == "GTR"
     assert args.write_boot is False
     assert args.threads == 1
@@ -302,7 +302,7 @@ def test_parser_all_threads():
     assert args.alignment == "align"
     assert args.boot is None
     assert args.outdir == "outdir"
-    assert args.soft == "iqtree"
+    assert args.soft == "iqtree2"
     assert args.model == "GTR"
     assert args.write_boot is False
     assert args.threads == nb
@@ -323,7 +323,7 @@ def test_parser_threads_ok():
     assert args.alignment == "align"
     assert args.boot is None
     assert args.outdir == "outdir"
-    assert args.soft == "iqtree"
+    assert args.soft == "iqtree2"
     assert args.model == "GTR"
     assert args.write_boot is False
     assert args.threads == nb
