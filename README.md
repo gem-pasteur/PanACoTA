@@ -124,7 +124,7 @@ This will create a repository called `PanACoTA`, containing the content of this 
 
 If you have permission issues, you can either use 'sudo' before the previous command lines to install it as root, or add the `--user` option to install it locally.
 
-To upload to new version, go back to your repository:
+To update to new version, go back to your repository:
 
     cd <your_dir>/PanACoTA
     git pull
@@ -164,6 +164,11 @@ Be careful while using conda, especially if you are not familiar with it. We adv
     conda install -c bioconda panacota
     # When you have finished using PanACoTA, deactivate environment
     conda deactivate
+
+To update to new version:
+
+    conda update panacota
+
 
 ### From zip version
 
