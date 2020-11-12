@@ -138,6 +138,7 @@ RUN tar -xzf iqtree-2.0.6-Linux.tar.gz &&\
 WORKDIR /install-dir
 RUN git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
 WORKDIR /install-dir/pipeline_annotation
+RUN git checkout master
 RUN ./make
 
 
