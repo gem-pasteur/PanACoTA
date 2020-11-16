@@ -375,14 +375,15 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         return "", 0
 
     # STEP 3. Rename genomes kept, ordered by decreasing quality
-    gfunc.rename_all_genomes(kept_genomes)
+    first_gname = gfunc.rename_all_genomes(kept_genomes)
     # kept_genomes = {genome: [gembase_name, path_to_origfile, path_split_gembase,
     #                 gsize, nbcont, L90]}
+    # first_gname = name of the first genome
     # Write lstinfo file (list of genomes kept with info on L90 etc.)
     outlst = utils.write_lstinfo(list_file, kept_genomes, res_dir)
 
     # STEP 4. Annotate all kept genomes
-    results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir,
+    results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir, first_gname,
                                        prodigal_only, small, quiet=quiet)
     # Information on genomes to format
     # results_ok = {genome: [gembase_name, path_to_origfile, path_split_gembase,

@@ -55,7 +55,8 @@ import threading
 import PanACoTA.utils as utils
 
 
-def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=False, small=False,
+
+def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only=False,
                        quiet=False):
     """
     For each genome in genomes, run prokka (or only prodigal) to annotate the genome.
@@ -74,6 +75,8 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
         a directory <genome_name>-prokkaRes or <genome_name>-prodigalRes> will be created
         in this folder, and all the results
         of prokka/prodigal for the genome will be written inside
+    fgn : str
+        name (key in genomes dict) of the fist genome, which will be used for prodigal training
     prodigal_only : bool
         True if only prodigal must run, False if prokka must run
     quiet : bool
@@ -130,7 +133,7 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
     # {genome: [gembase_name, path_to_origfile, path_toannotate_file, gsize, nbcont, L90]}
     # arguments: gpath, prok_folder, threads, name, force, nbcont, small(for prodigal), q
     arguments = [(genomes[g][2], annot_folder, cores_annot, genomes[g][0],
-                  force, genomes[g][4], small, q)
+                  force, genomes[g][4], gpath_train, q)
                  for g in sorted(genomes)]
     try:
         # Start pool (run 'run_annot' n each set of arguments)
@@ -336,7 +339,7 @@ def run_prodigal(arguments):
         True if eveything went well (all needed output files present,
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
-    gpath, prodigal_folder, threads, name, force, nbcont, small, q = arguments
+    gpath, prodigal_folder, threads, name, force, nbcont, gpath_train, q = arguments
 
     # Set logger for this process, which will be given to all subprocess
     qh = logging.handlers.QueueHandler(q)

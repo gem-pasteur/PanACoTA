@@ -415,6 +415,8 @@ def rename_all_genomes(genomes):
 
     """
     logger.info(f"Renaming kept genomes according to their quality ({len(genomes)} genomes)")
+    # Keep first genome name
+    first_gname = None
     # Keep previous genome name (ESCO.0109 -> ESCO)
     last_name = ""
     # Keep last strain number
@@ -423,6 +425,8 @@ def rename_all_genomes(genomes):
     # Sort genomes by species, L90 and nb_contigs
     for genome, [name, _, _, _, _, _] in sorted(genomes.items(),
                                                 key=utils.sort_genomes_byname_l90_nbcont):
+        if not first_gname:
+            first_gname = genome
         # first genome, or new strain name (ex: ESCO vs EXPL)
         # -> keep this new name, and add 1 to next strain number
         if last_name != name.split(".")[0]:
@@ -435,6 +439,7 @@ def rename_all_genomes(genomes):
         # Write information to "genomes" dict.
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
+        return first_gname
 
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
