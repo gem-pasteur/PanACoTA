@@ -72,6 +72,32 @@ def my_logger(name):
     return q, logging.getLogger(name)
 
 
+def test_prodigal_train(caplog):
+    """
+    Check prodigal training on a genome
+    """
+    caplog.set_level(logging.DEBUG)
+    train_gpath = os.path.join(GEN_PATH, "A_H738.fasta")
+    gtrain = afunc.prodigal_train(train_gpath, GENEPATH)
+    assert ("prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
+            "-t test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn") in caplog.text
+    assert ("End annotating A_H738.fasta (from test/data/annotate/genomes/A_H738.fasta)")
+    assert gtrain == ("test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn")
+
+
+def test_prodigal_train_error(caplog):
+    """
+    Check prodigal training on a genome too small
+    """
+    caplog.set_level(logging.DEBUG)
+    train_gpath = os.path.join(GEN_PATH, "H299_H561.fasta")
+    gtrain = afunc.prodigal_train(train_gpath, GENEPATH)
+    assert ("prodigal command: prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-t test/data/annotate/generated_by_unit-tests/H299_H561.fasta.trn") in caplog.text
+    assert ("Error while trying to train prodigal on H299_H561.fasta") in caplog.text
+    assert gtrain == ""
+
+
 def test_check_prodigal_nofaa():
     """
     Check that check_prodigal returns false when a faa file is missing, and an error message

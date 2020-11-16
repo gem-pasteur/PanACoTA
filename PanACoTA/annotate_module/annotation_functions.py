@@ -188,6 +188,43 @@ def run_annotation_all(genomes, threads, force, annot_folder, prodigal_only=Fals
     return final
 
 
+def prodigal_train(gpath, annot_folder):
+    """
+    Use prodigal training mode.
+    First, train prodigal on the first genome ('gpath'), and write it to 'genome'.trn,
+    file which will be used for the annotation of all next sequence
+    Parameters
+    ----------
+    gpath : str
+        path to genome to train on
+    annot_folder : str
+        path to folder where the log files and train file will be saved
+
+    Returns
+    -------
+    str
+        path and name of train file (will be used to annotate all next genomes)
+        If problem, returns empty string
+    """
+    gname = os.path.basename(gpath)             # path/to/original/genome.fasta -> genome.fasta
+    gpath_train = os.path.join(annot_folder, gname + ".trn") # path/to/prodiRes/genome.fasta.trn
+    prodigal_logfile = gpath_train + "-prodigal-train.log"  # path/to/genome-prodigal-train.log
+    prodigal_logfile_err = gpath_train + "-prodigal-train.log.err"
+    cmd = (f"prodigal -i {gpath} -t {gpath_train}")
+    error = (f"Error while trying to train prodigal on {gname}.")
+    logger.log(utils.detail_lvl(), "prodigal command: " + cmd)
+    prodigalf = open(prodigal_logfile, "w")
+    prodigalferr = open(prodigal_logfile_err, "w")
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
+    prodigalf.close()
+    prodigalferr.close()
+    if ret.returncode == 0:
+        logger.log(utils.detail_lvl(), f"End annotating {gname} (from {gpath})")
+        return gpath_train
+    else:
+        return ""
+
+
 def run_prokka(arguments):
     """
     Run prokka for the given genome.
