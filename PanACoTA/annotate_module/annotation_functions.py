@@ -54,6 +54,7 @@ import threading
 
 import PanACoTA.utils as utils
 
+logger = logging.getLogger('annotate.run_annotation_all')
 
 
 def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only=False,
@@ -113,7 +114,18 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
     # Get resource availability:
     # - number of threads used by prokka/prodigal (cores_annot)
     # - how many genomes can be annotated at the same time (pool_size)
-    if threads <= 3:
+    # - prodigal does not run with several threads: with prodigal, always cores_annot == 1
+    # and pool_size == threads
+    gpath_train = ""  # by default, no training genome
+    if prodigal_only:
+        cores_annot = 1
+        pool_size = threads
+        # If prodigal, train on the first genome
+        # fgn is key of genomes, genomes[fgn] = [_,_,annote_file,_,_,_]
+        gtrain = genomes[fgn][2]
+        gpath_train = prodigal_train(gtrain, annot_folder)
+    elif threads <= 3:
+        # less than 3 threads: run prokka 1 by 1 with all threads
         cores_annot = threads
         pool_size = 1
     else:
