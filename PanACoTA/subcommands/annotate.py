@@ -151,13 +151,12 @@ def main_from_parse(arguments):
          arguments.name,
          arguments.date, arguments.l90, arguments.nbcont, arguments.cutn, arguments.threads,
          arguments.force, arguments.qc_only, arguments.from_info, arguments.tmpdir,
-         arguments.annotdir, arguments.verbose, arguments.quiet, arguments.prodigal_only,
-         arguments.small)
+         arguments.annotdir, arguments.verbose, arguments.quiet, arguments.prodigal_only)
 
 
 def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
-         verbose=0, quiet=False, prodigal_only=False, small=False):
+         verbose=0, quiet=False, prodigal_only=False):
     """
     Main method, doing all steps:
 
@@ -225,8 +224,6 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
         True if nothing must be sent to stdout/stderr, False otherwise
     prodigal_only : bool
         True -> run only prodigal. False -> run prokka
-    small : bool
-        True -> use -p meta option with prodigal
 
     Returns
     -------
@@ -384,7 +381,7 @@ def main(cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn
 
     # STEP 4. Annotate all kept genomes
     results = pfunc.run_annotation_all(kept_genomes, threads, force, res_annot_dir, first_gname,
-                                       prodigal_only, small, quiet=quiet)
+                                       prodigal_only, quiet=quiet)
     # Information on genomes to format
     # results_ok = {genome: [gembase_name, path_to_origfile, path_split_gembase,
     #               gsize, nbcont, L90]}
@@ -514,10 +511,6 @@ def build_parser(parser):
                                 "again, and the formating step will use the already existing "
                                 "folder if correct, or skip the genome if there are problems in "
                                 "prokka/prodigal folder."))
-    optional.add_argument("--small", dest="small", action="store_true", default=False,
-                          help=("If you use Prodigal to annotate genomes, if you sequences are "
-                                "too small (less than 20000 characters), it cannot annotate them "
-                                "with the default options. Add this to use 'meta' procedure."))
     optional.add_argument("--threads", dest="threads", type=utils_argparse.thread_num, default=1,
                           help="Specify how many threads can be used (default=1)")
     helper = parser.add_argument_group('Others')
@@ -602,10 +595,6 @@ def check_args(parser, args):
     if args.verbose > 0 and args.quiet:
         parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
                      " You cannot have both.")
-    # option --small used only with prodigal
-    if not args.prodigal_only and args.small:
-        parser.error("You cannot use --small option with prokka. Either use prodigal, "
-                     "or remove this option.")
     # If user specifies a cutN value (different than default one which is 5), and give
     # an info file, it is not compatible: info file will use sequences as is, and won't cut them
     if args.cutn != 5 and args.from_info:
