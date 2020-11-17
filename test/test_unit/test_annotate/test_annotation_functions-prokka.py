@@ -475,7 +475,8 @@ def test_run_prokka_out_exists_ok():
     name = "prokka_out_for_test"
     force = False
     nbcont = 6
-    arguments = (gpath, TEST_DIR, cores_prokka, name, force, nbcont, None, logger[0])
+    trn_file = "nofile.trn"
+    arguments = (gpath, TEST_DIR, cores_prokka, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prokka(arguments)
 
     q = logger[0]
@@ -519,7 +520,8 @@ def test_run_prokka_out_exists_error():
     cores_prokka = 1
     force = False
     nbcont = 6
-    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
+    trn_file = "nofile.trn"
+    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, trn_file, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
     assert q.qsize() == 4
@@ -554,7 +556,8 @@ def test_run_prokka_out_exists_force():
     cores_prokka = 2
     force = True
     nbcont = 3
-    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
+    trn_file = "nofile.trn"
+    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prokka(arguments)
     # As we used 'force', tbl, faa and ffn files, which were empty, must have been replaced
     # by the prokka output
@@ -615,7 +618,8 @@ def test_run_prokka_out_doesnt_exist_ok():
     name = "test_runprokka_H299"
     force = False
     nbcont = 3
-    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
+    trn_file = "nofile.trn"
+    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prokka(arguments)
     # Check content of tbl, ffn and faa files
     exp_dir = os.path.join(EXP_DIR, "H299_H561.fasta-short-contig.fna-prokkaRes",
@@ -672,7 +676,8 @@ def test_run_prokka_out_problem_running():
     force = False
     nbcont = 3
     logf = os.path.join(GENEPATH, "H299_H561.fasta-prokka.log")
-    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, None, logger[0])
+    trn_file = "nofile.trn"
+    arguments = (gpath, GENEPATH, cores_prokka, name, force, nbcont, trn_file, logger[0])
     assert not afunc.run_prokka(arguments)
     q = logger[0]
     assert q.qsize() == 3

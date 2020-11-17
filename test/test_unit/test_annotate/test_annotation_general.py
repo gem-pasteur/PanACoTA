@@ -92,10 +92,182 @@ def test_count_tbl():
     assert ngene == 16
 
 
-def test_run_all_1by1():
+def test_run_all_prodigal():
+    """
+    Check that there is no problem when running prodigal on all genomes
+    Start and end are not necessarily in the same order (ex: start1, start2, end2, end1)
+    """
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
+    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
+    genome1 = "H299_H561.fasta"
+    gpath1 = os.path.join(GEN_PATH, genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join(GEN_PATH, genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
+    threads = 8
+    force = False
+    trn_gname = genome2
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_gname,
+                                     prodigal_only=True, quiet=True)
+    assert final[genome1]
+    assert final[genome2]
+    q = logger[0]
+    assert q.qsize() == 10
+    assert q.get().message == "Annotating all genomes with prodigal"
+    assert q.get().message == "Prodigal will train using test/data/annotate/genomes/A_H738.fasta"
+    assert q.get().message == ("prodigal command: prodigal -i "
+                               "test/data/annotate/genomes/A_H738.fasta -t "
+                               "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn")
+    assert q.get().message == "End training on test/data/annotate/genomes/A_H738.fasta"
+    messages = []
+    for i in range(6):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "(from test/data/annotate/genomes/H299_H561.fasta sequence) "
+                            "with Prodigal")
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "(from test/data/annotate/genomes/A_H738.fasta sequence) "
+                            "with Prodigal")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    assert message_start_annot2 in messages
+    # Prodigal cmd
+    message_cmd1 = ("Prodigal command: prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+                    "test_runall_1by1_1.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.gff -t "
+                    "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn -q")
+    message_cmd2 = ("Prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "A_H738.fasta-prodigalRes/test_runall_1by1_2.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.gff -t "
+                    "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn -q")
+    assert message_cmd1 in messages
+    assert message_cmd2 in messages
+    message_end_annot1 = ("End annotating test_runall_1by1_1 (from test/data/annotate/genomes/"
+                          "H299_H561.fasta)")
+    message_end_annot2 = ("End annotating test_runall_1by1_2 (from test/data/annotate/genomes/"
+                          "A_H738.fasta)")
+    assert message_end_annot1 in messages
+    assert message_end_annot2 in messages
+
+
+def test_run_all_prodigal_error_train():
+    """
+    Check that when we want to train on a genome but it fails, it returns False for all genomes
+    Here, it fails because genome to train on is too small
+    """
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
+    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
+    genome1 = "H299_H561.fasta"
+    gpath1 = os.path.join(GEN_PATH, genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join(GEN_PATH, genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
+    threads = 8
+    force = False
+    trn_gname = genome1
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_gname,
+                                     prodigal_only=True, quiet=True)
+    assert not final[genome1]
+    assert not final[genome2]
+    q = logger[0]
+    assert q.qsize() == 4
+    assert q.get().message == "Annotating all genomes with prodigal"
+    assert q.get().message == ("Prodigal will train using "
+                               "test/data/annotate/genomes/H299_H561.fasta")
+    assert q.get().message == ("prodigal command: prodigal -i "
+                               "test/data/annotate/genomes/H299_H561.fasta -t "
+                               "test/data/annotate/generated_by_unit-tests/H299_H561.fasta.trn")
+    assert q.get().message == ("Error while trying to train prodigal on H299_H561.fasta.")
+
+
+def test_run_all_prodigal_error_annotate():
+    """
+    Check running prodigal on 2 genomes:
+    - prodigal train ok
+    - running on genome1 ok
+    - running on genome2 error
+    """
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
+    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
+    genome1 = "toto.fasta"
+    gpath1 = os.path.join(GEN_PATH, genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join(GEN_PATH, genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
+    threads = 8
+    force = False
+    trn_gname = genome2
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_gname,
+                                     prodigal_only=True, quiet=False)
+    assert not final[genome1]
+    assert final[genome2]
+    q = logger[0]
+    assert q.qsize() == 10
+    assert q.get().message == "Annotating all genomes with prodigal"
+    assert q.get().message == "Prodigal will train using test/data/annotate/genomes/A_H738.fasta"
+    assert q.get().message == ("prodigal command: prodigal -i "
+                               "test/data/annotate/genomes/A_H738.fasta -t "
+                               "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn")
+    assert q.get().message == "End training on test/data/annotate/genomes/A_H738.fasta"
+    messages = []
+    for i in range(6):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "(from test/data/annotate/genomes/toto.fasta sequence) "
+                            "with Prodigal")
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "(from test/data/annotate/genomes/A_H738.fasta sequence) "
+                            "with Prodigal")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    assert message_start_annot2 in messages
+    # Prodigal cmd
+    message_cmd1 = ("Prodigal command: prodigal -i test/data/annotate/genomes/toto.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/toto.fasta-prodigalRes/"
+                    "test_runall_1by1_1.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "toto.fasta-prodigalRes/test_runall_1by1_1.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/"
+                    "toto.fasta-prodigalRes/test_runall_1by1_1.gff -t "
+                    "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn -q")
+    message_cmd2 = ("Prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "A_H738.fasta-prodigalRes/test_runall_1by1_2.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.gff -t "
+                    "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn -q")
+    assert message_cmd1 in messages
+    assert message_cmd2 in messages
+    message_end_annot1 = ("Error while trying to run prodigal. See "
+                          "test/data/annotate/generated_by_unit-tests/"
+                          "toto.fasta-prodigal.log.err.")
+    message_end_annot2 = ("End annotating test_runall_1by1_2 (from test/data/annotate/genomes/"
+                          "A_H738.fasta)")
+    assert message_end_annot1 in messages
+    assert message_end_annot2 in messages
+
+
+def test_run_all_1by1_prokka():
     """
     Check that when running with 3 threads (not parallel), prokka runs as expected,
     and returns True for each genome
+    -> Runs 1 by 1, with prokka using 3 cpus
     Start and end must be ordered: (start1, end1, start2, end2) or (start2, end2, start1, end1)
     """
     logger = my_logger("test_runall_1by1_1")
@@ -109,9 +281,10 @@ def test_run_all_1by1():
                genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
     threads = 3
     force = False
+    trn_file = "nofile.trn"
     annot_folder = os.path.join(GENEPATH, "annot-folder")
     os.makedirs(annot_folder)
-    final = afunc.run_annotation_all(genomes, threads, force, annot_folder)
+    final = afunc.run_annotation_all(genomes, threads, force, annot_folder, trn_file)
     assert final[genome1]
     assert final[genome2]
     q = logger[0]
@@ -121,13 +294,13 @@ def test_run_all_1by1():
     message_start_annot1 = ("Start annotating test_runall_1by1_1 test/data/annotate/genomes/"
                             "H299_H561.fasta")
     message_cmd1 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
-                    "annot-folder/H299_H561.fasta-prokkaRes")
+                    "annot-folder/H299_H561.fasta-prokkaRes --cpus 3")
     message_end_annot1 = ("End annotating test_runall_1by1_1 from test/data/annotate/genomes/"
                             "H299_H561.fasta.")
     message_start_annot2 = ("Start annotating test_runall_1by1_2 test/data/annotate/genomes/"
                             "A_H738.fasta")
     message_cmd2 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
-                    "annot-folder/A_H738.fasta-prokkaRes")
+                    "annot-folder/A_H738.fasta-prokkaRes --cpus 3")
     message_end_annot2 = ("End annotating test_runall_1by1_2 from test/data/annotate/genomes/"
                             "A_H738.fasta.")
     qget = q.get().message
@@ -152,67 +325,6 @@ def test_run_all_1by1():
         assert q.get().message == message_end_annot1
 
 
-def test_run_all_parallel_more_threads():
-    """
-    Check that there is no problem when running with more threads than genomes (each genome
-    uses nb_threads/nb_genome threads)
-    Start and end are not necessarily in the same order (ex: start1, start2, end2, end1)
-    """
-    logger = my_logger("test_run_all_parallel_more_threads")
-    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
-    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
-    genome1 = "H299_H561.fasta"
-    gpath1 = os.path.join(GEN_PATH, genome1)
-    genome2 = "A_H738.fasta"
-    gpath2 = os.path.join(GEN_PATH, genome2)
-    genomes = {genome1: ["test_runall_1by1_1", gpath1, gpath1, 12656, 3, 0],
-               genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
-    threads = 8
-    force = False
-    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH,
-                                     prodigal_only=True, small=True, quiet=True)
-    assert final[genome1]
-    assert final[genome2]
-    q = logger[0]
-    assert q.qsize() == 7
-    assert q.get().message == 'Annotating all genomes with prodigal'
-    messages = []
-    for i in range(6):
-        a = q.get().message
-        messages.append(a)
-    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
-                            "(from test/data/annotate/genomes/H299_H561.fasta sequence) "
-                            "with Prodigal")
-    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
-                            "(from test/data/annotate/genomes/A_H738.fasta sequence) "
-                            "with Prodigal")
-    # Check that all messages exist. We cannot know in which order,
-    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
-    assert message_start_annot1 in messages
-    assert message_start_annot2 in messages
-    # Prodigal cmd
-    message_cmd1 = ("Prodigal command: prodigal -i test/data/annotate/genomes/H299_H561.fasta "
-                    "-d test/data/annotate/generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-                    "test_runall_1by1_1.ffn -a test/data/annotate/generated_by_unit-tests/"
-                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.faa -f gff "
-                    "-o test/data/annotate/generated_by_unit-tests/"
-                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.gff -q -p meta")
-    message_cmd2 = ("Prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
-                    "-d test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
-                    "test_runall_1by1_2.ffn -a test/data/annotate/generated_by_unit-tests/"
-                    "A_H738.fasta-prodigalRes/test_runall_1by1_2.faa -f gff "
-                    "-o test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
-                    "test_runall_1by1_2.gff -q -p meta")
-    assert message_cmd1 in messages
-    assert message_cmd2 in messages
-    message_end_annot1 = ("End annotating test_runall_1by1_1 (from test/data/annotate/genomes/"
-                          "H299_H561.fasta)")
-    message_end_annot2 = ("End annotating test_runall_1by1_2 (from test/data/annotate/genomes/"
-                          "A_H738.fasta)")
-    assert message_end_annot1 in messages
-    assert message_end_annot2 in messages
-
-
 def test_run_all_parallel_less_threads():
     """
     Check that there is no problem when running with less threads than genomes (each genomes
@@ -221,19 +333,20 @@ def test_run_all_parallel_less_threads():
     so check_prokka should return false.
     """
     logger = my_logger("test_run_all_parallel_more_threads")
-    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_4threads')
     # genomes = {genome: [name, gpath, size, nbcont, l90]}
     gnames = ["H299_H561.fasta", "A_H738.fasta", "genome1.fasta", "genome2.fasta", "genome3.fasta"]
     gpaths = [os.path.join(GEN_PATH, name) for name in gnames]
     genomes = {gnames[0]: ["test_runall_1by1_1", gpaths[0], gpaths[0], 12656, 3, 1],
                gnames[1]: ["test_runall_1by1_2", gpaths[1], gpaths[1], 456464645, 1, 1],
-               gnames[2]: ["test_runall_1by1_2", gpaths[2], gpaths[2], 456464645, 4, 1],
-               gnames[3]: ["test_runall_1by1_2", gpaths[3], gpaths[3], 456464645, 3, 1],
-               gnames[4]: ["test_runall_1by1_2", gpaths[4], gpaths[4], 456464645, 1, 1]
+               gnames[2]: ["test_runall_1by1_3", gpaths[2], gpaths[2], 456464645, 4, 1],
+               gnames[3]: ["test_runall_1by1_4", gpaths[3], gpaths[3], 456464645, 3, 1],
+               gnames[4]: ["test_runall_1by1_5", gpaths[4], gpaths[4], 456464645, 1, 1]
                }
     threads = 4
     force = False
-    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH)
+    trn_file = "nofile.trn"
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_file)
     assert final[gnames[0]]
     assert final[gnames[1]]
     assert not final[gnames[2]]
@@ -246,7 +359,117 @@ def test_run_all_parallel_less_threads():
     # -> for each genome not ok (3 others):
     #           start annotate, prokka cmd, problem, end annotate -> 12 logs
     assert q.qsize() == 19
-    # Check at least 1st log
     assert q.get().message == "Annotating all genomes with prokka"
+    # messages start annotation
+    messages = []
+    for i in range(18):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "from test/data/annotate/genomes/H299_H561.fasta "
+                            "with Prokka")
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "from test/data/annotate/genomes/A_H738.fasta "
+                            "with Prokka")
+    message_start_annot3 = ("Start annotating test_runall_1by1_4 "
+                            "from test/data/annotate/genomes/genome2.fasta "
+                            "with Prokka")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    assert message_start_annot2 in messages
+    assert message_start_annot3 in messages
+    # messages Prokka cmd
+    message_cmd1 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runall_1by1_1 "
+                    "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
+    message_cmd2 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
+                    "A_H738.fasta-prokkaRes --cpus 2 --prefix test_runall_1by1_2 "
+                    "--centre prokka test/data/annotate/genomes/A_H738.fasta")
+    message_cmd3 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
+                    "genome1.fasta-prokkaRes --cpus 2 --prefix test_runall_1by1_3 "
+                    "--centre prokka test/data/annotate/genomes/genome1.fasta")
+    assert message_cmd1 in messages
+    assert message_cmd2 in messages
+    assert message_cmd3 in messages
+    # Messages end annotation cmd
+    message_end1 = ("End annotating test_runall_1by1_1 from "
+                    "test/data/annotate/genomes/H299_H561.fasta.")
+    message_end2 = ("End annotating test_runall_1by1_3 from "
+                    "test/data/annotate/genomes/genome1.fasta.")
+    message_end3 = ("End annotating test_runall_1by1_5 from "
+                    "test/data/annotate/genomes/genome3.fasta.")
+    assert message_end1 in messages
+    assert message_end2 in messages
+    assert message_end3 in messages
+    # Messages error annotation cmd
+    message_err1 = "test_runall_1by1_3 genome1.fasta: several .faa files"
+    message_err2 = "test_runall_1by1_4 genome2.fasta: several .faa files"
+    message_err3 = "test_runall_1by1_5 genome3.fasta: several .faa files"
+    assert message_err1 in messages
+    assert message_err2 in messages
+    assert message_err3 in messages
 
+
+def test_run_all_parallel_more_threads():
+    """
+    Check that there is no problem when running with more threads than genomes
+    (6 threads and 2 genome: each genome uses 3 threads)
+    Genomes H299 should run well but genome1.fasta should get an error
+    """
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_4threads')
+    # genomes = {genome: [name, gpath, size, nbcont, l90]}
+    gnames = ["H299_H561.fasta", "genome1.fasta"]
+    gpaths = [os.path.join(GEN_PATH, name) for name in gnames]
+    genomes = {gnames[0]: ["test_runall_1by1_1", gpaths[0], gpaths[0], 12656, 3, 1],
+               gnames[1]: ["test_runall_1by1_2", gpaths[1], gpaths[1], 456464645, 4, 1],
+               }
+    threads = 6
+    force = False
+    trn_file = "nofile.trn"
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_file)
+    assert final[gnames[0]]
+    assert not final[gnames[1]]
+    q = logger[0]
+    # Check size of logs
+    # -> starting log -> 1 log
+    # -> for genome ok : start annotate, prokka cmd, end annotate -> 3 logs
+    # -> for genome not ok : start annotate, prokka cmd, problem, end annotate -> 4 logs
+    assert q.qsize() == 8
+    assert q.get().message == "Annotating all genomes with prokka"
+    # messages start annotation
+    messages = []
+    for i in range(7):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "from test/data/annotate/genomes/H299_H561.fasta "
+                            "with Prokka")
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "from test/data/annotate/genomes/genome1.fasta "
+                            "with Prokka")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    assert message_start_annot2 in messages
+    # messages Prokka cmd
+    message_cmd1 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prokkaRes --cpus 3 --prefix test_runall_1by1_1 "
+                    "--centre prokka test/data/annotate/genomes/H299_H561.fasta")
+    message_cmd2 = ("Prokka command: prokka --outdir test/data/annotate/generated_by_unit-tests/"
+                    "genome1.fasta-prokkaRes --cpus 3 --prefix test_runall_1by1_2 "
+                    "--centre prokka test/data/annotate/genomes/genome1.fasta")
+    assert message_cmd1 in messages
+    assert message_cmd2 in messages
+    # Messages end annotation cmd
+    message_end1 = ("End annotating test_runall_1by1_1 from "
+                    "test/data/annotate/genomes/H299_H561.fasta.")
+    message_end2 = ("End annotating test_runall_1by1_2 from "
+                    "test/data/annotate/genomes/genome1.fasta.")
+    assert message_end1 in messages
+    assert message_end2 in messages
+    # Messages error annotation cmd
+    message_err1 = "test_runall_1by1_2 genome1.fasta: several .faa files"
+    assert message_err1 in messages
 

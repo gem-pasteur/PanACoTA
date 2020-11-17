@@ -124,6 +124,11 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
         # fgn is key of genomes, genomes[fgn] = [_,_,annote_file,_,_,_]
         gtrain = genomes[fgn][2]
         gpath_train = prodigal_train(gtrain, annot_folder)
+        # If there was a problem while training, no genome will be annotated
+        # Return False for all genomes
+        if not gpath_train:
+            res = {genome: False for genome in genomes}
+            return res
     elif threads <= 3:
         # less than 3 threads: run prokka 1 by 1 with all threads
         cores_annot = threads
@@ -221,6 +226,7 @@ def prodigal_train(gpath, annot_folder):
         path and name of train file (will be used to annotate all next genomes)
         If problem, returns empty string
     """
+    logger.info(f"Prodigal will train using {gpath}")
     gname = os.path.basename(gpath)             # path/to/original/genome.fasta -> genome.fasta
     gpath_train = os.path.join(annot_folder, gname + ".trn") # path/to/prodiRes/genome.fasta.trn
     prodigal_logfile = gpath_train + "-prodigal-train.log"  # path/to/genome-prodigal-train.log
@@ -234,7 +240,7 @@ def prodigal_train(gpath, annot_folder):
     prodigalf.close()
     prodigalferr.close()
     if ret.returncode == 0:
-        logger.log(utils.detail_lvl(), f"End annotating {gname} (from {gpath})")
+        logger.log(utils.detail_lvl(), f"End training on {gpath}")
         return gpath_train
     else:
         return ""
@@ -411,30 +417,21 @@ def run_prodigal(arguments):
         # So make prodigal_dir (not automatically created by prodigal)
         os.makedirs(prodigal_dir)
 
-    # If small contigs, add -p meta option
-    if small:
-        meta = "-p meta"
-    else:
-        meta = ""
     # Prodigal_directory is empty and ready to get prodigal results
     basic_outname = os.path.join(prodigal_dir, name)
     # Define cmd, stderr and stdout files, and error to write if problem.
-    error = ("Error while trying to run prodigal. See {}. If it mentions that "
-             "your genome sequences are too small, add '--small' option to "
-             "your PanACoTA command.").format(prodigal_logfile_err)
+    error = (f"Error while trying to run prodigal. See {prodigal_logfile_err}.")
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
-    cmd = ("prodigal -i {} -d {} -a {} -f gff -o {} -q {}").format(gpath, basic_outname + ".ffn",
-                                                                   basic_outname + ".faa",
-                                                                   basic_outname + ".gff", meta
-                                                                  )
+    cmd = (f"prodigal -i {gpath} -d {basic_outname + '.ffn'} -a {basic_outname + '.faa'} "
+           f"-f gff -o {basic_outname + '.gff'} -t {gpath_train} -q")
     logger.details("Prodigal command: " + cmd)
 
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
     prodigalf.close()
     prodigalferr.close()
     if ret.returncode == 0:
-        logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
+        logger.log(utils.detail_lvl(), f"End annotating {name} (from {gpath})")
         return True
     else:
         return False

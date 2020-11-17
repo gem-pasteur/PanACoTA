@@ -367,7 +367,8 @@ def test_run_prodigal_out_exists_ok():
     name = "prodigal.outtest.ok"
     force = False
     nbcont = 7
-    arguments = (gpath, TEST_DIR, cores_prodigal, name, force, nbcont, None, logger[0])
+    trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
+    arguments = (gpath, TEST_DIR, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prodigal(arguments)
 
     q = logger[0]
@@ -408,8 +409,9 @@ def test_run_prodigal_out_exists_error():
     gpath = "path/to/nogenome/original_name-error"
     cores_prodigal = 1
     force = False
+    trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
     nbcont = 7
-    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, None, logger[0])
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert not afunc.run_prodigal(arguments)
     q = logger[0]
     assert q.qsize() == 4
@@ -447,7 +449,8 @@ def test_run_prodigal_out_exists_force():
     cores_prodigal = 2
     force = True
     nbcont = 3
-    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, True, logger[0])
+    trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prodigal(arguments)
     # As we used 'force', tbl, faa and ffn files, which were empty, must have been replaced
     # by the prodigal output
@@ -475,7 +478,9 @@ def test_run_prodigal_out_exists_force():
                                       "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
                                       "test_runprodigal_H299.faa -f gff -o test/data/annotate/"
                                       "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-                                      "test_runprodigal_H299.gff -q -p meta")
+                                      "test_runprodigal_H299.gff -t "
+                                      "test/data/annotate/test_files/A_H738-and-B2_A3_5.fna.trn "
+                                      "-q")
     assert q.get() .message.startswith("End annotating test_runprodigal_H299 "
                                        "(from test/data/annotate/genomes/H299_H561.fasta)")
 
@@ -492,8 +497,9 @@ def test_run_prodigal_out_doesnt_exist():
     cores_prodigal = 2
     name = "test_runprodigal_H299"
     force = False
+    trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
     nbcont = 3
-    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, True, logger[0])
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert afunc.run_prodigal(arguments)
     # Check content of tbl, ffn and faa files
     exp_dir = os.path.join(EXP_DIR, "H299_H561.fasta-prodigalRes",
@@ -518,7 +524,9 @@ def test_run_prodigal_out_doesnt_exist():
                                "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
                                "test_runprodigal_H299.faa -f gff -o test/data/annotate/"
                                "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-                               "test_runprodigal_H299.gff -q -p meta")
+                               "test_runprodigal_H299.gff -t "
+                               "test/data/annotate/test_files/A_H738-and-B2_A3_5.fna.trn "
+                               "-q")
     assert q.get().message.startswith("End annotating")
 
 
@@ -534,8 +542,9 @@ def test_run_prodigal_out_problem_running():
     name = "test_runprodigal_H299-error"
     force = False
     nbcont = 3
+    trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
     logf = os.path.join(GENEPATH, "H299_H561bis.fasta-prodigal.log")
-    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, False, logger[0])
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert not afunc.run_prodigal(arguments)
     q = logger[0]
     assert q.qsize() == 3
@@ -547,11 +556,10 @@ def test_run_prodigal_out_problem_running():
                                "generated_by_unit-tests/H299_H561bis.fasta-prodigalRes/"
                                "test_runprodigal_H299-error.faa -f gff -o test/data/annotate/"
                                "generated_by_unit-tests/H299_H561bis.fasta-prodigalRes/"
-                               "test_runprodigal_H299-error.gff -q")
+                               "test_runprodigal_H299-error.gff -t "
+                               "test/data/annotate/test_files/A_H738-and-B2_A3_5.fna.trn "
+                               "-q")
     assert q.get().message.startswith("Error while trying to run prodigal. See test/data/"
                                       "annotate/generated_by_unit-tests/"
-                                      "H299_H561bis.fasta-prodigal.log.err. "
-                                      "If it mentions that your genome sequences "
-                                      "are too small, add '--small' option to your "
-                                      "PanACoTA command.")
+                                      "H299_H561bis.fasta-prodigal.log.err.")
 
