@@ -83,7 +83,6 @@ def test_main_from_parse():
     args.annotdir = False
     args.argv = ["annotate", "test_annote.py", "test_main_from_parse"]
     args.prodigal_only = False
-    args.small = False
     annot.main_from_parse(args)
     # Check that only 2 fna files (over 3) were created in tmp files. The 3rd
     # one is annotated from the original seq, nothing to merge
@@ -119,6 +118,14 @@ def test_main_given_tmp_verbose3(capsys):
     Test that when a tmp folder is given by user, tmp files are saved in it,
     and prokka files too.
     + check that, with verbose=3, warning and details are written to stdout
+
+    Giving 4 genomes in list_files
+    - for 1 genome, toto.fst does not exist, and will not be in the concatenated file
+    - 2 concatenated files
+    - 4 files to annotate
+    - 4 prokkaRes
+    - 1 genome with problems: no CDS found
+    - 3 genomes in result dirs
     """
     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-default.txt")
     tmpdir = os.path.join(GENEPATH, "tmp_funcGivenTmp")
@@ -227,7 +234,7 @@ def test_main_existresdirforce(capsys):
     cutn = 3
     info_file = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-default.lst")
     assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, force=True, l90=l90,
-                      prodigal_only=True, cutn = cutn, small=True) == (info_file, 4)
+                      prodigal_only=True, cutn = cutn) == (info_file, 4)
     out, err = capsys.readouterr()
 
     # Check that tmp files exist in the right folder
@@ -293,7 +300,7 @@ def test_main_onexistingprokkadir(capsys):
     main function arguments:
     cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
-    verbose=0, quiet=False, prodigal_only=False, small=False):
+    verbose=0, quiet=False, prodigal_only=False):
 
     """
     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
@@ -332,7 +339,8 @@ def test_main_onexistingprodigaldir(capsys):
     main function arguments:
     cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
     threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
-    verbose=0, quiet=False, prodigal_only=False, small=False):
+    verbose=0, quiet=False, prodigal_only=False
+    ):
 
     """
     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
@@ -554,7 +562,7 @@ def test_main_frominfo(capsys):
     infofile = os.path.join(TEST_DIR, "lstinfo.lst")
     out_infofile = os.path.join(GENEPATH, "LSTINFO-lstinfo.lst")
     assert annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
-                      prodigal_only=True, small=True) == (out_infofile, 3)
+                      prodigal_only=True) == (out_infofile, 3)
     out, err = capsys.readouterr()
     # Check logs
     assert ("Generating distribution of L90 and #contigs graphs.") in out
@@ -585,7 +593,7 @@ def test_main_novalid_genome_frominfo(capsys):
     infofile = os.path.join(TEST_DIR, "lstinfo-no-genome.lst")
     with pytest.raises(SystemExit):
         annot.main("cmd", listfile, dbpath, GENEPATH, name, date, from_info=infofile,
-                   prodigal_only=True, small=True)
+                   prodigal_only=True)
     out, err = capsys.readouterr()
     # Check logs
     assert ("No genome listed in test/data/annotate/test_files/lstinfo-no-genome.lst "

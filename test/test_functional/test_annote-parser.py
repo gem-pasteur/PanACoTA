@@ -49,7 +49,7 @@ def test_parser_noarg(capsys):
     assert "[-d DB_PATH] -r RES_PATH [-l LIST_FILE] [-n NAME] [-Q]" in err
     assert "[--info FROM_INFO] [--prodigal] [--l90 L90] [--nbcont NBCONT]" in err
     assert "[--cutn CUTN] [--date DATE] [--tmp TMPDIR]" in err
-    assert "[--annot_dir ANNOTDIR] [-F] [--small] [--threads THREADS] [-v]" in err
+    assert "[--annot_dir ANNOTDIR] [-F] [--threads THREADS] [-v]" in err
     assert "[-q] [-h]" in err
     assert "the following arguments are required: -r" in err
 
@@ -211,7 +211,6 @@ def test_parser_default():
     assert not options.qc_only
     assert not options.from_info
     assert not options.prodigal_only
-    assert not options.small
 
 
 def test_parser_values():
@@ -236,7 +235,6 @@ def test_parser_values():
     assert not options.qc_only
     assert not options.from_info
     assert options.prodigal_only
-    assert not options.small
 
 
 def test_parser_wrongforce(capsys):
@@ -270,20 +268,6 @@ def test_parser_qc():
     assert options.date == time.strftime("%m%y")
     assert not options.force
     assert options.qc_only
-
-
-def test_parser_prokka_small(capsys):
-    """
-    Test that when run with --small without --prodigal, error message
-    (--small only available with --prodigal)
-    """
-    parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
-    annot.build_parser(parser)
-    with pytest.raises(SystemExit):
-        annot.parse(parser, "-l list_file -d dbpath -r respath -Q --small".split())
-    _, err = capsys.readouterr()
-    assert ("You cannot use --small option with prokka. Either use prodigal, "
-            "or remove this option.") in err
 
 
 def test_parser_info_cutn(capsys):
