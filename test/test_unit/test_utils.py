@@ -677,10 +677,10 @@ def test_read_genomes_info_ok(caplog):
     assert 'Found 3 genomes in total' in caplog.text
     exp = {"genome1.fasta":
             ["genome1", "test/data/annotate/genomes/genome1.fasta",
-             "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
+             "test/data/annotate/genomes/genome1.fasta", 800, 6, 6],
            "A_H738-and-B2_A3_5.fna":
             ["A_H738-and-B2_A3_5", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna",
-             "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 6],
+             "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 5],
            "genome7.fasta":
             ["genome7", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
@@ -701,10 +701,10 @@ def test_read_genomes_info_date_ok(caplog):
     assert 'Found 3 genomes in total' in caplog.text
     exp = {"test/data/annotate/genomes/genome1.fasta":
             ["ESCO.0720", "test/data/annotate/genomes/genome1.fasta",
-             "test/data/annotate/genomes/genome1.fasta", 800, 6, 5],
+             "test/data/annotate/genomes/genome1.fasta", 800, 6, 6],
            "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna":
             ["ESCO.0720", "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna",
-             "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 6],
+             "test/data/annotate/genomes/A_H738-and-B2_A3_5.fna", 7000, 78, 5],
            "test/data/annotate/genomes/genome7.fasta":
             ["ESCO.0720", "test/data/annotate/genomes/genome7.fasta",
              "test/data/annotate/genomes/genome7.fasta", 79705, 80, 65]}
