@@ -415,7 +415,7 @@ def rename_all_genomes(genomes):
 
     """
     logger.info(f"Renaming kept genomes according to their quality ({len(genomes)} genomes)")
-    # Keep first genome name
+    # Keep first genome name to give to prodigal for training
     first_gname = None
     # Keep previous genome name (ESCO.0109 -> ESCO)
     last_name = ""
@@ -439,7 +439,7 @@ def rename_all_genomes(genomes):
         # Write information to "genomes" dict.
         gembase_name = ".".join([name, str(last_strain).zfill(5)])
         genomes[genome][0] = gembase_name
-        return first_gname
+    return first_gname
 
 
 def plot_distributions(genomes, res_path, listfile_base, l90, nbconts):
