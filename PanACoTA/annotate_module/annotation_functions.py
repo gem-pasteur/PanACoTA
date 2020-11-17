@@ -123,12 +123,10 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
         # If prodigal, train on the first genome
         # fgn is key of genomes, genomes[fgn] = [_,_,annote_file,_,_,_]
         gtrain = genomes[fgn][2]
+        # If problem, gpath_train will be empty, but this will be checked while
+        # trying to run prodigal, because we also need to check that genomes are not simply
+        # already annotated
         gpath_train = prodigal_train(gtrain, annot_folder)
-        # If there was a problem while training, no genome will be annotated
-        # Return False for all genomes
-        if not gpath_train:
-            res = {genome: False for genome in genomes}
-            return res
     elif threads <= 3:
         # less than 3 threads: run prokka 1 by 1 with all threads
         cores_annot = threads
@@ -181,7 +179,6 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
         # join lp (tell to stop once all log processes are done, which is the case here)
         lp.join()
         final = final.get()
-
     # # If user stops programm (ctrl+C), end it
     # except KeyboardInterrupt as ki:
     #     print("error")
@@ -229,6 +226,10 @@ def prodigal_train(gpath, annot_folder):
     logger.info(f"Prodigal will train using {gpath}")
     gname = os.path.basename(gpath)             # path/to/original/genome.fasta -> genome.fasta
     gpath_train = os.path.join(annot_folder, gname + ".trn") # path/to/prodiRes/genome.fasta.trn
+    if os.path.isfile(gpath_train):
+        logger.info(f"A training file already exists ({gpath_train}). "
+                     "It will be used to annotate all genomes.")
+        return gpath_train
     prodigal_logfile = gpath_train + "-prodigal-train.log"  # path/to/genome-prodigal-train.log
     prodigal_logfile_err = gpath_train + "-prodigal-train.log.err"
     cmd = (f"prodigal -i {gpath} -t {gpath_train}")
@@ -358,7 +359,6 @@ def run_prodigal(arguments):
         corresponding numbers of proteins, genes etc.). False otherwise.
     """
     gpath, prodigal_folder, threads, name, force, nbcont, gpath_train, q = arguments
-
     # Set logger for this process, which will be given to all subprocess
     qh = logging.handlers.QueueHandler(q)
     root = logging.getLogger()
@@ -381,6 +381,12 @@ def run_prodigal(arguments):
         shutil.rmtree(prodigal_dir)
         logger.warning("Prodigal results folder already exists, but is removed because "
                        "--force option was used.")
+
+    # If training file does not exist and prodigal result directory neither, return False
+    # We cannot annotate using nothing.
+    # Happens if there was a problem while training
+    if not os.path.isfile(gpath_train) and not os.path.isdir(prodigal_dir):
+        return False
 
     # If prodigal results dir already exists (meaning user did not want to force,
     # otherwise it would have been deleted just before),
