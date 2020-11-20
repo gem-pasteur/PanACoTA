@@ -393,7 +393,7 @@ def mash_step(to_try, corresp, mat_sp, genomes_removed, min_dist, max_dist):
             logger.warning("Should never happen as mat_sp is a triangle matrix!")
             dist = mat_sp[other_num, ref_num]
         # If distance not in the limits, remove genome from to_try and add to genomes_removed list
-        if not min_dist < dist < max_dist:
+        if not min_dist <= dist <= max_dist:
             to_try.remove(gname)
             genomes_removed[gname] = [ref_name, dist]
     return 0
