@@ -597,7 +597,8 @@ def test_analyse_all_genomes_binary(caplog):
                    gs[2]: ["ESCO.0416", gpaths[2], gpaths[2], 70, 4, 1]}
     assert exp_genomes == genomes
     assert ("Calculating genome size, number of contigs, L90") in caplog.text
-    assert ("'genome.fna.bin' does not seem to be a fasta file. It will be ignored.") in caplog.text
+    assert ("'genome.fna.bin' does not seem to be a fasta file. It "
+            "will be ignored.") in caplog.text
 
 
 def test_analyse_all_genomes_cut(caplog):
