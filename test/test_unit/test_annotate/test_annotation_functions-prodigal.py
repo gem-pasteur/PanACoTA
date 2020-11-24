@@ -98,6 +98,21 @@ def test_prodigal_train_error(caplog):
     assert gtrain == ""
 
 
+def test_prodigal_train_exists(caplog):
+    """
+    Check prodigal training when the training file already exists
+    """
+    caplog.set_level(logging.DEBUG)
+    train_gpath = os.path.join(GEN_PATH, "H299_H561.fasta")
+    # Create (empty) trn file
+    gtrain = os.path.join(GENEPATH, "H299_H561.fasta.trn")
+    open(gtrain, "w").close()
+    gtrain_found = afunc.prodigal_train(train_gpath, GENEPATH)
+    assert gtrain_found == gtrain
+    assert ("A training file already exists (test/data/annotate/generated_by_unit-tests/"
+            "H299_H561.fasta.trn). It will be used to annotate all genomes.") in caplog.text
+
+
 def test_check_prodigal_nofaa():
     """
     Check that check_prodigal returns false when a faa file is missing, and an error message
@@ -466,23 +481,23 @@ def test_run_prodigal_out_exists_force():
     assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     q = logger[0]
     assert q.qsize() == 4
-    # assert q.get() .message.startswith("Start annotating test_runprodigal_H299 (from test/data/"
-    #                                    "annotate/genomes/H299_H561.fasta sequence) "
-    #                                    "with Prodigal")
-    # assert q.get() .message.startswith("Prodigal results folder already exists, but is "
-    #                                    "removed because --force option was used")
-    # assert q.get().message.startswith("Prodigal command: prodigal -i test/data/annotate/genomes/"
-    #                                   "H299_H561.fasta -d test/data/annotate/"
-    #                                   "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-    #                                   "test_runprodigal_H299.ffn -a test/data/annotate/"
-    #                                   "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-    #                                   "test_runprodigal_H299.faa -f gff -o test/data/annotate/"
-    #                                   "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
-    #                                   "test_runprodigal_H299.gff -t "
-    #                                   "test/data/annotate/test_files/A_H738-and-B2_A3_5.fna.trn "
-    #                                   "-q")
-    # assert q.get() .message.startswith("End annotating test_runprodigal_H299 "
-    #                                    "(from test/data/annotate/genomes/H299_H561.fasta)")
+    assert q.get() .message.startswith("Prodigal results folder already exists, but is "
+                                       "removed because --force option was used")
+    assert q.get() .message.startswith("Start annotating test_runprodigal_H299 (from test/data/"
+                                       "annotate/genomes/H299_H561.fasta sequence) "
+                                       "with Prodigal")
+    assert q.get().message.startswith("Prodigal command: prodigal -i test/data/annotate/genomes/"
+                                      "H299_H561.fasta -d test/data/annotate/"
+                                      "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+                                      "test_runprodigal_H299.ffn -a test/data/annotate/"
+                                      "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+                                      "test_runprodigal_H299.faa -f gff -o test/data/annotate/"
+                                      "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+                                      "test_runprodigal_H299.gff -t "
+                                      "test/data/annotate/test_files/A_H738-and-B2_A3_5.fna.trn "
+                                      "-q")
+    assert q.get() .message.startswith("End annotating test_runprodigal_H299 "
+                                       "(from test/data/annotate/genomes/H299_H561.fasta)")
 
 
 def test_run_prodigal_out_doesnt_exist():
@@ -509,11 +524,11 @@ def test_run_prodigal_out_doesnt_exist():
     out_gff = os.path.join(out_dir, name + ".gff")
     # Check that faa and ffn files are as expected
     assert os.path.isfile(out_faa)
-    tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
     assert os.path.isfile(out_ffn)
-    tutil.compare_order_content(exp_dir + ".gff", out_gff)
+    assert tutil.compare_order_content(exp_dir + ".gff", out_gff)
     q = logger[0]
     assert q.qsize() == 3
     assert q.get().message.startswith("Start annotating")
@@ -546,6 +561,10 @@ def test_run_prodigal_out_problem_running():
     logf = os.path.join(GENEPATH, "H299_H561bis.fasta-prodigal.log")
     arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
     assert not afunc.run_prodigal(arguments)
+    # Check that output directory is empty
+    outdir = os.path.join(GENEPATH, "H299_H561bis.fasta-prodigalRes")
+    assert os.listdir(outdir) == []
+    # Check logs
     q = logger[0]
     assert q.qsize() == 3
     assert q.get().message.startswith("Start annotating")
@@ -563,3 +582,22 @@ def test_run_prodigal_out_problem_running():
                                       "annotate/generated_by_unit-tests/"
                                       "H299_H561bis.fasta-prodigal.log.err.")
 
+
+def test_run_prodigal_noout_notrain():
+    """
+    Prodigal result directory does not exist (not already run)
+    training file does not exist (probably, problem while trying to train)
+    -> return  False
+    """
+    logger = my_logger("test_run_prodigal_out_exists_error")
+    utils.init_logger(LOGFILE_BASE, 0, 'prodigal_out_error')
+    gpath = "path/to/nogenome/original_name-error"
+    cores_prodigal = 1
+    name = "prodigal_out_for_test-wrongCDS"
+    force = False
+    nbcont = 7
+    trn_file = "ghost_trn_file"
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
+    assert not afunc.run_prodigal(arguments)
+    q = logger[0]
+    assert q.qsize() == 0
