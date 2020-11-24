@@ -110,7 +110,6 @@ def test_skipped_format(caplog):
     assert ("\n\t- toto\n\t- genome\n\t- genome2\n") in caplog.text
 
 
-
 def test_write_discarded(caplog):
     """
     Test that the list of discarded genomes is written as expected.
