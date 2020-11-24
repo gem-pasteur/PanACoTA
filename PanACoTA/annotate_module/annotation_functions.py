@@ -367,8 +367,6 @@ def run_prodigal(arguments):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('annotate.run_prodigal')
-    logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
-                                     "with Prodigal")
     # Define prodigal directory and logfile, and check their existence
     # By default, prodigal is in tmp_folder -> resdir/tmp_files/genome-prodigalRes
     g_ori_name = os.path.basename(gpath)
@@ -388,6 +386,8 @@ def run_prodigal(arguments):
     if not os.path.isfile(gpath_train) and not os.path.isdir(prodigal_dir):
         return False
 
+    logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
+                                     "with Prodigal")
     # If prodigal results dir already exists (meaning user did not want to force,
     # otherwise it would have been deleted just before),
     # can we use it for next step ? -> check content.

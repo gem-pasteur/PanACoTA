@@ -110,7 +110,8 @@ def analyse_all_genomes(genomes, dbpath, tmp_path, nbn, soft, logger, quiet=Fals
         if not quiet:
             bar.update(curnum)
             curnum += 1
-        # analyse genome, and check everything went well
+        # analyse genome, and check everything went well.
+        # exception if binary file
         try:
             res = analyse_genome(genome, dbpath, tmp_path, cut, pat, genomes, soft, logger=logger)
         except UnicodeDecodeError:
