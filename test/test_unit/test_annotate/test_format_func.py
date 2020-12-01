@@ -97,17 +97,6 @@ def test_write_gene():
     assert tutil.compare_order_content(exp_file, lstfile)
 
 
-def test_contig_name():
-    """
-    test that when we give a genome name and a contig number, it returns the expected fasta header
-    for Replicon files (no gene number)
-    """
-    genome = "ESCO.1218.00005"
-    cont_num = 30
-    head_line = ffunc.get_contig_name(genome, cont_num)
-    assert head_line == ">ESCO.1218.00005.0030"
-
-
 def test_write_header_gene():
     """
     From a given line of lstinfo file, giving info for a gene (start, end, gene name,

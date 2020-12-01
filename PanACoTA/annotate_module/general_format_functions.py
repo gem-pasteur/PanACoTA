@@ -281,19 +281,3 @@ def write_header(lstline, outfile):
     size = int(end) - int(start) + 1
     towrite = " ".join([name, str(size), gene_name, info])
     outfile.write(">" + towrite + "\n")
-
-
-def get_contig_name(genome, cont_num):
-    """
-    From a genome name and a contig number, write the header corresponding to this contig
-    (for 'Replicons' files)
-
-    Parameters
-    ----------
-    genome : str
-        genome name
-    cont_num : int
-        contig number
-    """
-    return ">{}.{}".format(genome, str(cont_num).zfill(4))
-
