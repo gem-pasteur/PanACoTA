@@ -342,6 +342,10 @@ def test_main_onexistingprodigaldir(capsys):
     Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
     exist, and are ok, all runs well, no re-annotation, just format
 
+    - trains
+    - no re-annotation
+    - format
+
     main function arguments:
     cmd, list_file, db_path, res_dir, name, date, l90=100, nbcont=999, cutn=5,
          threads=1, force=False, qc_only=False, from_info=None, tmp_dir=None, res_annot_dir=None,
@@ -377,6 +381,13 @@ def test_main_onexistingprodigaldir(capsys):
                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
     with open(logfile, "r") as lc:
         log_content = lc.readlines()
+    assert ("Prodigal will train using "
+            "test/data/annotate/genomes/H299_H561.fasta") in " ".join(log_content)
+    assert ("prodigal command: prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/H299_H561.fasta.trn")
+    assert("Error while trying to train prodigal on H299_H561.fasta. "
+           "See test/data/annotate/generated_by_func-tests/results-prodigal/"
+           "H299_H561.fasta.trn-prodigal-train.log.err") in " ".join(log_content)
     assert ("Prodigal results folder test/data/annotate/generated_by_func-tests/"
             "results-prodigal/H299_H561.fasta-prodigalRes "
             "already exists") in " ".join(log_content)
@@ -385,12 +396,18 @@ def test_main_onexistingprodigaldir(capsys):
             "H299_H561.fasta-prodigalRes. "
             "If you want to re-run Prodigal, first remove this result folder, or use '-F' or "
             "'--force' option.") in ' '.join(log_content)
+    assert "Formatting all genomes" in " ".join(log_content)
+    assert "Annotation step done" in " ".join(log_content)
 
 
 def test_main_onexistingprodigaldir_train_exists(capsys):
     """
     Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
     exist, and are ok, all runs well, no re-annotation, just format
+
+    - no train
+    - no reannote
+    - format
 
     2 genomes in list file: B2_A3_5.fasta-changeName.fna and H299_H561.fasta
     """
@@ -441,46 +458,222 @@ def test_main_onexistingprodigaldir_train_exists(capsys):
             "H299_H561.fasta-prodigalRes. "
             "If you want to re-run Prodigal, first remove this result folder, or use '-F' or "
             "'--force' option.") in ' '.join(log_content)
+    assert "Formatting all genomes" in " ".join(log_content)
+    assert "Annotation step done" in " ".join(log_content)
 
 
-# def test_run_prodigal_train_exist_empty(capsys):
-#     """
-#     Run prodigal on list file with 2 genomes.
-#     output files do not exist, but training file does -> use it to annotate
-#     """
-#     # Create result folder, with only trn file
-#     res_folder = os.path.join(GENEPATH, "results-prodigal")
-#     os.makedirs(res_folder)
-#     trn_file = os.path.join(res_folder, "H299_H561.fasta.trn")
-#     open(trn_file, "w").close()
+def test_main_prodigal_train_empty(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal results do
+    not exist, and the given trn file is empty
+    -> error, with prodigal command
 
-#     # Function arguments
-#     list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
-#     name = "ESCO"
-#     date = "0417"
-#     lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
-#     lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
-#     with pytest.raises(SystemExit):
-#         annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
-#                    res_annot_dir=res_folder, verbose=3, prodigal_only=True)
-#     # Check that not formatted because exists + error
-#     logfile = os.path.join(GENEPATH,
-#                            "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
-#     with open(logfile, "r") as lc:
-#         log_content = lc.readlines()
-#     for l in log_content:
-#         print(l)
-#     assert ("A training file already exists (test/data/annotate/generated_by_func-tests/"
-#             "results-prodigal/H299_H561.fasta.trn). It will be used to annotate "
-#             "all genomes.") in " ".join(log_content)
-#     assert ("Error: No genome was correctly annotated, "
-#             "no need to format them") in ' '.join(log_content)
-#     assert ("Error while trying to run prodigal. See test/data/annotate/generated_by_func-tests/"
-#         "results-prodigal/B2_A3_5.fasta-changeName.fna-prodigal.log.err.") in ' '.join(log_content)
-#     assert ("Error while trying to run prodigal. See test/data/annotate/generated_by_func-tests/"
-#             "results-prodigal/H299_H561.fasta-prodigal.log.err.") in ' '.join(log_content)
-#     # Check that tmp files folder is empty (prokka res are somewhere else)
-#     assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
+    - no train
+    - try reannote but fails -> exits
+
+    2 genomes in list file: B2_A3_5.fasta-changeName.fna and H299_H561.fasta
+    """
+    # FOLDER with all results
+    # Create result folder, with empty trn file
+    res_folder = os.path.join(GENEPATH, "results-prodigal")
+    os.makedirs(res_folder)
+    trn_file = os.path.join(res_folder, "H299_H561.fasta.trn")
+    open(trn_file, "w").close()
+
+    # Function arguments
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+    name = "ESCO"
+    date = "0417"
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    with pytest.raises(SystemExit):
+        annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                   res_annot_dir=res_folder, verbose=3, prodigal_only=True)
+    out, err = capsys.readouterr()
+    # Test that result files are in result dir
+    assert os.path.isfile(lstout)
+    assert tutil.compare_order_content(lstout, lstexp)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    # Check logs
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
+    assert ("A training file already exists (test/data/annotate/generated_by_func-tests/"
+            "results-prodigal/H299_H561.fasta.trn). It will be used to annotate "
+            "all genomes.") in " ".join(log_content)
+    assert ("Start annotating ESCO.1116.00002 (from test/data/annotate/genomes/"
+            "B2_A3_5.fasta-changeName.fna sequence) with Prodigal") in " ".join(log_content)
+    assert ("Start annotating ESCO.1015.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/B2_A3_5.fasta-changeName.fna "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/H299_H561.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/H299_H561.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("Error while trying to run prodigal. See test/data/annotate/generated_by_func-tests/"
+            "results-prodigal/H299_H561.fasta-prodigal.log.err.") in " ".join(log_content)
+    assert ("Error while trying to run prodigal. See test/data/annotate/generated_by_func-tests/"
+            "results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigal.log.err") in " ".join(log_content)
+    assert ("No genome was correctly annotated, no need to format them.") in " ".join(log_content)
+
+
+def test_main_prodigal_train_ok(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
+    exist, and are ok, all runs well, no re-annotation, just format
+
+    - no train
+    - reannotate
+    - format
+
+    2 genomes in list file: B2_A3_5.fasta-changeName.fna and H299_H561.fasta
+    """
+    # FOLDER with all results
+    # Create result folder, with existing prodigal folders (which are OK)
+    res_folder = os.path.join(GENEPATH, "results-prodigal")
+    os.makedirs(res_folder)
+    # Add a valid training file in result folder
+    orig_trn_file = os.path.join(EXP_DIR, "exp_complete_genome_big.fna.trn")
+    trn_file = os.path.join(res_folder, "H299_H561.fasta.trn")
+    shutil.copyfile(orig_trn_file, trn_file)
+
+    # Function arguments
+    list_file = os.path.join(TEST_DIR, "list_genomes-func-test-exist_dir.txt")
+    name = "ESCO"
+    date = "0417"
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes-func-test-exist_dir.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=res_folder, verbose=3, prodigal_only=True) == (lstout, 2)
+    out, err = capsys.readouterr()
+    # Check that tmp files folder is empty (prokka res are somewhere else)
+    assert len(os.listdir(os.path.join(GENEPATH, "tmp_files"))) == 0
+    # Test that result files are in result dir
+    assert os.path.isfile(lstout)
+    assert tutil.compare_order_content(lstout, lstexp)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes-func-test-exist_dir.log.details")
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
+    assert ("A training file already exists (test/data/annotate/generated_by_func-tests/"
+            "results-prodigal/H299_H561.fasta.trn). It will be used to annotate "
+            "all genomes.") in " ".join(log_content)
+    assert ("Start annotating ESCO.1116.00002 (from test/data/annotate/genomes/"
+            "B2_A3_5.fasta-changeName.fna sequence) with Prodigal") in " ".join(log_content)
+    assert ("Start annotating ESCO.1015.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/B2_A3_5.fasta-changeName.fna "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "B2_A3_5.fasta-changeName.fna-prodigalRes/ESCO.1116.00002.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/H299_H561.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/ESCO.1015.00001.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/H299_H561.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("End annotating ESCO.1015.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta)") in " ".join(log_content)
+    assert "Formatting all genomes" in " ".join(log_content)
+    assert "Annotation step done" in " ".join(log_content)
+
+
+def test_main_prodigal_ok(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
+    exist, and are ok, all runs well, no re-annotation, just format
+
+    - train
+    - reannotate
+    - format
+
+    2 genomes in list file: B2_A3_5.fasta-changeName.fna and H299_H561.fasta
+    """
+    # FOLDER with all results
+    # Create result folder, with existing prodigal folders (which are OK)
+    res_folder = os.path.join(GENEPATH, "results-prodigal")
+    os.makedirs(res_folder)
+
+    # Function arguments
+    list_file = os.path.join(TEST_DIR, "list_genomes.txt")
+    with open(list_file, "w") as lf:
+        lf.write("A_H738.fasta \n")
+        lf.write("H299_H561.fasta::TOTO")
+    name = "ESCO"
+    date = "0417"
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes.lst")
+    lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=res_folder, verbose=3, prodigal_only=True) == (lstout, 2)
+    out, err = capsys.readouterr()
+    # Test that result files are in result dir
+    assert os.path.isfile(lstout)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes.log.details")
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
+    print(log_content)
+    assert ("Prodigal will train using "
+            "test/data/annotate/genomes/A_H738.fasta") in " ".join(log_content)
+    assert ("prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta.trn") in " ".join(log_content)
+    assert ("Start annotating ESCO.0417.00001 (from test/data/annotate/genomes/"
+            "A_H738.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Start annotating TOTO.0417.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/A_H738.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/A_H738.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.gff "
+            "-t test/data/annotate/generated_by_func-tests/results-prodigal/A_H738.fasta.trn "
+            "-q") in " ".join(log_content)
+    assert ("End annotating ESCO.0417.00001 (from test/data/annotate/genomes/"
+            "A_H738.fasta)") in " ".join(log_content)
+    assert ("End annotating TOTO.0417.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta)") in " ".join(log_content)
+    assert "Formatting all genomes" in " ".join(log_content)
+    assert "Annotation step done" in " ".join(log_content)
 
 
 def test_main_existing_prokkadir_errorannot():
