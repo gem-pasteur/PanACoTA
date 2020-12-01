@@ -189,13 +189,15 @@ def test_run_all_prodigal_error_train():
     assert q.get().message == ("prodigal command: prodigal -i "
                                "test/data/annotate/genomes/H299_H561.fasta -t "
                                "test/data/annotate/generated_by_unit-tests/H299_H561.fasta.trn")
-    assert q.get().message == ("Error while trying to train prodigal on H299_H561.fasta.")
+    assert q.get().message == ("Error while trying to train prodigal on H299_H561.fasta. See "
+                               "test/data/annotate/generated_by_unit-tests/"
+                               "H299_H561.fasta.trn-prodigal-train.log.err.")
 
 
 def test_run_all_prodigal_train_exists_error():
     """
-    Check that when we want to train on a genome but it fails, it returns False for all genomes
-    Here, it fails because genome to train on is too small
+    Check that when we give a wrong training file, it does not train again, but
+    fails while annotating
     """
     logger = my_logger("test_run_prodigal_train_exist_error")
     utils.init_logger(LOGFILE_BASE, 0, 'test_run_prodigal_train_exist_error')
@@ -413,6 +415,74 @@ def test_run_all_prodigal_error_annotate():
     assert message_end_annot2 in messages
 
 
+def test_run_all_prodigal_outexists_error():
+    """
+    trn file already exists, and output folder too. No force option. Output folder is empty
+    -> error message while checking prodigal
+    """
+    logger = my_logger("test_run_all_parallel_more_threads")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_all_parallel_more_threads')
+    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
+    genome1 = "toto.fasta"
+    genome2 = "A_H738.fasta"
+    genomes = {genome1: ["test_runall_1by1_1", genome1, genome1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", genome2, genome2, 456464645, 1, 465]}
+    # Create prodigal result directories
+    prodigaldir_g1 = os.path.join(GENEPATH, "A_H738.fasta-prodigalRes")
+    prodigaldir_g2 = os.path.join(GENEPATH, "toto.fasta-prodigalRes")
+    os.makedirs(prodigaldir_g1)
+    os.makedirs(prodigaldir_g2)
+    # Other parameters
+    threads = 1
+    force = False
+    # Add existing training file
+    orig_trn_file = os.path.join(TEST_DIR, "A_H738-and-B2_A3_5.fna.trn")
+    trn_file = os.path.join(GENEPATH, "toto.fasta.trn")
+    shutil.copyfile(orig_trn_file, trn_file)
+    trn_gname = genome1
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_gname,
+                                     prodigal_only=True, quiet=False)
+    assert not final[genome1]
+    assert not final[genome2]
+    q = logger[0]
+    assert q.qsize() == 15
+    assert q.get().message == "Annotating all genomes with prodigal"
+    assert q.get().message == "Prodigal will train using toto.fasta"
+    assert q.get().message == ("A training file already exists (test/data/annotate/"
+                               "generated_by_unit-tests/toto.fasta.trn). It will "
+                               "be used to annotate all genomes.")
+    messages = []
+    for i in range(12):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "(from toto.fasta sequence) with Prodigal")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    # Prodigal cmd
+    message_exists1 = ("Prodigal results folder test/data/annotate/generated_by_unit-tests/"
+                    "toto.fasta-prodigalRes already exists.")
+    message_errorfaa = ("test_runall_1by1_1 toto.fasta: no or several .faa file(s)")
+    message_errorffn = ("test_runall_1by1_1 toto.fasta: no or several .ffn file(s)")
+    message_errorgff = ("test_runall_1by1_1 toto.fasta: no or several .gff file(s)")
+    message_error1 = ("Problems in the files contained in your already existing output dir "
+                    "(test/data/annotate/generated_by_unit-tests/toto.fasta-prodigalRes). "
+                    "Please check it, or remove it to re-annotate.")
+    assert message_exists1 in messages
+    assert message_errorfaa in messages
+    assert message_errorffn in messages
+    assert message_errorgff in messages
+    assert message_error1 in messages
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "(from A_H738.fasta sequence) with Prodigal")
+    assert message_start_annot2 in messages
+    message_error_annot2 = ("Problems in the files contained in your already existing output dir "
+                          "(test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes). "
+                          "Please check it, or remove it to re-annotate.")
+    assert message_error_annot2 in messages
+
+
 def test_run_all_1by1_prokka():
     """
     Check that when running with 3 threads (not parallel), prokka runs as expected,
@@ -475,7 +545,7 @@ def test_run_all_1by1_prokka():
         assert q.get().message == message_end_annot1
 
 
-def test_run_all_parallel_less_threads():
+def test_run_all_prokka_parallel_less_threads():
     """
     Check that there is no problem when running with less threads than genomes (each genomes
     uses 2 threads)
@@ -561,7 +631,7 @@ def test_run_all_parallel_less_threads():
     assert message_err3 in messages
 
 
-def test_run_all_parallel_more_threads():
+def test_run_all_parallel_prokka_more_threads():
     """
     Check that there is no problem when running with more threads than genomes
     (6 threads and 2 genome: each genome uses 3 threads)
