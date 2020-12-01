@@ -233,11 +233,12 @@ def prodigal_train(gpath, annot_folder):
     prodigal_logfile = gpath_train + "-prodigal-train.log"  # path/to/genome-prodigal-train.log
     prodigal_logfile_err = gpath_train + "-prodigal-train.log.err"
     cmd = (f"prodigal -i {gpath} -t {gpath_train}")
-    error = (f"Error while trying to train prodigal on {gname}.")
+    error = (f"Error while trying to train prodigal on {gname}. See {prodigal_logfile_err}.")
     logger.log(utils.detail_lvl(), "prodigal command: " + cmd)
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
-    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf,
+                        logger=logger)
     prodigalf.close()
     prodigalferr.close()
     if ret.returncode == 0:
@@ -433,7 +434,8 @@ def run_prodigal(arguments):
            f"-f gff -o {basic_outname + '.gff'} -t {gpath_train} -q")
     logger.details("Prodigal command: " + cmd)
 
-    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf)
+    ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf,
+                        logger=logger)
     prodigalf.close()
     prodigalferr.close()
     if ret.returncode == 0:
