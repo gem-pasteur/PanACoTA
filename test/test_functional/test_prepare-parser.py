@@ -339,8 +339,8 @@ def test_parser_nospecies(capsys):
     options = prepare.parse(parser, "-t 1234".split())
     assert not options.no_refseq
     assert not options.only_mash
-    assert options.NCBI_species_taxid == "1234"
-    assert options.NCBI_species == ""
+    assert options.ncbi_species_taxid == "1234"
+    assert options.ncbi_species == ""
     out, err = capsys.readouterr()
     assert ("WARNING: you did not provide a species name ('-s species' option') "
             "nor an output directory ('-o outdir'). "
@@ -358,8 +358,8 @@ def test_parser_default_cutn(capsys):
     options = prepare.parse(parser, "-t 1234 -o outdir -s species".split())
     assert not options.no_refseq
     assert not options.only_mash
-    assert options.NCBI_species_taxid == "1234"
-    assert options.NCBI_species == "species"
+    assert options.ncbi_species_taxid == "1234"
+    assert options.ncbi_species == "species"
     out, err = capsys.readouterr()
     assert ("!! Your genomes will be split when sequence contains at "
             "least 5'N' in a row. If you want to change this threshold, use "
@@ -376,8 +376,8 @@ def test_parser_default_l90_nb_cont(capsys):
     options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1".split())
     assert not options.no_refseq
     assert not options.only_mash
-    assert options.NCBI_species_taxid == "1234"
-    assert options.NCBI_species == "species"
+    assert options.ncbi_species_taxid == "1234"
+    assert options.ncbi_species == "species"
     out, err = capsys.readouterr()
     assert ("!! Your genomes will be filtered, and only the ones with 'L90' <= 100 "
             "and 'number of contigs' < 999 will be kept. If you want to change those "
@@ -393,8 +393,8 @@ def test_parser_info_notonlymash(capsys):
     options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1 --info toto".split())
     assert not options.no_refseq
     assert not options.only_mash
-    assert options.NCBI_species_taxid == "1234"
-    assert options.NCBI_species == "species"
+    assert options.ncbi_species_taxid == "1234"
+    assert options.ncbi_species == "species"
     out, err = capsys.readouterr()
     assert ("!! You gave an info file (--info option), but did not ask to run only Mash "
             "step (-M option). Your info file will be ignored (and renamed with '.back' "

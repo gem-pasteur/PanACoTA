@@ -66,7 +66,7 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.NCBI_species, arguments.NCBI_species_taxid, arguments.levels,
+    main(cmd, arguments.ncbi_species, arguments.ncbi_species_taxid, arguments.levels,
          arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
          arguments.db_dir, arguments.only_mash,
          arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
@@ -285,12 +285,12 @@ def build_parser(parser):
     from PanACoTA import utils_argparse
 
     general = parser.add_argument_group('General arguments')
-    general.add_argument("-t", dest="NCBI_species_taxid", default="",
+    general.add_argument("-t", dest="ncbi_species_taxid", default="",
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI. A comma-separated "
                                 "list of taxid can also be provided.")
                          )
-    general.add_argument("-s", dest="NCBI_species", default="",
+    general.add_argument("-s", dest="ncbi_species", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
@@ -420,7 +420,6 @@ def check_args(parser, args):
         with error message if error occurs with arguments given.
 
     """
-
     # Message if user kept default thresholds for L90 and nbcont. Just to warn him, to be sure
     # it was on purpose
     def thresholds_message(l90, nbcont):
@@ -434,7 +433,7 @@ def check_args(parser, args):
     # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
     # -> Give at least 1!
     if (not args.only_mash and not args.no_refseq and
-        not args.NCBI_species_taxid and not args.NCBI_species):
+        not args.ncbi_species_taxid and not args.ncbi_species):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
                      "you want to download refseq genomes. But you did not provide any "
                      "information, so PanACoTA cannot guess which species you want to download. "
@@ -456,12 +455,12 @@ def check_args(parser, args):
                      "output directory where you want to save your results (see '-o' option)")
 
     # Cannot be verbose and quiet at the same time
-    if args.verbose > 0 and args.quiet:
+    if int(args.verbose) > 0 and args.quiet:
         parser.error("Choose between a verbose output (-v) or a quiet output (-q)."
                      " You cannot have both.")
 
     # min_dist must be higher than max_dist
-    if args.min_dist >= args.max_dist:
+    if float(args.min_dist) >= float(args.max_dist):
         parser.error(f"min_dist ({args.min_dist}) cannot be higher "
                      f"than max_dist ({args.max_dist})")
 
@@ -476,11 +475,11 @@ def check_args(parser, args):
 
     # WARNINGS
     # User did not specify a species name
-    if not args.NCBI_species and not args.outdir:
+    if not args.ncbi_species and not args.outdir:
         print(colored("WARNING: you did not provide a species name ('-s species' option') "
             "nor an output directory ('-o outdir'). "
                       "All files will be downloaded in a folder called with the NCBI species "
-                      f"taxid {args.NCBI_species_taxid} instead of the species name.", "yellow"))
+                      f"taxid {args.ncbi_species_taxid} instead of the species name.", "yellow"))
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn == 5:
         message = ("  !! Your genomes will be split when sequence contains at "
