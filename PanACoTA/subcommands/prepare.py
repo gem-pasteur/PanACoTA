@@ -69,7 +69,7 @@ def main_from_parse(arguments):
     main(cmd, arguments.ncbi_species, arguments.ncbi_species_taxid, arguments.levels,
          arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
          arguments.db_dir, arguments.only_mash,
-         arguments.from_info, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
+         arguments.info_file, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
@@ -362,7 +362,7 @@ def build_parser(parser):
                                 "number of contigs and L90 values). "
                                 "It will then get information on genomes quality from this "
                                 "file, and run mash steps."))
-    optional.add_argument("--info", dest="from_info",
+    optional.add_argument("--info", dest="info_file",
                           help=("If you already ran the quality control, specify from which "
                                 "file PanACoTA can read this information, in order to proceed "
                                 "to the mash step. This file must contain at "
@@ -447,7 +447,7 @@ def check_args(parser, args):
         parser.error("You must provide an output directory, where your results will be saved.")
 
     # If user wants only mash steps, check that he gave info file, and outdir
-    if args.only_mash and not args.from_info:
+    if args.only_mash and not args.info_file:
         parser.error("If you want to run only Mash filtering steps, please give the "
                      "info file with the required information (see '--info' option)")
     if args.only_mash and not args.outdir:
@@ -492,12 +492,13 @@ def check_args(parser, args):
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
 
     # Warn if user gave info file, but does not ask to run only Mash -> info file will be ignored
-    if args.from_info and not args.only_mash:
+    if args.info_file and not args.only_mash:
         message = ("  !! You gave an info file (--info option), but did not ask to run only Mash "
                    "step (-M option). Your info file will be ignored (and renamed with '.back' "
                    "at the end), and another one will "
                    "be created with the new calculated values.")
         print(colored(message, "yellow"))
+    return args
 
 
 
