@@ -109,6 +109,7 @@ def parse_arguments(argv):
                                         add_help=False)
     all_modules.build_parser(parser_all)
     actions["all"] = all_modules.main_from_parse
+    checks["all"] = all_modules.check_args
     # checks["all_modules"] = all_modules.check_args
 
     # Preparation part. Start with ASCII art title, + small description of subcommand
