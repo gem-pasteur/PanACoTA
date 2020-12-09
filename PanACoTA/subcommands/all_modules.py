@@ -47,6 +47,7 @@ from termcolor import colored
 import sys
 
 from PanACoTA import utils
+from PanACoTA import utils_argparse
 from PanACoTA.subcommands import prepare
 from PanACoTA.subcommands import annotate
 from PanACoTA.subcommands import pangenome
@@ -193,30 +194,31 @@ def build_parser(parser):
                           help=("Path to your output folder, where all results "
                                 "from all 6 modules will be saved.")
                           )
-    general.add_argument("--threads", dest="threads", type=utils_argparse.thread_num, default=1,
+    general.add_argument("--threads", dest="threads", type=utils_argparse.thread_num,
                           help="Specify how many threads can be used (default=1)")
-
-    prepare = parser.add_argument_group("'prepare' module arguments")
-    prepare.add_argument("-t", dest="NCBI_species_taxid", default="",
+    # prepare arguments
+    pprepare = parser.add_argument_group("'prepare' module arguments")
+    pprepare.add_argument("-t", dest="ncbi_species_taxid",
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI. A comma-separated "
                                 "list of taxid can also be provided.")
                          )
-    prepare.add_argument("-s", dest="NCBI_species", default="",
+    pprepare.add_argument("-s", dest="ncbi_species",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
                         )
-    prepare.add_argument("-l", "--assembly_level", dest="levels", default="",
+    pprepare.add_argument("-l", "--assembly_level", dest="levels",
                           help=("Assembly levels of genomes to download (default: all). "
                                 "Possible levels are: 'all', 'complete', 'chromosome', "
                                 "'scaffold', 'contig'."
                                 "You can also provide a comma-separated list of assembly "
                                 "levels. For ex: 'complete,chromosome'")
                           )
-    prepare_annote = parser.add_argument_group("Common arguments to 'prepare' "
+    pprepare_annote = parser.add_argument_group("Common arguments to 'prepare' "
                                                "and 'annotate' modules")
-    prepare_annote.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int, default=5,
+    pprepare_annote.add_argument("--cutn", dest="cutn", type=utils_argparse.positive_int,
+
                           help=("By default, each genome will be cut into new contigs when "
                                 "at least 5 'N' in a row are found in its sequence. "
                                 "If you don't want to "
@@ -224,67 +226,62 @@ def build_parser(parser):
                                 "put 0 to this option. If you want to cut from a different number "
                                 "of 'N' in a row, put this value to this option.")
                           )
-    prepare_annote.add_argument("--l90", dest="l90", type=int, default=100,
+    pprepare_annote.add_argument("--l90", dest="l90", type=int,
                                 help=("Maximum value of L90 allowed to keep a genome. "
                                       "Default is 100.")
                                 )
-    prepare_annote.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num,
-                                default=999, help=("Maximum number of contigs allowed to "
+    pprepare_annote.add_argument("--nbcont", dest="nbcont", type=utils_argparse.cont_num,
+                                help=("Maximum number of contigs allowed to "
                                                    "keep a genome. Default is 999."))
 
-    # build_parser(prepare)
-    # args_prepare = parser.parse_args(argu)
-    # prepare.check_args(prepare_annote, args_prepare)
-    # OPTIONS = parse(my_parser, sys.argv[1:])
-
-    annote = parser.add_argument_group("'annotate' module arguments")
-    annote.add_argument("--prodigal", dest="prodigal_only", action="store_true", default=False,
+    pannote = parser.add_argument_group("'annotate' module arguments")
+    pannote.add_argument("--prodigal", dest="prodigal_only", action="store_true",
                         help="Add this option if you only want syntactical annotation, given "
                              "by prodigal, and not functional annotation requiring prokka and "
                              "is slower.")
-    annote.add_argument("-n", dest="name", required=True, type=utils_argparse.gen_name,
+    pannote.add_argument("-n", dest="name", required=True, type=utils_argparse.gen_name,
                         help=("Choose a name for your annotated genomes. This name should "
                               "contain 4 alphanumeric characters. Generally, they correspond "
                               "to the 2 first letters of genus, and 2 first letters of "
                               "species, e.g. ESCO for Escherichia Coli."))
 
-    pangenome = parser.add_argument_group("'pangenome' module arguments")
-    pangenome.add_argument("-i", dest="min_id", type=utils_argparse.perc_id, default=0.8,
+    ppangenome = parser.add_argument_group("'pangenome' module arguments")
+    ppangenome.add_argument("-i", dest="min_id", type=utils_argparse.perc_id,
                            help=("Minimum sequence identity to be considered in the same "
                                  "cluster (float between 0 and 1). Default is 0.8."))
 
-    corepers = parser.add_argument_group("'corepers' module arguments")
-    corepers.add_argument("--tol", dest="tol", type=utils_argparse.percentage, default=1,
+    pcorepers = parser.add_argument_group("'corepers' module arguments")
+    pcorepers.add_argument("--tol", dest="tol", type=utils_argparse.percentage,
                           help=("min %% of genomes having at least 1 member in a family to "
                                 "consider the family as persistent (between 0 and 1, "
                                 "default is 1 = 100%% of genomes = Core genome)."
                                 "By default, the minimum number of genomes will be "
                                 "ceil('tol'*N) (N being the total number of genomes). If "
                                 "you want to use floor('tol'*N) instead, add the '-F' option."))
-    corepers.add_argument("-M", dest="multi", action='store_true',
+    pcorepers.add_argument("-M", dest="multi", action='store_true',
                           help=("Add this option if you allow several members in any genome "
                                 "of a family. By default, only 1 (or 0 if tol<1) member "
                                 "per genome are allowed in all genomes. If you want to allow "
                                 "exactly 1 member in 'tol'%% of the genomes, and 0, 1 "
                                 "or several members in the '1-tol'%% left, use the option -X "
                                 "instead of this one: -M and -X options are not compatible."))
-    corepers.add_argument("-X", dest="mixed", action='store_true',
+    pcorepers.add_argument("-X", dest="mixed", action='store_true',
                           help="Add this option if you want to allow families having several "
                                "members only in '1-tol'%% of the genomes. In the other genomes, "
                                "only 1 member exactly is allowed. This option is not compatible "
                                "with -M (which is allowing multigenic families: having several "
                                "members in any number of genomes).")
 
-    tree = parser.add_argument_group("'tree' module arguments")
+    ptree = parser.add_argument_group("'tree' module arguments")
     softs = ["fasttree", "fastme", "quicktree", "iqtree", "iqtree2"]
-    tree.add_argument("--soft", dest="soft", choices=softs, default="iqtree",
+    ptree.add_argument("--soft", dest="soft", choices=softs,
                       help=("Choose with which software you want to infer the "
                             "phylogenetic tree. Default is IQtree."))
 
     helper = parser.add_argument_group('Others')
-    helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
+    helper.add_argument("-v", "--verbose", dest="verbose", action="count",
                         help="Increase verbosity in stdout/stderr.")
-    helper.add_argument("-q", "--quiet", dest="quiet", action="store_true", default=False,
+    helper.add_argument("-q", "--quiet", dest="quiet", action="store_true",
                         help=("Do not display anything to stdout/stderr. log files will "
                               "still be created."))
     helper.add_argument("-h", "--help", dest="help", action="help",
@@ -308,10 +305,113 @@ def parse(parser, argu):
         Parsed arguments
     """
     import argparse
-
     args = parser.parse_args(argu)
-    return args
-    # return check_args(parser, args)
+    return check_args(parser, args)
+
+
+def check_args(parser, argv):
+    """
+
+    """
+    from argparse import Namespace
+    # Get arguments given in command line
+    # If an argument was not in the user command-line, it still exists in argv,
+    # but is set to 'None' -> ignore it
+    # If a bool argument (quiet, mixed, multi, prodigal_only) is not in the user command-line,
+    # it still exists in argv but is set to False -> ignore it to replace by info from
+    # config file if any, or default otherwise
+    argv.conffile = "configfile.ini"
+    dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
+
+    # PREPARE STEP
+    prep_dict = get_prepare(dict_argv)
+    a = Namespace(**prep_dict)
+    prepare.check_args(parser, a)
+
+    # ANNOTATE STEP
+    annot_dict = get_annotate(dict_argv)
+    print(annot_dict)
+    a = Namespace(**annot_dict)
+    annotate.check_args(parser, a)
+
+
+    # Combine
+    annot_dict.update(prep_dict)
+    print(annot_dict)
+    # Put new args values in argv
+    for key, val in annot_dict.items():
+        vars(argv)[key] = val
+
+
+def get_prepare(dict_argv):
+    """
+    Check that arguments given for prepare step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["prepare"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "prepare")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
+                "min_id": 0.8, "tol": 1, "soft": "iqtree", "levels": "",
+                "quiet": False, "mixed": False, "multi": False, "prodigal_only": False}
+    conf_conffile.add_default(defaults, "prepare")
+    # Change to expected types (boolean, int, float)
+    conf_conffile.set_boolean("prepare", "quiet")
+    conf_conffile.set_boolean("prepare", "from_info")
+    conf_conffile.set_boolean("prepare", "only_mash")
+    conf_conffile.set_boolean("prepare", "no_refseq")
+    conf_conffile.set_int("prepare", "threads")
+    conf_conffile.set_int("prepare", "verbose")
+    conf_conffile.set_int("prepare", "cutn")
+    conf_conffile.set_int("prepare", "l90")
+    conf_conffile.set_int("prepare", "nbcont")
+    conf_conffile.set_float("prepare", "min_dist")
+    conf_conffile.set_float("prepare", "max_dist")
+    prep_dict = conf_conffile.get_section_dict("prepare")
+    return prep_dict
+
+
+def get_annotate(dict_argv):
+    """
+    Check that arguments given for prepare step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["annotate"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "annotate")
+    if "date" not in dict(conf_conffile["annotate"]):
+        import time
+        date = time.strftime("%m%y")
+        conf_conffile.update({"date": date}, "annotate")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
+                "min_id": 0.8, "tol": 1, "soft": "iqtree", "levels": "",
+                "quiet": False, "mixed": False, "multi": False, "prodigal_only": False}
+    conf_conffile.add_default(defaults, "annotate")
+    # Change to expected types (boolean, int, float)
+    conf_conffile.set_boolean("annotate", "quiet")
+    # conf_conffile.set_boolean("annotate", "qc_only")
+    # conf_conffile.set_boolean("prepare", "only_mash")
+    # conf_conffile.set_boolean("prepare", "no_refseq")
+    # conf_conffile.set_boolean("prepare", "mixed")
+    # conf_conffile.set_boolean("prepare", "multi")
+    # conf_conffile.set_int("prepare", "threads")
+    # conf_conffile.set_int("prepare", "verbose")
+    # conf_conffile.set_int("prepare", "cutn")
+    # conf_conffile.set_int("prepare", "l90")
+    # conf_conffile.set_int("prepare", "nbcont")
+    # conf_conffile.set_float("prepare", "min_dist")
+    # conf_conffile.set_float("prepare", "max_dist")
+    # conf_conffile.set_float("prepare", "min_id")
+    # conf_conffile.set_float("prepare", "tol")
+    # Check that all arguments are ok
+    annot_dict = conf_conffile.get_section_dict("annotate")
+    annot_dict["from_info"] = True
+    annot_dict["list_file"] = ""
+    annot_dict["db_path"] = ""
+
+    return annot_dict
 
 
 if __name__ == '__main__':
