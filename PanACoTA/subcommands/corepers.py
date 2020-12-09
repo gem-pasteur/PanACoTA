@@ -279,6 +279,7 @@ def check_args(parser, args):
                      "present in a family, but with 'tol'=1: the minimum number of genomes "
                      "will always be equal to N, using floor or the default ceil! Either "
                      "use a 'tol' lower than 1, or remove the '-F' option.")
+    return args
 
 
 def parse(parser, argu):

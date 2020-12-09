@@ -312,6 +312,7 @@ def check_args(parser, args):
             args.model = check_model(models_iqtree, args.model)
         else:
             args.model = "GTR"
+    return args
 
 
 def parse(parser, argu):

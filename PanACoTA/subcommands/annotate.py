@@ -639,7 +639,7 @@ def check_args(parser, args):
         if args.from_info:
             print(colored(nosplit_message(), "yellow"))
     print()
-
+    return args
 
 if __name__ == '__main__':
     import argparse
