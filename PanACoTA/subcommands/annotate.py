@@ -640,8 +640,6 @@ def check_args(parser, args):
             print(colored(nosplit_message(), "yellow"))
     print()
 
-    return args
-
 
 if __name__ == '__main__':
     import argparse

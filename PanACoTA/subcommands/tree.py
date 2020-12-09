@@ -117,7 +117,7 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
             sys.exit(1)
         from PanACoTA.tree_module import quicktree_func as tree
     elif soft == "iqtree2":
-        # by default, iqtree2 (not iqtree). 
+        # by default, iqtree2 (not iqtree).
         # So, if user did not specify, it means iqtree2. But if 'iqtree2' command
         # does not exist, use iqtree command instead.
         # test if iqtree2 is installed and in the path
@@ -312,7 +312,6 @@ def check_args(parser, args):
             args.model = check_model(models_iqtree, args.model)
         else:
             args.model = "GTR"
-    return args
 
 
 def parse(parser, argu):

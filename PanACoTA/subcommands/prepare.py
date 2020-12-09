@@ -499,7 +499,6 @@ def check_args(parser, args):
                    "be created with the new calculated values.")
         print(colored(message, "yellow"))
 
-    return args
 
 
 if __name__ == '__main__':
