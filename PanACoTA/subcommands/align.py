@@ -59,7 +59,8 @@ def main_from_parse(args):
          args.outdir, args.threads, args.force, args.verbose, args.quiet)
 
 
-def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0, quiet=False):
+def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0,
+         quiet=False):
     """
     Align given core genome families
 
