@@ -162,7 +162,13 @@ class Conf_all_parser(configparser.ConfigParser):
         self.read(conffile)
         self.sec_dicts = {}
         for sec in sections:
-            self.sec_dicts[sec] = dict(self[sec])
+            # If section in configfile, put its arguments and values to a dict
+            # If not, create empty section, and associate with empty dict
+            if sec in dict(self):
+                self.sec_dicts[sec] = dict(self[sec])
+            else:
+                self.sec_dicts[sec] = {}
+                self.add_section(sec)
 
     def get_section_dict(self, section):
         """
@@ -172,7 +178,8 @@ class Conf_all_parser(configparser.ConfigParser):
 
     def add_default(self, defargs, section):
         """
-        Add all default arguments (defargs) in section dict.
+        Complete 'section' dict with default parameters.
+        If key already defined, keep current value.
         """
         for key, val in defargs.items():
             if key not in self.sec_dicts[section]:
@@ -191,6 +198,7 @@ class Conf_all_parser(configparser.ConfigParser):
     def set_boolean(self, section, param):
         """
         Change param of section to boolean
+        raise error if problem
         """
         try:
             bool_param = self.getboolean(section, param)
@@ -202,7 +210,8 @@ class Conf_all_parser(configparser.ConfigParser):
 
     def set_int(self, section, param):
         """
-        Change param of section to boolean
+        Change param of section to int
+        raise error if problem
         """
         try:
             int_param = self.getint(section, param)
@@ -214,7 +223,8 @@ class Conf_all_parser(configparser.ConfigParser):
 
     def set_float(self, section, param):
         """
-        Change param of section to boolean
+        Change param of section to float
+        raise error if problem
         """
         try:
             float_param = self.getfloat(section, param)

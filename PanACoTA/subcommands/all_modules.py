@@ -175,6 +175,9 @@ def build_parser(parser):
 
     # Create command-line parser for all options and arguments to give
     general = parser.add_argument_group("General arguments")
+    general.add_argument("-c", dest="configfile",
+                          help=("Path to your configuration file, defining values of parameters.")
+                          )
     general.add_argument("-o", dest="outdir", required=True,
                           help=("Path to your output folder, where all results "
                                 "from all 6 modules will be saved.")
@@ -305,7 +308,6 @@ def check_args(parser, argv):
     # If a bool argument (quiet, mixed, multi, prodigal_only) is not in the user command-line,
     # it still exists in argv but is set to False -> ignore it to replace by info from
     # config file if any, or default otherwise
-    argv.conffile = "configfile.ini"
     dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
 
     final_dict = {}
@@ -359,9 +361,14 @@ def get_prepare(dict_argv):
     Check that arguments given for prepare step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
-    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["prepare"])
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["prepare"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       sections=["prepare"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "prepare")
+    # Add default arguments if not found in comd line nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
                 "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
                 "ncbi_species_taxid": "", "tmp_dir": "", "db_dir": "",
@@ -388,7 +395,11 @@ def get_annotate(dict_argv):
     Check that arguments given for prepare step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
-    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["annotate"])
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["annotate"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       sections=["annotate"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "annotate")
     if "date" not in dict(conf_conffile["annotate"]):
@@ -417,7 +428,11 @@ def get_pangenome(dict_argv):
     Check that arguments given for prepare step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
-    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["pangenome"])
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["pangenome"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       sections=["pangenome"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "pangenome")
     # Add default arguments if not found in commandline nor config file
@@ -437,7 +452,11 @@ def get_corepers(dict_argv):
     Check that arguments given for prepare step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
-    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["corepers"])
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["corepers"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       sections=["corepers"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "corepers")
     # Add default arguments if not found in commandline nor config file
@@ -460,7 +479,10 @@ def get_tree(dict_argv):
     Check that arguments given for prepare step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
-    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["tree"])
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["tree"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'], sections=["tree"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "tree")
     # Add default arguments if not found in commandline nor config file
