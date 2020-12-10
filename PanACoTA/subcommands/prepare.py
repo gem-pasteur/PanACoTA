@@ -184,7 +184,7 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
         # Not only mash, so a new info file will be created. If the user still gave an info
         # file (he will be warned that it will be ignored), rename it with '.bak'
         # to avoid erasing it
-        if info_file:
+        if info_file and os.path.isfile(info_file):
             os.rename(info_file, info_file + ".back")
 
         # 'no_refseq = True" : Do not download genomes, just do QC and mash filter on given genomes
@@ -492,7 +492,7 @@ def check_args(parser, args):
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
 
     # Warn if user gave info file, but does not ask to run only Mash -> info file will be ignored
-    if args.info_file and not args.only_mash:
+    if (args.info_file and not args.only_mash) or (args.info_file and not args.no_refseq):
         message = ("  !! You gave an info file (--info option), but did not ask to run only Mash "
                    "step (-M option). Your info file will be ignored (and renamed with '.back' "
                    "at the end), and another one will "
