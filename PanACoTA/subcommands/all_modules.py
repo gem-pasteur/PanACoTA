@@ -323,24 +323,50 @@ def check_args(parser, argv):
     argv.conffile = "configfile.ini"
     dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
 
+    final_dict = {}
+
     # PREPARE STEP
     prep_dict = get_prepare(dict_argv)
     a = Namespace(**prep_dict)
     prepare.check_args(parser, a)
+    final_dict.update(prep_dict)
 
     # ANNOTATE STEP
     annot_dict = get_annotate(dict_argv)
-    print(annot_dict)
     a = Namespace(**annot_dict)
     annotate.check_args(parser, a)
+    final_dict.update(annot_dict)
 
+    # PANGENOME STEP
+    pan_dict = get_pangenome(dict_argv)
+    final_dict.update(pan_dict)
+    # Add default arguments if not found in commandline nor config file
 
-    # Combine
-    annot_dict.update(prep_dict)
-    print(annot_dict)
+    # COREPERS STEP
+    cp_dict = get_corepers(dict_argv)
+    a = Namespace(**cp_dict)
+    corepers.check_args(parser, a)
+    final_dict.update(cp_dict)
+
+    # TREE STEP
+    tree_dict = get_tree(dict_argv)
+    # If we chose soft==quicktree, check_args will return error if threads > 1. So,
+    # we put threads = 1 during check_args, and put back the value after
+    th_save = tree_dict["threads"]
+    if tree_dict["soft"] == "quicktree":
+        tree_dict["threads"] = 1
+    a = Namespace(**tree_dict)
+    checked_a = tree.check_args(parser, a)
+    # Variable can be changed by check_args (like put default model if not given)
+    tree_dict.update(vars(checked_a))
+    tree_dict["threads"] = th_save
+    final_dict.update(tree_dict)
+
+    # Combine files
     # Put new args values in argv
-    for key, val in annot_dict.items():
+    for key, val in final_dict.items():
         vars(argv)[key] = val
+    return argv
 
 
 def get_prepare(dict_argv):
@@ -351,14 +377,14 @@ def get_prepare(dict_argv):
     conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["prepare"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "prepare")
-    # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "min_id": 0.8, "tol": 1, "soft": "iqtree", "levels": "",
-                "quiet": False, "mixed": False, "multi": False, "prodigal_only": False}
+                "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
+                "ncbi_species_taxid": "", "tmp_dir": "", "db_dir": "",
+                "info_file": "", "min_dist": 1e-4, "max_dist": 0.06,
+                "no_refseq": False, "only_mash": False}
     conf_conffile.add_default(defaults, "prepare")
     # Change to expected types (boolean, int, float)
     conf_conffile.set_boolean("prepare", "quiet")
-    conf_conffile.set_boolean("prepare", "from_info")
     conf_conffile.set_boolean("prepare", "only_mash")
     conf_conffile.set_boolean("prepare", "no_refseq")
     conf_conffile.set_int("prepare", "threads")
@@ -386,32 +412,85 @@ def get_annotate(dict_argv):
         conf_conffile.update({"date": date}, "annotate")
     # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "min_id": 0.8, "tol": 1, "soft": "iqtree", "levels": "",
-                "quiet": False, "mixed": False, "multi": False, "prodigal_only": False}
+                "quiet": False, "prodigal_only": False, "qc_only": False,
+                "list_file": "", "db_path": "", "from_info": True}
     conf_conffile.add_default(defaults, "annotate")
-    # Change to expected types (boolean, int, float)
     conf_conffile.set_boolean("annotate", "quiet")
-    # conf_conffile.set_boolean("annotate", "qc_only")
-    # conf_conffile.set_boolean("prepare", "only_mash")
-    # conf_conffile.set_boolean("prepare", "no_refseq")
-    # conf_conffile.set_boolean("prepare", "mixed")
-    # conf_conffile.set_boolean("prepare", "multi")
-    # conf_conffile.set_int("prepare", "threads")
-    # conf_conffile.set_int("prepare", "verbose")
-    # conf_conffile.set_int("prepare", "cutn")
-    # conf_conffile.set_int("prepare", "l90")
-    # conf_conffile.set_int("prepare", "nbcont")
-    # conf_conffile.set_float("prepare", "min_dist")
-    # conf_conffile.set_float("prepare", "max_dist")
-    # conf_conffile.set_float("prepare", "min_id")
-    # conf_conffile.set_float("prepare", "tol")
-    # Check that all arguments are ok
+    conf_conffile.set_boolean("annotate", "prodigal_only")
+    conf_conffile.set_boolean("annotate", "qc_only")
+    conf_conffile.set_int("annotate", "verbose")
+    conf_conffile.set_int("annotate", "threads")
+    conf_conffile.set_int("annotate", "cutn")
+    conf_conffile.set_int("annotate", "nbcont")
+    conf_conffile.set_int("annotate", "l90")
     annot_dict = conf_conffile.get_section_dict("annotate")
-    annot_dict["from_info"] = True
-    annot_dict["list_file"] = ""
-    annot_dict["db_path"] = ""
-
     return annot_dict
+
+
+def get_pangenome(dict_argv):
+    """
+    Check that arguments given for prepare step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["pangenome"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "pangenome")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"verbose": 0, "threads": 1, "min_id": 0.8, "quiet": False, "clust_mode": 1,
+                "outfile": "", "spedir": ""}
+    conf_conffile.add_default(defaults, "pangenome")
+    conf_conffile.set_boolean("pangenome", "quiet")
+    conf_conffile.set_int("pangenome", "verbose")
+    conf_conffile.set_int("pangenome", "threads")
+    conf_conffile.set_float("pangenome", "min_id")
+    pan_dict = conf_conffile.get_section_dict("pangenome")
+    return pan_dict
+
+
+def get_corepers(dict_argv):
+    """
+    Check that arguments given for prepare step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["corepers"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "corepers")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"verbose": 0, "quiet": False, "tol": 1, "mixed": False, "multi": False,
+                "floor": False, "threads": 1}
+    conf_conffile.add_default(defaults, "corepers")
+    conf_conffile.set_boolean("corepers", "quiet")
+    conf_conffile.set_boolean("corepers", "floor")
+    conf_conffile.set_boolean("corepers", "mixed")
+    conf_conffile.set_boolean("corepers", "multi")
+    conf_conffile.set_int("corepers", "verbose")
+    conf_conffile.set_int("corepers", "tol")
+    conf_conffile.set_int("corepers", "threads")
+    corepers_dict = conf_conffile.get_section_dict("corepers")
+    return corepers_dict
+
+
+def get_tree(dict_argv):
+    """
+    Check that arguments given for prepare step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    conf_conffile = utils_argparse.Conf_all_parser(dict_argv['conffile'], sections=["tree"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "tree")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"verbose": 0, "quiet": False, "threads": 1,
+                "soft": "iqtree", "model": None, "boot": False, "write_boot": False,
+                "memory": None, "fast": False}
+    conf_conffile.add_default(defaults, "tree")
+    conf_conffile.set_boolean("tree", "quiet")
+    conf_conffile.set_boolean("tree", "fast")
+    conf_conffile.set_boolean("tree", "boot")
+    conf_conffile.set_boolean("tree", "write_boot")
+    conf_conffile.set_int("tree", "verbose")
+    conf_conffile.set_int("tree", "threads")
+    tree_dict = conf_conffile.get_section_dict("tree")
+    return tree_dict
 
 
 if __name__ == '__main__':
