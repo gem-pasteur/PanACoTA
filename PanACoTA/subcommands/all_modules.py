@@ -67,16 +67,22 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.outdir, args.threads, args.NCBI_species_taxid, args.NCBI_species,
-         args.levels, args.cutn, args.l90, args.nbcont, args.name, args.prodigal_only, args.min_id,
-         args.tol, args.multi, args.mixed, args.soft, verbose=args.verbose, quiet=args.quiet)
+    args_all = (args.outdir, args.threads, args.verbose, args.quiet)
+    args_prepare = (args.ncbi_species_taxid, args.ncbi_species, args.levels,
+                    args.tmp_dir, args.no_refseq, args.db_dir, args.only_mash, args.info_file,
+                    args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
+    args_annot = (args.name, args.qc_only, args.date, args.prodigal_only)
+    args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
+    args_cp = (args.tol, args.mixed, args.multi, args.floor)
+    args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
+    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_tree)
 
 
-def main(cmd, outdir, threads, NCBI_species_taxid, NCBI_species, levels, cutn, l90, nbcont,
-         name, prodigal_only, min_id, tol, multi, mixed, soft, verbose=0, quiet=False):
+def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree):
     """
     Call all modules, one by one, using output of one as input for the next one
     """
+    outdir, threads, verbose, quiet = args_all
     os.makedirs(outdir, exist_ok=True)
     # Initialize logger
     import logging
@@ -98,14 +104,9 @@ def main(cmd, outdir, threads, NCBI_species_taxid, NCBI_species, levels, cutn, l
 
     # Run prepare module
     outdir_prepare = os.path.join(outdir, "1-prepare_module")
-    tmp_dir = ""
-    no_refseq = False
-    db_dir = ""
-    only_mash = False
-    info_file = ""
-    min_dist = 1e-4
-    max_dist = 0.06
-
+    (NCBI_species_taxid, NCBI_species, levels, tmp_dir, no_refseq, db_dir, only_mash, info_file,
+     l90, nbcont, cutn, min_dist, max_dist) = args_prepare
+    logger.info("prepare step")
     info_file = prepare.main("PanACoTA prepare", NCBI_species, NCBI_species_taxid, levels,
                              outdir_prepare, tmp_dir, threads, no_refseq, db_dir, only_mash,
                              info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet)
@@ -113,65 +114,49 @@ def main(cmd, outdir, threads, NCBI_species_taxid, NCBI_species, levels, cutn, l
     # Run annotate module
     list_file = ""
     db_path = ""
-    outdir_annotate = os.path.join(outdir, "2-annotate_module")
-    import time
-    date = time.strftime("%m%y")
-    force = False
-    qc_only = False
     tmp_dir = ""
+    force = False
+    outdir_annotate = os.path.join(outdir, "2-annotate_module")
+    (name, qc_only, date, prodigal_only) = args_annot
     res_annot_dir = None
     small = False
 
+    logger.info("annotate step")
     lstinfo, nbgenomes = annotate.main("PanACoTA annotate", list_file, db_path, outdir_annotate,
                                        name, date, l90, nbcont, cutn, threads, force, qc_only,
                                        info_file, tmp_dir, res_annot_dir, verbose, quiet,
-                                       prodigal_only, small)
+                                       prodigal_only)
 
     # Pangenome step
     name_pan = f"{name}_{nbgenomes}"
     outdir_pan = os.path.join(outdir, "3-pangenome_module")
-    clust_mode = 1
-    spe_dir = ""
     dbpath = os.path.join(outdir_annotate, "Proteins")
-    panfile = pangenome.main("PanACoTA pangenome", lstinfo, name, dbpath, min_id, outdir_pan,
-                             clust_mode, spe_dir, threads, outfile=None, verbose=verbose,
+    (min_id, clust_mode, spe_dir, outfile) = args_pan
+    logger.info("pangenome step")
+    panfile = pangenome.main("PanACoTA pangenome", lstinfo, name_pan, dbpath, min_id, outdir_pan,
+                             clust_mode, spe_dir, threads, outfile, verbose=verbose,
                              quiet=quiet)
 
     # Coregenome step
     outdir_corpers = os.path.join(outdir, "4-corepers_module")
+    logger.info("corepers step")
+    (tol, mixed, multi, floor) = args_corepers
     corepers_file = corepers.main("PanACoTA corepers", panfile, tol, multi, mixed, outdir_corpers,
-                                  verbose=verbose, quiet=quiet)
-
+                                  floor, verbose, quiet)
     # Align step
     outdir_align = os.path.join(outdir, "5-align_module")
     force = False
+    logger.info("align step")
     align_file = align.main("PanACoTA align", corepers_file, lstinfo, name_pan, outdir_annotate,
-                            outdir_align, threads, force, verbose, quiet)
-    print(align_file)
+                            outdir_align, threads, force, verbose=verbose, quiet=quiet)
+
 
     # Tree step
-    # models_fastme = {"p-distance": "p", "RY-symetric": "Y", "RY": "R",
-    #                  "JC69": "J", "K2P": "K", "F81": "1", "F84": "4",
-    #                  "TN93": "T", "LogDet": "L"}
-    # models_fasttree = {"GTR": "-gtr", "JC": ""}
-    # models_iqtree = set(["HKY", "JC", "F81", "K2P", "K3P", "K81uf",
-    #                      "TNef", "TIM", "TIMef", "TVM", "TVMef", "SYM", "GTR"])
-    # models_iqtree = {mod: mod for mod in models_iqtree}
-    if soft == "fasttree":
-        model = "-gtr"
-    elif soft =="iqtree" or soft == "iqtree2":
-        model = "GTR"
-    elif soft == "quicktree":
-        model = ""
-    elif soft == "fastme":
-        model = "T"
-    else:
-        logger.error(f"Soft {soft} is not possible.")
-        sys.exit(1)
+    (soft, model, boot, write_boot, memory, fast) = args_tree
     outdir_tree = os.path.join(outdir, "6-tree_module")
-    tree.main("PanACoTA tree", align_file, outdir_tree, soft, model, threads, boot=False,
-              write_boot=False, memory=False, fast=False, verbose=verbose, quiet=quiet)
-
+    logger.info("tree step")
+    tree.main("PanACoTA tree", align_file, outdir_tree, soft, model, threads, boot,
+              write_boot, memory, fast, verbose=verbose, quiet=quiet)
     logger.info("All modules of PanACOTA are finished.")
 
 
