@@ -42,6 +42,8 @@ April 2017
 """
 from PanACoTA import utils
 import argparse
+import configparser
+import sys
 
 
 def gen_name(param):
@@ -149,3 +151,75 @@ def perc_id(param):
         msg = ("The minimum %% of identity must be in [0, 1]. Invalid value: {}".format(param))
         raise argparse.ArgumentTypeError(msg)
     return param
+
+
+class Conf_all_parser(configparser.ConfigParser):
+    """
+    Read configfile and return arguments found, according to required type
+    """
+    def __init__(self, conffile, sections):
+        super().__init__()
+        self.read(conffile)
+        self.sec_dicts = {}
+        for sec in sections:
+            self.sec_dicts[sec] = dict(self[sec])
+
+    def get_section_dict(self, section):
+        """
+        get dictionary of values for 'section' section
+        """
+        return self.sec_dicts[section]
+
+    def add_default(self, defargs, section):
+        """
+        Add all default arguments (defargs) in section dict.
+        """
+        for key, val in defargs.items():
+            if key not in self.sec_dicts[section]:
+                self[section][key] = str(val)
+                self.sec_dicts[section][key] = val
+
+    def update(self, args, section):
+        """
+        Add all arguments from args. If key already exists in self, overwrite it.
+        Otherwise, create it.
+        """
+        self.sec_dicts[section].update(args)
+        for key, val in self.sec_dicts[section].items():
+            self[section][key] = str(val)
+
+    def set_boolean(self, section, param):
+        """
+        Change param of section to boolean
+        """
+        try:
+            bool_param = self.getboolean(section, param)
+            self.sec_dicts[section][param] = bool_param
+        except ValueError as err:
+            val = self[section][param]
+            print(f"ERROR: {param} must be a boolean. Wrong value: {val}.")
+            sys.exit(1)
+
+    def set_int(self, section, param):
+        """
+        Change param of section to boolean
+        """
+        try:
+            int_param = self.getint(section, param)
+            self.sec_dicts[section][param] = int_param
+        except ValueError as err:
+            val = self[section][param]
+            print(f"ERROR: {param} must be an int. Wrong value: {val}.")
+            sys.exit(1)
+
+    def set_float(self, section, param):
+        """
+        Change param of section to boolean
+        """
+        try:
+            float_param = self.getfloat(section, param)
+            self.sec_dicts[section][param] = float_param
+        except ValueError as err:
+            val = self[section][param]
+            print(f"ERROR: {param} must be a float. Wrong value: {val}.")
+            sys.exit(1)
