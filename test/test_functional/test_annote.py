@@ -621,7 +621,7 @@ def test_main_prodigal_ok(capsys):
     os.makedirs(res_folder)
 
     # Function arguments
-    list_file = os.path.join(TEST_DIR, "list_genomes.txt")
+    list_file = os.path.join(GENEPATH, "list_genomes.txt")
     with open(list_file, "w") as lf:
         lf.write("A_H738.fasta \n")
         lf.write("H299_H561.fasta::TOTO")

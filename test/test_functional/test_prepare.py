@@ -55,15 +55,15 @@ def test_main_from_parse():
     """
     args = argparse.Namespace()
     args.argv = ["prepare", "test_func_prepare"]
-    args.NCBI_species = "Acetobacter orleanensis"
-    args.NCBI_species_taxid = "104099"
+    args.ncbi_species = "Acetobacter orleanensis"
+    args.ncbi_species_taxid = "104099"
     args.outdir = GENEPATH
     args.tmp_dir = ""
     args.parallel = 1
     args.no_refseq = False
     args.db_dir = ""
     args.only_mash = False
-    args.from_info = ""
+    args.info_file = ""
     args.l90 = 100
     args.nbcont = 999
     args.cutn = 0

@@ -77,7 +77,7 @@ def test_check_prokka_no_outdir():
     Test that prokka returns the right error message when output directory does not exist
     """
     logger = my_logger("test_check_prokka_no_outdir")
-    outdir = "outdir"
+    outdir = os.path.join(GENEPATH, "outdir")
     name = "prokka_out_for_test"
     logf = "prokka.log"
     gpath = os.path.join(GENEPATH, "toto.fna")
