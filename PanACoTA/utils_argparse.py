@@ -44,9 +44,15 @@ from PanACoTA import utils
 import argparse
 import configparser
 import sys
+import os
 
 
 def gen_name(param):
+    """
+    Check name given for the genome set:
+    - must contain 4 characters, all alphanumeric (calling utils.check_format)
+    - if does not fit, give advice on format (genus_genus_species_species)
+    """
     if not utils.check_format(param):
         msg = ("The genome name must contain 4 characters. For example, this name can "
                "correspond to the 2 first letters of genus, and 2 first letters of "
@@ -56,6 +62,11 @@ def gen_name(param):
 
 
 def date_name(param):
+    """
+    Check format of given date:
+    - must contain 4 characters, all alphanumeric (calling utils.check_format)
+    - if does not fit, give advice on format (MMYY)
+    """
     if not utils.check_format(param):
         msg = ("The date must contain 4 characters. Usually, it contains 4 digits, "
                "corresponding to the month (2 digits) and year (2 digits).")
@@ -64,11 +75,19 @@ def date_name(param):
 
 
 def get_date():
+    """
+    Get current date in MMYY format
+    """
     import time
     return time.strftime("%m%y")
 
 
 def cont_num(param):
+    """
+    Check number of contigs given
+    - must be positive int
+    - not more than 10000
+    """
     try:
         param = int(param)
     except Exception:
@@ -84,6 +103,12 @@ def cont_num(param):
 
 
 def thread_num(param):
+    """
+    check number of threads given.
+    - must be a positive int
+    - Cannot be more than number of threads available
+    - if '0' given, return number of threads available
+    """
     import multiprocessing
     try:
         param = int(param)
@@ -105,6 +130,9 @@ def thread_num(param):
 
 
 def positive_int(param):
+    """
+    Return a positive int for argument --cutn
+    """
     try:
         param = int(param)
     except ValueError:
@@ -117,6 +145,9 @@ def positive_int(param):
 
 
 def mash_dist(param):
+    """
+    Check mash distance given. Must be a float between 0 and 1 included
+    """
     try:
         param = float(param)
     except ValueError:
@@ -129,19 +160,25 @@ def mash_dist(param):
 
 
 def percentage(param):
-        try:
-            param = float(param)
-        except Exception:
-            msg = "argument -t tol: invalid float value: {}".format(param)
-            raise argparse.ArgumentTypeError(msg)
-        if param < 0 or param > 1:
-            msg = ("The minimum %% of genomes required in a family to be persistent must "
-                   "be in [0, 1]. Invalid value: {}".format(param))
-            raise argparse.ArgumentTypeError(msg)
-        return param
+    """
+    check argument given to parameter '-t tol'
+    """
+    try:
+        param = float(param)
+    except Exception:
+        msg = "argument -t tol: invalid float value: {}".format(param)
+        raise argparse.ArgumentTypeError(msg)
+    if param < 0 or param > 1:
+        msg = ("The minimum %% of genomes required in a family to be persistent must "
+               "be in [0, 1]. Invalid value: {}".format(param))
+        raise argparse.ArgumentTypeError(msg)
+    return param
 
 
 def perc_id(param):
+    """
+    Check argument given to parameter -i percentage_id
+    """
     try:
         param = float(param)
     except Exception:
@@ -157,11 +194,15 @@ class Conf_all_parser(configparser.ConfigParser):
     """
     Read configfile and return arguments found, according to required type
     """
-    def __init__(self, conffile, sections):
+    def __init__(self, conffile, readsec=[]):
         super().__init__()
+        if not os.path.isfile(conffile):
+            print(f"Error: config file {conffile} not found.")
+            sys.exit(1)
+        self.conffile = conffile
         self.read(conffile)
         self.sec_dicts = {}
-        for sec in sections:
+        for sec in readsec:
             # If section in configfile, put its arguments and values to a dict
             # If not, create empty section, and associate with empty dict
             if sec in dict(self):
@@ -174,7 +215,11 @@ class Conf_all_parser(configparser.ConfigParser):
         """
         get dictionary of values for 'section' section
         """
-        return self.sec_dicts[section]
+        if section in self.sec_dicts:
+            return self.sec_dicts[section]
+        else:
+            print(f"No section {section} in {self.conffile}")
+            sys.exit(1)
 
     def add_default(self, defargs, section):
         """
