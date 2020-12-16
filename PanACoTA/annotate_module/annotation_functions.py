@@ -324,6 +324,7 @@ def run_prokka(arguments):
     cmd = (f"prokka --outdir {prok_dir} --cpus {threads} "
            f"--prefix {name} --centre prokka {gpath}")
     error = (f"Error while trying to run prokka on {name} from {gpath}")
+    print(cmd)
     logger.details("Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf, logger=logger)
