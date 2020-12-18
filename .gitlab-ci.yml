@@ -18,7 +18,7 @@ build-from-ubuntu:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_ubuntu.py
+    - py.test test/test_install/test_make_ubuntu.py -xv
 
 
 build-from-barrnap:
@@ -29,7 +29,7 @@ build-from-barrnap:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_barrnap.py
+    - py.test test/test_install/test_make_barrnap.py -xv
 
 
 build-from-prokka-quicktree:
@@ -40,7 +40,7 @@ build-from-prokka-quicktree:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prokka-quicktree.py
+    - py.test test/test_install/test_make_prokka-quicktree.py -xv
 
 
 build-from-prodigal:
@@ -51,7 +51,7 @@ build-from-prodigal:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_prodigal.py
+    - py.test test/test_install/test_make_prodigal.py -xv
 
 
 build-from-test-image:
@@ -61,7 +61,7 @@ build-from-test-image:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - py.test test/test_install/test_make_all-installed.py
+    - py.test test/test_install/test_make_all-installed.py -xv
 
 
 unit-test-ubuntu:
