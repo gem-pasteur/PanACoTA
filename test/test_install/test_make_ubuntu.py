@@ -95,7 +95,7 @@ def test_install_panacota_base_ubuntu():
             assert linec in logf_content
 
     # # # Check that needed packages are installed
-    assert utils.is_package_installed("argparse")
+    assert not utils.is_package_installed("argparse")
     assert utils.is_package_installed("progressbar")
     assert utils.is_package_installed("numpy")
     assert utils.is_package_installed("matplotlib")
