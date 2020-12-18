@@ -40,7 +40,6 @@ build-from-prokka-quicktree:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
-    - mafft -h
     - py.test test/test_install/test_make_prokka-quicktree.py -xv
 
 
