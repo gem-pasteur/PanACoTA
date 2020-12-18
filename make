@@ -99,8 +99,8 @@ def install_all(install_dir, target, dev=False, user=False):
              "you do not have root access, install with the '--user' option")
     run_cmd(cmd, error, eof=True)
     if user:
-        gapcat_bin = os.path.join(os.getcwd(), "bin", "PanACoTA")
-        os.symlink(gapcat_bin, os.path.join(install_dir, os.path.basename(gapcat_bin)))
+        gapcat_bin = os.path.join(os.getcwd(), "PanACoTA", "bin", "run_panacota.py")
+        os.symlink(gapcat_bin, os.path.join(install_dir, "PanACoTA"))
     if to_install_user:
         msg = ("Some dependencies needed for some subcommands of PanACoTA are not installed. "
                "Here is the list of missing dependencies, and for what they are used. If you plan "
@@ -113,7 +113,7 @@ def install_all(install_dir, target, dev=False, user=False):
                     "syntaxic annotation only). If you even need functional annotation, also "
                     "install prokka\n")
         if "prokka" in to_install_user:
-            msg += ("\t- prokka (for annotate subcommand, with syntaxic + functional annotation). "   
+            msg += ("\t- prokka (for annotate subcommand, with syntaxic + functional annotation). "
                     "If you only need syntaxic annotation, prodigal is enough.\n")
         if "barrnap" in to_install_user:
             msg += ("\t- barrnap. If you use Prokka for functional annotation, it will not predict"
