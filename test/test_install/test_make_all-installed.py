@@ -43,12 +43,14 @@ def test_install_panacota():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
+    assert utils.check_installed("FastTreeMP")
     # Install panacota
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
+    assert utils.check_installed("FastTreeMP")
     # Check that panacota is installed (pip3 module exists)
     assert utils.is_package_installed("PanACoTA")
     # Check that it is installed in "final mode"
@@ -89,6 +91,7 @@ def test_upgrade(install_panacota):
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("FastTreeMP")
     assert utils.check_installed("PanACoTA")
     # Upgrade PanACoTA
     cmd = "python3 make upgrade"
@@ -97,6 +100,7 @@ def test_upgrade(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("FastTreeMP")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -113,6 +117,7 @@ def test_upgrade_notinstalled():
     """
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
+    assert utils.check_installed("FastTreeMP")
     assert not utils.check_installed("PanACoTA")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
@@ -120,6 +125,7 @@ def test_upgrade_notinstalled():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("FastTreeMP")
     logfile = "install.log"
     with open(logfile, "r") as logf:
         lines = logf.readlines()
@@ -137,6 +143,7 @@ def test_uninstall(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("FastTreeMP")
     cmd = "python3 make uninstall"
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
@@ -144,6 +151,7 @@ def test_uninstall(install_panacota):
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
+    assert utils.check_installed("FastTreeMP")
     assert utils.check_installed("quicktree")
     assert utils.check_installed("iqtree") or utils.check_installed("iqtree2")
     logfile = "install.log"
@@ -217,10 +225,12 @@ def test_install_user():
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
+    assert utils.check_installed("FastTreeMP")
     utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
+    assert utils.check_installed("FastTreeMP")
     # Check logfile content
     logfile = "install.log"
     content = ["Installing PanACoTA in user mode...", "DONE"]
