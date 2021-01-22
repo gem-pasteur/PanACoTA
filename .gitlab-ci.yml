@@ -81,8 +81,7 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_utils-argparse.py -vx
     - py.test test/test_unit/test_prepare -v -x
     - py.test test/test_unit/test_annotate/test_genome_func.py -vx
-    # - py.test test/test_unit/test_annotate/test_annotation*  -vx
-    - py.test test/test_unit/test_annotate/test_annotation_functions-prokka.py::test_run_prokka_out_exists_force -xvs
+    - py.test test/test_unit/test_annotate/test_annotation*  -vx
     - py.test test/test_unit/test_annotate/test_format* -v -x
     - py.test test/test_unit/test_pangenome -vx
     - py.test test/test_unit/test_corepers -vx
