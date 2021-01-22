@@ -76,7 +76,6 @@ unit-test-ubuntu:
     - ./make
   script:
     - prokka --version
-    - prodigal -v
     - prokka --outdir test/data/annotate/generated_by_unit-tests/H299_H561.fasta-prokkaRes --cpus 2 --prefix test_runprokka_H299 --centre prokka test/data/annotate/genomes/H299_H561.fasta
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-logging.py -xv
