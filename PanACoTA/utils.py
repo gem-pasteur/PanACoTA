@@ -341,7 +341,7 @@ def run_cmd(cmd, error, eof=False, **kwargs):
         call.wait()
         retcode = call.returncode
     except OSError:
-        logger.error(f"error: command {cmd} is not possible.")
+        logger.error(f"error: command '>{cmd}' is not possible.")
         if eof:
             sys.exit(1)
         else:

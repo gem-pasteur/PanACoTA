@@ -821,7 +821,7 @@ def test_run_cmd_error_noquit(caplog):
     cmd = "toto"
     error = "error trying to run toto"
     assert utils.run_cmd(cmd, error) == 1
-    assert "toto does not exist" in caplog.text
+    assert "error: command '>toto' is not possible" in caplog.text
 
 
 def test_run_cmd_error_noquit_logger(caplog):
@@ -833,7 +833,7 @@ def test_run_cmd_error_noquit_logger(caplog):
     logger = logging.getLogger("default")
     error = "error trying to run toto"
     assert utils.run_cmd(cmd, error, logger=logger) == 1
-    assert "toto does not exist" in caplog.text
+    assert "error: command '>toto' is not possible" in caplog.text
 
 
 def test_run_cmd_error_quit(caplog):
@@ -845,7 +845,7 @@ def test_run_cmd_error_quit(caplog):
     error = "error trying to run toto"
     with pytest.raises(SystemExit):
         utils.run_cmd(cmd, error, eof=True)
-    assert "toto does not exist" in caplog.text
+    assert "command '>toto' is not possible" in caplog.text
 
 
 def test_run_cmd_retcode_non0(caplog):
@@ -880,7 +880,7 @@ def test_run_cmd_error_stderrfile(caplog):
     error = "error trying to run toto"
     outfile = open(os.path.join(GENEPATH, "stderr_run_cmd.txt"), "w")
     assert utils.run_cmd(cmd, error, stderr=outfile) == 1
-    assert "error: toto does not exist" in caplog.text
+    assert "error: command '>toto' is not possible" in caplog.text
     outfile.close()
 
 
@@ -893,7 +893,7 @@ def test_run_cmd_error_stdoutfile(caplog):
     error = "error trying to run toto"
     outfile = open(os.path.join(GENEPATH, "stdout_run_cmd.txt"), "w")
     assert utils.run_cmd(cmd, error, stdout=outfile) == 1
-    assert "error: toto does not exist" in caplog.text
+    assert "error: command '>toto' is not possible" in caplog.text
     outfile.close()
 
 
