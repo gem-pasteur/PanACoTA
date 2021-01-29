@@ -75,7 +75,8 @@ unit-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - ls
+    - ls Examples/genomes_init/genome1.fst
+    - prokka Examples/genomes_init/genome1.fst
     # - py.test test/test_unit/test_utils.py -vx
     # - py.test test/test_unit/test_utils-logging.py -xv
     # - py.test test/test_unit/test_utils-pan.py -vx
