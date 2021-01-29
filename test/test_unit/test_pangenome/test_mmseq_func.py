@@ -819,5 +819,5 @@ def test_run_all_pangenome_givenfile_parallel(caplog):
     assert "Clustering proteins..." in caplog.text
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[1].levelname == "INFO"
-    assert caplog.records[2].levelname == "DETAIL"
-    assert caplog.records[3].levelname == "DETAIL"
+    assert caplog.records[2].levelname == "DEBUG"
+    assert caplog.records[3].levelname == "DEBUG"
