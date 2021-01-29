@@ -417,8 +417,8 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
             return 0
     if len(files_existing) != len(outext):
         logger.info("Creating database")
-        logger.details("Existing files: {}".format(len(files_existing)))
-        logger.details("Expected extensions: {}".format(len(outext)))
+        logger.debug("Existing files: {}".format(len(files_existing)))
+        logger.debug("Expected extensions: {}".format(len(outext)))
         cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
         msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
                "database format.")
