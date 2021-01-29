@@ -148,8 +148,8 @@ def test_create_mmseqdb(caplog):
     assert "Existing files: 0" in caplog.text
     assert "Expected extensions: 7" in caplog.text
     assert caplog.records[0].levelname == "INFO"
-    assert caplog.records[1].levelname == "DETAIL"
-    assert caplog.records[2].levelname == "DETAIL"
+    assert caplog.records[1].levelname == "DEBUG"
+    assert caplog.records[2].levelname == "DEBUG"
     assert os.path.isfile(logfile)
 
 
@@ -224,9 +224,9 @@ def test_create_mmseqdb_not_all_exist(caplog):
     assert ("Creating database") in found_text
     assert caplog.records[6].levelname == "INFO"
     assert ("Existing files: 0") in found_text
-    assert caplog.records[7].levelname == "DETAIL"
+    assert caplog.records[7].levelname == "DEBUG"
     assert ("Expected extensions: 7") in found_text
-    assert caplog.records[8].levelname == "DETAIL"
+    assert caplog.records[8].levelname == "DEBUG"
 
 
 def test_cluster2file():
@@ -758,8 +758,8 @@ def test_run_all_pangenome(caplog):
     assert "Clustering proteins..." in caplog.text
     assert caplog.records[0].levelname == "INFO"
     assert caplog.records[1].levelname == "INFO"
-    assert caplog.records[2].levelname == "DETAIL"
-    assert caplog.records[3].levelname == "DETAIL"
+    assert caplog.records[2].levelname == "DEBUG"
+    assert caplog.records[3].levelname == "DEBUG"
 
 
 def test_run_all_pangenome_givenfile_parallel(caplog):
