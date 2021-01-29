@@ -524,7 +524,7 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     try:
         shutil.move(orig_mafft, temp_mafft)
     except PermissionError:
-        pytest.skip("No permission to change mafft bin filename") 
+        pytest.skip("No permission to change mafft bin filename")
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
     gen_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
     miss_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
@@ -539,8 +539,8 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
                                    ngenomes, logger)
     assert "Checking extractions for family 8" in caplog.text
     assert "Aligning family 8" in caplog.text
-    assert ("mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt "
-            "does not exist") in caplog.text
+    assert ("command '>mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt' "
+            "is not possible") in caplog.text
     # Check content of mafft and btr files
     assert not os.path.isfile(mafft_file)
     assert not os.path.isfile(btr_file)

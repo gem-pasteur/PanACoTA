@@ -86,10 +86,10 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_annotate/test_annotation*  -vx
     - py.test test/test_unit/test_annotate/test_format* -v -x
     - py.test test/test_unit/test_pangenome -vx
-    # - py.test test/test_unit/test_corepers -vx
-    # - py.test test/test_unit/test_align -vx
-    # - py.test test/test_unit/test_tree -xv
-    # - mv .coverage .coverage-unit
+    - py.test test/test_unit/test_corepers -vx
+    - py.test test/test_unit/test_align -vx
+    - py.test test/test_unit/test_tree -xv
+    - mv .coverage .coverage-unit
   artifacts:
     paths:
       - .coverage-unit
