@@ -75,19 +75,20 @@ unit-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_unit/test_utils.py -vx
-    - py.test test/test_unit/test_utils-logging.py -xv
-    - py.test test/test_unit/test_utils-pan.py -vx
-    - py.test test/test_unit/test_utils-argparse.py -vx
-    - py.test test/test_unit/test_prepare -v -x
-    - py.test test/test_unit/test_annotate/test_genome_func.py -vx
-    - py.test test/test_unit/test_annotate/test_annotation*  -vx
-    - py.test test/test_unit/test_annotate/test_format* -v -x
+    - ls
+    # - py.test test/test_unit/test_utils.py -vx
+    # - py.test test/test_unit/test_utils-logging.py -xv
+    # - py.test test/test_unit/test_utils-pan.py -vx
+    # - py.test test/test_unit/test_utils-argparse.py -vx
+    # - py.test test/test_unit/test_prepare -v -x
+    # - py.test test/test_unit/test_annotate/test_genome_func.py -vx
+    # - py.test test/test_unit/test_annotate/test_annotation*  -vx
+    # - py.test test/test_unit/test_annotate/test_format* -v -x
     # - py.test test/test_unit/test_pangenome -vx
     # - py.test test/test_unit/test_corepers -vx
     # - py.test test/test_unit/test_align -vx
     # - py.test test/test_unit/test_tree -xv
-    - mv .coverage .coverage-unit
+    # - mv .coverage .coverage-unit
   artifacts:
     paths:
       - .coverage-unit
