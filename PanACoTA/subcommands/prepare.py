@@ -67,13 +67,13 @@ def main_from_parse(arguments):
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.ncbi_species, arguments.ncbi_species_taxid, arguments.levels,
-         arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.no_refseq,
+         arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
          arguments.db_dir, arguments.only_mash,
          arguments.info_file, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_refseq, db_dir,
+def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
@@ -99,7 +99,7 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
         Path to directory where tmp files are saved (sequences split at each row of 5 'N')
     threads : int
         max number of threads to use
-    no_refseq : bool
+    norefseq : bool
         True if user does not want to download again the database
     db_dir : str
         Name of the folder where already downloaded fasta files are saved.
@@ -187,9 +187,9 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, no_ref
         if info_file and os.path.isfile(info_file):
             os.rename(info_file, info_file + ".back")
 
-        # 'no_refseq = True" : Do not download genomes, just do QC and mash filter on given genomes
+        # 'norefseq = True" : Do not download genomes, just do QC and mash filter on given genomes
         # -> if not, error and exit
-        if no_refseq:
+        if norefseq:
             logger.warning('You asked to skip refseq downloads.')
 
             # -> if db_dir given, watch for sequences there. If does not exist, error and exit
@@ -345,7 +345,7 @@ def build_parser(parser):
                                 "you want to use all cores of your computer."))
 
     optional = parser.add_argument_group('Alternatives')
-    optional.add_argument("--norefseq", dest="no_refseq", action="store_true",
+    optional.add_argument("--norefseq", dest="norefseq", action="store_true",
                           help=("If you already downloaded refseq genomes and do not want to "
                                 "check them, add this option to directly go to the next steps:"
                                 "quality control (L90, number of contigs...) and mash filter. "
@@ -432,7 +432,7 @@ def check_args(parser, args):
 
     # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
     # -> Give at least 1!
-    if (not args.only_mash and not args.no_refseq and
+    if (not args.only_mash and not args.norefseq and
         not args.ncbi_species_taxid and not args.ncbi_species):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
                      "you want to download refseq genomes. But you did not provide any "
@@ -443,7 +443,7 @@ def check_args(parser, args):
     # If norefseq, give output directory
     #  - folder containing Database_init, with all sequences
     #  - or new folder where you want to put the new results
-    if args.no_refseq and not args.outdir:
+    if args.norefseq and not args.outdir:
         parser.error("You must provide an output directory, where your results will be saved.")
 
     # If user wants only mash steps, check that he gave info file, and outdir
@@ -492,7 +492,7 @@ def check_args(parser, args):
         print(colored(thresholds_message(args.l90, args.nbcont), "yellow"))
 
     # Warn if user gave info file, but does not ask to run only Mash -> info file will be ignored
-    if (args.info_file and not args.only_mash) or (args.info_file and not args.no_refseq):
+    if (args.info_file and not args.only_mash) or (args.info_file and not args.norefseq):
         message = ("  !! You gave an info file (--info option), but did not ask to run only Mash "
                    "step (-M option). Your info file will be ignored (and renamed with '.back' "
                    "at the end), and another one will "
