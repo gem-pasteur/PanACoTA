@@ -42,8 +42,9 @@ This README file provides some essential information to install/use PanACoTA. Bu
 
 If you use PanACoTA, please cite:
 
-Amandine PERRIN, Eduardo P.C. ROCHA (2020).  PanACoTA: A modular tool for massive microbial comparative genomics. BioRxiv. 
-[![DOI:10.1101/2020.09.11.293472](https://zenodo.org/badge/DOI/10.1101/2020.09.11.293472.svg)](https://doi.org/10.1101/2020.09.11.293472)
+Amandine Perrin, Eduardo P. C. Rocha, PanACoTA: a modular tool for massive microbial comparative genomics, NAR Genomics and Bioinformatics, Volume 3, Issue 1, March 2021, lqaa106
+[![DOI:10.1093/nargab/lqaa106](https://zenodo.org/badge/DOI/10.1093/nargab/lqaa106.svg)](https://academic.oup.com/nargab/article/3/1/lqaa106/6090162)
+
 
 **Content of this README:**
 
