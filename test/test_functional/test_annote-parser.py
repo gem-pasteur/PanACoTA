@@ -11,6 +11,8 @@ import os
 import shutil
 
 from PanACoTA.subcommands import annotate as annot
+DBDIR = os.path.join("test", "data", "annotate")
+GENEPATH = os.path.join(DBDIR, "generated_by_unit-tests")
 
 
 @pytest.fixture(autouse=True)
