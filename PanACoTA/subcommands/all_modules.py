@@ -69,7 +69,7 @@ def main_from_parse(args):
     cmd = "PanACoTA " + ' '.join(args.argv)
     args_all = (args.outdir, args.threads, args.verbose, args.quiet)
     args_prepare = (args.ncbi_species_taxid, args.ncbi_species, args.levels,
-                    args.tmp_dir, args.no_refseq, args.db_dir, args.only_mash, args.info_file,
+                    args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, args.info_file,
                     args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
     args_annot = (args.name, args.qc_only, args.date, args.prodigal_only)
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
@@ -104,11 +104,11 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
 
     # Run prepare module
     outdir_prepare = os.path.join(outdir, "1-prepare_module")
-    (NCBI_species_taxid, NCBI_species, levels, tmp_dir, no_refseq, db_dir, only_mash, info_file,
+    (NCBI_species_taxid, NCBI_species, levels, tmp_dir, norefseq, db_dir, only_mash, info_file,
      l90, nbcont, cutn, min_dist, max_dist) = args_prepare
     logger.info("prepare step")
     info_file = prepare.main("PanACoTA prepare", NCBI_species, NCBI_species_taxid, levels,
-                             outdir_prepare, tmp_dir, threads, no_refseq, db_dir, only_mash,
+                             outdir_prepare, tmp_dir, threads, norefseq, db_dir, only_mash,
                              info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet)
 
     # Run annotate module
@@ -246,7 +246,7 @@ def build_parser(parser):
                                 "By default, the minimum number of genomes will be "
                                 "ceil('tol'*N) (N being the total number of genomes). If "
                                 "you want to use floor('tol'*N) instead, add the '-F' option."))
-    pcorepers.add_argument("-M", dest="multi", action='store_true',
+    pcorepers.add_argument("-Mu", dest="multi", action='store_true',
                           help=("Add this option if you allow several members in any genome "
                                 "of a family. By default, only 1 (or 0 if tol<1) member "
                                 "per genome are allowed in all genomes. If you want to allow "
@@ -278,7 +278,7 @@ def build_parser(parser):
 
 def parse(parser, argu):
     """
-    arse arguments given to parser
+    parse arguments given to parser
 
     Parameters
     ----------
@@ -302,6 +302,7 @@ def check_args(parser, argv):
 
     """
     from argparse import Namespace
+
     # Get arguments given in command line
     # If an argument was not in the user command-line, it still exists in argv,
     # but is set to 'None' -> ignore it
@@ -309,7 +310,6 @@ def check_args(parser, argv):
     # it still exists in argv but is set to False -> ignore it to replace by info from
     # config file if any, or default otherwise
     dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
-
     final_dict = {}
 
     # PREPARE STEP
@@ -340,8 +340,6 @@ def check_args(parser, argv):
     # If we chose soft==quicktree, check_args will return error if threads > 1. So,
     # we put threads = 1 during check_args, and put back the value after
     th_save = tree_dict["threads"]
-    if tree_dict["soft"] == "quicktree":
-        tree_dict["threads"] = 1
     a = Namespace(**tree_dict)
     checked_a = tree.check_args(parser, a)
     # Variable can be changed by check_args (like put default model if not given)
@@ -365,20 +363,21 @@ def get_prepare(dict_argv):
         conf_conffile = utils_argparse.Conf_all_parser("",["prepare"])
     else:
         conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
-                                                       sections=["prepare"])
+                                                       readsec=["prepare"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "prepare")
+    print(conf_conffile.sec_dicts)
     # Add default arguments if not found in comd line nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
                 "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
                 "ncbi_species_taxid": "", "tmp_dir": "", "db_dir": "",
                 "info_file": "", "min_dist": 1e-4, "max_dist": 0.06,
-                "no_refseq": False, "only_mash": False}
+                "norefseq": False, "only_mash": False}
     conf_conffile.add_default(defaults, "prepare")
     # Change to expected types (boolean, int, float)
     conf_conffile.set_boolean("prepare", "quiet")
     conf_conffile.set_boolean("prepare", "only_mash")
-    conf_conffile.set_boolean("prepare", "no_refseq")
+    conf_conffile.set_boolean("prepare", "norefseq")
     conf_conffile.set_int("prepare", "threads")
     conf_conffile.set_int("prepare", "verbose")
     conf_conffile.set_int("prepare", "cutn")
@@ -399,7 +398,7 @@ def get_annotate(dict_argv):
         conf_conffile = utils_argparse.Conf_all_parser("",["annotate"])
     else:
         conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
-                                                       sections=["annotate"])
+                                                       readsec=["annotate"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "annotate")
     if "date" not in dict(conf_conffile["annotate"]):
@@ -432,7 +431,7 @@ def get_pangenome(dict_argv):
         conf_conffile = utils_argparse.Conf_all_parser("",["pangenome"])
     else:
         conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
-                                                       sections=["pangenome"])
+                                                       readsec=["pangenome"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "pangenome")
     # Add default arguments if not found in commandline nor config file
@@ -456,7 +455,7 @@ def get_corepers(dict_argv):
         conf_conffile = utils_argparse.Conf_all_parser("",["corepers"])
     else:
         conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
-                                                       sections=["corepers"])
+                                                       readsec=["corepers"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "corepers")
     # Add default arguments if not found in commandline nor config file
@@ -482,7 +481,7 @@ def get_tree(dict_argv):
     if not "configfile" in dict_argv:
         conf_conffile = utils_argparse.Conf_all_parser("",["tree"])
     else:
-        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'], sections=["tree"])
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'], readsec=["tree"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "tree")
     # Add default arguments if not found in commandline nor config file
