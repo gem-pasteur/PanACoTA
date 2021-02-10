@@ -196,11 +196,15 @@ class Conf_all_parser(configparser.ConfigParser):
     """
     def __init__(self, conffile, readsec=[]):
         super().__init__()
-        if not os.path.isfile(conffile):
+        if conffile != "" and not os.path.isfile(conffile):
             print(f"Error: config file {conffile} not found.")
             sys.exit(1)
         self.conffile = conffile
-        self.read(conffile)
+        try:
+            self.read(conffile)
+        except configparser.DuplicateOptionError as err:
+            print(err)
+            sys.exit(1)
         self.sec_dicts = {}
         for sec in readsec:
             # If section in configfile, put its arguments and values to a dict
