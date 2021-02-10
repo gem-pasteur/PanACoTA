@@ -117,6 +117,7 @@ func-test-ubuntu:
     - py.test test/test_functional/test_annote-parser.py -vx
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_prepare* -vx
+    - py.test test/test_functional/test_all* -vx
     - mv .coverage .coverage-functional
   artifacts:
     paths:
