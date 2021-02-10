@@ -185,20 +185,14 @@ def test_conf_parser_init_empty(capsys):
     test class Conf_all_parser init when no config file or empty config file
     """
     # No conf file, no section
-    with pytest.raises(SystemExit):
-        c = autils.Conf_all_parser("")
-    out, err = capsys.readouterr()
-    assert ('Error: config file  not found.') in out
+    c = autils.Conf_all_parser("")
+    assert c.sec_dicts == {}
     # No conf file, empty section list
-    with pytest.raises(SystemExit):
-        c = autils.Conf_all_parser("", [])
-    out, err = capsys.readouterr()
-    assert ('Error: config file  not found.') in out
+    c = autils.Conf_all_parser("", [])
+    assert c.sec_dicts == {}
     # No conf file, sections
-    with pytest.raises(SystemExit):
-        c = autils.Conf_all_parser("", ["sec1", "sec2"])
-    out, err = capsys.readouterr()
-    assert ('Error: config file  not found.') in out
+    c = autils.Conf_all_parser("", ["sec1", "sec2"])
+    assert c.sec_dicts == {"sec1": {}, "sec2": {}}
 
     confdir = os.path.join("test", "data", "generated_by_utils")
     os.makedirs(confdir)

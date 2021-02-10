@@ -366,7 +366,6 @@ def get_prepare(dict_argv):
                                                        readsec=["prepare"])
     # Add arguments from commandline
     conf_conffile.update(dict_argv, "prepare")
-    print(conf_conffile.sec_dicts)
     # Add default arguments if not found in comd line nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
                 "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
