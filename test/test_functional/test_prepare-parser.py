@@ -258,7 +258,7 @@ def test_parser_all_threads(capsys):
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-p 0 --norefseq -o toto".split())
     assert options.parallel == nb_cpu
-    assert options.no_refseq == True
+    assert options.norefseq == True
     assert options.only_mash == False
 
 
@@ -337,7 +337,7 @@ def test_parser_nospecies(capsys):
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-t 1234".split())
-    assert not options.no_refseq
+    assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
     assert options.ncbi_species == ""
@@ -356,7 +356,7 @@ def test_parser_default_cutn(capsys):
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-t 1234 -o outdir -s species".split())
-    assert not options.no_refseq
+    assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
     assert options.ncbi_species == "species"
@@ -374,7 +374,7 @@ def test_parser_default_l90_nb_cont(capsys):
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1".split())
-    assert not options.no_refseq
+    assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
     assert options.ncbi_species == "species"
@@ -391,7 +391,7 @@ def test_parser_info_notonlymash(capsys):
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1 --info toto".split())
-    assert not options.no_refseq
+    assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
     assert options.ncbi_species == "species"
