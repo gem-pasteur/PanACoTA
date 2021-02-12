@@ -93,6 +93,9 @@ def main(cmd, NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefs
         name of species to download, as given by NCBI
     NCBI_taxid : int
         species taxid given in NCBI
+    levels: str
+        Level of assembly to download. Choice between 'all', 'complete', 'chromosome',
+        'scaffold', 'contig'. Default is 'all'
     outdir : str
         path to output directory (where created database will be saved).
     tmp_dir : str

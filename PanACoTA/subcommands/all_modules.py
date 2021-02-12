@@ -61,10 +61,37 @@ def main_from_parse(args):
     """
     Call main function from the arguments given by parser
 
+        verbosity:
+
+    - defaut 0 : stdout contains INFO, stderr contains ERROR.
+    - 1: stdout contains INFO, stderr contains WARNING and ERROR
+    - 2: stdout contains (DEBUG), DETAIL and INFO, stderr contains WARNING and ERROR
+    - >=15: Add DEBUG in stdout
+
     Parameters
     ----------
-    args : argparse.Namespace
-        result of argparse parsing of all arguments in command line
+    cmd : str
+        command line used to launch this program
+    args_all : tuple
+        arguments common to all modules: output directory (str),
+        threads (int), verbose (int), quiet (bool)
+    args_prepare : tuple
+        arguments for prepare module (see subcommands.prepare.py): NCBI_species_taxid (int),
+        NCBI_species (str), levels (str), tmp_dir (str), norefseq (bool), db_dir (str),
+        only_mash (bool), info_file (str), l90 (int), nbcont (int), cutn (int),
+        min_dist (float), max_dist (float)
+    args_annot : tuple
+        arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
+        date (str), prodigal_only (bool)
+    args_pan : tuple
+        arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
+        clust_mode (int), spe_dir (str), outfile (str)
+    args_corepers : tuple
+        arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
+        multi (bool), floor (bool)
+    args_tree : tuple
+        arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
+        write_boot (bool), memory (str), fast (bool)
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     args_all = (args.outdir, args.threads, args.verbose, args.quiet)
