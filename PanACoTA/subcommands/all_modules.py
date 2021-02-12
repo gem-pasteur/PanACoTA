@@ -153,6 +153,8 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
                                        name, date, l90, nbcont, cutn, threads, force, qc_only,
                                        info_file, tmp_dir, res_annot_dir, verbose, quiet,
                                        prodigal_only)
+    if qc_only:
+        return "QC_only done"
 
     # Pangenome step
     name_pan = f"{name}_{nbgenomes}"
