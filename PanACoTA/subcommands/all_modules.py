@@ -187,6 +187,7 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     tree.main("PanACoTA tree", align_file, outdir_tree, soft, model, threads, boot,
               write_boot, memory, fast, verbose=verbose, quiet=quiet)
     logger.info("All modules of PanACOTA are finished.")
+    return 0
 
 
 def build_parser(parser):
