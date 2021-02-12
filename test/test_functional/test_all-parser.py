@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for the parser of align subcommand
+Functional tests for the parser of 'all' subcommand
 """
 import argparse
 import pytest

@@ -1,1 +1,1 @@
-""" genomeAPCAT functional tests """
+""" PanACoTA functional tests """

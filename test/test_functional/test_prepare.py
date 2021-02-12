@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for genomeAPCAT annotate
+Functional tests for PanACoTA 'prepare' subcommand
 """
 
 from PanACoTA.subcommands import prepare

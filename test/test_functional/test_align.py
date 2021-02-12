@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Functional tests for genomeAPCAT pangenome
+Functional tests for 'align' subcommand
 """
 import os
 import shutil

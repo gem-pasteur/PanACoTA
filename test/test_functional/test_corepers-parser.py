@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for the parser of corepers.py
+Functional tests for the parser of 'corepers' subcommand
 """
 
 import pytest

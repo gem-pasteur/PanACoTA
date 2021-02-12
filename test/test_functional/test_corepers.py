@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Functional tests for genomeAPCAT corepers subcommand
+Functional tests for PanACoTA corepers subcommand
 """
 import glob
 import os

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for the parser of annote_pipeline.py
+Functional tests for the parser of 'annotate' subcommand
 """
 import pytest
 import argparse

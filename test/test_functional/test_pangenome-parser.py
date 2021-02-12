@@ -2,7 +2,7 @@
 # coding: utf-8
 
 """
-Functional tests for the parser of pangenome.py
+Functional tests for the parser of 'pangenome' subcommand
 """
 
 import pytest

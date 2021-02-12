@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Functional tests for genomeAPCAT pangenome
+Functional tests for pangenome subcommand
 """
 import glob
 import os
