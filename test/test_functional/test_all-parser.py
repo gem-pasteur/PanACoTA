@@ -110,10 +110,11 @@ def test_parser_thread_quicktree(capsys):
     with pytest.raises(SystemExit):
         allm.parse(parser,
                          "-c test/data/all/default-conffigfile.ini -o out-all "
-                         "-n TEST --threads 10 --soft quicktree".split())
+                         "-n TEST --threads 2 --soft quicktree".split())
     _, err = capsys.readouterr()
     assert ("You cannot run quicktree with multiple threads. "
             "Choose another software, or remove the --threads option") in err
+
 
 def test_duplicate_value(capsys):
     """
@@ -124,7 +125,7 @@ def test_duplicate_value(capsys):
     with pytest.raises(SystemExit):
         allm.parse(parser,
                          "-c test/data/all/conffile-duplicate.ini -o out-all "
-                         "-n TEST --threads 10 --soft quicktree".split())
+                         "-n TEST --threads 2 --soft quicktree".split())
     out, err = capsys.readouterr()
     assert ("option 'verbose' in section 'prepare' already exists") in out
 
