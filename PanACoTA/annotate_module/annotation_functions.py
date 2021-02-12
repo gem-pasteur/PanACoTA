@@ -281,7 +281,7 @@ def run_prokka(arguments):
     logging.addLevelName(utils.detail_lvl(), "DETAIL")
     root.addHandler(qh)
     logger = logging.getLogger('annotate.run_prokka')
-    logger.details(f"Start annotating {name} from {gpath} with Prokka")
+    logger.log(utils.detail_lvl(), f"Start annotating {name} from {gpath} with Prokka")
 
     # Define prokka directory and logfile, and check their existence
     prok_dir = os.path.join(prok_folder, os.path.basename(gpath) + "-prokkaRes")
@@ -296,12 +296,12 @@ def run_prokka(arguments):
         # If everything ok in the result dir, do not rerun prokka,
         # use those results for next step (formatting)
         if ok:
-            logger.details("Prokka did not run again, "
-                           "formatting step used already generated results of "
-                           f"Prokka in {prok_dir}. If you want to re-run prokka, first "
-                           "remove this result folder, or use '-F' or '--force' "
-                           "option if you want to rerun prokka for all genomes.")
-            logger.details(f"End annotating {name} {gpath}")
+            logger.log(utils.detail_lvl(), "Prokka did not run again, "
+                       "formatting step used already generated results of "
+                       f"Prokka in {prok_dir}. If you want to re-run prokka, first "
+                       "remove this result folder, or use '-F' or '--force' "
+                       "option if you want to rerun prokka for all genomes.")
+            logger.log(utils.detail_lvl(), f"End annotating {name} {gpath}")
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:
@@ -324,8 +324,7 @@ def run_prokka(arguments):
     cmd = (f"prokka --outdir {prok_dir} --cpus {threads} "
            f"--prefix {name} --centre prokka {gpath}")
     error = (f"Error while trying to run prokka on {name} from {gpath}")
-    print(cmd)
-    logger.details("Prokka command: " + cmd)
+    logger.log(utils.detail_lvl(), "Prokka command: " + cmd)
     prokf = open(prok_logfile, "w")
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prokf, logger=logger)
     prokf.close()
@@ -433,7 +432,7 @@ def run_prodigal(arguments):
     prodigalferr = open(prodigal_logfile_err, "w")
     cmd = (f"prodigal -i {gpath} -d {basic_outname + '.ffn'} -a {basic_outname + '.faa'} "
            f"-f gff -o {basic_outname + '.gff'} -t {gpath_train} -q")
-    logger.details("Prodigal command: " + cmd)
+    logger.log(utils.detail_lvl(), "Prodigal command: " + cmd)
 
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf,
                         logger=logger)
