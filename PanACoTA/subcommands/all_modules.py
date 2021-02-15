@@ -70,8 +70,6 @@ def main_from_parse(args):
 
     Parameters
     ----------
-    cmd : str
-        command line used to launch this program
     args_all : tuple
         arguments common to all modules: output directory (str),
         threads (int), verbose (int), quiet (bool)
@@ -108,6 +106,31 @@ def main_from_parse(args):
 def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree):
     """
     Call all modules, one by one, using output of one as input for the next one
+
+    Parameters
+    ----------
+    cmd : str
+        command line used to launch the program
+    args_all : tuple
+        arguments common to all modules: output directory (str),
+        threads (int), verbose (int), quiet (bool)
+    args_prepare : tuple
+        arguments for prepare module (see subcommands.prepare.py): NCBI_species_taxid (int),
+        NCBI_species (str), levels (str), tmp_dir (str), norefseq (bool), db_dir (str),
+        only_mash (bool), info_file (str), l90 (int), nbcont (int), cutn (int),
+        min_dist (float), max_dist (float)
+    args_annot : tuple
+        arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
+        date (str), prodigal_only (bool)
+    args_pan : tuple
+        arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
+        clust_mode (int), spe_dir (str), outfile (str)
+    args_corepers : tuple
+        arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
+        multi (bool), floor (bool)
+    args_tree : tuple
+        arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
+        write_boot (bool), memory (str), fast (bool)
     """
     outdir, threads, verbose, quiet = args_all
     os.makedirs(outdir, exist_ok=True)
@@ -329,7 +352,19 @@ def parse(parser, argu):
 
 def check_args(parser, argv):
     """
+    Check arguments given by user
 
+    Parameters
+    ----------
+    parser : argparse.ArgumentParser
+        the parser used
+    argv : argparse.Namespace
+        parsed command-line given by user
+
+    Returns
+    -------
+    argv : argparse.Namespace
+        parsed command-line 
     """
     from argparse import Namespace
 
@@ -420,7 +455,7 @@ def get_prepare(dict_argv):
 
 def get_annotate(dict_argv):
     """
-    Check that arguments given for prepare step are compatible
+    Check that arguments given for annotate step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
     if not "configfile" in dict_argv:
@@ -453,7 +488,7 @@ def get_annotate(dict_argv):
 
 def get_pangenome(dict_argv):
     """
-    Check that arguments given for prepare step are compatible
+    Check that arguments given for pangenome step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
     if not "configfile" in dict_argv:
@@ -477,7 +512,7 @@ def get_pangenome(dict_argv):
 
 def get_corepers(dict_argv):
     """
-    Check that arguments given for prepare step are compatible
+    Check that arguments given for corepers step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
     if not "configfile" in dict_argv:
@@ -504,7 +539,7 @@ def get_corepers(dict_argv):
 
 def get_tree(dict_argv):
     """
-    Check that arguments given for prepare step are compatible
+    Check that arguments given for tree step are compatible
     """
     # Get arguments from config file and add them (overwrite if needed)
     if not "configfile" in dict_argv:
