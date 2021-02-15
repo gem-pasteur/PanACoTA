@@ -76,7 +76,6 @@ unit-test-ubuntu:
     - ./make
   script:
     - ls Examples/genomes_init/genome1.fst
-    - prokka Examples/genomes_init/genome1.fst
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-logging.py -xv
     - py.test test/test_unit/test_utils-pan.py -vx
