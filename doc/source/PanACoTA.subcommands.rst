@@ -56,4 +56,10 @@
     :undoc-members:
     :show-inheritance:
 
+``all`` module
+---------------
 
+.. automodule:: PanACoTA.subcommands.all_modules
+    :members:
+    :undoc-members:
+    :show-inheritance:
