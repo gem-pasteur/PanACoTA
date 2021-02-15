@@ -76,7 +76,6 @@ unit-test-ubuntu:
     - ./make
   script:
     - ls Examples/genomes_init/genome1.fst
-    - prokka Examples/genomes_init/genome1.fst
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-logging.py -xv
     - py.test test/test_unit/test_utils-pan.py -vx
@@ -117,7 +116,6 @@ func-test-ubuntu:
     - py.test test/test_functional/test_annote-parser.py -vx
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_prepare* -vx
-    - py.test test/test_functional/test_all.py::test_main_default_qc_only -xv
     - py.test test/test_functional/test_all* -vx
     - mv .coverage .coverage-functional
   artifacts:

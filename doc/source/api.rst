@@ -15,6 +15,8 @@ Hereafter is the PanACoTA API, describing all modules and their functions.
         * :doc:`corepers_module<PanACoTA.corepers_module>`,
         * :doc:`align_module<PanACoTA.align_module>`,
         * :doc:`tree_module<PanACoTA.tree_module>`.
+    - the module to run all subcommands:
+        :doc:`all_module<PanACoTA.all_modules>`.
 
 
 .. toctree::
@@ -28,3 +30,5 @@ Hereafter is the PanACoTA API, describing all modules and their functions.
     PanACoTA.corepers_module
     PanACoTA.align_module
     PanACoTA.tree_module
+    PanACoTA.all_modules
+    

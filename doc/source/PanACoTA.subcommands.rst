@@ -56,4 +56,7 @@
     :undoc-members:
     :show-inheritance:
 
+``all`` module
+---------------
 
+:doc:`all_modules<PanACoTA.all_modules>`
