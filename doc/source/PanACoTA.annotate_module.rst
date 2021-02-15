@@ -18,7 +18,7 @@
 ``annotation_functions`` submodule
 ----------------------------------
 
-.. automodule:: PanACoTA.annotate_module.prokka_prodigal_functions
+.. automodule:: PanACoTA.annotate_module.annotation_functions
     :members:
     :undoc-members:
     :show-inheritance:
