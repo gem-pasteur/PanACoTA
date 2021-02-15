@@ -51,6 +51,47 @@ according to your needs (if default values are ok, you do not need to specify th
 
 We will now describe each subcommand, with its options.
 
+``all`` subcommand
+==================
+You have to provide, at least, an output directory. You can see all other available options with::
+
+    PanACoTA all -h
+
+To access more options, you can use a configuration file, given with `-c <config-file>`. You can find an example of this file in `Example/input_files/configfile.ini`. The value of arguments will be taken into account in this order:
+
+    - value given in command-line (for example, `-i 0.85`)
+    - if not in command line, value given in configfile (`min_id = 0.85` in `[pangenome]` section)
+    - if not in configfile, default value (0.8 for this parameter)
+
+Configuration file
+------------------
+
+Configfile has the following format:
+
+.. code-block:: text
+
+    [module]
+    param1 = "test"
+    param2 = test
+    param3= True
+    param4 =yes
+    param5 = 1
+    param6: 5
+    #param7
+
+Where:
+
+    - `module` corresponds to the module for which you want to give a parameter (`prepare`, `annotate`, `pangenome`, `corepers`, `align`, `tree`).
+    - a boolean parameter is set with one of the boolean values (case-insensitive): 'yes'/'no', 'on'/'off', 'true'/'false' or '1'/'0' (examples with `param3`, `param4` and `param5` which are all booleans with True value)
+    - `""` are not mandatory for str arguments: `param1` and `param2` are the same.
+    - Use `#` to comment a line (information after a `#` will not be taken into account by the parser).
+    - Use `:` or `=` to delimit argument names from values
+
+In `Example/input_files/configfile.ini`, you have all possible parameters for all modules. Just uncomment and give your value to the ones you need. Values given in this example file are default ones (used if the parameter is not given in the configuration file nor in the command-line).
+
+
+
+
 
 ``prepare`` subcommand
 ======================
@@ -483,7 +524,7 @@ with:
     - ``-n <name>`` the default species name to use, for lines of the list_file which do not contain this information. This name must contain 4 alpha-numeric characters.
     - ``--l90 <num>``: *optional*. If the default value (max L90 = 100) does not fit your data, choose your own maximum limit.
     - ``--nbcont <num>``: *optional*. If the default value (max nb_contigs = 999) does not fit your data, choose your own maximum limit.
-    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower.
+    - ``--prodigal``: *optional*. Add this option if you only want syntactical annotation, given by prodigal, and not functional annotation which requires prokka and is slower. Prodigal will train on the first genome, and then annotate all genomes.
     - ``--small``: *optional*. If you use Prodigal to annotate genomes, if you sequences are too small (less than 20000 characters), it cannot annotate them with the default options. Add this to use 'meta' procedure.
 
 This command will run the same steps as described in quality control only, with additional steps:

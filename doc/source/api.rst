@@ -30,3 +30,5 @@ Hereafter is the PanACoTA API, describing all modules and their functions.
     PanACoTA.corepers_module
     PanACoTA.align_module
     PanACoTA.tree_module
+    PanACoTA.all_modules
+    

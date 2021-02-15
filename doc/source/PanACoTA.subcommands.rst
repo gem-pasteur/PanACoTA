@@ -59,7 +59,4 @@
 ``all`` module
 ---------------
 
-.. automodule:: PanACoTA.subcommands.all_modules
-    :members:
-    :undoc-members:
-    :show-inheritance:
+:doc:`all_modules<PanACoTA.all_modules>`
