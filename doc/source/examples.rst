@@ -35,6 +35,7 @@ We provide 4 different fictive genomes:
         * 1 file, with 1 contig (fasta) ``genome4.fst``
         * example of a complete genome (no stretch of "N" in the sequence)
 
+
 Annotate step
 =============
 
@@ -115,6 +116,8 @@ Prodigal does not accept, by default, sequences smaller than 20000 nucleotides, 
     PanACoTA annotate -d Examples/genomes_init -r Examples/2-res-prodigal -l Examples/input_files/list_genomes.lst -n GENO --l90 3 --nbcont 10 --prodigal --small
 
 .. note:: Only use --small option if you need to (if you have really small sequences). But keep in mind that, with so small sequences, annotation will be limited!
+
+.. note:: On sequences with a standard size, prodigal will start training on the best genome, and will then annotate all others based on this trained dataset. This will ensure a faster annotation, and a more homogeneous one, as the model used will be the same for all genomes.
 
 Here, we put the L90 limit to 3, which should lead to the removal of 1 genome (genome2, according to the ``info-genomes-list_genomes.lst``). We also put the nbcont limit to 10. However, this should not remove any genome, as all have less than 10 contigs. We put these limits just to show how the program works with your own limits, but they do not have any significance here, as a genome with L90 = 4 is not a bad quality genome!
 
