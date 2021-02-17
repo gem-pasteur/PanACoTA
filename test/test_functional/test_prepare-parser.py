@@ -352,6 +352,26 @@ def test_parser_nospecies(capsys):
             "taxid 1234 instead of the species name.") in out
 
 
+def test_parser_nospecies_nospeid(capsys):
+    """
+    Test that when the user does not give an int for the threads value, it returns an
+    error message.
+    """
+    parser = argparse.ArgumentParser(description="Prepare", add_help=False)
+    prepare.build_parser(parser)
+    options = prepare.parse(parser, "-t 1234".split())
+    assert not options.norefseq
+    assert not options.only_mash
+    assert options.ncbi_species_taxid == ""
+    assert options.ncbi_taxid == "1234"
+    assert options.ncbi_species_name == ""
+    out, err = capsys.readouterr()
+    assert ("WARNING: you did not provide a species name ('-g species' option) "
+            "nor a species taxid ('-T spetaxid') nor an output directory ('-o outdir'). "
+            "All files will be downloaded in a folder called with the NCBI "
+            "taxid 1234.") in out
+
+
 def test_parser_default_cutn(capsys):
     """
     Test that when the user does not give an int for the threads value, it returns an

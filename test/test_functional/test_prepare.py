@@ -155,8 +155,8 @@ def test_main_wrong_taxid(capsys):
     -> will change its name to .back to save it when the new file will be created
     """
     NCBI_species_name = ""
-    NCBI_taxid = ""
-    NCBI_species_taxid = "123"
+    NCBI_taxid = "123"
+    NCBI_species_taxid = ""
     NCBI_section = "genbank"
     levels = ""
     outdir = ""
