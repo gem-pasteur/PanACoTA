@@ -53,7 +53,7 @@ from PanACoTA import utils
 logger = logging.getLogger("prepare.dds")
 
 
-def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels, outdir, threads):
+def download_from_refseq(species_linked, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir, threads):
     """
     Download refseq genomes of given species
 
@@ -62,11 +62,13 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels, outdi
     species_linked : str
         given NCBI species with '_' instead of spaces, or NCBI taxID if species
         name not given
-    NCBI_species : str or None
+    ncbi_species_name : str or None
         name of species to download: user given NCBI species. None if
         no species name given
-    NCBI_taxid : str
-        species taxid given in NCBI
+    ncbi_species_taxid : int
+        species taxid given in NCBI (-T option)
+    ncbi_taxid : int
+        taxid given in NCBI (-t option)
     outdir : str
         Directory where downloaded sequences must be saved
     threads : int
@@ -89,16 +91,23 @@ def download_from_refseq(species_linked, NCBI_species, NCBI_taxid, levels, outdi
                "metadata_table":abs_sumfile}
     message = "Downloading all genomes for "
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
-    if NCBI_species:
-        keyargs["genera"] = NCBI_species
-        message += f"NCBI species = {NCBI_species}"
+    if ncbi_species_name:
+        keyargs["genera"] = ncbi_species_name
+        message += f"NCBI species = {ncbi_species_name}"
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
-    if NCBI_taxid:
-        keyargs["species_taxids"] = NCBI_taxid
-        if NCBI_species:
-            message += f" (NCBI_taxid = {NCBI_taxid})."
+    if ncbi_species_taxid:
+        keyargs["species_taxids"] = ncbi_species_taxid
+        if ncbi_species_name:
+            message += f" (NCBI_species_taxid = {ncbi_species_taxid})."
         else:
-            message += f" NCBI_taxid = {NCBI_taxid}"
+            message += f" NCBI_species_taxid = {ncbi_species_taxid}"
+    if ncbi_taxid:
+        keyargs["taxids"] = ncbi_taxid
+        if ncbi_species_name or ncbi_species_taxid:
+            message += f" (and NCBI_taxid = {ncbi_taxid})."
+        else:
+            message += f" NCBI_taxid = {ncbi_taxid}"
+
     # If assembly level(s) given, add it to arguments, and write to info message
     if levels:
         keyargs["assembly_levels"] = levels
