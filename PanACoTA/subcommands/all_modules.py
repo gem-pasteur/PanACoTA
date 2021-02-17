@@ -433,10 +433,10 @@ def get_prepare(dict_argv):
     conf_conffile.update(dict_argv, "prepare")
     # Add default arguments if not found in comd line nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
-                "ncbi_species_taxid": "", "tmp_dir": "", "db_dir": "",
+                "levels": "all", "quiet": False, "ncbi_species_name": "",
+                "ncbi_species_taxid": "", "ncbi_taxid": "", "tmp_dir": "", "db_dir": "",
                 "info_file": "", "min_dist": 1e-4, "max_dist": 0.06,
-                "norefseq": False, "only_mash": False}
+                "norefseq": False, "only_mash": False, "ncbi_section": "refseq"}
     conf_conffile.add_default(defaults, "prepare")
     # Change to expected types (boolean, int, float)
     conf_conffile.set_boolean("prepare", "quiet")
