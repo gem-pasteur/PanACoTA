@@ -55,8 +55,10 @@ def test_main_from_parse():
     """
     args = argparse.Namespace()
     args.argv = ["prepare", "test_func_prepare"]
-    args.ncbi_species = "Acetobacter orleanensis"
+    args.ncbi_species_name = "Acetobacter orleanensis"
     args.ncbi_species_taxid = "104099"
+    args.ncbi_taxid = ""
+    args.ncbi_section = "refseq"
     args.outdir = GENEPATH
     args.tmp_dir = ""
     args.parallel = 1
@@ -99,8 +101,10 @@ def test_main_not_only_mash_infoexists():
     We run without option only_mash, but still provide a lstinfo file
     -> will change its name to .back to save it when the new file will be created
     """
-    NCBI_species = ""
-    NCBI_taxid = "104099"
+    NCBI_species_name = ""
+    NCBI_species_taxid = "104099"
+    NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
     tmp_dir = os.path.join(outdir, "temporary_directory")
@@ -118,7 +122,7 @@ def test_main_not_only_mash_infoexists():
     verbose = 2
     quiet = False
     out_info_file = os.path.join(outdir, "LSTINFO-104099-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir,
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section, outdir, tmp_dir,
                         threads, norefseq, db_dir, only_mash, info_file, l90, nbcont,
                         cutn, min_dist, max_dist, verbose, quiet) == out_info_file
 
@@ -150,8 +154,10 @@ def test_main_wrong_taxid(capsys):
     We run without option only_mash, but still provide a lstinfo file
     -> will change its name to .back to save it when the new file will be created
     """
-    NCBI_species = ""
-    NCBI_taxid = "123"
+    NCBI_species_name = ""
+    NCBI_taxid = ""
+    NCBI_species_taxid = "123"
+    NCBI_section = "genbank"
     levels = ""
     outdir = ""
     tmp_dir = os.path.join("123", "temporary_directory")
@@ -169,7 +175,8 @@ def test_main_wrong_taxid(capsys):
     quiet = False
     res_outdir = "123"
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section, 
+                     outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     _, err = capsys.readouterr()
@@ -177,9 +184,9 @@ def test_main_wrong_taxid(capsys):
             "NCBI species name. If you gave both, check that given taxID and name really "
             "correspond to the same species.") in err
     # Check output files
-    summary =  os.path.join(res_outdir, "assembly_summary-104099.txt")
+    summary =  os.path.join(res_outdir, "assembly_summary-123.txt")
     assert not os.path.isfile(summary)
-    ngd_outdir = os.path.join(res_outdir, "refseq", "bacteria")
+    ngd_outdir = os.path.join(res_outdir, "genbank", "bacteria")
     assert not os.path.isdir(ngd_outdir)
     # # Check logfiles are here
     log_files = glob.glob(os.path.join(res_outdir, "*log*"))
@@ -198,8 +205,10 @@ def test_main_norefseq_wrongdbpath(capsys):
     We run with option norefseq, but given db_dir does not exist.
     -> error message
     """
-    NCBI_species = ""
-    NCBI_taxid = "123"
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
     tmp_dir = os.path.join(outdir, "temporary_directory")
@@ -216,7 +225,8 @@ def test_main_norefseq_wrongdbpath(capsys):
     quiet = False
     info_file = ""
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section,
+                     outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     _, err = capsys.readouterr()
@@ -224,7 +234,7 @@ def test_main_norefseq_wrongdbpath(capsys):
     assert ("Database folder dbdir supposed to contain fasta sequences does not exist. Please "
             "give a valid folder, or leave the default directory (no '-d' option)") in err
     # Check output files
-    summary =  os.path.join(GENEPATH, "assembly_summary-104099.txt")
+    summary =  os.path.join(GENEPATH, "assembly_summary-123.txt")
     assert not os.path.isfile(summary)
     ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
     assert not os.path.isdir(ngd_outdir)
@@ -242,8 +252,10 @@ def test_main_norefseq_nodefault_dbdir_nor_refseq(capsys):
     We run with option norefseq, but given db_dir does not exist.
     -> error message
     """
-    NCBI_species = ""
-    NCBI_taxid = "123"
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_section = "genbank"
     levels = ""
     outdir = GENEPATH
     tmp_dir = ""
@@ -260,27 +272,28 @@ def test_main_norefseq_nodefault_dbdir_nor_refseq(capsys):
     quiet = False
     info_file = ""
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+                     NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     _, err = capsys.readouterr()
-    assert ("You asked to skip refseq downloads") in err
+    assert ("You asked to skip genbank downloads") in err
     assert ("Database folder test/data/prepare/generated_by_func-tests/Database_init supposed "
             "to contain fasta sequences does not exist. We will check if the download folder "
             "(with compressed sequences) exists.") in err
-    assert ("Folder test/data/prepare/generated_by_func-tests/refseq/bacteria "
-            "does not exist. You do not have any genome to analyse. Possible reasons:\n"
-            "- if you want to rerun analysis in the same folder as "
+    assert ("Folder test/data/prepare/generated_by_func-tests/genbank/bacteria "
+            "does not exist. You do not have any genome to analyse. Possible reasons:\n") in err
+    assert ("- if you want to rerun analysis in the same folder as "
             "sequences were downloaded (my_outdir/Database_init or "
-            "my_outdir/refseq), make sure you have '-o my_outdir' option\n"
-            "- if you want to rerun analysis and save them in a new "
+            "my_outdir/genbank), make sure you have '-o my_outdir' option\n") in err
+    assert ("- if you want to rerun analysis and save them in a new "
             "output folder called 'new_outdir', make sure you have '-o new_outdir' option, "
             "and you specified where the uncompressed sequences to use are "
             "('-d sequence_database_path'") in err
     # # Check output files
-    summary =  os.path.join(GENEPATH, "assembly_summary-104099.txt")
+    summary =  os.path.join(GENEPATH, "assembly_summary-123.txt")
     assert not os.path.isfile(summary)
-    ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
+    ngd_outdir = os.path.join(GENEPATH, "genbank", "bacteria")
     assert not os.path.isdir(ngd_outdir)
     # Check logfiles are here
     log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
@@ -296,8 +309,10 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     We run with option norefseq, but given db_dir does not exist.
     -> error message
     """
-    NCBI_species = ""
-    NCBI_taxid = "123"
+    NCBI_species_name = ""
+    NCBI_species_taxid = "123"
+    NCBI_taxid = ""
+    NCBI_section = "genbank"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
     outdir = GENEPATH
@@ -305,7 +320,7 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     threads = 1
     norefseq = True
     orig_dbdir = os.path.join(GEN_PATH, "refseq")
-    refseq_db_dir = os.path.join(GENEPATH, "refseq")
+    refseq_db_dir = os.path.join(GENEPATH, "genbank")
     shutil.copytree(orig_dbdir, refseq_db_dir)
     db_dir = ""
     only_mash = False
@@ -318,11 +333,12 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     quiet = False
     info_file = ""
     out_info_file = os.path.join(outdir, f"LSTINFO-123-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+                        NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
-    assert ("You asked to skip refseq downloads") in err
+    assert ("You asked to skip genbank downloads") in err
     assert ("Database folder test/data/prepare/generated_by_func-tests/"
             "Database_init supposed "
             "to contain fasta sequences does not exist. We will check if the download folder "
@@ -333,7 +349,7 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     assert ("Final number of genomes in dataset: 1") in out
     # Check output files
     # Check that the NCBI_genome_download output directory exists
-    ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
+    ngd_outdir = os.path.join(GENEPATH, "genbank", "bacteria")
     # And that it contains folders
     assert os.path.isdir(ngd_outdir)
     assert len(os.listdir(ngd_outdir)) == 3
@@ -353,8 +369,10 @@ def test_main_norefseq_defaultdbdir(capsys):
     We run with option norefseq, but given db_dir does not exist.
     -> error message
     """
-    NCBI_species = ""
-    NCBI_taxid = "123"
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
     outdir = GENEPATH
@@ -374,13 +392,14 @@ def test_main_norefseq_defaultdbdir(capsys):
     verbose = 2
     quiet = False
     info_file = ""
-    out_info_file = os.path.join(outdir, "LSTINFO-123-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+    out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+                        NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
     assert ("You asked to skip refseq downloads") in err
-    assert ("Total number of genomes for 123: 5") in out
+    assert ("Total number of genomes for NA: 5") in out
     assert ("Computing pairwise distances between all genomes") in out
     assert ("Final number of genomes in dataset: 1") in out
     # Check output files
@@ -403,8 +422,10 @@ def test_main_norefseq_givendbdir(capsys):
     We run with option norefseq, but given db_dir does not exist.
     -> error message
     """
-    NCBI_species = ""
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
     outdir = GENEPATH
@@ -425,7 +446,8 @@ def test_main_norefseq_givendbdir(capsys):
     quiet = False
     info_file = ""
     out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+                        NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
@@ -449,8 +471,10 @@ def test_only_mash(capsys):
     """
     Running only mash step (giving genomes and corresponding LSTINFO file)
     """
-    NCBI_species = ""
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
     tmp_dir = ""
@@ -467,7 +491,8 @@ def test_only_mash(capsys):
     verbose = 1
     quiet = False
     out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads,
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+                        NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
     out, err = capsys.readouterr()
@@ -494,8 +519,10 @@ def test_only_mash_empty_lstinfo(capsys):
     """
     Running only mash step giving an empty lstinfo file -> error, no genome found
     """
-    NCBI_species = ""
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
     tmp_dir = ""
@@ -514,7 +541,8 @@ def test_only_mash_empty_lstinfo(capsys):
     verbose = 1
     quiet = False
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels,
+                     NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     out, err = capsys.readouterr()
@@ -537,8 +565,10 @@ def test_only_mash_no_lstinfo(capsys):
     """
     Running only mash step giving an info file which does not exist -> error missing infofile
     """
-    NCBI_species = ""
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
     tmp_dir = ""
@@ -556,7 +586,8 @@ def test_only_mash_no_lstinfo(capsys):
     verbose = 1
     quiet = False
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species, NCBI_taxid, levels, outdir, tmp_dir, threads, norefseq,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels,
+                     NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     out, err = capsys.readouterr()
