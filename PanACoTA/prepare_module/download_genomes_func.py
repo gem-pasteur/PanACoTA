@@ -53,15 +53,18 @@ from PanACoTA import utils
 logger = logging.getLogger("prepare.dds")
 
 
-def download_from_refseq(species_linked, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir, threads):
+def download_from_ncbi(species_linked, section, ncbi_species_name, 
+    ncbi_species_taxid, ncbi_taxid, levels, outdir, threads):
     """
-    Download refseq genomes of given species
+    Download ncbi genomes of given species
 
     Parameters
     ----------
     species_linked : str
         given NCBI species with '_' instead of spaces, or NCBI taxID if species
         name not given
+    section : str
+        genbank or only refseq (default = refseq)
     ncbi_species_name : str or None
         name of species to download: user given NCBI species. None if
         no species name given
@@ -86,7 +89,8 @@ def download_from_refseq(species_linked, ncbi_species_name, ncbi_species_taxid, 
 
     # arguments needed to download all genomes of the given species
     abs_outdir = os.path.abspath(outdir)
-    keyargs = {"section": "refseq", "file_formats": "fasta", "output": abs_outdir,
+    keyargs = {"section": section, "file_formats": "fasta", 
+               "output": abs_outdir,
                "parallel": threads, "groups": "bacteria",
                "metadata_table":abs_sumfile}
     message = "Downloading all genomes for "
@@ -150,38 +154,41 @@ def download_from_refseq(species_linked, ncbi_species_name, ncbi_species_taxid, 
         # Error message
         logger.error(error_message)
         sys.exit(1)
-    nb_gen, db_dir = to_database(outdir)
+    nb_gen, db_dir = to_database(outdir, section)
     return db_dir, nb_gen
 
 
-def to_database(outdir):
+def to_database(outdir, section):
     """
     Move .fna.gz files to 'database_init' folder, and uncompress them.
 
     Parameters
     ----------
     outdir : str
-        directory where all results are (for now, refseq folders, assembly summary and log
+        directory where all results are (for now, refseq/genbank folders, assembly summary and log
+    section : str
+        refseq (default) or genbank
 
     Returns
     -------
         nb_gen : number of genomes downloaded
-        db_dir : directory where are all fna files downloaded from refseq
+        db_dir : directory where are all fna files downloaded from refseq/genbank
     """
     # Copy .gz files in a new folder, and Unzip them in this new folder
     logger.info("Uncompressing genome files.")
     # Folder where are .gz files
-    download_dir = os.path.join(outdir, "refseq", "bacteria")
+    download_dir = os.path.join(outdir, section, "bacteria")
     # If no folder output/refseq/bacteria: error, no genome found
+    # (or output/genbank/bacteria)
     if not os.path.exists(download_dir):
-        logger.error(f"The folder containing genomes downloaded from NCBI refseq "
+        logger.error(f"The folder containing genomes downloaded from NCBI {section} "
                      f"({download_dir}) does not exist. Check that you really downloaded "
                      "sequences (fna.gz) and that they are in this folder.")
         sys.exit(1)
-    # If folder output/refseq/bacteria empty: error, no genome found
+    # If folder output/<refseq or genbank>/bacteria empty: error, no genome found
     list_downloads = os.listdir(download_dir)
     if list_downloads == []:
-        logger.error(f"The folder supposed to contain genomes downloaded from NCBI refseq "
+        logger.error(f"The folder supposed to contain genomes downloaded from NCBI {section} "
                      f"({download_dir}) exists but is empty. Check that you really downloaded "
                      "sequences (fna.gz).")
         sys.exit(1)
