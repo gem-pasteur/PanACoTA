@@ -93,9 +93,9 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     args_all = (args.outdir, args.threads, args.verbose, args.quiet)
-    args_prepare = (args.ncbi_species_taxid, args.ncbi_species, args.levels,
-                    args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, args.info_file,
-                    args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
+    args_prepare = (args.ncbi_species_taxid, args.ncbi_species_name, args.ncbi_taxid, args.levels,
+                    args.ncbi_section, args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, 
+                    args.info_file, args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
     args_annot = (args.name, args.qc_only, args.date, args.prodigal_only)
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
@@ -116,7 +116,8 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
         threads (int), verbose (int), quiet (bool)
     args_prepare : tuple
         arguments for prepare module (see subcommands.prepare.py): NCBI_species_taxid (int),
-        NCBI_species (str), levels (str), tmp_dir (str), norefseq (bool), db_dir (str),
+        NCBI_species_name (str), NCBI_taxid (int), levels (str), NCBI_section (str),
+        tmp_dir (str), norefseq (bool), db_dir (str),
         only_mash (bool), info_file (str), l90 (int), nbcont (int), cutn (int),
         min_dist (float), max_dist (float)
     args_annot : tuple
@@ -154,10 +155,12 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
 
     # Run prepare module
     outdir_prepare = os.path.join(outdir, "1-prepare_module")
-    (NCBI_species_taxid, NCBI_species, levels, tmp_dir, norefseq, db_dir, only_mash, info_file,
+    (NCBI_species_taxid, NCBI_species_name, NCBI_taxid, levels, NCBI_section,
+     tmp_dir, norefseq, db_dir, only_mash, info_file,
      l90, nbcont, cutn, min_dist, max_dist) = args_prepare
     logger.info("prepare step")
-    info_file = prepare.main("PanACoTA prepare", NCBI_species, NCBI_species_taxid, levels,
+    info_file = prepare.main("PanACoTA prepare", NCBI_species_name, NCBI_species_taxid,
+                             NCBI_taxid, levels, NCBI_section,
                              outdir_prepare, tmp_dir, threads, norefseq, db_dir, only_mash,
                              info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet)
 
