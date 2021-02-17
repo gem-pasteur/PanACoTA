@@ -58,7 +58,7 @@ logger = logging.getLogger('annotate.run_annotation_all')
 
 
 def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only=False,
-                       quiet=False):
+                       small=False, quiet=False):
     """
     For each genome in genomes, run prokka (or only prodigal) to annotate the genome.
 
@@ -80,6 +80,8 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
         name (key in genomes dict) of the fist genome, which will be used for prodigal training
     prodigal_only : bool
         True if only prodigal must run, False if prokka must run
+    small : bool
+        True -> use -p meta option with prodigal. Do not use training
     quiet : bool
         True if nothing must be written to stderr/stdout, False otherwise
 
@@ -126,7 +128,10 @@ def run_annotation_all(genomes, threads, force, annot_folder, fgn, prodigal_only
         # If problem, gpath_train will be empty, but this will be checked while
         # trying to run prodigal, because we also need to check that genomes are not simply
         # already annotated
-        gpath_train = prodigal_train(gtrain, annot_folder)
+        if not small:
+            gpath_train = prodigal_train(gtrain, annot_folder)
+        else:
+            gpath_train = "small option"
     elif threads <= 3:
         # less than 3 threads: run prokka 1 by 1 with all threads
         cores_annot = threads
@@ -381,10 +386,13 @@ def run_prodigal(arguments):
         logger.warning("Prodigal results folder already exists, but is removed because "
                        "--force option was used.")
 
-    # If training file does not exist and prodigal result directory neither, return False
+    # Training file can be "small option", meaning that we did not use the training mode.
+    # If not "small option", we used the training mode. If training file does not exist 
+    # and prodigal result directory neither, return False
     # We cannot annotate using nothing.
     # Happens if there was a problem while training
-    if not os.path.isfile(gpath_train) and not os.path.isdir(prodigal_dir):
+    if (gpath_train != "small option" and not os.path.isfile(gpath_train) 
+        and not os.path.isdir(prodigal_dir)):
         return False
 
     logger.log(utils.detail_lvl(), f"Start annotating {name} (from {gpath} sequence) "
@@ -404,13 +412,13 @@ def run_prodigal(arguments):
                                            "remove this result folder, or use '-F' or '--force' "
                                            "option.".format(prodigal_dir))
 
-            logger.log(utils.detail_lvl(), "End annotating {} (from {})".format(name, gpath))
+            logger.log(utils.detail_lvl(), f"End annotating {name} (from {gpath})")
         # If missing files, or other problems in result dir, error message,
         # ask user to force or remove this folder.
         else:
             logger.warning("Problems in the files contained in your already existing output dir "
-                           "({}). Please check it, or remove it to "
-                           "re-annotate.".format(prodigal_dir))
+                           f"({prodigal_dir}). Please check it, or remove it to "
+                           "re-annotate.")
         # If everything was ok -> everything is ready for next step -> return True
         # If something is wrong -> cannot use those results, genome won't be annotated
         # -> return False
@@ -430,8 +438,12 @@ def run_prodigal(arguments):
     error = (f"Error while trying to run prodigal. See {prodigal_logfile_err}.")
     prodigalf = open(prodigal_logfile, "w")
     prodigalferr = open(prodigal_logfile_err, "w")
+    if gpath_train == "small option":
+        training = "-p meta"
+    else:
+        training = f"-t {gpath_train}"
     cmd = (f"prodigal -i {gpath} -d {basic_outname + '.ffn'} -a {basic_outname + '.faa'} "
-           f"-f gff -o {basic_outname + '.gff'} -t {gpath_train} -q")
+           f"-f gff -o {basic_outname + '.gff'} {training} -q")
     logger.log(utils.detail_lvl(), "Prodigal command: " + cmd)
 
     ret = utils.run_cmd(cmd, error, eof=False, stderr=prodigalferr, stdout=prodigalf,
