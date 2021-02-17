@@ -48,7 +48,7 @@ def test_main_default_qc_only():
     # NCBI_species_taxid (int), NCBI_species (str), levels (str), tmp_dir (str),
     # norefseq (bool), db_dir (str), only_mash (bool), info_file (str), l90 (int),
     # nbcont (int), cutn (int), min_dist (float), max_dist (float)
-    args_prepare = ("104099", "", "all", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
+    args_prepare = ("104099", "", "", "all", "refseq", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
     # args for annotate:
     # name (str), qc_only (bool), date (str), prodigal_only (bool)
     args_annot = ("TEST", True, "2101", False)
@@ -108,7 +108,7 @@ def test_main_norefseq():
     # db_dir = "test/data/pangenome/test_files/example_db/Replicons"
     # db_dir = "104099/Database_init"
     db_dir = os.path.join(DATADIR, "genomes")
-    args_prepare = ("104099", "", "", "", True, db_dir, False, "", 100, 999, 5, 1e-4, 1)
+    args_prepare = ("104099", "", "", "all", "refseq", "", True, db_dir, False, "", 100, 999, 5, 1e-4, 1)
     # args for annotate:
     # name (str), qc_only (bool), date (str), prodigal_only (bool)
     args_annot = ("TEST", False, "2101", True)
@@ -196,9 +196,11 @@ def test_main_from_parse():
     args.verbose = 15
     args.quiet = False
     # prepare params
+    args.ncbi_species_name = ""
     args.ncbi_species_taxid = "104099"
-    args.ncbi_species = ""
+    args.ncbi_taxid = ""
     args.levels = ""
+    args.ncbi_section = "refseq"
     args.tmp_dir = ""
     args.norefseq = True
     args.db_dir = os.path.join(DATADIR, "genomes")
