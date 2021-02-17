@@ -67,13 +67,14 @@ def main_from_parse(arguments):
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
     main(cmd, arguments.ncbi_species_name, arguments.ncbi_species_taxid, arguments.ncbi_taxid, arguments.levels,
-         arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
+         arguments.ncbi_section, arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
          arguments.db_dir, arguments.only_mash,
          arguments.info_file, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir, tmp_dir, threads, norefseq, db_dir,
+def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_section,
+         outdir, tmp_dir, threads, norefseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
     Main method, constructing the draft dataset for the given species
@@ -159,7 +160,7 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir,
     if not tmp_dir:
         tmp_dir = os.path.join(outdir, "tmp_files")
     # directory that will be created by ncbi_genome_download
-    refseqdir = os.path.join(outdir, "refseq", "bacteria")
+    ncbidir = os.path.join(outdir, ncbi_section, "bacteria")
     os.makedirs(outdir, exist_ok=True)
     os.makedirs(tmp_dir, exist_ok=True)
 
@@ -198,7 +199,7 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir,
         # 'norefseq = True" : Do not download genomes, just do QC and mash filter on given genomes
         # -> if not, error and exit
         if norefseq:
-            logger.warning('You asked to skip refseq downloads.')
+            logger.warning(f'You asked to skip {ncbi_section} downloads.')
 
             # -> if db_dir given, watch for sequences there. If does not exist, error and exit
             # (user gave a directory (even if it does not exist), so we won't look for
@@ -223,12 +224,12 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir,
                     # -> if not in database_init, genomes must be in
                     # outdir/refeq/bacteria/<genome_name>.fna.gz. In that case,
                     # uncompress and add them to Database_init
-                    if not os.path.exists(refseqdir):
-                        logger.error(f"Folder {refseqdir} does not exist. You do not have any "
+                    if not os.path.exists(ncbidir):
+                        logger.error(f"Folder {ncbidir} does not exist. You do not have any "
                                      "genome to analyse. Possible reasons:\n"
                                      "- if you want to rerun analysis in the same folder as "
                                      "sequences were downloaded (my_outdir/Database_init or "
-                                     "my_outdir/refseq), make sure you have '-o my_outdir' "
+                                     f"my_outdir/{ncbi_section}), make sure you have '-o my_outdir' "
                                      "option\n"
                                      "- if you want to rerun analysis and save them in a new "
                                      "output folder called 'new_outdir', make sure you have "
@@ -237,13 +238,13 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, outdir,
                                      "use are ('-d sequence_database_path'). ")
                         sys.exit(1)
                     # add genomes from refseq/bacteria folder to Database_init
-                    nb_gen, _ = dgf.to_database(outdir)
+                    nb_gen, _ = dgf.to_database(outdir, ncbi_section)
         # No sequence: Do all steps -> download, QC, mash filter
         else:
             # Download all genomes of the given taxID
-            db_dir, nb_gen = dgf.download_from_refseq(species_linked, ncbi_species_name, ncbi_species_taxid,
+            db_dir, nb_gen = dgf.download_from_ncbi(species_linked, ncbi_section, ncbi_species_name, ncbi_species_taxid,
                                                       ncbi_taxid, levels, outdir, threads)
-            logger.info("{} refseq genome(s) downloaded".format(nb_gen))
+            logger.info(f"{nb_gen} {ncbi_section} genome(s) downloaded")
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
         genomes = fg.check_quality(species_linked, db_dir, tmp_dir, l90, nbcont, cutn)
@@ -310,10 +311,13 @@ def build_parser(parser):
                                 "and '-t 1123862' will download the strain K. pneumoniae subsp. pneumoniae Kp13 "
                                 "(not included in -t 72407, as it is a strain of the subspecies with a specific taxid).")
                          )
-    general.add_argument("-s", dest="ncbi_species_name", default="",
+    general.add_argument("-g", dest="ncbi_species_name", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
                                 "quotes (for example \"escherichia coli\")")
+                        )
+    general.add_argument("-s", dest="ncbi_section", default="refseq", choices = ["refseq", "genbank"],
+                          help=("NCBI section to download: all genbank, or only refseq (default)")
                         )
     general.add_argument("-l", "--assembly_level", dest="levels", default="",
                           help=("Assembly levels of genomes to download (default: all). "
@@ -455,9 +459,9 @@ def check_args(parser, args):
     if (not args.only_mash and not args.norefseq and
         not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
-                     "you want to download refseq genomes. But you did not provide any "
+                     "you want to download refseq (or genbank) genomes. But you did not provide any "
                      "information, so PanACoTA cannot guess which species you want to download. "
-                     "Specify NCBI_taxid (-t), or NCBI species taxid (-T) and/or NCBI_species (-s) to download, or add one of "
+                     "Specify NCBI_taxid (-t), and/or NCBI species taxid (-T) and/or NCBI_species (-g) to download, or add one of "
                      "the 2 options (--norefseq or -M) if you want to skip the 'download step'.")
 
     # If norefseq, give output directory
@@ -496,10 +500,16 @@ def check_args(parser, args):
     # WARNINGS
     # User did not specify a species name
     if not args.ncbi_species_name and not args.outdir:
-        print(colored("WARNING: you did not provide a species name ('-s species' option') "
-            "nor an output directory ('-o outdir'). "
-                      "All files will be downloaded in a folder called with the NCBI species "
-                      f"taxid {args.ncbi_species_taxid} instead of the species name.", "yellow"))
+        if args.ncbi_species_taxid:
+            print(colored("WARNING: you did not provide a species name ('-g species' option) "
+                          "nor an output directory ('-o outdir'). "
+                          "All files will be downloaded in a folder called with the NCBI species "
+                          f"taxid {args.ncbi_species_taxid} instead of the species name.", "yellow"))
+        else:
+            print(colored("WARNING: you did not provide a species name ('-g species' option) "
+                          "nor a species taxid ('-T spetaxid') nor an output directory ('-o outdir'). "
+                          "All files will be downloaded in a folder called with the NCBI "
+                          f"taxid {args.ncbi_taxid}.", "yellow"))
     # If user wants to cut genomes, warn him to check that it is on purpose (because default is cut at each 5'N')
     if args.cutn == 5:
         message = ("  !! Your genomes will be split when sequence contains at "
