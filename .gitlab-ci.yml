@@ -106,7 +106,6 @@ func-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
-    - py.test test/test_functional/test_prepare* -vx
     - py.test test/test_functional/test_pangenome.py -vx
     - py.test test/test_functional/test_pangenome-parser.py -vx
     - py.test test/test_functional/test_corepers* -vx
@@ -116,6 +115,7 @@ func-test-ubuntu:
     - py.test test/test_functional/test_annote-parser.py -vx
     - py.test test/test_functional/test_annote.py -xv
     - py.test test/test_functional/test_all* -vx
+    - py.test test/test_functional/test_prepare* -vx
     - mv .coverage .coverage-functional
   artifacts:
     paths:
