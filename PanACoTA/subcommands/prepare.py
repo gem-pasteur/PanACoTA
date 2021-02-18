@@ -140,7 +140,6 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_se
     # -> will be used to name output directory
     # -> will be used to download summary file if given species corresponds to NCBI name
     if ncbi_species_name:
-        ncbi_species_name = ncbi_species_name.capitalize()
         species_linked = "_".join(ncbi_species_name.split())
         species_linked = "_".join(species_linked.split("/"))
 
