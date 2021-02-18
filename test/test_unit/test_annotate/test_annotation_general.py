@@ -160,6 +160,71 @@ def test_run_all_prodigal():
     assert message_end_annot2 in messages
 
 
+def test_run_all_prodigal_small():
+    """
+    Check that there is no problem when running prodigal with --small option on all genomes
+    Start and end are not necessarily in the same order (ex: start1, start2, end2, end1)
+    """
+    logger = my_logger("test_run_all_prodigal_small")
+    # genomes = {genome: [name, gpath, annot_path, size, nbcont, l90]}
+    genome1 = "H299_H561.fasta"
+    gpath1 = os.path.join(GEN_PATH, genome1)
+    genome2 = "A_H738.fasta"
+    gpath2 = os.path.join(GEN_PATH, genome2)
+    genomes = {genome1: ["test_runall_1by1_1", gpath1, gpath1, 12656, 3, 0],
+               genome2: ["test_runall_1by1_2", gpath2, gpath2, 456464645, 1, 465]}
+    threads = 8
+    force = False
+    trn_gname = genome2
+    final = afunc.run_annotation_all(genomes, threads, force, GENEPATH, trn_gname,
+                                     prodigal_only=True, quiet=True, small=True)
+    assert final[genome1]
+    assert final[genome2]
+    q = logger[0]
+    # assert q.qsize() == 10
+    assert q.get().message == "Annotating all genomes with prodigal"
+    # assert q.get().message == "Prodigal will train using test/data/annotate/genomes/A_H738.fasta"
+    # assert q.get().message == ("prodigal command: prodigal -i "
+    #                            "test/data/annotate/genomes/A_H738.fasta -t "
+    #                            "test/data/annotate/generated_by_unit-tests/A_H738.fasta.trn")
+    # assert q.get().message == "End training on test/data/annotate/genomes/A_H738.fasta"
+    messages = []
+    for i in range(6):
+        a = q.get().message
+        messages.append(a)
+    message_start_annot1 = ("Start annotating test_runall_1by1_1 "
+                            "(from test/data/annotate/genomes/H299_H561.fasta sequence) "
+                            "with Prodigal")
+    message_start_annot2 = ("Start annotating test_runall_1by1_2 "
+                            "(from test/data/annotate/genomes/A_H738.fasta sequence) "
+                            "with Prodigal")
+    # Check that all messages exist. We cannot know in which order,
+    # as 'genomes' is a dict, hence unordered, and as computation is done in parallel
+    assert message_start_annot1 in messages
+    assert message_start_annot2 in messages
+    # Prodigal cmd
+    message_cmd1 = ("Prodigal command: prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+                    "test_runall_1by1_1.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/"
+                    "H299_H561.fasta-prodigalRes/test_runall_1by1_1.gff -p meta -q")
+    message_cmd2 = ("Prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
+                    "-d test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.ffn -a test/data/annotate/generated_by_unit-tests/"
+                    "A_H738.fasta-prodigalRes/test_runall_1by1_2.faa -f gff "
+                    "-o test/data/annotate/generated_by_unit-tests/A_H738.fasta-prodigalRes/"
+                    "test_runall_1by1_2.gff -p meta -q")
+    assert message_cmd1 in messages
+    assert message_cmd2 in messages
+    message_end_annot1 = ("End annotating test_runall_1by1_1 (from test/data/annotate/genomes/"
+                          "H299_H561.fasta)")
+    message_end_annot2 = ("End annotating test_runall_1by1_2 (from test/data/annotate/genomes/"
+                          "A_H738.fasta)")
+    assert message_end_annot1 in messages
+    assert message_end_annot2 in messages
+
+
 def test_run_all_prodigal_error_train():
     """
     Check that when we want to train on a genome but it fails, it returns False for all genomes
