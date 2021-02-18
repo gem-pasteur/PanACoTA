@@ -80,7 +80,7 @@ def main_from_parse(args):
         min_dist (float), max_dist (float)
     args_annot : tuple
         arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
-        date (str), prodigal_only (bool)
+        date (str), prodigal_only (bool), small (bool)
     args_pan : tuple
         arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
         clust_mode (int), spe_dir (str), outfile (str)
@@ -122,7 +122,7 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
         min_dist (float), max_dist (float)
     args_annot : tuple
         arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
-        date (str), prodigal_only (bool)
+        date (str), prodigal_only (bool), small (bool)
     args_pan : tuple
         arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
         clust_mode (int), spe_dir (str), outfile (str)

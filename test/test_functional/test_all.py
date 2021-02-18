@@ -50,8 +50,8 @@ def test_main_default_qc_only():
     # nbcont (int), cutn (int), min_dist (float), max_dist (float)
     args_prepare = ("104099", "", "", "all", "refseq", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
     # args for annotate:
-    # name (str), qc_only (bool), date (str), prodigal_only (bool)
-    args_annot = ("TEST", True, "2101", False)
+    # name (str), qc_only (bool), date (str), prodigal_only (bool), small (bool)
+    args_annot = ("TEST", True, "2101", False, False)
     # args for pangenome:
     # min_id (float), clust_mode (int), spe_dir (str), outfile (str)
     args_pan = (0.8, 1, "", "")
@@ -110,8 +110,8 @@ def test_main_norefseq():
     db_dir = os.path.join(DATADIR, "genomes")
     args_prepare = ("104099", "", "", "all", "refseq", "", True, db_dir, False, "", 100, 999, 5, 1e-4, 1)
     # args for annotate:
-    # name (str), qc_only (bool), date (str), prodigal_only (bool)
-    args_annot = ("TEST", False, "2101", True)
+    # name (str), qc_only (bool), date (str), prodigal_only (bool), small (bool)
+    args_annot = ("TEST", False, "2101", True, False)
     # args for pangenome:
     # min_id (float), clust_mode (int), spe_dir (str), outfile (str)
     args_pan = (0.8, 1, "", "")
@@ -215,6 +215,7 @@ def test_main_from_parse():
     args.qc_only = False
     args.date = "2101"
     args.prodigal_only = False
+    args.small = False
     args.name = "TEST"
     # pangenome params
     args.min_id = 0.8
