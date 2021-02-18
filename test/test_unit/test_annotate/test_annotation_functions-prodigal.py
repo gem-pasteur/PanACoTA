@@ -545,6 +545,52 @@ def test_run_prodigal_out_doesnt_exist():
     assert q.get().message.startswith("End annotating")
 
 
+def test_run_prodigal_small():
+    """
+    Test that when the output directory does not exist, it creates it, and runs prodigal
+    with all expected outfiles. Here, we run prodigal with --small option (on a small genome)
+    """
+    logger = my_logger("test_run_prodigal_small")
+    utils.init_logger(LOGFILE_BASE, 0, 'test_run_prodigal_small')
+    gpath = os.path.join(GEN_PATH, "H299_H561.fasta")
+    out_dir = os.path.join(GENEPATH, "H299_H561.fasta-prodigalRes")
+    cores_prodigal = 2
+    name = "test_runprodigal_small_H299"
+    force = False
+    trn_file = "small option"
+    nbcont = 3
+    arguments = (gpath, GENEPATH, cores_prodigal, name, force, nbcont, trn_file, logger[0])
+    assert afunc.run_prodigal(arguments)
+
+    # Check content of tbl, ffn and faa files
+    exp_dir = os.path.join(EXP_DIR, "H299_H561.fasta_small-prodigalRes",
+                           "test_runprodigal_small_H299")
+    out_faa = os.path.join(out_dir, name + ".faa")
+    out_ffn = os.path.join(out_dir, name + ".ffn")
+    out_gff = os.path.join(out_dir, name + ".gff")
+    # Check that faa and ffn files are as expected
+    assert os.path.isfile(out_faa)
+    assert tutil.compare_order_content(exp_dir + ".faa", out_faa)
+    assert os.path.isfile(out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".ffn", out_ffn)
+    assert os.path.isfile(out_ffn)
+    assert tutil.compare_order_content(exp_dir + ".gff", out_gff)
+    # Check logs
+    q = logger[0]
+    assert q.qsize() == 3
+    assert q.get().message.startswith("Start annotating")
+    prodigal_cmd = q.get().message
+    assert ("Prodigal command: prodigal -i test/data/annotate/genomes/"
+            "H299_H561.fasta -d test/data/annotate/"
+            "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+            "test_runprodigal_small_H299.ffn -a test/data/annotate/"
+            "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+            "test_runprodigal_small_H299.faa -f gff -o test/data/annotate/"
+            "generated_by_unit-tests/H299_H561.fasta-prodigalRes/"
+            "test_runprodigal_small_H299.gff -p meta -q")in prodigal_cmd
+    assert q.get().message.startswith("End annotating")
+
+
 def test_run_prodigal_out_problem_running():
     """
     Check that when a problem occurs while trying to run prodigal, run_prodigal returns False,
