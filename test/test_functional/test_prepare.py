@@ -96,6 +96,53 @@ def test_main_from_parse():
     assert len(fna_files) >= 4
 
 
+def test_main_from_parse_longspeciesname():
+    """
+    Run
+    """
+    args = argparse.Namespace()
+    args.argv = ["prepare", "test_func_prepare"]
+    args.ncbi_species_name = "Salmonella enterica subsp. enterica serovar Paratyphi C"
+    args.ncbi_species_taxid = ""
+    args.ncbi_taxid = ""
+    args.ncbi_section = "refseq"
+    args.outdir = GENEPATH
+    args.tmp_dir = ""
+    args.parallel = 1
+    args.norefseq = False
+    args.db_dir = ""
+    args.only_mash = False
+    args.info_file = ""
+    args.l90 = 100
+    args.nbcont = 999
+    args.cutn = 0
+    args.min_dist = 1e-4
+    args.max_dist = 0.06
+    args.verbose = 0
+    args.quiet = False
+    args.levels = ""
+
+    prepare.main_from_parse(args)
+
+    # Check output files
+    summary =  os.path.join(GENEPATH, "assembly_summary-Salmonella_enterica_subsp._enterica_serovar_Paratyphi_C.txt")
+    assert os.path.isfile(summary)
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir)
+    assert len(os.listdir(ngd_outdir)) >= 1
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
+    assert len(log_files) == 3
+    # Check tmp files folder created, but empty as we do not split
+    tmp_folder = os.listdir(os.path.join(GENEPATH, "tmp_files"))
+    assert len(tmp_folder) == 0
+    # Check Database_init folder created, with at list 4 ".fna" genomes
+    fna_files = glob.glob(os.path.join(GENEPATH, "Database_init", "*.fna"))
+    assert len(fna_files) >= 1
+
+
 def test_main_not_only_mash_infoexists():
     """
     We run without option only_mash, but still provide a lstinfo file
