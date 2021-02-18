@@ -102,7 +102,7 @@ You can see all required arguments and available options with::
 
 The ``prepare`` module works in 3 steps:
 
-    1) Downloading assemblies from refseq
+    1) Downloading assemblies from refseq or genbank
     2) Quality control to filter assemblies in terms of sequence quality
     3) Filtering step dedicated to remove redundant and miss-classified genomes, based on Mash genetic distance.
 
@@ -113,7 +113,7 @@ Inputs
 
 Your input will depend on the step from which you are starting.
 
-- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species. You can also specify which assembly level(s) you want to download
+- If your start from the beginning, your input is a NCBI taxid and/or a NCBI species taxid and/or a NCBI species name. You can also specify which assembly level(s) you want to download, as well as the NCBI section (genbank or refseq)
 - If you start from step 2, your input will be a database of fasta sequences, in :ref:`sequences format <seq>`.
 - If you start from step 3, your input will be the database as previously, as well as the LSTINFO output of :ref:`step 2 <step2>`.
 
@@ -129,7 +129,7 @@ All sequences are in fasta format, as described in :ref:`sequences format <seq>`
 
 In your output directory, you will find:
 
-- Only if you started from step 1: A folder called ``refseq/bacteria``, containing 1 folder per assembly (called with the assembly accession number), and, inside, the assembly sequence in fasta.gz format, and the MD5SUMS of this file.
+- Only if you started from step 1: A folder called ``refseq/bacteria`` (or ``genbank/bacteria`` if you downloaded all genomes from genbank), containing 1 folder per assembly (called with the assembly accession number), and, inside, the assembly sequence in fasta.gz format, and the MD5SUMS of this file.
 - Only if you started from step 1: A folder called ``Database_init``, containing all assemblies downloaded from refseq in fasta format
 - Only if you started from step 1 or 2: A folder called ``tmp_files`` containing your genomic sequences, split at each stretch of at least 5 ``N`` (see :ref:`sequences format <seq>` for more details on the splitting part).
 
@@ -204,25 +204,35 @@ Running from step 1
 
 To download genomes, and then process them by the `prepare` filters, run::
 
-    PanACoTA prepare [-t <NCBI species taxid> -s <NCBI species> -l <assembly_level(s)>]
+    PanACoTA prepare [-g <NCBI species> -T <NCBI species taxid> -t <NCBI taxid> -s <genbank or refseq> -l <assembly_level(s)>]
 
-Give at least one of ``-t`` or ``-s`` parameters. With:
+Give at least one of ``-T``, ``-t`` or ``-g`` parameters (one of them is enough) With:
 
-- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the species you want to study.
-- ``-s <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes.
+- ``-g <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes.
+- ``-T <NCBI species taxid>``: the taxid provided by the NCBI for the species you want to download
+- ``-t <NCBI taxid>``: the taxid provided by the NCBI for the subspecies or specific strain you want to download
+
+If you want to download all genomes in genbank, and not only the ones in refseq, use option ``-s genbank`` (default is ``-s refseq``).
 
 If you do not want to download all assemblies in refseq, but only genomes with specific assembly levels, use option ``-l <level(s)>``. Give it a comma separated list of assembly levels you want to download, between 'all', 'complete', 'chromosome', 'scaffold', 'contig' (default is 'all').
 
-For example, if we want to download refseq assemblies of *Acetobacter orleanensis*. With the `taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=104099&lvl=3&p=has_linkout&p=blast_url&p=genome_blast&lin=f&keep=1&srchmode=1&unlock>`_, we can find its corresponding NCBI species taxid: "104099".
+For example, if we want to download refseq assemblies of *Acetobacter orleanensis*: With the `taxonomy browser <https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?mode=Info&id=104099&lvl=3&p=has_linkout&p=blast_url&p=genome_blast&lin=f&keep=1&srchmode=1&unlock>`_, we can find its corresponding NCBI species taxid: "104099".
 To download all assembly levels::
 
-    PanACoTA prepare -t 104099 -s "Acetobacter orleanensis"
+    PanACoTA prepare -T 104099 -g "Acetobacter orleanensis"
 
 Or, to download only complete and scaffold assemblies::
 
-    PanACoTA prepare -s "Acetobacter orleanensis" -l complete,scafflod
+    PanACoTA prepare -g "Acetobacter orleanensis" -l complete,scafflod
 
-Only one of 'species taxid' and 'species name' argument is enough.
+To download the subspecies Acetobacter pasteurianus subsp. Pasteurianus (taxid = 481145):
+
+    PanACoTA prepare -t 481145
+
+To download only the specific strain "Acetobacter orleanensis JCM 7639" (taxid = 1231342):
+    
+    PanACoTA prepare -t 1231342 
+
 
 
 Running from step 2
