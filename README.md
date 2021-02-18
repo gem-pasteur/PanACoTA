@@ -46,7 +46,6 @@ Amandine Perrin, Eduardo P. C. Rocha, PanACoTA: a modular tool for massive micro
 [![DOI:10.1093/nargab/lqaa106](https://zenodo.org/badge/DOI/10.1093/nargab/lqaa106.svg)](https://academic.oup.com/nargab/article/3/1/lqaa106/6090162)
 
 
-
 **Content of this README:**
 
 Installation
