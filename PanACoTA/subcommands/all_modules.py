@@ -96,7 +96,7 @@ def main_from_parse(args):
     args_prepare = (args.ncbi_species_taxid, args.ncbi_species_name, args.ncbi_taxid, args.levels,
                     args.ncbi_section, args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, 
                     args.info_file, args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
-    args_annot = (args.name, args.qc_only, args.date, args.prodigal_only)
+    args_annot = (args.name, args.qc_only, args.date, args.prodigal_only, args.small)
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
     args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
@@ -170,15 +170,14 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     tmp_dir = ""
     force = False
     outdir_annotate = os.path.join(outdir, "2-annotate_module")
-    (name, qc_only, date, prodigal_only) = args_annot
+    (name, qc_only, date, prodigal_only, small) = args_annot
     res_annot_dir = None
-    small = False
 
     logger.info("annotate step")
     lstinfo, nbgenomes = annotate.main("PanACoTA annotate", list_file, db_path, outdir_annotate,
                                        name, date, l90, nbcont, cutn, threads, force, qc_only,
                                        info_file, tmp_dir, res_annot_dir, verbose, quiet,
-                                       prodigal_only)
+                                       prodigal_only=prodigal_only, small=small)
     if qc_only:
         return "QC_only done"
 
@@ -474,11 +473,12 @@ def get_annotate(dict_argv):
         conf_conffile.update({"date": date}, "annotate")
     # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "quiet": False, "prodigal_only": False, "qc_only": False,
+                "quiet": False, "prodigal_only": False, "small": False, "qc_only": False,
                 "list_file": "", "db_path": "", "from_info": True}
     conf_conffile.add_default(defaults, "annotate")
     conf_conffile.set_boolean("annotate", "quiet")
     conf_conffile.set_boolean("annotate", "prodigal_only")
+    conf_conffile.set_boolean("annotate", "small")
     conf_conffile.set_boolean("annotate", "qc_only")
     conf_conffile.set_int("annotate", "verbose")
     conf_conffile.set_int("annotate", "threads")
