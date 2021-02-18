@@ -80,6 +80,7 @@ def test_main_from_parse():
     args.quiet = False
     args.from_info = False
     args.prodigal_only = False
+    args.small = False
     args.annotdir = False
     args.argv = ["annotate", "test_annote.py", "test_main_from_parse"]
     args.prodigal_only = False
@@ -535,8 +536,7 @@ def test_main_prodigal_train_empty(capsys):
 
 def test_main_prodigal_train_ok(capsys):
     """
-    Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
-    exist, and are ok, all runs well, no re-annotation, just format
+    Test that, when the pipeline is run with a given prodigal dir, where prodigal train exists and is ok:
 
     - no train
     - reannotate
@@ -606,8 +606,7 @@ def test_main_prodigal_train_ok(capsys):
 
 def test_main_prodigal_ok(capsys):
     """
-    Test that, when the pipeline is run with a given prodigal dir, where prodigal results already
-    exist, and are ok, all runs well, no re-annotation, just format
+    Test that, when the pipeline is run with a given empty prodigal dir, it does everything
 
     - train
     - reannotate
@@ -638,7 +637,6 @@ def test_main_prodigal_ok(capsys):
                            "PanACoTA-annotate_list_genomes.log.details")
     with open(logfile, "r") as lc:
         log_content = lc.readlines()
-    print(log_content)
     assert ("Prodigal will train using "
             "test/data/annotate/genomes/A_H738.fasta") in " ".join(log_content)
     assert ("prodigal command: prodigal -i test/data/annotate/genomes/A_H738.fasta "
@@ -668,6 +666,69 @@ def test_main_prodigal_ok(capsys):
             "H299_H561.fasta-prodigalRes/TOTO.0417.00001.gff "
             "-t test/data/annotate/generated_by_func-tests/results-prodigal/A_H738.fasta.trn "
             "-q") in " ".join(log_content)
+    assert ("End annotating ESCO.0417.00001 (from test/data/annotate/genomes/"
+            "A_H738.fasta)") in " ".join(log_content)
+    assert ("End annotating TOTO.0417.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta)") in " ".join(log_content)
+    assert "Formatting all genomes" in " ".join(log_content)
+    assert "Annotation step done" in " ".join(log_content)
+
+
+def test_main_prodigal_small_ok(capsys):
+    """
+    Test that, when the pipeline is run with a given prodigal dir, and --small option, it does:
+
+    - no train
+    - reannotate
+    - format
+
+    2 genomes in list file: B2_A3_5.fasta-changeName.fna and H299_H561.fasta
+    """
+    # FOLDER with all results
+    # Create result folder, with existing prodigal folders (which are OK)
+    res_folder = os.path.join(GENEPATH, "results-prodigal")
+    os.makedirs(res_folder)
+
+    # Function arguments
+    list_file = os.path.join(GENEPATH, "list_genomes_prodigal_small.txt")
+    with open(list_file, "w") as lf:
+        lf.write("A_H738.fasta \n")
+        lf.write("H299_H561.fasta::TOTO")
+    name = "ESCO"
+    date = "0417"
+    lstout = os.path.join(GENEPATH, "LSTINFO-list_genomes_prodigal_small.lst")
+    # lstexp = os.path.join(EXP_DIR, "exp_LSTINFO-func-annot_exists-prokkadir.lst")
+    assert annot.main("cmd", list_file, GEN_PATH, GENEPATH, name, date, cutn=0,
+                      res_annot_dir=res_folder, verbose=3, prodigal_only=True, small=True) == (lstout, 2)
+    out, err = capsys.readouterr()
+    # Test that result files are in result dir
+    assert os.path.isfile(lstout)
+    logfile = os.path.join(GENEPATH,
+                           "PanACoTA-annotate_list_genomes_prodigal_small.log.details")
+    with open(logfile, "r") as lc:
+        log_content = lc.readlines()
+    assert ("Start annotating ESCO.0417.00001 (from test/data/annotate/genomes/"
+            "A_H738.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Start annotating TOTO.0417.00001 (from test/data/annotate/genomes/"
+            "H299_H561.fasta sequence) with Prodigal") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/A_H738.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "A_H738.fasta-prodigalRes/ESCO.0417.00001.gff "
+            "-p meta -q") in " ".join(log_content)
+    assert ("Prodigal command: "
+            "prodigal -i test/data/annotate/genomes/H299_H561.fasta "
+            "-d test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.ffn "
+            "-a test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.faa "
+            "-f gff -o test/data/annotate/generated_by_func-tests/results-prodigal/"
+            "H299_H561.fasta-prodigalRes/TOTO.0417.00001.gff "
+            "-p meta -q") in " ".join(log_content)
     assert ("End annotating ESCO.0417.00001 (from test/data/annotate/genomes/"
             "A_H738.fasta)") in " ".join(log_content)
     assert ("End annotating TOTO.0417.00001 (from test/data/annotate/genomes/"
