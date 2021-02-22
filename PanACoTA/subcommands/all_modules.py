@@ -379,9 +379,6 @@ def check_args(parser, argv):
     dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
     final_dict = {}
 
-    # TODO: give list of possible parameters, error if does not exist.
-
-
     # PREPARE STEP
     prep_dict = get_prepare(dict_argv)
     final_dict.update(prep_dict)  # put new arguments to final_dict
@@ -458,7 +455,6 @@ def get_prepare(dict_argv):
     conf_conffile.set_float("prepare", "min_dist")
     conf_conffile.set_float("prepare", "max_dist")
     prep_dict = conf_conffile.get_section_dict("prepare")
-    print(prep_dict)
     return prep_dict
 
 
@@ -473,6 +469,11 @@ def get_annotate(dict_argv):
         conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
                                                        readsec=["annotate"])
     # Add arguments from commandline
+    not_allowed = ["l90", "nbcont", "cutn"]
+    for param in not_allowed:
+        if param in conf_conffile.get_section_dict("annotate").keys():
+            print(f"{param} not allowed in annotate section.")
+            sys.exit(1)
     conf_conffile.update(dict_argv, "annotate")
     if "date" not in dict(conf_conffile["annotate"]):
         import time
@@ -489,7 +490,6 @@ def get_annotate(dict_argv):
     conf_conffile.set_boolean("annotate", "qc_only")
     conf_conffile.set_int("annotate", "verbose")
     conf_conffile.set_int("annotate", "threads")
-    print("warining, todo")
     annot_dict = conf_conffile.get_section_dict("annotate")
     return annot_dict
 

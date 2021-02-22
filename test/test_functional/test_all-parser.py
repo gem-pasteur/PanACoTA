@@ -211,3 +211,33 @@ def test_parser_cutn_l90_nbcont():
     assert options.l90 == 70
     assert options.nbcont == 998
 
+
+def test_parser_error_contig_annotate(capsys):
+    """
+    Test that when L90, nbcont or cutn parameter is given in annotate section of config file, it returns an error.
+    Those parameters can only be defined in prepare step.
+    """
+    # Error with nbcont in annotate section of configfile
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    with pytest.raises(SystemExit):
+        allm.parse(parser, "-o out-all -n TEST -T 5678 -c test/data/all/init_files/error_nbcont.ini".split())
+    out, err = capsys.readouterr()
+    assert ("nbcont not allowed in annotate section.") in out
+
+    # Error with l90 in annotate section of configfile
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    with pytest.raises(SystemExit):
+        allm.parse(parser, "-o out-all -n TEST -T 5678 -c test/data/all/init_files/error_l90.ini --nbcont 10".split())
+    out, err = capsys.readouterr()
+    assert ("l90 not allowed in annotate section.") in out
+
+    # Error with cutn in annotate section of configfile
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    with pytest.raises(SystemExit):
+        allm.parse(parser, "-o out-all -n TEST -T 5678 -c test/data/all/init_files/error_cutn.ini".split())
+    out, err = capsys.readouterr()
+    assert ("cutn not allowed in annotate section.") in out
+
