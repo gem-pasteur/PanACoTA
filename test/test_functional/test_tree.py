@@ -307,6 +307,60 @@ def test_main_iqtree2_newdir(capsys):
     assert "END" in out
 
 
+def test_main_iqtree2_test_model(capsys):
+    """
+    Test that when giving the alignment file, and all default parameters, it runs iqtree2,
+    and returns expected files
+    """
+    outdir = os.path.join(GENEPATH, "test_iqtree2_testmodel")
+    soft = "iqtree2"
+    model = "TEST"
+    threads = 1
+
+    cmd = "cmd test_main_default"
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=1000, write_boot=True,
+              verbose=2)
+    # Check output files
+    # Check iqtree logfile
+    iq_log_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.iqtree_tree.log")
+    assert os.path.isfile(iq_log_file)
+    with open(iq_log_file, "r") as logf:
+        iq_lines = logf.readlines()
+    assert ("Command: iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
+            "-T 1 -m TEST -B 1000 --boot-trees --seqtype DNA "
+            "--prefix test/data/tree/generated_by_func_tests/"
+            "test_iqtree2_testmodel/exp_pers4genomes.grp.aln.iqtree_tree "
+            "--quiet") in " ".join(iq_lines)
+    assert ("Alignment has 4 sequences with 6438 columns, "
+            "81 distinct patterns") in " ".join(iq_lines)
+    assert "Analysis results written to:" in " ".join(iq_lines)
+    assert "ModelFinder will test up to" in " ".join(iq_lines)
+    # Check treefile
+    tree_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.iqtree_tree.treefile")
+    assert os.path.isfile(tree_file)
+    assert not tutils.is_tree_lengths(tree_file)
+    assert tutils.is_tree_bootstrap(tree_file)
+    # Check bootstrap tree file
+    boot_file = os.path.join(outdir, "exp_pers4genomes.grp.aln.iqtree_tree.ufboot")
+    assert os.path.isfile(tree_file)
+    with open(boot_file, "r") as tbf:
+        lines = tbf.readlines()
+    assert len(lines) == 1000
+    # Check panacota logfile
+    logs_base = os.path.join(outdir, "PanACoTA-tree-iqtree2.log")
+    assert os.path.isfile(logs_base)
+    assert os.path.isfile(logs_base + ".err")
+    assert os.path.isfile(logs_base + ".details")
+    # Check logs
+    out, err = capsys.readouterr()
+    assert "Running IQtree..." in out
+    assert ("IQtree command: iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
+            "-T 1 -m TEST  -B 1000 --boot-trees --seqtype DNA --prefix test/data/tree/"
+            "generated_by_func_tests/test_iqtree2_testmodel/exp_pers4genomes.grp.aln.iqtree_tree "
+            "--quiet") in out
+    assert "END" in out
+
+
 def test_main_from_parse(capsys):
     """
     Test main when we give the output of the parser
