@@ -83,7 +83,7 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
     return outfile
 
 
-def concat_alignments(fam_nums, prefix, quiet):
+def concat_alignments(fam_nums, prefix, ali_type, quiet):
     """
     Concatenate all family alignment files to a unique file
 
@@ -93,6 +93,8 @@ def concat_alignments(fam_nums, prefix, quiet):
         list of family numbers
     prefix : str
         path to ``aldir/<name of dataset>`` (used to get extraction, alignment and btr files easily)
+    ali_type : str
+        aa or nucl
     quiet : bool
         True if nothing must be sent to sdtout/stderr, False otherwise
 
@@ -104,7 +106,11 @@ def concat_alignments(fam_nums, prefix, quiet):
         - output: path to file containing concatenation of all alignments
         - str: "OK" if concatenation file already exists, "Done" if just did concatenation
     """
-    output = "{}-complete.cat.aln".format(prefix)
+    if ali_type == "nucl":
+        ali_pre = "-mafft-prt2nuc"
+    else:
+        ali_pre = "-mafft-align"
+    output = f"{prefix}-complete.{ali_type}.cat.aln"
     if os.path.isfile(output):
         logger.info("Alignments already concatenated")
         logger.warning(("Alignments already concatenated in {}. Program will use "
@@ -112,12 +118,12 @@ def concat_alignments(fam_nums, prefix, quiet):
                         "running.").format(output))
         return output, "OK"
     logger.info("Concatenating all alignment files")
-    list_files = ["{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam) for num_fam in fam_nums]
+    list_files = [f"{prefix}{ali_pre}.{num_fam}.aln" for num_fam in fam_nums]
     # Check that all files exist
     for f in list_files:
         if not os.path.isfile(f):
-            logger.error("The alignment file {} does not exist. Please check the families you "
-                         "want, and their corresponding alignment files".format(f))
+            logger.error(f"The alignment file {f} does not exist. Please check the families you "
+                         "want, and their corresponding alignment files")
             sys.exit(1)
     if quiet:
         utils.cat(list_files, output)
