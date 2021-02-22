@@ -22,7 +22,7 @@ def test_parser_noarg(capsys):
     _, err = capsys.readouterr()
     assert "usage: " in err
     assert "-o OUTDIR [--threads THREADS]" in err
-    assert "[-t NCBI_SPECIES_TAXID]" in err
+    assert "[-T NCBI_SPECIES_TAXID]" in err
     assert "-o OUTDIR" in err
     assert "[-s NCBI_SPECIES]" in err
     assert "[-l LEVELS]" in err
@@ -40,7 +40,7 @@ def test_parser_noconffile():
     """
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
-    options = allm.parse(parser, "-o out-all -n TEST -t 1234".split())
+    options = allm.parse(parser, "-o out-all -n TEST -T 1234".split())
     assert options.outdir == "out-all"
     assert options.threads == 1
     assert options.ncbi_species_taxid == '1234'
@@ -62,7 +62,7 @@ def test_parser_conffile():
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     options = allm.parse(parser,
-                         "-c test/data/all/default-conffigfile.ini -o out-all -n TEST".split())
+                         "-c test/data/all/init_files/default-conffigfile.ini -o out-all -n TEST".split())
     assert options.outdir == "out-all"
     assert options.threads == 10
     assert not options.ncbi_species_taxid
@@ -86,7 +86,7 @@ def test_parser_conffile_and_cmd():
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     options = allm.parse(parser,
-                         "-c test/data/all/default-conffigfile.ini -o out-all "
+                         "-c test/data/all/init_files/default-conffigfile.ini -o out-all "
                          "-n TEST --threads 0 -i 0.99 -Mu".split())
     assert options.outdir == "out-all"
     assert options.threads == nb
@@ -109,7 +109,7 @@ def test_parser_thread_quicktree(capsys):
     allm.build_parser(parser)
     with pytest.raises(SystemExit):
         allm.parse(parser,
-                         "-c test/data/all/default-conffigfile.ini -o out-all "
+                         "-c test/data/all/init_files/default-conffigfile.ini -o out-all "
                          "-n TEST --threads 2 --soft quicktree".split())
     _, err = capsys.readouterr()
     assert ("You cannot run quicktree with multiple threads. "
@@ -124,7 +124,7 @@ def test_duplicate_value(capsys):
     allm.build_parser(parser)
     with pytest.raises(SystemExit):
         allm.parse(parser,
-                         "-c test/data/all/conffile-duplicate.ini -o out-all "
+                         "-c test/data/all/init_files/conffile-duplicate.ini -o out-all "
                          "-n TEST --threads 2 --soft quicktree".split())
     out, err = capsys.readouterr()
     assert ("option 'verbose' in section 'prepare' already exists") in out
@@ -137,7 +137,7 @@ def test_wrong_conffile_name(capsys):
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     with pytest.raises(SystemExit):
-        allm.parse(parser, "-c conf.ini -o out-all -t 1234 -n TEST".split())
+        allm.parse(parser, "-c conf.ini -o out-all -T 1234 -n TEST".split())
     out, err = capsys.readouterr()
     assert ("Error: config file conf.ini not found.") in out
 
@@ -150,7 +150,7 @@ def test_annot_defvalue(capsys):
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     options = allm.parse(parser,
-                         "-c test/data/all/default-conffigfile.ini -o out-all -n TEST".split())
+                         "-c test/data/all/init_files/default-conffigfile.ini -o out-all -n TEST".split())
     assert options.outdir == "out-all"
     assert options.threads == 10
     assert not options.ncbi_species_taxid
@@ -164,4 +164,50 @@ def test_annot_defvalue(capsys):
     assert not options.multi
     assert not options.boot
 
+
+def test_parser_cutn_l90_nbcont():
+    """
+    When user gives custom value for cutn, l90 and/or nbcont, it keeps it. No replacement with annotate module.
+    """
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    # custom cutn from command line
+    options = allm.parse(parser,
+                         "-o out-all -n TEST --cutn 10 -T 1234".split())
+    assert options.outdir == "out-all"
+    assert options.cutn == 10
+    assert options.l90 == 100
+    assert options.nbcont == 999
+
+    # custom l90 from command line
+    options = allm.parse(parser,
+                         "-o out-all -n TEST --l90 10 -T 1234".split())
+    assert options.outdir == "out-all"
+    assert options.cutn == 5
+    assert options.l90 == 10
+    assert options.nbcont == 999
+
+    # custom nbcont from command line
+    options = allm.parse(parser,
+                         "-o out-all -n TEST --l90 11 --nbcont 998 -T 1234".split())
+    assert options.outdir == "out-all"
+    assert options.cutn == 5
+    assert options.l90 == 11
+    assert options.nbcont == 998
+
+    # all 3 custom from configfile
+    options = allm.parse(parser,
+                         "-c test/data/all/init_files/cutn-l90-nbcont.ini -o out-all-bis -n TEST -T 1234".split())
+    assert options.outdir == "out-all-bis"
+    assert options.cutn == 15
+    assert options.l90 == 70
+    assert options.nbcont == 998
+
+    # l90 and cutn custom from configfile, cutn from command line
+    options = allm.parse(parser,
+                         "-c test/data/all/init_files/cutn-l90-nbcont.ini -o out-all-bis -n TEST -T 1234 --cutn 55".split())
+    assert options.outdir == "out-all-bis"
+    assert options.cutn == 55
+    assert options.l90 == 70
+    assert options.nbcont == 998
 

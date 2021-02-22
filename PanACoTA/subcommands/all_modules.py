@@ -241,7 +241,7 @@ def build_parser(parser):
                           help="Specify how many threads can be used (default=1)")
     # prepare arguments
     pprepare = parser.add_argument_group("'prepare' module arguments")
-    pprepare.add_argument("-t", dest="ncbi_species_taxid",
+    pprepare.add_argument("-T", dest="ncbi_species_taxid",
                           help=("Species taxid to download, corresponding to the "
                                 "'species taxid' provided by the NCBI. A comma-separated "
                                 "list of taxid can also be provided.")
@@ -379,17 +379,23 @@ def check_args(parser, argv):
     dict_argv = {key:val for key,val in vars(argv).items() if val is not None and val != False}
     final_dict = {}
 
+    # TODO: give list of possible parameters, error if does not exist.
+
+
     # PREPARE STEP
     prep_dict = get_prepare(dict_argv)
-    a = Namespace(**prep_dict)
-    prepare.check_args(parser, a)
-    final_dict.update(prep_dict)
+    final_dict.update(prep_dict)  # put new arguments to final_dict
+    a = Namespace(**final_dict)
+    prepare.check_args(parser, a)  # Check compatibility
+    # dict1.update(dict2):
+    # dict1 will contain key/values from dict2 that did not exist
+    # dict1 will have values of dict2 for existing keys 
 
     # ANNOTATE STEP
     annot_dict = get_annotate(dict_argv)
-    a = Namespace(**annot_dict)
-    annotate.check_args(parser, a)
     final_dict.update(annot_dict)
+    a = Namespace(**final_dict)
+    annotate.check_args(parser, a)
 
     # PANGENOME STEP
     pan_dict = get_pangenome(dict_argv)
@@ -398,9 +404,9 @@ def check_args(parser, argv):
 
     # COREPERS STEP
     cp_dict = get_corepers(dict_argv)
-    a = Namespace(**cp_dict)
-    corepers.check_args(parser, a)
     final_dict.update(cp_dict)
+    a = Namespace(**final_dict)
+    corepers.check_args(parser, a)
 
     # TREE STEP
     tree_dict = get_tree(dict_argv)
@@ -452,6 +458,7 @@ def get_prepare(dict_argv):
     conf_conffile.set_float("prepare", "min_dist")
     conf_conffile.set_float("prepare", "max_dist")
     prep_dict = conf_conffile.get_section_dict("prepare")
+    print(prep_dict)
     return prep_dict
 
 
@@ -472,9 +479,9 @@ def get_annotate(dict_argv):
         date = time.strftime("%m%y")
         conf_conffile.update({"date": date}, "annotate")
     # Add default arguments if not found in commandline nor config file
-    defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
+    defaults = {"verbose": 0, "threads": 1,
                 "quiet": False, "prodigal_only": False, "small": False, "qc_only": False,
-                "list_file": "", "db_path": "", "from_info": True}
+                "list_file": "list_file", "db_path": "db_path", "from_info": False}
     conf_conffile.add_default(defaults, "annotate")
     conf_conffile.set_boolean("annotate", "quiet")
     conf_conffile.set_boolean("annotate", "prodigal_only")
@@ -482,9 +489,7 @@ def get_annotate(dict_argv):
     conf_conffile.set_boolean("annotate", "qc_only")
     conf_conffile.set_int("annotate", "verbose")
     conf_conffile.set_int("annotate", "threads")
-    conf_conffile.set_int("annotate", "cutn")
-    conf_conffile.set_int("annotate", "nbcont")
-    conf_conffile.set_int("annotate", "l90")
+    print("warining, todo")
     annot_dict = conf_conffile.get_section_dict("annotate")
     return annot_dict
 
