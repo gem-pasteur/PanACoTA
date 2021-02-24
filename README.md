@@ -129,7 +129,7 @@ To update to new version, go back to your repository:
 
     cd <your_dir>/PanACoTA
     git pull
-    ./make update
+    ./make upgrade
 
 
 ### <a name="singularity"></a> From singularity image
