@@ -136,15 +136,19 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
             pool.terminate()
             main_logger.error(excp)
             sys.exit(1)
-        # We re-aligned at least one family -> remove concatenated files and groupby
+    # We re-aligned at least one family -> remove concatenated files and groupby files (if they exist)
     if set(final) != {"OK"}:
         aldir = os.path.split(prefix)[0]
-        concat = os.path.join(aldir, f"{dname}-complete.cat.aln")
+        concat_nucl = os.path.join(aldir, f"{dname}-complete.nucl.cat.aln")
+        concat_aa = os.path.join(aldir, f"{dname}-complete.aa.cat.aln")
         outdir = os.path.split(aldir)[0]
         treedir = os.path.join(outdir, "Phylo-" + dname)
-        grpfile = os.path.join(treedir, dname + ".grp.aln")
-        utils.remove(concat)
-        utils.remove(grpfile)
+        grpfile_nucl = os.path.join(treedir, dname + ".nucl.grp.aln")
+        grpfile_aa = os.path.join(treedir, dname + ".aa.grp.aln")
+        utils.remove(concat_nucl)
+        utils.remove(concat_aa)
+        utils.remove(grpfile_nucl)
+        utils.remove(grpfile_aa)
     return False not in final
 
 
@@ -183,11 +187,29 @@ def handle_family_1thread(args):
     miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
     mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
     btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
+    # Align all sequences for given family
     status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
                                num_fam, ngenomes, logger)
-    # If it returned true, Add missing genomes
+    #  status1 is:
+    # - False if problem with extractions, alignment or backtranslation -> return False
+    # - 'nb_seqs' = number of sequences aligned if everything went well (extractions and
+    # alignment ok, btr created without problem)
+    # - "OK" if extractions and alignments went well, and btr already exists and is ok
+    # If it returned true or the , Add missing genomes
+    # If 'OK' or nb_seq, add missing genomes
     if status1:
-        return add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+        added_aa = add_missing_genomes(mafft_file, miss_file, num_fam, ngenomes, status1, logger)
+        added_nucl = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+        # 1 of them false: return false
+        # both are "OK": return OK (no need to remove concatenated and grouped files)
+        # 1 of them true: return true
+        if not added_nucl or not added_aa:
+            return False
+        elif added_aa == "OK" and added_nucl == "OK":
+            return "OK"
+        else:
+            return True
+    # Else, return False (there was a problem while trying to align, in any step)
     return False
 
 
@@ -230,21 +252,23 @@ def handle_family(args):
     return handle_family_1thread((prefix, num_fam, ngenomes))
 
 
-def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger):
+def add_missing_genomes(align_file, miss_file, num_fam, ngenomes, status1, logger):
     """
     Once all family proteins are aligned, and back-translated to nucleotides,
     add missing genomes for the family to the alignment with '-'.
+    (Add missing genomes to both mafft alignment and back-translated alignment)
 
     Parameters
     ----------
-    btr_file : str
-        path to file containing protein alignments back-translated to nucleotides
+    align_file : str
+        path to file containing alignments (proteins if from mafft output, 
+        or nucleic sequences if after backtranslating them)
     miss_file : str
         path to file containing the list of missing genomes in this family
     num_fam : int
         family number
     ngenomes : int
-        total number of genomes in dataset
+        total number of genomes in dataset 
     status1 : bool or str
         - "OK" if we did not redo the alignments as they already were as expected. In that case,
           if missing genomes are already present, just add a warning message saying that we
@@ -260,7 +284,7 @@ def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
     bool or str
         - "OK" if btr file was not recreated, and already has the right number of sequences,
           and all with the same length.
-        - False if problem in btr file alignment, so missing genomes not added
+        - False if problem in btr file alignment, so missing genomes not added 
         - True if alignment + adding missing genomes is ok. Can happen if there is no missing
           genome for this family (in that case, btr generated already has the right number of
           sequences), or if we just added the missing genomes.
@@ -269,12 +293,12 @@ def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
     # btr_file should always exist.
     # Sometimes it comes from previous step ('missing genomes' are missing)
     # Sometimes it comes from a previous run (all genomes should be here)
-    status = check_add_missing(btr_file, num_fam, ngenomes, logger, prev=True)
+    status = check_add_missing(align_file, num_fam, ngenomes, logger, prev=True)
     # If btr_file has the correct number of sequences, all the same length, return True
     if status is True:
         if status1 == "OK":
-            logger.warning(("Alignment already done for family {}. The program will use "
-                            "it for next steps").format(num_fam))
+            logger.warning(f"Alignment already done for family {num_fam}. The program will use "
+                            "it for next steps")
             return "OK"
         else:
             return True
@@ -282,23 +306,21 @@ def add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
     elif status is False:
         return False
     # All sequences have same length but some genomes are missing -> Add missing genomes
-    logger.log(utils.detail_lvl(), "Adding missing genomes for family {}".format(num_fam))
+    # status is length of sequence (if it was True or False, it already ended this function)
+    logger.log(utils.detail_lvl(), f"Adding missing genomes for family {num_fam}")
     len_aln = status
-    with open(miss_file, "r") as missf, open(btr_file, "a") as btrf:
+    with open(miss_file, "r") as missf, open(align_file, "a") as alif:
         for genome in missf:
             genome = genome.strip()
             toadd = ">" + genome + "\n" + "-" * len_aln + "\n"
-            btrf.write(toadd)
-    ret = check_add_missing(btr_file, num_fam, ngenomes, logger)
-    # Return True only if all genomes found with all same length (check_add_missing = True,
-    # and not check_add_missing = len_alignment)
-    if ret is True:
-        return True
-    else:
-        return False
+            alif.write(toadd)
+    # check_add_missing called with prev=False :
+    # output is True if all ok, or False if problems. Cannot be sequence length (as it can be with prev=True)
+    ret = check_add_missing(align_file, num_fam, ngenomes, logger, prev=False)
+    return ret
 
 
-def check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False):
+def check_add_missing(btr_file, num_fam, ngenomes, logger, prev):
     """
     Check back-translated alignment while missing genomes have been added
 
@@ -324,22 +346,36 @@ def check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False):
     -------
     bool or int
         - True if right number of sequences in btr file and all the same length (everything is ok)
-        - False if problem in alignment (sequences do not all have the same size)
+        - False if problem in alignment (sequences do not all have the same size), or same size but not all
+          genomes while not being from previous run (prev=False)
         - alignment length if sequences aligned all have the same length, but missing
           genomes are not added yet (so, will have to add lines with this number of '-')
     """
     res = check_lens(btr_file, num_fam, logger)
-    # If all sequences have the same length, get number of sequences
+    # If all sequences have the same length, res = (length of a sequence, number of sequences in btr file)
     if res:
         len_aln, nb = res
     # otherwise, return False: problem while aligning or back-translating
     else:
         return False
+    # If number of sequences in btr file is not the same as the total number of genomes, either:
+    #   - btr comes from a previous run, but was not complete (prev)
+    #   - we just created btr file, and there are missing genomes in this family.
+    # return sequence length, so that we add missing genomes
     if nb != ngenomes:
+        # prev = true: this function was called at the beggining of 'add_missing_genomes',
+        # so it's ok if there are not all sequences, they will be added just after. We
+        # just checked in case this is a file already complete from a previous run, or 
+        # in case there is no missing genome in this family.
+        # prev = false: called after adding missing genomes. So, error message, as it should
+        # contain all expected genomes.
         if not prev:
             logger.error(("ERROR: family {} contains {} genomes in total instead of the {} "
                           "genomes in input.\n").format(num_fam, nb, ngenomes))
+            return False
+        # If not already has all sequences, return sequence length to add the missing ones
         return len_aln
+    # Everything ok (nb genomes ok and all same length)
     return True
 
 
@@ -378,9 +414,11 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
         - "OK" if extractions and alignments went well, and btr already exists and is ok
     """
     # Check number of proteins extracted
+    # =check that nb_prt (or nb_gen, which should be the same) + nb_miss = nb_genomes
+    # returns number of genomes extracted (so, excludes missing genomes for the family)
     nbfprt = check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
     nbfal = None
-    # If problem with extractions, remove mafft and btr files if they exist, so that they will
+    # If problem with extractions (0 proteins extracted), remove mafft and btr files if they exist, so that they will
     # be regenerated
     if not nbfprt:
         utils.remove(mafft_file)
@@ -389,9 +427,9 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # If mafft file already exists, check the number of proteins aligned corresponds to number of
     #  proteins extracted. If not, remove mafft and btr files.
     if os.path.isfile(mafft_file):
-        message = ("fam {}: Will redo alignment, because found a different number of proteins "
-                   "extracted in {} ({}) and proteins aligned in "
-                   "existing {}").format(num_fam, prt_file, nbfprt, mafft_file)
+        message = (f"fam {num_fam}: Will redo alignment, because found a different number of proteins "
+                   f"extracted in {prt_file} ({nbfprt}) and proteins aligned in "
+                   f"existing {mafft_file}")
         nbfal = check_nb_seqs(mafft_file, nbfprt, logger, message)
         if not nbfal:
             os.remove(mafft_file)
@@ -399,7 +437,7 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # If mafft file does not exist (removed because problem in its alignment, or just not generated
     # yet), remove btr (will be regenerated), and do alignment with mafft
     if not os.path.isfile(mafft_file):
-        utils.remove(btr_file)
+        utils.remove(btr_file)  # remove if exists...
         nbfal = mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger)
     # If problem with alignment, return False
     if not nbfal:
@@ -408,17 +446,21 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # extractions and mafft files are ok. So, return True, saying that btr file is done,
     # next step will be to check it, add missing genomes etc.
     if os.path.isfile(btr_file):
-        message = ("fam {}: Will redo back-translation, because found a different number of "
-                   "proteins aligned in {} ({}) and genes back-translated in "
-                   "existing {}").format(num_fam, mafft_file, nbfal, btr_file)
+        message = (f"fam {num_fam}: Will redo back-translation, because found a different number of "
+                   f"proteins aligned in {mafft_file} ({nbfal}) and genes back-translated in "
+                   f"existing {btr_file}")
+        # btr file contains either nbfal entries (number of proteins extracted) if it was not completed 
+        # with missing genomes, or ngenomes if it was completed. If it is not the case, remove it
+        # (will be regenerated)
         res = check_nb_seqs(btr_file, [nbfal, ngenomes], logger, message)
         if not res:
             utils.remove(btr_file)
         else:
             return "OK"
     # If btr file does not exist (removed because problem with mafft generated before,
-    # or just not generated yet), do back-translation, and return True if it went well,
-    # False otherwise
+    # or just not generated yet), do back-translation, and return:
+    # - number of sequences back-translated if it went well,
+    # - False otherwise
     return back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger)
 
 
@@ -490,12 +532,12 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
         True if no problem (alignment ok, same number of proteins extracted and aligned),
         False otherwise
     """
-    logger.log(utils.detail_lvl(), "Aligning family {}".format(num_fam))
-    cmd = "mafft --auto {}".format(prt_file)
-    error = "Problem while trying to align fam {}".format(num_fam)
+    logger.log(utils.detail_lvl(), f"Aligning family {num_fam}")
+    cmd = f"mafft --auto {prt_file}"
+    error = f"Problem while trying to align fam {num_fam}"
     stdout = open(mafft_file, "w")
     stderr = open(mafft_file + ".log", "w")
-    logger.log(utils.detail_lvl(), cmd)
+    logger.log(utils.detail_lvl(), f"Mafft command: {cmd}")
     ret = utils.run_cmd(cmd, error, stdout=stdout, stderr=stderr, logger=logger)
     stdout.close()
     if not isinstance(ret, int):
@@ -503,8 +545,8 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
     if ret != 0:
         os.remove(mafft_file)
         return False
-    message = ("fam {}: different number of proteins extracted in {} ({}) and proteins "
-               "aligned in {}").format(num_fam, prt_file, nbfprt, mafft_file)
+    message = (f"fam {num_fam}: different number of proteins extracted in {prt_file} ({nbfprt}) and proteins "
+               f"aligned in {mafft_file}")
     return check_nb_seqs(mafft_file, nbfprt, logger, message)
 
 
@@ -534,12 +576,12 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
         - False if problem (back-translation, different number of families...)
         - number of sequences in btr file if everything went well
     """
-    logger.log(utils.detail_lvl(), "Back-translating family {}".format(num_fam))
+    logger.log(utils.detail_lvl(), f"Back-translating family {num_fam}")
     curpath = os.path.dirname(os.path.abspath(__file__))
     awk_script = os.path.join(curpath, "prt2codon.awk")
-    cmd = "awk -f {} {} {}".format(awk_script, mafft_file, gen_file)
+    cmd = f"awk -f {awk_script} {mafft_file} {gen_file}"
     stdout = open(btr_file, "w")
-    error = "Problem while trying to backtranslate {} to a nucleotide alignment".format(mafft_file)
+    error = f"Problem while trying to backtranslate {mafft_file} to a nucleotide alignment"
     ret = utils.run_cmd(cmd, error, stdout=stdout, logger=logger)
     stdout.close()
     if not isinstance(ret, int):
@@ -547,8 +589,10 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     if ret != 0:
         os.remove(btr_file)
         return False
-    message = ("fam {}: different number of proteins aligned in {} ({}) and genes "
-               "back-translated in {}").format(num_fam, mafft_file, nbfal, btr_file)
+    message = (f"fam {num_fam}: different number of proteins aligned in {mafft_file} ({nbfal}) and genes "
+               f"back-translated in {btr_file}")
+    # Check number of sequences in btr file, and return True/False according to it
+    # It should contain the same number of sequences as the mafft file.
     return check_nb_seqs(mafft_file, nbfal, logger, message)
 
 
@@ -580,7 +624,7 @@ def check_nb_seqs(alnfile, nbfal, logger, message):
         if nbseqs == num:
             return nbseqs
 
-    logger.error(message + ' ({})'.format(nbseqs))
+    logger.error(f"{message} ({nbseqs})")
     return False
 
 
@@ -622,7 +666,8 @@ def check_lens(aln_file, num_fam, logger):
                 cur_sum += len(line.strip())
         all_sums.add(cur_sum)
     if len(all_sums) > 1:
-        logger.error(("alignments for family {} do not all have the same "
-                      "length. Lengths found are: {}\n").format(num_fam, all_sums))
+        logger.error(f"Nucleic alignments for family {num_fam} (in {aln_file}) do not all have the same "
+                     f"length. Lengths found are: {all_sums}\n")
         return False
+    # Return sequence length and number of sequences in alignment file
     return list(all_sums)[0], nb_gen
