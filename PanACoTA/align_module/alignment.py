@@ -198,8 +198,8 @@ def handle_family_1thread(args):
     # If it returned true or the , Add missing genomes
     # If 'OK' or nb_seq, add missing genomes
     if status1:
-        added_aa = add_missing_genomes(mafft_file, miss_file, num_fam, ngenomes, status1, logger)
-        added_nucl = add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+        added_aa = add_missing_genomes(mafft_file, "protein", miss_file, num_fam, ngenomes, status1, logger)
+        added_nucl = add_missing_genomes(btr_file, "back-translated", miss_file, num_fam, ngenomes, status1, logger)
         # 1 of them false: return false
         # both are "OK": return OK (no need to remove concatenated and grouped files)
         # 1 of them true: return true
@@ -252,7 +252,7 @@ def handle_family(args):
     return handle_family_1thread((prefix, num_fam, ngenomes))
 
 
-def add_missing_genomes(align_file, miss_file, num_fam, ngenomes, status1, logger):
+def add_missing_genomes(align_file, ali_type, miss_file, num_fam, ngenomes, status1, logger):
     """
     Once all family proteins are aligned, and back-translated to nucleotides,
     add missing genomes for the family to the alignment with '-'.
@@ -263,6 +263,8 @@ def add_missing_genomes(align_file, miss_file, num_fam, ngenomes, status1, logge
     align_file : str
         path to file containing alignments (proteins if from mafft output, 
         or nucleic sequences if after backtranslating them)
+    ali_type : str
+        protein or backtranslated
     miss_file : str
         path to file containing the list of missing genomes in this family
     num_fam : int
@@ -297,7 +299,7 @@ def add_missing_genomes(align_file, miss_file, num_fam, ngenomes, status1, logge
     # If btr_file has the correct number of sequences, all the same length, return True
     if status is True:
         if status1 == "OK":
-            logger.warning(f"Alignment already done for family {num_fam}. The program will use "
+            logger.warning(f"{ali_type} alignment already done for family {num_fam}. The program will use "
                             "it for next steps")
             return "OK"
         else:
@@ -307,7 +309,7 @@ def add_missing_genomes(align_file, miss_file, num_fam, ngenomes, status1, logge
         return False
     # All sequences have same length but some genomes are missing -> Add missing genomes
     # status is length of sequence (if it was True or False, it already ended this function)
-    logger.log(utils.detail_lvl(), f"Adding missing genomes for family {num_fam}")
+    logger.log(utils.detail_lvl(), f"Adding missing genomes for family {num_fam} in {ali_type} alignment.")
     len_aln = status
     with open(miss_file, "r") as missf, open(align_file, "a") as alif:
         for genome in missf:
@@ -430,8 +432,19 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
         message = (f"fam {num_fam}: Will redo alignment, because found a different number of proteins "
                    f"extracted in {prt_file} ({nbfprt}) and proteins aligned in "
                    f"existing {mafft_file}")
-        nbfal = check_nb_seqs(mafft_file, nbfprt, logger, message)
-        if not nbfal:
+        # There can be nbfprt (number of proteins extracted) 
+        # or nb_genomes (proteins extracted + missing added with '-')
+        nbfal1 = check_nb_seqs(mafft_file, nbfprt, logger, "")
+        nbfal2 = check_nb_seqs(mafft_file, ngenomes, logger, "")
+        # if nbfal1: missing genomes have not been added yet. Save this value for later
+        if nbfal1:
+            nbfal = nbfal1
+        # if nbfal2: missing genomes already there, save for later
+        elif nbfal2:
+            nbfal = nbfal2
+        # If not any of those 2 numbers: error
+        else:
+            logger.error(message)
             os.remove(mafft_file)
             utils.remove(btr_file)
     # If mafft file does not exist (removed because problem in its alignment, or just not generated
@@ -596,7 +609,7 @@ def back_translate(num_fam, mafft_file, gen_file, btr_file, nbfal, logger):
     return check_nb_seqs(mafft_file, nbfal, logger, message)
 
 
-def check_nb_seqs(alnfile, nbfal, logger, message):
+def check_nb_seqs(alnfile, nbfal, logger, message=""):
     """
     Check the number of sequences in the given alignment file
 
@@ -623,8 +636,8 @@ def check_nb_seqs(alnfile, nbfal, logger, message):
     for num in nbfal:
         if nbseqs == num:
             return nbseqs
-
-    logger.error(f"{message} ({nbseqs})")
+    if message:
+        logger.error(f"{message} ({nbseqs})")
     return False
 
 
