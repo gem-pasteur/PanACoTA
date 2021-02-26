@@ -243,7 +243,7 @@ def run_mmseqs_clust(args):
 
     """
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
-    cmd = (f"mmseqs cluster {mmseqsdb} {mmseqsclust} {tmpdir} --min-seq-id {min_id} --threads {threads} --cluster-mode "
+    cmd = (f"mmseqs cluster {mmseqdb} {mmseqclust} {tmpdir} --min-seq-id {min_id} --threads {threads} --cluster-mode "
            f"{clust_mode}")
     logger.details(f"MMseqs command: {cmd}")
     msg = f"Problem while clustering proteins with mmseqs. See log in {logmmseq}"
