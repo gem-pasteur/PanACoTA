@@ -51,7 +51,7 @@ from PanACoTA import utils
 logger = logging.getLogger("align.post")
 
 
-def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
+def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet):
     """
     After the alignment of all proteins by family:
 
@@ -70,17 +70,30 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet):
         path to output directory, containing Aldir and Listdir, and that will also contain Treedir
     dname : str
         name of dataset (used to name concat and grouped files, as well as tree folder)
+    prot_ali : bool
+        true: also give concatenated alignment in aa
     quiet : bool
         True if nothing must be sent to sdtout/stderr, False otherwise
     """
-    all_alns, status = concat_alignments(fam_nums, prefix, quiet)
+    all_alns_nucl, status_nucl = concat_alignments(fam_nums, prefix, "nucl", quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    outfile = os.path.join(treedir, dname + ".grp.aln")
-    res = launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet)
-    if not res:
-        logger.error("An error occurred. We could not group sequences by genome.")
-    return outfile
+    outfile_nucl = os.path.join(treedir, dname + ".grp.nucl.aln")
+    res_nucl = launch_group_by_genome(all_genomes, all_alns_nucl, status_nucl, outfile_nucl, dname, "nucleic", quiet)
+    if not res_nucl:
+        utils.remove(all_alns_nucl)
+        utils.remove(outfile_nucl)
+        logger.error("An error occurred. We could not group DNA alignments by genome.")
+        sys.exit(1)
+    if prot_ali:
+        all_alns_aa, status_aa = concat_alignments(fam_nums, prefix, "aa", quiet)
+        outfile_aa = os.path.join(treedir, dname + ".grp.aa.aln")
+        res_aa = launch_group_by_genome(all_genomes, all_alns_aa, status_aa, outfile_aa, dname, "protein", quiet)
+        if not res_aa:
+            utils.remove(all_alns_aa)
+            utils.remove(outfile_aa)
+            logger.error("An error occurred. We could not group protein alignments by genome.")
+    return outfile_nucl
 
 
 def concat_alignments(fam_nums, prefix, ali_type, quiet):
@@ -91,8 +104,11 @@ def concat_alignments(fam_nums, prefix, ali_type, quiet):
     ----------
     fam_nums : []
         list of family numbers
+    ali_type: str
+        nucl or aa
     prefix : str
-        path to ``aldir/<name of dataset>`` (used to get extraction, alignment and btr files easily)
+        path to ``aldir/<name of dataset>-[mafft-align or mafft-prt2nuc]`` 
+        (used to get extraction, alignment and btr files easily)
     ali_type : str
         aa or nucl
     quiet : bool
@@ -106,19 +122,22 @@ def concat_alignments(fam_nums, prefix, ali_type, quiet):
         - output: path to file containing concatenation of all alignments
         - str: "OK" if concatenation file already exists, "Done" if just did concatenation
     """
-    if ali_type == "nucl":
-        ali_pre = "-mafft-prt2nuc"
+    if ali_type == "aa":
+        info = "mafft-align"
+    elif ali_type == "nucl":
+        info = "mafft-prt2nuc"
     else:
-        ali_pre = "-mafft-align"
-    output = f"{prefix}-complete.{ali_type}.cat.aln"
+        logger.error(f"Not possible to concatenate '{ali_type}' type of alignments.")
+        sys.exit(1)
+    output = f"{prefix}-complete.cat.{ali_type}.aln"
     if os.path.isfile(output):
-        logger.info("Alignments already concatenated")
-        logger.warning(("Alignments already concatenated in {}. Program will use "
+        logger.info(f"{ali_type} alignments already concatenated")
+        logger.warning(f"{ali_type} alignments already concatenated in {output}. Program will use "
                         "it for next steps. If you want to redo it, remove it before "
-                        "running.").format(output))
+                        "running.")
         return output, "OK"
-    logger.info("Concatenating all alignment files")
-    list_files = [f"{prefix}{ali_pre}.{num_fam}.aln" for num_fam in fam_nums]
+    logger.info(f"Concatenating all {ali_type} alignment files")
+    list_files = [f"{prefix}-{info}.{num_fam}.aln" for num_fam in fam_nums]
     # Check that all files exist
     for f in list_files:
         if not os.path.isfile(f):
@@ -132,7 +151,7 @@ def concat_alignments(fam_nums, prefix, ali_type, quiet):
     return output, "Done"
 
 
-def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet):
+def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, type_ali, quiet):
     """
     Function calling group_by_genome in a pool, while giving information to user
     (time elapsed)
@@ -149,6 +168,8 @@ def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet)
         file containing all families align by genome
     dname : str
         name of dataset
+    type_ali : str
+        nucleic or aa
     quiet : bool
         True if nothing must be sent to sdtout/stderr, False otherwise
 
@@ -166,11 +187,11 @@ def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, quiet)
     # Status was not 'Done' (it was 'ok', concat file already existed). And by_genome file
     # also already exists. Warn user
     if os.path.isfile(outfile):
-        logger.info("Alignments already grouped by genome")
-        logger.warning((f"Alignments already grouped by genome in {outfile}. "
+        logger.info(f"{type_ali} alignments already grouped by genome")
+        logger.warning((f"{type_ali} alignments already grouped by genome in {outfile}. "
                         "Program will end. "))
         return True
-    logger.info("Grouping alignments per genome")
+    logger.info(f"Grouping {type_ali} alignments per genome")
     bar = None
     if not quiet:
         widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
@@ -211,6 +232,7 @@ def group_by_genome(args):
     """
     all_genomes, all_alns, outfile = args
     sequences = read_alignments(all_alns, all_genomes)
+    logger.info(sequences)
     if not sequences:
         return False
     write_groups(outfile, sequences)
