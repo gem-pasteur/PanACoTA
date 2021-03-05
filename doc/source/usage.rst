@@ -983,6 +983,11 @@ with:
     - ``-d <dbdir>``: directory containing the ``Proteins`` and ``Genes`` folders, with files corresponding to :ref:`list_file<lfilealign>`
     - ``-o <resdir>``: directory where you want to have the temporary and result files
 
+optional:
+
+    - ``-F``: force to redo all alignments
+    - ``-P``: also provide concatenated protein alignments
+
 Add ``--threads <num>`` to parallelize the alignments. Put 0 to use all cores of your computer.
 
 In your ``<resdir>`` directory, you will find:
@@ -1046,7 +1051,7 @@ IQtree options
 If you use IQtree (default one), you can use the following options:
 
     - ``-o <outdir>``: by default, the output files (tree, logs) will be in the current directory. Add this option if you want to save them somewhere else.
-    - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is GTR (Generalized Time Reversible). You can choose between: HKY, JC, F81, K2P, K3P, K81uf, TNef, TIM, TIMef, TVM, TVMef, SYM, GTR.
+    - ``-m <model>`` or ``--model <model>``: Choose your DNA substitution model. Default is GTR (Generalized Time Reversible). You can choose between: HKY, JC, F81, K2P, K3P, K81uf, TNef, TIM, TIMef, TVM, TVMef, SYM, GTR. To ask IQtree to test and select the best model, use TEST.
     - ``-b <num>`` or ``--boot <num>``: indicate how many bootstraps you want to compute. By default, no bootstrap is calculated
     - ``-B``: Add this option if you want to write all bootstrap pseudo-trees
     - ``--threads <num>``: Indicate how many threads you want to use. By default, it uses only 1 thread. Put 0 if you want to use all your computer cores
