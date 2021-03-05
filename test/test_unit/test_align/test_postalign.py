@@ -473,7 +473,7 @@ def test_postalign(caplog):
     orig_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     orig_btr11 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.11.aln")
     orig_ali1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
-    orig_ali8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    orig_ali8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     orig_ali11 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.11.aln")
     btr1 = os.path.join(aldir, dname + "-mafft-prt2nuc.1.aln")
     btr8 = os.path.join(aldir, dname + "-mafft-prt2nuc.8.aln")
@@ -661,7 +661,7 @@ def test_postalign_error_grpaa(caplog):
     assert "Grouping protein alignments per genome" in caplog.text
     assert ("An error occurred. We could not group protein alignments by genome") in caplog.text
 
-# TODO
+
 def test_postalign_diffnbseq(caplog):
     """
     Test that when running post-alignment on a folder containing all expected alignment files,
