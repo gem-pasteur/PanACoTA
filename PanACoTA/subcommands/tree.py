@@ -126,7 +126,7 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
                 print("IQtree2 is not installed. 'PanACoTA tree' cannot run.")
                 sys.exit(1)
             else:
-                soft == "iqtree"
+                soft = "iqtree"
         from PanACoTA.tree_module import iqtree_func as tree
     elif soft == "iqtree":
         # user specifically asked for iqtree (version 1)
