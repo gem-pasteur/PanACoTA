@@ -298,7 +298,7 @@ def test_concat_nucl(caplog):
     fam_nums = [1, 8, 11]
     quiet = False
     output, mess = pal.concat_alignments(fam_nums, prefix, "nucl", quiet)
-    assert output == os.path.join(aldir, dname + "-complete.cat.nucl.aln")
+    assert output == os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     assert tutil.compare_order_content(output, ref_concat)
     assert mess == "Done"
@@ -330,7 +330,7 @@ def test_concat_aa(caplog):
     fam_nums = [1, 8, 11]
     quiet = False
     output, mess = pal.concat_alignments(fam_nums, prefix, "aa", quiet)
-    assert output == os.path.join(aldir, dname + "-complete.cat.aa.aln")
+    assert output == os.path.join(aldir, dname + "-complete.aa.cat.aln")
     ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aa.aln")
     assert tutil.compare_order_content(output, ref_concat)
     assert mess == "Done"
@@ -362,7 +362,7 @@ def test_concat_quiet(caplog):
     fam_nums = [1, 8, 11]
     quiet = True
     output, mess = pal.concat_alignments(fam_nums, prefix, "nucl", quiet)
-    assert output == os.path.join(aldir, dname + "-complete.cat.nucl.aln")
+    assert output == os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     ref_concat = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     assert tutil.compare_order_content(output, ref_concat)
     assert mess == "Done"
@@ -422,7 +422,7 @@ def test_concat_outexists(caplog):
     shutil.copyfile(orig_btr8, btr8)
     shutil.copyfile(orig_btr11, btr11)
     # Create empty concatenated file
-    outempty = os.path.join(aldir, dname + "-complete.cat.aa.aln")
+    outempty = os.path.join(aldir, dname + "-complete.aa.cat.aln")
     open(outempty, "w").close()
     # Other parameters, and run concatenation
     fam_nums = [1, 8, 11]
@@ -435,7 +435,7 @@ def test_concat_outexists(caplog):
     assert "aa alignments already concatenated" in caplog.text
     assert ("aa alignments already concatenated in "
             "test/data/align/generated_by_unit-tests/test_concat_aldir/"
-            "TESTconcat-complete.cat.aa.aln. "
+            "TESTconcat-complete.aa.cat.aln. "
             "Program will use it for next steps") in caplog.text
 
 
@@ -492,24 +492,24 @@ def test_postalign(caplog):
     # print(caplog.text)
     # CHECK CONCAT
     # Check that concatenated file in nucl is created and with expected content
-    out_concat_nucl = os.path.join(aldir, dname + "-complete.cat.nucl.aln")
+    out_concat_nucl = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     assert os.path.isfile(out_concat_nucl)
     ref_concat_nucl = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
     assert tutil.compare_order_content(out_concat_nucl, ref_concat_nucl)
     # Check concatenated in aa
-    out_concat_aa = os.path.join(aldir, dname + "-complete.cat.aa.aln")
+    out_concat_aa = os.path.join(aldir, dname + "-complete.aa.cat.aln")
     assert os.path.isfile(out_concat_aa)
     ref_concat_aa = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aa.aln")
     assert tutil.compare_order_content(out_concat_aa, ref_concat_aa)
     # CHECK GROUPED
     # Check that grouped by genome file in nucleotides is created, with expected content
     treedir = os.path.join(outdir, "Phylo-" + dname)
-    out_grp = os.path.join(treedir, dname + ".grp.nucl.aln")
+    out_grp = os.path.join(treedir, dname + ".nucl.grp.aln")
     assert os.path.isfile(out_grp)
     exp_grp = os.path.join(EXPPATH, "exp_grp_4genomes-fam1-8-11.aln")
     assert tutil.compare_order_content(out_grp, exp_grp)
     # Check aa alignment grouped by genome
-    out_grp_aa = os.path.join(treedir, dname + ".grp.aa.aln")
+    out_grp_aa = os.path.join(treedir, dname + ".aa.grp.aln")
     assert os.path.isfile(out_grp_aa)
     exp_grp_aa = os.path.join(EXPPATH, "exp_grp_4genomes-fam1-8-11.aa.aln")
     assert tutil.compare_order_content(out_grp_aa, exp_grp_aa)
@@ -588,11 +588,11 @@ def test_postalign_missgenome(caplog):
     with pytest.raises(SystemExit):
         pal.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet)
     # Check that concatenated file is created and with expected content
-    out_concat = os.path.join(aldir, dname + "-complete.cat.nucl.aln")
+    out_concat = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     assert not os.path.isfile(out_concat)
     # Check that grouped by genome file is not created
     treedir = os.path.join(outdir, "Phylo-" + dname)
-    out_grp = os.path.join(treedir, dname + ".grp.nucl.aln")
+    out_grp = os.path.join(treedir, dname + ".nucl.grp.aln")
     assert not os.path.isfile(out_grp)
     # check logs
     assert "Concatenating all nucl alignment files" in caplog.text
@@ -631,7 +631,7 @@ def test_postalign_error_grpaa(caplog):
     btr11 = os.path.join(aldir, dname + "-mafft-prt2nuc.11.aln")
     ali1 = os.path.join(aldir, dname + "-mafft-align.1.aln")
     ali11 = os.path.join(aldir, dname + "-mafft-align.11.aln")
-    concataa = os.path.join(aldir, dname + "-complete.cat.aa.aln")
+    concataa = os.path.join(aldir, dname + "-complete.aa.cat.aln")
     shutil.copyfile(orig_btr1, btr1)
     shutil.copyfile(orig_btr8, btr8)
     shutil.copyfile(orig_btr11, btr11)
@@ -639,9 +639,9 @@ def test_postalign_error_grpaa(caplog):
     shutil.copyfile(orig_ali11, ali11)
     shutil.copyfile(orig_concat_aa, concataa)
     # Run post-alignment
-    out_concat = os.path.join(aldir, dname + "-complete.cat.nucl.aln")
+    out_concat = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     treedir = os.path.join(outdir, "Phylo-" + dname)
-    out_grp = os.path.join(treedir, dname + ".grp.nucl.aln")
+    out_grp = os.path.join(treedir, dname + ".nucl.grp.aln")
     assert pal.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet) == out_grp
     # Check that concatenated file is created and with expected content
     ref_concat_nucl = os.path.join(EXPPATH, "exp_concat_4genomes-fam1-8-11.aln")
@@ -655,7 +655,7 @@ def test_postalign_error_grpaa(caplog):
     assert "Concatenating all nucl alignment files" in caplog.text
     assert "Grouping nucleic alignments per genome" in caplog.text
     assert ("aa alignments already concatenated in test/data/align/generated_by_unit-tests/"
-            "test_post-align/aldir_post-align/TESTpost-complete.cat.aa.aln. "
+            "test_post-align/aldir_post-align/TESTpost-complete.aa.cat.aln. "
             "Program will use it for next steps. If you want to redo it, "
             "remove it before running.") in caplog.text
     assert "Grouping protein alignments per genome" in caplog.text

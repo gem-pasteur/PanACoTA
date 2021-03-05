@@ -78,7 +78,7 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet
     all_alns_nucl, status_nucl = concat_alignments(fam_nums, prefix, "nucl", quiet)
     treedir = os.path.join(outdir, "Phylo-" + dname)
     os.makedirs(treedir, exist_ok=True)
-    outfile_nucl = os.path.join(treedir, dname + ".grp.nucl.aln")
+    outfile_nucl = os.path.join(treedir, dname + ".nucl.grp.aln")
     res_nucl = launch_group_by_genome(all_genomes, all_alns_nucl, status_nucl, outfile_nucl, dname, "nucleic", quiet)
     if not res_nucl:
         utils.remove(all_alns_nucl)
@@ -87,7 +87,7 @@ def post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet
         sys.exit(1)
     if prot_ali:
         all_alns_aa, status_aa = concat_alignments(fam_nums, prefix, "aa", quiet)
-        outfile_aa = os.path.join(treedir, dname + ".grp.aa.aln")
+        outfile_aa = os.path.join(treedir, dname + ".aa.grp.aln")
         res_aa = launch_group_by_genome(all_genomes, all_alns_aa, status_aa, outfile_aa, dname, "protein", quiet)
         if not res_aa:
             utils.remove(all_alns_aa)
@@ -104,8 +104,6 @@ def concat_alignments(fam_nums, prefix, ali_type, quiet):
     ----------
     fam_nums : []
         list of family numbers
-    ali_type: str
-        nucl or aa
     prefix : str
         path to ``aldir/<name of dataset>-[mafft-align or mafft-prt2nuc]`` 
         (used to get extraction, alignment and btr files easily)
@@ -129,7 +127,7 @@ def concat_alignments(fam_nums, prefix, ali_type, quiet):
     else:
         logger.error(f"Not possible to concatenate '{ali_type}' type of alignments.")
         sys.exit(1)
-    output = f"{prefix}-complete.cat.{ali_type}.aln"
+    output = f"{prefix}-complete.{ali_type}.cat.aln"
     if os.path.isfile(output):
         logger.info(f"{ali_type} alignments already concatenated")
         logger.warning(f"{ali_type} alignments already concatenated in {output}. Program will use "
@@ -169,7 +167,7 @@ def launch_group_by_genome(all_genomes, all_alns, status, outfile, dname, type_a
     dname : str
         name of dataset
     type_ali : str
-        nucleic or aa
+        nucleic or protein
     quiet : bool
         True if nothing must be sent to sdtout/stderr, False otherwise
 
@@ -232,7 +230,6 @@ def group_by_genome(args):
     """
     all_genomes, all_alns, outfile = args
     sequences = read_alignments(all_alns, all_genomes)
-    logger.info(sequences)
     if not sequences:
         return False
     write_groups(outfile, sequences)
