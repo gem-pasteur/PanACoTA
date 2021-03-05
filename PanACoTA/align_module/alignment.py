@@ -136,7 +136,8 @@ def align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads):
             pool.terminate()
             main_logger.error(excp)
             sys.exit(1)
-    # We re-aligned at least one family -> remove concatenated files and groupby files (if they exist)
+    # We re-aligned (or added missing genomes) at least one family 
+    # -> remove concatenated files and groupby files (if they exist)
     if set(final) != {"OK"}:
         aldir = os.path.split(prefix)[0]
         concat_nucl = os.path.join(aldir, f"{dname}-complete.nucl.cat.aln")
@@ -182,11 +183,11 @@ def handle_family_1thread(args):
     prefix, num_fam, ngenomes = args
     logger = logging.getLogger('align.align_family')
     # Get file names
-    prt_file = "{}-current.{}.prt".format(prefix, num_fam)
-    gen_file = "{}-current.{}.gen".format(prefix, num_fam)
-    miss_file = "{}-current.{}.miss.lst".format(prefix, num_fam)
-    mafft_file = "{}-mafft-align.{}.aln".format(prefix, num_fam)
-    btr_file = "{}-mafft-prt2nuc.{}.aln".format(prefix, num_fam)
+    prt_file = f"{prefix}-current.{num_fam}.prt"
+    gen_file = f"{prefix}-current.{num_fam}.gen"
+    miss_file = f"{prefix}-current.{num_fam}.miss.lst"
+    mafft_file = f"{prefix}-mafft-align.{num_fam}.aln"
+    btr_file = f"{prefix}-mafft-prt2nuc.{num_fam}.aln"
     # Align all sequences for given family
     status1 = family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
                                num_fam, ngenomes, logger)
@@ -202,7 +203,7 @@ def handle_family_1thread(args):
         added_nucl = add_missing_genomes(btr_file, "back-translated", miss_file, num_fam, ngenomes, status1, logger)
         # 1 of them false: return false
         # both are "OK": return OK (no need to remove concatenated and grouped files)
-        # 1 of them true: return true
+        # 1 of them true (not "OK"): return true
         if not added_nucl or not added_aa:
             return False
         elif added_aa == "OK" and added_nucl == "OK":
@@ -372,8 +373,8 @@ def check_add_missing(btr_file, num_fam, ngenomes, logger, prev):
         # prev = false: called after adding missing genomes. So, error message, as it should
         # contain all expected genomes.
         if not prev:
-            logger.error(("ERROR: family {} contains {} genomes in total instead of the {} "
-                          "genomes in input.\n").format(num_fam, nb, ngenomes))
+            logger.error((f"ERROR: family {num_fam} contains {nb} genomes in total "
+                          f"instead of the {ngenomes} genomes in input.\n"))
             return False
         # If not already has all sequences, return sequence length to add the missing ones
         return len_aln
@@ -429,9 +430,6 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
     # If mafft file already exists, check the number of proteins aligned corresponds to number of
     #  proteins extracted. If not, remove mafft and btr files.
     if os.path.isfile(mafft_file):
-        message = (f"fam {num_fam}: Will redo alignment, because found a different number of proteins "
-                   f"extracted in {prt_file} ({nbfprt}) and proteins aligned in "
-                   f"existing {mafft_file}")
         # There can be nbfprt (number of proteins extracted) 
         # or nb_genomes (proteins extracted + missing added with '-')
         nbfal1 = check_nb_seqs(mafft_file, nbfprt, logger, "")
@@ -444,6 +442,9 @@ def family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file,
             nbfal = nbfal2
         # If not any of those 2 numbers: error
         else:
+            message = (f"fam {num_fam}: Will redo alignment, because found a different number of proteins "
+                       f"extracted in {prt_file} ({nbfprt}) and proteins aligned in "
+                       f"existing {mafft_file}")
             logger.error(message)
             os.remove(mafft_file)
             utils.remove(btr_file)
@@ -505,7 +506,7 @@ def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger):
         False if any problem (nbmiss+prt != nbgenomes or nbmiss+gen != nbgenomes). If no
         problem, returns the number of proteins/genes extracted
     """
-    logger.log(utils.detail_lvl(), "Checking extractions for family {}".format(num_fam))
+    logger.log(utils.detail_lvl(), f"Checking extractions for family {num_fam}")
 
     # Check that extractions went well
     nbmiss = utils.count(miss_file)
