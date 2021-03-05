@@ -510,6 +510,16 @@ def check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger):
 
     # Check that extractions went well
     nbmiss = utils.count(miss_file)
+    # If files with proteins extracted do not even exist, close with error
+    # (they should have been created at the previous step)
+    if not os.path.isfile(gen_file):
+        logger.error(f"fam {num_fam}: no file with genes extracted "
+                     f"('{gen_file}'). Cannot align.")
+        sys.exit(1)
+    if not os.path.isfile(prt_file):
+        logger.error(f"fam {num_fam}: no file with proteins extracted "
+                     f"('{prt_file}'). Cannot align.")
+        sys.exit(1)
     nbfprt = utils.grep(prt_file, "^>", counts=True)
     nbfgen = utils.grep(gen_file, "^>", counts=True)
     if nbmiss + nbfprt != ngenomes:

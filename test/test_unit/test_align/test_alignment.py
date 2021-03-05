@@ -276,6 +276,42 @@ def test_check_extract(caplog):
     assert "Checking extractions for family 1" in caplog.text
 
 
+def test_check_extract_nogen(caplog):
+    """
+    Test that when gen file is ok, but prt file is missing, it exits with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    num_fam = 1
+    gen_file = os.path.join("genfile")
+    prt_file = os.path.join(EXPPATH, "exp_aldir", "current.1.prt")
+    miss_file = os.path.join(GENEPATH, "test_check_extract_miss-file.txt")
+    ngenomes = 5
+    logger = logging.getLogger("test_check_extract")
+    with open(miss_file, "w") as missf:
+        missf.write("Genome5")
+    with pytest.raises(SystemExit):
+        al.check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
+    assert "fam 1: no file with genes extracted ('genfile'). Cannot align." in caplog.text
+
+
+def test_check_extract_noprt(caplog):
+    """
+    Test that when gen file is ok, but prt file is missing, it exits with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    num_fam = 1
+    gen_file = os.path.join(EXPPATH, "exp_aldir", "current.1.gen")
+    prt_file = os.path.join("prt_file")
+    miss_file = os.path.join(GENEPATH, "test_check_extract_miss-file.txt")
+    ngenomes = 5
+    logger = logging.getLogger("test_check_extract")
+    with open(miss_file, "w") as missf:
+        missf.write("Genome5")
+    with pytest.raises(SystemExit):
+        al.check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
+    assert "fam 1: no file with proteins extracted ('prt_file'). Cannot align." in caplog.text
+
+
 def test_check_extract_wrongnbmiss(caplog):
     """
     Test that given the 3 files: 4 proteins extracted in gen and prt, empty miss file,
@@ -765,7 +801,7 @@ def test_handle_family_true():
     assert al.handle_family(args) is True
     cur_mafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
     cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, exp_btr)
@@ -846,7 +882,7 @@ def test_handle_family_emptyaln_true():
     args = (prefix, num_fam, ngenomes, q)
     assert al.handle_family(args)
     cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, exp_btr)
@@ -897,7 +933,7 @@ def test_handle_family_emptybtr_true():
     args = (prefix, num_fam, ngenomes, q)
     assert al.handle_family(args)
     # mafft file should have been completed with missing genomes
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, ref_btr)
     q.put(None)
@@ -929,7 +965,7 @@ def test_handle_family_already_ok():
     ref_prt = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
     ref_gen = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
     ref_miss = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
-    ref_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    ref_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     ref_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     cur_prt = os.path.join(aldir, "TESThandlefam-current.8.prt")
     cur_gen = os.path.join(aldir, "TESThandlefam-current.8.gen")
@@ -1026,7 +1062,7 @@ def test_handle_family_addfalse():
     assert al.handle_family(args) is False
     cur_mafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
     cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     # assert tutil.compare_order_content(cur_btr, exp_btr)
@@ -1085,7 +1121,7 @@ def test_align_all_true(caplog):
     out_btr8 = os.path.join(aldir, dname + "-mafft-prt2nuc.8.aln")
     exp_mafft1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
     exp_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-prt2nuc.1.aln")
-    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(out_mafft1, exp_mafft1)
     assert tutil.compare_order_content(out_btr1, exp_btr1)
@@ -1126,7 +1162,7 @@ def test_align_all_exists_true(caplog):
     ref_gen1 = os.path.join(EXPPATH, "exp_aldir", "current.1.gen")
     exp_mafft1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
     exp_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-prt2nuc.1.aln")
-    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     cur_prt8 = os.path.join(aldir, dname + "-current.8.prt")
     cur_gen8 = os.path.join(aldir, dname + "-current.8.gen")
