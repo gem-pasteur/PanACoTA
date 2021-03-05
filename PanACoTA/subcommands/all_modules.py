@@ -103,7 +103,7 @@ def main_from_parse(args):
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
     args_align = (args.prot_ali)
     args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
-    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_tree)
+    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_align, args_tree)
 
 
 def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree):
@@ -206,7 +206,7 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     outdir_align = os.path.join(outdir, "5-align_module")
     force = False
     logger.info("align step")
-    prot_ali = args_align[0]
+    (prot_ali) = args_align
     align_file = align.main("PanACoTA align", corepers_file, lstinfo, name_pan, outdir_annotate,
                             outdir_align, prot_ali, threads, force, verbose=verbose, quiet=quiet)
 

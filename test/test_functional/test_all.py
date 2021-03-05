@@ -58,12 +58,15 @@ def test_main_default_qc_only():
     # args for corepers
     # tol (float), mixed (bool), multi (bool), floor (bool)
     args_corepers = (1, False, False, False)
+    # args for align:
+    # prot_ali (bool)
+    args_align = (False)
     #  args for tree module
     #  soft (str), model (str), boot (bool), write_boot (bool), memory (str), fast (bool)
     args_tree = ("iqtree2", "GTR", False, False, "", True)
 
     # Run 'all' module
-    out = allm.main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree)
+    out = allm.main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree)
     assert out == "QC_only done"
     # Check that there are 3 log files (log, err and details)
     log_files = glob.glob(os.path.join(outdir, "*log*"))
@@ -118,12 +121,15 @@ def test_main_norefseq():
     # args for args_corepers
     # tol (float), mixed (bool), multi (bool), floor (bool)
     args_corepers = (1, False, False, False)
+    # args for align:
+    # prot_ali (bool)
+    args_align = (True)
     #  args for tree module
     #  soft (str), model (str), boot (bool), write_boot (bool), memory (str), fast (bool)
     args_tree = ("iqtree2", "GTR", False, False, "", True)
 
     # Run 'all' module
-    out = allm.main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree)
+    out = allm.main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree)
     assert out == 0
     # Check that there are 2 log files (log, err)
     log_files = glob.glob(os.path.join(outdir, "*log*"))
@@ -174,13 +180,16 @@ def test_main_norefseq():
     # CHECK PAN
     assert(len(glob.glob(os.path.join(ali_dir, "PanACoTA*log*")))) == 3
     assert os.path.isdir(os.path.join(ali_dir, "Align-TEST_4"))
+    assert os.path.isfile(os.path.join(ali_dir, "Align-TEST_4", "TEST_4-complete.nucl.cat.aln"))
+    assert os.path.isfile(os.path.join(ali_dir, "Align-TEST_4", "TEST_4-complete.aa.cat.aln"))
     assert os.path.isdir(os.path.join(ali_dir, "List-TEST_4"))
     assert os.path.isdir(os.path.join(ali_dir, "Phylo-TEST_4"))
-    assert os.path.isfile(os.path.join(ali_dir, "Phylo-TEST_4", "TEST_4.grp.aln"))
+    assert os.path.isfile(os.path.join(ali_dir, "Phylo-TEST_4", "TEST_4.nucl.grp.aln"))
+    assert os.path.isfile(os.path.join(ali_dir, "Phylo-TEST_4", "TEST_4.aa.grp.aln"))
     # CHECK TREE
     assert(len(glob.glob(os.path.join(tree_dir, "PanACoTA*log*")))) == 3
-    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.grp.aln.iqtree_tree.iqtree"))
-    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.grp.aln.iqtree_tree.treefile"))
+    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.nucl.grp.aln.iqtree_tree.iqtree"))
+    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.nucl.grp.aln.iqtree_tree.treefile"))
 
 
 def test_main_from_parse():
@@ -227,6 +236,8 @@ def test_main_from_parse():
     args.mixed = False
     args.multi = False
     args.floor = False
+    # args for align:
+    args.prot_ali = False
     # params tree
     args.soft = "iqtree2"
     args.model = "GTR"
@@ -288,8 +299,9 @@ def test_main_from_parse():
     assert os.path.isdir(os.path.join(ali_dir, "Align-TEST_4"))
     assert os.path.isdir(os.path.join(ali_dir, "List-TEST_4"))
     assert os.path.isdir(os.path.join(ali_dir, "Phylo-TEST_4"))
-    assert os.path.isfile(os.path.join(ali_dir, "Phylo-TEST_4", "TEST_4.grp.aln"))
+    assert os.path.isfile(os.path.join(ali_dir, "Phylo-TEST_4", "TEST_4.nucl.grp.aln"))
     # CHECK TREE
     assert(len(glob.glob(os.path.join(tree_dir, "PanACoTA*log*")))) == 4
-    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.grp.aln.iqtree_tree.iqtree"))
-    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.grp.aln.iqtree_tree.treefile"))
+    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.nucl.grp.aln.iqtree_tree.iqtree"))
+    assert os.path.isfile(os.path.join(tree_dir, "TEST_4.nucl.grp.aln.iqtree_tree.treefile"))
+    
