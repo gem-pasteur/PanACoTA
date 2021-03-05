@@ -85,13 +85,13 @@ def test_parser_conffile_protalichanged():
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     options = allm.parse(parser,
-                         "-c test/data/all/default-conffigfile2.ini -o out-all -n TEST".split())
+                         "-c test/data/all/init_files/default-conffigfile2.ini -o out-all -n TEST".split())
     assert options.outdir == "out-all"
     assert options.threads == 10
     assert not options.ncbi_species_taxid
     assert options.prodigal_only == False
     assert options.norefseq
-    assert options.l90 == 99
+    assert options.l90 == 100
     assert options.clust_mode == 1
     assert options.min_id == 0.85
     assert options.tol == 1
