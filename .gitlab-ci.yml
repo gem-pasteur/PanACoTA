@@ -150,7 +150,7 @@ sphinx-doc:
   stage: doc
   only:
     - master
-    - doc
+    - documentation
   before_script:
     - pip3 install -r requirements-dev.txt
     - ./make

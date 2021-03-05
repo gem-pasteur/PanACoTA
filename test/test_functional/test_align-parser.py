@@ -23,7 +23,7 @@ def test_parser_noarg(capsys):
     assert "usage: " in err
     assert "-c COREPERS -l LIST_GENOMES -n DATASET_NAME -d DBPATH" in err
     assert "-o OUTDIR" in err
-    assert "[--threads THREADS] [-F] [-v] [-q] [-h]" in err
+    assert "[--threads THREADS] [-F] [-P] [-v] [-q] [-h]" in err
     assert "[-h]" in err
     assert "the following arguments are required: -c, -l, -n, -d, -o" in err
 
@@ -89,7 +89,8 @@ def test_parser_default():
     assert options.force is False
     assert options.verbose == 0
     assert options.quiet is False
-
+    assert options.prot_ali is False
+    
 
 def test_parser_allthreads():
     """
@@ -111,6 +112,7 @@ def test_parser_allthreads():
     assert options.force is False
     assert options.verbose == 0
     assert options.quiet is False
+    assert options.prot_ali is False
 
 
 def test_parser_all_ok():
@@ -120,7 +122,7 @@ def test_parser_all_ok():
     parser = argparse.ArgumentParser(description="Align families", add_help=False)
     align.build_parser(parser)
     options = align.parse(parser, "-c cp -l listgenome -n dname -d dbpath -o outdir "
-                                  "--threads 1".split())
+                                  "--threads 1 -P".split())
     assert options.corepers == "cp"
     assert options.list_genomes == "listgenome"
     assert options.dataset_name == "dname"
@@ -130,3 +132,4 @@ def test_parser_all_ok():
     assert options.force is False
     assert options.verbose == 0
     assert options.quiet is False
+    assert options.prot_ali is True

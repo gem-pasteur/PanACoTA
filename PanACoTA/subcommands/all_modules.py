@@ -87,6 +87,8 @@ def main_from_parse(args):
     args_corepers : tuple
         arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
         multi (bool), floor (bool)
+    args_align : tuple
+        arguments for align module (see subcommands.align.py): prot_ali (bool)
     args_tree : tuple
         arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
         write_boot (bool), memory (str), fast (bool)
@@ -99,11 +101,12 @@ def main_from_parse(args):
     args_annot = (args.name, args.qc_only, args.date, args.prodigal_only, args.small)
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
+    args_align = (args.prot_ali)
     args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
-    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_tree)
+    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_align, args_tree)
 
 
-def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree):
+def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree):
     """
     Call all modules, one by one, using output of one as input for the next one
 
@@ -129,6 +132,8 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     args_corepers : tuple
         arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
         multi (bool), floor (bool)
+    args_align : tuple
+        arguments for align module (see subcommands.align.py): prot_ali (bool)
     args_tree : tuple
         arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
         write_boot (bool), memory (str), fast (bool)
@@ -201,8 +206,9 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     outdir_align = os.path.join(outdir, "5-align_module")
     force = False
     logger.info("align step")
+    (prot_ali) = args_align
     align_file = align.main("PanACoTA align", corepers_file, lstinfo, name_pan, outdir_annotate,
-                            outdir_align, threads, force, verbose=verbose, quiet=quiet)
+                            outdir_align, prot_ali, threads, force, verbose=verbose, quiet=quiet)
 
 
     # Tree step
@@ -405,6 +411,10 @@ def check_args(parser, argv):
     a = Namespace(**final_dict)
     corepers.check_args(parser, a)
 
+    # ALIGN STEP
+    ali_dict = get_align(dict_argv)
+    final_dict.update(ali_dict)
+
     # TREE STEP
     tree_dict = get_tree(dict_argv)
     # If we chose soft==quicktree, check_args will return error if threads > 1. So,
@@ -543,6 +553,26 @@ def get_corepers(dict_argv):
     conf_conffile.set_int("corepers", "threads")
     corepers_dict = conf_conffile.get_section_dict("corepers")
     return corepers_dict
+
+
+def get_align(dict_argv):
+    """
+    Check that arguments given for align step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["align"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       readsec=["align"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "align")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"prot_ali": False}
+    conf_conffile.add_default(defaults, "align")
+    conf_conffile.set_boolean("align", "prot_ali")
+    ali_dict = conf_conffile.get_section_dict("align")
+    return ali_dict
 
 
 def get_tree(dict_argv):

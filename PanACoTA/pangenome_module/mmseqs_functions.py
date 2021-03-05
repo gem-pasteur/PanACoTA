@@ -169,7 +169,7 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
     prt_bank : str
         name of the file containing all proteins to cluster, without path
     mmseqdb : str
-        path to base filename for output mmseq db
+        path to base filename of output of mmseqs createdb
     min_id : float
         min percentage of identity to be considered in the same family (between 0 and 1)
     clust_mode : [0, 1, 2]
@@ -177,7 +177,7 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
     threads : int
         max number of threads to use
     start : str
-        string containing trat date and time
+        string containing start date and time
     panfile : str
         if a pangenome file is specified. Otherwise, default pangenome name will be used
     quiet : bool
@@ -232,7 +232,7 @@ def run_mmseqs_clust(args):
     args : tuple
          (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode), with:
 
-            * mmseqdb: path to base filename for output mmseq db
+            * mmseqdb: path to base filename (output created by mmseq db)
             * mmseqclust: path to base filename for output of mmseq clustering
             * tmpdir : path to folder which will contain mmseq temporary files
             * logmmseq : path to file where logs must be written
@@ -243,8 +243,8 @@ def run_mmseqs_clust(args):
 
     """
     mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode = args
-    cmd = ("mmseqs cluster {} {} {} --min-seq-id {} --threads {} --cluster-mode "
-           "{}").format(mmseqdb, mmseqclust, tmpdir, min_id, threads, clust_mode)
+    cmd = (f"mmseqs cluster {mmseqdb} {mmseqclust} {tmpdir} --min-seq-id {min_id} --threads {threads} --cluster-mode "
+           f"{clust_mode}")
     logger.details(f"MMseqs command: {cmd}")
     msg = f"Problem while clustering proteins with mmseqs. See log in {logmmseq}"
     with open(logmmseq, "a") as logm:
@@ -261,9 +261,9 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     Parameters
     ----------
     mmseqdb : str
-         path to base filename for output mmseq db
+         path to base filename of output of mmseqs createdb
     mmseqclust : str
-        path to base filename for output of mmseq clustering
+        path to base filename of output of mmseqs cluster
     logmmseq : str
          path to file where logs must be written
     start : str
@@ -388,7 +388,7 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
     Parameters
     ----------
     mmseqdb : str
-         path to base filename for output mmseq db
+         path to base filename for output of mmseqs createdb
     prt_path : str
         path to the file containing all proteins to cluster
     logmmseq : str

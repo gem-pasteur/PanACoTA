@@ -4,6 +4,8 @@ Tutorial on examples
 
 We provide a folder, ``Examples``, containing genomic sequences (in ``Examples/genomes``).
 
+All commands to run all Example steps can be found in ``Examples/commands/``
+
 .. note:: The provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations, but running very quickly. Hence, the example results should not be interpreted biologically!
 
 Genomes description
@@ -165,6 +167,10 @@ In your ``Examples/2-res-prokka/Proteins`` folder, you should have a new file, `
 
 If you used the same dataset and parameters as in this file, you should get a pangenome with 14 families.
 
+If you did not run the annotate step, but just want to test the pangenome step, use::
+
+    PanACoTA pangenome -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3 -d Examples/input_files/pan-input/Proteins -i 0.8 -o Examples/3-pangenome
+
 Core/Persistent Genome step
 ===========================
 
@@ -182,6 +188,10 @@ If you want a persistent genome, specify the required :ref:`options<docorepers>`
     PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst -o Examples/4-corepers -t 0.95
 
 The output file will be ``Examples/4-corepers/PersGenome_<pangenome-filename>_0.95.lst``, and will contain the same 6 families (95% of 3 genomes is all genomes).
+
+If you did not run the annotate and pangenome steps, but only want to test the corepers module, run::
+
+    PanACoTA corepers -p Examples/input_files/core-input/PanGenome-example.lst -o Examples/4-corepers
 
 
 Alignment step
@@ -201,10 +211,18 @@ with:
     - ``-d``: path to the folder containing the directories 'Proteins' and 'Genes'
     - ``-o``: put all result and temporary files to this directory
 
+optional:
+
+    - ``-F``: force to redo all alignments
+    - ``-P``: also provide concatenated protein alignments
+
 In your output directory ``Examples/5-align``, you will find a directory called ``Phylo-GENO3_1``, containing your alignment file: ``GENO3_1.grp.aln``.
 
 See :ref:`here <doalign>` for a description of the other files generated, as well as the options available.
 
+If you did not run the annotate, pan and corepers steps, but just want to test the align module, run::
+
+    PanACoTA align -c Examples/input_files/align-input/coregenome-example.lst -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/input_files/pan-input -o Examples/5-align
 
 Tree step
 =========
@@ -221,3 +239,6 @@ In your output directory, ``Examples/6-tree``, you will find your phylogenetic t
 
 See the :ref:`tree part of tutorial<dotree>` to get more information on all options available, output files generated, as well as how to use FastTree, FastME or Quicktree instead of IQ TREE to infer the phylogenetic tree.
 
+If you did not run the annotate, pan, corepers and align steps but just want to test the tree module, run::
+
+    PanACoTA tree -a Examples/input_files/tree-input/GENO3_1.nucl.grp.aln -o Examples/6-tree

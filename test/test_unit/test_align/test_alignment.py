@@ -68,7 +68,9 @@ def test_check_len_diff(caplog):
     logger = logging.getLogger("test_alignment_check_len")
     fam = 1
     assert not al.check_lens(aln_file, fam, logger)
-    assert ("alignments for family 1 do not all have the same length. "
+    assert ("Nucleic alignments for family 1 (in "
+            "test/data/align/test_files/test_alignment-mafft-diff-len.aln) "
+            "do not all have the same length. "
             "Lengths found are: {") in caplog.text
     assert "126" in caplog.text
     assert "154" in caplog.text
@@ -180,8 +182,8 @@ def test_backtranslate_wrongnbfam(caplog):
 
 def test_backtranslate_problem(caplog):
     """
-    Test that when giving an alignment file and a wrong filename for the  nucleic sequences,
-    it generates an empty btr file, and returns False, and an error message.
+    Test that when giving an alignment file and a wrong filename for the nucleic sequences,
+    it does not generate btr file, and returns False, and an error message.
     """
     caplog.set_level(logging.DEBUG)
     num_fam = 1
@@ -196,20 +198,7 @@ def test_backtranslate_problem(caplog):
     assert "Back-translating family 1" in caplog.text
     assert ("Problem while trying to backtranslate test/data/align/test_files/test_alignment-"
             "mafft-ok.aln to a nucleotide alignment") in caplog.text
-    # Chek btr file content
     assert not os.path.isfile(btr_file)
-
-
-def test_check_mafft_align():
-    """
-    Test that when giving an alignment file, and a number of sequences equal to the number of
-    sequences in the alignment file, it returns this number.
-    """
-    nbfal = 4
-    mafft_file = os.path.join(TESTPATH, "test_alignment-mafft-ok.aln")
-    message = "problem!"
-    logger = logging.getLogger("test_check_mafft_align")
-    assert al.check_nb_seqs(mafft_file, nbfal, logger, message) == 4
 
 
 def test_mafft_align(caplog):
@@ -287,6 +276,42 @@ def test_check_extract(caplog):
     assert "Checking extractions for family 1" in caplog.text
 
 
+def test_check_extract_nogen(caplog):
+    """
+    Test that when gen file is ok, but prt file is missing, it exits with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    num_fam = 1
+    gen_file = os.path.join("genfile")
+    prt_file = os.path.join(EXPPATH, "exp_aldir", "current.1.prt")
+    miss_file = os.path.join(GENEPATH, "test_check_extract_miss-file.txt")
+    ngenomes = 5
+    logger = logging.getLogger("test_check_extract")
+    with open(miss_file, "w") as missf:
+        missf.write("Genome5")
+    with pytest.raises(SystemExit):
+        al.check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
+    assert "fam 1: no file with genes extracted ('genfile'). Cannot align." in caplog.text
+
+
+def test_check_extract_noprt(caplog):
+    """
+    Test that when gen file is ok, but prt file is missing, it exits with error message
+    """
+    caplog.set_level(logging.DEBUG)
+    num_fam = 1
+    gen_file = os.path.join(EXPPATH, "exp_aldir", "current.1.gen")
+    prt_file = os.path.join("prt_file")
+    miss_file = os.path.join(GENEPATH, "test_check_extract_miss-file.txt")
+    ngenomes = 5
+    logger = logging.getLogger("test_check_extract")
+    with open(miss_file, "w") as missf:
+        missf.write("Genome5")
+    with pytest.raises(SystemExit):
+        al.check_extractions(num_fam, miss_file, prt_file, gen_file, ngenomes, logger)
+    assert "fam 1: no file with proteins extracted ('prt_file'). Cannot align." in caplog.text
+
+
 def test_check_extract_wrongnbmiss(caplog):
     """
     Test that given the 3 files: 4 proteins extracted in gen and prt, empty miss file,
@@ -337,7 +362,7 @@ def test_family_align(caplog):
     """
     Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
     and total nb genomes = 4, it aligns all families, and backtranslates the alignment to
-    nucleotides as expected, and returns the number of sequences aligned.
+    nucleotides as expected, and returns the number of sequences aligned (3).
     """
     caplog.set_level(logging.DEBUG)
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
@@ -408,6 +433,7 @@ def test_family_align_mafftok_nobtr(caplog):
     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
                                ngenomes, logger) == 3
     assert "Checking extractions for family 8" in caplog.text
+    assert "Aligning family 8" not in caplog.text   # alignment is not redone
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
@@ -419,8 +445,10 @@ def test_family_align_mafftok_nobtr(caplog):
 def test_family_align_mafftempty_btrempty(caplog):
     """
     Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
-    and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
-    it back-translates it and returns 3, the number of sequences back-translated
+    and total nb genomes = 4, and empty alignment and btr files.
+    -> it says that alignments will be redone. Back-translate too.
+    -> output mafft and btr are not empty, and even contain expected sequences
+    returns nb of genomes in alignment (3)
     """
     caplog.set_level(logging.DEBUG)
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
@@ -440,8 +468,9 @@ def test_family_align_mafftempty_btrempty(caplog):
     assert "Checking extractions for family 8" in caplog.text
     assert ("fam 8: Will redo alignment, because found a different number of proteins extracted "
             "in test/data/align/exp_files/exp_aldir-pers/current.8.prt (3) and proteins aligned "
-            "in existing test/data/align/generated_by_unit-tests/test_fam_align.8.aln (0)") in caplog.text
+            "in existing test/data/align/generated_by_unit-tests/test_fam_align.8.aln") in caplog.text
     assert "Aligning family 8" in caplog.text
+    assert "Mafft command: mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt" in caplog.text
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
@@ -454,7 +483,8 @@ def test_family_align_mafftok_emptybtr(caplog):
     """
     Test that when giving prt file (3 extracted), gen file (3 extracted), miss file (1)
     and total nb genomes = 4, and the alignment file with the 3 sequences aligned,
-    and an empty btr file, it re-does the backtranslation, and returns True
+    and an empty btr file, it re-does the backtranslation, and returns nb of genomes
+    in alignment (3)
     """
     caplog.set_level(logging.DEBUG)
     prt_file = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
@@ -473,6 +503,12 @@ def test_family_align_mafftok_emptybtr(caplog):
     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
                                ngenomes, logger) == 3
     assert "Checking extractions for family 8" in caplog.text
+    assert "Aligning family 8" not in caplog.text
+    assert ("Will redo back-translation, because found a different number of proteins aligned "
+            "in test/data/align/generated_by_unit-tests/test_fam_align.8.aln (3) "
+            "and genes back-translated in existing "
+            "test/data/align/generated_by_unit-tests/test_fam_align_btr.8.aln (0)") in caplog.text
+    assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
@@ -505,6 +541,8 @@ def test_family_align_mafftok_btrok(caplog):
     assert al.family_alignment(prt_file, gen_file, miss_file, mafft_file, btr_file, num_fam,
                                ngenomes, logger) == "OK"
     assert "Checking extractions for family 8" in caplog.text
+    assert "Aligning family 8" not in caplog.text
+    assert "Back-translating family 8" not in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
     assert tutil.compare_file_content(mafft_file, exp_mafft)
@@ -547,6 +585,24 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
     shutil.move(temp_mafft, orig_mafft)
 
 
+# def test_family_align_problemmafft(caplog):
+#     """
+#     Giving prt, gen and miss files. It tries to align, but fails (because mafft command not found).
+#     returns false
+#     """
+#     # Change mafft command
+#     orig_mafft = subprocess.check_output("which mafft".split()).decode().strip()
+#     temp_mafft = orig_mafft + "-orig"
+#     try:
+#         shutil.move(orig_mafft, temp_mafft)
+#     except PermissionError:
+#         pytest.skip("No permission to change mafft bin filename")
+
+#     # Restore mafft command
+#     shutil.move(temp_mafft, orig_mafft)
+
+
+
 def test_check_addmissing_ok():
     """
     Test that when giving a btr file with all sequences same length, and as many sequences as
@@ -555,8 +611,9 @@ def test_check_addmissing_ok():
     btr_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
     num_fam = 8
     ngenomes = 3
+    prev = False
     logger = logging.getLogger("test_check_add_missing")
-    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger) is True
+    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger, prev) is True
 
 
 def test_check_addmissing_difflen():
@@ -566,8 +623,9 @@ def test_check_addmissing_difflen():
     btr_file = os.path.join(TESTPATH, "test_alignment-mafft-diff-len.aln")
     num_fam = 8
     ngenomes = 4
+    prev = True
     logger = logging.getLogger("test_check_add_missing")
-    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger) is False
+    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger, prev) is False
 
 
 def test_check_addmissing_missgenomes_prev():
@@ -586,17 +644,30 @@ def test_check_addmissing_missgenomes_prev():
 def test_check_addmissing_missgenomes_noprev(caplog):
     """
     Test that when giving a btr file with all sequences of same length, but not the same number
-    of sequences than expected, and does not come from previous run, it returns the length of
-    alignment, with an error message.
+    of sequences than expected, and does not come from previous run, it returns False, with an error message.
     """
     caplog.set_level(logging.DEBUG)
     btr_file = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-btr.8.aln")
     num_fam = 8
     ngenomes = 4
     logger = logging.getLogger("test_check_add_missing")
-    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger) == 789
+    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False) is False
     assert ("ERROR: family 8 contains 3 genomes in total instead of the 4 genomes in "
             "input.") in caplog.text
+
+
+def test_check_addmissing_notsamelength(caplog):
+    """
+    Test that when giving a btr file with all sequences but different lengths, it returns False, with an error message.
+    """
+    caplog.set_level(logging.DEBUG)
+    btr_file = os.path.join(EXPPATH, "exp_aldir", "current.1.gen")
+    num_fam = 8
+    ngenomes = 4
+    logger = logging.getLogger("test_check_add_missing")
+    assert al.check_add_missing(btr_file, num_fam, ngenomes, logger, prev=False) is False
+    assert ("Nucleic alignments for family 8 (in test/data/align/exp_files/exp_aldir/current.1.gen) "
+            "do not all have the same length. Lengths found are: {474, 381}") in caplog.text
 
 
 def test_add_missing_btrok():
@@ -611,7 +682,7 @@ def test_add_missing_btrok():
     ngenomes = 3
     status1 = True
     logger = logging.getLogger("test_add_missing")
-    assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger)
+    assert al.add_missing_genomes(btr_file, "back-translated", miss_file, num_fam, ngenomes, status1, logger)
 
 
 def test_add_missing_btralreadyok(caplog):
@@ -628,8 +699,8 @@ def test_add_missing_btralreadyok(caplog):
     ngenomes = 3
     status1 = "OK"
     logger = logging.getLogger("test_add_missing")
-    assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) == "OK"
-    assert ("Alignment already done for family 8. The program will use it for next "
+    assert al.add_missing_genomes(btr_file, "back-translated", miss_file, num_fam, ngenomes, status1, logger) == "OK"
+    assert ("back-translated alignment already done for family 8. The program will use it for next "
             "steps") in caplog.text
 
 
@@ -647,9 +718,10 @@ def test_add_missing_btr_difflen(caplog):
     ngenomes = 4
     status1 = "OK"
     logger = logging.getLogger("test_add_missing")
-    assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) is False
-    assert ("alignments for family 8 do not all have the same length. Lengths found "
-            "are: {") in caplog.text
+    assert al.add_missing_genomes(btr_file, "bt", miss_file, num_fam, ngenomes, status1, logger) is False
+    assert ("Nucleic alignments for family 8 "
+            "(in test/data/align/test_files/test_alignment-mafft-diff-len.aln) "
+            "do not all have the same length. Lengths found are: {") in caplog.text
     assert "126" in caplog.text
     assert "154" in caplog.text
     assert "157" in caplog.text
@@ -658,7 +730,7 @@ def test_add_missing_btr_difflen(caplog):
 
 def test_add_missing_btrmiss(caplog):
     """
-    Giving a btr_file with all sequences with same lengths, but 1 sequence less that the
+    Giving a btr_file with all sequences with same lengths, but 1 sequence less than the
     expected number, + miss file with the name of the missing genome.
     Returns True, after adding missing genome to btr_file (overwrites it).
     """
@@ -672,8 +744,8 @@ def test_add_missing_btrmiss(caplog):
     ngenomes = 4
     status1 = "OK"
     logger = logging.getLogger("test_add_missing")
-    assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) is True
-    assert "Adding missing genomes for family 8" in caplog.text
+    assert al.add_missing_genomes(btr_file, "bt", miss_file, num_fam, ngenomes, status1, logger) is True
+    assert "Adding missing genomes for family 8 in bt alignment" in caplog.text
     final_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_file_content(btr_file, final_btr)
 
@@ -695,8 +767,8 @@ def test_add_missing_btrmiss2(caplog):
     ngenomes = 5
     status1 = True
     logger = logging.getLogger("test_add_missing")
-    assert al.add_missing_genomes(btr_file, miss_file, num_fam, ngenomes, status1, logger) is False
-    assert "Adding missing genomes for family 8" in caplog.text
+    assert al.add_missing_genomes(btr_file, "bt", miss_file, num_fam, ngenomes, status1, logger) is False
+    assert "Adding missing genomes for family 8 in bt alignment" in caplog.text
     assert ("ERROR: family 8 contains 4 genomes in total instead of the 5 genomes in "
             "input") in caplog.text
     final_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
@@ -729,7 +801,7 @@ def test_handle_family_true():
     assert al.handle_family(args) is True
     cur_mafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
     cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, exp_btr)
@@ -739,7 +811,9 @@ def test_handle_family_true():
     assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
-    assert "Adding missing genomes for family 8" in q.get().message
+    # Writes it twice: 1 for nucleic and one for aa
+    assert "Adding missing genomes for family 8 in protein alignment" in q.get().message
+    assert "Adding missing genomes for family 8 in back-translated alignment" in q.get().message
     assert not q.get()
 
 
@@ -808,7 +882,7 @@ def test_handle_family_emptyaln_true():
     args = (prefix, num_fam, ngenomes, q)
     assert al.handle_family(args)
     cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
-    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, exp_btr)
@@ -818,19 +892,19 @@ def test_handle_family_emptyaln_true():
             "extracted in "
             "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-current.8.prt (3) "
             "and proteins aligned in existing "
-            "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-align.8.aln "
-            "(0)") in q.get().message
+            "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-align.8.aln") in q.get().message
     assert "Aligning family 8" in q.get().message
     assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
-    assert "Adding missing genomes for family 8" in q.get().message
+    assert "Adding missing genomes for family 8 in protein alignment" in q.get().message
+    assert "Adding missing genomes for family 8 in back-translated alignment" in q.get().message
     assert not q.get()
 
 
 def test_handle_family_emptybtr_true():
     """
-    Giving an aldir with correct prt, gen, miss and mafft files, and an empty btr files,
+    Giving an aldir with correct prt, gen, miss and mafft files, and an empty btr file,
     it redoes back-translation and returns True
     """
     aldir = os.path.join(GENEPATH, "aldir")
@@ -858,7 +932,9 @@ def test_handle_family_emptybtr_true():
     open(cur_btr, "w").close()
     args = (prefix, num_fam, ngenomes, q)
     assert al.handle_family(args)
-    assert tutil.compare_order_content(cur_mafft, ref_mafft)
+    # mafft file should have been completed with missing genomes
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
+    assert tutil.compare_order_content(cur_mafft, exp_mafft)
     assert tutil.compare_order_content(cur_btr, ref_btr)
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
@@ -869,7 +945,8 @@ def test_handle_family_emptybtr_true():
             "existing test/data/align/generated_by_unit-tests/"
             "aldir/TESThandlefam-mafft-prt2nuc.8.aln (0)") in q.get().message
     assert "Back-translating family 8" in q.get().message
-    assert "Adding missing genomes for family 8" in q.get().message
+    assert "Adding missing genomes for family 8 in protein alignment" in q.get().message
+    assert "Adding missing genomes for family 8 in back-translated alignment" in q.get().message
     assert not q.get()
 
 
@@ -888,7 +965,7 @@ def test_handle_family_already_ok():
     ref_prt = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
     ref_gen = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
     ref_miss = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
-    ref_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    ref_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     ref_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     cur_prt = os.path.join(aldir, "TESThandlefam-current.8.prt")
     cur_gen = os.path.join(aldir, "TESThandlefam-current.8.gen")
@@ -902,10 +979,13 @@ def test_handle_family_already_ok():
     shutil.copyfile(ref_mafft, cur_mafft)
     shutil.copyfile(ref_btr, cur_btr)
     args = (prefix, num_fam, ngenomes, q)
-    assert al.handle_family(args) == "OK"
+    # assert al.handle_family(args) == "OK"
+    al.handle_family(args)
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
-    assert ("Alignment already done for family 8. The program will use it for next "
+    assert ("protein alignment already done for family 8. The program will use it for next "
+            "steps") in q.get().message
+    assert ("back-translated alignment already done for family 8. The program will use it for next "
             "steps") in q.get().message
     assert not q.get()
 
@@ -949,6 +1029,53 @@ def test_handle_family_wrongextract():
     assert not q.get()
 
 
+def test_handle_family_addfalse():
+    """
+    Giving an aldir with correct prt, gen and miss files, correct mafft, but btr with not 
+    same length for all sequences: returns False, because cannot add genomes to btr
+    """
+    aldir = os.path.join(GENEPATH, "aldir")
+    prefix = os.path.join(aldir, "TESThandlefam")
+    num_fam = 8
+    ngenomes = 4
+    q = multiprocessing.Manager().Queue()
+    # Create aldir, and put prt, gen and miss files in it
+    ref_prt = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.prt")
+    ref_gen = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    ref_miss = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.miss.lst")
+    ref_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    # btr: a file with different length between sequences
+    ref_btr = os.path.join(EXPPATH, "exp_aldir-pers", "current.8.gen")
+    cur_prt = os.path.join(aldir, "TESThandlefam-current.8.prt")
+    cur_gen = os.path.join(aldir, "TESThandlefam-current.8.gen")
+    cur_miss = os.path.join(aldir, "TESThandlefam-current.8.miss.lst")
+    cur_mafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
+    cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
+    # Create aldir inside GENEPATH, empty directory created for this test
+    os.makedirs(aldir)
+    shutil.copyfile(ref_prt, cur_prt)
+    shutil.copyfile(ref_gen, cur_gen)
+    shutil. copyfile(ref_miss, cur_miss)
+    shutil.copyfile(ref_mafft, cur_mafft)
+    shutil.copyfile(ref_btr, cur_btr)
+    args = (prefix, num_fam, ngenomes, q)
+    assert al.handle_family(args) is False
+    cur_mafft = os.path.join(aldir, "TESThandlefam-mafft-align.8.aln")
+    cur_btr = os.path.join(aldir, "TESThandlefam-mafft-prt2nuc.8.aln")
+    exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
+    exp_btr = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
+    assert tutil.compare_order_content(cur_mafft, exp_mafft)
+    # assert tutil.compare_order_content(cur_btr, exp_btr)
+    q.put(None)
+    assert "Checking extractions for family 8" in q.get().message
+    # Writes it twice: 1 for nucleic and one for aa
+    assert "Adding missing genomes for family 8 in protein alignment" in q.get().message
+    assert ("Nucleic alignments for family 8 (in "
+            "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-prt2nuc.8.aln) "
+            "do not all have the same length. Lengths found are: {768, 792}") in q.get().message
+    assert not q.get()
+
+
 def test_align_all_true(caplog):
     """
     Giving aldir with prt, gen and miss files for families 1 and 8, as well as concat file (
@@ -984,7 +1111,7 @@ def test_align_all_true(caplog):
     open(cur_miss1, "w").close()
     assert os.path.isfile(cur_miss1)
     # create empty concat-file, to check that it is removed
-    concat = os.path.join(aldir, dname + "-complete.cat.aln")
+    concat = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     open(concat, "w").close()
     assert al.align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads)
     # Check output files
@@ -994,7 +1121,7 @@ def test_align_all_true(caplog):
     out_btr8 = os.path.join(aldir, dname + "-mafft-prt2nuc.8.aln")
     exp_mafft1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
     exp_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-prt2nuc.1.aln")
-    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     assert tutil.compare_order_content(out_mafft1, exp_mafft1)
     assert tutil.compare_order_content(out_btr1, exp_btr1)
@@ -1035,7 +1162,7 @@ def test_align_all_exists_true(caplog):
     ref_gen1 = os.path.join(EXPPATH, "exp_aldir", "current.1.gen")
     exp_mafft1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
     exp_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-prt2nuc.1.aln")
-    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
+    exp_mafft8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     exp_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-prt2nuc.8.aln")
     cur_prt8 = os.path.join(aldir, dname + "-current.8.prt")
     cur_gen8 = os.path.join(aldir, dname + "-current.8.gen")
@@ -1056,7 +1183,7 @@ def test_align_all_exists_true(caplog):
     # empty miss file for family 1
     open(cur_miss1, "w").close()
     # create empty concat-file, to check that it is removed
-    concat = os.path.join(aldir, dname + "-complete.cat.aln")
+    concat = os.path.join(aldir, dname + "-complete.aa.cat.aln")
     open(concat, "w").close()
     assert al.align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads)
     # Check output files
@@ -1071,10 +1198,14 @@ def test_align_all_exists_true(caplog):
     assert ("Starting alignment of all families: protein alignment, back-translation to "
             "nucleotides, and add missing genomes in the family") in caplog.text
     assert "Checking extractions for family 1" in caplog.text
-    assert ("Alignment already done for family 1. The program will use it for next "
+    assert ("back-translated alignment already done for family 1. The program will use it for next "
+            "steps") in caplog.text
+    assert ("protein alignment already done for family 1. The program will use it for next "
             "steps") in caplog.text
     assert "Checking extractions for family 8" in caplog.text
-    assert ("Alignment already done for family 8. The program will use it for next "
+    assert ("back-translated alignment already done for family 8. The program will use it for next "
+            "steps") in caplog.text
+    assert ("protein alignment already done for family 8. The program will use it for next "
             "steps") in caplog.text
 
 
@@ -1113,7 +1244,7 @@ def test_align_all_false(caplog):
     open(cur_miss1, "w").close()
     open(cur_miss8, "w").close()
     # create empty concat-file, to check that it is removed
-    concat = os.path.join(aldir, dname + "-complete.cat.aln")
+    concat = os.path.join(aldir, dname + "-complete.aa.cat.aln")
     open(concat, "w").close()
     assert not al.align_all_families(prefix, all_fams, ngenomes, dname, quiet, threads)
     # Check output files

@@ -390,7 +390,7 @@ def test_sort_proteins_error_format1(caplog):
     with pytest.raises(SystemExit):
         sorted(proteins, key=utils.sort_proteins)
     assert ("ERROR: Protein error-protein does not have the required format. It must contain, "
-            "at least <alpha-num>_<num_only>, and at best "
+            "at least <alpha-num_only>_<num_only>, and at best "
             "<name>.<date>.<strain_num>.<contig_info>_<prot_num>. "
             "Please change its name.") in caplog.text
 

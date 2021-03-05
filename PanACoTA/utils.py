@@ -625,7 +625,7 @@ def sort_proteins(x):
     except (IndexError, ValueError):
         logger = logging.getLogger("utils")
         logger.error(("ERROR: Protein {} does not have the required format. "
-                      "It must contain, at least <alpha-num>_<num_only>, and at best "
+                      "It must contain, at least <alpha-num_only>_<num_only>, and at best "
                       "<name>.<date>.<strain_num>.<contig_info>_<prot_num>. "
                       "Please change its name.").format(x))
         sys.exit(1)
