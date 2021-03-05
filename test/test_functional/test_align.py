@@ -57,7 +57,8 @@ def test_main():
     threads = 1
     force = False
     cmd = "cmd"
-    al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force)
+    prot_ali = False
+    al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, prot_ali, threads, force)
     # Check creation of the 3 subdirectories
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
@@ -78,11 +79,11 @@ def test_main():
         assert os.path.isfile(os.path.join(aldir, f'{dname}-current.{fam}.miss.lst'))
         assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln'))
         assert os.path.isfile(os.path.join(aldir, f'{dname}-mafft-prt2nuc.{fam}.aln'))
-    out_concat = os.path.join(aldir, dname + "-complete.cat.aln")
+    out_concat = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     exp_concat = os.path.join(EXPPATH, "exp_pers4genome-complete.cat.aln")
     assert tutil.compare_order_content(out_concat, exp_concat)
     # Check content of treedir
-    out_grp = os.path.join(treedir, dname + ".grp.aln")
+    out_grp = os.path.join(treedir, dname + ".nucl.grp.aln")
     exp_grp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
     assert tutil.compare_order_content(out_grp, exp_grp)
     # Check presence of log files, and log.err is empty
@@ -123,6 +124,7 @@ def test_main_exist_ok():
     threads = 1
     force = False
     cmd = "cmd test_main_exist_ok"
+    prot_ali = False
     # Create output directories and files
     aldir = os.path.join(outdir, "Align-" + dname)
     listdir = os.path.join(outdir, "List-" + dname)
@@ -143,6 +145,8 @@ def test_main_exist_ok():
     # Create content of aldir
     ex_aldir = os.path.join(EXPPATH, "exp_aldir-pers")
     fams = [1, 4, 6, 8, 10, 11, 13, 14]
+    fams_ok = [1, 6, 10, 11, 13, 14]  # families with already all 4 genomes
+    fams_miss = [4, 8]  # families with missing genomes
     for fam in fams:
         outgen = os.path.join(aldir, f'{dname}-current.{fam}.gen')
         refgen = os.path.join(ex_aldir, f"current.{fam}.gen")
@@ -153,21 +157,28 @@ def test_main_exist_ok():
         outmiss = os.path.join(aldir, f'{dname}-current.{fam}.miss.lst')
         refmiss = os.path.join(ex_aldir, f"current.{fam}.miss.lst")
         shutil.copyfile(refmiss, outmiss)
-        outaln = os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln')
-        refaln = os.path.join(ex_aldir, f"mafft-align.{fam}.aln")
-        shutil.copyfile(refaln, outaln)
         outbtr = os.path.join(aldir, f'{dname}-mafft-prt2nuc.{fam}.aln')
         refbtr = os.path.join(ex_aldir, f"mafft-prt2nuc.{fam}.aln")
         shutil.copyfile(refbtr, outbtr)
-    outcat = os.path.join(aldir, dname + "-complete.cat.aln")
+    for fam in fams_ok:
+        outaln = os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln')
+        refaln = os.path.join(ex_aldir, f"mafft-align.{fam}.aln")
+        shutil.copyfile(refaln, outaln)
+    for fam in fams_miss:
+        outaln = os.path.join(aldir, f'{dname}-mafft-align.{fam}.aln')
+        refaln = os.path.join(ex_aldir, f"mafft-align.{fam}-completed.aln")
+        shutil.copyfile(refaln, outaln)
+    outcat = os.path.join(aldir, dname + "-complete.nucl.cat.aln")
     refcat = os.path.join(EXPPATH, "exp_pers4genome-complete.cat.aln")
     shutil.copyfile(refcat, outcat)
     # Create content of treedir
-    outgrp = os.path.join(treedir, dname + ".grp.aln")
+    outgrp = os.path.join(treedir, dname + ".nucl.grp.aln")
     refgrp = os.path.join(EXPPATH, "exp_pers4genomes.grp.aln")
     shutil.copyfile(refgrp, outgrp)
-    # Run align module
-    al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force)
+
+    # RUN align module
+    al.main(cmd, corepers, list_genomes, dname, dbpath, outdir, prot_ali, threads, force, verbose=2)
+
     # Check logs
     logfile = os.path.join(outdir, "PanACoTA-align_TEST4exists.log.details")
     with open(logfile, "r") as lc:
