@@ -55,11 +55,11 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath,
-         args.outdir, args.threads, args.force, args.verbose, args.quiet)
+    main(cmd, args.corepers, args.list_genomes, args.dataset_name, args.dbpath, 
+         args.outdir, args.prot_ali, args.threads, args.force, args.verbose, args.quiet)
 
 
-def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, verbose=0,
+def main(cmd, corepers, list_genomes, dname, dbpath, outdir, prot_ali, threads, force, verbose=0,
          quiet=False):
     """
     Align given core genome families
@@ -77,6 +77,8 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
         path to the directory containing 'Proteins' and 'Genes' folders
     outdir : str
         path to the directory where output files must be saved
+    prot_ali : bool
+        Also give aa alignment of concatenation of persistent proteins
     threads : int
         Max number of threads to use
     force : bool
@@ -142,7 +144,7 @@ def main(cmd, corepers, list_genomes, dname, dbpath, outdir, threads, force, ver
         sys.exit(1)
 
     # post-process alignment files
-    align_file = post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, quiet)
+    align_file = post.post_alignment(fam_nums, all_genomes, prefix, outdir, dname, prot_ali, quiet)
     logger.info("END")
     return align_file
 
@@ -195,6 +197,10 @@ def build_parser(parser):
                                 "it will be used for the next step. If you want to redo only "
                                 "a given alignment, just delete its file, without using "
                                 "this option."))
+    optional.add_argument("-P", dest="prot_ali", default=False, action="store_true",
+                          help=("Add this option if you also need the aa alignment of the concatenation of "
+                                "all persistent proteins. "
+                                "By default, PanACoTA only gives the nucleic alignment."))
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
                         help="Increase verbosity in stdout/stderr.")

@@ -47,8 +47,8 @@ def test_parser_noarg(capsys):
         annot.parse(parser, "".split())
     _, err = capsys.readouterr()
     assert "[-d DB_PATH] -r RES_PATH [-l LIST_FILE] [-n NAME] [-Q]" in err
-    assert "[--info FROM_INFO] [--prodigal] [--l90 L90] [--nbcont NBCONT]" in err
-    assert "[--cutn CUTN] [--date DATE] [--tmp TMPDIR]" in err
+    assert "[--info FROM_INFO] [--prodigal] [--small] [--l90 L90]" in err
+    assert "[--nbcont NBCONT] [--cutn CUTN] [--date DATE] [--tmp TMPDIR]" in err
     assert "[--annot_dir ANNOTDIR] [-F] [--threads THREADS] [-v]" in err
     assert "[-q] [-h]" in err
     assert "the following arguments are required: -r" in err
@@ -344,6 +344,19 @@ def test_parser_info_dbpath(capsys):
             "of genomes to annotate. Remove -d <db_path> option.") in err
 
 
+def test_parser_small_noprodigal(capsys):
+    """
+    Test that when run with both --small but do not ask to use prodigal, it returns error
+    """
+    parser = argparse.ArgumentParser(description="Annotate all genomes", add_help=False)
+    annot.build_parser(parser)
+    with pytest.raises(SystemExit):
+        annot.parse(parser, "-r respath -n name --small".split())
+    _, err = capsys.readouterr()
+    assert("You cannot use --small option with prokka. "
+           "Either use prodigal, or remove this option") in err
+
+
 def test_parser_filter(capsys):
     """
     Test that warnings are written (when will split l90 and/or nbcont)
@@ -363,7 +376,11 @@ def test_parser_filter(capsys):
     assert not options.force
     assert options.qc_only
     stdout, _ = capsys.readouterr()
-    assert (" !! Your genomes will be filtered, and only the ones with 'L90' <= 10 and 'number of contigs' < 999 will be kept. If you want to change those thresholds, use '--l90' and '--nbcont' options.") in stdout
+    assert(" !! Your genomes will be filtered, and only the ones with 'L90' <= 10 and 'number of contigs' < 999 "
+           "will be kept. If you want to change those thresholds, use '--l90' and '--nbcont' options.") in stdout
+    assert("! Your genomes will be split when sequence contains at least 5'N' in a row. "
+           "If you want to change this threshold, see --cutn option.") in stdout
+
 
 
 def test_parser_nosplit(capsys):

@@ -20,11 +20,13 @@ def test_parser_noarg(capsys):
     with pytest.raises(SystemExit):
         prepare.parse(parser, "".split())
     _, err = capsys.readouterr()
+    print(err)
     assert "error: " in err
     assert ("As you did not put the '--norefseq' nor the '-M' option, it means that you want "
-            "to download refseq genomes. But you did not provide any information, so PanACoTA "
-            "cannot guess which species you want to download. Specify NCBI_taxid and/or "
-            "NCBI_species to download, or add one of the 2 options (--norefseq or -M) "
+            "to download refseq (or genbank) genomes. But you did not provide any information, so PanACoTA "
+            "cannot guess which species you want to download. Specify NCBI_taxid (-t)") in err
+    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) to download, "
+            "or add one of the 2 options (--norefseq or -M) "
             "if you want to skip the 'download step'.") in err
 
 
@@ -271,11 +273,12 @@ def test_parse_missing_arg(capsys):
     with pytest.raises(SystemExit):
         prepare.parse(parser, "-p 1".split())
     _, err = capsys.readouterr()
-    assert ("As you did not put the '--norefseq' nor the '-M' option, it means that "
-            "you want to download refseq genomes. But you did not provide any "
-            "information, so PanACoTA cannot guess which species you want to download. "
-            "Specify NCBI_taxid and/or NCBI_species to download, or add one of "
-            "the 2 options (--norefseq or -M) if you want to skip the 'download step'.") in err
+    assert ("As you did not put the '--norefseq' nor the '-M' option, it means that you want "
+            "to download refseq (or genbank) genomes. But you did not provide any information, so PanACoTA "
+            "cannot guess which species you want to download. Specify NCBI_taxid (-t)") in err
+    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) to download, "
+            "or add one of the 2 options (--norefseq or -M) "
+            "if you want to skip the 'download step'.") in err
 
 
 def test_norefseq_nooutdir(capsys):
@@ -336,16 +339,37 @@ def test_parser_nospecies(capsys):
     """
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
-    options = prepare.parse(parser, "-t 1234".split())
+    options = prepare.parse(parser, "-T 1234".split())
     assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
-    assert options.ncbi_species == ""
+    assert options.ncbi_taxid == ""
+    assert options.ncbi_species_name == ""
     out, err = capsys.readouterr()
-    assert ("WARNING: you did not provide a species name ('-s species' option') "
+    assert ("WARNING: you did not provide a species name ('-g species' option) "
             "nor an output directory ('-o outdir'). "
             "All files will be downloaded in a folder called with the NCBI species "
             "taxid 1234 instead of the species name.") in out
+
+
+def test_parser_nospecies_nospeid(capsys):
+    """
+    Test that when the user does not give an int for the threads value, it returns an
+    error message.
+    """
+    parser = argparse.ArgumentParser(description="Prepare", add_help=False)
+    prepare.build_parser(parser)
+    options = prepare.parse(parser, "-t 1234".split())
+    assert not options.norefseq
+    assert not options.only_mash
+    assert options.ncbi_species_taxid == ""
+    assert options.ncbi_taxid == "1234"
+    assert options.ncbi_species_name == ""
+    out, err = capsys.readouterr()
+    assert ("WARNING: you did not provide a species name ('-g species' option) "
+            "nor a species taxid ('-T spetaxid') nor an output directory ('-o outdir'). "
+            "All files will be downloaded in a folder called with the NCBI "
+            "taxid 1234.") in out
 
 
 def test_parser_default_cutn(capsys):
@@ -355,15 +379,27 @@ def test_parser_default_cutn(capsys):
     """
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
-    options = prepare.parse(parser, "-t 1234 -o outdir -s species".split())
+    options = prepare.parse(parser, "-t 1234 -o outdir -g species".split())
     assert not options.norefseq
     assert not options.only_mash
-    assert options.ncbi_species_taxid == "1234"
-    assert options.ncbi_species == "species"
+    assert options.ncbi_taxid == "1234"
+    assert options.ncbi_species_name == "species"
     out, err = capsys.readouterr()
     assert ("!! Your genomes will be split when sequence contains at "
             "least 5'N' in a row. If you want to change this threshold, use "
             "'--cutn n' option (n=0 if you do not want to cut)") in out
+
+
+def test_parser_error_section_name(capsys):
+    """
+    Test when we give another value than refseq or genbank to -s section option
+    """
+    parser = argparse.ArgumentParser(description="Prepare", add_help=False)
+    prepare.build_parser(parser)
+    with pytest.raises(SystemExit):
+        prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1".split())
+    _, err = capsys.readouterr()
+    assert ("argument -s: invalid choice: 'species' (choose from 'refseq', 'genbank')") in err
 
 
 def test_parser_default_l90_nb_cont(capsys):
@@ -373,11 +409,11 @@ def test_parser_default_l90_nb_cont(capsys):
     """
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
-    options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1".split())
+    options = prepare.parse(parser, "-t 1234 -o outdir -g species --cutn 1".split())
     assert not options.norefseq
     assert not options.only_mash
-    assert options.ncbi_species_taxid == "1234"
-    assert options.ncbi_species == "species"
+    assert options.ncbi_taxid == "1234"
+    assert options.ncbi_species_name == "species"
     out, err = capsys.readouterr()
     assert ("!! Your genomes will be filtered, and only the ones with 'L90' <= 100 "
             "and 'number of contigs' < 999 will be kept. If you want to change those "
@@ -390,11 +426,11 @@ def test_parser_info_notonlymash(capsys):
     """
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
-    options = prepare.parse(parser, "-t 1234 -o outdir -s species --cutn 1 --info toto".split())
+    options = prepare.parse(parser, "-T 1234 -o outdir -g species --cutn 1 --info toto".split())
     assert not options.norefseq
     assert not options.only_mash
     assert options.ncbi_species_taxid == "1234"
-    assert options.ncbi_species == "species"
+    assert options.ncbi_species_name == "species"
     out, err = capsys.readouterr()
     assert ("!! You gave an info file (--info option), but did not ask to run only Mash "
             "step (-M option). Your info file will be ignored (and renamed with '.back' "

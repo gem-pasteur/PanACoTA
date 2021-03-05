@@ -80,30 +80,33 @@ def main_from_parse(args):
         min_dist (float), max_dist (float)
     args_annot : tuple
         arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
-        date (str), prodigal_only (bool)
+        date (str), prodigal_only (bool), small (bool)
     args_pan : tuple
         arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
         clust_mode (int), spe_dir (str), outfile (str)
     args_corepers : tuple
         arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
         multi (bool), floor (bool)
+    args_align : tuple
+        arguments for align module (see subcommands.align.py): prot_ali (bool)
     args_tree : tuple
         arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
         write_boot (bool), memory (str), fast (bool)
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     args_all = (args.outdir, args.threads, args.verbose, args.quiet)
-    args_prepare = (args.ncbi_species_taxid, args.ncbi_species, args.levels,
-                    args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, args.info_file,
-                    args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
-    args_annot = (args.name, args.qc_only, args.date, args.prodigal_only)
+    args_prepare = (args.ncbi_species_taxid, args.ncbi_species_name, args.ncbi_taxid, args.levels,
+                    args.ncbi_section, args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, 
+                    args.info_file, args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
+    args_annot = (args.name, args.qc_only, args.date, args.prodigal_only, args.small)
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
+    args_align = (args.prot_ali)
     args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
-    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_tree)
+    main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_align, args_tree)
 
 
-def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_tree):
+def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree):
     """
     Call all modules, one by one, using output of one as input for the next one
 
@@ -116,18 +119,21 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
         threads (int), verbose (int), quiet (bool)
     args_prepare : tuple
         arguments for prepare module (see subcommands.prepare.py): NCBI_species_taxid (int),
-        NCBI_species (str), levels (str), tmp_dir (str), norefseq (bool), db_dir (str),
+        NCBI_species_name (str), NCBI_taxid (int), levels (str), NCBI_section (str),
+        tmp_dir (str), norefseq (bool), db_dir (str),
         only_mash (bool), info_file (str), l90 (int), nbcont (int), cutn (int),
         min_dist (float), max_dist (float)
     args_annot : tuple
         arguments for annotate module (see subcommands/annotate.py): name (str), qc_only (bool),
-        date (str), prodigal_only (bool)
+        date (str), prodigal_only (bool), small (bool)
     args_pan : tuple
         arguments for pangenome module (see subcommands/pangenome.py): min_id (float),
         clust_mode (int), spe_dir (str), outfile (str)
     args_corepers : tuple
         arguments for corepers module (see subcommands.corepers.py): tol (float), mixed (bool),
         multi (bool), floor (bool)
+    args_align : tuple
+        arguments for align module (see subcommands.align.py): prot_ali (bool)
     args_tree : tuple
         arguments for tree module (see subcommands.tree.py): soft (str), model (str), boot (bool),
         write_boot (bool), memory (str), fast (bool)
@@ -154,10 +160,12 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
 
     # Run prepare module
     outdir_prepare = os.path.join(outdir, "1-prepare_module")
-    (NCBI_species_taxid, NCBI_species, levels, tmp_dir, norefseq, db_dir, only_mash, info_file,
+    (NCBI_species_taxid, NCBI_species_name, NCBI_taxid, levels, NCBI_section,
+     tmp_dir, norefseq, db_dir, only_mash, info_file,
      l90, nbcont, cutn, min_dist, max_dist) = args_prepare
     logger.info("prepare step")
-    info_file = prepare.main("PanACoTA prepare", NCBI_species, NCBI_species_taxid, levels,
+    info_file = prepare.main("PanACoTA prepare", NCBI_species_name, NCBI_species_taxid,
+                             NCBI_taxid, levels, NCBI_section,
                              outdir_prepare, tmp_dir, threads, norefseq, db_dir, only_mash,
                              info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet)
 
@@ -167,15 +175,14 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     tmp_dir = ""
     force = False
     outdir_annotate = os.path.join(outdir, "2-annotate_module")
-    (name, qc_only, date, prodigal_only) = args_annot
+    (name, qc_only, date, prodigal_only, small) = args_annot
     res_annot_dir = None
-    small = False
 
     logger.info("annotate step")
     lstinfo, nbgenomes = annotate.main("PanACoTA annotate", list_file, db_path, outdir_annotate,
                                        name, date, l90, nbcont, cutn, threads, force, qc_only,
                                        info_file, tmp_dir, res_annot_dir, verbose, quiet,
-                                       prodigal_only)
+                                       prodigal_only=prodigal_only, small=small)
     if qc_only:
         return "QC_only done"
 
@@ -199,8 +206,9 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     outdir_align = os.path.join(outdir, "5-align_module")
     force = False
     logger.info("align step")
+    (prot_ali) = args_align
     align_file = align.main("PanACoTA align", corepers_file, lstinfo, name_pan, outdir_annotate,
-                            outdir_align, threads, force, verbose=verbose, quiet=quiet)
+                            outdir_align, prot_ali, threads, force, verbose=verbose, quiet=quiet)
 
 
     # Tree step
@@ -400,6 +408,10 @@ def check_args(parser, argv):
     corepers.check_args(parser, a)
     final_dict.update(cp_dict)
 
+    # ALIGN STEP
+    ali_dict = get_align(dict_argv)
+    final_dict.update(ali_dict)
+
     # TREE STEP
     tree_dict = get_tree(dict_argv)
     # If we chose soft==quicktree, check_args will return error if threads > 1. So,
@@ -433,10 +445,10 @@ def get_prepare(dict_argv):
     conf_conffile.update(dict_argv, "prepare")
     # Add default arguments if not found in comd line nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "min_id": 0.8, "levels": "", "quiet": False, "ncbi_species": "",
-                "ncbi_species_taxid": "", "tmp_dir": "", "db_dir": "",
+                "levels": "all", "quiet": False, "ncbi_species_name": "",
+                "ncbi_species_taxid": "", "ncbi_taxid": "", "tmp_dir": "", "db_dir": "",
                 "info_file": "", "min_dist": 1e-4, "max_dist": 0.06,
-                "norefseq": False, "only_mash": False}
+                "norefseq": False, "only_mash": False, "ncbi_section": "refseq"}
     conf_conffile.add_default(defaults, "prepare")
     # Change to expected types (boolean, int, float)
     conf_conffile.set_boolean("prepare", "quiet")
@@ -471,11 +483,12 @@ def get_annotate(dict_argv):
         conf_conffile.update({"date": date}, "annotate")
     # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "threads": 1, "cutn": 5, "l90": 100, "nbcont":999,
-                "quiet": False, "prodigal_only": False, "qc_only": False,
+                "quiet": False, "prodigal_only": False, "small": False, "qc_only": False,
                 "list_file": "", "db_path": "", "from_info": True}
     conf_conffile.add_default(defaults, "annotate")
     conf_conffile.set_boolean("annotate", "quiet")
     conf_conffile.set_boolean("annotate", "prodigal_only")
+    conf_conffile.set_boolean("annotate", "small")
     conf_conffile.set_boolean("annotate", "qc_only")
     conf_conffile.set_int("annotate", "verbose")
     conf_conffile.set_int("annotate", "threads")
@@ -535,6 +548,26 @@ def get_corepers(dict_argv):
     conf_conffile.set_int("corepers", "threads")
     corepers_dict = conf_conffile.get_section_dict("corepers")
     return corepers_dict
+
+
+def get_align(dict_argv):
+    """
+    Check that arguments given for align step are compatible
+    """
+    # Get arguments from config file and add them (overwrite if needed)
+    if not "configfile" in dict_argv:
+        conf_conffile = utils_argparse.Conf_all_parser("",["align"])
+    else:
+        conf_conffile = utils_argparse.Conf_all_parser(dict_argv['configfile'],
+                                                       readsec=["align"])
+    # Add arguments from commandline
+    conf_conffile.update(dict_argv, "align")
+    # Add default arguments if not found in commandline nor config file
+    defaults = {"prot_ali": False}
+    conf_conffile.add_default(defaults, "align")
+    conf_conffile.set_boolean("align", "prot_ali")
+    ali_dict = conf_conffile.get_section_dict("align")
+    return ali_dict
 
 
 def get_tree(dict_argv):

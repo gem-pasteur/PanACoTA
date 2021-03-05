@@ -76,6 +76,30 @@ def test_parser_conffile():
     assert not options.boot
 
 
+def test_parser_conffile_protalichanged():
+    """
+    Test running with arguments with config file.
+    arguments given in cmd line are kept, others are those in configfile,
+    where prot_ali has been changed to True
+    """
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    options = allm.parse(parser,
+                         "-c test/data/all/default-conffigfile2.ini -o out-all -n TEST".split())
+    assert options.outdir == "out-all"
+    assert options.threads == 10
+    assert not options.ncbi_species_taxid
+    assert options.prodigal_only == False
+    assert options.norefseq
+    assert options.l90 == 99
+    assert options.clust_mode == 1
+    assert options.min_id == 0.85
+    assert options.tol == 1
+    assert not options.multi
+    assert not options.boot
+    assert options.prot_ali
+
+
 def test_parser_conffile_and_cmd():
     """
     Test that when some arguments given in config file are also given in cmd,
@@ -97,8 +121,10 @@ def test_parser_conffile_and_cmd():
     assert options.clust_mode == 1
     assert options.min_id == 0.99
     assert options.tol == 1
+    assert not options.floor
     assert options.multi
     assert not options.boot
+    assert not options.prot_ali
 
 
 def test_parser_thread_quicktree(capsys):

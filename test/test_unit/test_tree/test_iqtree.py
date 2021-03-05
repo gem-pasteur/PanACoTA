@@ -104,6 +104,37 @@ def test_run_iqtree2_default(caplog):
     assert not tutil.is_tree_bootstrap(treefile)
 
 
+def test_run_iqtree2_test_model(caplog):
+    """
+    Test that when running iqtree2 without bootstrap, and with default model, it returns a file
+    in the expected format (all branches have lengths, no bootstrap value, treefile
+    created with expected name).
+    """
+    caplog.set_level(logging.DEBUG)
+    boot = None
+    threads = 1
+    quiet = False
+    model = "TEST"
+    fast = False
+    ft.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb="", mem="",
+                s="iqtree2", f=fast)
+    treefile = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.iqtree_tree.treefile")
+    assert os.path.isfile(treefile)
+    logs = os.path.join(GENEPATH, "exp_pers4genomes.grp.aln.iqtree_tree.log")
+    assert os.path.isfile(logs)
+    assert "Running IQtree..." in caplog.text
+    assert ("iqtree2 -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
+            "-T 1 -m TEST    --seqtype DNA "
+            "--prefix test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.iqtree_tree "
+            "--quiet") in caplog.text
+    # Check that modelfinder is mentionned
+    with open(logs, "r") as logf:
+        log_lines = logf.readlines()
+    assert "ModelFinder will test up to" in " ".join(log_lines)
+    assert tutil.is_tree_lengths(treefile)
+    assert not tutil.is_tree_bootstrap(treefile)
+
+
 def test_run_iqtree_boot_quiet_TVM(caplog):
     """
     Test that when running iqtree with bootstrap, and with TVM model, it returns a file
