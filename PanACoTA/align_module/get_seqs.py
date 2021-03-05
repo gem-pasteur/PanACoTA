@@ -90,7 +90,7 @@ def get_all_seqs(all_genomes, dname, dbpath, listdir, aldir, all_fams, quiet):
     for genome in all_genomes:
         ge_gen = os.path.join(listdir, dname + "-getEntry_gen_" + genome + ".txt")
         ge_prt = os.path.join(listdir, dname + "-getEntry_prt_" + genome + ".txt")
-        logger.details("Extracting proteins and genes from {}".format(genome))
+        logger.details(f"Extracting proteins and genes from {genome}")
         prtdb = os.path.join(dbpath, "Proteins", genome + ".prt")
         gendb = os.path.join(dbpath, "Genes", genome + ".gen")
         get_genome_seqs(prtdb, ge_prt, files_todo)
@@ -254,7 +254,6 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
     files_todo = frozenset(files_todo)
     if type(to_extract) == list:
         to_extract = frozenset(to_extract)
-
     # State machine variables
     previous_fp = None
 
