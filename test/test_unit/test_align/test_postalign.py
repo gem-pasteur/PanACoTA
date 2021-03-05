@@ -317,7 +317,7 @@ def test_concat_aa(caplog):
     dname = "TEST-concat"
     prefix = os.path.join(aldir, dname)
     orig_btr1 = os.path.join(EXPPATH, "exp_aldir", "mafft-align.1.aln")
-    orig_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aa.aln")
+    orig_btr8 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8-completed.aln")
     orig_btr11 = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.11.aln")
     btr1 = os.path.join(aldir, dname + "-mafft-align.1.aln")
     btr8 = os.path.join(aldir, dname + "-mafft-align.8.aln")
