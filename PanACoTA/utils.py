@@ -1303,3 +1303,24 @@ def remove(infile):
     """
     if os.path.isfile(infile):
         os.remove(infile)
+
+
+def thread_progressbar(widgets, stop):
+    """
+    Thread running an "inifite" progress bar, while the main thread is working.
+    Once this progressbar has to stop, we send a signal.
+
+    Parameters
+    ----------
+    widgets : list
+        list of widgets to put in the progressbar
+    stop : function
+        function returning False when thread can run, True when it has to stop.
+    """
+    if widgets:
+        bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
+        while True:
+            bar.update()
+            if stop(): 
+                print()
+                break

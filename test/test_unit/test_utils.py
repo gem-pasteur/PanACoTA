@@ -12,6 +12,9 @@ import os
 import logging
 import shutil
 import matplotlib
+import progressbar
+import threading
+import time
 
 matplotlib.use('AGG')
 
@@ -1206,3 +1209,33 @@ def test_remove_not_exist():
     assert not os.path.isfile(infile)
     utils.remove(infile)
     assert not os.path.isfile(infile)
+
+
+def test_thread_progressbar(capsys):
+    """
+    Launch a progressbar in a separate thread, and stop it after 2 seconds
+    """
+    stop_bar = False
+    widgets = ['test', progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+                           "  -  ", progressbar.Timer()]
+    x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda : stop_bar,))
+    x.start()
+    out, err = capsys.readouterr()
+    time.sleep(2)
+    stop_bar = True
+    x.join()
+
+
+def test_thread_empty_progressbar(capsys):
+    """
+    Launch a progressbar in a separate thread, and stop it after 2 seconds
+    as widgets is empty, the thread does not start anything, it ends just after being called.
+    """
+    stop_bar = False
+    widgets = []
+    x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda : stop_bar,))
+    x.start()
+    out, err = capsys.readouterr()
+    time.sleep(0.5)
+    stop_bar = True
+    x.join()
