@@ -41,8 +41,9 @@ April 2017
 """
 import logging
 import os
+import sys
 import time
-import multiprocessing
+import threading
 import progressbar
 import copy
 
@@ -202,21 +203,27 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
                         "it to a pangenome file.").format(mmseqclust))
     else:
         logger.info("Clustering proteins...")
-        if not quiet:
-            widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
-                       "  -  ", progressbar.Timer()]
-            bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
-        pool = multiprocessing.Pool(1)
-        args = [mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode]
-        final = pool.map_async(run_mmseqs_clust, [args], chunksize=1)
-        pool.close()
-        if not quiet:
-            while True:
-                if final.ready():
-                    break
-                bar.update()
-            bar.finish()
-        pool.join()
+        try:
+            stop_bar = False
+            if quiet:
+                widgets = []
+            # If not quiet, start a progress bar while clustering proteins. We cannot guess
+            # how many time it will take, so we start an "infinite" bar, and send it a signal
+            # when it has to stop. If quiet, we start a thread that will immediatly stop
+            else:
+                widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+                           "  -  ", progressbar.Timer()]
+            x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda : stop_bar,))
+            x.start()
+            args = (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode)
+            run_mmseqs_clust(args)
+        except KeyboardInterrupt: # pragma: no cover
+            stop_bar = True
+            x.join()
+            sys.exit(1)
+        # Clustering done, stop bar and join (if quiet, it was already finished, so we just join it)
+        stop_bar = True
+        x.join()
     # Convert output to tsv file (one line per comparison done)
     #  # Convert output to tsv file (one line per comparison done)
     # -> returns (families, outfile)
