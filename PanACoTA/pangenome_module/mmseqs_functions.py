@@ -87,16 +87,15 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     """
     # Get general information and file/directory names
     prt_bank = os.path.basename(prt_path)
-    start = time.strftime('%Y-%m-%d_%H-%M-%S')
+    # start = time.strftime('%Y-%m-%d_%H-%M-%S')
     mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     information = ("Will run MMseqs2 with:\n"
                    f"\t- minimum sequence identity = {min_id*100}%\n"
                    f"\t- cluster mode {clust_mode}")
     if threads > 1:
-        information += "\n\t- {} threads".format(threads)
+        information += f"\n\t- {threads} threads"
     logger.info(information)
-
-    infoname = get_info(threads, min_id, clust_mode, start)
+    infoname = get_info(threads, min_id, clust_mode)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
     # Create ffindex of DB if not already done
     create_mmseqs_db(mmseqdb, prt_path, logmmseq)
@@ -109,7 +108,7 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     return families, outfile
 
 
-def get_info(threads, min_id, clust_mode, start):
+def get_info(threads, min_id, clust_mode):
     """
     Get string containing all information on future run
 
@@ -121,8 +120,6 @@ def get_info(threads, min_id, clust_mode, start):
         min percentage of identity to consider 2 proteins in hte same family
     clust_mode : [0, 1, 2]
         0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
-    start : str
-        string containing starting date and time
 
     Returns
     -------
@@ -133,7 +130,7 @@ def get_info(threads, min_id, clust_mode, start):
         threadinfo = "-th" + str(threads)
     else:
         threadinfo = ""
-    infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo + "_" + start
+    infoname = str(min_id) + "-mode" + str(clust_mode) + threadinfo
     return infoname
 
 
@@ -175,10 +172,11 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
         min percentage of identity to be considered in the same family (between 0 and 1)
     clust_mode : [0, 1, 2]
         0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    just_done : str
+        True if mmseqs db was just (re)created -> remove mmseqs clust. 
+        False if mmseqs db was kept from previous run -> no need to rerun mmseqs clust if already exists
     threads : int
         max number of threads to use
-    start : str
-        string containing start date and time
     panfile : str
         if a pangenome file is specified. Otherwise, default pangenome name will be used
     quiet : bool
@@ -258,7 +256,7 @@ def run_mmseqs_clust(args):
         utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
 
 
-def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
+def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, outfile):
     """
     Convert mmseqs clustering to a pangenome file:
 
@@ -273,17 +271,13 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
         path to base filename of output of mmseqs cluster
     logmmseq : str
          path to file where logs must be written
-    start : str
-        string containing start date and time
     outfile : str
-        pangenome filename, or None if default one must be used
+        pangenome filename
 
     Returns
     -------
-    (families, outfile) : tuple
-
+    dict
         - families : {fam_num: [all members]}
-        - outfile : pangenome filename
     """
     cmd = f"mmseqs createtsv {mmseqdb} {mmseqdb} {mmseqclust} {mmseqclust}.tsv"
     msg = "Problem while trying to convert mmseq result file to tsv file"
@@ -291,11 +285,11 @@ def mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, outfile=None):
     with open(logmmseq, "a") as logf:
         utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
     # Convert the tsv file to a 'pangenome' file: one line per family
-    families, outfile = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile)
-    return families, outfile
+    families = mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, outfile)
+    return families
 
 
-def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
+def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, outfile):
     """
     Convert the tsv output file of mmseqs to the pangenome file
 
@@ -305,31 +299,23 @@ def mmseqs_tsv_to_pangenome(mmseqclust, logmmseq, start, outfile=None):
         path to base filename for output of mmseq clustering
     logmmseq : str
         path to file where logs must be written
-    start : str
-        string containing start date and time
     outfile : str
         pangenome filename, or None if default one must be used
 
     Returns
     -------
-    (families, outfile) : tuple
+    dict
 
         - families : {fam_num: [all members]}
-        - outfile : pangenome filename
     """
     logger.info("Converting mmseqs results to pangenome file")
     tsvfile = mmseqclust + ".tsv"
-    if not outfile:
-        outpath = os.path.dirname(tsvfile)
-        base = os.path.basename(tsvfile)
-        outfile = os.path.join(outpath, "PanGenome-" + base + ".lst")
     clusters = mmseq_tsv_to_clusters(tsvfile)
     families = clusters_to_file(clusters, outfile)
     end = time.strftime('%Y-%m-%d_%H-%M-%S')
     with open(logmmseq, "a") as logm:
-        logm.write(f"\n------------\n\nStart: {start} \n")
         logm.write(f"End: {end}")
-    return families, outfile
+    return families
 
 
 def mmseq_tsv_to_clusters(mmseq):
