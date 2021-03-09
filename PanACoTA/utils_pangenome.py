@@ -41,6 +41,7 @@ April 2017
 """
 import logging
 import os
+import sys
 from PanACoTA import utils
 
 logger = logging.getLogger("utils.pan")
@@ -145,13 +146,16 @@ def read_pan_file(filein, logger):
     with open(filein, 'r') as coref:
         for line in coref:
             genes = line.strip().split()
-            fam_num = genes[0]
+            fam_num = int(genes[0])
             fams_by_strain[fam_num] = {}
             genes_ok = genes[1:]
             for gene in genes_ok:
                 read_gene(gene, fam_num, fams_by_strain, all_strains)
             families[fam_num] = genes_ok
             nfam += 1
+    if not families:
+        logger.error("Error in pangenome file. No family found.")
+        sys.exit(1)
     sort_all_strains = sorted(list(all_strains), key=utils.sort_genomes_by_name)
     return fams_by_strain, families, sort_all_strains
 
