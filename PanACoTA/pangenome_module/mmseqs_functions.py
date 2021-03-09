@@ -48,6 +48,7 @@ import progressbar
 import copy
 
 from PanACoTA import utils
+from PanACoTA import utils_pangenome as utils_pan
 
 logger = logging.getLogger("pangenome.mmseqs")
 
@@ -97,15 +98,30 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     logger.info(information)
     infoname = get_info(threads, min_id, clust_mode)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
-    # Create ffindex of DB if not already done
-    create_mmseqs_db(mmseqdb, prt_path, logmmseq)
 
-    # Cluster with mmseqs
-    if panfile:
+    mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
+    mmseqstsv = mmseqclust + ".tsv"
+    tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
+    # Get pangenome filename
+    if not panfile:
+        outpath = os.path.dirname(mmseqstsv)
+        base = os.path.basename(mmseqstsv)
+        panfile = os.path.join(outdir, f"PanGenome-{prt_bank}-clust-{infoname}.lst")
+    else:
         panfile = os.path.join(outdir, panfile)
-    families, outfile = do_pangenome(outdir, prt_bank, mmseqdb, min_id,
-                                     clust_mode, threads, start, panfile, quiet)
-    return families, outfile
+    # If pangenome file already exists, read it to get families
+    if os.path.isfile(panfile):
+        logger.warning(f"Pangenome file {panfile} already exists. PanACoTA will read it to get families.")
+        _, families, _ = utils_pan.read_pan_file(panfile, logger)
+    else:
+        # Create ffindex of DB if not already done
+        status = create_mmseqs_db(mmseqdb, prt_path, logmmseq)
+        # Status = ok means that mmseqs_db files already existed and were not re-done
+        # If they were redone (or just done), remove any existing following file (mmseqs clust, tsv, csv)
+        # Cluster with mmseqs
+        families, panfile = do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmpdir, logmmseq, min_id,
+                                         clust_mode, status, threads, panfile, quiet)
+    return families, panfile
 
 
 def get_info(threads, min_id, clust_mode):
@@ -155,8 +171,8 @@ def get_logmmseq(outdir, prt_bank, infoname):
     return os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
 
 
-def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, panfile=None,
-                 quiet=False):
+def do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, clust_mode, 
+                just_done, threads, panfile, quiet=False):
     """
     Use mmseqs to cluster proteins
 
@@ -189,16 +205,23 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
         - families : {fam_num: [all members]}
         - outfile : pangenome filename
     """
-    infoname = get_info(threads, min_id, clust_mode, start)
-    logmmseq = get_logmmseq(outdir, prt_bank, infoname)
-    mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
-    tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
+    mmseqstsv = mmseqclust + ".tsv"
+    # If we just made the database, we must redo all next steps
+    # -> if existing, remove
+    # mmseqsclust (created by run_mmseqs_clust)
+    # mmseqstsv (created by mmseqs_to_pangenome)
+    # pangenome file
+    if just_done and os.path.isfile(mmseqclust) or os.path.isfile(mmseqstsv) or os.path.isfile(panfile):
+        logger.details("Removing existing clustering and/or pangenome files.")
+        utils.remove(mmseqclust)
+        utils.remove(mmseqstsv)
+        utils.remove(panfile)
     os.makedirs(tmpdir, exist_ok=True)
     bar = None
     logger.debug(mmseqclust)
     if os.path.isfile(mmseqclust):
-        logger.warning(("mmseqs clustering {} already exists. The program will now convert "
-                        "it to a pangenome file.").format(mmseqclust))
+        logger.warning((f"mmseqs clustering {mmseqclust} already exists. The program will now convert "
+                        "it to a pangenome file."))
     else:
         logger.info("Clustering proteins...")
         try:
@@ -215,7 +238,8 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
             x.start()
             args = (mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, threads, clust_mode)
             run_mmseqs_clust(args)
-        except KeyboardInterrupt: # pragma: no cover
+        # except KeyboardInterrupt: # pragma: no cover
+        except: # pragma: no cover
             stop_bar = True
             x.join()
             sys.exit(1)
@@ -225,7 +249,8 @@ def do_pangenome(outdir, prt_bank, mmseqdb, min_id, clust_mode, threads, start, 
     # Convert output to tsv file (one line per comparison done)
     #  # Convert output to tsv file (one line per comparison done)
     # -> returns (families, outfile)
-    return mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, start, panfile)
+    families = mmseqs_to_pangenome(mmseqdb, mmseqclust, logmmseq, panfile)
+    return families, panfile
 
 
 def run_mmseqs_clust(args):
@@ -386,6 +411,12 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
         path to the file containing all proteins to cluster
     logmmseq : str
          path to file where logs must be written
+
+
+    Returns
+    -------
+    bool
+        True if mmseqs db just created, False if already existed
     """
     outext = ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]
     files_existing = []
@@ -407,14 +438,14 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
         else:
             logger.warning(f"mmseqs database {mmseqdb} already exists. The program will "
                            "use it.")
-            return 0
-    if len(files_existing) != len(outext):
-        logger.info("Creating database")
-        logger.debug("Existing files: {}".format(len(files_existing)))
-        logger.debug("Expected extensions: {}".format(len(outext)))
-        cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
-        msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
-               "database format.")
-        logger.details(f"MMseqs command: {cmd}")
-        with open(logmmseq, "w") as logf:
-            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
+            return False
+    logger.info("Creating database")
+    logger.debug("Existing files: {}".format(len(files_existing)))
+    logger.debug("Expected extensions: {}".format(len(outext)))
+    cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
+    msg = (f"Problem while trying to convert database {prt_path} to mmseqs "
+           "database format.")
+    logger.details(f"MMseqs command: {cmd}")
+    with open(logmmseq, "w") as logf:
+        utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
+    return True
