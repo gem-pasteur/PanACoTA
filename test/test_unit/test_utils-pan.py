@@ -167,7 +167,7 @@ def test_read_gene_other_format():
     Check that when reading a gene name which does not have the gembase
     format, it still returns the right information
     """
-    gene = "my_gene-name_other_0001"
+    gene = "my_gene-name_other_0001t"
     num = "1"
     fams_by_strain = {"1": {}}
     all_strains = set()
@@ -188,8 +188,7 @@ def test_read_gene_strain_known():
     all_strains = {"ESCO.1016.00012"}
     upan.read_gene(gene, num, fams_by_strain, all_strains)
     assert all_strains == {"ESCO.1016.00012"}
-    assert fams_by_strain == {"1": {"ESCO.1016.00012": ["ESCO.1016.00012.i001_01",
-                                                        gene]}}
+    assert fams_by_strain == {"1": {"ESCO.1016.00012": ["ESCO.1016.00012.i001_01", gene]}}
 
 
 def test_read_panfile(caplog):
@@ -205,6 +204,58 @@ def test_read_panfile(caplog):
     assert "Reading and getting information from pangenome file" in caplog.text
 
 
+def test_read_panfile_strfamnum(caplog):
+    """
+    check that it reads the pangenome file and returns the expected objects
+    """
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test_pan")
+    panfile = os.path.join(GENEPATH, "panfile_wrong")
+    with open(panfile, "w") as pfw:
+        pfw.write("family1 gene1_5 gene2_6 gene3_8\n")
+        pfw.write("2 gene1_ gene3_5 gene1_toto")
+    fbs, fams, sas = upan.read_pan_file(panfile, logger)
+    assert fbs == {"family1": {"gene1": ["gene1_5"],
+                               "gene2": ["gene2_6"],
+                               "gene3": ["gene3_8"]},
+                   "2": {"gene1": ["gene1_", "gene1_toto"],
+                         "gene3": ["gene3_5"]}}
+    assert fams == {"family1": ["gene1_5", "gene2_6", "gene3_8"],
+                    "2": ["gene1_", "gene3_5", "gene1_toto"]}
+    assert sas == ["gene1", "gene2", "gene3"]
+    assert "Reading and getting information from pangenome file" in caplog.text
+
+
+def test_read_panfile_wrong(caplog):
+    """
+    reading wrong format pangenome file
+    """
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test_pan")
+    panfile = os.path.join(GENEPATH, "panfile_wrong")
+    with open(panfile, "w") as pfw:
+        pfw.write("I'm a wrong panfile")
+        pfw.write("123 456 789")
+    with pytest.raises(SystemExit):
+        upan.read_pan_file(panfile, logger)
+    assert "Reading and getting information from pangenome file" in caplog.text
+    assert "Error in pangenome file. No family found." in caplog.text
+
+
+def test_read_panfile_empty(caplog):
+    """
+    reading wrong format pangenome file
+    """
+    caplog.set_level(logging.DEBUG)
+    logger = logging.getLogger("test_pan")
+    panfile = os.path.join(GENEPATH, "panfile_wrong")
+    open(panfile, "w").close()
+    with pytest.raises(SystemExit):
+        upan.read_pan_file(panfile, logger)
+    assert "Reading and getting information from pangenome file" in caplog.text
+    assert "Error in pangenome file. No family found." in caplog.text
+
+
 def test_get_fams(caplog):
     """
     Test that when giving all members for each family, it returns all strains involved in
@@ -218,7 +269,7 @@ def test_get_fams(caplog):
     assert "Retrieving information from pan families" in caplog.text
 
 
-def test_read_pan_filetxt(caplog):
+def test_read_pangenome_filetxt(caplog):
     """
     Test that when giving a pangenome file, it returns all families as expected.
     """
@@ -236,7 +287,49 @@ def test_read_pan_filetxt(caplog):
     assert os.path.isfile(pan_to_use + ".bin")
 
 
-def test_read_pan_filebin(caplog):
+def test_read_pangenome_filewrong(caplog):
+    """
+    giving a wrong pangenome file, raises error
+    """
+    caplog.set_level(logging.INFO)
+    logger = logging.getLogger("test_pan")
+    # create wrong pangenome file
+    pan_to_use = os.path.join(GENEPATH, "Pangenome.lst")
+    with open(pan_to_use, "w") as ptu:
+        ptu.write("I'm not a good pangenome file")
+    with pytest.raises(SystemExit):
+        upan.read_pangenome(pan_to_use, logger)
+    assert "Reading and getting information from pangenome file" in caplog.text
+    assert "Error in pangenome file. No family found" in caplog.text
+    assert not os.path.isfile(pan_to_use + ".bin")
+
+
+def test_read_pangenome_strfamnum(caplog):
+    """
+    giving a wrong pangenome file, raises error
+    """
+    caplog.set_level(logging.INFO)
+    logger = logging.getLogger("test_pan")
+    # create wrong pangenome file
+    panfile = os.path.join(GENEPATH, "panfile_wrong")
+    with open(panfile, "w") as pfw:
+        pfw.write("family1 gene1_5 gene2_6 gene3_8\n")
+        pfw.write("2 gene1_ gene3_5 gene1_toto")
+    fbs, fams, sas = upan.read_pangenome(panfile, logger)
+    assert fbs == {"family1": {"gene1": ["gene1_5"],
+                               "gene2": ["gene2_6"],
+                               "gene3": ["gene3_8"]},
+                   "2": {"gene1": ["gene1_", "gene1_toto"],
+                         "gene3": ["gene3_5"]}}
+    assert fams == {"family1": ["gene1_5", "gene2_6", "gene3_8"],
+                    "2": ["gene1_", "gene3_5", "gene1_toto"]}
+    assert sas == ["gene1", "gene2", "gene3"]
+    assert "Reading and getting information from pangenome file" in caplog.text
+    assert "Saving all information to a binary file for later use" in caplog.text
+    assert os.path.isfile(panfile + ".bin")
+
+
+def test_read_pangenome_filebin(caplog):
     """
     Test that when giving only a pangenome filename, and the corresponding bin file exists,
     it reads the binary file, and returns expected objects.
@@ -256,7 +349,32 @@ def test_read_pan_filebin(caplog):
     assert "Retrieving info from binary file" in caplog.text
 
 
-def test_read_pan_fams(caplog):
+def test_read_pangenome_filebin_strfamnum(caplog):
+    """
+    Test that when giving only a pangenome filename, and the corresponding bin file exists,
+    it reads the binary file, and returns expected objects.
+    """
+    caplog.set_level(logging.INFO)
+    logger = logging.getLogger("test_pan")
+    # Copy pan file to folder for files generated by tests. It will also save its bin version
+    pan_to_use = os.path.join(GENEPATH, "Pangenome.lst")
+    panbin_to_use = os.path.join(GENEPATH, "Pangenome.lst.bin")
+    test_panbin = os.path.join(PAN_TEST, "pangenome-strfamnum.bin")
+    shutil.copyfile(PAN_FILE, pan_to_use)
+    shutil.copyfile(test_panbin, panbin_to_use)
+    fbs, fams, ass = upan.read_pangenome(pan_to_use, logger)
+    assert fbs == {"family1": {"gene1": ["gene1_5"],
+                               "gene2": ["gene2_6"],
+                               "gene3": ["gene3_8"]},
+                   "2": {"gene1": ["gene1_", "gene1_toto"],
+                         "gene3": ["gene3_5"]}}
+    assert fams == {"family1": ["gene1_5", "gene2_6", "gene3_8"],
+                    "2": ["gene1_", "gene3_5", "gene1_toto"]}
+    assert ass == ["gene1", "gene2", "gene3"]
+    assert "Retrieving info from binary file" in caplog.text
+
+
+def test_read_pangenome_fams(caplog):
     """
     Test that when giving a pangenome file, and families, it directly extracts strain information
     from the families: pangenome file does not need to exist, and a binary file is created
@@ -273,7 +391,7 @@ def test_read_pan_fams(caplog):
     assert os.path.isfile(panfile + ".bin")
     
 
-def test_read_pan_fams_binok(caplog):
+def test_read_pangenome_fams_binok(caplog):
     """
     Test that when giving a pangenome file, and families, it directly extracts strain information
     from the families: pangenome file does not need to exist. However, the pangenome.bin file
@@ -293,3 +411,5 @@ def test_read_pan_fams_binok(caplog):
     assert all_lines == []
     assert "Retrieving information from pan families" in caplog.text
     assert os.path.isfile(panfile + ".bin")
+    with open(panfile + ".bin", "r") as pfb:
+        assert pfb.readlines() == []
