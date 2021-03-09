@@ -801,7 +801,8 @@ def test_run_all_pangenome_panexists_ok(caplog):
 
     # Check families returned in fams dict.
     for num, fam in fams.items():
-        assert num in list(range(1, 17))
+        exp_nums = [str(i) for i in range(1, 17)]
+        assert num in exp_nums
         found = False
         for expfam in FAMILIES4G:
             if fam == expfam:
@@ -850,7 +851,8 @@ def test_run_all_pangenome_givenpan_ok(caplog):
 
     # Check families returned in fams dict.
     for num, fam in fams.items():
-        assert num in list(range(1, 17))
+        exp_fams = [str(i) for i in range(1, 17)]
+        assert num in exp_fams
         found = False
         for expfam in FAMILIES4G:
             if fam == expfam:
