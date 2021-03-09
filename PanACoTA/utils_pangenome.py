@@ -188,3 +188,35 @@ def read_gene(gene, num, fams_by_strain, all_strains):
         fams_by_strain[num][strain] = [gene]
     if strain not in all_strains:
         all_strains.add(strain)
+
+
+def read_lstinfo(lstinfo, logger):
+    """
+    Read lstinfo file and return list of genomes
+
+    Parameters
+    ----------
+    lstinfo : str
+        File containing the list of all genomes to include in the pan-genome, 
+        1 genome per line. Here, only the first column will be used. 
+
+    Returns
+    -------
+    list
+        list of genomes
+    """
+    genomes = []
+    if not os.path.isfile(lstinfo):
+        logger.error(f"{lstinfo} file not found.")
+        sys.exit(1)
+    with open(lstinfo) as lstf:
+        for line in lstf:
+            # skip header
+            if "_name" in line:
+                continue
+            genome = line.split()[0].strip()
+            genomes.append(genome)
+    if genomes == []:
+        logger.error(f"No genome found in {lstinfo} file.")
+        sys.exit(1)
+    return genomes
