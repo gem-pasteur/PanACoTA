@@ -68,28 +68,26 @@ def test_main_from_parse():
     assert os.path.isfile(prtbank)
 
     # Check presence of tmp folder
-    tmp_base = os.path.join(GENEPATH, "tmp_testFromParsePAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(GENEPATH, "tmp_testFromParsePAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # check presence of mmseq cluster files
-    cluster = os.path.join(GENEPATH, name + ".All.prt-clust-0.8-mode1_*")
+    cluster = os.path.join(GENEPATH, name + ".All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testFromParsePAN4*"))
-    to_check = [".tsv.lst", ".tsv.lst.quali.txt", ".tsv.lst.quanti.txt", ".tsv.lst.summary.txt"]
+    to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = ""
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
                 found.append(c)
-            if f.endswith(".tsv.lst"):
-                pangenome_file = f
+    panfile = os.path.join(GENEPATH, "PanGenome-testFromParsePAN4.All.prt-clust-0.8-mode1.lst")
     assert set(found) == set(to_check)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
     # Check that all families are as expected. Compare lines without the family number
-    with open(exp_pan, "r") as ep, open(pangenome_file, "r") as panf:
+    with open(exp_pan, "r") as ep, open(panfile, "r") as panf:
         lines_exp = []
         lines_out = []
         for line_exp in ep:
@@ -116,30 +114,27 @@ def test_main(caplog):
     used_dbpath = os.path.join(GENEPATH, "database")
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
-    out_panfile = os.path.join(outdir, "PanGenome-testPAN4.All.prt-clust-0.8-mode1_")
+    out_panfile = os.path.join(outdir, "PanGenome-testPAN4.All.prt-clust-0.8-mode1.lst")
     assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode,
-                    spe_dir, threads, verbose=2).startswith(out_panfile)
+                    spe_dir, threads, verbose=2) == out_panfile
     # Checl creation of prt bank
     prtbank = os.path.join(used_dbpath, "testPAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_testPAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(outdir, "tmp_testPAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testPAN4*"))
-    to_check = [".tsv.lst", ".tsv.lst.quali.txt", ".tsv.lst.quanti.txt", ".tsv.lst.summary.txt"]
+    to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = ""
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
                 found.append(c)
-            if f.endswith(".tsv.lst"):
-                pangenome_file = f
     assert set(found) == set(to_check)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
-    with open(exp_pan, "r") as ep, open(pangenome_file, "r") as panf:
+    with open(exp_pan, "r") as ep, open(out_panfile, "r") as panf:
         lines_exp = []
         lines_out = []
         for line_exp in ep:
@@ -182,9 +177,9 @@ def test_main_prt_exist(caplog):
     dest_prt_bank = os.path.join(used_dbpath, "test2PAN4.All.prt")
     shutil.copyfile(src_prt_bank, dest_prt_bank)
 
-    out_panfile = os.path.join(outdir, "PanGenome-test2PAN4.All.prt-clust-0.8-mode1_")
+    out_panfile = os.path.join(outdir, "PanGenome-test2PAN4.All.prt-clust-0.8-mode1.lst")
     assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-                    threads, verbose=15).startswith(out_panfile)
+                    threads, verbose=15) == out_panfile
 
     # Check presence of mmseq DB files
     msdb = os.path.join(GENEPATH, "test2PAN4.All.prt-msDB")
@@ -194,27 +189,24 @@ def test_main_prt_exist(caplog):
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test2PAN4.All.prt-clust-0.8-mode1_*")
+    cluster = os.path.join(outdir, "test2PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-test2PAN4*"))
-    to_check = [".tsv.lst", ".tsv.lst.quali.txt", ".tsv.lst.quanti.txt", ".tsv.lst.summary.txt"]
+    to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = ""
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
                 found.append(c)
-            if f.endswith(".tsv.lst"):
-                pangenome_file = f
     assert set(found) == set(to_check)
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test2PAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(outdir, "tmp_test2PAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
-    with open(exp_pan, "r") as ep, open(pangenome_file, "r") as panf:
+    with open(exp_pan, "r") as ep, open(out_panfile, "r") as panf:
         lines_exp = []
         lines_out = []
         for line_exp in ep:
@@ -253,9 +245,9 @@ def test_main_spedir(caplog):
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
 
-    out_panfile = os.path.join(outdir, "PanGenome-test3PAN4.All.prt-clust-0.8-mode1_")
+    out_panfile = os.path.join(outdir, "PanGenome-test3PAN4.All.prt-clust-0.8-mode1.lst")
     assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-                    threads, verbose=15).startswith(out_panfile)
+                    threads, verbose=15) == out_panfile
     # Checl creation of prt bank
     prtbank = os.path.join(spe_dir, "test3PAN4.All.prt")
     assert os.path.isfile(prtbank)
@@ -267,27 +259,24 @@ def test_main_spedir(caplog):
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test3PAN4.All.prt-clust-0.8-mode1_*")
+    cluster = os.path.join(outdir, "test3PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test3PAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(outdir, "tmp_test3PAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-test3PAN4*"))
-    to_check = [".tsv.lst", ".tsv.lst.quali.txt", ".tsv.lst.quanti.txt", ".tsv.lst.summary.txt"]
+    to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = ""
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
                 found.append(c)
-            if f.endswith(".tsv.lst"):
-                pangenome_file = f
     assert set(found) == set(to_check)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
-    with open(exp_pan, "r") as ep, open(pangenome_file, "r") as panf:
+    with open(exp_pan, "r") as ep, open(out_panfile, "r") as panf:
         lines_exp = []
         lines_out = []
         for line_exp in ep:
@@ -338,12 +327,12 @@ def test_main_outfile(caplog):
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test4PAN4.All.prt-clust-0.8-mode1_*")
+    cluster = os.path.join(outdir, "test4PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test4PAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(outdir, "tmp_test4PAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     outf = os.path.join(outdir, outfile)
     assert os.path.isfile(outf)
@@ -402,23 +391,21 @@ def test_pangenome_all():
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "testAllPAN4.All.prt-clust-0.8-mode1_*")
+    cluster = os.path.join(outdir, "testAllPAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1_*")
-    assert len(glob.glob(tmp_base)) == 1
+    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testAllPAN4*"))
-    to_check = [".tsv.lst", ".tsv.lst.quali.txt", ".tsv.lst.quanti.txt", ".tsv.lst.summary.txt"]
+    to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = ""
+    pangenome_file = os.path.join(outdir, "PanGenome-testAllPAN4.All.prt-clust-0.8-mode1.lst")
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
                 found.append(c)
-            if f.endswith(".tsv.lst"):
-                pangenome_file = f
     assert set(found) == set(to_check)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
