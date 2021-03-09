@@ -279,7 +279,7 @@ def read_alignments(all_alns, all_genomes):
                      "do not have the same number of sequences. Check that each protein "
                      "name contains the name of the genome from which it comes.")
         return None
-    logger.details("{} sequences found per genome".format(per_genome[0]))
+    logger.log(utils.detail_lvl(), f"{per_genome[0]} sequences found per genome")
     return sequences
 
 
@@ -294,7 +294,7 @@ def write_groups(outfile, sequences):
     sequences : dict
         {genome_name: [list of sequences (DNA, prot...) for this genome]}
     """
-    logger.details("Writing alignments per genome")
+    logger.log(utils.detail_lvl(), "Writing alignments per genome")
     with open(outfile, "w") as outf:
         for genome in sorted(sequences, key=utils.sort_genomes_by_name):
             # write header for genome
