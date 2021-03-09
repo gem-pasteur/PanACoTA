@@ -207,6 +207,28 @@ def test_conf_parser_init_empty(capsys):
     shutil.rmtree(confdir)
 
 
+def test_conf_parser_init_notexisting(capsys):
+    """
+    test class Conf_all_parser init when given configfile does not exist
+    """
+    with pytest.raises(SystemExit):
+        autils.Conf_all_parser("not_existing_conffile.ini")
+    out, err = capsys.readouterr()
+    assert "Error: config file not_existing_conffile.ini not found." in out
+
+
+def test_conf_parser_init_duplicate(capsys):
+    """
+    test class Conf_all_parser configfile contains a duplicated parameter
+    -> raises error
+    """
+    conffile = os.path.join("test", "data", "utils", "configfile-dup.ini")
+    with pytest.raises(SystemExit):
+        autils.Conf_all_parser(conffile)
+    out, err = capsys.readouterr()
+    assert "option 'bool_y' in section 'sec_bool' already exists" in out
+
+
 def test_conf_parser_init():
     """
     Test config parser with a given config file. Check value of defaults etc.
