@@ -6,12 +6,15 @@ Unit tests for the persistent_functions submodule in corepers module
 """
 import os
 import logging
+import pytest
+import shutil
 
 import PanACoTA.corepers_module.persistent_functions as persf
 import test.test_unit.utilities_for_tests as tutils
 
 
 PERS_PATH = os.path.join("test", "data", "persgenome")
+GENEPATH = os.path.join(PERS_PATH, "generated_by_unit-tests")
 EXP_PATH = os.path.join(PERS_PATH, "exp_files")
 FAMS_BY_STRAIN = \
     {'1': {'GEN4.1111.00001': ['GEN4.1111.00001.b0001_00001'],
@@ -86,6 +89,21 @@ FAMILIES = {'1': ['GEN4.1111.00001.b0001_00001', 'GENO.0817.00001.b0001_00002',
             }
 
 
+@pytest.fixture(autouse=True)
+def setup_teardown_module():
+    """
+    Remove log files at the end of this test module
+    """
+    # Init logger to level detail (15)
+    # utils.init_logger(LOGFILE_BASE, logging.DEBUG, 'test_utils', verbose=1)
+    os.mkdir(GENEPATH)
+    print("setup")
+
+    yield
+    shutil.rmtree(GENEPATH)
+    print("teardown")
+
+
 def test_uniq_mems():
     """
     Test that it returns True when there is only 1 member of each genome in the given family
@@ -132,6 +150,7 @@ def test_zero_mem_notuniq(caplog):
               "strain4": ["my_member"]}
     assert not persf.uniq_members(family)
     assert "Problem, no members for strain1!" in caplog.text
+
 
 def test_mixed():
     """
@@ -200,11 +219,97 @@ def test_write_pers():
             5: ["ESCO.1216.00003.i001_01001", "SAEN.0215.00003.i009_00001",
                 "ESCO.1017.00003.b001_00001", "ESCO.0812.00002.i002_02000",
                 "ESCO.0812.00003.i002_02000"]}
-    outfile = "test-persistent_families.txt"
+    outfile = os.path.join(GENEPATH, "test-persistent_families.txt")
     persf.write_persistent(fams, outfile)
     expfile = os.path.join(EXP_PATH, "exp_persgenome1.txt")
     assert tutils.compare_order_content(outfile, expfile)
-    os.remove(outfile)
+
+
+def test_isinsubset():
+    """
+    Check if a given protein is in the given list of genomes
+    """
+    # With gembase format
+    protein = "GENO.1234.genomename.contignum_proteinnum"
+    genomes = ["GENO.1234.genomename", "GENO.1234.toto"]
+    assert persf.is_in_subset(protein, genomes)
+    # With other format
+    protein2 = "along-genome'name_2344-f"
+    genomes2 = ["along-genome'name", "genome1", "GENO.1234.toto"]
+    assert persf.is_in_subset(protein2, genomes2)
+
+
+def test_not_isinsubset():
+    """
+    Check if a given protein is not in the given list of genomes
+    """
+    # With gembase format
+    protein = "GENO.1234.genomename1.contignum_proteinnum"
+    genomes = ["GENO.1234.genomename", "GENO.1234.toto"]
+    assert not persf.is_in_subset(protein, genomes)
+    # With other format
+    protein2 = "along-genome-name_2344-f"
+    genomes2 = ["along-genome'name", "genome1", "GENO.1234.toto"]
+    assert not persf.is_in_subset(protein2, genomes2)
+
+
+def test_get_subset(caplog):
+    """
+    Get FAMS_BY_STRAIN and FAMILIES but only with
+    proteins from given genome list
+    """
+    caplog.set_level(logging.DEBUG)
+    lstinfo = os.path.join(GENEPATH, "lstinfo-ok.lst")
+    with open(lstinfo, "w") as lst:
+        lst.write("GEN4.1111.00001 toto we don't use other fields\n")
+        lst.write("GENO.1216.00003\n")
+    fbs, fam, genomes = persf.get_subset_genomes(FAMS_BY_STRAIN, FAMILIES, lstinfo)
+    exp_fams = {'1': ['GEN4.1111.00001.b0001_00001', 'GENO.1216.00003.i0001_00003'],
+            '10': ['GEN4.1111.00001.i0001_00004'],
+            '11': ['GEN4.1111.00001.i0001_00005'],
+            '12': ['GEN4.1111.00001.i0001_00008', 'GENO.1216.00003.i0001_00004',
+                   'GENO.1216.00003.i0001_01000'],
+            '2': ['GEN4.1111.00001.i0001_00003'],
+            '3': ['GEN4.1111.00001.b0001_00009', 'GENO.1216.00003.i0001_01010'],
+            '5': ['GEN4.1111.00001.i0001_00002', 'GENO.1216.00003.i0080_00010'],
+            '6': ['GEN4.1111.00001.i0001_00006'],
+            '8': ['GEN4.1111.00001.i0001_00007'],
+            }
+    exp_fbs = {'1': {'GEN4.1111.00001': ['GEN4.1111.00001.b0001_00001'],
+                      'GENO.1216.00003': ['GENO.1216.00003.i0001_00003']},
+                '10': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00004']},
+                '11': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00005']},
+                '12': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00008'],
+                       'GENO.1216.00003': ['GENO.1216.00003.i0001_00004', 'GENO.1216.00003.i0001_01000']
+                       },
+                '2': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00003']},
+                '3': {'GEN4.1111.00001': ['GEN4.1111.00001.b0001_00009'],
+                      'GENO.1216.00003': ['GENO.1216.00003.i0001_01010']},
+                '5': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00002'],
+                      'GENO.1216.00003': ['GENO.1216.00003.i0080_00010']},
+                '6': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00006']},
+                '8': {'GEN4.1111.00001': ['GEN4.1111.00001.i0001_00007']}}
+    assert fam == exp_fams
+    assert fbs == exp_fbs
+    assert genomes == ["GEN4.1111.00001", "GENO.1216.00003"]
+    assert ("Getting subset of pangenome for genomes in "
+            "test/data/persgenome/generated_by_unit-tests/lstinfo-ok.lst") in caplog.text
+
+
+def test_get_subset_empty(caplog):
+    """
+    Test get subset of families but the list of genomes file is empty
+    """
+    caplog.set_level(logging.DEBUG)
+    lstinfo = os.path.join(GENEPATH, "lstinfo-empty.lst")
+    open(lstinfo, "w").close()
+    with pytest.raises(SystemExit):
+        persf.get_subset_genomes(FAMS_BY_STRAIN, FAMILIES, lstinfo)
+    assert ("Getting subset of pangenome for genomes in "
+            "test/data/persgenome/generated_by_unit-tests/lstinfo-empty.lst") in caplog.text
+    assert ("No genome found in "
+            "test/data/persgenome/generated_by_unit-tests/lstinfo-empty.lst "
+            "file") in caplog.text
 
 
 def test_get_core_strict(caplog):
