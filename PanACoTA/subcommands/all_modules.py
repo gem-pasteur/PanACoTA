@@ -200,8 +200,9 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
     outdir_corpers = os.path.join(outdir, "4-corepers_module")
     logger.info("corepers step")
     (tol, mixed, multi, floor) = args_corepers
+    lstinfo_file = ""  # include all genomes in core
     corepers_file = corepers.main("PanACoTA corepers", panfile, tol, multi, mixed, outdir_corpers,
-                                  floor, verbose, quiet)
+                                  lstinfo_file, floor, verbose, quiet)
     # Align step
     outdir_align = os.path.join(outdir, "5-align_module")
     force = False
