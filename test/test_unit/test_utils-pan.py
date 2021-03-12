@@ -413,3 +413,37 @@ def test_read_pangenome_fams_binok(caplog):
     assert os.path.isfile(panfile + ".bin")
     with open(panfile + ".bin", "r") as pfb:
         assert pfb.readlines() == []
+
+
+def test_read_lstinfo():
+    """
+    Read lstinfo file and return genome names
+    """
+    logger = logging.getLogger("test_pan")
+    lstinfo = os.path.join(PAN_TEST, "list_to_pan.txt")
+    g = upan.read_lstinfo(lstinfo, logger)
+    assert g == ["GEN2.1017.00001", "GEN4.1111.00001", "GENO.1017.00001", "GENO.1216.00002"]
+
+
+def test_read_lstinfo_empty(caplog):
+    """
+    Reading empty lstinfo file: exits with error no genome found
+    """
+    logger = logging.getLogger("test_pan")
+    empty_lstinfo = os.path.join(GENEPATH, "empty.txt")
+    open(empty_lstinfo, "w").close()
+    with pytest.raises(SystemExit):
+        upan.read_lstinfo(empty_lstinfo, logger)
+    assert ("No genome found in "
+            "test/data/pangenome/generated_by_unit-tests/empty.txt file.") in caplog.text
+
+
+def test_read_lstinfo_nofile(caplog):
+    """
+    Trying to read genomes from non-existing file
+    """
+    logger = logging.getLogger("test_pan")
+    with pytest.raises(SystemExit):
+        upan.read_lstinfo("non-existing-file.txt", logger)
+    assert ("non-existing-file.txt file not found") in caplog.text
+    
