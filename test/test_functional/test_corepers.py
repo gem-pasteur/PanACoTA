@@ -52,8 +52,12 @@ def test_main_default(capsys):
     multi = False
     mixed = False
     cmd = "cmd"
+    floor = False
+    verbose = 0
+    quiet = False
+    lstinfo = ""
     out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_1.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH) == out_pers
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor,verbose,quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
@@ -73,6 +77,42 @@ def test_main_default(capsys):
             "4 members, from the 4 different genomes.") in out
 
 
+def test_main_core_subset(capsys):
+    """
+    Test that with default parameters, it creates the expected core genome.
+    """
+    tol = 1
+    multi = False
+    mixed = False
+    cmd = "cmd"
+    floor = False
+    verbose = 0
+    quiet = False
+    lstinfo = os.path.join(GENEPATH, "lstinfo-ok.lst")
+    with open(lstinfo, "w") as lst:
+        lst.write("GEN4.1111.00001 toto we don't use other fields\n")
+        lst.write("GENO.1216.00003\n")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_1.lst")
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor,verbose,quiet) == out_pers
+    # Check creation of binary file for pangenome, and remove it
+    assert os.path.isfile(UPAN + ".bin")
+    # Check presence of persistent genome, and its content, and remove it
+    exp_pers = os.path.join(EXP_PATH, "exp_coregenome_subset.txt")
+    assert os.path.isfile(out_pers)
+    assert tutil.compare_order_content(out_pers, exp_pers)
+    # Check presence of log files and remove them
+    logfile = os.path.join(GENEPATH, "PanACoTA-corepers.log")
+    assert os.path.isfile(logfile)
+    assert os.path.isfile(logfile + ".err")
+    # Check log messages
+    out, err = capsys.readouterr()
+    assert "Will generate a CoreGenome." in out
+    assert "Saving all information to a binary file for later use" in out
+    assert "Generating Persistent genome of a dataset containing 2 genomes" in out
+    assert ("The core genome contains 3 families, each one having exactly "
+            "2 members, from the 2 different genomes.") in out
+
+
 def test_main_pers(capsys):
     """
     Test that with default parameters, it creates the expected core genome.
@@ -80,9 +120,13 @@ def test_main_pers(capsys):
     tol = 0.99
     multi = False
     mixed = False
+    lstinfo = os.path.join(TEST_PATH, "test_lstinfo.txt")
+    floor = False
+    verbose = 0
+    quiet = False
     cmd = "cmd"
     out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_0.99.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH) == out_pers
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
@@ -100,6 +144,8 @@ def test_main_pers(capsys):
     assert ("To be considered as persistent, a family "
             "must contain exactly 1 member in at least 99.0% of all genomes. "
             "The other genomes are absent from the family.") in out
+    assert ("Getting subset of pangenome for genomes in "
+            "test/data/persgenome/test_files/test_lstinfo.txt") in out 
     assert "Saving all information to a binary file for later use" in out
     assert "Generating Persistent genome of a dataset containing 4 genomes" in out
     assert ("The persistent genome contains 2 families, each one having exactly "
@@ -115,11 +161,14 @@ def test_main_pers_floor_verbose2(capsys):
     multi = False
     mixed = False
     floor = True
+    verbose = 2
+    lstinfo = ""
+    quiet = False
     cmd = "cmd"
     floor = True
     out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_F0.99.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH,
-                         floor=floor, verbose=2) == out_pers
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo,
+                         floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
@@ -153,10 +202,13 @@ def test_main_pers_floor_mixed_debug(capsys):
     multi = False
     mixed = True
     floor = True
+    verbose = 15
+    quiet = False
+    lstinfo = ""
     cmd = "cmd"
     out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_F0.99-mixed.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH,
-                         floor=floor, verbose = 15) == out_pers
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo,
+                         floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
@@ -191,14 +243,20 @@ def test_main_pers_floor_multi(capsys):
     multi = True
     mixed = False
     floor = True
+    verbose = 15
+    lstinfo = os.path.join(GENEPATH, "lstinfo-ok.lst")
+    with open(lstinfo, "w") as lst:
+        lst.write("GEN4.1111.00001 toto we don't use other fields\n")
+        lst.write("GENO.1216.00003\n")    
+    quiet = False
     cmd = "cmd"
     outdir = os.path.join(GENEPATH, "outdir")
     out_pers = os.path.join(outdir, "PersGenome_pangenome.lst_F0.99-multi.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, outdir, floor=floor) == out_pers
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, outdir, lstinfo, floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
-    exp_pers = os.path.join(EXP_PATH, "exp_pers-floor-multi.txt")
+    exp_pers = os.path.join(EXP_PATH, "exp_pers-floor-multi_subset.txt")
     assert os.path.isfile(out_pers)
     assert tutil.compare_order_content(out_pers, exp_pers)
     # Check presence of log files and remove them
@@ -211,9 +269,9 @@ def test_main_pers_floor_multi(capsys):
             "of all genomes in each family.") in out
     assert ("Multigenic families are allowed (several members in any genome of a family).") in out
     assert "Saving all information to a binary file for later use" in out
-    assert "Generating Persistent genome of a dataset containing 4 genomes" in out
-    assert ("The persistent genome contains 8 families with members present in "
-            "at least 3 different genomes (99.0% of the total number of genomes).") in out
+    assert "Generating Persistent genome of a dataset containing 2 genomes" in out
+    assert ("The persistent genome contains 9 families with members present in "
+            "at least 1 different genomes (99.0% of the total number of genomes).") in out
 
 
 def test_main_from_parse(capsys):
@@ -230,6 +288,7 @@ def test_main_from_parse(capsys):
     args.tol = tol
     args.multi = multi
     args.mixed = mixed
+    args.lstinfo_file = ""
     args.floor = floor
     args.outputdir = GENEPATH
     args.verbose = 0
@@ -251,7 +310,6 @@ def test_main_from_parse(capsys):
     assert os.path.isfile(logfile + ".err")
     # Check log messages
     out, err = capsys.readouterr()
-    print(out)
     assert "Will generate a CoreGenome." in out
     assert "Saving all information to a binary file for later use" in out
     assert "Generating Persistent genome of a dataset containing 4 genomes" in out

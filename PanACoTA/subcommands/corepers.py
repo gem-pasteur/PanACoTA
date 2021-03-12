@@ -65,10 +65,10 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.pangenome, args.tol, args.multi, args.mixed, args.outputdir,
-         floor=args.floor, verbose=args.verbose, quiet=args.quiet)
+         args.lstinfo_file, args.floor, args.verbose, args.quiet)
 
 
-def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, quiet=False):
+def main(cmd, pangenome, tol, multi, mixed, outputdir, lstinfo_file, floor, verbose, quiet):
     """
     Read pangenome and deduce Persistent genome according to the user criteria
 
@@ -84,6 +84,8 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, q
         True if mixed families are allowed, False otherwise
     outputdir : str or None
         Specific directory for the generated persistent genome. If not given, pangenome directory is used.
+    lstinfo_file : str
+        list of genomes to include in the core/persistent genome
     floor : bool
         Require at least floor(nb_genomes*tol) genomes if True, ceil(nb_genomes*tol) if False
     verbose : int
@@ -139,6 +141,9 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, floor=False, verbose=0, q
 
     # Read pangenome
     fams_by_strain, families, all_strains = utilsp.read_pangenome(pangenome, logger)
+    # If list of genomes given, get subset of previous dicts, including only the genomes aksed
+    if lstinfo_file:
+        fams_by_strain, families, all_strains = pers.get_subset_genomes(fams_by_strain, families, lstinfo_file)
     # Generate persistent genome
     fams = pers.get_pers(fams_by_strain, families, len(all_strains), tol, multi, mixed, floor)
     # Write persistent genome to file
@@ -236,6 +241,12 @@ def build_parser(parser):
                                "than 1, you can add this option to use floor('tol'*N) "
                                "as a minimum number of genomes instead of ceil('tol'*N) "
                                "which is the default behavior.")
+    optional.add_argument("-l", dest="lstinfo_file",
+                          help=("By default, the core/persistent genome will include all genomes "
+                                "found in the given pangenome file. If you want to do a core/persistent "
+                                "genome on a subset of those genomes, give a file with this "
+                                "list of genomes. This file must have 1 line per genome, only the first column "
+                                "(genome name without extension) will be used."))
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
