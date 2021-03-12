@@ -791,6 +791,8 @@ You can see all required arguments and available options with::
 
 As core and persistent genomes are inferred from the pangenome, the only file required to generate a core or persistent genome is the pangenome of your dataset, in the format described in :ref:`pangenome part<panfile>`.
 
+However, if you want to generate a core or persistent genome of a subset of the genomes used in the pangenome, you can give the list of those genomes in a file with `-l lstinfo` option.
+
 Input file format
 -----------------
 

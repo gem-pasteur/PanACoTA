@@ -25,6 +25,7 @@ def test_parser_noarg(capsys):
     assert " -p PANGENOME -o OUTPUTDIR [-t TOL] [-M] [-X] [-F]" in err
     assert "[-v] [-q]" in err
     assert "[-h]" in err
+    assert "[-l LSTINFO_FILE]" in err
     assert "the following arguments are required: -p, -o" in err
 
 

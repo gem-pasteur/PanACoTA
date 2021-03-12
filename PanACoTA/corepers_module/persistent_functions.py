@@ -43,8 +43,69 @@ import logging
 import math
 
 from PanACoTA import utils
+from PanACoTA import utils_pangenome as utilsp
 
 logger = logging.getLogger("corepers.pers")
+
+
+def get_subset_genomes(fam_by_strain, fam_all_members, list_file):
+    """
+    If the user gives a list of genomes, which is a subset of all genomes in the pangenome, 
+    just keep them in fam_by_strain and fam_all_members dicts. This will give the pangenome of those genomes.
+    They will then be handled by the get_pers function to get corresponding core/persistent genome
+
+    Parameters
+    ----------
+    fam_by_strain : dict
+        {fam_num: {genome1: [members], genome2: [members]}, fam_num2: {genome1: [members]}}
+    fam_all_members : dict
+        {fam_num: [all members]}
+    list_file : str
+        name of file containing all genome names
+
+    Return
+    ------
+    tuple
+
+        sub_fbs = {fam_num: {genome: [members]}} -> with only genomes in list_genomes
+        sub_fam = {fam_num: [members]} -> with only members from genomes in list_genomes
+    """
+    logger.info(f"Getting subset of pangenome for genomes in {list_file}.")
+    list_genomes = utilsp.read_lstinfo(list_file, logger)
+    sub_fbs = {}
+    sub_fam = {}
+    for fam_num, family in fam_by_strain.items():
+        kept = {genome:members for genome, members in family.items() if genome in list_genomes}
+        if kept != {}:
+            sub_fbs[fam_num] = kept
+            sub_fam[fam_num] = [member for member in fam_all_members[fam_num] if is_in_subset(member, list_genomes)]
+    return sub_fbs, sub_fam, list_genomes
+
+
+def is_in_subset(member, list_genomes):
+    """
+    From a list of members, keep only those in the given list of genomes
+
+    Parameters
+    ----------
+    members : str
+        protein name
+    list_genomes : str
+        filename containing list of genomes
+
+    Return
+    ------
+    bool
+        True if member is in list_genomes, False otherwise
+    """
+    # if format is gembase (ex: ESCO.1512.00001.i0002_12124), genome name is 3 first . separated fields
+    if "." in member and len(member.split(".")) >= 3:
+        genome = ".".join(member.split(".")[:3])
+        return genome in list_genomes
+    else:   
+        # if format is not like this, it must be something_00001 (genomeName_proteinNumber):
+        return member.split("_")[0] in list_genomes
+
 
 
 def get_pers(fam_by_strain, fam_all_members, nb_strains, tol=1, multi=False, mixed=False,

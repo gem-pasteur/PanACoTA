@@ -40,6 +40,7 @@ Functions to build a bank of all proteins to include in the pangenome
 April 2017
 """
 from PanACoTA import utils
+from PanACoTA import utils_pangenome as utilsp
 import logging
 import os
 
@@ -82,14 +83,7 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
                         "It will be used by mmseqs."))
         return outfile
     logger.info(f"Building bank with all proteins to {outfile}")
-    genomes = []
-    with open(lstinfo) as lstf:
-        for line in lstf:
-            # skip header
-            if "_name" in line:
-                continue
-            genome = line.strip().split()[0].strip()
-            genomes.append(genome)
+    genomes = utilsp.read_lstinfo(lstinfo, logger)
     all_names = [os.path.join(dbpath, gen + ".prt") for gen in genomes]
     if quiet:
         utils.cat(all_names, outfile)
