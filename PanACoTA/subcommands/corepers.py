@@ -85,7 +85,7 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, lstinfo_file, floor, verb
     outputdir : str or None
         Specific directory for the generated persistent genome. If not given, pangenome directory is used.
     lstinfo_file : str
-        list of genomes to include in the core/persistent genome
+        list of genomes to include in the core/persistent genome. If not given, include all genomes of pan
     floor : bool
         Require at least floor(nb_genomes*tol) genomes if True, ceil(nb_genomes*tol) if False
     verbose : int
@@ -106,8 +106,12 @@ def main(cmd, pangenome, tol, multi, mixed, outputdir, lstinfo_file, floor, verb
 
     # get pangenome name info
     _, base_pan = os.path.split(pangenome)
+    if lstinfo_file:
+        _, base_lst = os.path.split(lstinfo_file)
+    else:
+        base_lst = "all"
     # Define output filename
-    output_name = "PersGenome_" + base_pan + "_"
+    output_name = f"PersGenome_{base_pan}-{base_lst}_"
     if floor:
         output_name += "F"
     output_name += str(tol)
