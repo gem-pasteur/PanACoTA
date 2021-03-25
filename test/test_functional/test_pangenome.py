@@ -63,7 +63,7 @@ def test_main_from_parse():
     args.argv = ["pangenome", "pan.py", "test_main_from_parse"]
     # Run main_from_parse
     pan.main_from_parse(args)
-    # Check rprt bank was created, and in expected location
+    # Check prt bank was created, and in expected location
     prtbank = os.path.join(args.dbpath, name + ".All.prt")
     assert os.path.isfile(prtbank)
 
@@ -71,7 +71,7 @@ def test_main_from_parse():
     tmp_base = os.path.join(GENEPATH, "tmp_testFromParsePAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # check presence of mmseq cluster files
-    cluster = os.path.join(GENEPATH, name + ".All.prt-clust-0.8-mode1*")
+    cluster = os.path.join(tmp_base, name + ".All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of pangenome files (pangenome, matrices, summary)
@@ -178,18 +178,24 @@ def test_main_prt_exist(caplog):
     shutil.copyfile(src_prt_bank, dest_prt_bank)
 
     out_panfile = os.path.join(outdir, "PanGenome-test2PAN4.All.prt-clust-0.8-mode1.lst")
-    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
-                    threads, verbose=15) == out_panfile
 
+    # assert 
+    a = pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+                    threads, verbose=15) #== out_panfile
+    assert a == out_panfile
+
+    # Check presence of tmp folder
+    tmp_base = os.path.join(outdir, "tmp_test2PAN4.All.prt_0.8-mode1")
+    assert os.path.isdir(tmp_base)
     # Check presence of mmseq DB files
-    msdb = os.path.join(GENEPATH, "test2PAN4.All.prt-msDB")
+    msdb = os.path.join(tmp_base, "test2PAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
     assert os.path.isfile(msdb + ".lookup")
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test2PAN4.All.prt-clust-0.8-mode1*")
+    cluster = os.path.join(tmp_base, "test2PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of pangenome files (pangenome, matrices, summary)
@@ -201,9 +207,6 @@ def test_main_prt_exist(caplog):
             if f.endswith(c):
                 found.append(c)
     assert set(found) == set(to_check)
-    # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test2PAN4.All.prt_0.8-mode1")
-    assert os.path.isdir(tmp_base)
     # Check content of pangenome
     exp_pan = os.path.join(EXP_FILES, "exp_pangenome-4genomes.lst")
     with open(exp_pan, "r") as ep, open(out_panfile, "r") as panf:
@@ -252,18 +255,18 @@ def test_main_spedir(caplog):
     prtbank = os.path.join(spe_dir, "test3PAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    msdb = os.path.join(outdir, "test3PAN4.All.prt-msDB")
+    tmp_base = os.path.join(outdir, "tmp_test3PAN4.All.prt_0.8-mode1")
+    msdb = os.path.join(tmp_base, "test3PAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
     assert os.path.isfile(msdb + ".lookup")
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test3PAN4.All.prt-clust-0.8-mode1*")
+    cluster = os.path.join(tmp_base, "test3PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test3PAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-test3PAN4*"))
@@ -320,18 +323,18 @@ def test_main_outfile(caplog):
     prtbank = os.path.join(used_dbpath, "test4PAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    msdb = os.path.join(outdir, "test4PAN4.All.prt-msDB")
+    tmp_base = os.path.join(outdir, "tmp_test4PAN4.All.prt_0.8-mode1")
+    msdb = os.path.join(tmp_base, "test4PAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
     assert os.path.isfile(msdb + ".lookup")
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "test4PAN4.All.prt-clust-0.8-mode1*")
+    cluster = os.path.join(tmp_base, "test4PAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test4PAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     outf = os.path.join(outdir, outfile)
@@ -384,18 +387,18 @@ def test_pangenome_all():
     prtbank = os.path.join(used_dbpath, "testAllPAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    msdb = os.path.join(outdir, "testAllPAN4.All.prt-msDB")
+    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1")
+    msdb = os.path.join(tmp_base, "testAllPAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
     assert os.path.isfile(msdb + ".lookup")
     assert os.path.isfile(msdb + "_h")
     assert os.path.isfile(msdb + "_h.index")
     # Check presence of mmseq cluster files
-    cluster = os.path.join(outdir, "testAllPAN4.All.prt-clust-0.8-mode1*")
+    cluster = os.path.join(tmp_base, "testAllPAN4.All.prt-clust-0.8-mode1*")
     clust_files = glob.glob(cluster)
     assert len(clust_files) == 4
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testAllPAN4*"))

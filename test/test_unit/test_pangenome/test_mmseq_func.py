@@ -144,12 +144,13 @@ def test_create_mmseqdb(caplog):
     outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
-    assert "Creating database" in caplog.text
+    assert ("MMseqs command: mmseqs createdb test/data/pangenome/exp_files/exp_EXEM.All.prt "
+            "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb.msdb") in caplog.text
     assert "Existing files: 0" in caplog.text
     assert "Expected extensions: 7" in caplog.text
-    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[0].levelname == "DEBUG"
     assert caplog.records[1].levelname == "DEBUG"
-    assert caplog.records[2].levelname == "DEBUG"
+    assert caplog.records[2].levelname == "DETAIL"
     assert os.path.isfile(logfile)
 
 
@@ -221,12 +222,15 @@ def test_create_mmseqdb_not_all_exist(caplog):
                 "test_create_mmseqsdb_not-all-exists.msdb_h.dbtype'.") in found_text
     for num in range(1, 6):
         assert caplog.records[num].levelname == "DETAIL"
-    assert ("Creating database") in found_text
-    assert caplog.records[6].levelname == "INFO"
     assert ("Existing files: 0") in found_text
-    assert caplog.records[7].levelname == "DEBUG"
+    assert caplog.records[6].levelname == "DEBUG"
     assert ("Expected extensions: 7") in found_text
-    assert caplog.records[8].levelname == "DEBUG"
+    assert caplog.records[7].levelname == "DEBUG"
+    assert ("MMseqs command: mmseqs createdb "
+            "test/data/pangenome/exp_files/exp_EXEM.All.prt "
+            "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb_not-all-exists.msdb") in caplog.text
+    assert caplog.records[8].levelname == "DETAIL"
+
 
 
 def test_do_mmseqdb_existok(caplog):
@@ -497,6 +501,7 @@ def test_do_pangenome(caplog):
     quiet = False
     just_done = False
     assert not os.path.isdir(outdir)
+    os.makedirs(tmp_dir)
     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmp_dir, logmmseq, min_id,
                                         clust_mode, just_done, threads, panfile, quiet=quiet)
     # Check creation of output directory
@@ -549,7 +554,7 @@ def test_do_pangenome_quiet(caplog):
     threads = 1
     quiet = True
     just_done = True
-    assert not os.path.isdir(outdir)
+    os.makedirs(tmp_dir)
     fams, outfile = mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmp_dir, logmmseq, min_id,
                                         clust_mode, just_done, threads, panfile, quiet=quiet)
     # Check creation of output directory
@@ -600,7 +605,7 @@ def test_do_pangenome_justdone_panexists(caplog):
     quiet = False
     just_done = True
     # Create clustering and panfile results in outdir
-    os.makedirs(outdir)
+    os.makedirs(tmp_dir)
     open(mmseqclust, "w").close()
     open(panfile, "w").close()
     # Run do pangenome
@@ -655,7 +660,7 @@ def test_do_pangenome_mmseqsclustexists_wrong(caplog):
     just_done = False
     quiet = False
     # Create clustering results in outdir
-    os.makedirs(outdir)
+    os.makedirs(tmp_dir)
     open(mmseqclust, "w").close()
     with pytest.raises(SystemExit):
         mmseqs.do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmp_dir, logmmseq, min_id,
@@ -702,7 +707,7 @@ def test_do_pangenome_mmseqsclustexists_ok(caplog):
     quiet = False
     min_id = 0.8
     # Create clustering results in outdir
-    os.makedirs(outdir)
+    os.makedirs(tmp_dir)
     orig_clust = os.path.join(PATH_TEST_FILES, "mmseq_clust-out")
     shutil.copyfile(orig_clust, mmseqclust)
     assert os.path.isfile(mmseqclust)

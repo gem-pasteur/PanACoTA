@@ -89,7 +89,6 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     # Get general information and file/directory names
     prt_bank = os.path.basename(prt_path)
     # start = time.strftime('%Y-%m-%d_%H-%M-%S')
-    mmseqdb = os.path.join(outdir, prt_bank + "-msDB")
     information = ("Will run MMseqs2 with:\n"
                    f"\t- minimum sequence identity = {min_id*100}%\n"
                    f"\t- cluster mode {clust_mode}")
@@ -99,12 +98,12 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
     infoname = get_info(threads, min_id, clust_mode)
     logmmseq = get_logmmseq(outdir, prt_bank, infoname)
 
-    mmseqclust = os.path.join(outdir, prt_bank + "-clust-" + infoname)
-    mmseqstsv = mmseqclust + ".tsv"
     tmpdir = os.path.join(outdir, "tmp_" + prt_bank + "_" + infoname)
+    mmseqdb = os.path.join(tmpdir, prt_bank + "-msDB")
+    mmseqclust = os.path.join(tmpdir, prt_bank + "-clust-" + infoname)
+    mmseqstsv = mmseqclust + ".tsv"
     # Get pangenome filename
     if not panfile:
-        outpath = os.path.dirname(mmseqstsv)
         base = os.path.basename(mmseqstsv)
         panfile = os.path.join(outdir, f"PanGenome-{prt_bank}-clust-{infoname}.lst")
     else:
@@ -114,8 +113,8 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
         logger.warning(f"Pangenome file {panfile} already exists. PanACoTA will read it to get families.")
         _, families, _ = utils_pan.read_pan_file(panfile, logger)
     else:
+        os.makedirs(tmpdir, exist_ok=True)
         # Create ffindex of DB if not already done
-
         status = do_mmseqs_db(mmseqdb, prt_path, logmmseq, quiet)
         # status = create_mmseqs_db(mmseqdb, prt_path, logmmseq)
         # Status = ok means that mmseqs_db files already existed and were not re-done
@@ -197,6 +196,7 @@ def do_mmseqs_db(mmseqdb, prt_path, logmmseq, quiet):
     bool
         True if mmseqs db just created, False if already existed
     """
+    logger.info("Creating database")
     try:
         stop_bar = False
         if quiet:
@@ -234,6 +234,12 @@ def do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmpdir, logmmseq, min_id
         name of the file containing all proteins to cluster, without path
     mmseqdb : str
         path to base filename of output of mmseqs createdb
+    mmseqclust : str
+        mmseqs clust
+    tmp_dir : str
+        path to tmp directory
+    logmmseq : str
+        path to file for mmseqs logs
     min_id : float
         min percentage of identity to be considered in the same family (between 0 and 1)
     clust_mode : [0, 1, 2]
@@ -266,7 +272,6 @@ def do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmpdir, logmmseq, min_id
         utils.remove(mmseqclust)
         utils.remove(mmseqstsv)
         utils.remove(panfile)
-    os.makedirs(tmpdir, exist_ok=True)
     bar = None
     logger.debug(mmseqclust)
     if os.path.isfile(mmseqclust):
@@ -489,7 +494,6 @@ def create_mmseqs_db(mmseqdb, prt_path, logmmseq):
             logger.warning(f"mmseqs database {mmseqdb} already exists. The program will "
                            "use it.")
             return False
-    logger.info("Creating database")
     logger.debug("Existing files: {}".format(len(files_existing)))
     logger.debug("Expected extensions: {}".format(len(outext)))
     cmd = f"mmseqs createdb {prt_path} {mmseqdb}"
