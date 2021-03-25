@@ -56,7 +56,7 @@ def test_main_default(capsys):
     verbose = 0
     quiet = False
     lstinfo = ""
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_1.lst")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-all_1.lst")
     assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor,verbose,quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
@@ -92,15 +92,15 @@ def test_main_core_subset(capsys):
     with open(lstinfo, "w") as lst:
         lst.write("GEN4.1111.00001 toto we don't use other fields\n")
         lst.write("GENO.1216.00003\n")
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_1.lst")
-    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor,verbose,quiet) == out_pers
-    # Check creation of binary file for pangenome, and remove it
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-lstinfo-ok.lst_1.lst")
+    assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor, verbose, quiet) == out_pers
+    # Check creation of binary file for pangenome
     assert os.path.isfile(UPAN + ".bin")
-    # Check presence of persistent genome, and its content, and remove it
+    # Check presence of persistent genome, and its content
     exp_pers = os.path.join(EXP_PATH, "exp_coregenome_subset.txt")
     assert os.path.isfile(out_pers)
     assert tutil.compare_order_content(out_pers, exp_pers)
-    # Check presence of log files and remove them
+    # Check presence of log files
     logfile = os.path.join(GENEPATH, "PanACoTA-corepers.log")
     assert os.path.isfile(logfile)
     assert os.path.isfile(logfile + ".err")
@@ -125,7 +125,7 @@ def test_main_pers(capsys):
     verbose = 0
     quiet = False
     cmd = "cmd"
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_0.99.lst")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-test_lstinfo.txt_0.99.lst")
     assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo, floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
@@ -166,7 +166,7 @@ def test_main_pers_floor_verbose2(capsys):
     quiet = False
     cmd = "cmd"
     floor = True
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_F0.99.lst")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-all_F0.99.lst")
     assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo,
                          floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
@@ -206,7 +206,7 @@ def test_main_pers_floor_mixed_debug(capsys):
     quiet = False
     lstinfo = ""
     cmd = "cmd"
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_F0.99-mixed.lst")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-all_F0.99-mixed.lst")
     assert corepers.main(cmd, UPAN, tol, multi, mixed, GENEPATH, lstinfo,
                          floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
@@ -251,7 +251,7 @@ def test_main_pers_floor_multi(capsys):
     quiet = False
     cmd = "cmd"
     outdir = os.path.join(GENEPATH, "outdir")
-    out_pers = os.path.join(outdir, "PersGenome_pangenome.lst_F0.99-multi.lst")
+    out_pers = os.path.join(outdir, "PersGenome_pangenome.lst-lstinfo-ok.lst_F0.99-multi.lst")
     assert corepers.main(cmd, UPAN, tol, multi, mixed, outdir, lstinfo, floor, verbose, quiet) == out_pers
     # Check creation of binary file for pangenome, and remove it
     assert os.path.isfile(UPAN + ".bin")
@@ -298,7 +298,7 @@ def test_main_from_parse(capsys):
     corepers.main_from_parse(args)
 
     # Check creation of binary file for pangenome, and remove it
-    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst_1.lst")
+    out_pers = os.path.join(GENEPATH, "PersGenome_pangenome.lst-all_1.lst")
     assert os.path.isfile(UPAN + ".bin")
     # Check presence of persistent genome, and its content, and remove it
     exp_pers = os.path.join(EXP_PATH, "exp_coregenome.txt")
