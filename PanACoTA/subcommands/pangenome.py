@@ -135,7 +135,6 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
     logger.info("Command used\n \t > " + cmd)
 
     # Build bank with all proteins to include in the pangenome
-    logger.info("build prt bank")
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
     # Do pangenome
     families, panfile = mmf.run_all_pangenome(min_id, clust_mode, outdir,
