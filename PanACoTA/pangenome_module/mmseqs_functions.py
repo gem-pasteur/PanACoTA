@@ -115,7 +115,9 @@ def run_all_pangenome(min_id, clust_mode, outdir, prt_path, threads, panfile=Non
         _, families, _ = utils_pan.read_pan_file(panfile, logger)
     else:
         # Create ffindex of DB if not already done
-        status = create_mmseqs_db(mmseqdb, prt_path, logmmseq)
+
+        status = do_mmseqs_db(mmseqdb, prt_path, logmmseq, quiet)
+        # status = create_mmseqs_db(mmseqdb, prt_path, logmmseq)
         # Status = ok means that mmseqs_db files already existed and were not re-done
         # If they were redone (or just done), remove any existing following file (mmseqs clust, tsv, csv)
         # Cluster with mmseqs
@@ -169,6 +171,54 @@ def get_logmmseq(outdir, prt_bank, infoname):
         path to mmseq logfile
     """
     return os.path.join(outdir, "mmseq_" + prt_bank + "_" + infoname + ".log")
+
+
+def do_mmseqs_db(mmseqdb, prt_path, logmmseq, quiet):
+    """
+    Runs create_mmseqs_db with an "infinite progress bar" in the background.
+    
+    create_mmseqs_db does :
+    Create ffindex of protein bank (prt_path) if not already done. If done, just write a message
+    to tell the user that the current existing file will be used.
+
+    Parameters
+    ----------
+    mmseqdb : str
+         path to base filename for output of mmseqs createdb
+    prt_path : str
+        path to the file containing all proteins to cluster
+    logmmseq : str
+         path to file where logs must be written
+    quiet : bool
+        True if no output in stderr/stdout, False otherwise
+
+    Returns
+    -------
+    bool
+        True if mmseqs db just created, False if already existed
+    """
+    try:
+        stop_bar = False
+        if quiet:
+            widgets = []
+        # If not quiet, start a progress bar while clustering proteins. We cannot guess
+        # how many time it will take, so we start an "infinite" bar, and send it a signal
+        # when it has to stop. If quiet, we start a thread that will immediatly stop
+        else:
+            widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
+                       "  -  ", progressbar.Timer()]
+        x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda : stop_bar,))
+        x.start()
+        res = create_mmseqs_db(mmseqdb, prt_path, logmmseq)
+    # except KeyboardInterrupt: # pragma: no cover
+    except: # pragma: no cover
+        stop_bar = True
+        x.join()
+        sys.exit(1)
+    # Clustering done, stop bar and join (if quiet, it was already finished, so we just join it)
+    stop_bar = True
+    x.join()
+    return res
 
 
 def do_pangenome(outdir, prt_bank, mmseqdb, mmseqclust, tmpdir, logmmseq, min_id, clust_mode, 

@@ -229,6 +229,55 @@ def test_create_mmseqdb_not_all_exist(caplog):
     assert caplog.records[8].levelname == "DEBUG"
 
 
+def test_do_mmseqdb_existok(caplog):
+    """
+    Check that, when trying to run create_mmseqs_db while all output files already exist,
+    it logs a warning message and quits without creating it
+    """
+    filename = os.path.join(GENEPATH, "test_create_mmseqsdb_exist.msdb")
+    outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
+    quiet = False
+    for file in [filename + ext for ext in outext]:
+        open(file, "w").close()
+    prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
+    logfile = os.path.join(GENEPATH, "test_create_mmseqsdb_exist.log")
+    mmseqs.do_mmseqs_db(filename, prt_path, logfile, quiet)
+
+    # Check files created/existing
+    for file in [filename + ext for ext in outext]:
+        assert os.path.isfile(file)
+    assert ("mmseqs database "
+            "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb_exist.msdb "
+            "already exists. The program will use it.") in caplog.text
+    assert caplog.records[0].levelname == "WARNING"
+
+
+def test_do_mmseqdb_quiet(caplog):
+    """
+    Test that when running do_mmseqs_db, which calls create_mmseqs_db, mmseq DB is created. 
+    We do not check its content as it could change
+    according to mmseq versions, and we are here testing PanACoTA, not mmseqs
+    Just check that all expected outfiles are present.
+    """
+    caplog.set_level(logging.DEBUG)
+    filename = os.path.join(GENEPATH, "test_create_mmseqsdb.msdb")
+    prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
+    logfile = os.path.join(GENEPATH, "test_create_mmseqsdb.log")
+    quiet = True
+    mmseqs.do_mmseqs_db(filename, prt_path, logfile, quiet)
+
+    outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
+    for file in [filename + ext for ext in outext]:
+        assert os.path.isfile(file)
+    assert "Creating database" in caplog.text
+    assert "Existing files: 0" in caplog.text
+    assert "Expected extensions: 7" in caplog.text
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[1].levelname == "DEBUG"
+    assert caplog.records[2].levelname == "DEBUG"
+    assert os.path.isfile(logfile)
+
+
 def test_cluster2file():
     """
     Check that given clusters are written as expected to output file
