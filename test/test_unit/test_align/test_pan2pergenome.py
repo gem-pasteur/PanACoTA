@@ -100,27 +100,29 @@ def test_get_per_genome(caplog):
     assert set(fams) == set(exp_fams)
 
 
-def test_prot_per_strain():
+def test_prot_per_strain_gembase():
     """
-    Test parser of persistent genome file
+    Test parser of persistent genome file when genome names are in gembase format 
+    -> genome files = ESCO.0421.00001.prt and prot names = ESCO.0421.00001.0001i_00001
     """
     pers = os.path.join("test", "data", "persgenome", "exp_files", "exp_pers-floor-mixed.txt")
-    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers)
-    exp_several = {'1': ["GENO.1216.00002"],
-                   '3': [],
-                   '5': [],
-                   '8': [],
-                   '10': [],
-                   '11': [],
-                   '12': ["GENO.1216.00003"]}
+    all_genomes = ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]
+    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers, all_genomes)
+    exp_several = {'1': {"GENO.1216.00002"},
+                   '3': set(),
+                   '5': set(),
+                   '8': set(),
+                   '10': set(),
+                   '11': set(),
+                   '12': {"GENO.1216.00003"}}
     assert several == exp_several
-    exp_fams = {'1': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"],
-                '3': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"],
-                '5': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"],
-                '8': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"],
-                '10': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"],
-                '11': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"],
-                '12': ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]}
+    exp_fams = {'1': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"},
+                '3': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"},
+                '5': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"},
+                '8': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"},
+                '10': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"},
+                '11': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"},
+                '12': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"}}
     assert fams_genomes == exp_fams
     exp_prots = {"GEN4.1111.00001": {"GEN4.1111.00001.b0001_00001": '1',
                                      "GEN4.1111.00001.b0001_00009": '3',
@@ -157,23 +159,151 @@ def test_prot_per_strain():
     assert all_prots == exp_prots
 
 
+def test_prot_per_strain_completeg():
+    """
+    Test parser of persistent genome file when genome names are in gembase complete genomes format 
+    -> genome files = ESCO.0421.00001.C001.prt and prot names = ESCO.0421.00001.C001_00001
+    """
+    pers = os.path.join(TESTPATH, "pers_genome_complete-gembase.txt")
+    all_genomes = ["GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002", "GENO.1216.00003.C001"]
+    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers, all_genomes)
+    exp_several = {'1': {"GENO.1216.00002.C002"},
+                   '3': set(),
+                   '5': set(),
+                   '8': set(),
+                   '10': set(),
+                   '11': set(),
+                   '12': {"GENO.1216.00003.C001"}}
+    assert several == exp_several
+    exp_fams = {'1': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002", "GENO.1216.00003.C001"},
+                '3': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002", "GENO.1216.00003.C001"},
+                '5': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002", "GENO.1216.00003.C001"},
+                '8': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002"},
+                '10': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002"},
+                '11': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002"},
+                '12': {"GEN4.1111.00001.C001", "GEN4.1111.00001.P001", "GENO.1216.00002.C002", "GENO.1216.00003.C001"}}
+    assert fams_genomes == exp_fams
+    exp_prots = {"GEN4.1111.00001.C001": {"GEN4.1111.00001.C001_00001": '1',
+                                         "GEN4.1111.00001.C001_00009": '3',
+                                         "GEN4.1111.00001.C001_00002": '5',
+                                         "GEN4.1111.00001.C001_00007": '8',
+                                         "GEN4.1111.00001.C001_00004": '10',
+                                         "GEN4.1111.00001.C001_00005": '11',
+                                         "GEN4.1111.00001.C001_00008": '12'
+                                         },
+                 "GEN4.1111.00001.P001": {"GEN4.1111.00001.P001_00002": '1',
+                                         "GEN4.1111.00001.P001_00011": '3',
+                                         "GEN4.1111.00001.P001_00003": '5',
+                                         "GEN4.1111.00001.P001_00009": '8',
+                                         "GEN4.1111.00001.P001_00004": '10',
+                                         "GEN4.1111.00001.P001_00005": '11',
+                                         "GEN4.1111.00001.P001_00010": '12'
+                                         },
+                 "GENO.1216.00002.C002": {"GENO.1216.00002.C002_00001": '1',
+                                         "GENO.1216.00002.C002_00002": '1',
+                                         "GENO.1216.00002.C002_00010": '3',
+                                         "GENO.1216.00002.C002_00003": '5',
+                                         "GENO.1216.00002.C002_00008": '8',
+                                         "GENO.1216.00002.C002_00005": '10',
+                                         "GENO.1216.00002.C002_00006": '11',
+                                         "GENO.1216.00002.C002_00009": '12'
+                                         },
+                 "GENO.1216.00003.C001": {"GENO.1216.00003.C001_00003": '1',
+                                         "GENO.1216.00003.C001_01010": '3',
+                                         "GENO.1216.00003.C001_00010": '5',
+                                         "GENO.1216.00003.C001_00004": '12',
+                                         "GENO.1216.00003.C001_01000": '12'
+                                         }
+                 }
+    assert all_prots == exp_prots
+
+
+def test_prot_per_strain_noformat():
+    """
+    Test parser of persistent genome file when genome names are anything
+    -> genome files = my.genome-name.prt and prot names = my.genome-name_00001
+    """
+    pers = os.path.join(TESTPATH, "pers_genome_noformat.txt")
+    all_genomes = ["my.genome-name", "my-genome", "genome1", "genome3"]
+    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers, all_genomes)
+    exp_several = {'1': {"genome1"},
+                   '5': set(),
+                   '12':set(),
+                   '32': set()}
+    assert several == exp_several
+    exp_fams = {'1': {"my.genome-name", "my-genome", "genome1", "genome3"},
+                '5': {"my.genome-name", "my-genome", "genome3"},
+                '12': {"my.genome-name", "my-genome", "genome1"},
+                '32': {"my.genome-name", "my-genome", "genome1", "genome3"}}
+    assert fams_genomes == exp_fams
+    exp_prots = {"my.genome-name": {"my.genome-name_1": '1',
+                                     "my.genome-name_2": '5',
+                                     "my.genome-name_3": '12',
+                                     "my.genome-name_4": '32'
+                                     },
+                 "my-genome": {"my-genome_1": '1',
+                              "my-genome_2": '5',
+                              "my-genome_3": '12',
+                              "my-genome_50": '32'
+                              },
+                 "genome1": {"genome1_1": '1', "genome1_10": "1",
+                             "genome1_3": '12',
+                             "genome1_4": '32',
+                             },
+                 "genome3": {"genome3_1": '1',
+                             "genome3_3": '5',
+                             "genome3_4": '32',
+                            }
+                 }
+    assert all_prots == exp_prots
+
+
 def test_prot_per_strain_member_bis(caplog):
     """
     Test parser of persistent genome file when a same member is in 2 different families
     """
     caplog.set_level(logging.DEBUG)
     pers = os.path.join(TESTPATH, "pers_genome_member-bis.txt")
-    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers)
+    all_genomes = ["t", "j"]
+    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers, all_genomes)
     assert "problem: ESCO2_2 already exists, in family 5. Conflict with family 32" in caplog.text
-    exp_several = {'1': [], '5': [], '12': [], '32': []}
+    exp_several = {'1': set(), '5': set(), '12': set(), '32': set()}
     assert several == exp_several
-    exp_fams = {'1': ["ESCO_1", "ESCO2", "ESCO3", "ESCO4"], '5': ["ESCO_1", "ESCO2", "ESCO4"],
-                '12': ["ESCO_1", "ESCO2", "ESCO3"], '32': ["ESCO_1", "ESCO2", "ESCO3", "ESCO4"]}
+    exp_fams = {'1': {"ESCO_1", "ESCO2", "ESCO3", "ESCO4"}, '5': {"ESCO_1", "ESCO2", "ESCO4"},
+                '12': {"ESCO_1", "ESCO2", "ESCO3"}, '32': {"ESCO_1", "ESCO2", "ESCO3", "ESCO4"}}
     assert fams_genomes == exp_fams
     exp_prots = {"ESCO_1": {"ESCO_1_1": '1', "ESCO_1_2": '5', "ESCO_1_3": '12', "ESCO_1_4": '32'},
                  "ESCO2": {"ESCO2_1": '1', "ESCO2_2": '32', "ESCO2_3": '12'},
                  "ESCO3": {"ESCO3_1": '1', "ESCO3_3": '12', "ESCO3_4": '32'},
                  "ESCO4": {"ESCO4_1": '1', "ESCO4_3": '5', "ESCO4_4": '32'}}
+    assert all_prots == exp_prots
+
+
+def test_prot_per_strain_gembase_member_bis(caplog):
+    """
+    Test parser of persistent genome file when a same member is in 2 different families, with gembase format
+    """
+    caplog.set_level(logging.DEBUG)
+    pers = os.path.join(TESTPATH, "pers_genome_gembase_member-bis.txt")
+    all_genomes = ["GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"]
+    all_prots, fams_genomes, several = p2p.proteins_per_strain(pers, all_genomes)
+    assert "problem: GEN4.1111.00001.0001i_00005 already exists, in family 12. Conflict with family 32" in caplog.text
+    exp_several = {'1': {"GENO.1216.00002"}, '5': set(), '12': set(), '32': {"GENO.1216.00003"}}
+    assert several == exp_several
+    exp_fams = {'1': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"}, 
+                '5': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"},
+                '12': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002"},
+                '32': {"GEN4.1111.00001", "GENO.0817.00001", "GENO.1216.00002", "GENO.1216.00003"}}
+    assert fams_genomes == exp_fams
+    exp_prots = {"GEN4.1111.00001": {"GEN4.1111.00001.0001b_00001": '1', "GEN4.1111.00001.0001b_00009": '5', 
+                                     "GEN4.1111.00001.0001i_00005": '12', "GEN4.1111.00001.0001i_00005": '32'},
+                 "GENO.0817.00001": {"GENO.0817.00001.0001b_00002": '1', "GENO.0817.00001.0002b_00011": '5', 
+                                     "GENO.0817.00001.0002i_00005": '12', "GENO.0817.00001.i0002_00010": '32'},
+                 "GENO.1216.00002": {"GENO.1216.00002.0001b_00001": '1', "GENO.1216.00002.i0001_00002": "1", 
+                                     "GENO.1216.00002.0002b_00010": '5', "GENO.1216.00002.0001i_00006": '12',
+                                     "GENO.1216.00002.b0002_00009": '32'},
+                 "GENO.1216.00003": {"GENO.1216.00003.i0001_00003": '1', "GENO.1216.00003.i0001_01010": '5', 
+                                     "GENO.1216.00003.i0001_00004": '32', "GENO.1216.00003.i0001_01000": '32'}}
     assert all_prots == exp_prots
 
 

@@ -108,7 +108,7 @@ def get_per_genome(persgen, list_gen, dname, outdir):
 
     # Sort proteins by strain
     logger.info("Reading PersGenome and constructing lists of missing genomes in each family.")
-    all_prots, fam_genomes, several = proteins_per_strain(persgen)
+    all_prots, fam_genomes, several = proteins_per_strain(persgen, all_genomes)
     # Write output files
     write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
     write_missing_genomes(fam_genomes, several, all_genomes, aldir, dname)
@@ -139,7 +139,7 @@ def get_all_genomes(list_gen):
     return all_genomes
 
 
-def proteins_per_strain(persgen):
+def proteins_per_strain(persgen, all_genomes):
     """
     From the persistentGenome file, get all persistent proteins, and classify them
     according to the strain from which they are.
@@ -154,33 +154,36 @@ def proteins_per_strain(persgen):
     (all_prots, fam_genomes, several) : tuple
 
         * all_prots: dict, {strain: {member: fam_num}}
-        * fam_genomes: dict, {fam_num: [genomes having a member in fam]}
-        * several: dict, {fam_num: [genomes having several members in fam]}
+        * fam_genomes: dict, {fam_num: set(genomes having a member in fam)}
+        * several: dict, {fam_num: set(genomes having several members in fam)}
     """
     logger.info("Getting all persistent proteins and classify by strain.")
+    all_genomes = frozenset(all_genomes)
     all_prots = {}  # {strain: {member: fam_num}}
-    fam_genomes = {}  # {fam_num: [genomes having a member in fam]}
-    several = {}  # {fam_num: [genomes having several members in fam]}
+    fam_genomes = {}  # {fam_num: set(genomes having a member in fam)}
+    several = {}  # {fam_num: set(genomes having several members in fam)}
     with open(persgen, "r") as pgf:
         for line in pgf:
             fam_num = line.split()[0]
             members = line.strip().split()[1:]
-            fam_genomes[fam_num] = []
-            several[fam_num] = []
+            fam_genomes[fam_num] = set()
+            several[fam_num] = set()
             for mem in members:
                 # if format is ESCO.1512.00001.i0002_12124, strain is 3 first fields
                 # separated by '.'
                 if "." in mem and len(mem.split(".")) >= 3:
                     strain = ".".join(mem.split(".")[:3])
+                    if strain not in all_genomes:
+                        strain = "_".join(mem.split("_")[:-1])
                 # if format is not like this, it must be something_00001:
                 else:
                     strain = "_".join(mem.split("_")[:-1])
                 # if strain not already in fam_genomes, add it
                 if strain not in fam_genomes[fam_num]:
-                    fam_genomes[fam_num].append(strain)
+                    fam_genomes[fam_num].add(strain)
                 # If strain already in fam_genomes, it has several members: add it to several
                 elif strain not in several[fam_num]:
-                    several[fam_num].append(strain)
+                    several[fam_num].add(strain)
                 if strain not in all_prots:
                     all_prots[strain] = {}
                 if mem in all_prots[strain]:
@@ -221,9 +224,9 @@ def write_getentry_files(all_prots, several, listdir, aldir, dname, all_genomes)
             error.append(strain)
     if error:
         for gen in error:
-            logger.error(("There is not any protein for genome {} in any family! "
-                          "The program will close, please fix this problem to be able to "
-                          "run the alignments").format(gen))
+            logger.error(f"There is not any protein for genome {gen} in any family! "
+                         "The program will close, please fix this problem to be able to "
+                         "run the alignments")
         sys.exit(1)
 
 
