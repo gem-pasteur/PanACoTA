@@ -293,7 +293,7 @@ def check_args(parser, args):
     if (args.fast and ((args.soft != "iqtree" and args.soft != "iqtree2")
         or (args.boot or args.write_boot))):
         msg = ("-fast option is available only for IQtree, and not compatible "
-               "with '-B' and '-b' options (bootstraps).")
+               "with '-B' and '--boot' options (bootstraps).")
         parser.error(msg)
 
     # Check model name is valid for the chosen soft

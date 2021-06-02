@@ -589,13 +589,13 @@ def get_tree(dict_argv):
     conf_conffile.update(dict_argv, "tree")
     # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "quiet": False, "threads": 1,
-                "soft": "iqtree", "model": None, "boot": False, "write_boot": False,
+                "soft": "iqtree", "model": None, "boot": 1000, "write_boot": False,
                 "memory": None, "fast": False}
     conf_conffile.add_default(defaults, "tree")
     conf_conffile.set_boolean("tree", "quiet")
     conf_conffile.set_boolean("tree", "fast")
-    conf_conffile.set_boolean("tree", "boot")
     conf_conffile.set_boolean("tree", "write_boot")
+    conf_conffile.set_int("tree", "boot")
     conf_conffile.set_int("tree", "verbose")
     conf_conffile.set_int("tree", "threads")
     tree_dict = conf_conffile.get_section_dict("tree")
