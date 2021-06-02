@@ -191,7 +191,7 @@ def test_parser_fasttree_fast(capsys):
     with pytest.raises(SystemExit):
         tree.parse(parser, "-o outdir -a align -s fasttree -fast".split())
     _, err = capsys.readouterr()
-    assert "-fast option is available only for IQtree, and not compatible with '-B' and '-b' options (bootstraps)" in err
+    assert "-fast option is available only for IQtree, and not compatible with '-B' and '--boot' options (bootstraps)" in err
 
 
 def test_parser_fastme_memory(capsys):
@@ -217,7 +217,7 @@ def test_parser_iqtree_boot_fast(capsys):
     with pytest.raises(SystemExit):
         tree.parse(parser, "-o outdir -a align -b 1000 -fast".split())
     _, err = capsys.readouterr()
-    assert "-fast option is available only for IQtree, and not compatible with '-B' and '-b' options (bootstraps)" in err
+    assert "-fast option is available only for IQtree, and not compatible with '-B' and '--boot' options (bootstraps)" in err
 
 
 def test_parser_iqtree_writeboot_fast(capsys):
@@ -230,7 +230,7 @@ def test_parser_iqtree_writeboot_fast(capsys):
     with pytest.raises(SystemExit):
         tree.parse(parser, "-o outdir -a align -B -fast".split())
     _, err = capsys.readouterr()
-    assert "-fast option is available only for IQtree, and not compatible with '-B' and '-b' options (bootstraps)" in err
+    assert "-fast option is available only for IQtree, and not compatible with '-B' and '--boot' options (bootstraps)" in err
 
 
 def test_parser_default():

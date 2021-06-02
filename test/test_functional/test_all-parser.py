@@ -50,7 +50,7 @@ def test_parser_noconffile():
     assert options.clust_mode == 1
     assert options.min_id == 0.8
     assert options.tol == 1
-    assert not options.boot
+    assert options.boot == 0
 
 
 def test_parser_conffile():
