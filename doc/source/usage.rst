@@ -653,6 +653,8 @@ families will only be sorted by protein number (the ``<numeric_chars>`` part).
 Output file formats
 -------------------
 
+.. note:: See :ref:`below<dopan>` for the details on output filenames.
+
 .. _panfile:
 
 pangenome file
@@ -737,6 +739,7 @@ For example, here is the summary file corresponding to the pangenome example abo
     3       2          2          2         4    2       0        6                1
     4       3          3          1         5    0       1        6                3
 
+.. _dopan:
 
 Do pangenome
 ------------
@@ -754,9 +757,11 @@ with:
     - ``-i <min_id>``: minimum percentage of identity required to put 2 proteins in the same family. When doing a pangenome at the species level, we commonly use a threshold of 80% of identity.
 
 
+**Output files**
+
 This will create (if not already existing) your ``outdir``, and, after execution, this directory will contain your pangenome file,
 as well as other useful files. If you did not specify a pangenome filename (``-f`` option), the default pangenome name will be
-``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst``:
+``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>.lst``:
 
     - ``<pangenome_file or default>``: your pangenome file, which format is described :ref:`here above<panfile>`
     - ``<pangenome_file or default>.quali.txt``: :ref:`qualitative matrix<quali>`
@@ -766,10 +771,10 @@ as well as other useful files. If you did not specify a pangenome filename (``-f
 
 It will also contain other files and directories, that could help you if you need to investigate the results (see :ref:`options<optpan>` for the meaning of parameters between ``<>`` not described in the main command line):
 
-    - ``tmp_<dataset_name>.All.prt-mode<mode_num_given>_<current_date_and_time>`` folder, containing all temporary files used by MMseqs2 to cluster your proteins.
+    - ``tmp_<dataset_name>.All.prt-mode<mode_num_given>`` folder, containing all temporary files used by MMseqs2 to cluster your proteins.
     - ``PanACoTA-pangenome_<dataset_name>.log*``: the 3 log files as in the annotate subcommand (.log, .log.details, .log.err). See their description :ref:`here<logf>`
-    - ``mmseq_<dataset_name>.All.prt_<min_id>-mode<mode_num_given>_<current_date_and_time>.log``: MMseqs2 log file.
-    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst.bin`` is a binary file of the pangenome in PanACoTA format. This file is only used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
+    - ``mmseq_<dataset_name>.All.prt_<min_id>-mode<mode_num_given>.log``: MMseqs2 log file.
+    - ``Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>.lst.bin`` is a binary file of the pangenome in PanACoTA format. This file is only used by the program to do calculations faster the next time it needs this information (to generate Core or Persistent genome for example).
 
 In your ``outdir`` folder (or where you specified if you used the ``-s`` option), you should have a new file, ``<dataset_name>.All.prt``, containing all proteins of all your genomes.
 
@@ -782,7 +787,7 @@ You can also specify other options with:
 
     - ``-c <num>``: You can choose the clustering mode: 0 for 'set cover' (greedy algorithm), 1 for 'single-linkage' (or connected component algorithm), 2 for 'CD-Hit' (greedy algorithm used by CD-Hit). Default is 'single-linkage' (1). See `MMseqs2 user guide <https://github.com/soedinglab/mmseqs2/wiki#clustering-sequence-database-using-mmseqs-cluster>`_ for more information on those 3 algorithms.
     - ``-s <path/to/spedir>``: the first step of 'pangenome' subcommand will be to concatenate all proteins of all genomes included in your list_file into a single protein databank. By default, this databank is saved in ``dbdir``, the same directory as the protein files for each genome, and is called ``<dataset_name>.All.prt``. With this option, you can specify another directory to save this databank.
-    - ``-f <path/to/outfile>``: by default, your pangenome will be called ``<path/to/outdir>/Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>_<current_date_and_time>.tsv.lst``. With this option, you can give another path and name for the pangenome file.
+    - ``-f <path/to/outfile>``: by default, your pangenome will be called ``<path/to/outdir>/Pangenome-<dataset_name>.All.prt-clust-<min_id>-mode<mode_num_given>.lst``. With this option, you can give another path and name for the pangenome file.
     - ``--threads <num>``: add this option if you want to run the pangenome step on several cores. By default, it runs only on 1 core. Put 0 if you want to use all your computer cores, or specify a given number of cores to use.
 
 
@@ -797,16 +802,22 @@ As core and persistent genomes are inferred from the pangenome, the only file re
 
 However, if you want to generate a core or persistent genome of a subset of the genomes used in the pangenome, you can give the list of those genomes in a file with `-l lstinfo` option.
 
+.. _inputcorepers:
+
 Input file format
 -----------------
 
 Your pangenome file must be in the same format as :ref:`described here<panfile>`, and the protein names must follow the format described :ref:`here<protname>`.
 
+If you want to calculate the core/persistent genome of a subset of genomes, give the list of those genomes. Same format as output of :ref:`annotate LSTINFO file<lstinfof>`, but only the first column will be used.
+
 
 Output file format
 ------------------
 
-Your persistent genome file has the same format as the pangenome file. The family numbers in the first column correspond to pangenome family numbers.
+.. note:: See :ref:`below<docorepers>` for the details on output filenames.
+
+Your persistent genome file (``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst`` or specified name) has the same format as the pangenome file. The family numbers in the first column correspond to pangenome family numbers.
 
 .. _docorepers:
 
@@ -824,6 +835,10 @@ If you want to do a persistent genome, use the following options to specify what
     - ``-X``: the ``-t`` parameter defines how many genomes must have exactly 1 member in the family to consider it as persistent. By default, all genomes present in a family must have exactly 1 member. You can put this option to get a ``mixed persistent genome``, meaning that a family is considered as persistent if at least ``tol%`` of the genomes have exactly 1 member, and other genomes have either 0 either several members. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
     - ``-M``: *not compatible with -X*. You can put this option if you want to allow several member in any genome of a family. With this option, ``-t`` now defines the minimum percentage of genomes having at least 1 member in a family to consider it as persistent.
     - ``-F``: When you specify the ``-t <tol>`` option, with a number lower than 1, you can add this option to use floor('tol'*N) as a minimum number of genomes instead of ceil('tol'*N) which is the default behavior.
+    - ``-l lstinfo_file``: see above
+
+If you want to do a core or persistent genome of a subset of genomes, give the list of those genomes with ``-l lstinfo_file`` option. This file must have 1 line per genome, with the genome name without extension (like GENO.0121.00012) in the first column (others are ignored): see :ref:`input files<inputcorepers>`.
+
 
 You can also specify your core/persistent genome file path and name with ``-o <path/to/outdir``. By default, it will be saved in the same directory as your pangenome, and be called ``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst``, where:
 
@@ -832,7 +847,7 @@ You can also specify your core/persistent genome file path and name with ``-o <p
     - ``-multi`` will be added if you put the ``-M`` option
     - ``-mixed`` will be added if you put the ``-X`` option
 
-In your pangenome folder (or where you specified if you used the ``-o`` option), you will find your persistent genome file.
+In your pangenome folder (or where you specified if you used the ``-o`` option), you will find your persistent genome file (``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst`` or specified name).
 
 
 ``align`` subcommand
@@ -881,6 +896,9 @@ Those folders and files are automatically created by the 'annotate' subcommand, 
 Output files
 ------------
 
+.. note:: See :ref:`below<doalign>` for the details on output filenames.
+
+
 The main output file is the file containing your final alignment. You will find it in your ``<outdir>``, in a folder called ``Phylo-<dataset_name>``. This file is in fasta format, with 1 entry per genome given in list_file. The sequence corresponds to the concatenation of all persitent proteins of the genome, each aligned against its own family. Hereafter, we describe how this file is generated.
 
 For example, if we have 4 genomes, and 3 persistent families, like in this persistent genome file:
@@ -893,9 +911,18 @@ For example, if we have 4 genomes, and 3 persistent families, like in this persi
 
 The 4 genomes are ``ESCO.0217.00001``, ``ESCO.1216.00002``, ``ESCO.0217.00003`` and ``ESCO.0217.00004``. Family 1 is a core family: each genome is present in 1 copy. Family 2 is a persistent family, as genome ``ESCO.0217.00003`` is missing. In family 3, all genomes are present, but genome ``ESCO.0217.00004`` has 2 members.
 
-.. note:: We here give examples of step by step alignment files. These are fictive alignments, not based on any real sequence! They are just here to show the formats, and how we deal with missing genomes.
 
-Alignment of family 1 would be like:
+`List-<genomes>` folder
+^^^^^^^^^^^^^^^^^^^^^^^
+
+For each genome, the list of genes (``getEntry_gen``) and proteins (``getEntry_gen``) present in any family of the core/persistent, and in which fasta file their sequence is.
+
+`Align<genome>` folder
+^^^^^^^^^^^^^^^^^^^^^^
+
+All protein (``.prt``) and gene (``.gen``) sequences by family. 
+
+For each family, alignment of all proteins (``mafft-align.*.aln``, ``*`` being the family number of the pangenome). For example, alignment of family 1 would be like:
 
 .. code-block:: text
 
@@ -914,7 +941,7 @@ Alignment of family 1 would be like:
 
 Alignment of family 2 would be similar, but with only 3 proteins. Alignment of family 3 would also be similar, but ignoring the genome having 2 members: we only align proteins ``ESCO.0217.00001.i0001_00015``, ``ESCO.1216.00002.i0001_00006`` and ``ESCO.0217.00003.i0001_00100``.
 
-We then backtranslate protein alignments to nucleotide alignments, using the files in the ``Genes`` repository. Then, we add the missing genomes as a stretch of ``-`` with same size as other sequences, so that each family alignment contains all genome entries. For example, for family 3:
+We then backtranslate protein alignments to nucleotide alignments (``mafft-prt2nuc.*.aln``), using the files in the ``Genes`` repository. Then, we add the missing genomes as a stretch of ``-`` with same size as other sequences, so that each family alignment contains all genome entries. For example, for family 3:
 
 .. code-block:: text
 
@@ -935,7 +962,12 @@ We then backtranslate protein alignments to nucleotide alignments, using the fil
     ------------------------------------------------
     -----------
 
-Then, we concatenate all family alignment files, and group the alignments by genome, to obtain the final alignment file, which looks like:
+Then, we concatenate all family alignment files (``complete.nucl.cat.aln``)
+
+`Phylo<genome>` folder
+^^^^^^^^^^^^^^^^^^^^^^
+
+We finally group the alignments by genome, to obtain the final alignment file (``.nucl.grp.aln``), which looks like:
 
 .. code-block:: text
 
@@ -1007,9 +1039,10 @@ In your ``<resdir>`` directory, you will find:
             + ``<dataset_name>-current.<fam_num>.gen`` with all genes extracted
             + ``<dataset_name>-current.<fam_num>.prt`` with all proteins extracted
             + ``<dataset_name>-current.<fam_num>.miss.lst`` with the list of genomes not present in the family
-        + ``<dataset_name>-complete.cat.aln`` concatenation of all family alignments
+        + ``<dataset_name>-complete.nucl.cat.aln`` DNA sequence concatenation of all family alignments
+        + ``<dataset_name>-complete..cat.aln`` concatenation of all family alignments in aa (if option required by user)
 
-    - a folder ``Phylo-<dataset_name>``: contains ``<dataset_name>.grp.aln``, the alignment of all families grouped by genome, as described in :ref:`output files section<outalign>`. This is the file you will need to infer a phylogenetic tree.
+    - a folder ``Phylo-<dataset_name>``: contains ``<dataset_name>.nucl.grp.aln``, the alignment of all families grouped by genome, as described in :ref:`output files section<outalign>`. This is the file you will need to infer a phylogenetic tree.
 
 ``tree`` subcommand
 ===================
