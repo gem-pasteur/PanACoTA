@@ -205,7 +205,7 @@ If you used the same dataset and parameters as in this file, you should get a co
 
 If you want a persistent genome, specify the required :ref:`options<docorepers>` (minimum percentage of genomes in a family to be considered as persistent, allowing or not multi/mixed families...). For example, for a strict persistent genome at 95%::
 
-    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1.lst -o Examples/4-corepers -t 0.95
+    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1.lst -o Examples/4-corepers0.95 -t 0.95
 
 The output file will be ``Examples/4-corepers/PersGenome_<pangenome-filename>_0.95.lst``, and will contain the same 6 families (95% of 3 genomes is all genomes).
 
