@@ -182,7 +182,7 @@ With:
     - ``-i``: we want a pangenome with 80% identity
     - ``-o``: put all result and temporary files to this directory
 
-In your ``Examples/3-pangenome`` folder, you should have your pangenome in a file called ``PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst``. It contains 1 line per family. The first column is the family number, and others are all family members. You also have the qualitative (``.quali.txt``) and quantitative (``.quanti.txt``) matrix of this pangenome, as well as a summary file (``.summary.txt``). See more information on those files in :ref:`output format description<panfile>`.
+In your ``Examples/3-pangenome`` folder, you should have your pangenome in a file called ``PanGenome-GENO3.All.prt-clust-0.8-mode1.lst``. It contains 1 line per family. The first column is the family number, and others are all family members. You also have the qualitative (``.quali.txt``) and quantitative (``.quanti.txt``) matrix of this pangenome, as well as a summary file (``.summary.txt``). See more information on those files in :ref:`output format description<panfile>`.
 
 In your ``Examples/2-res-prokka/Proteins`` folder, you should have a new file, ``GENO3.All.prt``, containing all proteins of the 3 genomes.
 
@@ -190,29 +190,28 @@ If you used the same dataset and parameters as in this file, you should get a pa
 
 If you did not run the annotate step, but just want to test the pangenome step, use::
 
-    PanACoTA pangenome -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3 -d Examples/input_files/pan-input/Proteins -i 0.8 -o Examples/3-pangenome
+    PanACoTA pangenome -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3 -d Examples/input_files/pan-input/Proteins -i 0.8 -o Examples/3-pangenome-alone
 
 Core/Persistent Genome step
 ===========================
 
 The core genome is inferred from the pangenome. So, the only required file is your pangenome, obtained at last step. By default, it will generate a core genome. Here is the command line to obtain the core genome of our dataset::
 
-    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst -o Examples/4-corepers
+    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1.lst -o Examples/4-corepers
 
-**Replace `<date>` by your real filename**
 
 You now have your core genome (we used the default parameter) in ``Examples/4-corepers/PersGenome_<pangenome-filename>_1.lst``. With ``_1`` meaning that you asked for 100% of genomes present in each family.
 If you used the same dataset and parameters as in this file, you should get a core genome with **6 families**.
 
 If you want a persistent genome, specify the required :ref:`options<docorepers>` (minimum percentage of genomes in a family to be considered as persistent, allowing or not multi/mixed families...). For example, for a strict persistent genome at 95%::
 
-    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1_<date>.tsv.lst -o Examples/4-corepers -t 0.95
+    PanACoTA corepers -p Examples/3-pangenome/PanGenome-GENO3.All.prt-clust-0.8-mode1.lst -o Examples/4-corepers -t 0.95
 
 The output file will be ``Examples/4-corepers/PersGenome_<pangenome-filename>_0.95.lst``, and will contain the same 6 families (95% of 3 genomes is all genomes).
 
 If you did not run the annotate and pangenome steps, but only want to test the corepers module, run::
 
-    PanACoTA corepers -p Examples/input_files/core-input/PanGenome-example.lst -o Examples/4-corepers
+    PanACoTA corepers -p Examples/input_files/core-input/PanGenome-example.lst -o Examples/4-corepers-alone
 
 
 Alignment step
@@ -220,7 +219,7 @@ Alignment step
 
 You can then do an alignment of all the proteins of each persistent family. For example, to align the 6 core families found in the previous step::
 
-    PanACoTA align -c Examples/4-corepers/PersGenome_<pangenome-filename>_1.lst -l Examples/2-res-prokka/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/2-res-prokka -o Examples/5-align
+    PanACoTA align -c Examples/4-corepers/PersGenome_PanGenome-GENO3.All.prt-clust-0.8-mode1.lst-all_1.lst -l Examples/2-res-prokka/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/2-res-prokka -o Examples/5-align
 
 **Replace `PersGenome_<pangenome-filename>_1.lst` by your real persistent genome filename**
 
@@ -243,7 +242,7 @@ See :ref:`here <doalign>` for a description of the other files generated, as wel
 
 If you did not run the annotate, pan and corepers steps, but just want to test the align module, run::
 
-    PanACoTA align -c Examples/input_files/align-input/coregenome-example.lst -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/input_files/pan-input -o Examples/5-align
+    PanACoTA align -c Examples/input_files/align-input/coregenome-example.lst -l Examples/input_files/pan-input/LSTINFO-list_genomes.lst -n GENO3_1 -d Examples/input_files/pan-input -o Examples/5-align-alone
 
 Tree step
 =========
@@ -262,4 +261,4 @@ See the :ref:`tree part of tutorial<dotree>` to get more information on all opti
 
 If you did not run the annotate, pan, corepers and align steps but just want to test the tree module, run::
 
-    PanACoTA tree -a Examples/input_files/tree-input/GENO3_1.nucl.grp.aln -o Examples/6-tree
+    PanACoTA tree -a Examples/input_files/tree-input/GENO3_1.nucl.grp.aln -o Examples/6-tree-alone
