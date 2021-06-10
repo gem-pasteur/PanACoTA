@@ -4,9 +4,11 @@ Tutorial on examples
 
 We provide a folder, ``Examples``, containing genomic sequences (in ``Examples/genomes``).
 
-All commands to run all Example steps can be found in ``Examples/commands/``
+All commands to run all Example steps can be found in ``Examples/commands/``.
 
-.. note:: The provided genomic sequences are taken from real genomes, but then modified and shortened in order to have an example showing different situations, but running very quickly. Hence, the example results should not be interpreted biologically!
+All example input files (which are output of the previous module) can be found in ``Example/input_files``.
+
+.. note:: The provided genomic sequences are taken from real genomes, but then modified and drastically shortened in order to have an example showing different situations, but running very quickly. Hence, the example results should not be interpreted biologically!
 
 Genomes description
 ===================
@@ -41,7 +43,9 @@ We provide 4 different fictive genomes:
 Annotate step
 =============
 
-To annotate genomes, you need to provide a list of genomes to annotate, in a text file. An example, corresponding to the genomes in ``Examples/genomes_init`` is provided in ``Examples/input_files/list_genomes.lst``. Here is its content:
+To annotate genomes, you need to provide a list of genomes to annotate, in a text file. This file can be either a list of files (``-l list_file``) or a list of files + their characteristics already calculated (like the output of module ``prepare``: ``--info info_file``).
+
+An example, corresponding to the genomes in ``Examples/genomes_init`` is provided in ``Examples/input_files/list_genomes.lst``. Here is its content:
 
 .. code-block:: text
 
@@ -101,7 +105,7 @@ In the ``QC_L90-list_genomes.png``, we can see that all genomes have a L90 lower
 Annotation: functional (default) or only syntactic
 --------------------------------------------------
 
-Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits with. Here, we only annotate genomes with less than 10 contigs and a maximum of 3 for L90 (meaning that genome2 is removed from analysis):
+Now that you have seen the distribution of L90 and #contig values in your genomes, and decided which limits you want to use (if you do not want to use the default ones), you can annotate the genomes which are under those limits. Here, we only annotate genomes with less than 10 contigs and a maximum of 3 for L90 (meaning that genome2 is removed from analysis):
 
 Functional annotation with Prokka (default)::
 
@@ -144,6 +148,23 @@ In your result directory, you should now have:
 - in ``tmp_files``, you still have the 'split5N' genomic sequence files, as well as prokka/prodigal result folders.
 - You have 5 new folders: ``Replicons``, ``LSTINFO``, ``gff3``, ``Genes``, ``Proteins`` each one containing 3 files (1 per genome) with your results.
 
+From existing info_file
+-----------------------
+
+If you already calculated the genomes metrics (genome name, size, L90, nb of contigs), you can directly give them as an input instead of the list of genome files, to avoid re-running the "Cutting genomes at each time there are at least X 'N' in a row, and then, calculating genome size, number of contigs and L90" step. This file must contain at least 4 columns, tab separated, with the following headers: 'to_annotate', 'gsize', 'nb_conts', 'L90'. Any other  column will be ignored.
+
+You can either:
+
+    - create this file yourself
+    - take it from ``prepare`` step (``LSTINFO-<datasetname>-filtered-<min_dist>_<max_dist>.lst`` is directly compatible)
+    - take it from this ``annotate`` step run with QC_only option (``ALL-GENOMES-info-list_genomes.lst`` is directly compatible)
+    - take it from this ``annotate`` step already ran with annotation, but that you want to re-annotate with other options for example (``LSTINFO-list_genomes.lst`` is directly compatible)
+
+ With our example, you can run::
+
+    PanACoTA annotate -r Examples/2-res-from-info --info Examples/input_files/annot-input/ALL-GENOMES-info-list_genomes.lst  -n GENO --l90 3 --nbcont 10 --prodigal --small
+
+Results should be the same as before.
 
 PanGenome step
 ==============
