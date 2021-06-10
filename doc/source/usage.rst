@@ -318,6 +318,12 @@ We have here a dataset with 5 genomes:
     - the 4th genome's sequence is in ``gen4-contigs.fst``. Its species name will be ``ESCO``, and its date ``0217`` (February 2017).
     - the 5th genome's sequence is in ``genome.fasta`` and ``genome-plasmids.fasta``. Its species name will be the default one, and the date will be ``0217``.
 
+or 'info_file'
+^^^^^^^^^^^^^^
+
+If you already calculated the genomes metrics (genome name, size, L90, nb of contigs), you can directly give them as an input instead of the list of genome files. This text file must have at least 4 columns (others are ignored), with the following headers (in any order): 'to_annotate', 'gsize', 'nb_conts', 'L90'. 
+
+This file can be the :ref:`output file<step2>` of ``prepare``.
 
 .. _seq:
 
@@ -551,8 +557,8 @@ This will create a folder ``<res_path>``, with the following files inside:
     - prokka result folders in your ``tmp_files`` directory
     - The 5 folders ``LSTINFO``, ``gff3``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
 
-Annotation only
----------------
+Annotation only (from info_file)
+--------------------------------
 
 When you already have information on genome sequences, and just want to annotate those which are bellow the thresholds. Use::
 
