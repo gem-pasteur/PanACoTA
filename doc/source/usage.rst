@@ -323,7 +323,7 @@ or 'info_file'
 
 If you already calculated the genomes metrics (genome name, size, L90, nb of contigs), you can directly give them as an input instead of the list of genome files. This text file must have at least 4 columns (others are ignored), with the following headers (in any order): 'to_annotate', 'gsize', 'nb_conts', 'L90'. 
 
-This file can be the :ref:`output file<step2>` of ``prepare``.
+This file can be the :ref:`output file<step2>` of ``prepare``, or even the ouput of this ``annotate`` step, if you want to re-run it with other parameters.
 
 .. _seq:
 
@@ -515,7 +515,7 @@ This will create a folder ``<res_path>``, with the following files inside:
     - ``QC_L90-<list_file>.png``: histogram of the L90 values of all genomes
     - ``QC_nb-contigs-<list_file>.png``: histogram of number of contigs in all genomes
     - ``discarded-<list_file>.lst``: list of genomes that would be discarded if you keep the default limits (L90 :math:`\leq` 100 and #contigs :math:`\leq` 999).
-    - ``info-genomes-<list_file>.lst``: file with information on each genome: size, number of contigs and L90.
+    - ``ALL-GENOMES-info-<list_file>.lst``: file with information on each genome: size, number of contigs and L90.
     - ``tmp_files`` folder: containing your genomic sequences, split at each stretch of at least 5 ``N``.
 
 .. _logf:
@@ -552,7 +552,7 @@ This command will run the same steps as described in quality control only, with 
 
 This will create a folder ``<res_path>``, with the following files inside:
 
-    - same files as quality control only, except ``info-genomes-<list_file>.lst``.
+    - same files as quality control only, except ``ALL-GENOMES-info-<list_file>.lst``.
     - ``LSTINFO_<list_file>.lst``: information on annotated genomes, as described :ref:`here<lstinfof>`
     - prokka result folders in your ``tmp_files`` directory
     - The 5 folders ``LSTINFO``, ``gff3``, ``Replicons``, ``Genes`` and ``Proteins`` as described in :ref:`output file formats<outform>`.
@@ -815,8 +815,6 @@ If you want to calculate the core/persistent genome of a subset of genomes, give
 Output file format
 ------------------
 
-.. note:: See :ref:`below<docorepers>` for the details on output filenames.
-
 Your persistent genome file (``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst`` or specified name) has the same format as the pangenome file. The family numbers in the first column correspond to pangenome family numbers.
 
 .. _docorepers:
@@ -838,8 +836,8 @@ For a persistent genome, there are several possibilities:
 
 If you want to do a persistent genome, use the following options to specify what you want:
 
-    - ``-t <tol>``:  % (between 0 and 1) of the persistent genome: a family is considered as persistent if it contains exactly one member in at least tol% of the genomes. Default value for ``t`` is 1, meaning that all genomes must have a unique member. This corresponds to the coregenome (so no need to put this option if you want a coregenome).
-    - ``-X``: add this option if you want to relax a little the definition of the persistent genome, to get a *mixed* persistent genome. With ``-X`` option, a family is considered as persistent if at least tol% (tol defined by ``-t <tol>`` parameter, see above) of the genomes have exactly one member in the family, and the other genomes have either 0, either several members in the family. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
+    - ``-t <tol>``:  % (between 0 and 1) of the persistent genome: a family is considered as persistent if it contains exactly one member in at least tol% of the genomes, and is absent in all other genomes. Default value for ``t`` is 1, meaning that all genomes must have a unique member. This corresponds to the coregenome (so no need to put this option if you want a coregenome). More relaxed definitions of a persistent genome can be used by using ``-X`` or ``-M`` options (see below).
+    - ``-X``: add this option if you want to relax a little the definition of the persistent genome, to get a *mixed* persistent genome. With ``-X`` option, a family is considered as persistent if at least tol% (tol defined by ``-t <tol>`` parameter, see above) of the genomes have exactly one member in the family, but the other genomes can have either 0, either several members in the family. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
     - ``-M``: *not compatible with -X*. With this option, you get the *multi* persistent genome. It includes the strict and mixed persistent, but is even wider: the only condition for a family to be persistent is that it must have at least one member in at least tol% (tol still defined by ``-t <tol>`` parameter) of the genomes (independent of the copy number).
     - ``-F``: When you specify the ``-t <tol>`` option, with a number lower than 1, you can add this option to use floor('tol'*N) as a minimum number of genomes instead of ceil('tol'*N) which is the default behavior.
     - ``-l lstinfo_file``: see above
@@ -1046,9 +1044,13 @@ In your ``<resdir>`` directory, you will find:
             + ``<dataset_name>-current.<fam_num>.prt`` with all proteins extracted
             + ``<dataset_name>-current.<fam_num>.miss.lst`` with the list of genomes not present in the family
         + ``<dataset_name>-complete.nucl.cat.aln`` DNA sequence concatenation of all family alignments
-        + ``<dataset_name>-complete..cat.aln`` concatenation of all family alignments in aa (if option required by user)
+        + ``<dataset_name>-complete.aa.cat.aln`` concatenation of all family alignments in aa (if option required by user)
 
-    - a folder ``Phylo-<dataset_name>``: contains ``<dataset_name>.nucl.grp.aln``, the alignment of all families grouped by genome, as described in :ref:`output files section<outalign>`. This is the file you will need to infer a phylogenetic tree.
+    - a folder ``Phylo-<dataset_name>``: contains 
+
+        + ``<dataset_name>.nucl.grp.aln``, the alignment of all families grouped by genome, as described in :ref:`output files section<outalign>`. This is the file you will need to infer a phylogenetic tree.
+        + ``<dataset_name>.aa.grp.aln``, same, but protein sequences instead of DNA. Generated only if option ``-P`` is given
+        
 
 ``tree`` subcommand
 ===================
