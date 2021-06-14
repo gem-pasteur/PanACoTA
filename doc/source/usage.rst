@@ -827,16 +827,22 @@ To do a coregenome, run the following command::
 
     PanACoTA corepers -p <pangenome_file>
 
+
+For a persistent genome, there are several possibilities:
+
+.. figure:: images/persistent-types.png
+    :align: center
+    :width: 60%
+
 If you want to do a persistent genome, use the following options to specify what you want:
 
-    - ``-t <tol>``:  min % of genomes (between 0 and 1) having exactly 1 member in a family to consider the family as persistent. Default value is 1, and 100% of genomes required corresponds to the coregenome (so no need to put this option if you want a coregenome)
-    - ``-X``: the ``-t`` parameter defines how many genomes must have exactly 1 member in the family to consider it as persistent. By default, all genomes present in a family must have exactly 1 member. You can put this option to get a ``mixed persistent genome``, meaning that a family is considered as persistent if at least ``tol%`` of the genomes have exactly 1 member, and other genomes have either 0 either several members. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
-    - ``-M``: *not compatible with -X*. You can put this option if you want to allow several member in any genome of a family. With this option, ``-t`` now defines the minimum percentage of genomes having at least 1 member in a family to consider it as persistent.
+    - ``-t <tol>``:  % (between 0 and 1) of the persistent genome: a family is considered as persistent if it contains exactly one member in at least tol% of the genomes. Default value for ``t`` is 1, meaning that all genomes must have a unique member. This corresponds to the coregenome (so no need to put this option if you want a coregenome).
+    - ``-X``: add this option if you want to relax a little the definition of the persistent genome, to get a *mixed* persistent genome. With ``-X`` option, a family is considered as persistent if at least tol% (tol defined by ``-t <tol>`` parameter, see above) of the genomes have exactly one member in the family, and the other genomes have either 0, either several members in the family. This is useful to add the families where, in some genomes, 1 protein has been split in several parts, because of sequencing or assembly error(s).
+    - ``-M``: *not compatible with -X*. With this option, you get the *multi* persistent genome. It includes the strict and mixed persistent, but is even wider: the only condition for a family to be persistent is that it must have at least one member in at least tol% (tol still defined by ``-t <tol>`` parameter) of the genomes (independent of the copy number).
     - ``-F``: When you specify the ``-t <tol>`` option, with a number lower than 1, you can add this option to use floor('tol'*N) as a minimum number of genomes instead of ceil('tol'*N) which is the default behavior.
     - ``-l lstinfo_file``: see above
 
 If you want to do a core or persistent genome of a subset of genomes, give the list of those genomes with ``-l lstinfo_file`` option. This file must have 1 line per genome, with the genome name without extension (like GENO.0121.00012) in the first column (others are ignored): see :ref:`input files<inputcorepers>`.
-
 
 You can also specify your core/persistent genome file path and name with ``-o <path/to/outdir``. By default, it will be saved in the same directory as your pangenome, and be called ``PersGenome_<pangenome>_<tol>[-multi][-mixed].lst``, where:
 
