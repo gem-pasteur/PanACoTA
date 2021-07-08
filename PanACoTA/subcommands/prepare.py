@@ -314,7 +314,8 @@ def build_parser(parser):
                          help=("List of strains to download."
                                "A comma-separated list of strain names is possible."
                                "As well as a path to a filename containing one name per line."
-                               "Ex: SB2390, IA565 for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains")
+                               "Ex: '-S SB2390, IA565' for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains"
+                               "Ex: '-S path/to/list.txt' path to file with strain names, one per line.")
                          )
     general.add_argument("-g", dest="ncbi_species_name", default="",
                           help=("Species to download, corresponding to the "
