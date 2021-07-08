@@ -54,7 +54,7 @@ logger = logging.getLogger("prepare.dds")
 
 
 def download_from_ncbi(species_linked, section, ncbi_species_name, 
-    ncbi_species_taxid, ncbi_taxid, levels, outdir, threads):
+    ncbi_species_taxid, ncbi_taxid, strains, levels, outdir, threads):
     """
     Download ncbi genomes of given species
 
@@ -93,7 +93,10 @@ def download_from_ncbi(species_linked, section, ncbi_species_name,
                "output": abs_outdir,
                "parallel": threads, "groups": "bacteria",
                "metadata_table":abs_sumfile}
-    message = "Downloading all genomes for "
+    if not strains:
+        message = "Downloading all genomes for "
+    else:
+        message = 'Downloading specified strains for'
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
     if ncbi_species_name:
         keyargs["genera"] = ncbi_species_name
@@ -116,6 +119,12 @@ def download_from_ncbi(species_linked, section, ncbi_species_name,
     if levels:
         keyargs["assembly_levels"] = levels
         message += f" (Only those assembly levels: {levels}). "
+
+    # If starins list is given, add it to arguments, and write to info message
+    if strains:
+        keyargs["strains"] = strains
+        message += f" (Only those strains: {strains}). "
+
     logger.info(f"Metadata for all genomes will be saved in {sumfile}")
     logger.info(message)
 

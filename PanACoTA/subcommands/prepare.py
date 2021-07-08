@@ -66,14 +66,14 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.ncbi_species_name, arguments.ncbi_species_taxid, arguments.ncbi_taxid, arguments.levels,
-         arguments.ncbi_section, arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
+    main(cmd, arguments.ncbi_species_name, arguments.ncbi_species_taxid, arguments.ncbi_taxid, arguments.strains,
+         arguments.levels, arguments.ncbi_section, arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
          arguments.db_dir, arguments.only_mash,
          arguments.info_file, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_section,
+def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels, ncbi_section,
          outdir, tmp_dir, threads, norefseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
@@ -310,6 +310,12 @@ def build_parser(parser):
                                 "and '-t 1123862' will download the strain K. pneumoniae subsp. pneumoniae Kp13 "
                                 "(not included in -t 72407, as it is a strain of the subspecies with a specific taxid).")
                          )
+    general.add_argument("-S", dest="strains", default="",
+                         help=("List of strains to download."
+                               "A comma-separated list of strain names is possible."
+                               "As well as a path to a filename containing one name per line."
+                               "Ex: SB2390, IA565 for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains")
+                         )
     general.add_argument("-g", dest="ncbi_species_name", default="",
                           help=("Species to download, corresponding to the "
                                 "'organism name' provided by the NCBI. Give name between "
@@ -456,7 +462,7 @@ def check_args(parser, args):
     # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
     # -> Give at least 1!
     if (not args.only_mash and not args.norefseq and
-        not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid):
+        not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid and not args.strains):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
                      "you want to download refseq (or genbank) genomes. But you did not provide any "
                      "information, so PanACoTA cannot guess which species you want to download. "

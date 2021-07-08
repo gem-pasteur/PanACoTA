@@ -237,11 +237,12 @@ def test_download_specify_level(caplog):
     NCBI_species = "Acetobacter orleanensis"
     NCBI_species_taxid = "104099"
     NCBI_taxid = ""
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq")
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir, threads)
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
@@ -282,13 +283,51 @@ def test_download_specify_level(caplog):
     # Re-run, but only asking for complete and scaffold
     outdir2 = os.path.join(GENEPATH, "test_download_refseq_only-scaf")
     levels2 = "scaffold,complete"
-    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid,
+    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains,
                                                   levels2, outdir2, threads)
     assert scaf + comp == nb_gen2
     assert db_dir2 == os.path.join(outdir2, "Database_init")
     # Check log giving species name + species taxid + levels given
     assert ("Downloading all genomes for NCBI species = Acetobacter orleanensis "
             "(NCBI_species_taxid = 104099). (Only those assembly levels: scaffold,complete)") in caplog.text
+
+
+def test_download_specify_strains(caplog):
+    """
+    Test that, given a taxid, and a species name,
+    it downloads genomes in .gz, and uncompress them in the
+    db folder (which is named as expected)
+
+    We cannot compare log, as it is already catched by NCBI_genome_download
+    """
+    caplog.set_level(logging.INFO)
+
+    species_linked = "Klebsiella_pneumoniae"
+    section = "refseq"
+    NCBI_species = "Klebsiella pneumoniae"
+    NCBI_species_taxid = "573"
+    NCBI_taxid = ""
+    NCBI_strains = "SB2390,IA565,KPPR1,XH209"
+    outdir = os.path.join(GENEPATH, "test_download_specify_strains")
+    threads = 1
+    levels = ""
+
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                                outdir, threads)
+    # Check path to uncompressed files is as expected
+    assert db_dir == os.path.join(outdir, "Database_init")
+    # Check number of genomes downloaded
+    assert nb_gen == 4
+    # And that db_dir exists and contains nb_gen files
+    assert os.path.isdir(db_dir)
+    assert len(os.listdir(db_dir)) == nb_gen
+
+    assert ("Downloading specified strains for NCBI species = Klebsiella pneumoniae "
+            "(NCBI_species_taxid = 573). (Only those strains: SB2390,IA565,KPPR1,XH209)") in caplog.text
+
+    # Check that assembly summary file wwas donwloaded as expected
+    sum_file = os.path.join(outdir, "assembly_summary-Klebsiella_pneumoniae.txt" )
+    assert os.path.isfile(sum_file)
 
 
 def test_download_only_spetaxid(caplog):
@@ -304,11 +343,12 @@ def test_download_only_spetaxid(caplog):
     NCBI_species = None
     NCBI_species_taxid = "104099"
     NCBI_taxid = ""
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_noSpe")
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir, threads)
 
     # Check path to uncompressed files is as expected
@@ -344,10 +384,11 @@ def test_download_taxid_and_spetaxid(caplog):
     NCBI_species = None
     NCBI_species_taxid = "104099"
     NCBI_taxid = "1231342"
+    NCBI_strains = ""
     levels = ""
     threads = 1
     outdir2 = os.path.join(GENEPATH, "test_download_refseq_noSpeandSpecific")
-    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                   outdir2, threads)
 
     # Check path to uncompressed files is as expected
@@ -383,10 +424,11 @@ def test_download_taxid_and_spename(caplog):
     NCBI_species = "Acetobacter orleanensis"
     NCBI_species_taxid = ""
     NCBI_taxid = "1231342"
+    NCBI_strains = "NCBI_strains"
     levels = ""
     threads = 1
     outdir = os.path.join(GENEPATH, "test_download_refseq_noSpeandSpecific")
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir, threads)
 
     # Check path to uncompressed files is as expected
@@ -422,11 +464,12 @@ def test_download_specific_strain(caplog):
     section = "refseq"
     NCBI_species_taxid = ""
     NCBI_taxid = "1123862"
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_specific")
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir, threads)
 
     # Check path to uncompressed files is as expected
@@ -465,10 +508,11 @@ def test_download_2taxid(caplog):
     # 913079 is the subspecies Salmonella enterica subsp. enterica serovar Mississippi
     # 1212561  is the strain Salmonella enterica subsp. enterica serovar Mississippi strain 2010K-1406
     NCBI_taxid = "913079,1212561"
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_2taxid")
     threads = 1
     levels = ""
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir, threads)
 
     # Check path to uncompressed files is as expected
@@ -500,7 +544,7 @@ def test_download_2taxid(caplog):
     outdir_1 = os.path.join(GENEPATH, "test_download_refseq_2taxid_1")
     threads = 1
     levels = ""
-    db_dir_1, nb_gen_1 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid_1, levels,
+    db_dir_1, nb_gen_1 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid_1, NCBI_strains, levels,
                                                     outdir_1, threads)
     assert nb_gen == nb_gen_1 + 1
     assert "Downloading all genomes for  NCBI_taxid = 913079" in caplog.text
@@ -519,13 +563,14 @@ def test_download_refseq_vs_genbank(caplog):
     NCBI_species = None
     NCBI_species_taxid = ""
     NCBI_taxid = "39831"
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_genbank")
     levels = ""
     threads = 1
 
     # With refseq, no genome found
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                    outdir, threads)
 
     # Check path to uncompressed files does not exist
@@ -544,7 +589,7 @@ def test_download_refseq_vs_genbank(caplog):
     # REDO with genbank instead of refseq
     section = "genbank"
     outdir2 = os.path.join(GENEPATH, "test_download_genbank")
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                                 outdir2, threads)
 
     # Check path to uncompressed files is as expected
@@ -575,11 +620,12 @@ def test_download_wrongTaxID(caplog):
     section = "refseq"
     NCBI_species_taxid = "10409"
     NCBI_taxid = ""
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_wrongTaxID")
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                    outdir, threads)
 
     # Check path to uncompressed files does not exist
@@ -612,11 +658,12 @@ def test_download_diffSpeTaxID(caplog):
     NCBI_species = "Acetobacter fabarum"
     NCBI_species_taxid = "104099"
     NCBI_taxid = ""
+    NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_wrongTaxID")
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, levels,
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                                    outdir, threads)
 
     # Check path to uncompressed files does not exist
