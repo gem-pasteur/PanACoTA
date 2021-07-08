@@ -242,7 +242,7 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels
         else:
             # Download all genomes of the given taxID
             db_dir, nb_gen = dgf.download_from_ncbi(species_linked, ncbi_section, ncbi_species_name, ncbi_species_taxid,
-                                                      ncbi_taxid, levels, outdir, threads)
+                                                      ncbi_taxid, strains, levels, outdir, threads)
             logger.info(f"{nb_gen} {ncbi_section} genome(s) downloaded")
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
