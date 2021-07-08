@@ -307,7 +307,7 @@ def test_download_specify_strains(caplog):
     NCBI_species = "Klebsiella pneumoniae"
     NCBI_species_taxid = "573"
     NCBI_taxid = ""
-    NCBI_strains = "SB2390,IA565,KPPR1,XH209"
+    NCBI_strains = "SB2390,AS001254,KPPR1,XH209"
     outdir = os.path.join(GENEPATH, "test_download_specify_strains")
     threads = 1
     levels = ""
@@ -424,7 +424,7 @@ def test_download_taxid_and_spename(caplog):
     NCBI_species = "Acetobacter orleanensis"
     NCBI_species_taxid = ""
     NCBI_taxid = "1231342"
-    NCBI_strains = "NCBI_strains"
+    NCBI_strains = ""
     levels = ""
     threads = 1
     outdir = os.path.join(GENEPATH, "test_download_refseq_noSpeandSpecific")
