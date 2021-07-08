@@ -323,7 +323,7 @@ def test_download_specify_strains(caplog):
     assert len(os.listdir(db_dir)) == nb_gen
 
     assert ("Downloading specified strains for NCBI species = Klebsiella pneumoniae "
-            "(NCBI_species_taxid = 573). (Only those strains: SB2390,IA565,KPPR1,XH209)") in caplog.text
+            "(NCBI_species_taxid = 573). (Only those strains: SB2390,AS001254,KPPR1,XH209)") in caplog.text
 
     # Check that assembly summary file wwas donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-Klebsiella_pneumoniae.txt" )
