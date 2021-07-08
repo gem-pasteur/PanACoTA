@@ -96,6 +96,8 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels
         species taxid given in NCBI
     ncbi_taxid : int
         NCBI taxid of strain
+    strains : str
+        strains to download
     levels: str
         Level of assembly to download. Choice between 'all', 'complete', 'chromosome',
         'scaffold', 'contig'. Default is 'all'
