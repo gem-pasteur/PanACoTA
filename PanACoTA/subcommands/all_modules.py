@@ -95,7 +95,7 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     args_all = (args.outdir, args.threads, args.verbose, args.quiet)
-    args_prepare = (args.ncbi_species_taxid, args.ncbi_species_name, args.strains, args.ncbi_taxid, args.levels,
+    args_prepare = (args.ncbi_species_taxid, args.ncbi_species_name, args.ncbi_taxid, args.strains, args.levels,
                     args.ncbi_section, args.tmp_dir, args.norefseq, args.db_dir, args.only_mash, 
                     args.info_file, args.l90, args.nbcont, args.cutn, args.min_dist, args.max_dist)
     args_annot = (args.name, args.qc_only, args.date, args.prodigal_only, args.small)
@@ -119,7 +119,7 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
         threads (int), verbose (int), quiet (bool)
     args_prepare : tuple
         arguments for prepare module (see subcommands.prepare.py): NCBI_species_taxid (int),
-        NCBI_species_name (str), NCBI_taxid (int), NCBI_strains, levels (str), NCBI_section (str),
+        NCBI_species_name (str), NCBI_taxid (int), NCBI_strains (str), levels (str), NCBI_section (str),
         tmp_dir (str), norefseq (bool), db_dir (str),
         only_mash (bool), info_file (str), l90 (int), nbcont (int), cutn (int),
         min_dist (float), max_dist (float)
