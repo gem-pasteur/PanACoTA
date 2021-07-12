@@ -66,14 +66,14 @@ def main_from_parse(arguments):
 
     """
     cmd = "PanACoTA " + ' '.join(arguments.argv)
-    main(cmd, arguments.ncbi_species_name, arguments.ncbi_species_taxid, arguments.ncbi_taxid, arguments.levels,
-         arguments.ncbi_section, arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
+    main(cmd, arguments.ncbi_species_name, arguments.ncbi_species_taxid, arguments.ncbi_taxid, arguments.strains,
+         arguments.levels, arguments.ncbi_section, arguments.outdir, arguments.tmp_dir, arguments.parallel, arguments.norefseq,
          arguments.db_dir, arguments.only_mash,
          arguments.info_file, arguments.l90, arguments.nbcont, arguments.cutn, arguments.min_dist,
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_section,
+def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels, ncbi_section,
          outdir, tmp_dir, threads, norefseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
@@ -96,6 +96,8 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_se
         species taxid given in NCBI
     ncbi_taxid : int
         NCBI taxid of strain
+    strains : str
+        strains to download
     levels: str
         Level of assembly to download. Choice between 'all', 'complete', 'chromosome',
         'scaffold', 'contig'. Default is 'all'
@@ -242,7 +244,7 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, levels, ncbi_se
         else:
             # Download all genomes of the given taxID
             db_dir, nb_gen = dgf.download_from_ncbi(species_linked, ncbi_section, ncbi_species_name, ncbi_species_taxid,
-                                                      ncbi_taxid, levels, outdir, threads)
+                                                      ncbi_taxid, strains, levels, outdir, threads)
             logger.info(f"{nb_gen} {ncbi_section} genome(s) downloaded")
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
@@ -309,6 +311,13 @@ def build_parser(parser):
                                 "Ex: '-t 72407' will download all 'general' K. pneumoniae subsp. pneumoniae strains, "
                                 "and '-t 1123862' will download the strain K. pneumoniae subsp. pneumoniae Kp13 "
                                 "(not included in -t 72407, as it is a strain of the subspecies with a specific taxid).")
+                         )
+    general.add_argument("-S", dest="strains", default="",
+                         help=("List of strains to download."
+                               "A comma-separated list of strain names is possible."
+                               "As well as a path to a filename containing one name per line."
+                               "Ex: '-S SB2390, IA565' for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains"
+                               "Ex: '-S path/to/list.txt' path to file with strain names, one per line.")
                          )
     general.add_argument("-g", dest="ncbi_species_name", default="",
                           help=("Species to download, corresponding to the "
@@ -456,7 +465,7 @@ def check_args(parser, args):
     # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
     # -> Give at least 1!
     if (not args.only_mash and not args.norefseq and
-        not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid):
+        not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid and not args.strains):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
                      "you want to download refseq (or genbank) genomes. But you did not provide any "
                      "information, so PanACoTA cannot guess which species you want to download. "
