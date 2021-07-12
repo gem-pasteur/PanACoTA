@@ -96,7 +96,7 @@ def download_from_ncbi(species_linked, section, ncbi_species_name,
     if not strains:
         message = "Downloading all genomes for "
     else:
-        message = 'Downloading specified strains for'
+        message = 'Downloading specified strains for '
     # If NCBI species given, add it to arguments to download genomes, and write it to info message
     if ncbi_species_name:
         keyargs["genera"] = ncbi_species_name
