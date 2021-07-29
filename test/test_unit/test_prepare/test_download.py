@@ -225,10 +225,7 @@ def test_to_database_1genome_wrong_format(caplog):
 def test_download_specify_level(caplog):
     """
     Test that, given a taxid, and a species name,
-    it downloads genomes in .gz, and uncompress them in the
-    db folder (which is named as expected)
-
-    We cannot compare log, as it is already catched by NCBI_genome_download
+    it downloads only genomes with the specified level
     """
     caplog.set_level(logging.INFO)
 
@@ -242,8 +239,9 @@ def test_download_specify_level(caplog):
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                              outdir, threads)
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
     # Check number of genomes downloaded. We cannot know the exact value, as it is updated
@@ -278,42 +276,45 @@ def test_download_specify_level(caplog):
     assert os.path.isdir(ngd_outdir)
     assert len(os.listdir(ngd_outdir)) >= 4
     # Check log giving species name + species taxid
-    assert 'Downloading all genomes for NCBI species = Acetobacter orleanensis (NCBI_species_taxid = 104099)' in caplog.text
+    assert ('Downloading all genomes of NCBI species = '
+            'Acetobacter orleanensis (NCBI_species_taxid = 104099)') in caplog.text
 
     # Re-run, but only asking for complete and scaffold
     outdir2 = os.path.join(GENEPATH, "test_download_refseq_only-scaf")
     levels2 = "scaffold,complete"
-    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains,
-                                                  levels2, outdir2, threads)
+    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                                NCBI_species_taxid, NCBI_taxid, NCBI_strains,
+                                                levels2, outdir2, threads)
     assert scaf + comp == nb_gen2
     assert db_dir2 == os.path.join(outdir2, "Database_init")
     # Check log giving species name + species taxid + levels given
-    assert ("Downloading all genomes for NCBI species = Acetobacter orleanensis "
-            "(NCBI_species_taxid = 104099). (Only those assembly levels: scaffold,complete)") in caplog.text
+    assert ("Downloading all genomes of NCBI species = Acetobacter orleanensis "
+            "(NCBI_species_taxid = 104099). "
+            "(Only those assembly levels: scaffold,complete)") in caplog.text
 
 
 def test_download_specify_strains(caplog):
     """
-    Test that, given a taxid, and a species name,
-    it downloads genomes in .gz, and uncompress them in the
-    db folder (which is named as expected)
-
-    We cannot compare log, as it is already catched by NCBI_genome_download
+    Giving specific strain names + corresponding species taxids
+    -> downloads all specified strains
     """
     caplog.set_level(logging.INFO)
 
-    species_linked = "Klebsiella_pneumoniae"
+    species_linked = "spestrain" #"Klebsiella_pneumoniae"
     section = "refseq"
-    NCBI_species = "Klebsiella pneumoniae"
-    NCBI_species_taxid = "573"
+    NCBI_species = ""  #"Klebsiella pneumoniae"
+    NCBI_species_taxid = "573,104099"
     NCBI_taxid = ""
-    NCBI_strains = "SB2390,AS001254,KPPR1,XH209"
+    # Download only those strains: "SB2390,AS001254,KPPR1" for KLPN 573, "LMG 1583" from 104099
+    NCBI_strains = "SB2390,AS001254,KPPR1,LMG 1583"    
     outdir = os.path.join(GENEPATH, "test_download_specify_strains")
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, 
+                                              levels, outdir, threads)
+
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
     # Check number of genomes downloaded
@@ -322,20 +323,97 @@ def test_download_specify_strains(caplog):
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
 
-    assert ("Downloading specified strains for NCBI species = Klebsiella pneumoniae (NCBI_species_taxid = 573). "
-            "(Only those strains: SB2390,AS001254,KPPR1,XH209).") in caplog.text
+    assert ("Downloading the following specified strain(s): SB2390,AS001254,KPPR1,LMG 1583, "
+            "which also have:") in caplog.text
+    # assert ("NCBI species = Klebsiella pneumoniae") in caplog.text
+    assert ("NCBI_species_taxid = 573,104099") in caplog.text
+    # Check that assembly summary file was donwloaded as expected
+    sum_file = os.path.join(outdir, "assembly_summary-spestrain.txt" )
+    assert os.path.isfile(sum_file)
 
-    # Check that assembly summary file wwas donwloaded as expected
+
+def test_download_specify_strains_fromfile(caplog):
+    """
+    Giving specific strain names + corresponding species taxids
+    -> downloads all specified strains
+    """
+    caplog.set_level(logging.INFO)
+
+    species_linked = "spestrain" #"Klebsiella_pneumoniae"
+    section = "refseq"
+    NCBI_species = ""  #"Klebsiella pneumoniae"
+    NCBI_species_taxid = "573,104099"
+    NCBI_taxid = ""
+    # Download only those strains: "SB2390,AS001254,KPPR1" for KLPN 573, "LMG 1583" from 104099
+    NCBI_strains = os.path.join(DATA_TEST_DIR, "test_files", "test_list-strains.txt")    
+    outdir = os.path.join(GENEPATH, "test_download_specify_strains")
+    threads = 1
+    levels = ""
+
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, 
+                                              levels, outdir, threads)
+
+    # Check path to uncompressed files is as expected
+    assert db_dir == os.path.join(outdir, "Database_init")
+    # Check number of genomes downloaded
+    assert nb_gen == 3
+    # And that db_dir exists and contains nb_gen files
+    assert os.path.isdir(db_dir)
+    assert len(os.listdir(db_dir)) == nb_gen
+
+    assert ("Downloading all strains specified in "
+            "test/data/prepare/test_files/test_list-strains.txt file, "
+            "which also have:") in caplog.text
+    assert ("NCBI_species_taxid = 573,104099") in caplog.text
+    # Check that assembly summary file was donwloaded as expected
+    sum_file = os.path.join(outdir, "assembly_summary-spestrain.txt" )
+    assert os.path.isfile(sum_file)
+
+
+def test_download_specify_strains_notaxid(caplog):
+    """
+    Giving specific strain names + corresponding species taxid for 1 but not the 3 others
+    -> downloads only 1 of the specified strains
+    """
+    caplog.set_level(logging.INFO)
+
+    species_linked = "Klebsiella_pneumoniae"
+    section = "refseq"
+    NCBI_species = ""  #"Klebsiella pneumoniae"
+    NCBI_species_taxid = "104099"
+    NCBI_taxid = ""
+    # Download only those strains: "SB2390,AS001254,KPPR1" for KLPN 573, "LMG 1583" from 104099
+    NCBI_strains = "SB2390,AS001254,KPPR1,LMG 1583"    
+    outdir = os.path.join(GENEPATH, "test_download_specify_strains")
+    threads = 1
+    levels = ""
+
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, 
+                                              levels, outdir, threads)
+
+    # Check path to uncompressed files is as expected
+    assert db_dir == os.path.join(outdir, "Database_init")
+    # Check number of genomes downloaded
+    assert nb_gen == 1
+    # And that db_dir exists and contains nb_gen files
+    assert os.path.isdir(db_dir)
+    assert len(os.listdir(db_dir)) == nb_gen
+    assert ("Downloading the following specified strain(s): SB2390,AS001254,KPPR1,LMG 1583, "
+            "which also have:") in caplog.text
+    # assert ("NCBI species = Klebsiella pneumoniae") in caplog.text
+    assert ("NCBI_species_taxid = 104099") in caplog.text
+    # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-Klebsiella_pneumoniae.txt" )
     assert os.path.isfile(sum_file)
 
 
 def test_download_only_spetaxid(caplog):
     """
-    Test that, given a species taxid, it downloads all genomes of the species in .gz, and uncompress them in the
-    db folder (which is named as expected)
+    Test that, given a species taxid, it downloads all genomes of the species in .gz, 
+    and uncompress them in the db folder (which is named as expected)
 
-    We cannot compare log, as it is already catched by NCBI_genome_download
     """
     caplog.set_level(logging.INFO)
     species_linked = "toto"
@@ -359,7 +437,7 @@ def test_download_only_spetaxid(caplog):
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
     # Check log giving only species taxid
-    assert "Downloading all genomes for  NCBI_species_taxid = 104099" in caplog.text
+    assert "Downloading all genomes of NCBI_species_taxid = 104099" in caplog.text
 
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-toto.txt" )
@@ -369,12 +447,13 @@ def test_download_only_spetaxid(caplog):
     ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
     # And that it contains folders
     assert os.path.isdir(ngd_outdir)
-    assert len(os.listdir(ngd_outdir)) >= 4
+    assert len(os.listdir(ngd_outdir)) == nb_gen
 
 
 def test_download_taxid_and_spetaxid(caplog):
     """
-    Test that, given a species taxid and a taxid, it downloads only the genome(s) corresponding to taxid (intersection)
+    Test that, given a species taxid and a taxid, it downloads only the genome(s) 
+    corresponding to taxid (intersection)
 
     We cannot compare log, as it is already catched by NCBI_genome_download
     """
@@ -388,18 +467,22 @@ def test_download_taxid_and_spetaxid(caplog):
     levels = ""
     threads = 1
     outdir2 = os.path.join(GENEPATH, "test_download_refseq_noSpeandSpecific")
-    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                  outdir2, threads)
+    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                                NCBI_species_taxid, NCBI_taxid, NCBI_strains,
+                                                levels, outdir2, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir2 == os.path.join(outdir2, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, as it is updated 
+    # everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
     assert nb_gen2 == 1
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir2)
     assert len(os.listdir(db_dir2)) == 1
     # Check log giving only species taxid
-    assert "Downloading all genomes for  NCBI_species_taxid = 104099 (and NCBI_taxid = 1231342)" in caplog.text
+    assert ("From refseq: Downloading genomes with "
+            "NCBI_taxid = 1231342, which also have") in caplog.text
+    assert ("NCBI_species_taxid = 104099") in caplog.text
 
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir2, "assembly_summary-toto-spe.txt" )
@@ -414,7 +497,8 @@ def test_download_taxid_and_spetaxid(caplog):
 
 def test_download_taxid_and_spename(caplog):
     """
-    Test that, given a taxid and a species name, it downloads only the genome(s) corresponding to taxid (intersection)
+    Test that, given a taxid and a species name, it downloads only the genome(s) 
+    corresponding to taxid (intersection)
 
     We cannot compare log, as it is already catched by NCBI_genome_download
     """
@@ -428,18 +512,23 @@ def test_download_taxid_and_spename(caplog):
     levels = ""
     threads = 1
     outdir = os.path.join(GENEPATH, "test_download_refseq_noSpeandSpecific")
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                              outdir, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, 
+    # as it is updated everyday. But in nov. 2019, there are 4 genomes. 
+    # So, there must be at least those 4 genomes
     assert nb_gen == 1
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == 1
     # Check log giving only species taxid
-    assert "Downloading all genomes for NCBI species = Acetobacter orleanensis (and NCBI_taxid = 1231342)" in caplog.text
+    assert ("From refseq: Downloading genomes with "
+            "NCBI_taxid = 1231342, which also have") in caplog.text
+    assert ("NCBI species = Acetobacter orleanensis") in caplog.text
 
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-aceor.txt" )
@@ -452,7 +541,51 @@ def test_download_taxid_and_spename(caplog):
     assert len(os.listdir(ngd_outdir)) == 1
 
 
-def test_download_specific_strain(caplog):
+def test_download_all_info(caplog):
+    """
+    Giving species name, species taxID and sub-species taxid
+    """
+    caplog.set_level(logging.INFO)
+    species_linked = "toto-spe"
+    section = "refseq"
+    NCBI_species = "Acetobacter orleanensis"
+    NCBI_species_taxid = "104099"
+    NCBI_taxid = "1231342"
+    NCBI_strains = "JCM 7639T"
+    levels = ""
+    threads = 1
+    outdir2 = os.path.join(GENEPATH, "test_download_allinfo")
+    db_dir2, nb_gen2 = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                                NCBI_species_taxid, NCBI_taxid, NCBI_strains,
+                                                levels, outdir2, threads)
+
+    # Check path to uncompressed files is as expected
+    assert db_dir2 == os.path.join(outdir2, "Database_init")
+    # Check number of genomes downloaded. We cannot know the exact value, as it is updated 
+    # everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    assert nb_gen2 == 1
+    # And that db_dir exists and contains nb_gen files
+    assert os.path.isdir(db_dir2)
+    assert len(os.listdir(db_dir2)) == 1
+    # Check log giving only species taxid
+    assert ("From refseq: Downloading the following specified strain(s): "
+            "JCM 7639T, which also have") in caplog.text 
+    assert "NCBI species = Acetobacter orleanensis" in caplog.text
+    assert "NCBI_species_taxid = 104099" in caplog.text
+    assert "NCBI_taxid = 1231342" in caplog.text
+
+    # Check that assembly summary file was donwloaded as expected
+    sum_file = os.path.join(outdir2, "assembly_summary-toto-spe.txt" )
+    assert os.path.isfile(sum_file)
+
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir2 = os.path.join(outdir2, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir2)
+    assert len(os.listdir(ngd_outdir2)) == 1
+
+
+def test_download_only_taxid(caplog):
     """
     Test that, given a taxid of a specific strain, it only downloads this one
 
@@ -469,12 +602,15 @@ def test_download_specific_strain(caplog):
     threads = 1
     levels = ""
 
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                              outdir, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, 
+    # as it is updated everyday. But in nov. 2019, there are 4 genomes. 
+    # So, there must be at least those 4 genomes
     assert nb_gen == 1
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
@@ -491,7 +627,7 @@ def test_download_specific_strain(caplog):
     assert len(os.listdir(ngd_outdir)) == 1
 
     # Check log giving only specific taxid
-    assert "Downloading all genomes for  NCBI_taxid = 1123862" in caplog.text
+    assert "Downloading genomes with NCBI_taxid = 1123862" in caplog.text
 
 
 def test_download_2taxid(caplog):
@@ -506,24 +642,27 @@ def test_download_2taxid(caplog):
     NCBI_species = None
     NCBI_species_taxid = ""
     # 913079 is the subspecies Salmonella enterica subsp. enterica serovar Mississippi
-    # 1212561  is the strain Salmonella enterica subsp. enterica serovar Mississippi strain 2010K-1406
+    # 1212561 = strain Salmonella enterica subsp. enterica serovar Mississippi strain 2010K-1406
     NCBI_taxid = "913079,1212561"
     NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_2taxid")
     threads = 1
     levels = ""
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                              outdir, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, 
+    # as it is updated everyday. But in nov. 2019, there are 4 genomes. 
+    # So, there must be at least those 4 genomes
     assert nb_gen >= 13
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
     # Check log giving only species taxid
-    assert "Downloading all genomes for  NCBI_taxid = 913079,1212561" in caplog.text
+    assert "From refseq: Downloading genomes with NCBI_taxid = 913079,1212561" in caplog.text
 
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir, "assembly_summary-salmo.txt" )
@@ -544,15 +683,16 @@ def test_download_2taxid(caplog):
     outdir_1 = os.path.join(GENEPATH, "test_download_refseq_2taxid_1")
     threads = 1
     levels = ""
-    db_dir_1, nb_gen_1 = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid_1, NCBI_strains, levels,
-                                                    outdir_1, threads)
+    db_dir_1, nb_gen_1 = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                                  NCBI_species_taxid, NCBI_taxid_1, NCBI_strains, 
+                                                  levels, outdir_1, threads)
     assert nb_gen == nb_gen_1 + 1
-    assert "Downloading all genomes for  NCBI_taxid = 913079" in caplog.text
+    assert "From refseq: Downloading genomes with NCBI_taxid = 913079" in caplog.text
 
 
 def test_download_refseq_vs_genbank(caplog):
     """
-    Give a taxid of a subspecies download strains from refseq, and then from genbank.
+    Give a taxid of a subspecies, download strains from refseq, and then from genbank.
     Currently, no strains in refseq, and 2 in genbank.
     39831 = Klebsiella pneumoniae subsp. rhinoscleromatis
     Later, there can be some in refseq, but always at least 2 more in genbank
@@ -570,8 +710,8 @@ def test_download_refseq_vs_genbank(caplog):
 
     # With refseq, no genome found
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                   outdir, threads)
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, 
+                                 NCBI_taxid, NCBI_strains, levels, outdir, threads)
 
     # Check path to uncompressed files does not exist
     assert not os.path.isdir(os.path.join(outdir, "Database_init"))
@@ -581,26 +721,31 @@ def test_download_refseq_vs_genbank(caplog):
     assert not os.path.isdir(ngd_outdir)
 
     # Check logs
+    assert ("From refseq: Downloading genomes with NCBI_taxid = 39831") in caplog.text
     assert "ERROR" in caplog.text
-    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
-            "NCBI species name. If you gave both, check that given taxID and name really "
-            "correspond to the same species.") in caplog.text
+    assert ("No strain correspond to your request. If you are sure there should have "
+            "some, check that you gave valid NCBI taxid and/or "
+            "NCBI species name and/or NCBI strain name. If you gave several, check that "
+            "given taxIDs and names are compatible.") in caplog.text
 
     # REDO with genbank instead of refseq
     section = "genbank"
     outdir2 = os.path.join(GENEPATH, "test_download_genbank")
-    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                                outdir2, threads)
+    db_dir, nb_gen = downg.download_from_ncbi(species_linked, section, NCBI_species, 
+                                              NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
+                                              outdir2, threads)
 
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir2, "Database_init")
-    # Check number of genomes downloaded. We cannot know the exact value, as it is updated everyday. But in nov. 2019, there are 4 genomes. So, there must be at least those 4 genomes
+    # Check number of genomes downloaded. We cannot know the exact value, as it is 
+    # updated everyday. But in nov. 2019, there are 4 genomes. 
+    # So, there must be at least those 4 genomes
     assert nb_gen >= 2
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
     # Check log giving only species taxid
-    assert "Downloading all genomes for  NCBI_taxid = 39831" in caplog.text
+    assert ("From genbank: Downloading genomes with NCBI_taxid = 39831") in caplog.text
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir2, "assembly_summary-refseq-genbank.txt" )
     assert os.path.isfile(sum_file)
@@ -625,8 +770,9 @@ def test_download_wrongTaxID(caplog):
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                   outdir, threads)
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, 
+                                 NCBI_taxid, NCBI_strains, levels,
+                                 outdir, threads)
 
     # Check path to uncompressed files does not exist
     assert not os.path.isdir(os.path.join(outdir, "Database_init"))
@@ -638,9 +784,10 @@ def test_download_wrongTaxID(caplog):
     # Check logs
     caplog.set_level(logging.DEBUG)
     assert "ERROR" in caplog.text
-    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
-            "NCBI species name. If you gave both, check that given taxID and name really "
-            "correspond to the same species.") in caplog.text
+    assert ("No strain correspond to your request. If you are sure there should have "
+            "some, check that you gave valid NCBI taxid and/or "
+            "NCBI species name and/or NCBI strain name. If you gave several, check that "
+            "given taxIDs and names are compatible.") in caplog.text
 
     # Check that output directory was not created
     assert not os.path.isdir(outdir)
@@ -648,8 +795,8 @@ def test_download_wrongTaxID(caplog):
 
 def test_download_diffSpeTaxID(caplog):
     """
-    Test that, when a taxID and a species name are given, but those 2 elements do not
-    match with the same genomes, it exists with error message
+    Test that, when a spe taxID and a species name are given, but those 2 elements do not
+    match with the same genomes, it exits with error message
 
     We cannot compare log, as it is already catched by NCBI_genome_download
     """
@@ -663,8 +810,9 @@ def test_download_diffSpeTaxID(caplog):
     threads = 1
     levels = ""
     with pytest.raises(SystemExit):
-        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
-                                   outdir, threads)
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, 
+                                 NCBI_taxid, NCBI_strains, levels,
+                                 outdir, threads)
 
     # Check path to uncompressed files does not exist
     assert not os.path.isdir(os.path.join(outdir, "Database_init"))
@@ -675,10 +823,52 @@ def test_download_diffSpeTaxID(caplog):
 
     # Check logs
     caplog.set_level(logging.DEBUG)
+    # assert ("In refseq, Downloading all genomes for NCBI_taxid = 39831") in caplog.text
     assert "ERROR" in caplog.text
-    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
-            "NCBI species name. If you gave both, check that given taxID and name really "
-            "correspond to the same species.") in caplog.text
+    assert ("No strain correspond to your request. If you are sure there should have "
+            "some, check that you gave valid NCBI taxid and/or "
+            "NCBI species name and/or NCBI strain name. If you gave several, check that "
+            "given taxIDs and names are compatible.") in caplog.text
+
+    # Check that output directory was not created
+    assert not os.path.isdir(outdir)
+
+
+def test_download_diff_specificStrain_species(caplog):
+    """
+    Test that, when a species name is given, as well as a specific strain name, but which 
+    does not exist for this species. It should exit with error message, as no strain is found.
+
+    """
+    species_linked = "Acetobacter_orleanensis"
+    section = "refseq"
+    NCBI_species = "Acetobacter fabarum"
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_strains = "SB2390,AS001254"
+    outdir = os.path.join(GENEPATH, "test_download_refseq_wrongTaxID")
+    threads = 1
+    levels = ""
+    with pytest.raises(SystemExit):
+        downg.download_from_ncbi(species_linked, section, NCBI_species, NCBI_species_taxid, 
+                                 NCBI_taxid, NCBI_strains, levels,
+                                 outdir, threads)
+
+    # Check path to uncompressed files does not exist
+    assert not os.path.isdir(os.path.join(outdir, "Database_init"))
+
+    # Check that the NCBI_genome_download output directory was not created
+    ngd_outdir = os.path.join(outdir, "refseq", "bacteria")
+    assert not os.path.isdir(ngd_outdir)
+
+    # Check logs
+    caplog.set_level(logging.DEBUG)
+    # assert ("In refseq, Downloading all genomes for NCBI_taxid = 39831") in caplog.text
+    assert "ERROR" in caplog.text
+    assert ("No strain correspond to your request. If you are sure there should have "
+            "some, check that you gave valid NCBI taxid and/or "
+            "NCBI species name and/or NCBI strain name. If you gave several, check that "
+            "given taxIDs and names are compatible.") in caplog.text
 
     # Check that output directory was not created
     assert not os.path.isdir(outdir)

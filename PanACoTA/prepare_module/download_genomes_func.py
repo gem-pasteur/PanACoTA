@@ -54,7 +54,7 @@ logger = logging.getLogger("prepare.dds")
 
 
 def download_from_ncbi(species_linked, section, ncbi_species_name, 
-    ncbi_species_taxid, ncbi_taxid, strains, levels, outdir, threads):
+    ncbi_species_taxid, ncbi_taxid, spe_strains, levels, outdir, threads):
     """
     Download ncbi genomes of given species
 
@@ -72,6 +72,9 @@ def download_from_ncbi(species_linked, section, ncbi_species_name,
         species taxid given in NCBI (-T option)
     ncbi_taxid : int
         taxid given in NCBI (-t option)
+    spe_strains : str
+        specific strain name, or comma-separated strain names 
+        (or name of a file with one strain name per line)
     outdir : str
         Directory where downloaded sequences must be saved
     threads : int
@@ -86,53 +89,75 @@ def download_from_ncbi(species_linked, section, ncbi_species_name,
     # Name of summary file, with metadata for each strain:
     sumfile = os.path.join(outdir, f"assembly_summary-{species_linked}.txt")
     abs_sumfile = os.path.abspath(sumfile)
-
     # arguments needed to download all genomes of the given species
     abs_outdir = os.path.abspath(outdir)
     keyargs = {"section": section, "file_formats": "fasta", 
                "output": abs_outdir,
                "parallel": threads, "groups": "bacteria",
                "metadata_table":abs_sumfile}
-    if not strains:
-        message = "Downloading all genomes for "
-    else:
-        message = 'Downloading specified strains for '
-    # If NCBI species given, add it to arguments to download genomes, and write it to info message
-    if ncbi_species_name:
-        keyargs["genera"] = ncbi_species_name
-        message += f"NCBI species = {ncbi_species_name}"
-    # If NCBI species given, add it to arguments to download genomes, and write it to info message
-    if ncbi_species_taxid:
-        keyargs["species_taxids"] = ncbi_species_taxid
+    message = f"From {section}: "
+    
+    # Specific strains: downloaded only if compatible with ncbi species/taxids
+    if spe_strains:
+        keyargs["strains"] = spe_strains
+        if os.path.isfile(spe_strains):
+            message += f"Downloading all strains specified in {spe_strains} file"
+        else:
+            message += f"Downloading the following specified strain(s): {spe_strains}"
+        if ncbi_species_name or ncbi_species_taxid or ncbi_taxid:
+            message += ", which also have: "
         if ncbi_species_name:
-            message += f" (NCBI_species_taxid = {ncbi_species_taxid})."
-        else:
-            message += f" NCBI_species_taxid = {ncbi_species_taxid}"
-    if ncbi_taxid:
+            keyargs["genera"] = ncbi_species_name
+            message += f"\n\t-NCBI species = {ncbi_species_name}"
+        if ncbi_species_taxid:
+            keyargs["species_taxids"] = ncbi_species_taxid
+            message += f"\n\t-NCBI_species_taxid = {ncbi_species_taxid}"
+        if ncbi_taxid:
+            keyargs["taxids"] = ncbi_taxid
+            message += f"\n\t-NCBI_taxid = {ncbi_taxid})."
+    # Not downloading specific strains, but a sub-species: must be compatible with species given
+    elif ncbi_taxid:
         keyargs["taxids"] = ncbi_taxid
+        message += f"Downloading genomes with NCBI_taxid = {ncbi_taxid}"
         if ncbi_species_name or ncbi_species_taxid:
-            message += f" (and NCBI_taxid = {ncbi_taxid})."
-        else:
-            message += f" NCBI_taxid = {ncbi_taxid}"
+            message += ", which also have: "
+        if ncbi_species_name:
+            keyargs["genera"] = ncbi_species_name
+            message += f"\n\t-NCBI species = {ncbi_species_name}"
+        if ncbi_species_taxid:
+            keyargs["species_taxids"] = ncbi_species_taxid
+            message += f"\n\t-NCBI_species_taxid = {ncbi_species_taxid}"
+    # Downloading all genomes of a species
+    else:
+        message += "Downloading all genomes of "
+        # If NCBI species given, add it to arguments to download genomes, 
+        # and write it to info message
+        if ncbi_species_name:
+            keyargs["genera"] = ncbi_species_name
+            message += f"NCBI species = {ncbi_species_name}"
+        # If NCBI species given, add it to arguments to download genomes, 
+        # and write it to info message
+        if ncbi_species_taxid:
+            keyargs["species_taxids"] = ncbi_species_taxid
+            if ncbi_species_name:
+                message += f" (NCBI_species_taxid = {ncbi_species_taxid})."
+            else:
+                message += f"NCBI_species_taxid = {ncbi_species_taxid}"
 
     # If assembly level(s) given, add it to arguments, and write to info message
     if levels:
         keyargs["assembly_levels"] = levels
         message += f" (Only those assembly levels: {levels}). "
 
-    # If starins list is given, add it to arguments, and write to info message
-    if strains:
-        keyargs["strains"] = strains
-        message += f" (Only those strains: {strains}). "
-
     logger.info(f"Metadata for all genomes will be saved in {sumfile}")
     logger.info(message)
 
     # Download genomes
     max_retries = 15 # If connection to NCBI fails, how many retry downloads must be done
-    error_message = ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
-                     "NCBI species name. If you gave both, check that given taxID and name really "
-                     "correspond to the same species.")
+    error_message = ("No strain correspond to your request. If you are sure there should have "
+                     "some, check that you gave valid NCBI taxid and/or "
+                     "NCBI species name and/or NCBI strain name. If you gave several, check that "
+                     "given taxIDs and names are compatible.")
     # widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
     #            "  -  ", progressbar.Timer()]
     # bar = progressbar.ProgressBar(widgets=widgets, max_value=20, term_width=50)
