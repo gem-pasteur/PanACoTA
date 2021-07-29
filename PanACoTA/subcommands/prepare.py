@@ -73,7 +73,7 @@ def main_from_parse(arguments):
          arguments.max_dist, arguments.verbose, arguments.quiet)
 
 
-def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels, ncbi_section,
+def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, ncbi_strains, levels, ncbi_section,
          outdir, tmp_dir, threads, norefseq, db_dir,
          only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist, verbose, quiet):
     """
@@ -95,9 +95,9 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels
     ncbi_species_taxid : int
         species taxid given in NCBI
     ncbi_taxid : int
-        NCBI taxid of strain
-    strains : str
-        strains to download
+        NCBI taxid (sub-species)
+    ncbi_strains : str
+        specific strains to download
     levels: str
         Level of assembly to download. Choice between 'all', 'complete', 'chromosome',
         'scaffold', 'contig'. Default is 'all'
@@ -151,7 +151,14 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels
     # if species name not species taxid by user, use taxID (if given) to name output directory
     elif ncbi_taxid:
         species_linked = str(ncbi_taxid)
-    # if neither speName, speID nor taxID given (--norefseq, mashonly), name is NA
+    # If no species nor taxID, get specific strain names
+    elif ncbi_strains:
+        if os.path.isfile(ncbi_strains):
+            species_linked = os.path.basename(ncbi_strains)
+        else:
+            species_linked = "_".join(ncbi_strains.split())
+            species_linked = "-".join(ncbi_strains.split("/"))
+    # if neither speName, speID, taxID nor strainName given (--norefseq, mashonly), name is NA
     else:
         species_linked = "NA"
     # Default outdir is species name if given, or species taxID
@@ -244,7 +251,7 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, strains, levels
         else:
             # Download all genomes of the given taxID
             db_dir, nb_gen = dgf.download_from_ncbi(species_linked, ncbi_section, ncbi_species_name, ncbi_species_taxid,
-                                                      ncbi_taxid, strains, levels, outdir, threads)
+                                                      ncbi_taxid, ncbi_strains, levels, outdir, threads)
             logger.info(f"{nb_gen} {ncbi_section} genome(s) downloaded")
 
         # Now that genomes are downloaded and uncompressed, check their quality to remove bad ones
@@ -314,8 +321,8 @@ def build_parser(parser):
                          )
     general.add_argument("-S", dest="strains", default="",
                          help=("List of strains to download."
-                               "A comma-separated list of strain names is possible."
-                               "As well as a path to a filename containing one name per line."
+                               "A comma-separated list of strain names is possible, "
+                               "as well as a path to a filename containing one name per line."
                                "Ex: '-S SB2390, IA565' for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains"
                                "Ex: '-S path/to/list.txt' path to file with strain names, one per line.")
                          )
@@ -465,11 +472,13 @@ def check_args(parser, args):
     # We don't want to run only mash, nor only quality control, but don't give a NCBI taxID.
     # -> Give at least 1!
     if (not args.only_mash and not args.norefseq and
-        not args.ncbi_species_taxid and not args.ncbi_species_name and not args.ncbi_taxid and not args.strains):
+        not args.ncbi_species_taxid and not args.ncbi_species_name and 
+        not args.ncbi_taxid and not args.strains):
         parser.error("As you did not put the '--norefseq' nor the '-M' option, it means that "
-                     "you want to download refseq (or genbank) genomes. But you did not provide any "
-                     "information, so PanACoTA cannot guess which species you want to download. "
-                     "Specify NCBI_taxid (-t), and/or NCBI species taxid (-T) and/or NCBI_species (-g) to download, or add one of "
+                     "you want to download refseq (or genbank) genomes. But you did not provide "
+                     "any information, so PanACoTA cannot guess which species you want to "
+                     "download. Specify NCBI_taxid (-t), and/or NCBI species taxid (-T) "
+                     "and/or NCBI_species (-g) and/or NCBI_strain (-S) to download, or add one of "
                      "the 2 options (--norefseq or -M) if you want to skip the 'download step'.")
 
     # If norefseq, give output directory
@@ -513,6 +522,11 @@ def check_args(parser, args):
                           "nor an output directory ('-o outdir'). "
                           "All files will be downloaded in a folder called with the NCBI species "
                           f"taxid {args.ncbi_species_taxid} instead of the species name.", "yellow"))
+        elif args.strains:
+            print(colored("WARNING: you did not provide a species name ('-g species' option) "
+                          "nor a species taxid ('-T spetaxid') nor an output directory ('-o outdir'). "
+                          "All files will be downloaded in a folder called with the specified strains "
+                          f"names {args.strains} instead of the species name.", "yellow"))
         else:
             print(colored("WARNING: you did not provide a species name ('-g species' option) "
                           "nor a species taxid ('-T spetaxid') nor an output directory ('-o outdir'). "

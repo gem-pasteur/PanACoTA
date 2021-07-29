@@ -23,9 +23,10 @@ def test_parser_noarg(capsys):
     print(err)
     assert "error: " in err
     assert ("As you did not put the '--norefseq' nor the '-M' option, it means that you want "
-            "to download refseq (or genbank) genomes. But you did not provide any information, so PanACoTA "
-            "cannot guess which species you want to download. Specify NCBI_taxid (-t)") in err
-    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) to download, "
+            "to download refseq (or genbank) genomes. But you did not provide any information, "
+            "so PanACoTA cannot guess which species you want to download. "
+            "Specify NCBI_taxid (-t)") in err
+    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) and/or NCBI_strain (-S) to download, "
             "or add one of the 2 options (--norefseq or -M) "
             "if you want to skip the 'download step'.") in err
 
@@ -274,9 +275,10 @@ def test_parse_missing_arg(capsys):
         prepare.parse(parser, "-p 1".split())
     _, err = capsys.readouterr()
     assert ("As you did not put the '--norefseq' nor the '-M' option, it means that you want "
-            "to download refseq (or genbank) genomes. But you did not provide any information, so PanACoTA "
-            "cannot guess which species you want to download. Specify NCBI_taxid (-t)") in err
-    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) to download, "
+            "to download refseq (or genbank) genomes. But you did not provide any information, "
+            "so PanACoTA cannot guess which species you want to download. "
+            "Specify NCBI_taxid (-t)") in err
+    assert ("NCBI species taxid (-T) and/or NCBI_species (-g) and/or NCBI_strain (-S) to download, "
             "or add one of the 2 options (--norefseq or -M) "
             "if you want to skip the 'download step'.") in err
 
@@ -350,6 +352,29 @@ def test_parser_nospecies(capsys):
             "nor an output directory ('-o outdir'). "
             "All files will be downloaded in a folder called with the NCBI species "
             "taxid 1234 instead of the species name.") in out
+
+
+def test_parser_nospecies_noid(capsys):
+    """
+    Test that when the user does not give an int for the threads value, it returns an
+    error message.
+    """
+    parser = argparse.ArgumentParser(description="Prepare", add_help=False)
+    prepare.build_parser(parser)
+    options = prepare.parse(parser, "-S toto".split())
+    assert not options.norefseq
+    assert not options.only_mash
+    assert options.ncbi_species_taxid == ""
+    assert options.ncbi_taxid == ""
+    assert options.ncbi_species_name == ""
+    assert options.strains == "toto"
+    out, err = capsys.readouterr()
+    print(out)
+    assert ("WARNING: you did not provide a species name ('-g species' option) "
+            "nor a species taxid ('-T spetaxid') "
+            "nor an output directory ('-o outdir'). ") in out
+    assert ("All files will be downloaded in a folder called with the specified strains "
+            "names toto instead of the species name.") in out
 
 
 def test_parser_nospecies_nospeid(capsys):
