@@ -138,9 +138,9 @@ coverage:
     - pwd
     - ls -la
     - ls /builds/EKrQxjEy/1/aperrin/pipeline_annotation/PanACoTA
-    - mv .coverage-unit .coverage
+    - mv .coverage-functional .coverage
     - coverage html
-    - ls -la PanACoTA
+    - ls -la
     - coverage combine .coverage-unit .coverage-functional
     - ls -la
     - coverage report
