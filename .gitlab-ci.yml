@@ -117,7 +117,7 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_all* -vx
     # - py.test test/test_functional/test_prepare* -vx
     - coverage html
-    - mv .coverage .coverage-functional
+    # - mv .coverage .coverage-functional
   artifacts:
     paths:
       - .coverage
