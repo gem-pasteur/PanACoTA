@@ -140,7 +140,7 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - pwd
-    - coverage combine .coverage-unit .coverage-functional
+    - coverage combine .coverage.unit .coverage.functional
     - coverage report -i
     - coverage html -i
     # test coverage parsing: \d+\%\s*$
