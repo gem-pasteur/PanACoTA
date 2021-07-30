@@ -137,7 +137,6 @@ coverage:
   script:
     - pwd
     - ls -la
-    - coverage html
     - coverage erase
     - ls -la PanACoTA
     - coverage combine .coverage-unit .coverage-functional
