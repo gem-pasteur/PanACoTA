@@ -141,8 +141,6 @@ coverage:
   script:
     - pwd
     - coverage combine # .coverage-unit .coverage-functional
-    - coverage report
-    - coverage html
     - coverage html -i
     - coverage report -i
     # test coverage parsing: \d+\%\s*$
