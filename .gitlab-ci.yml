@@ -138,16 +138,9 @@ coverage:
   script:
     - pwd
     - ls -la
-    - ls -la /builds/EKrQxjEy/0/aperrin/pipeline_annotation/PanACoTA
-    - mv .coverage-unit .coverage
-    - coverage html
-    - mv .coverage .coverage-unit
-    - mv .coverage-functional .coverage
-    - coverage html
-    - ls -la
     - coverage combine .coverage-unit .coverage-functional
-    - ls -la
-    - coverage report
+    - coverage html -i
+    - coverage report -i
     # test coverage parsing: \d+\%\s*$
     # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
