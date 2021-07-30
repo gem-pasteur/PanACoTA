@@ -136,9 +136,11 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - ls -la
+    - ls -la PanACoTA
     - coverage combine .coverage-unit .coverage-functional
-    - coverage html -i
+    - ls -la
     - coverage report
+    - coverage html -i
     # test coverage parsing: \d+\%\s*$
     # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
