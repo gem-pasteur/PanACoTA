@@ -117,12 +117,12 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_annote.py -xv
     # - py.test test/test_functional/test_all* -vx
     # - py.test test/test_functional/test_prepare* -vx
+    - mv .coverage .coverage.functional
     - coverage report
     - coverage html
-    #- mv .coverage .coverage.functional
   artifacts:
     paths:
-      - .coverage
+      - .coverage.functional
     expire_in: 1 hour
 
 
