@@ -88,6 +88,7 @@ unit-test-ubuntu:
     # - py.test test/test_unit/test_corepers -vx
     # - py.test test/test_unit/test_align -vx
     # - py.test test/test_unit/test_tree -xv
+    - coverage report
     - mv .coverage .coverage-unit
   artifacts:
     paths:
@@ -117,7 +118,7 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_all* -vx
     # - py.test test/test_functional/test_prepare* -vx
     - coverage report
-    # - mv .coverage .coverage-functional
+    - mv .coverage .coverage-functional
   artifacts:
     paths:
       - .coverage
@@ -136,9 +137,6 @@ coverage:
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
-    - pwd
-    - ls -la
-    - coverage html
     - coverage combine .coverage-unit .coverage-functional
     - coverage html -i
     - coverage report -i
