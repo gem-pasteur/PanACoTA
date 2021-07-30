@@ -58,6 +58,7 @@ def test_main_from_parse():
     args.ncbi_species_name = "Acetobacter orleanensis"
     args.ncbi_species_taxid = "104099"
     args.ncbi_taxid = ""
+    args.strains = ""
     args.ncbi_section = "refseq"
     args.outdir = GENEPATH
     args.tmp_dir = ""
@@ -105,6 +106,7 @@ def test_main_from_parse_longspeciesname():
     args.ncbi_species_name = "Salmonella enterica subsp. enterica serovar Paratyphi C"
     args.ncbi_species_taxid = ""
     args.ncbi_taxid = ""
+    args.strains = ""
     args.ncbi_section = "refseq"
     args.outdir = GENEPATH
     args.tmp_dir = ""
@@ -143,6 +145,104 @@ def test_main_from_parse_longspeciesname():
     assert len(fna_files) >= 1
 
 
+def test_main_only_strainname():
+    """
+    Only give strain names (no spe taxid etc). Chack that they are downloaded,
+    and that the summary file has the expected name.
+    """
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_section = "refseq"
+    NCBI_strains = "AS001254,KPPR1,LMG 1583"
+    levels = ""
+    outdir = GENEPATH
+    tmp_dir = os.path.join(outdir, 'tmp')
+    threads = 1
+    norefseq = False
+    db_dir = ""
+    only_mash = False
+    info_file = ""
+    l90 = 100
+    nbcont = 999
+    cutn = 5
+    min_dist = 1e-4
+    max_dist = 0.06
+    verbose = 2
+    quiet = False
+    out_info_file = os.path.join(outdir, "LSTINFO-AS001254_and_KPPR1_and_LMG_1583-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, NCBI_section, outdir, tmp_dir,
+                        threads, norefseq, db_dir, only_mash, info_file, l90, nbcont,
+                        cutn, min_dist, max_dist, verbose, quiet) == out_info_file
+
+    # Check output files
+    summary =  os.path.join(GENEPATH, "assembly_summary-AS001254_and_KPPR1_and_LMG_1583.txt")
+    assert os.path.isfile(summary)
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir)
+    assert len(os.listdir(ngd_outdir)) == 3
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
+    assert len(log_files) == 3
+    # Check tmp files folder created, with the 3 strain files 
+    tmp_files = glob.glob(os.path.join(tmp_dir, "*.fna_prepare-split5N.fna"))
+    assert len(tmp_files) == 3
+    # Check Database_init folder created, with all 3 ".fna" genomes
+    fna_files = glob.glob(os.path.join(GENEPATH, "Database_init", "*.fna"))
+    assert len(fna_files) == 3
+
+
+def test_main_only_strainname_file():
+    """
+    Only give strain names (no spe taxid etc). Chack that they are downloaded,
+    and that the summary file has the expected name.
+    """
+    NCBI_species_name = ""
+    NCBI_species_taxid = ""
+    NCBI_taxid = ""
+    NCBI_section = "refseq"
+    NCBI_strains = os.path.join(TEST_DIR, "test_list-strains.txt")
+    levels = ""
+    outdir = GENEPATH
+    tmp_dir = os.path.join(outdir, 'tmp')
+    threads = 1
+    norefseq = False
+    db_dir = ""
+    only_mash = False
+    info_file = ""
+    l90 = 100
+    nbcont = 999
+    cutn = 5
+    min_dist = 1e-4
+    max_dist = 0.06
+    verbose = 2
+    quiet = False
+    out_info_file = os.path.join(outdir, "LSTINFO-test_list-strains-filtered-0.0001_0.06.txt")
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, NCBI_section, outdir, tmp_dir,
+                        threads, norefseq, db_dir, only_mash, info_file, l90, nbcont,
+                        cutn, min_dist, max_dist, verbose, quiet) == out_info_file
+
+    # Check output files
+    summary =  os.path.join(GENEPATH, "assembly_summary-test_list-strains.txt")
+    assert os.path.isfile(summary)
+    # Check that the NCBI_genome_download output directory exists
+    ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
+    # And that it contains folders
+    assert os.path.isdir(ngd_outdir)
+    assert len(os.listdir(ngd_outdir)) == 3
+    # Check logfiles are here
+    log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
+    assert len(log_files) == 3
+    # Check tmp files folder created, with the 3 strain files 
+    tmp_files = glob.glob(os.path.join(tmp_dir, "*.fna_prepare-split5N.fna"))
+    assert len(tmp_files) == 3
+    # Check Database_init folder created, with all 3 ".fna" genomes
+    fna_files = glob.glob(os.path.join(GENEPATH, "Database_init", "*.fna"))
+    assert len(fna_files) == 3
+
+
 def test_main_not_only_mash_infoexists():
     """
     We run without option only_mash, but still provide a lstinfo file
@@ -152,6 +252,7 @@ def test_main_not_only_mash_infoexists():
     NCBI_species_taxid = "104099"
     NCBI_taxid = ""
     NCBI_section = "refseq"
+    NCBI_strains = ""
     levels = ""
     outdir = GENEPATH
     tmp_dir = os.path.join(outdir, "temporary_directory")
@@ -169,7 +270,7 @@ def test_main_not_only_mash_infoexists():
     verbose = 2
     quiet = False
     out_info_file = os.path.join(outdir, "LSTINFO-104099-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section, outdir, tmp_dir,
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, NCBI_section, outdir, tmp_dir,
                         threads, norefseq, db_dir, only_mash, info_file, l90, nbcont,
                         cutn, min_dist, max_dist, verbose, quiet) == out_info_file
 
@@ -204,10 +305,11 @@ def test_main_wrong_taxid(capsys):
     NCBI_species_name = ""
     NCBI_taxid = "123"
     NCBI_species_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "genbank"
     levels = ""
-    outdir = ""
-    tmp_dir = os.path.join("123", "temporary_directory")
+    outdir = GENEPATH
+    tmp_dir = os.path.join(GENEPATH, "123", "temporary_directory")
     threads = 1
     norefseq = False
     info_file = ""
@@ -220,31 +322,28 @@ def test_main_wrong_taxid(capsys):
     max_dist = 0.06
     verbose = 2
     quiet = False
-    res_outdir = "123"
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section, 
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, NCBI_section, 
                      outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
     _, err = capsys.readouterr()
-    assert ("Could not download genomes. Check that you gave valid NCBI taxid and/or "
-            "NCBI species name. If you gave both, check that given taxID and name really "
-            "correspond to the same species.") in err
+    assert ("No strain correspond to your request. If you are sure there should have "
+            "some, check that you gave valid NCBI taxid and/or "
+            "NCBI species name and/or NCBI strain name. If you gave several, check that "
+            "given taxIDs and names are compatible.") in err
     # Check output files
-    summary =  os.path.join(res_outdir, "assembly_summary-123.txt")
+    summary =  os.path.join(outdir, "assembly_summary-123.txt")
     assert not os.path.isfile(summary)
-    ngd_outdir = os.path.join(res_outdir, "genbank", "bacteria")
+    ngd_outdir = os.path.join(outdir, "genbank", "bacteria")
     assert not os.path.isdir(ngd_outdir)
     # # Check logfiles are here
-    log_files = glob.glob(os.path.join(res_outdir, "*log*"))
+    log_files = glob.glob(os.path.join(outdir, "*log*"))
     assert len(log_files) == 3
     # Check tmp files folder created, but empty asnothing is downloaded
     assert len(os.listdir(tmp_dir)) == 0
     # Check Database_init folder created, with at list 4 ".fna" genomes
-    assert not os.path.isdir(os.path.join(res_outdir, "Database_init"))
-
-    # Remove output directory
-    shutil.rmtree(res_outdir, ignore_errors=True)
+    assert not os.path.isdir(os.path.join(outdir, "Database_init"))
 
 
 def test_main_norefseq_wrongdbpath(capsys):
@@ -255,6 +354,7 @@ def test_main_norefseq_wrongdbpath(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
@@ -272,7 +372,7 @@ def test_main_norefseq_wrongdbpath(capsys):
     quiet = False
     info_file = ""
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, NCBI_section,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, NCBI_section,
                      outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
@@ -302,6 +402,7 @@ def test_main_norefseq_nodefault_dbdir_nor_refseq(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "genbank"
     levels = ""
     outdir = GENEPATH
@@ -319,7 +420,7 @@ def test_main_norefseq_nodefault_dbdir_nor_refseq(capsys):
     quiet = False
     info_file = ""
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, 
                      NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
@@ -359,6 +460,7 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = "123"
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "genbank"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
@@ -380,7 +482,7 @@ def test_main_norefseq_nodefault_dbdir_but_refseq(capsys):
     quiet = False
     info_file = ""
     out_info_file = os.path.join(outdir, f"LSTINFO-123-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, 
                         NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
@@ -419,6 +521,7 @@ def test_main_norefseq_defaultdbdir(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
@@ -440,7 +543,7 @@ def test_main_norefseq_defaultdbdir(capsys):
     quiet = False
     info_file = ""
     out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, 
                         NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
@@ -472,6 +575,7 @@ def test_main_norefseq_givendbdir(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     # Copy refseq/bacteria and content into outdirectory
@@ -493,7 +597,7 @@ def test_main_norefseq_givendbdir(capsys):
     quiet = False
     info_file = ""
     out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, 
                         NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
@@ -521,6 +625,7 @@ def test_only_mash(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
@@ -538,7 +643,7 @@ def test_only_mash(capsys):
     verbose = 1
     quiet = False
     out_info_file = os.path.join(outdir, "LSTINFO-NA-filtered-0.0001_0.06.txt")
-    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels, 
+    assert prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels, 
                         NCBI_section, outdir, tmp_dir, threads,
                         norefseq, db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist,
                         max_dist, verbose, quiet) == out_info_file
@@ -569,6 +674,7 @@ def test_only_mash_empty_lstinfo(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
@@ -588,7 +694,7 @@ def test_only_mash_empty_lstinfo(capsys):
     verbose = 1
     quiet = False
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                      NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)
@@ -615,6 +721,7 @@ def test_only_mash_no_lstinfo(capsys):
     NCBI_species_name = ""
     NCBI_species_taxid = ""
     NCBI_taxid = ""
+    NCBI_strains = ""
     NCBI_section = "refseq"
     levels = ""
     outdir = GENEPATH
@@ -633,7 +740,7 @@ def test_only_mash_no_lstinfo(capsys):
     verbose = 1
     quiet = False
     with pytest.raises(SystemExit):
-        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, levels,
+        prepare.main("cmd", NCBI_species_name, NCBI_species_taxid, NCBI_taxid, NCBI_strains, levels,
                      NCBI_section, outdir, tmp_dir, threads, norefseq,
                      db_dir, only_mash, info_file, l90, nbcont, cutn, min_dist, max_dist,
                      verbose, quiet)

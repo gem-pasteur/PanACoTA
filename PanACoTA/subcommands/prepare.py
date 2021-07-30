@@ -155,9 +155,11 @@ def main(cmd, ncbi_species_name, ncbi_species_taxid, ncbi_taxid, ncbi_strains, l
     elif ncbi_strains:
         if os.path.isfile(ncbi_strains):
             species_linked = os.path.basename(ncbi_strains)
+            species_linked = os.path.splitext(species_linked)[0]
         else:
             species_linked = "_".join(ncbi_strains.split())
-            species_linked = "-".join(ncbi_strains.split("/"))
+            species_linked = "-".join(species_linked.split("/"))
+            species_linked = "_and_".join(species_linked.split(","))
     # if neither speName, speID, taxID nor strainName given (--norefseq, mashonly), name is NA
     else:
         species_linked = "NA"
