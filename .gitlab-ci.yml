@@ -117,9 +117,9 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_annote.py -xv
     # - py.test test/test_functional/test_all* -vx
     # - py.test test/test_functional/test_prepare* -vx
-    - mv .coverage .coverage.functional
     - coverage report
     - coverage html
+    - mv .coverage .coverage.functional
   artifacts:
     paths:
       - .coverage.functional
@@ -140,8 +140,9 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     #- coverage combine # .coverage-unit .coverage-functional
+    - mv .coverage.functional .coverage
+    - coverage report --omit --omit PanACoTA/__init__.py 
     - coverage html
-    - coverage report
     - coverage html -i
     - coverage report -i
     # test coverage parsing: \d+\%\s*$
