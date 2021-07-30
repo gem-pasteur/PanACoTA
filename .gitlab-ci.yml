@@ -141,7 +141,7 @@ coverage:
   script:
     #- coverage combine # .coverage-unit .coverage-functional
     - mv .coverage.functional .coverage
-    - coverage report --omit --omit PanACoTA/__init__.py 
+    - coverage report --omit PanACoTA/__init__.py 
     - coverage html
     - coverage html -i
     - coverage report -i
