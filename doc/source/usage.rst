@@ -211,6 +211,7 @@ Give at least one of ``-T``, ``-t`` or ``-g`` parameters (one of them is enough)
 - ``-g <NCBI species>``: the name of the species, as written by the NCBI. Give name between quotes.
 - ``-T <NCBI species taxid>``: the taxid provided by the NCBI for the species you want to download
 - ``-t <NCBI taxid>``: the taxid provided by the NCBI for the subspecies or specific strain you want to download
+- ``-S <NCBI_strain>``: specific strain name you want to download. A comma-separated list of strain names is possible, as well as a file with 1 line per strain.
 
 If you want to download all genomes in genbank, and not only the ones in refseq, use option ``-s genbank`` (default is ``-s refseq``).
 
