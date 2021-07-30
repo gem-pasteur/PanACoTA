@@ -137,6 +137,7 @@ coverage:
   script:
     - pwd
     - ls -la
+    - ls /builds/EKrQxjEy/1/aperrin/pipeline_annotation/PanACoTA
     - mv .coverage-unit .coverage
     - coverage html
     - ls -la PanACoTA
