@@ -121,7 +121,7 @@ func-test-ubuntu:
     - mv .coverage .coverage-functional
   artifacts:
     paths:
-      - .coverage
+      - .coverage-functional
     expire_in: 1 hour
 
 
