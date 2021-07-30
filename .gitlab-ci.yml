@@ -80,9 +80,9 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_utils-logging.py -xv
     - py.test test/test_unit/test_utils-pan.py -vx
     - py.test test/test_unit/test_utils-argparse.py -vx
-    # - py.test test/test_unit/test_prepare -v -x
+    - py.test test/test_unit/test_prepare -v -x
     - py.test test/test_unit/test_annotate/test_genome_func.py -vx
-    # - py.test test/test_unit/test_annotate/test_annotation*  -vx
+    - py.test test/test_unit/test_annotate/test_annotation*  -vx
     - py.test test/test_unit/test_annotate/test_format* -v -x
     - py.test test/test_unit/test_pangenome -vx
     - py.test test/test_unit/test_corepers -vx
@@ -113,12 +113,11 @@ func-test-ubuntu:
     - py.test test/test_functional/test_align-parser.py -vx
     - py.test test/test_functional/test_align.py -vx
     - py.test test/test_functional/test_tree* -vx
-    # - py.test test/test_functional/test_annote-parser.py -vx
-    # - py.test test/test_functional/test_annote.py -xv
-    # - py.test test/test_functional/test_all* -vx
-    # - py.test test/test_functional/test_prepare* -vx
+    - py.test test/test_functional/test_annote-parser.py -vx
+    - py.test test/test_functional/test_annote.py -xv
+    - py.test test/test_functional/test_all* -vx
+    - py.test test/test_functional/test_prepare* -vx
     - coverage report
-    - coverage html
     - mv .coverage .coverage.functional
   artifacts:
     paths:
