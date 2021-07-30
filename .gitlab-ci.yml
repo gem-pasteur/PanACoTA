@@ -138,6 +138,7 @@ coverage:
     - pwd
     - ls -la
     - ls /builds/EKrQxjEy/0/aperrin/pipeline_annotation/PanACoTA
+    - ls /builds/EKrQxjEy/3/aperrin/pipeline_annotation/PanACoTA
     - mv .coverage-functional .coverage
     - coverage html
     - ls -la
