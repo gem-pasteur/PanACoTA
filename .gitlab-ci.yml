@@ -136,8 +136,8 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - coverage combine .coverage-unit .coverage-functional
-    - coverage html
-    - coverage report
+    - coverage html -i
+    - coverage report -i
     # test coverage parsing: \d+\%\s*$
     # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
