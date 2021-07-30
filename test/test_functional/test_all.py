@@ -45,10 +45,10 @@ def test_main_default_qc_only():
     # Common arguments: outdir, threads, verbose, quiet
     args_all = (outdir, 1, 2, False)
     # args for prepare:
-    # NCBI_species_taxid (int), NCBI_species (str), levels (str), tmp_dir (str),
-    # norefseq (bool), db_dir (str), only_mash (bool), info_file (str), l90 (int),
+    # NCBI_species_name (str), NCBI_species_taxid (int), NCBI_taxid,  NCBI_strains, levels (str), NCBI_section,
+    # tmp_dir (str), norefseq (bool), db_dir (str), only_mash (bool), info_file (str), l90 (int),
     # nbcont (int), cutn (int), min_dist (float), max_dist (float)
-    args_prepare = ("104099", "", "", "all", "refseq", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
+    args_prepare = ("", "104099", "", "", "all", "refseq", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
     # args for annotate:
     # name (str), qc_only (bool), date (str), prodigal_only (bool), small (bool)
     args_annot = ("TEST", True, "2101", False, False)
@@ -95,6 +95,67 @@ def test_main_default_qc_only():
         assert os.path.isfile(f)
 
 
+def test_main_qconly_spestrains():
+    """
+    Test downloading 104099 genomes and analysis until QC, with verbose==2
+    """
+    cmd = "cmd"
+    outdir = os.path.join(GENEPATH, "main_all_default_qc")
+
+    # Common arguments: outdir, threads, verbose, quiet
+    args_all = (outdir, 1, 2, False)
+    # args for prepare:
+    # NCBI_species_name (str), NCBI_species_taxid (int), NCBI_taxid,  NCBI_strains, levels (str), NCBI_section,
+    # tmp_dir (str), norefseq (bool), db_dir (str), only_mash (bool), info_file (str), l90 (int),
+    # nbcont (int), cutn (int), min_dist (float), max_dist (float)
+    strains_file = os.path.join("test", "data", "prepare", "test_files", "test_list-strains.txt")
+    args_prepare = ("", "", "",strains_file, "all", "refseq", "", False, "", False, "", 100, 999, 5, 1e-4, 0.06)
+    # args for annotate:
+    # name (str), qc_only (bool), date (str), prodigal_only (bool), small (bool)
+    args_annot = ("TEST", True, "2101", False, False)
+    # args for pangenome:
+    # min_id (float), clust_mode (int), spe_dir (str), outfile (str)
+    args_pan = (0.8, 1, "", "")
+    # args for corepers
+    # tol (float), mixed (bool), multi (bool), floor (bool)
+    args_corepers = (1, False, False, False)
+    # args for align:
+    # prot_ali (bool)
+    args_align = (False)
+    #  args for tree module
+    #  soft (str), model (str), boot (bool), write_boot (bool), memory (str), fast (bool)
+    args_tree = ("iqtree2", "GTR", False, False, "", True)
+
+    # Run 'all' module
+    out = allm.main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_align, args_tree)
+    assert out == "QC_only done"
+    # Check that there are 3 log files (log, err and details)
+    log_files = glob.glob(os.path.join(outdir, "*log*"))
+    assert len(log_files) == 3
+    # Check that there are 5 files/folders : 3 logs + 2 result folders
+    assert len(os.listdir(outdir)) == 5
+    # Check result folder names
+    prep_dir = os.path.join(outdir, "1-prepare_module")
+    annot_dir = os.path.join(outdir, "2-annotate_module")
+    assert os.path.isdir(prep_dir)
+    assert os.path.isdir(annot_dir)
+    # Check presence of some key files for prepare module
+    assert(len(glob.glob(os.path.join(prep_dir, "*log*")))) == 3
+    lst1 = os.path.join(prep_dir, "LSTINFO-test_list-strains-filtered-0.0001_0.06.txt")
+    ass1 = os.path.join(prep_dir, "assembly_summary-test_list-strains.txt") 
+    assert os.path.isfile(lst1)
+    assert os.path.isfile(ass1)
+    assert os.path.isdir(os.path.join(prep_dir, "refseq"))
+    # Check presence of key files in prepare module
+    assert(len(glob.glob(os.path.join(annot_dir, "*log*")))) == 3
+    lst2 = os.path.join(annot_dir, "ALL-GENOMES-info-LSTINFO-test_list-strains-filtered-0.0001_0.06.lst")
+    png1 = os.path.join(annot_dir, "QC_L90-LSTINFO-test_list-strains-filtered-0.0001_0.06.png")
+    png2 = os.path.join(annot_dir, "QC_nb-contigs-LSTINFO-test_list-strains-filtered-0.0001_0.06.png")
+    disc = os.path.join(annot_dir, "discarded-LSTINFO-test_list-strains-filtered-0.0001_0.06.lst")
+    for f in (lst2, png1, png2, disc):
+        assert os.path.isfile(f)
+
+
 def test_main_norefseq():
     """
     Test with norefseq (4 genomes given, giving 13 families).
@@ -111,7 +172,7 @@ def test_main_norefseq():
     # db_dir = "test/data/pangenome/test_files/example_db/Replicons"
     # db_dir = "104099/Database_init"
     db_dir = os.path.join(DATADIR, "genomes")
-    args_prepare = ("104099", "", "", "all", "refseq", "", True, db_dir, False, "", 100, 999, 5, 1e-4, 1)
+    args_prepare = ("", "104099", "", "", "all", "refseq", "", True, db_dir, False, "", 100, 999, 5, 1e-4, 1)
     # args for annotate:
     # name (str), qc_only (bool), date (str), prodigal_only (bool), small (bool)
     args_annot = ("TEST", False, "2101", True, False)
@@ -208,6 +269,7 @@ def test_main_from_parse():
     args.ncbi_species_name = ""
     args.ncbi_species_taxid = "104099"
     args.ncbi_taxid = ""
+    args.strains = ""
     args.levels = ""
     args.ncbi_section = "refseq"
     args.tmp_dir = ""
