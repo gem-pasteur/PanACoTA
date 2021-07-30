@@ -137,8 +137,8 @@ coverage:
   script:
     - pwd
     - ls -la
-    - ls /builds/EKrQxjEy/0/aperrin/pipeline_annotation/PanACoTA
-    - mv .coverage-functional .coverage
+    - ls -la /builds/EKrQxjEy/0/aperrin/pipeline_annotation/PanACoTA
+    - mv .coverage-unit .coverage
     - coverage html
     - ls -la
     - coverage combine .coverage-unit .coverage-functional
