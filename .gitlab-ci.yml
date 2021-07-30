@@ -88,6 +88,7 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_corepers -vx
     - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
+    - coverage html
     - mv .coverage .coverage-unit
   artifacts:
     paths:
