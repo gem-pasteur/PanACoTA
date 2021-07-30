@@ -89,10 +89,10 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
     - coverage report
-    - mv .coverage .coverage-unit
+    - mv .coverage .coverage.unit
   artifacts:
     paths:
-      - .coverage-unit
+      - .coverage.unit
     expire_in: 1 hour
 
 
@@ -136,6 +136,7 @@ coverage:
     - unit-test-ubuntu
     - func-test-ubuntu
   before_script:
+    - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
   script:
     #- coverage combine # .coverage-unit .coverage-functional
