@@ -133,8 +133,8 @@ coverage:
     - helpers
     - install
   dependencies:
-    - func-test-ubuntu
     - unit-test-ubuntu
+    - func-test-ubuntu
   before_script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
