@@ -193,27 +193,54 @@ def perc_id(param):
 class Conf_all_parser(configparser.ConfigParser):
     """
     Read configfile and return arguments found, according to required type
+    
+    Parameters
+    ----------
+    conffile : str
+        path to configuration file
+    readsec : list
+        list of sections of the config file to read
+
+    Attributes
+    ----------
+    conffile : str
+        Path to configfile
+    sec_dicts : dict
+        {section1: {param: value}, {section2: {param:value}}}
+
     """
     def __init__(self, conffile, readsec=[]):
         super().__init__()
+        # If there is a config file specified, but it does not exist -> exit with error message
         if conffile != "" and not os.path.isfile(conffile):
             print(f"Error: config file {conffile} not found.")
             sys.exit(1)
         self.conffile = conffile
+        # Read the config file
         try:
             self.read(conffile)
         except configparser.DuplicateOptionError as err:
             print(err)
             sys.exit(1)
         self.sec_dicts = {}
+        # Convert configfile sections to dicts
         for sec in readsec:
             # If section in configfile, put its arguments and values to a dict
             # If not, create empty section, and associate with empty dict
             if sec in dict(self):
                 self.sec_dicts[sec] = dict(self[sec])
+                self.clean_strings(sec)
             else:
                 self.sec_dicts[sec] = {}
                 self.add_section(sec)
+
+    def clean_strings(self, section):
+        """
+        Remove quote marks surrounding strings
+        """
+        for param in self.sec_dicts[section]:
+            initial = self.sec_dicts[section][param]
+            self.sec_dicts[section][param] = initial.strip('"')
 
     def get_section_dict(self, section):
         """
