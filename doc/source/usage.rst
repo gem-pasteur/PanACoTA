@@ -71,7 +71,6 @@ Configfile has the following format:
 .. code-block:: text
 
     [module]
-    param1 = "test"
     param2 = test
     param3= True
     param4 =yes
@@ -83,7 +82,7 @@ Where:
 
     - `module` corresponds to the module for which you want to give a parameter (`prepare`, `annotate`, `pangenome`, `corepers`, `align`, `tree`).
     - a boolean parameter is set with one of the boolean values (case-insensitive): 'yes'/'no', 'on'/'off', 'true'/'false' or '1'/'0' (examples with `param3`, `param4` and `param5` which are all booleans with True value)
-    - `""` are not mandatory for str arguments: `param1` and `param2` are the same.
+    - `""` around strings will be removed. It is better to avoid using them (ex: `param2 = test` instead of `param2 = "test"`)
     - Use `#` to comment a line (information after a `#` will not be taken into account by the parser).
     - Use `:` or `=` to delimit argument names from values
 
