@@ -86,7 +86,7 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_annotate/test_format* -v -x
     - py.test test/test_unit/test_pangenome -vx
     - py.test test/test_unit/test_corepers -vx
-    - py.test test/test_unit/test_align -vx
+    # - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
     - coverage report
     - mv .coverage .coverage.unit
@@ -113,10 +113,11 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_align-parser.py -vx
     # - py.test test/test_functional/test_align.py -vx
     # - py.test test/test_functional/test_tree* -vx
-    - py.test test/test_functional/test_annote-parser.py -vx
+    # - py.test test/test_functional/test_annote-parser.py -vx
     # - py.test test/test_functional/test_annote.py -xv
     # - py.test test/test_functional/test_all* -vx
     # - py.test test/test_functional/test_prepare* -vx
+    - py.test test/test_unit/test_align -vx
     - coverage report
     - mv .coverage .coverage.functional
   artifacts:
