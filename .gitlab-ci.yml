@@ -137,7 +137,8 @@ coverage:
   before_script:
     - pip3 install -r requirements-dev.txt
   script:
-    - coverage combine .coverage-unit .coverage-functional
+    # - coverage combine .coverage-unit .coverage-functional
+    - mv .coverage-functional .coverage
     - coverage html -i
     - coverage report -i
     # test coverage parsing: \d+\%\s*$
