@@ -140,6 +140,7 @@ coverage:
   script:
     - pwd
     - coverage combine .coverage.unit .coverage.functional
+    - ls -la
     # - mv .coverage.functional .coverage  # only func coverage for now
     - coverage report -i
     - coverage html -i
