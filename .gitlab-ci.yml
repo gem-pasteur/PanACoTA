@@ -140,7 +140,7 @@ coverage:
   script:
     - pwd
     # - coverage combine .coverage.unit .coverage.functional
-    - mv .coverage.functional .coverage
+    - mv .coverage.functional .coverage  # only func coverage for now
     - coverage report -i
     - coverage html -i
     # test coverage parsing: \d+\%\s*$
