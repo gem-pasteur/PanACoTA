@@ -89,10 +89,14 @@ unit-test-ubuntu:
     # - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
     - coverage report
+    - coverage html
+    - mv htmlcov/index.html myindex
+    - more myindex
     - mv .coverage .coverage.unit
   artifacts:
     paths:
       - .coverage.unit
+      - myindex
     expire_in: 1 hour
 
 
@@ -143,6 +147,7 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - pwd
+    - more myindex
     - more htmlcov/index.html
     - coverage combine .coverage.unit .coverage.functional
     - ls -la
