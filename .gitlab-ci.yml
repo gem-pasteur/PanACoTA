@@ -139,8 +139,8 @@ coverage:
   script:
     - pwd
     - coverage combine .coverage.unit .coverage.functional
-    - coverage report
     - coverage html
+    - coverage report
     # test coverage parsing: \d+\%\s*$
     # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
