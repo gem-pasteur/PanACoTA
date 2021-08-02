@@ -200,6 +200,8 @@ class Conf_all_parser(configparser.ConfigParser):
         path to configuration file
     readsec : list
         list of sections of the config file to read
+    clean_str : boolean
+        by default, remove " surrounding strings. If no need to do it, set this parameter to False
 
     Attributes
     ----------
@@ -209,7 +211,7 @@ class Conf_all_parser(configparser.ConfigParser):
         {section1: {param: value}, {section2: {param:value}}}
 
     """
-    def __init__(self, conffile, readsec=[]):
+    def __init__(self, conffile, readsec=[], clean_str=True):
         super().__init__()
         # If there is a config file specified, but it does not exist -> exit with error message
         if conffile != "" and not os.path.isfile(conffile):
@@ -229,7 +231,8 @@ class Conf_all_parser(configparser.ConfigParser):
             # If not, create empty section, and associate with empty dict
             if sec in dict(self):
                 self.sec_dicts[sec] = dict(self[sec])
-                self.clean_strings(sec)
+                if clean_str:
+                    self.clean_strings(sec)
             else:
                 self.sec_dicts[sec] = {}
                 self.add_section(sec)

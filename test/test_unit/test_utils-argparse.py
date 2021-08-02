@@ -271,6 +271,22 @@ def test_conf_parser_init():
                            "sec4": {}}  # But sec4 dict is empty (no param given in configfile)
 
 
+def test_conf_parser_clean_str(capsys):
+    """
+    Check that surounding "" are removed
+    """
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c = autils.Conf_all_parser(cfg_file, ["sec2", "sec_bool"])
+    assert c.get_section_dict("sec2") == {"param2": "", "myval": "parameter", 
+                                          'param3': "myparameter",
+                                          "param1": "3"}
+    assert c.get_section_dict("sec_bool") == {"bool num_false": "0", "bool_num_true": "1", 
+                                              "bool_f": "off", "bool_t": "ON", "bool_n": "no",
+                                              "bool_y": "YES", 
+                                              "bool_false": "FalSe", "bool_true": "tRUE",
+                                              "param1": "3", "param2": "10"}
+
+
 def test_conf_parser_get_section(capsys):
     """
     Test get dict of values for a given section

@@ -143,6 +143,8 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - pwd
+    - mv .coverage.unit .coverage
+    - coverage report
     - coverage combine .coverage.unit .coverage.functional
     - coverage report -i
     - coverage html -i
