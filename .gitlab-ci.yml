@@ -75,6 +75,7 @@ unit-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
+    - pwd
     - ls Examples/genomes_init/genome1.fst
     - py.test test/test_unit/test_utils.py -vx
     - py.test test/test_unit/test_utils-logging.py -xv
@@ -96,7 +97,7 @@ unit-test-ubuntu:
     expire_in: 1 hour
 
 func-test-ubuntu:
-  stage: test2
+  stage: test
   except:
     - docker
     - helpers
@@ -106,6 +107,7 @@ func-test-ubuntu:
     - pip3 install -r requirements-dev.txt
     - ./make
   script:
+    - pwd
     # - py.test test/test_functional/test_pangenome.py -vx
     # - py.test test/test_functional/test_pangenome-parser.py -vx
     # - py.test test/test_functional/test_corepers* -vx
