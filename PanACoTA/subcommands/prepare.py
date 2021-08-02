@@ -322,7 +322,7 @@ def build_parser(parser):
                                 "(not included in -t 72407, as it is a strain of the subspecies with a specific taxid).")
                          )
     general.add_argument("-S", dest="strains", default="",
-                         help=("List of strains to download."
+                         help=("List of strains to download. "
                                "A comma-separated list of strain names is possible, "
                                "as well as a path to a filename containing one name per line."
                                "Ex: '-S SB2390, IA565' for Klebsiella pneumoniae SB2390 and Klebsiella pneumoniae IA565 strains"
