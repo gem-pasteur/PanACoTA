@@ -119,10 +119,13 @@ func-test-ubuntu:
     # - py.test test/test_functional/test_prepare* -vx
     - py.test test/test_unit/test_align -vx
     - coverage report
+    - coverage html
+    - more htmlcov/index.html
     - mv .coverage .coverage.functional
   artifacts:
     paths:
       - .coverage.functional
+      - htmlcov/index.html
     expire_in: 1 hour
 
 
@@ -140,6 +143,7 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - pwd
+    - more htmlcov/index.html
     - coverage combine .coverage.unit .coverage.functional
     - ls -la
     # - mv .coverage.functional .coverage  # only func coverage for now
