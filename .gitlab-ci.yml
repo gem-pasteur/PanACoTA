@@ -4,6 +4,7 @@ image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/testing-ubuntu
 stages:
   - build
   - test
+  - test2
   - coverage
   - doc
   - deploy
@@ -63,37 +64,6 @@ build-from-test-image:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py -xv
 
-func-test-ubuntu:
-  stage: test
-  except:
-    - docker
-    - helpers
-    - install
-  before_script:
-    - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    # - py.test test/test_functional/test_pangenome.py -vx
-    # - py.test test/test_functional/test_pangenome-parser.py -vx
-    # - py.test test/test_functional/test_corepers* -vx
-    # - py.test test/test_functional/test_align-parser.py -vx
-    # - py.test test/test_functional/test_align.py -vx
-    # - py.test test/test_functional/test_tree* -vx
-    # - py.test test/test_functional/test_annote-parser.py -vx
-    # - py.test test/test_functional/test_annote.py -xv
-    # - py.test test/test_functional/test_all* -vx
-    # - py.test test/test_functional/test_prepare* -vx
-    - py.test test/test_unit/test_align -vx
-    - coverage report
-    - mv .coverage .coverage.functional
-  artifacts:
-    paths:
-      - .coverage.functional
-      - htmlcov/index.html
-    expire_in: 1 hour
-    
-
 unit-test-ubuntu:
   stage: test
   except:
@@ -125,10 +95,36 @@ unit-test-ubuntu:
       - .coverage.unit
     expire_in: 1 hour
 
-
-
-
-
+func-test-ubuntu:
+  stage: test2
+  except:
+    - docker
+    - helpers
+    - install
+  before_script:
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements-dev.txt
+    - ./make
+  script:
+    # - py.test test/test_functional/test_pangenome.py -vx
+    # - py.test test/test_functional/test_pangenome-parser.py -vx
+    # - py.test test/test_functional/test_corepers* -vx
+    # - py.test test/test_functional/test_align-parser.py -vx
+    # - py.test test/test_functional/test_align.py -vx
+    # - py.test test/test_functional/test_tree* -vx
+    # - py.test test/test_functional/test_annote-parser.py -vx
+    # - py.test test/test_functional/test_annote.py -xv
+    # - py.test test/test_functional/test_all* -vx
+    # - py.test test/test_functional/test_prepare* -vx
+    - py.test test/test_unit/test_align -vx
+    - coverage report
+    - mv .coverage .coverage.functional
+  artifacts:
+    paths:
+      - .coverage.functional
+      - htmlcov/index.html
+    expire_in: 1 hour
+    
 coverage:
   stage: coverage
   except:
