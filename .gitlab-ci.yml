@@ -21,7 +21,6 @@ build-from-ubuntu:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_ubuntu.py -xv
 
-
 build-from-barrnap:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-barrnaponly
   stage: build
@@ -31,7 +30,6 @@ build-from-barrnap:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_barrnap.py -xv
-
 
 build-from-prokka-quicktree:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-ubuntu-annote-quicktree
@@ -43,7 +41,6 @@ build-from-prokka-quicktree:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_prokka-quicktree.py -xv
 
-
 build-from-prodigal:
   image: registry-gitlab.pasteur.fr/aperrin/pipeline_annotation/install-prodigal
   stage: build
@@ -54,7 +51,6 @@ build-from-prodigal:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_prodigal.py -xv
 
-
 build-from-test-image:
   stage: build
   only:
@@ -63,6 +59,7 @@ build-from-test-image:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py -xv
+
 
 unit-test-ubuntu:
   stage: test
@@ -87,7 +84,7 @@ unit-test-ubuntu:
     - py.test test/test_unit/test_annotate/test_format* -v -x
     - py.test test/test_unit/test_pangenome -vx
     - py.test test/test_unit/test_corepers -vx
-    # - py.test test/test_unit/test_align -vx
+    - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
     - coverage report
     - mv .coverage .coverage.unit
@@ -108,17 +105,16 @@ func-test-ubuntu:
     - ./make
   script:
     - pwd
-    # - py.test test/test_functional/test_pangenome.py -vx
-    # - py.test test/test_functional/test_pangenome-parser.py -vx
-    # - py.test test/test_functional/test_corepers* -vx
-    # - py.test test/test_functional/test_align-parser.py -vx
-    # - py.test test/test_functional/test_align.py -vx
-    # - py.test test/test_functional/test_tree* -vx
-    # - py.test test/test_functional/test_annote-parser.py -vx
-    # - py.test test/test_functional/test_annote.py -xv
-    # - py.test test/test_functional/test_all* -vx
-    # - py.test test/test_functional/test_prepare* -vx
-    - py.test test/test_unit/test_align -vx
+    - py.test test/test_functional/test_pangenome.py -vx
+    - py.test test/test_functional/test_pangenome-parser.py -vx
+    - py.test test/test_functional/test_corepers* -vx
+    - py.test test/test_functional/test_align-parser.py -vx
+    - py.test test/test_functional/test_align.py -vx
+    - py.test test/test_functional/test_tree* -vx
+    - py.test test/test_functional/test_annote-parser.py -vx
+    - py.test test/test_functional/test_annote.py -xv
+    - py.test test/test_functional/test_all* -vx
+    - py.test test/test_functional/test_prepare* -vx
     - coverage report
     - mv .coverage .coverage.functional
   artifacts:
@@ -127,6 +123,7 @@ func-test-ubuntu:
       - htmlcov/index.html
     expire_in: 1 hour
     
+
 coverage:
   stage: coverage
   except:
@@ -142,8 +139,8 @@ coverage:
   script:
     - pwd
     - coverage combine .coverage.unit .coverage.functional
-    - coverage report -i
-    - coverage html -i
+    - coverage report
+    - coverage html
     # test coverage parsing: \d+\%\s*$
     # or pytest-cov (Python): ^TOTAL.+?(\d+\%)$
   artifacts:
