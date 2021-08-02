@@ -244,6 +244,7 @@ class Conf_all_parser(configparser.ConfigParser):
         for param in self.sec_dicts[section]:
             initial = self.sec_dicts[section][param]
             self.sec_dicts[section][param] = initial.strip('"')
+            self[section][param] = initial.strip('"')
 
     def get_section_dict(self, section):
         """

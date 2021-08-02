@@ -271,6 +271,25 @@ def test_conf_parser_init():
                            "sec4": {}}  # But sec4 dict is empty (no param given in configfile)
 
 
+def test_conf_parser_init_noCleanStr():
+    """
+    Test config parser with a given config file. Do not clean str (keep surounding "")
+    """
+    # configfile but no section
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c = autils.Conf_all_parser(cfg_file, clean_str=False)
+    assert c["sec2"]["param1"] == "3"
+    assert c["sec2"]["param2"] == ''
+    assert c["sec2"]["myval"] == '"parameter"'
+    assert c["sec2"]["param3"] == 'myparameter'
+    assert c["sec3"]["param1"] == "3"
+    assert c["sec3"]["param2"] == "10"
+    assert c["sec_bool"]["bool num_false"] == "0"
+    assert c["sec_bool"]["bool_t"] == "ON"
+    assert c["sec_bool"]["bool_f"] == '"off"'
+    assert c.sec_dicts == {}
+
+
 def test_conf_parser_clean_str(capsys):
     """
     Check that surounding "" are removed
@@ -279,7 +298,7 @@ def test_conf_parser_clean_str(capsys):
     c = autils.Conf_all_parser(cfg_file, ["sec2", "sec_bool"])
     assert c.get_section_dict("sec2") == {"param2": "", "myval": "parameter", 
                                           'param3': "myparameter",
-                                          "param1": "3"}
+                                          "param1": "3", "paramint": "2"}
     assert c.get_section_dict("sec_bool") == {"bool num_false": "0", "bool_num_true": "1", 
                                               "bool_f": "off", "bool_t": "ON", "bool_n": "no",
                                               "bool_y": "YES", 
@@ -395,6 +414,21 @@ def test_conf_parser_setbool(capsys):
     assert c1["sec_bool"]["bool_true"] == "tRUE"
     assert c1.sec_dicts["sec_bool"]["bool_true"] == True
 
+    # With a boolean called with "", not cleaned
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c_str = autils.Conf_all_parser(cfg_file, ["sec_bool"], clean_str=False)
+    with pytest.raises(SystemExit):
+        c_str.set_boolean("sec_bool", "bool_f")
+    out, err = capsys.readouterr()
+    assert ('ERROR: bool_f must be a boolean. Wrong value: "off".') in out
+
+    # With a boolean called with "" but cleaned
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c_str = autils.Conf_all_parser(cfg_file, ["sec_bool"])
+    c_str.set_boolean("sec_bool", "bool_f")
+    assert c1["sec_bool"]["bool_f"] == 'off'
+    assert c1.sec_dicts["sec_bool"]["bool_f"] == False
+
     # error
     with pytest.raises(SystemExit):
         c1.set_boolean('sec1', "param1")
@@ -410,6 +444,14 @@ def test_conf_parser_setint(capsys):
     c1.set_int("sec1", "param1")
     assert c1["sec1"]["param1"] == "10"
     assert c1.sec_dicts["sec1"]["param1"] == 10
+
+    # With an int called with "" but cleaned
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c_str = autils.Conf_all_parser(cfg_file, ["sec2"])
+    assert c_str.sec_dicts["sec2"]["paramint"] == "2"
+    c_str.set_int("sec2", "paramint")
+    assert c_str["sec2"]["paramint"] == "2"
+    assert c_str.sec_dicts["sec2"]["paramint"] == 2
 
     with pytest.raises(SystemExit):
         c1.set_int("sec1", "toto")
@@ -436,3 +478,20 @@ def test_conf_parser_setfloat(capsys):
         c1.set_float("sec1", "toto")
     out, err = capsys.readouterr()
     assert ('ERROR: toto must be a float. Wrong value: parameter.') in out
+
+    # With a fload called with "" but cleaned
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c_str = autils.Conf_all_parser(cfg_file, ["sec_float"])
+    assert c_str.sec_dicts["sec_float"]["float_param"] == "0.12"
+    c_str.set_float("sec_float", "float_param")
+    assert c_str["sec_float"]["float_param"] == "0.12"
+    assert c_str.sec_dicts["sec_float"]["float_param"] == 0.12
+
+    # With a fload called with "" not cleaned
+    cfg_file = os.path.join("test", "data", "utils", "configfile-str.ini")
+    c_str = autils.Conf_all_parser(cfg_file, ["sec_float"], clean_str=False)
+    assert c_str.sec_dicts["sec_float"]["float_param"] == '"0.12"'
+    with pytest.raises(SystemExit):
+        c_str.set_float("sec_float", "float_param")
+    out, err = capsys.readouterr()
+    assert ('ERROR: float_param must be a float. Wrong value: "0.12".') in out
