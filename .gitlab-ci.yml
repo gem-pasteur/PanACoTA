@@ -120,7 +120,6 @@ func-test-ubuntu:
   artifacts:
     paths:
       - .coverage.functional
-      - htmlcov/index.html
     expire_in: 1 hour
     
 
