@@ -63,6 +63,36 @@ build-from-test-image:
     - pip3 install -r requirements-dev.txt
     - py.test test/test_install/test_make_all-installed.py -xv
 
+func-test-ubuntu:
+  stage: test
+  except:
+    - docker
+    - helpers
+    - install
+  before_script:
+    - pip3 install --upgrade pip
+    - pip3 install -r requirements-dev.txt
+    - ./make
+  script:
+    # - py.test test/test_functional/test_pangenome.py -vx
+    # - py.test test/test_functional/test_pangenome-parser.py -vx
+    # - py.test test/test_functional/test_corepers* -vx
+    # - py.test test/test_functional/test_align-parser.py -vx
+    # - py.test test/test_functional/test_align.py -vx
+    # - py.test test/test_functional/test_tree* -vx
+    # - py.test test/test_functional/test_annote-parser.py -vx
+    # - py.test test/test_functional/test_annote.py -xv
+    # - py.test test/test_functional/test_all* -vx
+    # - py.test test/test_functional/test_prepare* -vx
+    - py.test test/test_unit/test_align -vx
+    - coverage report
+    - mv .coverage .coverage.functional
+  artifacts:
+    paths:
+      - .coverage.functional
+      - htmlcov/index.html
+    expire_in: 1 hour
+    
 
 unit-test-ubuntu:
   stage: test
@@ -89,47 +119,14 @@ unit-test-ubuntu:
     # - py.test test/test_unit/test_align -vx
     - py.test test/test_unit/test_tree -xv
     - coverage report
-    - coverage html
-    - more .coverage
     - mv .coverage .coverage.unit
   artifacts:
     paths:
       - .coverage.unit
-      - myindex
     expire_in: 1 hour
 
 
-func-test-ubuntu:
-  stage: test
-  except:
-    - docker
-    - helpers
-    - install
-  before_script:
-    - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
-    - ./make
-  script:
-    # - py.test test/test_functional/test_pangenome.py -vx
-    # - py.test test/test_functional/test_pangenome-parser.py -vx
-    # - py.test test/test_functional/test_corepers* -vx
-    # - py.test test/test_functional/test_align-parser.py -vx
-    # - py.test test/test_functional/test_align.py -vx
-    # - py.test test/test_functional/test_tree* -vx
-    # - py.test test/test_functional/test_annote-parser.py -vx
-    # - py.test test/test_functional/test_annote.py -xv
-    # - py.test test/test_functional/test_all* -vx
-    # - py.test test/test_functional/test_prepare* -vx
-    - py.test test/test_unit/test_align -vx
-    - coverage report
-    - coverage html
-    - more .coverage
-    - mv .coverage .coverage.functional
-  artifacts:
-    paths:
-      - .coverage.functional
-      - htmlcov/index.html
-    expire_in: 1 hour
+
 
 
 coverage:
@@ -146,11 +143,7 @@ coverage:
     - pip3 install -r requirements-dev.txt
   script:
     - pwd
-    - more .coverage.unit
-    - more .coverage.functional
     - coverage combine .coverage.unit .coverage.functional
-    - ls -la
-    # - mv .coverage.functional .coverage  # only func coverage for now
     - coverage report -i
     - coverage html -i
     # test coverage parsing: \d+\%\s*$
