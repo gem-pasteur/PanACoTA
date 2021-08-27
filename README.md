@@ -23,7 +23,8 @@
 
 <!--
  To get right angles instead of rounded ones, 
-add '?style=flat-square' after .svg -->
+add '?style=flat-square' after .svg 
+-->
 
 
 This README file provides some essential information to install/use PanACoTA. But it is better to read the [**full documentation**](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc), providing more details : [![](doc/source/images/manual.jpg) ](http://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc)
