@@ -9,6 +9,10 @@
 
 [![DOI:10.1093/nargab/lqaa106](https://zenodo.org/badge/DOI/10.1093/nargab/lqaa106.svg)](https://academic.oup.com/nargab/article/3/1/lqaa106/6090162)
 
+<!--
+[![Join the chat at https://gitter.im/PanACoTA-gitter/community](https://badges.gitter.im/PanACoTA-gitter/community.svg)](https://gitter.im/PanACoTA-gitter/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+-->
+
  [![License (AGPL version 3)](https://img.shields.io/badge/license-GNU%20AGPL%20version%203-green.svg)](COPYING)
 [![pipeline status](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/pipeline.svg)](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/-/commits)
 [![coverage report](https://gitlab.pasteur.fr/aperrin/pipeline_annotation/badges/master/coverage.svg)](http://aperrin.pages.pasteur.fr/pipeline_annotation/htmlcov)
@@ -174,6 +178,7 @@ To update to new version:
 ### From zip version
 
 For people wanting to download source code of a specific version, we provide releases. You can download last one here: [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+
 
 ## <a name="uninstall"></a> Uninstalling `PanACoTA`
 
