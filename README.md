@@ -1,6 +1,6 @@
 # **PanACoTA**
 
-[![Downloads](https://static.pepy.tech/personalized-badge/panacota?period=total&units=international_system&left_color=grey&right_color=lightgrey&left_text=Downloads)](https://pepy.tech/project/panacota)
+![Downloads](https://static.pepy.tech/personalized-badge/panacota?period=total&units=international_system&left_color=grey&right_color=lightgrey&left_text=Downloads)
 [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
 [![PyPI version](https://badge.fury.io/py/PanACoTA.svg)](https://badge.fury.io/py/PanACoTA)
 [![Anaconda-Server Badge](https://anaconda.org/bioconda/panacota/badges/version.svg)](https://anaconda.org/bioconda/panacota)
