@@ -173,7 +173,7 @@ To update to new version:
 
 ### From zip version
 
-For people wanting to download source code of a specific version, we provide releases. You can download last one here: [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases)
+For people wanting to download source code of a specific version, we provide releases. You can download last one here: [![GitHub release](https://img.shields.io/github/release/gem-pasteur/PanACoTA.svg)](https://github.com/gem-pasteur/PanACoTA/releases) [![Join the chat at https://gitter.im/PanACoTA-gitter/community](https://badges.gitter.im/PanACoTA-gitter/community.svg)](https://gitter.im/PanACoTA-gitter/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## <a name="uninstall"></a> Uninstalling `PanACoTA`
 
