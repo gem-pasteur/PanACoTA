@@ -320,10 +320,21 @@ def get_genome(header, all_genomes):
         name of genome from which the header is
         None if no genome found
     """
+    # Name of protein is not always genome-name_num
+    # Ex: in gembase complete DB: >TOTO.0215.00002.i006_00065 is from genome TOTO.0215.00002
+    # So, genome name cannot be deduced directly from header. But it is always included in header
     header = header.split(">")[1].split()[0]
+
     for genome in all_genomes:
         if genome in header:
-            return genome
+            # header should be genome<something>_num
+            # -> header.split(genome) should be empty for the first field
+            # If not empty, means that genome name is included into another genome name, so
+            # we must not return this genome.
+            # For example, genome "8-KG" is in header "98-KG_xxx", but the correct genome for this
+            # header is "98-KG"
+            if not header.split(genome)[0]:
+                return genome
     logger.error((f"Protein {header} does not correspond to any genome name "
                   f"given... {all_genomes}"))
     return None

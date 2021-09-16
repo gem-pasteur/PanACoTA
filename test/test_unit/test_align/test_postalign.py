@@ -55,14 +55,22 @@ def test_get_genome():
     assert pal.get_genome(header, genomes) == "TOTO.0215.00002"
 
 
-def test_get_genome_not_start():
+def test_get_genome_included():
     """
-    Given a header and a list of genomes, check that it returns the expected genome. The genome
-    name is not at the beginning of the protein name
+    Given a header and a list of genomes, check that it returns the expected genome
     """
-    header = ">mongenome,TOTO.0215.00002.i006_00065"
-    genomes = ["TOTO.0315.00001", "ESCO.0215.00002", "ESCO.0215.00001", "TOTO.0215.00002"]
-    assert pal.get_genome(header, genomes) == "TOTO.0215.00002"
+    header = ">aTOTO.0215.00002.i006_00065"
+    genomes = [ "TOTO.0215.00002", "TOTO.0315.00001", "ESCO.0215.00002", "aTOTO.0215.00002"]
+    assert pal.get_genome(header, genomes) == "aTOTO.0215.00002"
+
+# def test_get_genome_not_start():
+#     """
+#     Given a header and a list of genomes, check that it returns the expected genome. The genome
+#     name is not at the beginning of the protein name
+#     """
+#     header = ">mongenome,TOTO.0215.00002.i006_00065"
+#     genomes = ["TOTO.0315.00001", "ESCO.0215.00002", "ESCO.0215.00001", "TOTO.0215.00002"]
+#     assert pal.get_genome(header, genomes) == "TOTO.0215.00002"
 
 
 def test_get_genome_notfound(caplog):
