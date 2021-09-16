@@ -893,6 +893,8 @@ All other information than the genome names in the first columns will be ignored
     - a ``Genes`` folder, containing at list the following files: ``ESCO.0217.00001.gen``, ``ESCO.0217.00002.gen``, ``ESCO.0217.00003.gen`` and ``ESCO.0217.00004.gen``.
     - a ``Proteins`` folder, containing at list the following files: ``ESCO.0217.00001.prt``, ``ESCO.0217.00002.prt``, ``ESCO.0217.00003.prt`` and ``ESCO.0217.00004.prt``.
 
+.. warning:: Inside those files, each fasta entry must start with the genome name, and end with a protein number separated by a `_`. For example, in ``ESCO.0217.00003.prt``, all gene names should start with ``>ESCO.0217.00003``. Examples of good names: ``ESCO.0217.00003_12345``, ``ESCO.0217.00003.toto_12345``. Bad name: ``toto.ESCO.0217.00003_12345``.
+
 Those folders and files are automatically created by the 'annotate' subcommand, in the given ``<outdir>``.
 
 .. _outalign:
