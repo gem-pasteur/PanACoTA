@@ -326,15 +326,10 @@ def get_genome(header, all_genomes):
     header = header.split(">")[1].split()[0]
 
     for genome in all_genomes:
-        if genome in header:
-            # header should be genome<something>_num
-            # -> header.split(genome) should be empty for the first field
-            # If not empty, means that genome name is included into another genome name, so
-            # we must not return this genome.
-            # For example, genome "8-KG" is in header "98-KG_xxx", but the correct genome for this
-            # header is "98-KG"
-            if not header.split(genome)[0]:
-                return genome
+        if header.startswith(genome):
+            # header should start with the genome name. Nothing before it.
+            # Ex: >86KG_12345 is from genome 86KG. >6KG_12345 is from genome 6KG, not 86KG
+            return genome
     logger.error((f"Protein {header} does not correspond to any genome name "
                   f"given... {all_genomes}"))
     return None
