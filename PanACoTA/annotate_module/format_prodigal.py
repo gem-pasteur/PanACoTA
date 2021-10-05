@@ -358,7 +358,7 @@ def create_gff(gpath, gff_file, res_gff_file, res_lst_file, contigs, sizes):
     # open lst file to read all information saved from prodigal results
     with open(gff_file, 'r') as gf, open(res_gff_file, "w") as rgf, open(res_lst_file, "r") as rlf:
         # Write headers of gff3 file
-        rgf.write("##gff-version  3\n")
+        rgf.write("##gff-version 3\n")
         for ori_name, new_name in contigs.items():
             # Write the list of contigs, with their size
             end = sizes[new_name]

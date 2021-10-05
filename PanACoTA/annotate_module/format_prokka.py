@@ -411,7 +411,7 @@ def generate_gff(gpath, prokka_gff_file, res_gff_file, res_lst_file, sizes, cont
     with open(prokka_gff_file, "r") as prokf, open(res_lst_file, "r") as lstf, \
             open(res_gff_file, "w") as gfff:
         # Write headers of gff3 file
-        gfff.write("##gff-version  3\n")
+        gfff.write("##gff-version 3\n")
         # Write all sequences with their size. Order by name in gembase format
         for old, new in sorted(contigs.items(), key=lambda items:items[1]):
             end = sizes[new]
