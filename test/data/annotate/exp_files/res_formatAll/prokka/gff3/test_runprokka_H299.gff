@@ -1,4 +1,4 @@
-##gff-version  3
+##gff-version 3
 ##sequence-region	test_runprokka_H299.0001	1	3480
 ##sequence-region	test_runprokka_H299.0002	1	7080
 ##sequence-region	test_runprokka_H299.0003	1	2583

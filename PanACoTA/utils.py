@@ -1148,7 +1148,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
                 # - add its name with its original name to
                 # - write header ("<contig name> <size>") to replicon file
                 if prev_cont:
-                    cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
+                    cont = " ".join([prev_cont, str(cont_size)]) + "\n"
                     prevcont_nohead = prev_cont.split(">")[1]
                     prev_orig_name_nohead = prev_orig_name.split(">")[1]
                     if prev_orig_name_nohead:
@@ -1172,7 +1172,7 @@ def get_genome_contigs_and_rename(gembase_name, gpath, outfile, logger):
                 cont_size += len(line.strip())
         # Write last contig, if there is one (if gpath not empty)
         if prev_cont:
-            cont = "\t".join([prev_cont, str(cont_size)]) + "\n"
+            cont = " ".join([prev_cont, str(cont_size)]) + "\n"
             prevcont_nohead = "".join(prev_cont.split(">")[1:])
             prev_orig_name_nohead = prev_orig_name.split(">")[1]
             if prev_orig_name_nohead:

@@ -1,4 +1,4 @@
-##gff-version  3
+##gff-version 3
 ##sequence-region	test.0417.00002.0001	1	9603
 ##sequence-region	test.0417.00002.0002	1	22446
 ##sequence-region	test.0417.00002.0003	1	51012

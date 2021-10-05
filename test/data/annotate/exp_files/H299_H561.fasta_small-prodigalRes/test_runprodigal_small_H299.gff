@@ -1,4 +1,4 @@
-##gff-version  3
+##gff-version 3
 # Sequence Data: seqnum=1;seqlen=3480;seqhdr="H561_S27 L001_R1_001_(paired)_contig_1"
 # Model Data: version=Prodigal.v2.6.3;run_type=Metagenomic;model="20|Escherichia_coli_UMN026|B|50.7|11|1";gc_cont=50.70;transl_table=11;uses_sd=1
 H561_S27	Prodigal_v2.6.3	CDS	3	140	31.2	-	0	ID=1_1;partial=10;start_type=ATG;rbs_motif=GGAG/GAGG;rbs_spacer=5-10bp;gc_cont=0.580;conf=99.92;score=31.21;cscore=19.39;sscore=11.82;rscore=11.19;uscore=-3.31;tscore=3.95;
