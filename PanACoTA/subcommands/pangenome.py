@@ -55,12 +55,12 @@ def main_from_parse(args):
         result of argparse parsing of all arguments in command line
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
-    main(cmd, args.lstinfo_file, args.dataset_name, args.dbpath, args.min_id, args.outdir,
+    main(cmd, args.lstinfo_file, args.dataset_name, args.dbpath, args.method, args.min_id, args.outdir,
          args.clust_mode, args.spedir, args.threads, args.outfile, args.verbose,
          args.quiet)
 
 
-def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
+def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
          verbose=0, quiet=False):
     """
     Main method, doing all steps:
@@ -111,12 +111,13 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
     from PanACoTA.pangenome_module import post_treatment as pt
     from PanACoTA import __version__ as version
 
-    # test if mmseqs is installed and in the path
-    if not utils.check_installed("mmseqs"):  # pragma: no cover
-        print("mmseqs is not installed. 'PanACoTA pangenome' cannot run.")
+    from PanACoTA.pangenome_module.MMseq import MMseq
+
+    # check if method is valid
+    if method not in ["mmseqs", "proteinortho"]:
+        print("unknown method. 'PanACoTA pangenome' cannot run.")
         sys.exit(1)
 
-    os.makedirs(outdir, exist_ok=True)
     # level is the minimum level that will be considered.
     # for verbose = 0 or 1, ignore details and debug, start from info
     if verbose <= 1:
@@ -137,8 +138,20 @@ def main(cmd, lstinfo, name, dbpath, min_id, outdir, clust_mode, spe_dir, thread
     # Build bank with all proteins to include in the pangenome
     prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
     # Do pangenome
-    families, panfile = mmf.run_all_pangenome(min_id, clust_mode, outdir,
-                                              prt_path, threads, outfile, quiet)
+    if method == "mmseqs":
+        runner = MMseq(min_id, clust_mode, outdir, prt_path, threads, outfile, quiet)
+
+    if method == "proteinortho":
+        pass
+
+    # test if package required for pangenome building is installed and in the path
+    if not runner.check_installed():  # pragma: no cover
+        print(f"{method} is not installed. 'PanACoTA pangenome' cannot run.")
+        sys.exit(1)
+
+    os.makedirs(outdir, exist_ok=True)
+    families, panfile = runner.run()
+
     # Create matrix pan_quali, pan_quanti and summary file
     pt.post_treat(families, panfile)
     logger.info("DONE")
@@ -179,6 +192,8 @@ def build_parser(parser):
     required.add_argument("-o", dest="outdir", required=True,
                           help=("Output directory, where all results must be saved "
                                 "(including tmp folder)"))
+    required.add_argument("-m", dest="method", required=True,
+                          help="Method to construct pangenome (mmseqs or proteinortho)")
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-i", dest="min_id", type=utils_argparse.perc_id, default=0.8,
