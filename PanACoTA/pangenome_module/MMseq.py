@@ -34,7 +34,7 @@
 # ###############################################################################
 
 """
-Functions to use proteinortho to create a pangenome
+A class for launching mmseqs clusterisation
 
 @author RedSnail
 October 2021
@@ -47,7 +47,7 @@ import sys
 import copy
 import time
 
-from PanACoTA.pangenome_module.Clusterisator import Clusterisator
+from PanACoTA.pangenome_module.Clusterisator import Clusterisator, infinite_progressbar
 from PanACoTA import utils
 
 class MMseq(Clusterisator):
@@ -56,20 +56,24 @@ class MMseq(Clusterisator):
         self.clust_mode = clust_mode
         super(MMseq, self).__init__(threads, outdir, prt_path, panfile, quiet)
 
-        self.mmseqdb = os.path.join(self.tmpdir, self.prt_bank + "-msDB")
-        self.mmseqclust = os.path.join(self.tmpdir, self.prt_bank + "-clust-" + self.infoname)
+        prt_bank = os.path.basename(self.prt_path)
+
+        self.mmseqdb = os.path.join(self.tmpdir, prt_bank + "-msDB")
+        self.mmseqclust = os.path.join(self.tmpdir, prt_bank + "-clust-" + self.infoname)
         self.mmseqstsv = self.mmseqclust + ".tsv"
 
     @property
     def method_name(self) -> str:
-        return "mmseq"
+        return "mmseqs"
 
+    @property
     def info_string(self) -> str:
         return ("Will run MMseqs2 with:\n"
                    f"\t- minimum sequence identity = {self.min_id*100}%\n"
                    f"\t- cluster mode {self.clust_mode}")
 
-    def get_info(self) -> str:
+    @property
+    def infoname(self) -> str:
         if self.threads != 1:
             threadinfo = "-th" + str(self.threads)
         else:
@@ -77,138 +81,35 @@ class MMseq(Clusterisator):
         infoname = str(self.min_id) + "-mode" + str(self.clust_mode) + threadinfo
         return infoname
 
-    def arrange_files(self, tmp_dir) -> int:
-        self.logger.info("Creating database")
-        try:
-            stop_bar = False
-            if self.quiet:
-                widgets = []
-            # If not quiet, start a progress bar while clustering proteins. We cannot guess
-            # how many time it will take, so we start an "infinite" bar, and send it a signal
-            # when it has to stop. If quiet, we start a thread that will immediatly stop
-            else:
-                widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
-                           "  -  ", progressbar.Timer()]
-            x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda: stop_bar,))
-            x.start()
-            res = self.create_mmseqs_db()
-        # except KeyboardInterrupt: # pragma: no cover
-        except:  # pragma: no cover
-            stop_bar = True
-            x.join()
-            sys.exit(1)
-        # Clustering done, stop bar and join (if quiet, it was already finished, so we just join it)
-        stop_bar = True
-        x.join()
-        return res
+    @property
+    def expected_files(self):
+        return list(map(lambda ext: self.mmseqdb + ext,
+                        ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]))
 
-    def create_mmseqs_db(self):
-        outext = ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]
-        files_existing = []
-        if os.path.isfile(self.mmseqdb):
-            for file in [self.mmseqdb + ext for ext in outext]:
-                if not os.path.isfile(file):
-                    continue
-                files_existing.append(file)
-            if len(files_existing) != len(outext):
-                self.logger.warning(f"mmseqs database {self.mmseqdb} already exists, but at least 1 associated "
-                               "file (.dbtype, .index etc). is missing. The program will "
-                               "remove existing files and recreate the database.")
-                files_remaining = copy.deepcopy(files_existing)
-                for file in files_existing:
-                    os.remove(file)  # Delete file
-                    files_remaining.remove(file)  # Remove file from list of existing files
-                    logger.details(f"Removing '{file}'.")
-                files_existing = copy.deepcopy(files_remaining)
-            else:
-                self.logger.warning(f"mmseqs database {mself.mseqdb} already exists. The program will "
-                               "use it.")
-                return False
-        self.logger.debug("Existing files: {}".format(len(files_existing)))
-        self.logger.debug("Expected extensions: {}".format(len(outext)))
-        cmd = f"mmseqs createdb {self.prt_path} {self.mmseqdb}"
-        msg = (f"Problem while trying to convert database {self.prt_path} to mmseqs "
+    @property
+    def tmp_files_cmd(self):
+        return (f"mmseqs createdb {self.prt_path} {self.mmseqdb}",
+                f"Problem while trying to convert database {self.prt_path} to mmseqs "
                "database format.")
-        self.logger.details(f"MMseqs command: {cmd}")
-        with open(self.log_path, "w") as logf:
-            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-        return True
 
-    def do_pangenome(self, status) -> tuple:
-        # If we just made the database, we must redo all next steps
-        # -> if existing, remove
-        # mmseqsclust (created by run_mmseqs_clust)
-        # mmseqstsv (created by mmseqs_to_pangenome)
-        # pangenome file
-        if status and os.path.isfile(self.mmseqclust) or os.path.isfile(self.mmseqstsv) or os.path.isfile(self.panfile):
-            self.logger.details("Removing existing clustering and/or pangenome files.")
-            utils.remove(self.mmseqclust)
-            utils.remove(self.mmseqstsv)
-            utils.remove(self.panfile)
-        bar = None
-        self.logger.debug(self.mmseqclust)
-        if os.path.isfile(self.mmseqclust):
-            self.logger.warning((f"mmseqs clustering {self.mmseqclust} already exists. The program will now convert "
-                            "it to a pangenome file."))
-        else:
-            self.logger.info("Clustering proteins...")
-            try:
-                stop_bar = False
-                if self.quiet:
-                    widgets = []
-                # If not quiet, start a progress bar while clustering proteins. We cannot guess
-                # how many time it will take, so we start an "infinite" bar, and send it a signal
-                # when it has to stop. If quiet, we start a thread that will immediatly stop
-                else:
-                    widgets = [progressbar.BouncingBar(marker=progressbar.RotatingMarker(markers="◐◓◑◒")),
-                               "  -  ", progressbar.Timer()]
-                x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda: stop_bar,))
-                x.start()
-                self.run_mmseqs_clust()
-            # except KeyboardInterrupt: # pragma: no cover
-            except:  # pragma: no cover
-                stop_bar = True
-                x.join()
-                sys.exit(1)
-            # Clustering done, stop bar and join (if quiet, it was already finished, so we just join it)
-            stop_bar = True
-            x.join()
-        # Convert output to tsv file (one line per comparison done)
-        #  # Convert output to tsv file (one line per comparison done)
-        # -> returns (families, outfile)
-        families = self.mmseqs_to_pangenome()
-        return families
+    @property
+    def clustering_files(self):
+        return [self.mmseqclust, self.mmseqstsv]
 
-    def run_mmseqs_clust(self):
-        cmd = (
-            f"mmseqs cluster {self.mmseqdb} {self.mmseqclust} {self.tmpdir} " 
-            f"--min-seq-id {self.min_id} --threads {self.threads} --cluster-mode "
-            f"{self.clust_mode}")
-        self.logger.details(f"MMseqs command: {cmd}")
-        msg = f"Problem while clustering proteins with mmseqs. See log in {self.log_path}"
-        with open(self.log_path, "a") as logm:
-            utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
+    @property
+    def clust_cmd(self):
+        return (f"mmseqs cluster {self.mmseqdb} {self.mmseqclust} {self.tmpdir} "
+                f"--min-seq-id {self.min_id} --threads {self.threads} --cluster-mode "
+                f"{self.clust_mode}",
+                f"Problem while clustering proteins with mmseqs. See log in {self.log_path}")
 
-    def mmseqs_to_pangenome(self):
+    def parse_to_pangenome(self):
         cmd = f"mmseqs createtsv {self.mmseqdb} {self.mmseqdb} {self.mmseqclust} {self.mmseqstsv}"
         msg = "Problem while trying to convert mmseq result file to tsv file"
         self.logger.details(f"MMseqs command: {cmd}")
         with open(self.log_path, "a") as logf:
             utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-        # Convert the tsv file to a 'pangenome' file: one line per family
-        families = self.mmseqs_tsv_to_pangenome()
-        return families
 
-    def mmseqs_tsv_to_pangenome(self):
-        self.logger.info("Converting mmseqs results to pangenome file")
-        clusters = self.mmseq_tsv_to_clusters()
-        families = self.clusters_to_file(clusters)
-        end = time.strftime('%Y-%m-%d_%H-%M-%S')
-        with open(self.log_path, "a") as logm:
-            logm.write(f"End: {end}")
-        return families
-
-    def mmseq_tsv_to_clusters(self):
         clusters = {}  # {representative: [all members]}
         with open(self.mmseqstsv) as mmsf:
             for line in mmsf:
@@ -217,20 +118,8 @@ class MMseq(Clusterisator):
                     clusters[repres].append(other)
                 else:
                     clusters[repres] = [repres]
-        self.logger.info(f"Pangenome has {len(clusters)} families.")
-        return clusters
 
-    def clusters_to_file(self, clust):
-        families = {}  # {famnum: [members]}
-        with open(self.panfile, "w") as fout:
-            num = 1
-            for _, fam in clust.items():
-                families[num] = []
-                fout.write(str(num))
-                for mem in sorted(fam, key=utils.sort_proteins):
-                    families[num].append(mem)
-                    fout.write(" " + mem)
-                fout.write("\n")
-                num += 1
+        families = list(map(lambda mems: sorted(mems, key=utils.sort_proteins), clusters.values()))
         return families
+
 

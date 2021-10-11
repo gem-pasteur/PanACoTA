@@ -146,7 +146,7 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
 
     # test if package required for pangenome building is installed and in the path
     if not runner.check_installed():  # pragma: no cover
-        print(f"{method} is not installed. 'PanACoTA pangenome' cannot run.")
+        logger.error(f"{method} is not installed. 'PanACoTA pangenome' cannot run.")
         sys.exit(1)
 
     os.makedirs(outdir, exist_ok=True)

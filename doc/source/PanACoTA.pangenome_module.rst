@@ -7,10 +7,16 @@
     :undoc-members:
     :show-inheritance:
 
-``mmseqs_functions`` submodule
-------------------------------
+``Clusterisator`` submodule
+---------------------------
+.. automodule:: PanACoTA.pangenome_module.Clusterisator
+    :members:
+    :undoc-members:
+    :show-inheritance:
 
-.. automodule:: PanACoTA.pangenome_module.mmseqs_functions
+``MMseq`` submodule
+-------------------
+.. automodule:: PanACoTA.pangenome_module.MMseq
     :members:
     :undoc-members:
     :show-inheritance:
@@ -30,5 +36,4 @@
     :members:
     :undoc-members:
     :show-inheritance:
-
 
