@@ -124,8 +124,10 @@ class Clusterisator(ABC):
         self.log_path = os.path.join(outdir, f"{self.method_name}_" + prt_bank + "_" + self.infoname + ".log")
         self.tmpdir = os.path.join(self.outdir, "tmp_" + prt_bank + "_" + self.infoname)
 
-        if not panfile:
+        if panfile is None:
             self.panfile = f"PanGenome-{prt_bank}-clust-{self.infoname}.lst"
+        else:
+            self.panfile = panfile
 
         self.panfile = os.path.join(self.outdir, self.panfile)
 
@@ -294,6 +296,7 @@ class Clusterisator(ABC):
             self.logger.warning((f"mmseqs clustering {self.mmseqclust} already exists. The program will now convert "
                                  "it to a pangenome file."))
 
+        self.logger.info(f"Parsing {self.method_name} result.")
         families = self.parse_to_pangenome() # here should edit parsing
         return families
 
@@ -345,7 +348,7 @@ class Clusterisator(ABC):
         """
         with open(self.panfile, "w") as panf:
             for i, fam in enumerate(families):
-                panf.write(" ".join([str(i)] + fam))
+                panf.write(" ".join([str(i)] + fam) + "\n")
 
     def run(self):
         """
@@ -379,6 +382,7 @@ class Clusterisator(ABC):
 
             families = self.do_pangenome(status)
 
+        self.logger.info(f"Pangenome has {len(families)} families")
         self.write_panfile(families)
 
         end = time.strftime('%Y-%m-%d_%H-%M-%S')

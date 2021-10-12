@@ -81,6 +81,8 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
     dbpath : str
         path to the folder containing all protein files (files called as the name of genome
         given in lstinfo + ".prt"
+    method : str
+        Method to construct the pangenome
     min_id : float
         Minimum percentage of identity between 2 proteins to put them in the same family
     outdir : str

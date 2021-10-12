@@ -21,15 +21,18 @@ def test_parser_noarg(capsys):
     with pytest.raises(SystemExit):
         pangenome.parse(parser, "".split())
     _, err = capsys.readouterr()
+    pytest
     assert "usage: " in err
     assert "-l LSTINFO_FILE -n DATASET_NAME -d DBPATH" in err
     assert "[-i MIN_ID]" in err
     assert " -o OUTDIR" in err
     assert "-m METHOD" in err
     assert "[-f OUTFILE] [-c {0,1,2}]" in err
-    assert "[-s SPEDIR] [--threads THREADS] [-v]" in err
+    assert "[-s SPEDIR]" in err
+    assert "[--threads THREADS]" in err
+    assert "[-v]" in err
     assert "[-q] [-h]" in err
-    assert "the following arguments are required: -l, -n, -d, -o -m" in err
+    assert "the following arguments are required: -l, -n, -d, -o, -m" in err
 
 
 def test_perc_id_nonum(capsys):

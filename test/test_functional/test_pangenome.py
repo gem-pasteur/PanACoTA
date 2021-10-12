@@ -60,6 +60,7 @@ def test_main_from_parse():
     args.outfile = None
     args.verbose = 0
     args.quiet = False
+    args.method = "mmseqs"
     args.argv = ["pangenome", "pan.py", "test_main_from_parse"]
     # Run main_from_parse
     pan.main_from_parse(args)
@@ -106,6 +107,7 @@ def test_main(caplog):
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "testPAN4"
     min_id = 0.8
+    method = "mmseqs"
     outdir = GENEPATH
     clust_mode = 1
     spe_dir = None
@@ -115,7 +117,7 @@ def test_main(caplog):
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
     out_panfile = os.path.join(outdir, "PanGenome-testPAN4.All.prt-clust-0.8-mode1.lst")
-    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode,
+    assert pan.main(cmd, lstinfo, name, used_dbpath, method, min_id, outdir, clust_mode,
                     spe_dir, threads, verbose=2) == out_panfile
     # Checl creation of prt bank
     prtbank = os.path.join(used_dbpath, "testPAN4.All.prt")
@@ -146,9 +148,9 @@ def test_main(caplog):
     # Check log content
     assert ("Building bank with all proteins to test/data/pangenome/"
             "generated_by_func-tests/database/testPAN4.All.prt") in caplog.text
-    assert "Creating database" in caplog.text
+    assert "Creating temporary files" in caplog.text
     assert "Clustering proteins..." in caplog.text
-    assert "Converting mmseqs results to pangenome file" in caplog.text
+    assert "Parsing mmseqs result" in caplog.text
     assert "Pangenome has 16 families" in caplog.text
     assert "Retrieving information from pan families" in caplog.text
     assert "Saving all information to a binary file for later use" in caplog.text
@@ -163,6 +165,7 @@ def test_main_prt_exist(caplog):
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "test2PAN4"
     min_id = 0.8
+    method = "mmseqs"
     outdir = GENEPATH
     clust_mode = 1
     spe_dir = None
@@ -180,7 +183,7 @@ def test_main_prt_exist(caplog):
     out_panfile = os.path.join(outdir, "PanGenome-test2PAN4.All.prt-clust-0.8-mode1.lst")
 
     # assert 
-    a = pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+    a = pan.main(cmd, lstinfo, name, used_dbpath, method, min_id, outdir, clust_mode, spe_dir,
                     threads, verbose=15) #== out_panfile
     assert a == out_panfile
 
@@ -222,9 +225,9 @@ def test_main_prt_exist(caplog):
     assert ("Protein bank test/data/pangenome/generated_by_func-tests/"
             "database/test2PAN4.All.prt already exists. It will "
             "be used by mmseqs.") in caplog.text
-    assert "Creating database" in caplog.text
+    assert "Creating temporary files" in caplog.text
     assert "Clustering proteins..." in caplog.text
-    assert "Converting mmseqs results to pangenome file" in caplog.text
+    assert "Parsing mmseqs result" in caplog.text
     assert "Pangenome has 16 families" in caplog.text
     assert "Retrieving information from pan families" in caplog.text
     assert "Saving all information to a binary file for later use" in caplog.text
@@ -239,6 +242,7 @@ def test_main_spedir(caplog):
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "test3PAN4"
     min_id = 0.8
+    method = "mmseqs"
     outdir = GENEPATH
     clust_mode = 1
     spe_dir = os.path.join(GENEPATH, "spedir")
@@ -249,7 +253,7 @@ def test_main_spedir(caplog):
     shutil.copytree(DBPATH, used_dbpath)
 
     out_panfile = os.path.join(outdir, "PanGenome-test3PAN4.All.prt-clust-0.8-mode1.lst")
-    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+    assert pan.main(cmd, lstinfo, name, used_dbpath, method, min_id, outdir, clust_mode, spe_dir,
                     threads, verbose=15) == out_panfile
     # Checl creation of prt bank
     prtbank = os.path.join(spe_dir, "test3PAN4.All.prt")
@@ -291,9 +295,9 @@ def test_main_spedir(caplog):
     # Check log content
     assert ("Building bank with all proteins to test/data/pangenome/"
             "generated_by_func-tests/spedir/test3PAN4.All.prt") in caplog.text
-    assert "Creating database" in caplog.text
+    assert "Creating temporary files" in caplog.text
     assert "Clustering proteins..." in caplog.text
-    assert "Converting mmseqs results to pangenome file" in caplog.text
+    assert "Parsing mmseqs result" in caplog.text
     assert "Pangenome has 16 families" in caplog.text
     assert "Retrieving information from pan families" in caplog.text
     assert "Saving all information to a binary file for later use" in caplog.text
@@ -307,6 +311,7 @@ def test_main_outfile(caplog):
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "test4PAN4"
     min_id = 0.8
+    method = "mmseqs"
     outdir = GENEPATH
     clust_mode = 1
     spe_dir = None
@@ -317,7 +322,7 @@ def test_main_outfile(caplog):
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
 
-    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, outdir, clust_mode, spe_dir,
+    assert pan.main(cmd, lstinfo, name, used_dbpath, method, min_id, outdir, clust_mode, spe_dir,
                     threads, outfile=outfile) == os.path.join(outdir, outfile)
 
     prtbank = os.path.join(used_dbpath, "test4PAN4.All.prt")
@@ -356,9 +361,9 @@ def test_main_outfile(caplog):
     # Check log content
     assert ("Building bank with all proteins to test/data/pangenome/"
             "generated_by_func-tests/database/test4PAN4.All.prt") in caplog.text
-    assert "Creating database" in caplog.text
+    assert "Creating temporary files" in caplog.text
     assert "Clustering proteins..." in caplog.text
-    assert "Converting mmseqs results to pangenome file" in caplog.text
+    assert "Parsing mmseqs result" in caplog.text
     assert "Pangenome has 16 families" in caplog.text
     assert "Retrieving information from pan families" in caplog.text
     assert "Saving all information to a binary file for later use" in caplog.text
@@ -372,6 +377,7 @@ def test_pangenome_all():
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "testAllPAN4"
     min_id = 0.8
+    method = "mmseqs"
     outdir = GENEPATH
     clust_mode = 1
     spe_dir = None
@@ -380,7 +386,7 @@ def test_pangenome_all():
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
 
-    cmd = f"PanACoTA pangenome -l {lstinfo} -n {name} -d {used_dbpath} -o {outdir} -vv"
+    cmd = f"PanACoTA pangenome -l {lstinfo} -n {name} -d {used_dbpath} -o {outdir} -m {method} -vv"
     ret = subprocess.call(cmd.split())
     assert ret == 0
 
