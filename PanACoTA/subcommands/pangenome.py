@@ -107,7 +107,6 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
     import logging
     from PanACoTA import utils
     from PanACoTA.pangenome_module import protein_seq_functions as protf
-    from PanACoTA.pangenome_module import mmseqs_functions as mmf
     from PanACoTA.pangenome_module import post_treatment as pt
     from PanACoTA import __version__ as version
 
@@ -193,7 +192,7 @@ def build_parser(parser):
                           help=("Output directory, where all results must be saved "
                                 "(including tmp folder)"))
     required.add_argument("-m", dest="method", required=True,
-                          help="Method to construct pangenome (mmseqs or proteinortho)")
+                          help=("Method to construct pangenome (mmseqs or proteinortho)"))
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-i", dest="min_id", type=utils_argparse.perc_id, default=0.8,

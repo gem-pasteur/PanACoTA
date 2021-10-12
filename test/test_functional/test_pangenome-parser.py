@@ -25,10 +25,11 @@ def test_parser_noarg(capsys):
     assert "-l LSTINFO_FILE -n DATASET_NAME -d DBPATH" in err
     assert "[-i MIN_ID]" in err
     assert " -o OUTDIR" in err
+    assert "-m METHOD" in err
     assert "[-f OUTFILE] [-c {0,1,2}]" in err
     assert "[-s SPEDIR] [--threads THREADS] [-v]" in err
     assert "[-q] [-h]" in err
-    assert "the following arguments are required: -l, -n, -d, -o" in err
+    assert "the following arguments are required: -l, -n, -d, -o -m" in err
 
 
 def test_perc_id_nonum(capsys):
@@ -131,7 +132,7 @@ def test_parser_default():
     """
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od -m mmseqs".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"
@@ -155,7 +156,7 @@ def test_parser_all_threads():
     nb = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 0".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od -m mmseqs --threads 0".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"
@@ -177,7 +178,7 @@ def test_parser_1thread():
     """
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
-    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 1".split())
+    options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od -m mmseqs --threads 1".split())
     assert options.lstinfo_file == "lstinfo"
     assert options.dataset_name == "TEST4"
     assert options.dbpath == "dbpath"

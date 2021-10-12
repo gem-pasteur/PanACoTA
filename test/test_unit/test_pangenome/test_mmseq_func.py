@@ -12,7 +12,7 @@ import glob
 import logging
 import pytest
 
-import PanACoTA.pangenome_module.mmseqs_functions as mmseqs
+from PanACoTA.pangenome_module.MMseq import MMseq
 import PanACoTA.utils as utils
 import test.test_unit.utilities_for_tests as tutil
 
@@ -139,12 +139,13 @@ def test_create_mmseqdb(caplog):
     filename = os.path.join(GENEPATH, "test_create_mmseqsdb.msdb")
     prt_path = os.path.join(PATH_EXP_FILES, "exp_EXEM.All.prt")
     logfile = os.path.join(GENEPATH, "test_create_mmseqsdb.log")
+    runner = MMseq(0.6, 1, )
     mmseqs.create_mmseqs_db(filename, prt_path, logfile)
 
     outext = ["", ".index", ".lookup", "_h", "_h.index", ".dbtype", "_h.dbtype"]
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
-    assert ("MMseqs command: mmseqs createdb test/data/pangenome/exp_files/exp_EXEM.All.prt "
+    assert ("mmseqs command: mmseqs createdb test/data/pangenome/exp_files/exp_EXEM.All.prt "
             "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb.msdb") in caplog.text
     assert "Existing files: 0" in caplog.text
     assert "Expected extensions: 7" in caplog.text

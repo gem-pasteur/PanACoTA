@@ -247,7 +247,7 @@ class Clusterisator(ABC):
         self.logger.debug(f"Expected files: {len(self.expected_files)}")
         cmd, msg = self.tmp_files_cmd
 
-        self.logger.details(f"MMseqs command: {cmd}")
+        self.logger.details(f"{self.method_name} command: {cmd}")
         with open(self.log_path, "w") as logf:
             utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
         return True
