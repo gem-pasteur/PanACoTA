@@ -46,87 +46,85 @@ import os
 import sys
 import copy
 import time
+import glob
+import re
 
 from PanACoTA.pangenome_module.Clusterisator import Clusterisator, infinite_progressbar
 from PanACoTA import utils
 
-class MMseq(Clusterisator):
-    def __init__(self, min_id, clust_mode, outdir, prt_path, threads, panfile, quiet):
-        self.min_id = min_id
-        self.clust_mode = clust_mode
-        super(MMseq, self).__init__(threads, outdir, prt_path, panfile, quiet)
+class ProteinOrtho(Clusterisator):
+    def __init__(self, po_mode, name, outdir, prt_path, threads, panfile, quiet):
+        self.po_mode = po_mode
+        self.name = name
 
-        prt_bank = os.path.basename(self.prt_path)
+        super(ProteinOrtho, self).__init__(threads, outdir, prt_path, panfile, quiet)
 
         if panfile is None:
-            self.panfile_tmp = f"PanGenome-{prt_bank}-clust-{self.infoname}.lst"
+            self.panfile_tmp = f"PanGenome-{name}-clust-{self.infoname}.lst"
         else:
             self.panfile_tmp = panfile
 
-        self.panfile = os.path.join(outdir, self.panfile)
-
-        self.mmseqdb = os.path.join(self.tmpdir, prt_bank + "-msDB")
-        self.mmseqclust = os.path.join(self.tmpdir, prt_bank + "-clust-" + self.infoname)
-        self.mmseqstsv = self.mmseqclust + ".tsv"
+        self.panfile_tmp = os.path.join(outdir, self.panfile_tmp)
+        self.wd = os.getcwd()
+        self.tmpdir = os.path.join(self.wd, self.tmpdir)
+        self.prt_path = os.path.join(self.wd, self.prt_path)
+        self.log_path = os.path.join(self.wd, self.log_path)
 
     @property
     def panfile(self):
         return self.panfile_tmp
 
     @property
-    def method_name(self) -> str:
-        return "mmseqs"
+    def method_name(self):
+        return "proteinortho"
 
     @property
-    def info_string(self) -> str:
-        return ("Will run MMseqs2 with:\n"
-                   f"\t- minimum sequence identity = {self.min_id*100}%\n"
-                   f"\t- cluster mode {self.clust_mode}")
+    def info_string(self):
+        return ("Will run ProteinOrtho with:\n"
+                f"\t- search method {self.po_mode}")
 
     @property
-    def infoname(self) -> str:
+    def infoname(self):
         if self.threads != 1:
             threadinfo = "-th" + str(self.threads)
         else:
             threadinfo = ""
-        infoname = str(self.min_id) + "-mode" + str(self.clust_mode) + threadinfo
+        infoname = self.po_mode + "-search" + threadinfo
         return infoname
 
     @property
     def expected_files(self):
-        return list(map(lambda ext: self.mmseqdb + ext,
-                        ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]))
+        return ["this", "files", "never", "gonna", "exist"]
+
+    def run_cmds(self, cmds):
+        os.chdir(self.tmpdir)
+        super(ProteinOrtho, self).run_cmds(cmds)
+        os.chdir(self.wd)
 
     @property
     def tmp_files_cmds(self):
-        return [(f"mmseqs createdb {self.prt_path} {self.mmseqdb}",
-                f"Problem while trying to convert database {self.prt_path} to mmseqs "
-               "database format.")]
+        protfiles = " ".join(glob.glob(f"{self.prt_path}/*.prt"))
+        return [(f"proteinortho -step=1 -cpus={self.threads} -p={self.po_mode} "
+                 f"-project={self.name} -temp={self.tmpdir} {protfiles}",
+                 f"An error occured while database building. View {self.log_path} for logs"),
+                (f"proteinortho -step=2 -cpus={self.threads} -p={self.po_mode} "
+                 f"-project={self.name} -temp={self.tmpdir} {protfiles}",
+                 f"An error occured while all-vs-all blast. View {self.log_path} for logs")]
 
     @property
     def clustering_files(self):
-        return list(map(lambda ext: self.mmseqclust + ext, [".0", ".1", ".dbtype", ".tsv"]))
+        return ["these", "files", "never", "gonna", "exist"]
 
     @property
     def clust_cmds(self):
-        clust_cmd = (f"mmseqs cluster {self.mmseqdb} {self.mmseqclust} {self.tmpdir} "
-                    f"--min-seq-id {self.min_id} --threads {self.threads} --cluster-mode "
-                    f"{self.clust_mode}")
-        tsv_cmd = f"mmseqs createtsv {self.mmseqdb} {self.mmseqdb} {self.mmseqclust} {self.mmseqstsv}"
-        return [(clust_cmd, f"En error occured while clustering was done. See logs in {self.log_path}"),
-                (tsv_cmd, f"En error occured while converting to tsv. See logs in {self.log_path}")]
+        protfiles = " ".join(glob.glob(f"{self.prt_path}/*.prt"))
+        resfiles = glob.glob(f"{self.name}.*")
+        return [(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} {protfiles}",
+                 f"An error occured while database building. View {self.log_path} for logs")]
 
     def parse_to_pangenome(self):
-        clusters = {}  # {representative: [all members]}
-        with open(self.mmseqstsv) as mmsf:
-            for line in mmsf:
-                repres, other = line.strip().split()
-                if repres in clusters:
-                    clusters[repres].append(other)
-                else:
-                    clusters[repres] = [repres]
+        with open(os.path.join(self.tmpdir, f"{self.name}.proteinortho.tsv")) as tsv:
+             lists = [list(filter(lambda a: len(a) > 0, re.split("[ \\*,\t\n]", line)[3:])) for line in tsv]
 
-        families = list(map(lambda mems: sorted(mems, key=utils.sort_proteins), clusters.values()))
-        return dict(zip(range(1, len(families) + 1), families))
-
-
+        lists = lists[1:]
+        return dict(zip(range(1, len(lists) + 1), lists))

@@ -122,12 +122,11 @@ class Clusterisator(ABC):
         self.log_path = os.path.join(outdir, f"{self.method_name}_" + prt_bank + "_" + self.infoname + ".log")
         self.tmpdir = os.path.join(outdir, "_".join(["tmp", self.method_name, prt_bank, self.infoname]))
 
-        if panfile is None:
-            self.panfile = f"PanGenome-{prt_bank}-clust-{self.infoname}.lst"
-        else:
-            self.panfile = panfile
 
-        self.panfile = os.path.join(outdir, self.panfile)
+    @property
+    @abstractmethod
+    def panfile(self):
+        pass
 
     @property
     @abstractmethod

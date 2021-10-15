@@ -56,11 +56,11 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.lstinfo_file, args.dataset_name, args.dbpath, args.method, args.min_id, args.outdir,
-         args.clust_mode, args.spedir, args.threads, args.outfile, args.verbose,
+         args.clust_mode, args.po_mode, args.spedir, args.threads, args.outfile, args.verbose,
          args.quiet)
 
 
-def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir, threads, outfile=None,
+def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, po_mode, spe_dir, threads, outfile=None,
          verbose=0, quiet=False):
     """
     Main method, doing all steps:
@@ -89,6 +89,8 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
         path to folder which will contain pangenome results and tmp files
     clust_mode : [0, 1, 2]
         0 for 'set cover', 1 for 'single-linkage', 2 for 'CD-Hit'
+    po_mode : {blastp+|blastn+|tblastx+|diamond|usearch|ublast|lastp|lastn|rapsearch|topaz|blatp|blatn|mmseqsp|mmseqsn}
+        blast algorithm which is run on first steps of proteinortho
     spe_dir : str or None
         path to the folder where concatenated bank of proteins must be saved.
         None to use the same folder as protein files
@@ -113,6 +115,7 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
     from PanACoTA import __version__ as version
 
     from PanACoTA.pangenome_module.MMseq import MMseq
+    from PanACoTA.pangenome_module.ProteinOrtho import ProteinOrtho
 
     # check if method is valid
     if method not in ["mmseqs", "proteinortho"]:
@@ -136,14 +139,15 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, spe_dir
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
 
-    # Build bank with all proteins to include in the pangenome
-    prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
+
     # Do pangenome
     if method == "mmseqs":
+        # Build bank with all proteins to include in the pangenome
+        prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet)
         runner = MMseq(min_id, clust_mode, outdir, prt_path, threads, outfile, quiet)
 
     if method == "proteinortho":
-        pass
+        runner = ProteinOrtho(po_mode, name, outdir, dbpath, threads, outfile, quiet)
 
     # test if package required for pangenome building is installed and in the path
     if not runner.check_installed():  # pragma: no cover
@@ -193,8 +197,8 @@ def build_parser(parser):
     required.add_argument("-o", dest="outdir", required=True,
                           help=("Output directory, where all results must be saved "
                                 "(including tmp folder)"))
-    required.add_argument("-m", dest="method", required=True,
-                          help=("Method to construct pangenome (mmseqs or proteinortho)"))
+    required.add_argument("-m", dest="method", choices=["mmseqs", "proteinortho"], required=True,
+                          help=("Method to construct pangenome."))
 
     optional = parser.add_argument_group('Optional arguments')
     optional.add_argument("-i", dest="min_id", type=utils_argparse.perc_id, default=0.8,
@@ -209,6 +213,10 @@ def build_parser(parser):
                           help=("Choose the clustering mode: 0 for 'set cover', 1 for "
                                 "'single-linkage', 2 for 'CD-Hit'. Default "
                                 "is 'single-linkage' (1)"))
+    optional.add_argument("-p", dest="po_mode", choices="blastp+ blastn+ tblastx+ diamond usearch ublast lastp "
+                                                        "lastn rapsearch topaz blatp blatn mmseqsp mmseqsn".split(),
+                          default="diamond",
+                          help=("For proteinortho algorithm. A blast algorithm which is used on initial steps."))
     optional.add_argument("-s", dest="spedir",
                           help=("use this option if you want to save the concatenated protein "
                                 "databank in another directory than the one containing all "
