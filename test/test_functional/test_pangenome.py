@@ -69,7 +69,7 @@ def test_main_from_parse():
     assert os.path.isfile(prtbank)
 
     # Check presence of tmp folder
-    tmp_base = os.path.join(GENEPATH, "tmp_testFromParsePAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(GENEPATH, "tmp_mmseqs_testFromParsePAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # check presence of mmseq cluster files
     cluster = os.path.join(tmp_base, name + ".All.prt-clust-0.8-mode1*")
@@ -123,7 +123,7 @@ def test_main(caplog):
     prtbank = os.path.join(used_dbpath, "testPAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_testPAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(outdir, "tmp_mmseqs_testPAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # Check presence of pangenome files (pangenome, matrices, summary)
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testPAN4*"))
@@ -188,7 +188,7 @@ def test_main_prt_exist(caplog):
     assert a == out_panfile
 
     # Check presence of tmp folder
-    tmp_base = os.path.join(outdir, "tmp_test2PAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(outdir, "tmp_mmseqs_test2PAN4.All.prt_0.8-mode1")
     assert os.path.isdir(tmp_base)
     # Check presence of mmseq DB files
     msdb = os.path.join(tmp_base, "test2PAN4.All.prt-msDB")
@@ -259,7 +259,7 @@ def test_main_spedir(caplog):
     prtbank = os.path.join(spe_dir, "test3PAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    tmp_base = os.path.join(outdir, "tmp_test3PAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(outdir, "tmp_mmseqs_test3PAN4.All.prt_0.8-mode1")
     msdb = os.path.join(tmp_base, "test3PAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
@@ -328,7 +328,7 @@ def test_main_outfile(caplog):
     prtbank = os.path.join(used_dbpath, "test4PAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    tmp_base = os.path.join(outdir, "tmp_test4PAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(outdir, "tmp_mmseqs_test4PAN4.All.prt_0.8-mode1")
     msdb = os.path.join(tmp_base, "test4PAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
@@ -393,7 +393,7 @@ def test_pangenome_all():
     prtbank = os.path.join(used_dbpath, "testAllPAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(outdir, "tmp_mmseqs_testAllPAN4.All.prt_0.8-mode1")
     msdb = os.path.join(tmp_base, "testAllPAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")

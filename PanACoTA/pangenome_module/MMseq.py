@@ -87,29 +87,25 @@ class MMseq(Clusterisator):
                         ["", ".index", ".dbtype", ".lookup", "_h", "_h.index", "_h.dbtype"]))
 
     @property
-    def tmp_files_cmd(self):
-        return (f"mmseqs createdb {self.prt_path} {self.mmseqdb}",
+    def tmp_files_cmds(self):
+        return [(f"mmseqs createdb {self.prt_path} {self.mmseqdb}",
                 f"Problem while trying to convert database {self.prt_path} to mmseqs "
-               "database format.")
+               "database format.")]
 
     @property
     def clustering_files(self):
-        return [self.mmseqclust, self.mmseqstsv]
+        return list(map(lambda ext: self.mmseqclust + ext, [".0", ".1", ".dbtype", ".tsv"]))
 
     @property
-    def clust_cmd(self):
-        return (f"mmseqs cluster {self.mmseqdb} {self.mmseqclust} {self.tmpdir} "
-                f"--min-seq-id {self.min_id} --threads {self.threads} --cluster-mode "
-                f"{self.clust_mode}",
-                f"Problem while clustering proteins with mmseqs. See log in {self.log_path}")
+    def clust_cmds(self):
+        clust_cmd = (f"mmseqs cluster {self.mmseqdb} {self.mmseqclust} {self.tmpdir} "
+                    f"--min-seq-id {self.min_id} --threads {self.threads} --cluster-mode "
+                    f"{self.clust_mode}")
+        tsv_cmd = f"mmseqs createtsv {self.mmseqdb} {self.mmseqdb} {self.mmseqclust} {self.mmseqstsv}"
+        return [(clust_cmd, f"En error occured while clustering was done. See logs in {self.log_path}"),
+                (tsv_cmd, f"En error occured while converting to tsv. See logs in {self.log_path}")]
 
     def parse_to_pangenome(self):
-        cmd = f"mmseqs createtsv {self.mmseqdb} {self.mmseqdb} {self.mmseqclust} {self.mmseqstsv}"
-        msg = "Problem while trying to convert mmseq result file to tsv file"
-        self.logger.details(f"MMseqs command: {cmd}")
-        with open(self.log_path, "a") as logf:
-            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
-
         clusters = {}  # {representative: [all members]}
         with open(self.mmseqstsv) as mmsf:
             for line in mmsf:
@@ -120,6 +116,6 @@ class MMseq(Clusterisator):
                     clusters[repres] = [repres]
 
         families = list(map(lambda mems: sorted(mems, key=utils.sort_proteins), clusters.values()))
-        return families
+        return dict(zip(range(1, len(families) + 1), families))
 
 

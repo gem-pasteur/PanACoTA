@@ -41,6 +41,7 @@ October 2021
 """
 import logging
 import os
+import sys
 import progressbar
 import threading
 import time
@@ -50,7 +51,7 @@ from PanACoTA import utils_pangenome as utils_pan
 from abc import ABC, abstractmethod, abstractproperty
 
 def infinite_progressbar(func):
-    def wrapper(self):
+    def wrapper(self, cmds):
         try:
             stop_bar = False
             if self.quiet:
@@ -63,9 +64,9 @@ def infinite_progressbar(func):
                             "  -  ", progressbar.Timer()]
             x = threading.Thread(target=utils.thread_progressbar, args=(widgets, lambda: stop_bar,))
             x.start()
-            res = func(self)
+            res = func(self, cmds)
             # except KeyboardInterrupt: # pragma: no cover
-        except:  # pragma: no cover
+        except :  # pragma: no cover
             stop_bar = True
             x.join()
             sys.exit(1)
@@ -98,8 +99,6 @@ class Clusterisator(ABC):
     ----------
         threads : int
             Where threads parameter is stored.
-        outdir : str
-            Where outdir parameter is stored.
         prt_path : str
             Where prt_path parameter is stored.
         quiet : bool
@@ -115,21 +114,20 @@ class Clusterisator(ABC):
     """
     def __init__(self, threads, outdir, prt_path, panfile, quiet):
         self.threads = threads
-        self.outdir = outdir
         self.prt_path = prt_path
         self.quiet = quiet
         self.logger = logging.getLogger(f"pangenome.{self.method_name}")
 
         prt_bank = os.path.basename(self.prt_path)
         self.log_path = os.path.join(outdir, f"{self.method_name}_" + prt_bank + "_" + self.infoname + ".log")
-        self.tmpdir = os.path.join(self.outdir, "tmp_" + prt_bank + "_" + self.infoname)
+        self.tmpdir = os.path.join(outdir, "_".join(["tmp", self.method_name, prt_bank, self.infoname]))
 
         if panfile is None:
             self.panfile = f"PanGenome-{prt_bank}-clust-{self.infoname}.lst"
         else:
             self.panfile = panfile
 
-        self.panfile = os.path.join(self.outdir, self.panfile)
+        self.panfile = os.path.join(outdir, self.panfile)
 
     @property
     @abstractmethod
@@ -207,12 +205,13 @@ class Clusterisator(ABC):
 
     @property
     @abstractmethod
-    def tmp_files_cmd(self):
+    def tmp_files_cmds(self):
         """
         Tuple of command and error message that are used for tmp files creation.
 
         Returns
         -------
+        cmds : List[(cmd, msg)]
         cmd : str
             bash command
         msg : str
@@ -220,7 +219,6 @@ class Clusterisator(ABC):
         """
         pass
 
-    @infinite_progressbar
     def create_tmp_files(self):
         """
         Creates temporary files and directories that are required for clustering method launch.
@@ -241,18 +239,32 @@ class Clusterisator(ABC):
             self.logger.warning(f"Some, but not all {self.method_name} temporary files exist, the program will remove"
                                 f"remaining.")
             for file in files_existing:
-                os.remove(file)
-                logger.details(f"Removing '{file}'.")
+                utils.remove(file)
+                self.logger.details(f"Removing existing temporary '{file}'.")
 
 
         self.logger.debug(f"Existing files: {len(files_existing)}")
         self.logger.debug(f"Expected files: {len(self.expected_files)}")
-        cmd, msg = self.tmp_files_cmd
-
-        self.logger.details(f"{self.method_name} command: {cmd}")
-        with open(self.log_path, "w") as logf:
-            utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
+        self.logger.info("Creating temporary files")
+        self.run_cmds(self.tmp_files_cmds)
         return True
+
+    @infinite_progressbar
+    def run_cmds(self, cmds):
+        """
+        Run commands that require some time
+        Parameters
+        ----------
+        cmds : List[(str, str)]
+            list of tuples of commands and error messages
+        Returns
+        -------
+
+        """
+        with open(self.log_path, "w") as logf:
+            for cmd, msg in cmds:
+                # self.logger.details(f"{self.method_name} command: {cmd}")
+                utils.run_cmd(cmd, msg, eof=True, stdout=logf, stderr=logf)
 
     @property
     @abstractmethod
@@ -280,44 +292,40 @@ class Clusterisator(ABC):
         families : {fam_num: [all members]}
             List of families
         """
-        present_downstream_files = list(filter(os.path.isfile, self.clustering_files + [self.panfile]))
+        present_downstream_files = list(filter(os.path.isfile, self.clustering_files))
 
-        if len(present_downstream_files) != len(self.clustering_files) + 1:
+        if len(present_downstream_files) != len(self.clustering_files):
             status = True
 
         if status and len(present_downstream_files) > 0:
             self.logger.details("Removing existing clustering and/or pangenome files.")
-            map(utils.remove, present_downstream_files)
+            for file in present_downstream_files:
+                utils.remove(file)
 
         if status:
             self.logger.info("Clustering proteins...")
-            self.run_clust()
+            self.run_cmds(self.clust_cmds)
         else:
-            self.logger.warning((f"mmseqs clustering {self.mmseqclust} already exists. The program will now convert "
+            self.logger.warning((f"clustering already exists. The program will now convert "
                                  "it to a pangenome file."))
 
         self.logger.info(f"Parsing {self.method_name} result.")
-        families = self.parse_to_pangenome() # here should edit parsing
+        families = self.parse_to_pangenome()
         return families
-
-    @infinite_progressbar
-    def run_clust(self):
-        cmd, msg = self.clust_cmd
-        with open(self.log_path, "a") as logm:
-            utils.run_cmd(cmd, msg, eof=False, stdout=logm, stderr=logm)
 
     @property
     @abstractmethod
-    def clust_cmd(self):
+    def clust_cmds(self):
         """
         Command to perform clustering and error message in case of failure
 
         Returns
         -------
+        cmds : List[(cmd, msg)]
         cmd : str
-            command that is used for clustering
+            bash command
         msg : str
-            an error message that is displayed in case of failure
+            error message
         """
         pass
 
@@ -328,7 +336,7 @@ class Clusterisator(ABC):
 
         Returns
         -------
-        families : List[List[str]]
+        families : {fam_num: [all members]}
             List of families
         """
         pass
@@ -339,15 +347,10 @@ class Clusterisator(ABC):
 
         Parameters
         ----------
-        families
-
-        Returns
-        -------
         families : {fam_num: [all members]}
-            List of families
         """
         with open(self.panfile, "w") as panf:
-            for i, fam in enumerate(families):
+            for i, fam in families.items():
                 panf.write(" ".join([str(i)] + fam) + "\n")
 
     def run(self):
@@ -377,17 +380,16 @@ class Clusterisator(ABC):
             _, families, _ = utils_pan.read_pan_file(self.panfile, self.logger)
         else:
             os.makedirs(self.tmpdir, exist_ok=True)
-            self.logger.info("Creating temporary files")
             status = self.create_tmp_files()
 
             families = self.do_pangenome(status)
+            self.write_panfile(families)
 
         self.logger.info(f"Pangenome has {len(families)} families")
-        self.write_panfile(families)
 
         end = time.strftime('%Y-%m-%d_%H-%M-%S')
         with open(self.log_path, "a") as logm:
             logm.write(f"End: {end}")
 
-        return dict(zip(range(1, len(families) + 1), families)), self.panfile
+        return families, self.panfile
 
