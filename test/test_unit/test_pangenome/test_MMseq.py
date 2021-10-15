@@ -225,23 +225,6 @@ def test_clust_path():
 
 # test run results
 
-tmp_dir = GENEPATH + f"/tmp_mmseqs_{PRT_BANK}_0.8-mode1-th2"
-
-db_ext = ["", ".index", ".lookup", ".dbtype", "_h", "_h.index", "_h.dbtype"]
-exp_db_base = PATH_TEST_FILES + "/mmseq_db"
-exp_db_files = list(map(lambda ext : exp_db_base + ext, db_ext))
-
-new_db_base = tmp_dir + "/" + PRT_BANK + "-msDB"
-new_db_files = list(map(lambda ext: new_db_base + ext, db_ext))
-
-clust_ext = [".0", ".1", ".dbtype", ".tsv"]
-
-exp_clust_base = PATH_TEST_FILES + "/mmseq_clust-out"
-exp_clust_files = list(map(lambda ext : exp_clust_base + ext, clust_ext))
-
-new_clust_base = tmp_dir + "/" + PRT_BANK + "-clust-0.8-mode1-th2"
-new_clust_files = list(map(lambda ext : new_clust_base + ext, clust_ext))
-
 @pytest.fixture(params=["existing_panfile", "clust_files", "full_db",
                         "clear_folder", "incomplete_db", "clust_files_only"])
 def test_cases(setup_teardown_module, request):
@@ -258,7 +241,22 @@ def test_cases(setup_teardown_module, request):
         case - string that defines the test case
         runner - runner for this case
     """
+    tmp_dir = GENEPATH + f"/tmp_mmseqs_{PRT_BANK}_0.8-mode1-th2"
 
+    db_ext = ["", ".index", ".lookup", ".dbtype", "_h", "_h.index", "_h.dbtype"]
+    exp_db_base = PATH_TEST_FILES + "/mmseq_db"
+    exp_db_files = list(map(lambda ext: exp_db_base + ext, db_ext))
+
+    new_db_base = tmp_dir + "/" + PRT_BANK + "-msDB"
+    new_db_files = list(map(lambda ext: new_db_base + ext, db_ext))
+
+    clust_ext = [".0", ".1", ".dbtype", ".tsv"]
+
+    exp_clust_base = PATH_TEST_FILES + "/mmseq_clust-out"
+    exp_clust_files = list(map(lambda ext: exp_clust_base + ext, clust_ext))
+
+    new_clust_base = tmp_dir + "/" + PRT_BANK + "-clust-0.8-mode1-th2"
+    new_clust_files = list(map(lambda ext: new_clust_base + ext, clust_ext))
     exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes.lst")
     panfile_out = os.path.join(GENEPATH, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1-th2.lst")
 

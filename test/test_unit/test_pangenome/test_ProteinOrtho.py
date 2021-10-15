@@ -74,11 +74,11 @@ def setup_teardown_module():
     print("setup")
 
     yield
-    # shutil.rmtree(GENEPATH)
-    # for f in LOGFILES:
-    #    if os.path.exists(f):
-    #        os.remove(f)
-    # print("teardown")
+    shutil.rmtree(GENEPATH)
+    for f in LOGFILES:
+        if os.path.exists(f):
+            os.remove(f)
+    print("teardown")
 
 
 def test_run(setup_teardown_module):

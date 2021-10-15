@@ -63,7 +63,7 @@ class MMseq(Clusterisator):
         else:
             self.panfile_tmp = panfile
 
-        self.panfile = os.path.join(outdir, self.panfile)
+        self.panfile_tmp = os.path.join(outdir, self.panfile_tmp)
 
         self.mmseqdb = os.path.join(self.tmpdir, prt_bank + "-msDB")
         self.mmseqclust = os.path.join(self.tmpdir, prt_bank + "-clust-" + self.infoname)
