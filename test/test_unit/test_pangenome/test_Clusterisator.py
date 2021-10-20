@@ -51,9 +51,9 @@ class TestClusterisator(ABC):
         print("setup")
 
         yield
-        shutil.rmtree(GENEPATH)
+        # shutil.rmtree(GENEPATH)
         for f in LOGFILES:
-            if os.path.exists(f):
+           if os.path.exists(f):
                 os.remove(f)
         print("teardown")
 
@@ -171,8 +171,7 @@ class TestClusterisator(ABC):
 
     def read_callback(self, runner, mocker):
         expected_args = {
-            "existing_panfile": (
-                os.path.join(GENEPATH, "PanGenome-exp_EXEM.All.prt-clust-0.8-mode1-th2.lst"), runner.logger),
+            "existing_panfile": (self.exp_new_panfile[1], runner.logger),
             "clust_files": 0,
             "full_db": 0,
             "clear_folder": 0,
@@ -288,7 +287,7 @@ class TestClusterisator(ABC):
 
     @pytest.fixture(params=["already exists. PanACoTA will read it to get families.",
                             "Creating temporary files",
-                            "Pangenome has 16 families",
+                            "Pangenome has",
                             "temporary files already exists. The program will use them.",
                             "Some, but not all",
                             "Removing existing temporary",
@@ -320,7 +319,7 @@ class TestClusterisator(ABC):
                 "incomplete_db": True,
                 "clust_files_only": True
             },
-            "Pangenome has 16 families": {
+            "Pangenome has": {
                 "existing_panfile": True,
                 "clust_files": True,
                 "full_db": True,
@@ -396,6 +395,10 @@ class TestClusterisator(ABC):
         except KeyError:
             pytest.skip("for this particular test case and phrase result not defined")
 
+    @abstractmethod
+    def test_parse(self):
+        pass
+
 
 class TestMMseq(TestClusterisator):
     __test__ = True
@@ -466,26 +469,66 @@ class TestMMseq(TestClusterisator):
         Test if path to clustering results is computed correctly
         """
         runner = self.clust_runner(threads=2)
-        assert runner.mmseqclust == GENEPATH + \
-               f"/tmp_mmseqs_{self.PRT_BANK}_0.8-mode1-th2/{self.PRT_BANK}-clust-0.8-mode1-th2"
+        assert runner.mmseqclust == f"{self.TMP_DIR}/{self.PRT_BANK}-clust-0.8-mode1-th2"
+
+    def test_parse(self):
+        runner = self.clust_runner(threads=2)
+        runner.mmseqstsv = os.path.join(PATH_TEST_FILES, "mmseq_clust-out.tsv")
+
+        _, exp_fams, _ = utils_pan.read_pan_file(self.exp_new_panfile[0], runner.logger)
+
+        families = runner.parse_to_pangenome()
+        assert set(map(lambda a: " ".join(a), families.values())) == set(map(lambda a: " ".join(a), exp_fams.values()))
 
 
 class TestProteinOrtho(TestClusterisator):
-    __test__ = False
+    __test__ = True
     PRT_PATH = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
     NAME = "EXEM"
+
+    @property
+    def TMP_DIR(self):
+        return GENEPATH + f"/tmp_proteinortho_Proteins_diamond-search-th2"
 
     def clust_runner(self, threads=1, **kwargs):
         panfile = kwargs.get("panfile", None)
         quiet = kwargs.get("quiet", False)
         po_mode = kwargs.get("po_mode", "diamond")
+        name = kwargs.get("name", self.NAME)
         return ProteinOrtho(po_mode, name, GENEPATH, self.PRT_PATH, threads, panfile, quiet)
 
+    @property
     def exp_new_panfile(self):
-        pass
+        exp_pan = os.path.join(PATH_EXP_FILES, "exp_pangenome-4genomes-proteinortho.lst")
+        panfile_out = os.path.join(GENEPATH, "PanGenome-EXEM-clust-diamond-search-th2.lst")
+        return exp_pan, panfile_out
 
+    @property
     def exp_new_clust_files(self):
-        pass
+        clust_ext = ["proteinortho-graph", "proteinortho-graph.summary", "proteinortho.html", "proteinortho.tsv"]
 
+        exp_clust_base = PATH_TEST_FILES + "/proteinortho_clust-out"
+        exp_clust_files = list(map(lambda ext: exp_clust_base + "." + ext, clust_ext))
+
+        new_clust_base = self.TMP_DIR + "/" + self.NAME
+        new_clust_files = list(map(lambda ext: new_clust_base + "." + ext, clust_ext))
+        return [tuple(a) for a in zip(exp_clust_files, new_clust_files)]
+
+    @property
     def exp_new_db_files(self):
-        pass
+        db_ext = ["info", "blast-graph"]
+
+        exp_db_base = PATH_TEST_FILES + "/proteinortho_db"
+        exp_db_files = list(map(lambda ext: exp_db_base + "." + ext, db_ext))
+
+        new_db_base = self.TMP_DIR + "/" + self.NAME
+        new_db_files = list(map(lambda ext: new_db_base + "." + ext, db_ext))
+        return [tuple(a) for a in zip(exp_db_files, new_db_files)]
+
+    def test_parse(self):
+        runner = self.clust_runner(threads=2, name="proteinortho_clust-out")
+        runner.tmpdir = PATH_TEST_FILES
+
+        _, exp_fams, _ = utils_pan.read_pan_file(self.exp_new_panfile[0], runner.logger)
+        families = runner.parse_to_pangenome()
+        assert set(map(lambda a: " ".join(a), families.values())) == set(map(lambda a: " ".join(a), exp_fams.values()))

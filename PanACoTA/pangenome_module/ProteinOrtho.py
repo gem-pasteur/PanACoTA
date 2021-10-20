@@ -89,12 +89,13 @@ class ProteinOrtho(Clusterisator):
             threadinfo = "-th" + str(self.threads)
         else:
             threadinfo = ""
-        infoname = self.po_mode + "-search" + threadinfo
+        infoname = f"{self.po_mode}-search{threadinfo}"
         return infoname
 
     @property
     def expected_files(self):
-        return ["this", "files", "never", "gonna", "exist"]
+        extentions = ["info", "blast-graph"]
+        return list(map(lambda ext: ".".join([os.path.join(self.tmpdir, self.name), ext]), extentions))
 
     def run_cmds(self, cmds):
         os.chdir(self.tmpdir)
@@ -104,16 +105,19 @@ class ProteinOrtho(Clusterisator):
     @property
     def tmp_files_cmds(self):
         protfiles = " ".join(glob.glob(f"{self.prt_path}/*.prt"))
-        return [(f"proteinortho -step=1 -cpus={self.threads} -p={self.po_mode} "
-                 f"-project={self.name} -temp={self.tmpdir} {protfiles}",
+        return [(f"mkdir {os.path.join(self.tmpdir, 'tmp')}",
+                 f"An error occured while proteinortho tmp folder creation. View {self.log_path} for logs"),
+                (f"proteinortho -step=1 -cpus={self.threads} -p={self.po_mode} "
+                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} {protfiles}",
                  f"An error occured while database building. View {self.log_path} for logs"),
                 (f"proteinortho -step=2 -cpus={self.threads} -p={self.po_mode} "
-                 f"-project={self.name} -temp={self.tmpdir} {protfiles}",
+                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -clean {protfiles}",
                  f"An error occured while all-vs-all blast. View {self.log_path} for logs")]
 
     @property
     def clustering_files(self):
-        return ["these", "files", "never", "gonna", "exist"]
+        extentions = ["proteinortho-graph", "proteinortho-graph.summary", "proteinortho.html", "proteinortho.tsv"]
+        return list(map(lambda ext: ".".join([os.path.join(self.tmpdir, self.name), ext]), extentions))
 
     @property
     def clust_cmds(self):

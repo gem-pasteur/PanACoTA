@@ -1,0 +1,12 @@
+SYSTEMCALL of Wed Oct 20 17:33:10 2021:
+proteinortho -step=1 -cpus=4 -project=testproj -temp=tmpdir ../test_files/example_db/Proteins/GEN2.1017.00001.prt ../test_files/example_db/Proteins/GEN4.1111.00001.prt ../test_files/example_db/Proteins/GENO.1017.00001.prt ../test_files/example_db/Proteins/GENO.1216.00002.prt
+Parameter-vector : (version=6.0.14,step=1,verbose=1,debug=0,exactstep3=0,synteny=0,duplication=2,cs=3,alpha=0.5,connectivity=0.1,cpus=4,evalue=1e-05,purity=1e-07,coverage=50,identity=25,blastmode=diamond,sim=0.95,report=3,keep=0,force=0,selfblast=0,twilight=0,singles=0,clean=0,blastOptions=,nograph=0,xml=0,desc=0,tmp_path=tmpdir//proteinortho_cache_testproj/,blastversion=unknown,binpath=,makedb=,blast=,jobs_todo=0,project=testproj,po_path=/usr/bin/,run_id=,threads_per_process=1,useMcl=0,freemem=-1)
+--------
+SYSTEMCALL of Wed Oct 20 17:34:06 2021:
+proteinortho -step=2 -cpus=6 -project=testproj -temp=tmpdir ../test_files/example_db/Proteins/GEN2.1017.00001.prt ../test_files/example_db/Proteins/GEN4.1111.00001.prt ../test_files/example_db/Proteins/GENO.1017.00001.prt ../test_files/example_db/Proteins/GENO.1216.00002.prt
+Parameter-vector : (version=6.0.14,step=2,verbose=1,debug=0,exactstep3=0,synteny=0,duplication=2,cs=3,alpha=0.5,connectivity=0.1,cpus=6,evalue=1e-05,purity=1e-07,coverage=50,identity=25,blastmode=diamond,sim=0.95,report=3,keep=0,force=0,selfblast=0,twilight=0,singles=0,clean=0,blastOptions=,nograph=0,xml=0,desc=0,tmp_path=tmpdir//proteinortho_cache_testproj/,blastversion=unknown,binpath=,makedb=,blast=,jobs_todo=0,project=testproj,po_path=/usr/bin/,run_id=,threads_per_process=1,useMcl=0,freemem=-1)
+--------
+SYSTEMCALL of Wed Oct 20 17:43:33 2021:
+proteinortho -step=3 -cpus=6 -project=testproj -temp=tmpdir ../test_files/example_db/Proteins/GEN2.1017.00001.prt ../test_files/example_db/Proteins/GEN4.1111.00001.prt ../test_files/example_db/Proteins/GENO.1017.00001.prt ../test_files/example_db/Proteins/GENO.1216.00002.prt
+Parameter-vector : (version=6.0.14,step=3,verbose=1,debug=0,exactstep3=0,synteny=0,duplication=2,cs=3,alpha=0.5,connectivity=0.1,cpus=6,evalue=1e-05,purity=1e-07,coverage=50,identity=25,blastmode=diamond,sim=0.95,report=3,keep=0,force=0,selfblast=0,twilight=0,singles=0,clean=0,blastOptions=,nograph=0,xml=0,desc=0,tmp_path=tmpdir//proteinortho_cache_testproj/,blastversion=unknown,binpath=,makedb=,blast=,jobs_todo=0,project=testproj,po_path=/usr/bin/,run_id=,threads_per_process=1,useMcl=0,freemem=-1)
+--------

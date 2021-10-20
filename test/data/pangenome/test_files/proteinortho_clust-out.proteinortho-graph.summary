@@ -1,0 +1,22 @@
+# The adjacency matrix, the number of edges between 2 species
+# file	GEN2.1017.00001.prt	GEN4.1111.00001.prt	GENO.1017.00001.prt	GENO.1216.00002.prt	
+GEN2.1017.00001.prt	0	8	11	10
+GEN4.1111.00001.prt	8	0	9	9
+GENO.1017.00001.prt	11	9	0	10
+GENO.1216.00002.prt	10	9	10	0
+# file	average number of edges
+GEN2.1017.00001.prt	7.25	
+GEN4.1111.00001.prt	6.5	
+GENO.1017.00001.prt	7.5	
+GENO.1216.00002.prt	7.25	
+# The 2-path matrix, the number of paths between 2 species of length 2
+# file	GEN2.1017.00001.prt	GEN4.1111.00001.prt	GENO.1017.00001.prt	GENO.1216.00002.prt	
+GEN2.1017.00001.prt(0)	285	189	172	182
+GEN4.1111.00001.prt(1)	378	226	178	170
+GENO.1017.00001.prt(2)	344	356	302	191
+GENO.1216.00002.prt(3)	364	340	382	281
+# file	average number of 2-paths
+GEN2.1017.00001.prt(0)	342.75
+GEN4.1111.00001.prt(1)	325
+GENO.1017.00001.prt(2)	346
+GENO.1216.00002.prt(3)	341.75
