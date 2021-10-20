@@ -147,7 +147,8 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, po_mode
         runner = MMseq(min_id, clust_mode, outdir, prt_path, threads, outfile, quiet)
 
     if method == "proteinortho":
-        runner = ProteinOrtho(po_mode, name, outdir, dbpath, threads, outfile, quiet)
+        prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet, dir=True)
+        runner = ProteinOrtho(po_mode, name, outdir, prt_path, threads, outfile, quiet)
 
     # test if package required for pangenome building is installed and in the path
     if not runner.check_installed():  # pragma: no cover

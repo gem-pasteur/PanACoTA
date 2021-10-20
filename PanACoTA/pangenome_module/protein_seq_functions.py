@@ -43,13 +43,15 @@ from PanACoTA import utils
 from PanACoTA import utils_pangenome as utilsp
 import logging
 import os
+import functools as fnc
+import shutil
 
 logger = logging.getLogger('pangenome.bank')
 
 
-def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
+def build_prt_bank(lstinfo, dbpath, name, spedir, quiet, dir=False):
     """
-    Build a file containing all proteins of all genomes contained in lstinfo.
+    Build a file or directory containing all proteins of all genomes contained in lstinfo.
 
     Parameters
     ----------
@@ -66,6 +68,9 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
         else, it is specified here.
     quiet : bool
         True if nothing must be written in stdout/stderr, False otherwise
+    dir : bool
+        If True, create a folder with required genomes instead of pulling them to one file. Some pangenome building
+        methods require such format.
 
     Returns
     -------
@@ -77,16 +82,43 @@ def build_prt_bank(lstinfo, dbpath, name, spedir, quiet):
     else:
         os.makedirs(spedir, exist_ok=True)
         outdir = spedir
-    outfile = os.path.join(outdir, name + ".All.prt")
-    if os.path.isfile(outfile):
-        logger.warning((f"Protein bank {outfile} already exists. "
-                        "It will be used by mmseqs."))
-        return outfile
-    logger.info(f"Building bank with all proteins to {outfile}")
+
     genomes = utilsp.read_lstinfo(lstinfo, logger)
     all_names = [os.path.join(dbpath, gen + ".prt") for gen in genomes]
-    if quiet:
-        utils.cat(all_names, outfile)
+
+    if not dir:
+        outfile = os.path.join(outdir, name + ".All.prt")
+        if os.path.isfile(outfile):
+                logger.warning((f"Protein bank {outfile} already exists. "
+                            "It will be used by pangenome builder."))
+                return outfile
+
+        logger.info(f"Building bank with all proteins to {outfile}")
+
+        if quiet:
+            utils.cat(all_names, outfile)
+        else:
+            utils.cat(all_names, outfile, title="Building bank")
+        return outfile
     else:
-        utils.cat(all_names, outfile, title="Building bank")
-    return outfile
+        outbase = os.path.join(outdir, name + "-All")
+        destinations = [os.path.join(outbase, gen + ".prt") for gen in genomes]
+
+        all_exist = fnc.reduce(lambda a, b: a and b, map(os.path.isfile, destinations))
+
+        if all_exist:
+            logger.warning((f"Protein bank {outbase} already exists. "
+                            "It will be used by pangenome builder."))
+            return outbase
+
+        if os.path.isdir(outbase):
+            shutil.rmtree(outbase)
+            logger.warning((f"Protein bank {outbase} exists. "
+                            "But it is invalid, so it will be removed and re-created."))
+
+        os.mkdir(outbase)
+        logger.info(f"Building bank with all proteins to {outbase} directory")
+        for ini, dest in zip(all_names, destinations):
+            shutil.copyfile(ini, dest)
+
+        return outbase

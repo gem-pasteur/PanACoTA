@@ -110,5 +110,28 @@ def test_build_bank_exists(caplog):
     outfile = psf.build_prt_bank(lstinfo, cur_dbpath, name, spedir, quiet)
     assert outfile == exp_out
     assert ("Protein bank test/data/pangenome/generated_by_unit-tests/Proteins/"
-            "EXEM.All.prt already exists. It will be used by mmseqs.") in caplog.text
+            "EXEM.All.prt already exists. It will be used by pangenome builder.") in caplog.text
     assert caplog.records[0].levelname == "WARNING"
+
+def test_dirbase_same(caplog):
+    """
+        Build a directory protein bank from a list of genomes, and create it at the same
+        place as the database.
+        """
+    caplog.set_level(logging.DEBUG)
+    lstinfo = os.path.join(PATH_TEST_FILES, "list_to_pan.txt")
+    dbpath = os.path.join(PATH_TEST_FILES, "example_db", "Proteins")
+    cur_dbpath = os.path.join(GENEPATH, "Proteins")
+    shutil.copytree(dbpath, cur_dbpath)
+    name = "EXEM"
+    spedir = None
+    quiet = True
+    outbase = psf.build_prt_bank(lstinfo, cur_dbpath, name, spedir, quiet, dir=True)
+    exp_out = os.path.join(cur_dbpath, name + "-All")
+
+    # Check prt bank filename
+    assert outbase == exp_out
+
+    # Check logs
+    assert ("Building bank with all proteins to test/data/pangenome/"
+            "generated_by_unit-tests/Proteins/EXEM-All") in caplog.text

@@ -488,14 +488,15 @@ class TestProteinOrtho(TestClusterisator):
 
     @property
     def TMP_DIR(self):
-        return GENEPATH + f"/tmp_proteinortho_Proteins_diamond-search-th2"
+        return GENEPATH + f"/tmp_proteinortho_{self.NAME}-All_diamond-search-th2"
 
     def clust_runner(self, threads=1, **kwargs):
         panfile = kwargs.get("panfile", None)
         quiet = kwargs.get("quiet", False)
         po_mode = kwargs.get("po_mode", "diamond")
         name = kwargs.get("name", self.NAME)
-        return ProteinOrtho(po_mode, name, GENEPATH, self.PRT_PATH, threads, panfile, quiet)
+        return ProteinOrtho(po_mode, name, GENEPATH, os.path.join(self.PRT_PATH, f"{self.NAME}-All"),
+                            threads, panfile, quiet)
 
     @property
     def exp_new_panfile(self):
