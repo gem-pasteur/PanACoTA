@@ -53,9 +53,13 @@ from PanACoTA.pangenome_module.Clusterisator import Clusterisator, infinite_prog
 from PanACoTA import utils
 
 class ProteinOrtho(Clusterisator):
-    def __init__(self, po_mode, name, outdir, prt_path, threads, panfile, quiet):
+    def __init__(self, po_mode, evalue, conn, purity, minspec, name, outdir, prt_path, threads, panfile, quiet):
         self.po_mode = po_mode
         self.name = name
+        self.evalue = evalue
+        self.conn = conn
+        self.purity = purity
+        self.minspec = minspec
 
         super(ProteinOrtho, self).__init__(threads, outdir, prt_path, panfile, quiet)
 
@@ -111,7 +115,7 @@ class ProteinOrtho(Clusterisator):
                  f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} {protfiles}",
                  f"An error occured while database building. View {self.log_path} for logs"),
                 (f"proteinortho -step=2 -cpus={self.threads} -p={self.po_mode} "
-                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -clean {protfiles}",
+                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -clean  -e={self.evalue} {protfiles}",
                  f"An error occured while all-vs-all blast. View {self.log_path} for logs")]
 
     @property
@@ -123,7 +127,11 @@ class ProteinOrtho(Clusterisator):
     def clust_cmds(self):
         protfiles = " ".join(glob.glob(f"{self.prt_path}/*.prt"))
         resfiles = glob.glob(f"{self.name}.*")
-        return [(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} {protfiles}",
+        print(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} -conn={self.conn}"
+                 f" -purity={self.purity:.20f} -minspecies={self.minspec} {protfiles}")
+        
+        return [(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} -conn={self.conn}"
+                 f" -purity={self.purity:.20f} -minspecies={self.minspec} {protfiles}",
                  f"An error occured while database building. View {self.log_path} for logs")]
 
     def parse_to_pangenome(self):

@@ -56,12 +56,12 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.lstinfo_file, args.dataset_name, args.dbpath, args.method, args.min_id, args.outdir,
-         args.clust_mode, args.po_mode, args.spedir, args.threads, args.outfile, args.verbose,
-         args.quiet)
+         args.clust_mode, args.po_mode, args.evalue, args.conn, args.purity, args.minspec, args.spedir,
+         args.threads, args.outfile, args.verbose, args.quiet)
 
 
-def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, po_mode, spe_dir, threads, outfile=None,
-         verbose=0, quiet=False):
+def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, po_mode, evalue, conn, purity, minspec,
+         spe_dir, threads, outfile=None, verbose=0, quiet=False):
     """
     Main method, doing all steps:
 
@@ -148,7 +148,7 @@ def main(cmd, lstinfo, name, dbpath, method, min_id, outdir, clust_mode, po_mode
 
     if method == "proteinortho":
         prt_path = protf.build_prt_bank(lstinfo, dbpath, name, spe_dir, quiet, dir=True)
-        runner = ProteinOrtho(po_mode, name, outdir, prt_path, threads, outfile, quiet)
+        runner = ProteinOrtho(po_mode, evalue, conn, purity, minspec, name, outdir, prt_path, threads, outfile, quiet)
 
     # test if package required for pangenome building is installed and in the path
     if not runner.check_installed():  # pragma: no cover
@@ -218,6 +218,21 @@ def build_parser(parser):
                                                         "lastn rapsearch topaz blatp blatn mmseqsp mmseqsn".split(),
                           default="diamond",
                           help=("For proteinortho algorithm. A blast algorithm which is used on initial steps."))
+    optional.add_argument("--eval", dest="evalue", default=1e-5,
+                          help=("Proteinortho search option. Evalue threshold for search algorithm."))
+    optional.add_argument("--conn", dest="conn", default=0.1,
+                          help=("Proteinortho clustering option. "
+                                "Minimal required algebraic connectivity for each connected "
+                                "component/group. This is the main parameter for the clustering algorithm. "
+                                "The higher this value, the more splits are made"))
+    optional.add_argument("--purity", dest="purity", default=1e-7,
+                          help=("Proteinortho clustering option. Avoid spurious graph assignments, "
+                                "the higher the more uncertain edges are cut"))
+    optional.add_argument("--minspecies", dest="minspec", default=1,
+                          help=("Proteinortho clustering option. "
+                                "minimal number of genes per species for each group. If a group is found "
+                                "with up to (minspecies) genes/species, it wont be split again "
+                                "(regardless of the connectivity). A value of 0 is always satisfied"))
     optional.add_argument("-s", dest="spedir",
                           help=("use this option if you want to save the concatenated protein "
                                 "databank in another directory than the one containing all "
@@ -227,6 +242,7 @@ def build_parser(parser):
                                 "Indicate on how many threads you want to parallelize. "
                                 "By default, it uses 1 thread. Put 0 if you want to use "
                                 "all threads of your computer."))
+    # TODO : добавить параметры поиска
 
     helper = parser.add_argument_group('Others')
     helper.add_argument("-v", "--verbose", dest="verbose", action="count", default=0,
