@@ -48,6 +48,7 @@ import copy
 import time
 import glob
 import re
+import subprocess as sp
 
 from PanACoTA.pangenome_module.Clusterisator import Clusterisator, infinite_progressbar
 from PanACoTA import utils
@@ -73,6 +74,9 @@ class ProteinOrtho(Clusterisator):
         self.tmpdir = os.path.join(self.wd, self.tmpdir)
         self.prt_path = os.path.join(self.wd, self.prt_path)
         self.log_path = os.path.join(self.wd, self.log_path)
+        trying = subprocess.Popen(shlex.split(torun), stdout=subprocess.PIPE)
+        out, _ = trying.communicate()
+        self.binpath = out
 
     @property
     def panfile(self):
@@ -112,10 +116,11 @@ class ProteinOrtho(Clusterisator):
         return [(f"mkdir {os.path.join(self.tmpdir, 'tmp')}",
                  f"An error occured while proteinortho tmp folder creation. View {self.log_path} for logs"),
                 (f"proteinortho -step=1 -cpus={self.threads} -p={self.po_mode} "
-                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} {protfiles}",
+                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -binpath={self.binpath}  {protfiles}",
                  f"An error occured while database building. View {self.log_path} for logs"),
                 (f"proteinortho -step=2 -cpus={self.threads} -p={self.po_mode} "
-                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -clean  -e={self.evalue} {protfiles}",
+                 f"-project={self.name} -temp={os.path.join(self.tmpdir, 'tmp')} -clean  -e={self.evalue} "
+                 f"-binpath={self.binpath} {protfiles}",
                  f"An error occured while all-vs-all blast. View {self.log_path} for logs")]
 
     @property
@@ -128,10 +133,10 @@ class ProteinOrtho(Clusterisator):
         protfiles = " ".join(glob.glob(f"{self.prt_path}/*.prt"))
         resfiles = glob.glob(f"{self.name}.*")
         print(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} -conn={self.conn}"
-                 f" -purity={self.purity:.20f} -minspecies={self.minspec} {protfiles}")
+                 f" -purity={self.purity:.20f} -minspecies={self.minspec} -binpath={self.binpath} {protfiles}")
         
         return [(f"proteinortho -step=3 -cpus={self.threads} -project={self.name} -temp={self.tmpdir} -conn={self.conn}"
-                 f" -purity={self.purity:.20f} -minspecies={self.minspec} {protfiles}",
+                 f" -purity={self.purity:.20f} -minspecies={self.minspec} -binpath={self.binpath} {protfiles}",
                  f"An error occured while database building. View {self.log_path} for logs")]
 
     def parse_to_pangenome(self):
