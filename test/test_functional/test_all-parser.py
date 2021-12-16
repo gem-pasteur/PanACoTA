@@ -191,6 +191,28 @@ def test_annot_defvalue(capsys):
     assert not options.boot
 
 
+def test_corepers_tol(capsys):
+    """
+    Test when a float value is given for tol parameter of corepers
+    """
+    parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
+    allm.build_parser(parser)
+    options = allm.parse(parser,
+                         "-c test/data/all/init_files/conffile-corepers.ini -o out-all -n TEST".split())
+    assert options.outdir == "out-all"
+    assert options.threads == 10
+    assert not options.ncbi_species_taxid
+    assert options.prodigal_only == False
+    assert options.min_dist == 0.01
+    assert options.norefseq
+    assert options.l90 == 100
+    assert options.clust_mode == 1
+    assert options.min_id == 0.85
+    assert options.tol == 0.85
+    assert not options.multi
+    assert not options.boot
+
+
 def test_parser_cutn_l90_nbcont():
     """
     When user gives custom value for cutn, l90 and/or nbcont, it keeps it. No replacement with annotate module.
