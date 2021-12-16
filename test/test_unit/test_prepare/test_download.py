@@ -357,7 +357,7 @@ def test_download_specify_strains_fromfile(caplog):
     # Check path to uncompressed files is as expected
     assert db_dir == os.path.join(outdir, "Database_init")
     # Check number of genomes downloaded
-    assert nb_gen == 3
+    assert nb_gen >= 3
     # And that db_dir exists and contains nb_gen files
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
