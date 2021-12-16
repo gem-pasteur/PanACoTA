@@ -551,7 +551,7 @@ def get_corepers(dict_argv):
     conf_conffile.set_boolean("corepers", "mixed")
     conf_conffile.set_boolean("corepers", "multi")
     conf_conffile.set_int("corepers", "verbose")
-    conf_conffile.set_int("corepers", "tol")
+    conf_conffile.set_float("corepers", "tol")
     conf_conffile.set_int("corepers", "threads")
     corepers_dict = conf_conffile.get_section_dict("corepers")
     return corepers_dict
