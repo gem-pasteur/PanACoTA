@@ -231,16 +231,17 @@ def test_main_only_strainname_file():
     ngd_outdir = os.path.join(GENEPATH, "refseq", "bacteria")
     # And that it contains folders
     assert os.path.isdir(ngd_outdir)
-    assert len(os.listdir(ngd_outdir)) == 3
+    nbgenomes = len(os.listdir(ngd_outdir))
+    assert nbgenomes >= 3
     # Check logfiles are here
     log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
-    assert len(log_files) == 3
+    assert len(log_files) == nbgenomes
     # Check tmp files folder created, with the 3 strain files 
     tmp_files = glob.glob(os.path.join(tmp_dir, "*.fna_prepare-split5N.fna"))
-    assert len(tmp_files) == 3
+    assert len(tmp_files) == nbgenomes
     # Check Database_init folder created, with all 3 ".fna" genomes
     fna_files = glob.glob(os.path.join(GENEPATH, "Database_init", "*.fna"))
-    assert len(fna_files) == 3
+    assert len(fna_files) == nbgenomes
 
 
 def test_main_not_only_mash_infoexists():
