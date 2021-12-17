@@ -1,5 +1,5 @@
 """PanACoTA"""
 
-__version__ = "1.3.1-dev3"
+__version__ = "1.3.1-dev4"
 
 
