@@ -235,9 +235,7 @@ def test_main_only_strainname_file():
     assert nbgenomes >= 3
     # Check logfiles are here
     log_files = glob.glob(os.path.join(GENEPATH, "*log*"))
-    print(os.listdir(ngd_outdir))
-    print(log_files)
-    assert len(log_files) == nbgenomes
+    assert len(log_files) == 3
     # Check tmp files folder created, with the 3 strain files 
     tmp_files = glob.glob(os.path.join(tmp_dir, "*.fna_prepare-split5N.fna"))
     assert len(tmp_files) == nbgenomes
