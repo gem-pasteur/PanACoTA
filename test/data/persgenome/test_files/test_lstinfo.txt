@@ -1,4 +1,0 @@
-GEN4.1111.00001
- GENO.0817.00001
-GENO.1216.00002 we don't care
-GENO.1216.00003 other fields

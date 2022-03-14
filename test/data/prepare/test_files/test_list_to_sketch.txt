@@ -1,3 +1,0 @@
-genome2
-test/data/prepare/genomes/genomes_comparison/ACOR003.0519.fna
-genome1

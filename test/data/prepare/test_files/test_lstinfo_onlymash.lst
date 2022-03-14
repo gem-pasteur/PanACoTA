@@ -1,6 +1,0 @@
-to_annotate	gsize	nb_conts	L90
-test/data/prepare/genomes/genomes_comparison/ACOC.1019.fna	3050	1	1
-test/data/prepare/genomes/genomes_comparison/ACOR002.0519.fna	3012665	78	17
-test/data/prepare/genomes/genomes_comparison/ACOR001.0519-almost-same.fna	3012665	261	17
-test/data/prepare/genomes/genomes_comparison/ACOR001.0519.fna	3012665	269	17
-test/data/prepare/genomes/genomes_comparison/ACOR001.0519-bis.fna	3012665	269	17

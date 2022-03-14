@@ -1,4 +1,0 @@
-gembase_name	orig_name	to_annotate	gsize	nb_conts	L90
-GEN4.1111.00001	genome4.fst	Examples/input_files/pan-init-files/tmp_files/genome4.fst_prokka-split5N.fna	7134	1	1
-GENO.0321.00001	genome1.fst	Examples/input_files/pan-init-files/tmp_files/genome1.fst_prokka-split5N.fna	9808	2	2
-GENO.1216.00002	genome3-chromo.fst-all.fna	Examples/input_files/pan-init-files/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna	8817	3	3

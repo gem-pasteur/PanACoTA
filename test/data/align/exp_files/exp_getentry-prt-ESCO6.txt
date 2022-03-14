@@ -1,3 +1,0 @@
-ESCO6_1 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.4.prt
-ESCO6_2 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.3.prt
-ESCO6_3 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.1.prt

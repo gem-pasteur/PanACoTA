@@ -1,4 +1,0 @@
-genome.fst
-B2_A3_5.fasta-changeName.fna
-H299_H561.fasta
-toto

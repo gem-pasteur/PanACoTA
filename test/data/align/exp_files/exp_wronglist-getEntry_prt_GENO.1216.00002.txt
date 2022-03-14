@@ -1,7 +1,0 @@
-GENO.1216.00002.i0001_00003 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.1.prt
-GENO.1216.00002.b0002_00010 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.6.prt
-GENO.1216.00002.i0001_00007 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.8.prt
-GENO.1216.00002.b0001_00008 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.10.prt
-GENO.1216.00002.b0002_00009 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.11.prt
-GENO.1216.00002.i0001_00005 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.13.prt
-GENO.1216.00002.i0001_00006 test/data/align/generated_by_func_tests/test_main_exist_wronglist/Align-TEST4-wronglist/TEST4-wronglist-current.14.prt

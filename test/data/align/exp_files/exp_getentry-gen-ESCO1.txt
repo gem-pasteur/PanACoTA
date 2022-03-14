@@ -1,2 +1,0 @@
-ESCO1_00001 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.1.gen
-ESCO1_00002 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.4.gen

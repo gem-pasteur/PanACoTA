@@ -1,4 +1,0 @@
-1 my.genome-name_1 my-genome_1 genome1_1 genome3_1 genome1_10
-5 my.genome-name_2 my-genome_2 genome3_3
-12 my.genome-name_3 my-genome_3 genome1_3
-32 my.genome-name_4 my-genome_50 genome1_4 genome3_4

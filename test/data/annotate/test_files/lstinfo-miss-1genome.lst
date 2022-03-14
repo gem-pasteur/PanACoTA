@@ -1,6 +1,0 @@
-to_annotate	toto	L90	gsize	nb_conts
-test/data/annotate/genomes/genome1.fasta	wrong	5	800	6
-data/annotate/genomes/A_H738-and-B2_A3_5.fna	ignored	6	7000	78
-
-test/data/annotate/genomes/genome7.fasta	ignored_too	65	79705	80
-

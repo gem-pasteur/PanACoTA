@@ -1,5 +1,0 @@
-orig_name	to_annotate	gsize	nb_conts	L90
-genome1.fst	Examples/input_files/annot-input/tmp_files/genome1.fst_prokka-split5N.fna	9808	2	2
-genome2.fst	Examples/input_files/annot-input/tmp_files/genome2.fst_prokka-split5N.fna	10717	5	4
-genome3-chromo.fst-all.fna	Examples/input_files/annot-input/tmp_files/genome3-chromo.fst-all.fna_prokka-split5N.fna	8817	3	3
-genome4.fst	Examples/input_files/tmp_files/annot-input/genome4.fst_prokka-split5N.fna	7134	1	1

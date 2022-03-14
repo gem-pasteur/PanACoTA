@@ -1,3 +1,0 @@
-GEN2.1017.00001.b0001_00001 test/data/align/generated_by_unit-tests/file1.txt
-GEN2.1017.00001.i0003_00008 test/data/align/generated_by_unit-tests/file2.txt
-GEN2.1017.00001.b0004_00013 test/data/align/generated_by_unit-tests/file1.txt

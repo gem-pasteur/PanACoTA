@@ -1,1 +1,0 @@
-"""annotate module of PanACoTA"""

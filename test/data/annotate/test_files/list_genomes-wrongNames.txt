@@ -1,9 +1,0 @@
-mygenome_in-fasta.fasta
-othergenome.fa
-
-yet-another-genome ABCD
-andAnother1.fna TOTO
-
-species-not-given
-another-genome-from-TOTO_species TOTO
-

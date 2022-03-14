@@ -1,3 +1,0 @@
-"""
-PanACoTA tree_module
-"""
