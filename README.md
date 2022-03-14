@@ -1,4 +1,4 @@
-# Reaster egg!
+# Easter egg!
 
 You found the Easter egg! "Panna-Cotta" is not the same as PanACoTA! For the software (PanACoTA), it's [there](https://github.com/gem-pasteur/PanACoTA).
 
