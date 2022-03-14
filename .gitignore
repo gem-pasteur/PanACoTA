@@ -1,0 +1,20 @@
+.DS_Store
+__pycache__
+
+# Executables
+*.pyc
+
+# Distribution
+*.egg-info
+
+# test files
+.cache
+
+# coverage files
+.coverage*
+coverage.xml
+htmlcov
+junit_tests.xml
+
+# pycharm project files
+.idea

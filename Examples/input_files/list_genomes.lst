@@ -1,0 +1,4 @@
+genome1.fst 
+genome2.fst :: GEN2
+genome3-chromo.fst genome3-plasmid.fst :: .1216
+genome4.fst  :: GEN4.1111

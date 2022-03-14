@@ -1,0 +1,30 @@
+>contig1 dgfdgd
+acgttgctgcgaatcgagctgtctagcgatcgag
+>contig2
+cga
+>contig3
+attcgggcttga
+>contig4
+at
+
+>Long_header_with_same_1
+AATTGCGCTAGCGCTAGGCGCTAGCGC
+GCTAGAGCCGCTAGGCGCCATTACGGCGCTATCCGCA
+CGCGCATGC
+CACCGTTAG
+>Long_header_with_same_2
+AACCGTTGGGGGGGGGGCCCCATTAGGCGCGGAATTTTCG
+>Long_header_with_same_3
+ACGGCTCGCGGAGAGAGAGAGCTCGCGCA
+>contig1 dgfdgd
+ac
+>contig2
+gACTGGTTTACCCGAGACCCACTTTAGGGTTCGCGCA
+ACG
+ACGGTTG
+>contig3
+aatcgggcttcgcgaggcgcttagagagctctcgcgcgatatatagcgctc
+cgctatagcgctac
+>contig4
+at
+

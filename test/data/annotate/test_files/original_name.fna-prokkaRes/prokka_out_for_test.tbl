@@ -1,0 +1,85 @@
+>Feature JGIKIPgffgIJ
+287	787	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00001
+			product	hypothetical protein
+4416	6068	CDS
+			gene	yiaD
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P37665
+			locus_tag	JGIKIPIJ_00005
+			product	putative lipoprotein YiaD
+12000	9000	CDS
+			EC_number	6.3.2.-
+			gene	vgrG1
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:Q9KS45
+			locus_tag	JGIKIPIJ_00008
+			product	Actin cross-linking toxin VgrG1
+>Feature toto
+77	1237	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00009
+			product	hypothetical protein
+1279	2346	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00010
+			product	hypothetical protein
+2419	3000	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00011
+			product	hypothetical protein
+3500	4000	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00011
+			product	hypothetical protein
+5000	4632	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00011
+			product	hypothetical protein
+>Feature other_header
+2968265	296902	CRISPR
+			note	CRISPR with 3 repeat units
+			rpt_family	CRISPR
+3399	4538	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00013
+			product	hypothetical protein
+>Feature my_contig
+4535	7888	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00014
+			product	hypothetical protein
+			db_xref	12345
+45015	888	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_00016
+			product	hypothetical protein
+			inference	ab initio prediction:Prodigal:2.6
+			inference	similar to AA sequence:UniProtKB:P32
+			db_xref	56
+>Feature bis
+>Feature contname
+3039279	3039355	tRNA
+			inference	COORDINATES:profile:Aragorn:1.2
+			locus_tag	PROKKA_02927
+			product	tRNA-Met(cat)
+3039389	3039465	tRNA
+			inference	COORDINATES:profile:Aragorn:1.2
+			locus_tag	PROKKA_02928
+			product	tRNA-Met(cat)
+7854	9491	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_03015
+			product	hypothetical protein
+9525	11285	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_03016
+			product	hypothetical protein
+2994578	2994971	repeat_region
+			rpt_family	CRISPR
+			score	7
+11249	12328	CDS
+			inference	ab initio prediction:Prodigal:2.6
+			locus_tag	JGIKIPIJ_03017
+			product	hypothetical protein

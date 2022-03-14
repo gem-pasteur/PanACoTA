@@ -1,0 +1,4 @@
+B2_A3_5.fasta-changeName.fna::ESCO.1116
+H299_H561.fasta genome6.fasta   ::  ESCO.1015
+A_H738.fasta genome1.fasta toto.fst ::.1015
+complete_genome.fna

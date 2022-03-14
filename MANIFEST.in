@@ -1,0 +1,6 @@
+include PanACoTA/align_module/prt2codon.awk
+include requirements.txt
+include requirements-dev.txt
+include make
+include COPYING
+include COPYRIGHT

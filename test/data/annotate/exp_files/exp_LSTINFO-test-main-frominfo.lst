@@ -1,0 +1,4 @@
+gembase_name	orig_name	to_annotate	gsize	nb_conts	L90
+TOTO.1205.00001	test/data/annotate/genomes/A_H738-and-B2_A3_5.fna	test/data/annotate/genomes/A_H738-and-B2_A3_5.fna	7000	78	5
+TOTO.1205.00002	test/data/annotate/genomes/genome1.fasta	test/data/annotate/genomes/genome1.fasta	800	6	6
+TOTO.1205.00003	test/data/annotate/genomes/genome7.fasta	test/data/annotate/genomes/genome7.fasta	79705	80	65

@@ -1,0 +1,4 @@
+ESCO5_1 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.1.gen
+ESCO5_2 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.3.gen
+ESCO5_4 test/data/align/generated_by_unit-tests/Aldir/TEST6-current.4.gen
+
