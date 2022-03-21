@@ -9,4 +9,4 @@ and learn how to write commit messages at the same time ;)
 
 PS: If you want a summary, it's [Here](https://github.com/gem-pasteur/PanACoTA/blob/cream-recipe/recipe.pdf)
 
-PS2: let me know you found it! You can comment here: https://github.com/gem-pasteur/PanACoTA/issues/32
+PS2: let me know you found it! You can comment here: https://github.com/gem-pasteur/PanACoTA/issues/32 and/or ask me for a little "reward" ;)
