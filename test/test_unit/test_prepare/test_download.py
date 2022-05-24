@@ -693,8 +693,9 @@ def test_download_2taxid(caplog):
 def test_download_refseq_vs_genbank(caplog):
     """
     Give a taxid of a subspecies, download strains from refseq, and then from genbank.
-    Currently, no strains in refseq, and 2 in genbank.
-    39831 = Klebsiella pneumoniae subsp. rhinoscleromatis
+    Currently, no strains in refseq, and 8 in genbank.
+    #39831 = Klebsiella pneumoniae subsp. rhinoscleromatis
+    60 = Vitreoscilla sp.
     Later, there can be some in refseq, but always at least 2 more in genbank
     """
     caplog.set_level(logging.INFO)
@@ -702,7 +703,7 @@ def test_download_refseq_vs_genbank(caplog):
     section = "refseq"
     NCBI_species = None
     NCBI_species_taxid = ""
-    NCBI_taxid = "39831"
+    NCBI_taxid = "60"
     NCBI_strains = ""
     outdir = os.path.join(GENEPATH, "test_download_refseq_genbank")
     levels = ""
@@ -721,7 +722,7 @@ def test_download_refseq_vs_genbank(caplog):
     assert not os.path.isdir(ngd_outdir)
 
     # Check logs
-    assert ("From refseq: Downloading genomes with NCBI_taxid = 39831") in caplog.text
+    assert ("From refseq: Downloading genomes with NCBI_taxid = 60") in caplog.text
     assert "ERROR" in caplog.text
     assert ("No strain correspond to your request. If you are sure there should have "
             "some, check that you gave valid NCBI taxid and/or "
@@ -745,7 +746,7 @@ def test_download_refseq_vs_genbank(caplog):
     assert os.path.isdir(db_dir)
     assert len(os.listdir(db_dir)) == nb_gen
     # Check log giving only species taxid
-    assert ("From genbank: Downloading genomes with NCBI_taxid = 39831") in caplog.text
+    assert ("From genbank: Downloading genomes with NCBI_taxid = 60") in caplog.text
     # Check that assembly summary file was donwloaded as expected
     sum_file = os.path.join(outdir2, "assembly_summary-refseq-genbank.txt" )
     assert os.path.isfile(sum_file)
