@@ -68,13 +68,16 @@ def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
         DNA substitution model chosen by user
     kwargs["wb"]: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
+    kwargs["matrix"]: bool
+        True if matrix file must be written, False otherwise
     """
     model = kwargs["model"]
     write_boot = kwargs["wb"]
+    write_matrix = kwargs["matrix"]
     align_name = os.path.basename(alignfile)
     align_phylip = os.path.join(outdir, align_name + ".phylip")
     convert2phylip(alignfile, align_phylip)
-    run_fastme(align_phylip, boot, write_boot, threads, model, outdir, quiet)
+    run_fastme(align_phylip, boot, write_boot, write_matrix, threads, model, outdir, quiet)
 
 
 def convert2phylip(infile, outfile):
@@ -100,7 +103,7 @@ def convert2phylip(infile, outfile):
         AlignIO.write(alignments, output_handle, "phylip-relaxed")
 
 
-def run_fastme(alignfile, boot, write_boot, threads, model, outdir, quiet):
+def run_fastme(alignfile, boot, write_boot, write_matrix, threads, model, outdir, quiet):
     """
     Run fastME on the given alignment.
 
@@ -125,6 +128,7 @@ def run_fastme(alignfile, boot, write_boot, threads, model, outdir, quiet):
     bootinfo = ""
     threadinfo = ""
     outboot = ""
+    outmat = ""
 
     # Get bootstrap information
     if boot:
@@ -139,11 +143,13 @@ def run_fastme(alignfile, boot, write_boot, threads, model, outdir, quiet):
     # If bootstrap pseudo-trees must be written, define the filename here
     if write_boot:
         outboot = "-B " + os.path.join(outdir, align_name + ".fastme_bootstraps.nwk")
+    if write_matrix:
+        outmat = "-O " + os.path.join(outdir, align_name + ".fastme_dist-mat.txt")
     # Put default model if not given
     if not model:
         model = "T"
-    cmd = (f"fastme -i {alignfile} -d{model} -nB -s {threadinfo} {bootinfo} "
-           f"-o {treefile} -I {logfile} {outboot}")
+    cmd = (f"fastme -i {alignfile} -d {model} -n B -s {threadinfo} {bootinfo} "
+           f"-o {treefile} -I {logfile} {outboot} {outmat}")
     logger.details(cmd)
     if quiet:
         fnull = open(os.devnull, 'w')
