@@ -24,7 +24,9 @@ def test_parser_noarg(capsys):
     assert "-a ALIGNMENT -o OUTDIR" in err
     assert "[-s {fasttree,fastme,quicktree,iqtree,iqtree2}] [-b BOOT]" in err
     assert "[--threads THREADS] [-m MODEL]" in err
-    assert "[-B] [--mem MEMORY" in err
+    assert "--mem MEMORY" in err
+    assert "-B" in err
+    assert "-M" in err
     assert "[-v]" in err
     assert "[-q] [-h]" in err
     assert "the following arguments are required: -a, -o" in err
@@ -124,6 +126,18 @@ def test_parser_quicktree_writeboot(capsys):
         tree.parse(parser, "-o outdir -a align -s quicktree -B".split())
     _, err = capsys.readouterr()
     assert "'-B' option is only available with FastME and IQtree." in err
+
+
+def test_parser_quicktree_writemat(capsys):
+    """
+    Test that when soft is quicktree, and we ask for writing distance matrix, it returns the expected error message.
+    """
+    parser = argparse.ArgumentParser(description="Tree", add_help=False)
+    tree.build_parser(parser)
+    with pytest.raises(SystemExit):
+        tree.parse(parser, "-o outdir -a align -s quicktree -M".split())
+    _, err = capsys.readouterr()
+    assert "'-M' option is only available with FastME." in err
 
 
 def test_parser_fastme_wrongmodel(capsys):

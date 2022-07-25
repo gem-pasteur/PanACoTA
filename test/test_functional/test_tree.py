@@ -179,8 +179,9 @@ def test_main_fastme(capsys):
     assert os.path.isfile(log_file)
     with open(log_file, "r") as logf:
         fastme_lines = logf.readlines()
+        print(fastme_lines)
     assert "Input data type  DNA" in " ".join(fastme_lines)
-    assert "evolutionary model  TN93" in " ".join(fastme_lines)
+    assert "evolutionary model  F84" in " ".join(fastme_lines)
     # tree file
     tree_file = phylip + ".fastme_tree.nwk"
     assert os.path.isfile(tree_file)
@@ -203,13 +204,64 @@ def test_main_fastme(capsys):
     assert "Converting fasta alignment to PHYLIP-relaxed format." in out
     assert "Running FastME..." in out
     assert ("fastme -i test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.phylip "
-            "-dT -nB -s  -b 100 -o test/data/tree/generated_by_func_tests/"
+            "-d T -n B -s  -b 100 -o test/data/tree/generated_by_func_tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.phylip.fastme.log "
             "-B test/data/tree/generated_by_func_tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_bootstraps.nwk") in out
     assert "END" in out
 
+
+def test_fastme_matrix(capsys):
+    """
+    Test that when giving the alignment file, running with fastme, no bootstraps,
+    it creates expected files
+    """
+    outdir = GENEPATH
+    soft = "fastme"
+    model = None
+    threads = None
+    boot = None
+    mat = True
+    cmd = "cmd: test_main_quicktree"
+    tree.main(cmd, ALIGNMENT, outdir, soft, model, threads, boot=boot, verbose=16, write_boot=True, write_mat=True)
+    # Check output files
+    # phylip alignments
+    phylip = os.path.join(outdir, "exp_pers4genomes.grp.aln.phylip")
+    assert os.path.isfile(phylip)
+    # fastme logfile
+    log_file = phylip + ".fastme.log"
+    assert os.path.isfile(log_file)
+    with open(log_file, "r") as logf:
+        fastme_lines = logf.readlines()
+        print(fastme_lines)
+    assert "Input data type  DNA" in " ".join(fastme_lines)
+    assert "evolutionary model  F84" in " ".join(fastme_lines)
+    # tree file
+    tree_file = phylip + ".fastme_tree.nwk"
+    assert os.path.isfile(tree_file)
+    assert tutils.is_tree_lengths(tree_file)
+    assert not tutils.is_tree_bootstrap(tree_file)
+    # matrix file
+    mat_file = phylip + ".fastme_dist-mat.txt"
+    assert os.path.isfile(mat_file)
+    # log files
+    logs_base = os.path.join(outdir, "PanACoTA-tree-fastme.log")
+    assert os.path.isfile(logs_base)
+    assert os.path.isfile(logs_base + ".details")
+    assert os.path.isfile(logs_base + ".debug")
+    assert os.path.isfile(logs_base + ".err")
+    # Check logs
+    out, err = capsys.readouterr()
+    assert "Converting fasta alignment to PHYLIP-relaxed format." in out
+    assert "Running FastME..." in out
+    assert ("fastme -i test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.phylip ") in out
+    assert "-d T -n B -s" in out
+    assert ("-o test/data/tree/generated_by_func_tests/"
+            "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk ") in out
+    assert "-I test/data/tree/generated_by_func_tests/exp_pers4genomes.grp.aln.phylip.fastme.log" in out
+    assert "exp_pers4genomes.grp.aln.phylip.fastme_bootstraps.nwk" in out
+    assert "END" in out
 
 def test_main_fasttree(capsys):
     """

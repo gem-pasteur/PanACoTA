@@ -206,7 +206,7 @@ def build_parser(parser):
                                 "all threads of your computer. Not available with quicktree."))
     optional.add_argument("-m", "--model", dest="model",
                           help=("Choose your DNA substitution model.\n"
-                                "Default for FastTree and IQtree: GTR. Default for FastME: TN93.\n"
+                                "Default for FastTree and IQtree: GTR. Default for FastME: F84.\n"
                                 "For FastTree, the choices are 'GTR' and 'JC'.\n"
                                 "For FastME, choices are: 'p-distance' "
                                 "(or 'p'), 'RY symmetric' (or 'Y'), 'RY' (or 'R'), "
