@@ -305,6 +305,7 @@ def test_main_from_parse():
     args.model = "GTR"
     args.boot = False
     args.write_boot = False 
+    args.write_mat = False
     args.memory = ""
     args.fast = True
 

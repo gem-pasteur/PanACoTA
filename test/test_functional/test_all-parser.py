@@ -51,6 +51,8 @@ def test_parser_noconffile():
     assert options.min_id == 0.8
     assert options.tol == 1
     assert options.boot == 0
+    assert not options.write_boot
+    assert not options.write_mat
 
 
 def test_parser_conffile():
