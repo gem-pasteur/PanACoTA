@@ -458,7 +458,4 @@ def test_main_from_parse(capsys):
     # Check logs
     out, err = capsys.readouterr()
     assert "Running IQtree..." in out
-    assert ("IQtree command: iqtree -s test/data/align/exp_files/exp_pers4genomes.grp.aln "
-            "-nt 1 -m HKY    -st DNA -pre test/data/tree/generated_by_func_tests/"
-            "exp_pers4genomes.grp.aln.iqtree_tree -quiet") in out
     assert "END" in out
