@@ -426,6 +426,7 @@ def test_main_from_parse(capsys):
     args.soft = "iqtree"
     args.model = "HKY"
     args.write_boot = False
+    args.write_boot = False
     args.threads = 1
     args.verbose = 2
     args.quiet = False
