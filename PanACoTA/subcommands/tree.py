@@ -56,7 +56,7 @@ def main_from_parse(args):
          args.boot, args.write_boot, args.memory, args.fast, args.verbose, args.quiet)
 
 
-def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
+def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False, write_mat=False,
          memory=False, fast=False, verbose=0, quiet=False):
     """
     Inferring a phylogenetic tree from an alignment file, with the given software.
@@ -79,6 +79,8 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
         Number of bootstraps to compute. None if no bootstrap asked
     write_boot: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
+    write_mat: bool
+        True if distance matrix must be saved, false otherwise
     memory: str
         Maximal RAM usage in GB | MB | % - Only for iqtree
     fast: boolean
@@ -156,7 +158,7 @@ def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False,
     logger.info(f'PanACoTA version {version}')
     logger.info("Command used\n \t > " + cmd)
     tree.run_tree(align, boot, outdir, quiet, threads, model=model, wb=write_boot,
-                  mem=memory, s=soft, f=fast)
+                  mem=memory, s=soft, f=fast, matrix=write_mat)
 
     logger.info("END")
 
@@ -215,6 +217,9 @@ def build_parser(parser):
     optional.add_argument("-B", dest="write_boot", action="store_true",
                           help=("Add this option if you want to write all bootstrap "
                                 "pseudo-trees. Only available with FastME and IQtree."))
+    optional.add_argument("-M", dest="write_mat", action="store_true",
+                          help=("Add this option if you want to write the distance matrix. "
+                                "Only available with FastME."))
     optional.add_argument("--mem", dest="memory",
                           help=("Maximal RAM usage in GB | MB. Only available with iqtree."))
     optional.add_argument("-fast", dest="fast", action="store_true",
@@ -287,6 +292,11 @@ def check_args(parser, args):
     if (args.soft != "iqtree" and args.soft != "iqtree2" and args.soft != "fastme"
         and args.write_boot):
         msg = "'-B' option is only available with FastME and IQtree."
+        parser.error(msg)
+
+    # Write distance matrix option only available for fastme
+    if (args.soft != "fastme" and args.write_mat):
+        msg = "'-M' option is only available with FastME."
         parser.error(msg)
 
     # Fast option only available for iqtree
