@@ -454,6 +454,7 @@ def test_main_from_parse(capsys):
     logs_base = os.path.join(GENEPATH, "PanACoTA-tree-iqtree.log")
     assert os.path.isfile(logs_base)
     assert os.path.isfile(logs_base + ".err")
+    assert os.path.isfile(logs_base + ".details")
     # Check logs
     out, err = capsys.readouterr()
     assert "Running IQtree..." in out
