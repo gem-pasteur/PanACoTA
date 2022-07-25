@@ -103,7 +103,7 @@ def main_from_parse(args):
     args_pan = (args.min_id, args.clust_mode, args.spedir, args.outfile)
     args_cp = (args.tol, args.mixed, args.multi, args.floor)
     args_align = (args.prot_ali)
-    args_tree = (args.soft, args.model, args.boot, args.write_boot, args.memory, args.fast)
+    args_tree = (args.soft, args.model, args.boot, args.write_boot, args.write_mat, args.memory, args.fast)
     main(cmd, args_all, args_prepare, args_annot, args_pan, args_cp, args_align, args_tree)
 
 
@@ -214,11 +214,11 @@ def main(cmd, args_all, args_prepare, args_annot, args_pan, args_corepers, args_
 
 
     # Tree step
-    (soft, model, boot, write_boot, memory, fast) = args_tree
+    (soft, model, boot, write_boot, write_mat, memory, fast) = args_tree
     outdir_tree = os.path.join(outdir, "6-tree_module")
     logger.info("tree step")
     tree.main("PanACoTA tree", align_file, outdir_tree, soft, model, threads, boot,
-              write_boot, memory, fast, verbose=verbose, quiet=quiet)
+              write_boot, write_mat, memory, fast, verbose=verbose, quiet=quiet)
     logger.info("All modules of PanACOTA are finished.")
     return 0
 
