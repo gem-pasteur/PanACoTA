@@ -591,7 +591,7 @@ def get_tree(dict_argv):
     # Add default arguments if not found in commandline nor config file
     defaults = {"verbose": 0, "quiet": False, "threads": 1,
                 "soft": "iqtree", "model": None, "boot": 0, "write_boot": False,
-                "memory": None, "fast": False}
+                "memory": None, "fast": False, "write_mat": False}
     conf_conffile.add_default(defaults, "tree")
     conf_conffile.set_boolean("tree", "quiet")
     conf_conffile.set_boolean("tree", "fast")

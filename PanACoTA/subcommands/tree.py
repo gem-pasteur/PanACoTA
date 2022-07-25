@@ -53,7 +53,7 @@ def main_from_parse(args):
     """
     cmd = "PanACoTA " + ' '.join(args.argv)
     main(cmd, args.alignment, args.outdir, args.soft, args.model, args.threads,
-         args.boot, args.write_boot, args.memory, args.fast, args.verbose, args.quiet)
+         args.boot, args.write_boot, args.write_mat, args.memory, args.fast, args.verbose, args.quiet)
 
 
 def main(cmd, align, outdir, soft, model, threads, boot=False, write_boot=False, write_mat=False,
@@ -295,7 +295,7 @@ def check_args(parser, args):
         parser.error(msg)
 
     # Write distance matrix option only available for fastme
-    if (args.soft != "fastme" and args.write_mat):
+    if args.write_mat and args.soft != "fastme":
         msg = "'-M' option is only available with FastME."
         parser.error(msg)
 
