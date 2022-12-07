@@ -1,4 +1,3 @@
-argparse
 termcolor
 colorlog
 progressbar2 >= 3.18.0
