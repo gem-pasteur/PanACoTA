@@ -88,7 +88,10 @@ def test_thread_num():
     with pytest.raises(argparse.ArgumentTypeError) as err:
         a = autils.thread_num("a")
     assert ("argument --threads threads: invalid int value: a") in str(err.value)
-    nb_cpu = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     with pytest.raises(argparse.ArgumentTypeError) as err:
         a = autils.thread_num(str(nb_cpu*2))
     assert (f"You have {nb_cpu} threads on your computer, you cannot ask for more: invalid value: "

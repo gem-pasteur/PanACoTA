@@ -6,6 +6,7 @@ Functional tests for the parser of tree subcommand
 """
 import argparse
 import pytest
+import os
 
 from PanACoTA.subcommands import tree
 
@@ -50,14 +51,17 @@ def test_parser_thread_toomany(capsys):
     it returns the expected error message
     """
     import multiprocessing
-    nb = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Tree", add_help=False)
     tree.build_parser(parser)
     with pytest.raises(SystemExit):
-        tree.parse(parser, "-a align --threads {} -o outdir".format(nb + 3).split())
+        tree.parse(parser, "-a align --threads {} -o outdir".format(nb_cpu + 3).split())
     _, err = capsys.readouterr()
     assert ("You have {} threads on your computer, you cannot ask for more: "
-            "invalid value: {}".format(nb, nb+3)) in err
+            "invalid value: {}".format(nb_cpu, nb_cpu+3)) in err
 
 
 def test_parser_thread_neg(capsys):
@@ -309,7 +313,10 @@ def test_parser_all_threads():
     for all arguments
     """
     import multiprocessing
-    nb = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Tree", add_help=False)
     tree.build_parser(parser)
     args = tree.parse(parser, "-a align -o outdir --threads 0".split())
@@ -319,7 +326,7 @@ def test_parser_all_threads():
     assert args.soft == "iqtree2"
     assert args.model == "GTR"
     assert args.write_boot is False
-    assert args.threads == nb
+    assert args.threads == nb_cpu
     assert args.verbose == 0
     assert args.quiet == False
 
@@ -332,15 +339,18 @@ def test_parser_threads_ok():
     parser = argparse.ArgumentParser(description="Tree", add_help=False)
     tree.build_parser(parser)
     import multiprocessing
-    nb = multiprocessing.cpu_count()
-    args = tree.parse(parser, f"-a align -o outdir --threads {nb}".split())
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
+    args = tree.parse(parser, f"-a align -o outdir --threads {nb_cpu}".split())
     assert args.alignment == "align"
     assert args.boot is None
     assert args.outdir == "outdir"
     assert args.soft == "iqtree2"
     assert args.model == "GTR"
     assert args.write_boot is False
-    assert args.threads == nb
+    assert args.threads == nb_cpu
     assert args.verbose == 0
     assert args.quiet == False
 

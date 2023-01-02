@@ -7,6 +7,8 @@ Functional tests for the parser of 'pangenome' subcommand
 
 import pytest
 import argparse
+import os
+
 
 from PanACoTA.subcommands import pangenome
 
@@ -25,7 +27,8 @@ def test_parser_noarg(capsys):
     assert "-l LSTINFO_FILE -n DATASET_NAME -d DBPATH" in err
     assert "[-i MIN_ID]" in err
     assert " -o OUTDIR" in err
-    assert "[-f OUTFILE] [-c {0,1,2}]" in err
+    assert "[-f OUTFILE]" in err
+    assert " [-c {0,1,2}]" in err
     assert "[-s SPEDIR] [--threads THREADS] [-v]" in err
     assert "[-q] [-h]" in err
     assert "the following arguments are required: -l, -n, -d, -o" in err
@@ -101,14 +104,17 @@ def test_thread_too_many(capsys):
     it returns the expected error message.
     """
     import multiprocessing
-    nb = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     with pytest.raises(SystemExit):
-        pangenome.parse(parser, f"-l lstinfo -n TEST4 -d dbpath -o od --threads {nb*10}".split())
+        pangenome.parse(parser, f"-l lstinfo -n TEST4 -d dbpath -o od --threads {nb_cpu*10}".split())
     _, err = capsys.readouterr()
     assert ("You have {} threads on your computer, you cannot ask for more: "
-            "invalid value: {}").format(nb, nb*10) in err
+            "invalid value: {}").format(nb_cpu, nb_cpu*10) in err
 
 
 def test_thread_neg(capsys):
@@ -152,7 +158,10 @@ def test_parser_all_threads():
     number of threads.
     """
     import multiprocessing
-    nb = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Do pangenome", add_help=False)
     pangenome.build_parser(parser)
     options = pangenome.parse(parser, "-l lstinfo -n TEST4 -d dbpath -o od --threads 0".split())
@@ -163,7 +172,7 @@ def test_parser_all_threads():
     assert options.outdir == "od"
     assert options.clust_mode == 1
     assert not options.spedir
-    assert options.threads == nb
+    assert options.threads == nb_cpu
     assert not options.outfile
     assert options.verbose == 0
     assert not options.quiet

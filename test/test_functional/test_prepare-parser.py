@@ -6,6 +6,8 @@ Functional tests for the parser of 'prepare' subcommand
 """
 import argparse
 import pytest
+import os
+
 
 from PanACoTA.subcommands import prepare
 
@@ -240,7 +242,10 @@ def test_parser_more_threads(capsys):
     error message.
     """
     import multiprocessing
-    nb_cpu = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     with pytest.raises(SystemExit):
@@ -256,7 +261,10 @@ def test_parser_all_threads(capsys):
     error message.
     """
     import multiprocessing
-    nb_cpu = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Prepare", add_help=False)
     prepare.build_parser(parser)
     options = prepare.parse(parser, "-p 0 --norefseq -o toto".split())

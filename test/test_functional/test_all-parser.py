@@ -6,6 +6,7 @@ Functional tests for the parser of 'all' subcommand
 """
 import argparse
 import pytest
+import os
 
 from PanACoTA.subcommands import all_modules as allm
 
@@ -108,14 +109,17 @@ def test_parser_conffile_and_cmd():
     the value kept is the one in cmd.
     """
     import multiprocessing
-    nb = multiprocessing.cpu_count()
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     parser = argparse.ArgumentParser(description="Run all modules", add_help=False)
     allm.build_parser(parser)
     options = allm.parse(parser,
                          "-c test/data/all/init_files/default-conffigfile.ini -o out-all "
                          "-n TEST --threads 0 -i 0.99 -Mu".split())
     assert options.outdir == "out-all"
-    assert options.threads == nb
+    assert options.threads == nb_cpu
     assert not options.ncbi_species_taxid
     assert options.prodigal_only == False
     assert options.norefseq
