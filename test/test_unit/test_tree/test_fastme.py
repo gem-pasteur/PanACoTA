@@ -88,18 +88,20 @@ def test_run_fme_default(caplog):
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = None
     write_boot = False
+    write_matrix = False
     threads = 1
     model = None
     quiet = False
     outdir = GENEPATH
-    fme.run_fastme(source_align, boot, write_boot, threads, model, outdir, quiet)
+    fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, outdir, quiet)
 
     assert "Running FastME..." in caplog.text
     treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
     assert os.path.isfile(treefile)
-    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dT -nB -s -T 1 "
-            " -o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
-            "-I test/data/tree/generated_by_unit-tests/"
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d T -n B -s -T 1") in caplog.text
+    assert (" -o test/data/tree/generated_by_unit-tests/"
+            "exp_align_phylip.ph.fastme_tree.nwk") in caplog.text
+    assert ("-I test/data/tree/generated_by_unit-tests/"
             "exp_align_phylip.ph.fastme.log") in caplog.text
     assert tree_util.is_tree_lengths(treefile)
     assert not tree_util.is_tree_bootstrap(treefile)
@@ -116,14 +118,15 @@ def test_run_fme_boot_j(caplog):
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = False
+    write_matrix = False
     threads = 1
     model = "J"
     quiet = False
-    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
+    fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
     treefile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_tree.nwk")
     assert os.path.isfile(treefile)
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dJ -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d J -n B -s -T 1 "
             "-b 105 -o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
             "exp_align_phylip.ph.fastme.log") in caplog.text
@@ -144,13 +147,14 @@ def test_run_fme_boot_write_f84(caplog):
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = True
+    write_matrix = False
     threads = 1
     model = "4"
     quiet = False
-    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
+    fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
 
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d4 -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d 4 -n B -s -T 1 "
             "-b 105 "
             "-o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log "
@@ -203,12 +207,13 @@ def test_run_fme_notreename_rysym(caplog):
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = True
+    write_matrix = False
     threads = 1
     model = "Y"
     quiet = True
-    fme.run_fastme(source_align, boot, write_boot, threads, model, GENEPATH, quiet)
+    fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dY -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d Y -n B -s -T 1 "
             "-b 105 "
             "-o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log "
@@ -233,12 +238,13 @@ def test_run_tree(caplog):
     threads = 1
     model = 'T'
     write_boot = False
-    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
+    write_matrix = False
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot, matrix=write_matrix)
     assert "Converting fasta alignment to PHYLIP-relaxed format" in caplog.text
     assert "Running FastME..." in caplog.text
     assert ("fastme "
             "-i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
-            "-dT -nB -s -T 1  "
+             "-d T -n B -s -T 1  "
             "-o test/data/tree/generated_by_unit-tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
@@ -258,7 +264,7 @@ def test_run_tree(caplog):
     threads = 1
     model = 'T'
     write_boot = True
-    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, matrix=write_matrix, wb=write_boot)
     assert "Phylip alignment file already existing." in caplog.text
     assert ("The Phylip alignment file "
             "test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
@@ -266,7 +272,7 @@ def test_run_tree(caplog):
             "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert "Running FastME..." in caplog.text
     assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
-            "-dT -nB -s -T 1 -b 110 "
+            "-d T -n B -s -T 1 -b 110 "
             "-o test/data/tree/generated_by_unit-tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
