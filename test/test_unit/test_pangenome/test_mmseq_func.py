@@ -250,10 +250,12 @@ def test_do_mmseqdb_existok(caplog):
     # Check files created/existing
     for file in [filename + ext for ext in outext]:
         assert os.path.isfile(file)
+    assert ("Creating database") in caplog.text
     assert ("mmseqs database "
             "test/data/pangenome/generated_by_unit-tests/test_create_mmseqsdb_exist.msdb "
             "already exists. The program will use it.") in caplog.text
-    # assert caplog.records[0].levelname == "WARNING"
+    assert caplog.records[0].levelname == "INFO"
+    assert caplog.records[1].levelname == "WARNING"
 
 
 def test_do_mmseqdb_quiet(caplog):
