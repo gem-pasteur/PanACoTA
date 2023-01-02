@@ -25,7 +25,6 @@ GENEPATH = os.path.join(TREEPATH, "generated_by_unit-tests")
 LOGFILE_BASE = "log_test_fastme"
 LOGFILES = [LOGFILE_BASE + ext for ext in [".log", ".log.debug", ".log.details", ".log.err"]]
 
-
 @pytest.fixture(autouse=True)
 def setup_teardown_module():
     """
@@ -64,7 +63,7 @@ def test_convert_phylip(caplog):
     tutil.compare_order_content(outfile, exp_stk)
     assert "Converting fasta alignment to PHYLIP-relaxed format" in caplog.text
 
-
+    
 def test_convert_exists(caplog):
     """
     Test that when asking to convert a file in phylip format, but output file already exists,
@@ -77,8 +76,8 @@ def test_convert_exists(caplog):
     assert ("The Phylip alignment file test/data/tree/exp_files/exp_align_phylip.ph "
             "already exists. The program will use it instead of re-converting "
             "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
-
-
+    
+    
 def test_run_fme_default(caplog):
     """
     Test that when running fastme without bootstrap, and with default model, it returns a file
@@ -167,7 +166,7 @@ def test_run_fme_boot_write_f84(caplog):
     assert os.path.isfile(logs)
     bootfile = os.path.join(GENEPATH, "exp_align_phylip.ph.fastme_bootstraps.nwk")
     assert os.path.isfile(bootfile)
-
+ 
 
 def test_run_fme_write_matrix(caplog):
     """
@@ -183,6 +182,20 @@ def test_run_fme_write_matrix(caplog):
     quiet = False
     fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
 
+
+def test_run_fme_write_matrix(caplog):
+    """
+    Test when running fastme and asking to save the distance matrix.
+    """
+    caplog.set_level(logging.DEBUG)
+    source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
+    boot = None
+    write_boot = False
+    write_matrix = True
+    threads = 1
+    model = None
+    quiet = False
+    fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
     assert "Running FastME..." in caplog.text
     # fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d T -n B -s -T 1  -o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk -I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log  -O test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_dist-mat.txt
     assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d T -n B -s -T 1") in caplog.text
