@@ -165,7 +165,6 @@ def test_run_fme_boot_write_f84(caplog):
     assert os.path.isfile(bootfile)
 
 
-<<<<<<< HEAD
 def test_run_fme_write_matrix(caplog):
     """
     Test when running fastme and asking to save the distance matrix.
@@ -195,8 +194,6 @@ def test_run_fme_write_matrix(caplog):
     assert not os.path.isfile(bootfile)
 
 
-=======
->>>>>>> 2210b9a (Revert "add option to write distance matrix with fastme")
 def test_run_fme_notreename_rysym(caplog):
     """
     Test that when running fastme without bootstrap, and with RY-symetric model, it returns a file
