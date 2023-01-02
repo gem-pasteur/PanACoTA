@@ -249,7 +249,8 @@ def test_run_tree(caplog):
     threads = 1
     model = 'T'
     write_boot = False
-    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
+    write_matrix = False
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot, matrix=write_matrix)
     assert "Converting fasta alignment to PHYLIP-relaxed format" in caplog.text
     assert "Running FastME..." in caplog.text
     assert ("fastme "
@@ -274,7 +275,7 @@ def test_run_tree(caplog):
     threads = 1
     model = 'T'
     write_boot = True
-    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, wb=write_boot)
+    fme.run_tree(ALIGNMENT, boot, GENEPATH, quiet, threads, model=model, matrix=write_matrix, wb=write_boot)
     assert "Phylip alignment file already existing." in caplog.text
     assert ("The Phylip alignment file "
             "test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
