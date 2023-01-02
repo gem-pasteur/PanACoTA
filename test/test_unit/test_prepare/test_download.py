@@ -693,9 +693,9 @@ def test_download_2taxid(caplog):
 def test_download_refseq_vs_genbank(caplog):
     """
     Give a taxid of a subspecies, download strains from refseq, and then from genbank.
-    Currently, no strains in refseq, and 8 in genbank.
-    #39831 = Klebsiella pneumoniae subsp. rhinoscleromatis
-    60 = Vitreoscilla sp.
+    Currently, no strains in refseq, and 2 in genbank.
+    39831 = Klebsiella pneumoniae subsp. rhinoscleromatis
+    (60 = Vitreoscilla sp.)
     Later, there can be some in refseq, but always at least 2 more in genbank
     """
     caplog.set_level(logging.INFO)
