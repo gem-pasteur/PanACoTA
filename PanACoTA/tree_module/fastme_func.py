@@ -70,6 +70,8 @@ def run_tree(alignfile, boot, outdir, quiet, threads, **kwargs):
         True if matrix file must be written, False otherwise
     kwargs["wb"]: bool
         True if all bootstrap pseudo-trees must be saved into a file, False otherwise
+    kwargs["matrix"]: bool
+        True if matrix file must be written, False otherwise
     """
     model = kwargs["model"]
     write_boot = kwargs["wb"]
