@@ -281,7 +281,7 @@ def test_run_tree(caplog):
             "already exists. The program will use it instead of re-converting "
             "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert "Running FastME..." in caplog.text
-     assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
+    assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
             "-d T -n B -s -T 1 -b 110 "
             "-o test/data/tree/generated_by_unit-tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
