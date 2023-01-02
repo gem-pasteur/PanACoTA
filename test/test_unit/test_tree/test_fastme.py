@@ -218,6 +218,7 @@ def test_run_fme_notreename_rysym(caplog):
     source_align = os.path.join(EXPPATH, "exp_align_phylip.ph")
     boot = 105
     write_boot = True
+    write_matrix = False
     threads = 1
     model = "Y"
     quiet = True
