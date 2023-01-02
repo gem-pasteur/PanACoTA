@@ -115,7 +115,13 @@ def thread_num(param):
     except Exception:
         msg = "argument --threads threads: invalid int value: {}".format(param)
         raise argparse.ArgumentTypeError(msg)
-    nb_cpu = multiprocessing.cpu_count()
+    # Get number of CPUs available to the process (to be able to use it on clusters)
+    # For Mac OS, sched_getaffinity does not work -> count total number of CPUs in the machine
+    # and not only available ones.
+    try:
+        nb_cpu = len(os.sched_getaffinity(0))
+    except AttributeError:
+        nb_cpu = multiprocessing.cpu_count()
     if param > nb_cpu:
         msg = ("You have {} threads on your computer, you cannot ask for more: "
                "invalid value: {}").format(nb_cpu, param)
