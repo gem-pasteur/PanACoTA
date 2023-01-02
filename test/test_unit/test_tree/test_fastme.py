@@ -224,7 +224,7 @@ def test_run_fme_notreename_rysym(caplog):
     quiet = True
     fme.run_fastme(source_align, boot, write_boot, write_matrix, threads, model, GENEPATH, quiet)
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -dY -nB -s -T 1 "
+    assert ("fastme -i test/data/tree/exp_files/exp_align_phylip.ph -d Y -n B -s -T 1 "
             "-b 105 "
             "-o test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/exp_align_phylip.ph.fastme.log "
@@ -254,7 +254,7 @@ def test_run_tree(caplog):
     assert "Running FastME..." in caplog.text
     assert ("fastme "
             "-i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
-            "-dT -nB -s -T 1  "
+             "-d T -n B -s -T 1  "
             "-o test/data/tree/generated_by_unit-tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
@@ -281,8 +281,8 @@ def test_run_tree(caplog):
             "already exists. The program will use it instead of re-converting "
             "test/data/align/exp_files/exp_pers4genomes.grp.aln") in caplog.text
     assert "Running FastME..." in caplog.text
-    assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
-            "-dT -nB -s -T 1 -b 110 "
+     assert ("fastme -i test/data/tree/generated_by_unit-tests/exp_pers4genomes.grp.aln.phylip "
+            "-d T -n B -s -T 1 -b 110 "
             "-o test/data/tree/generated_by_unit-tests/"
             "exp_pers4genomes.grp.aln.phylip.fastme_tree.nwk "
             "-I test/data/tree/generated_by_unit-tests/"
