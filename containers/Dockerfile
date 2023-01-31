@@ -143,9 +143,9 @@ RUN tar -xzf iqtree-2.0.6-Linux.tar.gz &&\
 
 # Install PanACoTA
 WORKDIR /install-dir
-RUN git clone https://gitlab.pasteur.fr/aperrin/pipeline_annotation.git
-WORKDIR /install-dir/pipeline_annotation
-RUN git checkout master
+RUN wget https://github.com/gem-pasteur/PanACoTA/archive/refs/tags/1.4.0.tar.gz
+RUN tar -xzf v1.4.0.tar.gz
+WORKDIR /install-dir/PanACoTA-1.4.0
 RUN ./make
 
 
