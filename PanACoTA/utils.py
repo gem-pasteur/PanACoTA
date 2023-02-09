@@ -548,7 +548,7 @@ def sort_genomes_by_name(x):
         x = x[1][0]
 
     # if format is ESCO.1512.00001 sort by ESCO, then 00001
-    if "." in x and len(x.split(".")) >= 3:
+    if "." in x and len(x.split(".")) == 3:
         return x.split(".")[0], int(x.split(".")[-1])
     # if format is not like this, just return alphabetical order
     return x,
