@@ -73,7 +73,7 @@ RUN git clone https://github.com/tseemann/prokka.git
 RUN /install_dir/prokka/bin/prokka --setupdb &&\
     ln -s /install_dir/prokka/bin/prokka /usr/local/bin
 # install tbl2asn (used by prokka)
-RUN wget -O tbl2asn.gz ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux.tbl2asn.gz &&\
+RUN wget -O tbl2asn.gz https://ftp.ncbi.nlm.nih.gov/asn1-converters/by_program/table2asn/linux64.table2asn.gz &&\
     gunzip tbl2asn.gz &&\
     chmod +x tbl2asn &&\
     ln -s /install_dir/tbl2asn /usr/local/bin
@@ -113,9 +113,9 @@ WORKDIR /install_dir
 RUN apt-get install -y automake  &&\
     git clone https://gite.lirmm.fr/atgc/FastME.git
 WORKDIR /install_dir/FastME/tarball
-RUN tar xzf fastme-2.1.6.2.tar.gz &&\
-    rm fastme-2.1.6.2.tar.gz &&\
-    ln -s /install_dir/FastME/tarball/fastme-2.1.6.2/binaries/fastme-2.1.6.2-linux64-omp /usr/local/bin/fastme
+RUN tar xzf fastme-2.1.6.4.tar.gz &&\
+    rm fastme-2.1.6.4.tar.gz &&\
+    ln -s /install_dir/FastME/tarball/fastme-2.1.6.2/binaries/fastme-2.1.6.4-linux64-omp /usr/local/bin/fastme
 
 # Install quicktree
 WORKDIR /install_dir
