@@ -60,6 +60,14 @@ RUN wget ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn
     mv linux64.tbl2asn /usr/bin/tbl2asn && \
     chmod 755 /usr/bin/tbl2asn
 # Install prokka
+# RUN git clone https://github.com/tseemann/prokka.git
+# RUN /install_dir/prokka/bin/prokka --setupdb &&\
+#     ln -s /install_dir/prokka/bin/prokka /usr/local/bin
+# # install tbl2asn (used by prokka)
+# RUN wget -O tbl2asn.gz https://ftp.ncbi.nlm.nih.gov/asn1-converters/by_program/table2asn/linux64.table2asn.gz &&\
+#     gunzip tbl2asn.gz &&\
+#     chmod +x tbl2asn &&\
+#     ln -s /install_dir/tbl2asn /usr/local/bin
 RUN apt-get install -y prokka
 
 WORKDIR /install_dir
