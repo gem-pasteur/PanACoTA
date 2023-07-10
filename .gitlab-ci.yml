@@ -58,6 +58,7 @@ build-from-test-image:
   script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
+    - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - py.test test/test_install/test_make_all-installed.py -xv
 
 
@@ -70,6 +71,7 @@ unit-test-ubuntu:
   before_script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
+    - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - ./make
   script:
     - pwd
@@ -102,6 +104,7 @@ func-test-ubuntu:
   before_script:
     - pip3 install --upgrade pip
     - pip3 install -r requirements-dev.txt
+    - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - ./make
   script:
     - pwd

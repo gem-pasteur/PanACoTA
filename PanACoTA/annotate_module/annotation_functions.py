@@ -246,7 +246,7 @@ def prodigal_train(gpath, annot_folder):
                         logger=logger)
     prodigalf.close()
     prodigalferr.close()
-    if ret.returncode == 0:
+    if ret != 1 and ret.returncode == 0:
         logger.log(utils.detail_lvl(), f"End training on {gpath}")
         return gpath_train
     else:
