@@ -157,11 +157,11 @@ RUN tar -xzf iqtree-2.0.6-Linux.tar.gz &&\
     ln -s /install_dir/iqtree-2.0.6-Linux/bin/iqtree2 /usr/local/bin
 
 # # # Install PanACoTA
-# # WORKDIR /install-dir
-# # RUN wget https://github.com/gem-pasteur/PanACoTA/archive/refs/tags/1.4.0.tar.gz
-# # RUN tar -xzf v1.4.0.tar.gz
-# # WORKDIR /install-dir/PanACoTA-1.4.0
-# # RUN ./make
+WORKDIR /install-dir
+RUN wget https://github.com/gem-pasteur/PanACoTA/archive/refs/tags/v1.4.0.tar.gz
+RUN tar -xzf v1.4.0.tar.gz
+WORKDIR /install-dir/PanACoTA-1.4.0
+RUN ./make
 
-# # ENTRYPOINT ["/usr/local/bin/PanACoTA"]
-# # CMD ['-h']
+ENTRYPOINT ["/usr/local/bin/PanACoTA"]
+CMD ['-h']
