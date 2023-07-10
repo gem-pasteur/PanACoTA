@@ -470,7 +470,7 @@ def test_family_align_mafftempty_btrempty(caplog):
             "in test/data/align/exp_files/exp_aldir-pers/current.8.prt (3) and proteins aligned "
             "in existing test/data/align/generated_by_unit-tests/test_fam_align.8.aln") in caplog.text
     assert "Aligning family 8" in caplog.text
-    assert "Mafft command: mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt" in caplog.text
+    assert "Mafft command: mafft --auto --anysymbol test/data/align/exp_files/exp_aldir-pers/current.8.prt" in caplog.text
     assert "Back-translating family 8" in caplog.text
     # Check content of mafft and btr files
     exp_mafft = os.path.join(EXPPATH, "exp_aldir-pers", "mafft-align.8.aln")
@@ -577,7 +577,7 @@ def test_family_align_nomafft_btrempty_errormafft(caplog):
                                    ngenomes, logger)
     assert "Checking extractions for family 8" in caplog.text
     assert "Aligning family 8" in caplog.text
-    assert ("command '>mafft --auto test/data/align/exp_files/exp_aldir-pers/current.8.prt' "
+    assert ("command '>mafft --auto --anysymbol test/data/align/exp_files/exp_aldir-pers/current.8.prt' "
             "is not possible") in caplog.text
     # Check content of mafft and btr files
     assert not os.path.isfile(mafft_file)
@@ -808,7 +808,7 @@ def test_handle_family_true():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto --anysymbol test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     # Writes it twice: 1 for nucleic and one for aa
@@ -849,7 +849,7 @@ def test_handle_family_true_nomiss():
     q.put(None)
     assert "Checking extractions for family 8" in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto --anysymbol test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     assert not q.get()
@@ -894,7 +894,7 @@ def test_handle_family_emptyaln_true():
             "and proteins aligned in existing "
             "test/data/align/generated_by_unit-tests/aldir/TESThandlefam-mafft-align.8.aln") in q.get().message
     assert "Aligning family 8" in q.get().message
-    assert ("mafft --auto test/data/align/generated_by_unit-tests/aldir/"
+    assert ("mafft --auto --anysymbol test/data/align/generated_by_unit-tests/aldir/"
             "TESThandlefam-current.8.prt") in q.get().message
     assert "Back-translating family 8" in q.get().message
     assert "Adding missing genomes for family 8 in protein alignment" in q.get().message

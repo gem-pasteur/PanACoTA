@@ -557,7 +557,7 @@ def mafft_align(num_fam, prt_file, mafft_file, nbfprt, logger):
         False otherwise
     """
     logger.log(utils.detail_lvl(), f"Aligning family {num_fam}")
-    cmd = f"mafft --auto {prt_file}"
+    cmd = f"mafft --auto --anysymbol {prt_file}"
     error = f"Problem while trying to align fam {num_fam}"
     stdout = open(mafft_file, "w")
     stderr = open(mafft_file + ".log", "w")
