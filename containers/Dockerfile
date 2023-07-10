@@ -141,11 +141,7 @@ RUN apt-get install -y automake  &&\
 WORKDIR /install_dir/FastME/tarball
 RUN tar xzf fastme-2.1.6.4.tar.gz &&\
     rm fastme-2.1.6.4.tar.gz &&\
-<<<<<<< HEAD
-    ln -s /install_dir/FastME/tarball/fastme-2.1.6.2/binaries/fastme-2.1.6.4-linux64-omp /usr/local/bin/fastme
-=======
     ln -s /install_dir/FastME/tarball/fastme-2.1.6.4/binaries/fastme-2.1.6.2-linux64-omp /usr/local/bin/fastme
->>>>>>> dev
 
 # Install quicktree
 WORKDIR /install_dir
