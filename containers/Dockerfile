@@ -156,7 +156,7 @@ RUN tar -xzf iqtree-2.0.6-Linux.tar.gz &&\
     rm iqtree-2.0.6-Linux.tar.gz &&\
     ln -s /install_dir/iqtree-2.0.6-Linux/bin/iqtree2 /usr/local/bin
 
-# # # Install PanACoTA
+# Install PanACoTA
 WORKDIR /install-dir
 RUN wget https://github.com/gem-pasteur/PanACoTA/archive/refs/tags/v1.4.0.tar.gz
 RUN tar -xzf v1.4.0.tar.gz
