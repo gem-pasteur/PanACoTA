@@ -106,7 +106,7 @@ def test_main():
     for fam in fams:
         assert f"Checking extractions for family {fam}" in " ".join(log_content)
         assert f"Aligning family {fam}" in " ".join(log_content)
-        assert ("Mafft command: mafft --auto --anysymbol "
+        assert ("Mafft command: mafft --auto --amino "
                 "test/data/align/generated_by_func_tests/"
                 f"Align-TEST4/TEST4-current.{fam}.prt") in " ".join(log_content)
         assert f"Back-translating family {fam}" in " ".join(log_content)
