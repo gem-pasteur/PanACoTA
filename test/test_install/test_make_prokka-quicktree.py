@@ -35,6 +35,9 @@ def test_install_prokka_quicktree():
     Test that when installing from a computer containing only prokka and quicktree, it installs
     PanACoTA, and returns the list of missing dependencies
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prodigal")
     assert utils.check_installed("quicktree")
