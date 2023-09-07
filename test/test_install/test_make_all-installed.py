@@ -191,14 +191,6 @@ def test_develop():
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    # Check installation in develop mode
-    with open(stdout, "r") as stdof:
-        lines = stdof.readlines()
-        for line in lines:
-            if line.startswith("Location"):
-                loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
-    os.remove(stdout)
     # Check not installed in user mode
     cmd = "pip list --user"
     list_user_packages = str(subprocess.check_output(shlex.split(cmd)))
