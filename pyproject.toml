@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PanACoTA"
+authors = [
+    {name = "Amandine PERRIN", email = "amandine.perrin@pasteur.fr"},
+]
+description="Large scale comparative genomics tools: annotate genomes, do pangenome, core/persistent genome, align core/persistent families, infer phylogenetic tree."
+requires-python = ">=3.7"
+keywords = ["persistent genome", "pangenome", "bacteria", "Bioinformatics", "Comparative genomics",
+            "core genome", "phylogenetic tree", "alignment", "families"]
+license = {file = "COPYING"}
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dynamic = ["version", "readme", "dependencies"]
+
+[tool.setuptools.dynamic]
+version = {attr = "PanACoTA.__init__.__version__"}
+readme = {file = ["README.md"]}
+dependencies = {file = ["requirements.txt"]}
+optional-dependencies = {dev = {file = ["requirements-dev.txt"]}}
+
+[project.scripts]
+PanACoTA = "PanACoTA.bin.run_panacota:main"
+
+[tool.setuptools]
+packages = ["PanACoTA"]
+
+[project.urls]
+homepage = "https://github.com/gem-pasteur/PanACoTA"
+documentation = "https://aperrin.pages.pasteur.fr/pipeline_annotation/html-doc/"
