@@ -18,7 +18,7 @@ build-from-ubuntu:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - py.test test/test_install/test_make_ubuntu.py -xv
 
 build-from-barrnap:
@@ -28,7 +28,7 @@ build-from-barrnap:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - py.test test/test_install/test_make_barrnap.py -xv
 
 build-from-prokka-quicktree:
@@ -48,7 +48,7 @@ build-from-prodigal:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - py.test test/test_install/test_make_prodigal.py -xv
 
 build-from-test-image:
@@ -57,7 +57,7 @@ build-from-test-image:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - py.test test/test_install/test_make_all-installed.py -xv
 
@@ -70,7 +70,7 @@ unit-test-ubuntu:
     - install
   before_script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - ./make
   script:
@@ -103,7 +103,7 @@ func-test-ubuntu:
     - install
   before_script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - pip install git+https://github.com/chasemc/ncbi-genome-download@4c5c24e27aa8123c7995890046b17b815da3571b 
     - ./make
   script:
@@ -137,7 +137,7 @@ coverage:
     - func-test-ubuntu
   before_script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
   script:
     - pwd
     - coverage combine .coverage.unit .coverage.functional
@@ -157,8 +157,7 @@ sphinx-doc:
     - master
     - documentation
   before_script:
-    - pip3 install -r requirements-dev.txt
-    - ./make
+    - ./make develop
   script:
     - cd doc/source
     - make html

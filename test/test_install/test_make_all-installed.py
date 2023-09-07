@@ -37,14 +37,17 @@ def test_install_panacota():
     """
     Test that when installing from a computer containing only all dependencies, it returns a message without any warning: everything is ok
     """
-    cmd = "python3 make"
-    error = "Error trying to install PanACoTA from base"
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
     assert utils.check_installed("FastTreeMP")
     # Install panacota
+    cmd = "python3 make"
+    error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
@@ -115,6 +118,9 @@ def test_upgrade_notinstalled():
     Test upgrading PanACoTA when dependencies are not installed (only barrnap),
     and PanACoTA is not installed. It just installs PanACoTA, without prokka dep
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("FastTreeMP")
@@ -167,6 +173,9 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
@@ -220,6 +229,9 @@ def test_install_user():
     Test that when installing from a computer in user mode, it really installs
     PanACoTA in user mode (pip showing PanACoTA when asking for user installed packages)
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     cmd = "python3 make --user"
     error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
