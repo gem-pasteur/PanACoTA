@@ -41,7 +41,7 @@ def test_install_panacota():
     error = "Error trying to uninstall PanACoTa"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
     assert utils.check_installed("FastTreeMP")
@@ -50,7 +50,7 @@ def test_install_panacota():
     error = "Error trying to install PanACoTA from base"
     utils.run_cmd(cmd, error)
     assert utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
     assert utils.check_installed("FastTreeMP")

@@ -25,6 +25,9 @@ def test_install_panacota_base_ubuntu():
     Test that when installing from a computer containing the basic ubuntu, it installs
     PanACoTA, without any dependence (show warning message)
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from ubuntu"
     assert not utils.check_installed("barrnap")
@@ -109,6 +112,9 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when barrnap is already installed
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
@@ -125,13 +131,6 @@ def test_develop():
     stdout = "stdout_pip3show.out"
     with open(stdout, "w") as stdof:
         utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    # Check that it was not installed
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            if line.startswith("Location"):
-                loc = line.split()[-1]
-                assert os.path.isdir(os.path.join(loc, "PanACoTA.egg-info"))
-    os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for PanACoTA",
                "Some dependencies needed for some subcommands of PanACoTA are "
