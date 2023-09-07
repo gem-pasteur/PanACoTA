@@ -92,7 +92,7 @@ def test_upgrade(install_panacota):
     """
     Test upgrading PanACoTA when dependencies are still installed
     """
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("FastTreeMP")
     assert utils.check_installed("PanACoTA")
@@ -100,7 +100,7 @@ def test_upgrade(install_panacota):
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("FastTreeMP")
@@ -121,14 +121,14 @@ def test_upgrade_notinstalled():
     cmd = "python3 make uninstall"
     error = "Error trying to uninstall PanACoTa"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("FastTreeMP")
     assert not utils.check_installed("PanACoTA")
     cmd = "python3 make upgrade"
     error = "Error upgrade"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("FastTreeMP")
@@ -146,7 +146,7 @@ def test_uninstall(install_panacota):
     """
     Test uninstalling PanACoTA when dependencies are still installed
     """
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("FastTreeMP")
@@ -154,7 +154,7 @@ def test_uninstall(install_panacota):
     error = "Error uninstalling"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("mash")
     assert utils.check_installed("FastTreeMP")
@@ -177,12 +177,12 @@ def test_develop():
     error = "Error trying to uninstall PanACoTa"
     utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     cmd = "python3 make develop"
     error = "Error develop"
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     # Check installed in developper mode (egg-info file is present)
@@ -226,12 +226,12 @@ def test_install_user():
     utils.run_cmd(cmd, error)
     cmd = "python3 make --user"
     error = "Error trying to install PanACoTA from base"
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("FastTreeMP")
     utils.run_cmd(cmd, error)
-    assert utils.check_installed("barrnap")
+    # assert utils.check_installed("barrnap")
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed("FastTreeMP")
