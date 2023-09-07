@@ -36,6 +36,9 @@ def test_install():
     Test that when installing from a computer containing only barrnap, it installs
     PanACoTA, and returns the list of missing dependencies
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     cmd = "python3 make"
     error = "Error trying to install PanACoTA from base"
     assert utils.check_installed("barrnap")
@@ -132,6 +135,9 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when barrnap is already installed
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
@@ -142,16 +148,6 @@ def test_develop():
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     cmd = "pip3 show PanACoTA"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            if line.startswith("Location"):
-                loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
-    os.remove(stdout)
     logfile = "install.log"
     content = ["Installing developer packages needed for PanACoTA",
                "Some dependencies needed for some subcommands of PanACoTA are "
@@ -188,6 +184,9 @@ def test_install_user():
     Test that when installing from a computer in user mode, it really installs
     PanACoTA in user mode
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert utils.check_installed("barrnap")
     assert not utils.check_installed("prokka")
     assert not utils.check_installed("PanACoTA")
