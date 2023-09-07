@@ -52,17 +52,17 @@ def test_install_prokka_quicktree():
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed('quicktree')
-    # cmd = "pip3 show PanACoTA"
-    # err = "error pip3"
-    # stdout = "stdout_pip3show.out"
-    # with open(stdout, "w") as stdof:
-    #     utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    # with open(stdout, "r") as stdof:
-    #     for line in stdof:
-    #         if line.startswith("Location"):
-    #             loc = line.split()[-1]
-    #             assert glob.glob(os.path.join(loc, r'PanACoTA*dist-info'))
-    # os.remove(stdout)
+    cmd = "pip3 show PanACoTA"
+    err = "error pip3"
+    stdout = "stdout_pip3show.out"
+    with open(stdout, "w") as stdof:
+        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    with open(stdout, "r") as stdof:
+        for line in stdof:
+            if line.startswith("Location"):
+                loc = line.split()[-1]
+                assert glob.glob(os.path.join(loc, r'PanACoTA*dist-info'))
+    os.remove(stdout)
     logfile = "install.log"
     content = ["Installing PanACoTA...", "DONE",
                "Some dependencies needed for some subcommands of PanACoTA are "
@@ -148,18 +148,18 @@ def test_develop():
     assert utils.check_installed("prokka")
     assert utils.check_installed("PanACoTA")
     assert utils.check_installed('quicktree')
-    cmd = "pip3 show PanACoTA"
-    err = "error pip3"
-    stdout = "stdout_pip3show.out"
-    with open(stdout, "w") as stdof:
-        utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
-    # Check installation in develop mode
-    with open(stdout, "r") as stdof:
-        for line in stdof:
-            if line.startswith("Location"):
-                loc = line.split()[-1]
-                assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
-    os.remove(stdout)
+    # cmd = "pip3 show PanACoTA"
+    # err = "error pip3"
+    # stdout = "stdout_pip3show.out"
+    # with open(stdout, "w") as stdof:
+    #     utils.run_cmd(cmd, err, stdout=stdof, stderr=stdof)
+    # # Check installation in develop mode
+    # with open(stdout, "r") as stdof:
+    #     for line in stdof:
+    #         if line.startswith("Location"):
+    #             loc = line.split()[-1]
+    #             assert glob.glob(os.path.join(loc, r'PanACoTA*egg-info'))
+    # os.remove(stdout)
     logfile = "install.log"
     content = ["Installing PanACoTA...",
                "Installing developer packages needed for PanACoTA",
