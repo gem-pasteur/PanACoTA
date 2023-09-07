@@ -38,7 +38,7 @@ build-from-prokka-quicktree:
     - install
   script:
     - pip3 install --upgrade pip
-    - pip3 install -r requirements-dev.txt
+    - pip3 install -e .[dev]
     - py.test test/test_install/test_make_prokka-quicktree.py -xv
 
 build-from-prodigal:

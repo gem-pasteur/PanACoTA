@@ -20,7 +20,7 @@ classifiers = [
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-dynamic = ["version", "readme", "dependencies"]
+dynamic = ["version", "readme", "dependencies", "optional-dependencies"]
 
 [tool.setuptools.dynamic]
 version = {attr = "PanACoTA.__init__.__version__"}

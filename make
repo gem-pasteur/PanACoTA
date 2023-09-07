@@ -86,12 +86,12 @@ def install_all(install_dir, target, dev=False, user=False):
         opt = ""
     if dev:
         logger.info("Installing developer packages needed for PanACoTA")
-        cmd = "pip3 install " + opt + " -e ."
-        cmd2 = "pip3 install -r requirements-dev.txt"
-        error2 = ("Problem while trying to install developer tools. If you have "
-                  "permission errors, try to add 'sudo' before your command line. If "
-                  "you do not have root access, install with the '--user' option")
-        run_cmd(cmd2, error2, eof=True)
+        cmd = "pip3 install " + opt + " -e .[dev]"
+        # cmd2 = "pip3 install -r requirements-dev.txt"
+        # error2 = ("Problem while trying to install developer tools. If you have "
+        #           "permission errors, try to add 'sudo' before your command line. If "
+        #           "you do not have root access, install with the '--user' option")
+        # run_cmd(cmd2, error2, eof=True)
     else:
         cmd = "pip3 install " + opt + " ."
     error = ("A problem occurred while trying to install PanACoTA. If you have "
