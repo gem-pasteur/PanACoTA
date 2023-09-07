@@ -134,6 +134,9 @@ def test_develop():
     """
     Test installing PanACoTA in developer mode, when prokka and barrnap are already installed
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("PanACoTA")
     assert not utils.check_installed("barrnap")
     assert utils.check_installed('quicktree')
@@ -191,6 +194,9 @@ def test_install_user():
     Test that when installing from a computer containing only prokka, in user mode, it installs
     PanACoTA in /Users and returns list of dependencies
     """
+    cmd = "python3 make uninstall"
+    error = "Error trying to uninstall PanACoTa"
+    utils.run_cmd(cmd, error)
     assert not utils.check_installed("barrnap")
     assert not utils.check_installed("mash")
     assert utils.check_installed("prokka")
