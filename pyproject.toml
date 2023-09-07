@@ -11,7 +11,7 @@ description="Large scale comparative genomics tools: annotate genomes, do pangen
 requires-python = ">=3.7"
 keywords = ["persistent genome", "pangenome", "bacteria", "Bioinformatics", "Comparative genomics",
             "core genome", "phylogenetic tree", "alignment", "families"]
-license = {file = "COPYING"}
+license = {text = "aGPL v3"}
 classifiers = [
     "Environment :: Console",
     "Intended Audience :: Science/Research",
