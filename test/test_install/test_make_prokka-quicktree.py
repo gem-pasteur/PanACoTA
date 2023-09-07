@@ -177,6 +177,7 @@ def test_develop():
 
     with open(logfile, "r") as logf:
         logf_content = "".join(logf.readlines())
+        print(logf_content)
         for linec in content:
             assert linec in logf_content
 
