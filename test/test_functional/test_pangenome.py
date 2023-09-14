@@ -378,10 +378,9 @@ def test_pangenome_all():
     used_dbpath = os.path.join(GENEPATH, "database")
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
-    outfile = "pangenome.txt"
     cmd = f"PanACoTA pangenome -l {lstinfo} -n {name} -d {used_dbpath} -o {GENEPATH} -vv"
     assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, GENEPATH, clust_mode, spe_dir,
-                    threads) == os.path.join(GENEPATH, outfile)
+                    threads) == os.path.join(GENEPATH, "PanGenome-testAllPAN4.All.prt-clust-0.8-mode1.lst")
     
     # ret = subprocess.call(cmd.split())
     # assert ret == 0
