@@ -372,22 +372,24 @@ def test_pangenome_all():
     lstinfo = os.path.join(TEST_FILES, "list_to_pan.txt")
     name = "testAllPAN4"
     min_id = 0.8
-    outdir = GENEPATH
     clust_mode = 1
     spe_dir = None
     threads = 1
     used_dbpath = os.path.join(GENEPATH, "database")
     # copy db_path folder to output folder, as it will modify it
     shutil.copytree(DBPATH, used_dbpath)
-
-    cmd = f"PanACoTA pangenome -l {lstinfo} -n {name} -d {used_dbpath} -o {outdir} -vv"
-    ret = subprocess.call(cmd.split())
-    assert ret == 0
+    outfile = "pangenome.txt"
+    cmd = f"PanACoTA pangenome -l {lstinfo} -n {name} -d {used_dbpath} -o {GENEPATH} -vv"
+    assert pan.main(cmd, lstinfo, name, used_dbpath, min_id, GENEPATH, clust_mode, spe_dir,
+                    threads) == os.path.join(GENEPATH, outfile)
+    
+    # ret = subprocess.call(cmd.split())
+    # assert ret == 0
 
     prtbank = os.path.join(used_dbpath, "testAllPAN4.All.prt")
     assert os.path.isfile(prtbank)
     # Check presence of mmseq DB files
-    tmp_base = os.path.join(outdir, "tmp_testAllPAN4.All.prt_0.8-mode1")
+    tmp_base = os.path.join(GENEPATH, "tmp_testAllPAN4.All.prt_0.8-mode1")
     msdb = os.path.join(tmp_base, "testAllPAN4.All.prt-msDB")
     assert os.path.isfile(msdb)
     assert os.path.isfile(msdb + ".index")
@@ -404,7 +406,7 @@ def test_pangenome_all():
     pan_files = glob.glob(os.path.join(GENEPATH, "PanGenome-testAllPAN4*"))
     to_check = [".lst", ".lst.quali.txt", ".lst.quanti.txt", ".lst.summary.txt"]
     found = []
-    pangenome_file = os.path.join(outdir, "PanGenome-testAllPAN4.All.prt-clust-0.8-mode1.lst")
+    pangenome_file = os.path.join(GENEPATH, "PanGenome-testAllPAN4.All.prt-clust-0.8-mode1.lst")
     for f in pan_files:
         for c in to_check:
             if f.endswith(c):
@@ -422,7 +424,7 @@ def test_pangenome_all():
     assert len(lines_exp) == len(lines_out)
     assert set(lines_exp) == set(lines_out)
     # Check presence of log files, and that .err is empty
-    log_base = os.path.join(outdir, "PanACoTA-pangenome_testAllPAN4.log")
+    log_base = os.path.join(GENEPATH, "PanACoTA-pangenome_testAllPAN4.log")
     assert os.path.isfile(log_base)
     assert os.path.isfile(log_base + ".details")
     assert os.path.isfile(log_base + ".err")
