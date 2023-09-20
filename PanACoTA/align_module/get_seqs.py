@@ -265,11 +265,13 @@ def extract_sequences(to_extract, fasf, files_todo=None, outf=None):
             previous_fp = None
 
             # Extract sequence name
-            # last_char = line.find(' ')
-            # if last_char == -1:
-            #     last_char = len(line)
-            # seq = line[1:last_char].strip()
-            seq = line.strip().split()[0][1:]
+            last_char = line.find('\t')
+            if last_char == -1:
+                last_char = line.find(' ')
+                if last_char == -1:            
+                    last_char = len(line)
+            seq = line[1:last_char].strip()
+            # seq = line.strip().split()[0][1:]
 
             # Seq is part of sequences to extract
             if seq in to_extract:
